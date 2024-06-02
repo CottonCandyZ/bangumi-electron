@@ -9,7 +9,8 @@ function App(): JSX.Element {
       <img alt="logo" className="logo" src={electronLogo} />
       <div className="creator">Powered by electron-vite</div>
       <div className="text">
-        Build an Electron app with <span className="react">React</span>
+        Build an Electron app with <span className="i-mingcute-react-line" />
+        <span className="react">React</span>
         &nbsp;and <span className="ts">TypeScript</span>
       </div>
       <p className="tip">
