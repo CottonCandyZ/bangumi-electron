@@ -23,7 +23,8 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.0",
     "@electron-toolkit/utils": "^3.0.0",
-    "electron-updater": "^6.1.7"
+    "electron-updater": "^6.1.7",
+    "react-router-dom": "^6.23.1"
   },
   "devDependencies": {
     "@egoist/tailwindcss-icons": "^1.8.0",
