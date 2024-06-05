@@ -1,8 +1,12 @@
+import BigCarousel from '@renderer/components/big-carousel'
 import SmallCarousel from '@renderer/components/small-carousel'
 
 export default function Home(): JSX.Element {
   return (
     <div className="flex flex-col gap-2">
+      <section>
+        <BigCarousel />
+      </section>
       <section>
         <SmallCarousel href="/anime" name="动画" />
       </section>
@@ -18,7 +22,7 @@ export default function Home(): JSX.Element {
       <section>
         <SmallCarousel href="/real" name="三次元" />
       </section>
-      {/* 时间线 */}
+      {/*  时间线 */}
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { Button, buttonVariants } from '@renderer/components/ui/button'
 import { cn } from '@renderer/lib/utils'
+import { motion } from 'framer-motion'
 import { Book, Cat, Gamepad2, Home, Library, Music, Tv } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
@@ -45,21 +46,29 @@ export default function NavBar(): JSX.Element {
             {/* <Button asChild className="size-16" variant="ghost"> */}
             <NavLink
               to={item.path}
-              className={({ isActive, isPending }) =>
+              className={({ isActive }) =>
                 cn(
                   'flex flex-col relative',
                   buttonVariants({
                     variant: 'ghost',
-                    className: 'size-16 hover:text-primary text-primary/65',
+                    className: 'size-16 hover:text-primary text-primary/65 cursor-default',
                   }),
-                  isActive &&
-                    `before:absolute before:left-0.5 before:top-6 before:bottom-6 before:w-1
-                    before:bg-primary before:rounded-xl bg-accent text-primary`,
+                  isActive && `bg-accent text-primary`,
                 )
               }
             >
-              {item.icon}
-              <span>{item.name}</span>
+              {({ isActive }) => (
+                <>
+                  {isActive ? (
+                    <motion.div
+                      className="absolute left-0.5 top-6 bottom-6 w-1 bg-primary rounded-xl"
+                      layoutId="underline"
+                    />
+                  ) : null}
+                  {item.icon}
+                  <span>{item.name}</span>
+                </>
+              )}
             </NavLink>
             {/* </Button> */}
           </li>
