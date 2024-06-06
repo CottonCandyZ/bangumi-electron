@@ -7,19 +7,19 @@ export default function Home(): JSX.Element {
       <section>
         <BigCarousel />
       </section>
-      <section>
+      <section className="px-9">
         <SmallCarousel href="/anime" name="动画" />
       </section>
-      <section>
+      <section className="px-9">
         <SmallCarousel href="/game" name="游戏" />
       </section>
-      <section>
+      <section className="px-9">
         <SmallCarousel href="/book" name="书" />
       </section>
-      <section>
+      <section className="px-9">
         <SmallCarousel href="/music" name="音乐" />
       </section>
-      <section>
+      <section className="px-9">
         <SmallCarousel href="/real" name="三次元" />
       </section>
       {/*  时间线 */}

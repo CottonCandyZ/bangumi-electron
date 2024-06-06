@@ -9,7 +9,7 @@ export default function RootLayout(): JSX.Element {
       </div>
 
       <section className="pt-1 overflow-auto w-full">
-        <div className="border-t border-l min-h-full p-2 rounded-tl-lg">
+        <div className="border-t border-l min-h-full rounded-tl-lg">
           <Outlet />
         </div>
       </section>

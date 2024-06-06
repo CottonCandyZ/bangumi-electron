@@ -18,27 +18,33 @@ export default function BigCarousel(): JSX.Element {
   }, [])
 
   return (
-    <div>
-      <div className="flex flex-row gap-2">
-        <Button
-          onClick={() => {
-            setCurrent((current) => {
-              return [current[0] - 1, true]
-            })
-          }}
-        >
-          <ArrowLeft />
-        </Button>
-        <Button
-          onClick={() => {
-            setCurrent((current) => {
-              return [current[0] + 1, true]
-            })
-          }}
-        >
-          <ArrowRight />
-        </Button>
-      </div>
+    <div className="relative group">
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => {
+          setCurrent((current) => {
+            return [current[0] - 1, true]
+          })
+        }}
+        className="absolute z-10 left-2 top-1/2 -translate-y-1/2 opacity-0 h-8 w-8 rounded-full
+         group-hover:opacity-100 transition-opacity"
+      >
+        <ArrowLeft className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => {
+          setCurrent((current) => {
+            return [current[0] + 1, true]
+          })
+        }}
+        className="absolute z-10 right-2 top-1/2 -translate-y-1/2 opacity-0 h-8 w-8 rounded-full
+        group-hover:opacity-100 transition-opacity"
+      >
+        <ArrowRight className="h-4 w-4" />
+      </Button>
 
       <div className="overflow-hidden">
         <motion.div
