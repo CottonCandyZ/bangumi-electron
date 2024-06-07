@@ -1,21 +1,73 @@
 import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import clsx from 'clsx'
-import { motion } from 'framer-motion'
+import { AnimationSequence, DynamicAnimationOptions, useAnimate } from 'framer-motion'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
-const items = 10
-const big = 176
 
-const before = 2
-const after = 5
+const items = 5
+const smallWidth = 176
+const bias = 36 // (9)
+
+const bigWidth = 512
+
+const animateConfig = {
+  duration: 0.5,
+  type: 'tween',
+  ease: [0.25, 0.1, 0.25, 1],
+} as DynamicAnimationOptions
+
 export default function BigCarousel(): JSX.Element {
-  const [[current, normal], setCurrent] = useState([before, false])
+  // index
+  const [currentIndex, setCurrentIndex] = useState(items)
+  const [scope, animate] = useAnimate<HTMLDivElement>()
 
   useEffect(() => {
-    const timeId = setInterval(() => setCurrent((current) => [current[0] + 1, true]), 5000)
+    let start = currentIndex
+    const timeId = setInterval(() => {
+      start = fromTo(start, start + 1)
+    }, 5000)
     return () => clearInterval(timeId)
   }, [])
+
+  useEffect(() => {
+    animate(scope.current, { x: -smallWidth * currentIndex + bias }, { duration: 0 })
+    for (const [index, child] of Array.from(scope.current.children).entries()) {
+      animate(child, { width: index === currentIndex ? bigWidth : smallWidth }, { duration: 0 })
+    }
+  }, [])
+
+  const animateFromTo = (begin: number, end: number) => {
+    const sequence: AnimationSequence = [
+      [scope.current, { x: [-smallWidth * begin + bias, -smallWidth * end + bias] }, animateConfig],
+    ]
+    for (const [index, child] of Array.from(scope.current.children).entries()) {
+      if (index === begin)
+        sequence.push([child, { width: [bigWidth, smallWidth] }, { ...animateConfig, at: '<' }])
+      else if (index === end)
+        sequence.push([child, { width: [smallWidth, bigWidth] }, { ...animateConfig, at: '<' }])
+      else sequence.push([child, { width: smallWidth }, { duration: 0, at: '<' }])
+    }
+    animate(sequence)
+  }
+
+  const fromTo = (begin: number, end: number) => {
+    if (begin === end) return end
+    let nextIndex = end
+    if (begin >= items && end >= items + 2) {
+      // start from list begin
+      animateFromTo(begin - items, end - items)
+      nextIndex = end - items
+    } else if (end <= 1) {
+      // start from middle
+      animateFromTo(begin + items, end + items)
+      nextIndex = end + items
+    } else {
+      animateFromTo(begin, end)
+    }
+    setCurrentIndex(nextIndex)
+    return nextIndex
+  }
 
   return (
     <div className="relative group">
@@ -23,9 +75,7 @@ export default function BigCarousel(): JSX.Element {
         variant="outline"
         size="icon"
         onClick={() => {
-          setCurrent((current) => {
-            return [current[0] - 1, true]
-          })
+          fromTo(currentIndex, currentIndex - 1)
         }}
         className="absolute z-10 left-2 top-1/2 -translate-y-1/2 opacity-0 h-8 w-8 rounded-full
          group-hover:opacity-100 transition-opacity"
@@ -36,9 +86,7 @@ export default function BigCarousel(): JSX.Element {
         variant="outline"
         size="icon"
         onClick={() => {
-          setCurrent((current) => {
-            return [current[0] + 1, true]
-          })
+          fromTo(currentIndex, currentIndex + 1)
         }}
         className="absolute z-10 right-2 top-1/2 -translate-y-1/2 opacity-0 h-8 w-8 rounded-full
         group-hover:opacity-100 transition-opacity"
@@ -47,46 +95,25 @@ export default function BigCarousel(): JSX.Element {
       </Button>
 
       <div className="overflow-hidden">
-        <motion.div
-          className="flex flex-row -ml-2"
-          initial={{ x: -big * current + 40 }}
-          animate={{ x: -big * current + 40 }}
-          transition={{ type: 'tween', duration: normal ? 0.5 : 0 }}
-          layout
-          onAnimationComplete={() => {
-            console.log('hello')
-            if (current == before - 1) setCurrent([before + items - 1, false])
-            if (current >= before + items) setCurrent([current - items, false])
-          }}
-        >
-          {Array.from({ length: items + before + after }).map((_, index) => (
+        <div className="flex flex-row -ml-2" ref={scope}>
+          {Array.from({ length: items * 2 }).map((_, index) => (
             <div
-              className={clsx(`min-w-0 shrink-0 grow-0 pl-2 `, {
-                'w-[32rem]': current === index,
-                'w-44': current !== index,
-                'transition-[width] ease-out duration-500': normal,
-              })}
+              className="min-w-0 shrink-0 grow-0 pl-2 w-44"
               key={index}
-              // transition={{ type: 'tween', duration: normal ? 0.4 : 0 }}
-              // layout
-              onClick={() => setCurrent([index, true])}
+              onClick={() => {
+                fromTo(currentIndex, index)
+              }}
             >
               <div className="p-1">
                 <Card>
                   <CardContent className={clsx(`flex items-center justify-center p-6 h-80`)}>
-                    <span className="text-3xl font-semibold">
-                      {index < before
-                        ? items - before + index + 1
-                        : index >= before + items
-                          ? index - items - before + 1
-                          : index - before + 1}
-                    </span>
+                    <span className="text-3xl font-semibold">{(index % items) + 1}</span>
                   </CardContent>
                 </Card>
               </div>
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </div>
   )
