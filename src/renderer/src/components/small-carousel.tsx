@@ -33,11 +33,11 @@ export default function SmallCarousel({ href, name }: SmallCarouselProps): JSX.E
           <Link to={href}>
             <div
               className={`flex gap-1 -translate-x-2 group-hover:translate-x-0 transition-all justify-center
-              items-center duration-100 group-hover:text-destructive/70`}
+              items-center duration-100 group-hover:text-red-600/70 dark:group-hover:text-red-400`}
             >
               <span>{name}</span>{' '}
               <ChevronRight
-                className="h-4 w-4 mt-[1px] text-destructive/50 group-hover:text-destructive/70"
+                className="h-4 w-4 mt-[1px] text-red-600/50 dark:text-red-600/80  group-hover:text-red-600/70 dark:group-hover:text-red-400"
                 strokeWidth={4}
               />
             </div>
