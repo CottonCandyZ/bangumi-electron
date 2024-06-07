@@ -3,7 +3,7 @@ import { Card, CardContent } from '@renderer/components/ui/card'
 import clsx from 'clsx'
 import { AnimationSequence, DynamicAnimationOptions, useAnimate } from 'framer-motion'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const items = 5
 const smallWidth = 176
@@ -21,14 +21,11 @@ export default function BigCarousel(): JSX.Element {
   // index
   const [currentIndex, setCurrentIndex] = useState(items)
   const [scope, animate] = useAnimate<HTMLDivElement>()
-
+  const timeId = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => {
-    let start = currentIndex
-    const timeId = setInterval(() => {
-      start = fromTo(start, start + 1)
-    }, 5000)
-    return () => clearInterval(timeId)
-  }, [])
+    clearTimeout(timeId.current)
+    timeId.current = setTimeout(() => fromTo(currentIndex, currentIndex + 1), 5000)
+  }, [currentIndex])
 
   useEffect(() => {
     animate(scope.current, { x: -smallWidth * currentIndex + bias }, { duration: 0 })
@@ -52,7 +49,7 @@ export default function BigCarousel(): JSX.Element {
   }
 
   const fromTo = (begin: number, end: number) => {
-    if (begin === end) return end
+    if (begin === end) return
     let nextIndex = end
     if (begin >= items && end >= items + 2) {
       // start from list begin
@@ -66,7 +63,6 @@ export default function BigCarousel(): JSX.Element {
       animateFromTo(begin, end)
     }
     setCurrentIndex(nextIndex)
-    return nextIndex
   }
 
   return (
