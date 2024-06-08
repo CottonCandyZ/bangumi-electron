@@ -1,7 +1,6 @@
 import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import clsx from 'clsx'
-import { AnimationSequence, DynamicAnimationOptions, useAnimate } from 'framer-motion'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
@@ -11,16 +10,16 @@ const bias = 36 // (9)
 
 const bigWidth = 512
 
-const animateConfig = {
-  duration: 0.5,
-  type: 'tween',
-  ease: [0.25, 0.1, 0.25, 1],
-} as DynamicAnimationOptions
+const animateConfig: KeyframeAnimationOptions = {
+  duration: 500,
+  fill: 'forwards',
+  easing: 'ease',
+}
 
 export default function BigCarousel(): JSX.Element {
   // index
   const [currentIndex, setCurrentIndex] = useState(items)
-  const [scope, animate] = useAnimate<HTMLDivElement>()
+  const flexBox = useRef<HTMLDivElement>(null)
   const timeId = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => {
     clearTimeout(timeId.current)
@@ -28,24 +27,39 @@ export default function BigCarousel(): JSX.Element {
   }, [currentIndex])
 
   useEffect(() => {
-    animate(scope.current, { x: -smallWidth * currentIndex + bias }, { duration: 0 })
-    for (const [index, child] of Array.from(scope.current.children).entries()) {
-      animate(child, { width: index === currentIndex ? bigWidth : smallWidth }, { duration: 0 })
+    if (!flexBox.current) return
+    flexBox.current.animate(
+      {
+        transform: `translateX(${-smallWidth * currentIndex + bias}px)`,
+      },
+      { duration: 0, fill: 'forwards' },
+    )
+    for (const [index, child] of Array.from(flexBox.current.children).entries()) {
+      child.animate(
+        { width: index === currentIndex ? `${bigWidth}px` : `${smallWidth}px` },
+        { duration: 0, fill: 'forwards' },
+      )
     }
   }, [])
 
   const animateFromTo = (begin: number, end: number) => {
-    const sequence: AnimationSequence = [
-      [scope.current, { x: [-smallWidth * begin + bias, -smallWidth * end + bias] }, animateConfig],
-    ]
-    for (const [index, child] of Array.from(scope.current.children).entries()) {
+    if (!flexBox.current) return
+    flexBox.current.animate(
+      {
+        transform: [
+          `translateX(${-smallWidth * begin + bias}px)`,
+          `translateX(${-smallWidth * end + bias}px)`,
+        ],
+      },
+      animateConfig,
+    )
+    for (const [index, child] of Array.from(flexBox.current.children).entries()) {
       if (index === begin)
-        sequence.push([child, { width: [bigWidth, smallWidth] }, { ...animateConfig, at: '<' }])
+        child.animate({ width: [`${bigWidth}px`, `${smallWidth}px`] }, animateConfig)
       else if (index === end)
-        sequence.push([child, { width: [smallWidth, bigWidth] }, { ...animateConfig, at: '<' }])
-      else sequence.push([child, { width: smallWidth }, { duration: 0, at: '<' }])
+        child.animate({ width: [`${smallWidth}px`, `${bigWidth}px`] }, animateConfig)
+      else child.animate({ width: `${smallWidth}px` }, { duration: 0, fill: 'forwards' })
     }
-    animate(sequence)
   }
 
   const fromTo = (begin: number, end: number) => {
@@ -91,7 +105,7 @@ export default function BigCarousel(): JSX.Element {
       </Button>
 
       <div className="overflow-hidden">
-        <div className="flex flex-row -ml-2" ref={scope}>
+        <div className="flex flex-row -ml-2" ref={flexBox}>
           {Array.from({ length: items * 2 }).map((_, index) => (
             <div
               className="min-w-0 shrink-0 grow-0 pl-2 w-44"
