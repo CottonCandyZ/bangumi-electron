@@ -1,3 +1,3 @@
-export default function RealHome(): JSX.Element {
+export function Component(): JSX.Element {
   return <div>RealHome</div>
 }

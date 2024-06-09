@@ -1,3 +1,3 @@
-export default function GameHome(): JSX.Element {
+export function Component(): JSX.Element {
   return <div>GameHome</div>
 }

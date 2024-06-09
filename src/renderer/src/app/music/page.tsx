@@ -1,3 +1,3 @@
-export default function MusicHome(): JSX.Element {
+export function Component(): JSX.Element {
   return <div>MusicHome</div>
 }

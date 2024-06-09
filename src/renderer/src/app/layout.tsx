@@ -1,13 +1,12 @@
 import NavBar from '@renderer/components/nav-bar'
 import { Outlet } from 'react-router-dom'
 
-export default function RootLayout(): JSX.Element {
+function RootLayout() {
   return (
     <main className="flex flex-row *:h-dvh">
       <div className="h-full py-1">
         <NavBar />
       </div>
-
       <section className="pt-1 overflow-auto w-full">
         <div className="border-t border-l min-h-full rounded-tl-lg">
           <Outlet />
@@ -16,3 +15,5 @@ export default function RootLayout(): JSX.Element {
     </main>
   )
 }
+
+export { RootLayout as Component }

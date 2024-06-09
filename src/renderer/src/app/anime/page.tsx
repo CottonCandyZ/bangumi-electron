@@ -1,3 +1,3 @@
-export default function AnimeHome(): JSX.Element {
+export function Component() {
   return <div className="w-full">AnimeHome</div>
 }

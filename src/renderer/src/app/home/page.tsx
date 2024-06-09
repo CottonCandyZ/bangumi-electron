@@ -1,7 +1,7 @@
 import BigCarousel from '@renderer/components/big-carousel'
 import SmallCarousel from '@renderer/components/small-carousel'
 
-export default function Home(): JSX.Element {
+export function Component() {
   return (
     <div className="flex flex-col gap-2">
       <section>
