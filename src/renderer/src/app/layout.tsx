@@ -1,18 +1,20 @@
+import Header from '@renderer/components/header'
 import NavBar from '@renderer/components/nav'
 import { Outlet } from 'react-router-dom'
 
 function RootLayout() {
   return (
-    <main className="flex flex-row *:h-dvh">
-      <div className="h-full py-1">
-        <NavBar />
-      </div>
-      <section className="pt-1 overflow-auto w-full">
-        <div className="border-t border-l min-h-full rounded-tl-lg">
-          <Outlet />
+    <>
+      <Header />
+      <div className="flex flex-row *:h-[calc(100dvh-48px)]">
+        <div className="h-full py-1">
+          <NavBar />
         </div>
-      </section>
-    </main>
+        <main className="overflow-auto border-t border-l rounded-tl-lg h-full w-full">
+          <Outlet />
+        </main>
+      </div>
+    </>
   )
 }
 

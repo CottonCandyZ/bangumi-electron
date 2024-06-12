@@ -1,5 +1,5 @@
-import BigCarousel from '@renderer/components/big-carousel'
-import SmallCarousel from '@renderer/components/small-carousel'
+import BigCarousel from '@renderer/components/carousel/big-carousel'
+import SmallCarousel from '@renderer/components/carousel/small-carousel'
 
 export function Component() {
   return (

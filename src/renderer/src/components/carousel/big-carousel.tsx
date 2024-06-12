@@ -4,7 +4,7 @@ import clsx from 'clsx'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
-const items = 5
+const items = 9
 const smallWidth = 176
 const bias = 36 // (9)
 
