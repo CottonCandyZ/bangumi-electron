@@ -22,13 +22,6 @@ function createWindow(): void {
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    if (details.url.startsWith('https://bgm.tv/oauth/authorize'))
-      return {
-        action: 'allow',
-        overrideBrowserWindowOptions: {
-          autoHideMenuBar: true,
-        },
-      }
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
