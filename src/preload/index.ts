@@ -4,6 +4,7 @@ import { electronAPI } from '@electron-toolkit/preload'
 // Custom APIs for renderer
 const api = {
   fetch: (...args) => ipcRenderer.invoke('fetch', ...args),
+  fetchRaw: (...args) => ipcRenderer.invoke('fetchRaw', ...args),
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

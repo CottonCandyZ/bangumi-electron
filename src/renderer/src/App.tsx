@@ -1,21 +1,16 @@
+import { Toaster } from '@renderer/components/ui/toaster'
 import { ThemeProvider } from '@renderer/components/wrapper/theme-wrapper'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Outlet } from 'react-router-dom'
-
+const queryClient = new QueryClient()
 function App(): JSX.Element {
   return (
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <Outlet />
-      {/* <Button
-        onClick={() => {
-          window.open(
-            'https://bgm.tv/oauth/authorize?client_id=bgm31636667df1e4f404&response_type=code&redirect_uri=bangumi://callback',
-            '_blank',
-          )
-        }}
-      >
-        Hello
-      </Button> */}
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+        <Outlet />
+        <Toaster />
+      </ThemeProvider>
+    </QueryClientProvider>
   )
 }
 

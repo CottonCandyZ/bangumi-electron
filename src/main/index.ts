@@ -51,11 +51,16 @@ app.whenReady().then(() => {
   })
 
   // fetch in node env
+
   ipcMain.handle('fetch', async (_, resource, options) => {
+    const data = await ofetch(resource, options)
+    return data
+  })
+
+  ipcMain.handle('fetchRaw', async (_, resource, options) => {
     const { _data, headers } = await ofetch.raw(resource, options)
     return { data: _data, cookie: headers.getSetCookie() }
   })
-
   createWindow()
 
   app.on('activate', function () {

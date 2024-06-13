@@ -21,10 +21,10 @@ export default function BigCarousel(): JSX.Element {
   const [currentIndex, setCurrentIndex] = useState(items)
   const flexBox = useRef<HTMLDivElement>(null)
   const timeId = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  useEffect(() => {
-    clearTimeout(timeId.current)
-    timeId.current = setTimeout(() => fromTo(currentIndex, currentIndex + 1), 5000)
-  }, [currentIndex])
+  // useEffect(() => {
+  //   clearTimeout(timeId.current)
+  //   timeId.current = setTimeout(() => fromTo(currentIndex, currentIndex + 1), 5000)
+  // }, [currentIndex])
 
   useEffect(() => {
     if (!flexBox.current) return

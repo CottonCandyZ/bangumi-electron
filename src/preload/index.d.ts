@@ -6,7 +6,9 @@ declare global {
     electron: ElectronAPI
     api: {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      fetch: (...P: Parameters<$Fetch['raw']>) => Promise<{ data: any; cookie: string[] }>
+      fetch: (...P: Parameters<$Fetch>) => Promise<any>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      fetchRaw: (...P: Parameters<$Fetch['raw']>) => Promise<{ data: any; cookie: string[] }>
     }
   }
 }
