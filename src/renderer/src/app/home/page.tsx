@@ -1,9 +1,12 @@
 import BigCarousel from '@renderer/components/carousel/big-carousel'
 import SmallCarousel from '@renderer/components/carousel/small-carousel'
+import { Button } from '@renderer/components/ui/button'
+import { getLoginFormHash } from '@renderer/constants/api/login'
 
 export function Component() {
   return (
     <div className="flex flex-col gap-2">
+      <Button onClick={async () => await getLoginFormHash()}> TSS </Button>
       <section>
         <BigCarousel />
       </section>

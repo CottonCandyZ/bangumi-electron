@@ -1,7 +1,8 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
+import { ofetch } from 'ofetch'
 
 function createWindow(): void {
   // Create the browser window.
@@ -47,6 +48,12 @@ app.whenReady().then(() => {
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
+  })
+
+  // fetch in node env
+  ipcMain.handle('fetch', async (_, resource, options) => {
+    const { _data, headers } = await ofetch.raw(resource, options)
+    return { data: _data, cookie: headers.getSetCookie() }
   })
 
   createWindow()

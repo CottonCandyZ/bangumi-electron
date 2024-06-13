@@ -4,7 +4,6 @@ import {
   FormItem,
   FormLabel,
   FormControl,
-  FormDescription,
   FormMessage,
 } from '@renderer/components/ui/form'
 import { Input } from '@renderer/components/ui/input'
@@ -12,11 +11,21 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@renderer/components/ui/button'
+import { CONFIG } from '@renderer/config/config'
+import { useEffect } from 'react'
+
+const login_form_message = CONFIG.login_form
 
 export default function LoginForm() {
+  
+
+
   const formSchema = z.object({
-    mail: z.string().min(1, { message: '不能为空噢' }).email('邮箱的格式不太对'),
-    password: z.string().min(1, { message: '不能为空噢' }),
+    mail: z
+      .string()
+      .min(1, { message: login_form_message.required })
+      .email(login_form_message.mailFormatError),
+    password: z.string().min(1, { message: login_form_message.required }),
   })
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -25,10 +34,12 @@ export default function LoginForm() {
       password: '',
     },
   })
-  function onSubmit(values: z.infer<typeof formSchema>) {}
+  // async function onSubmit(values: z.infer<typeof formSchema>) {
+  //   return
+  // }
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form className="space-y-8">
         <FormField
           control={form.control}
           name="mail"
@@ -36,9 +47,8 @@ export default function LoginForm() {
             <FormItem>
               <FormLabel>邮箱</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input placeholder="xxx@gmail.com" {...field} />
               </FormControl>
-              {/* <FormDescription>邮箱</FormDescription> */}
               <FormMessage />
             </FormItem>
           )}
@@ -50,9 +60,8 @@ export default function LoginForm() {
             <FormItem>
               <FormLabel>密码</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input type="password" {...field} />
               </FormControl>
-              {/* <FormDescription>密码</FormDescription> */}
               <FormMessage />
             </FormItem>
           )}
