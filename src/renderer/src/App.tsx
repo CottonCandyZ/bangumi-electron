@@ -1,4 +1,4 @@
-import { Toaster } from '@renderer/components/ui/toaster'
+import { Toaster } from '@renderer/components/ui/sonner'
 import { ThemeProvider } from '@renderer/components/wrapper/theme-wrapper'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Outlet } from 'react-router-dom'
@@ -9,7 +9,7 @@ function App(): JSX.Element {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <Outlet />
-        <Toaster />
+        <Toaster richColors />
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

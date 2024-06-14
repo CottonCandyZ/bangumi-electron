@@ -66,6 +66,29 @@ app.whenReady().then(() => {
     urls: ['https://*.bgm.tv/*'],
   }
 
+  ipcMain.handle('cookie-get', async (_, filter) => {
+    return await session.defaultSession.cookies.get(filter)
+  })
+
+  ipcMain.handle('cookie-remove', async (_, url, name) => {
+    return await session.defaultSession.cookies.remove(url, name)
+  })
+
+  ipcMain.handle('cookie-set', async (_, filter) => {
+    return await session.defaultSession.cookies.set(filter)
+  })
+  session.defaultSession.cookies.remove('https://bgm.tv', 'chii_sid')
+  session.defaultSession.cookies.remove('https://bgm.tv', 'chii_sec_id')
+  session.defaultSession.cookies.remove('https://bgm.tv', 'chii_cookietime')
+
+  session.defaultSession.cookies
+    .get({})
+    .then((cookies) => {
+      console.log(cookies)
+    })
+    .catch((error) => {
+      console.log(error)
+    })
   session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
     details.requestHeaders['User-Agent'] =
       'CottonCandyZ/bangumi-electron/0.0.1 (Electron) (https://github.com/CottonCandyZ/bangumi-electron)'

@@ -5,6 +5,9 @@ import { electronAPI } from '@electron-toolkit/preload'
 const api = {
   fetch: (...args) => ipcRenderer.invoke('fetch', ...args),
   fetchRaw: (...args) => ipcRenderer.invoke('fetchRaw', ...args),
+  getCookie: (...args) => ipcRenderer.invoke('cookie-get', ...args),
+  setCookie: (...args) => ipcRenderer.invoke('cookie-set', ...args),
+  removeCookie: (...args) => ipcRenderer.invoke('cookie-remove', ...args),
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
