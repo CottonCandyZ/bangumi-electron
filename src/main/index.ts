@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -60,6 +60,29 @@ app.whenReady().then(() => {
   ipcMain.handle('fetchRaw', async (_, resource, options) => {
     const { _data, headers } = await ofetch.raw(resource, options)
     return { data: _data, cookie: headers.getSetCookie() }
+  })
+
+  const filter = {
+    urls: ['https://*.bgm.tv/*'],
+  }
+
+  session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+    details.requestHeaders['User-Agent'] =
+      'CottonCandyZ/bangumi-electron/0.0.1 (Electron) (https://github.com/CottonCandyZ/bangumi-electron)'
+    callback({ requestHeaders: details.requestHeaders })
+  })
+
+  session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
+    details.responseHeaders!['Access-Control-Allow-Origin'] = ['http://localhost:5173']
+    details.responseHeaders!['Access-Control-Allow-Credentials'] = ['true']
+    if (details.responseHeaders!['set-cookie']) {
+      details.responseHeaders!['set-cookie'] = details.responseHeaders!['set-cookie'].map(
+        (item) => {
+          return (item += ';SameSite=None; Secure')
+        },
+      )
+    }
+    callback({ responseHeaders: details.responseHeaders })
   })
   createWindow()
 
