@@ -116,7 +116,7 @@ export async function getOAuthFormHash() {
  *
  * 模拟网页表单提交，获得 Authorization code
  *
- * 这里用了 Hack 的方法来获得，应为如果用浏览器发出，服务器会验证 Referer 字段，
+ * 这里用了 Hack 的方法来获得，因为如果用浏览器发出，服务器会验证 Referer 字段，
  * 所以在 main 里将 Referer 修改成了 https://bgm.tv/oauth/authorize
  */
 export async function getOAuthCode() {
