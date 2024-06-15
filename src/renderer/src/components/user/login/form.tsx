@@ -16,6 +16,8 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import {
   getCaptcha,
   getLoginFormHash,
+  getOAuthCode,
+  getOAuthFormHash,
   webLogin,
   webLoginProps,
 } from '@renderer/constants/api/login'
@@ -58,10 +60,13 @@ export default function LoginForm() {
   useEffect(() => {
     switch (stage) {
       case 1:
-        toast('网页验证成功 (1/5)')
+        toast.info('网页验证成功 (1/5)')
         break
       case 2:
-        toast('获取授权表单成功 (2/5)')
+        toast.info('获取授权表单成功 (2/5)')
+        break
+      case 3:
+        toast.info('获得授权 Code 成功 (3/5)')
         break
     }
   }, [stage])
@@ -70,6 +75,10 @@ export default function LoginForm() {
   const login = async (props: webLoginProps) => {
     await webLogin({ ...props })
     setStage(1)
+    await getOAuthFormHash()
+    setStage(2)
+    await getOAuthCode()
+    setStage(3)
   }
 
   const {

@@ -1,11 +1,11 @@
-import { DialogHeader, DialogTitle } from '@renderer/components/ui/dialog'
+import { DialogContent, DialogHeader, DialogTitle } from '@renderer/components/ui/dialog'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import LoginForm from '@renderer/components/user/login/form'
 import { CircleHelp } from 'lucide-react'
 
 export default function Login() {
   return (
-    <>
+    <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
       <DialogHeader>
         <DialogTitle>
           登录{' '}
@@ -27,6 +27,6 @@ export default function Login() {
         </DialogTitle>
       </DialogHeader>
       <LoginForm />
-    </>
+    </DialogContent>
   )
 }

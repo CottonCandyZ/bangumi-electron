@@ -1,5 +1,5 @@
 import { Button } from '@renderer/components/ui/button'
-import { Dialog, DialogContent, DialogTrigger } from '@renderer/components/ui/dialog'
+import { Dialog, DialogTrigger } from '@renderer/components/ui/dialog'
 import Login from '@renderer/components/user/login'
 
 export default function Header() {
@@ -24,9 +24,7 @@ export default function Header() {
                 登录
               </Button>
             </DialogTrigger>
-            <DialogContent>
-              <Login />
-            </DialogContent>
+            <Login />
           </Dialog>
         )}
       </div>

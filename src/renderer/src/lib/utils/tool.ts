@@ -7,3 +7,11 @@ export function urlStringify(
     .map(([key, value]) => `${key}=${encode ? encodeURIComponent(value) : value}`)
     .join('&')
 }
+
+export function createFormData(json: Record<string, string>) {
+  const formData = new FormData()
+  for (const key in json) {
+    formData.append(key, json[key])
+  }
+  return formData
+}

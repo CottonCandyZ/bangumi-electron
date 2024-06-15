@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, session } from 'electron'
+import { app, BrowserWindow, ipcMain, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -22,10 +22,10 @@ function createWindow(): void {
     mainWindow.show()
   })
 
-  mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
-    return { action: 'deny' }
-  })
+  // mainWindow.webContents.setWindowOpenHandler((details) => {
+  //   shell.openExternal(details.url)
+  //   return { action: 'deny' }
+  // })
 
   // HMR for renderer base on electron-vite cli.
   // Load the remote URL for development or the local html file for production.
@@ -90,6 +90,9 @@ app.whenReady().then(() => {
       console.log(error)
     })
   session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+    if (details.url.startsWith('https://bgm.tv/oauth/authorize')) {
+      details.requestHeaders['Referer'] = 'https://bgm.tv/oauth/authorize'
+    }
     details.requestHeaders['User-Agent'] =
       'CottonCandyZ/bangumi-electron/0.0.1 (Electron) (https://github.com/CottonCandyZ/bangumi-electron)'
     callback({ requestHeaders: details.requestHeaders })
@@ -101,7 +104,7 @@ app.whenReady().then(() => {
     if (details.responseHeaders!['set-cookie']) {
       details.responseHeaders!['set-cookie'] = details.responseHeaders!['set-cookie'].map(
         (item) => {
-          return (item += ';SameSite=None; Secure')
+          return (item += ' ;SameSite=None; Secure')
         },
       )
     }
