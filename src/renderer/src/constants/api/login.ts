@@ -1,4 +1,5 @@
-import { APP_ID, HOST, WEB_LOGIN } from '@renderer/constants/config'
+import { APP_ID, APP_SECRET, HOST, LOGIN, URL_OAUTH_REDIRECT } from '@renderer/constants/config'
+import { getTimestamp } from '@renderer/lib/utils/date'
 import { LoginError } from '@renderer/lib/utils/error'
 import { ofetch } from 'ofetch'
 
@@ -27,7 +28,7 @@ export interface webLoginProps {
  * 得表单 Hash 方便登录提交
  */
 export async function getLoginFormHash() {
-  const data = await ofetch(WEB_LOGIN.FORM_URL, {
+  const data = await ofetch(LOGIN.FORM_URL, {
     method: 'get',
     baseURL: HOST,
     credentials: 'include',
@@ -47,7 +48,7 @@ export async function getLoginFormHash() {
  * @returns 由 `URL.createObjectURL` encode `blob` 后的图片地址
  */
 export async function getCaptcha() {
-  const data = await ofetch(WEB_LOGIN.CAPTCHA, {
+  const data = await ofetch(LOGIN.CAPTCHA, {
     method: 'get',
     baseURL: HOST,
     credentials: 'include',
@@ -62,11 +63,11 @@ export async function getCaptcha() {
  * Web 登录函数，直接往登录地址 POST 相关信息
  */
 export async function webLogin({ email, password, captcha, save_password }: webLoginProps) {
-  const { _data: data, redirected } = await ofetch.raw(WEB_LOGIN.POST_URL, {
+  const { _data: data, redirected } = await ofetch.raw(LOGIN.POST_URL, {
     method: 'post',
     baseURL: HOST,
     headers: {
-      'Content-Type': WEB_LOGIN.POST_CONTENT_TYPE,
+      'Content-Type': LOGIN.POST_CONTENT_TYPE,
     },
     body: new URLSearchParams({
       formhash: tempStore.formHash!,
@@ -99,7 +100,7 @@ export async function webLogin({ email, password, captcha, save_password }: webL
  * 获得授权的表单 HASH
  */
 export async function getOAuthFormHash() {
-  const data = await ofetch(WEB_LOGIN.OAUTH_FORM_ULR, {
+  const data = await ofetch(LOGIN.OAUTH_FORM_ULR, {
     method: 'get',
     baseURL: HOST,
     credentials: 'include',
@@ -120,12 +121,12 @@ export async function getOAuthFormHash() {
  * 所以在 main 里将 Referer 修改成了 https://bgm.tv/oauth/authorize
  */
 export async function getOAuthCode() {
-  const { url } = await ofetch.raw(WEB_LOGIN.OAUTH_FORM_ULR, {
+  const { url } = await ofetch.raw(LOGIN.OAUTH_FORM_ULR, {
     method: 'post',
     baseURL: HOST,
     credentials: 'include',
     headers: {
-      'Content-Type': WEB_LOGIN.POST_CONTENT_TYPE,
+      'Content-Type': LOGIN.POST_CONTENT_TYPE,
     },
     body: new URLSearchParams({
       formhash: tempStore.formHash!,
@@ -136,5 +137,29 @@ export async function getOAuthCode() {
   })
   tempStore.code = new URL(url).searchParams.get('code')
   if (!tempStore.code) throw new LoginError('获取授权 code 失败')
-  console.log(tempStore.code)
+}
+
+/**
+ * LOGIN STEP 4
+ *
+ * 使用 code 获得 Bearer (Access token)
+ */
+export async function getOAuthAccessToken() {
+  const json = await ofetch(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
+    method: 'post',
+    baseURL: HOST,
+    headers: {
+      'Content-Type': LOGIN.POST_CONTENT_TYPE,
+    },
+    body: new URLSearchParams({
+      grant_type: 'authorization_code',
+      client_id: APP_ID,
+      client_secret: APP_SECRET,
+      code: tempStore.code!,
+      redirect_uri: URL_OAUTH_REDIRECT,
+      state: getTimestamp().toString(),
+    }),
+  })
+  if (!json.access_token) throw new LoginError('获取 Bearer 失败')
+  console.log(json)
 }

@@ -16,6 +16,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import {
   getCaptcha,
   getLoginFormHash,
+  getOAuthAccessToken,
   getOAuthCode,
   getOAuthFormHash,
   webLogin,
@@ -68,6 +69,12 @@ export default function LoginForm() {
       case 3:
         toast.info('获得授权 Code 成功 (3/5)')
         break
+      case 4:
+        toast.info('获得授权 secret 成功 (4/5)')
+        break
+      case 5:
+        toast.success('登陆成功 (5/5)')
+        break
     }
   }, [stage])
 
@@ -79,6 +86,8 @@ export default function LoginForm() {
     setStage(2)
     await getOAuthCode()
     setStage(3)
+    await getOAuthAccessToken()
+    setStage(4)
   }
 
   const {
@@ -98,7 +107,7 @@ export default function LoginForm() {
     mutationFn: login,
     onError(error) {
       if (error instanceof LoginError) {
-        toast.error(error.message, {})
+        toast.error(error.message)
       } else if (error instanceof FetchError) {
         toast.error('网络错误')
       } else {

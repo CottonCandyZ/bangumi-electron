@@ -6,17 +6,20 @@ export const HOST_NAME = 'bgm.tv'
 
 export const HOST = `https://${HOST_NAME}`
 
-export const APP_ID = 'bgm31636667df1e4f404'
+export const APP_ID = import.meta.env.VITE_APP_ID
+
+export const APP_SECRET = import.meta.env.VITE_APP_SECRET
 
 export const URL_OAUTH_REDIRECT = `${HOST}/dev/app`
 
 export const UA =
   'CottonCandyZ/bangumi-electron/0.0.1 (Electron) (https://github.com/CottonCandyZ/bangumi-electron)'
 
-export const WEB_LOGIN = {
+export const LOGIN = {
   FORM_URL: `/login`,
   CAPTCHA: `/signup/captcha?${getTimestamp()}`,
   POST_URL: `/FollowTheRabbit`,
   POST_CONTENT_TYPE: 'application/x-www-form-urlencoded',
   OAUTH_FORM_ULR: `/oauth/authorize?client_id=${APP_ID}&response_type=code&redirect_uri=${URL_OAUTH_REDIRECT}`,
+  OAUTH_ACCESS_TOKEN_URL: `/oauth/access_token`,
 }
