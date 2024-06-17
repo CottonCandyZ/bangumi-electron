@@ -16,7 +16,7 @@ export default function Header() {
         </div>
       </div>
 
-      <div className="pr-10 justify-end">
+      <div className="pr-40 justify-end">
         <div className="no-drag-region">
           {isLogin ? (
             <div></div>
