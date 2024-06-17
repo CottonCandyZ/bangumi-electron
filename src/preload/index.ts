@@ -8,6 +8,8 @@ const api = {
   getCookie: (...args) => ipcRenderer.invoke('cookie-get', ...args),
   setCookie: (...args) => ipcRenderer.invoke('cookie-set', ...args),
   removeCookie: (...args) => ipcRenderer.invoke('cookie-remove', ...args),
+  saveAccessToken: (...args) => ipcRenderer.invoke('save-access-token', ...args),
+  readAccessToken: (...args) => ipcRenderer.invoke('read-access-token', ...args),
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

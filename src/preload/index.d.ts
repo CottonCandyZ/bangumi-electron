@@ -1,5 +1,6 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
 import { type $Fetch } from 'ofetch'
+import { type token } from '../main/handle'
 
 declare global {
   interface Window {
@@ -12,6 +13,8 @@ declare global {
       getCookie: (P: Electron.CookiesGetFilter) => Promise<Electron.Cookie[]>
       setCookie: (P: Electron.CookiesSetDetails) => Promise<void>
       removeCookie: (url: string, name: string) => Promise<void>
+      saveAccessToken: (token: token) => void
+      readAccessToken: () => Promise<token>
     }
   }
 }

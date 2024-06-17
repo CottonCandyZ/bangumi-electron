@@ -161,5 +161,5 @@ export async function getOAuthAccessToken() {
     }),
   })
   if (!json.access_token) throw new LoginError('获取 Bearer 失败')
-  console.log(json)
+  window.api.saveAccessToken(json)
 }

@@ -1,8 +1,7 @@
-import { app, BrowserWindow, ipcMain, session } from 'electron'
+import { app, BrowserWindow, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
-import { ofetch } from 'ofetch'
 
 function createWindow(): void {
   // Create the browser window.
@@ -11,9 +10,10 @@ function createWindow(): void {
     height: 670,
     show: false,
     autoHideMenuBar: true,
+    titleBarStyle: 'hidden',
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, '../preload/index.mjs'),
       sandbox: false,
     },
   })
@@ -39,7 +39,7 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -52,31 +52,9 @@ app.whenReady().then(() => {
 
   // fetch in node env
 
-  ipcMain.handle('fetch', async (_, resource, options) => {
-    const data = await ofetch(resource, options)
-    return data
-  })
+  await import('./handle.js')
+  await import('./session.js')
 
-  ipcMain.handle('fetchRaw', async (_, resource, options) => {
-    const { _data, headers } = await ofetch.raw(resource, options)
-    return { data: _data, cookie: headers.getSetCookie() }
-  })
-
-  const filter = {
-    urls: ['https://*.bgm.tv/*'],
-  }
-
-  ipcMain.handle('cookie-get', async (_, filter) => {
-    return await session.defaultSession.cookies.get(filter)
-  })
-
-  ipcMain.handle('cookie-remove', async (_, url, name) => {
-    return await session.defaultSession.cookies.remove(url, name)
-  })
-
-  ipcMain.handle('cookie-set', async (_, filter) => {
-    return await session.defaultSession.cookies.set(filter)
-  })
   session.defaultSession.cookies.remove('https://bgm.tv', 'chii_sid')
   session.defaultSession.cookies.remove('https://bgm.tv', 'chii_sec_id')
   session.defaultSession.cookies.remove('https://bgm.tv', 'chii_cookietime')
@@ -89,27 +67,7 @@ app.whenReady().then(() => {
     .catch((error) => {
       console.log(error)
     })
-  session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    if (details.url.startsWith('https://bgm.tv/oauth/authorize')) {
-      details.requestHeaders['Referer'] = 'https://bgm.tv/oauth/authorize'
-    }
-    details.requestHeaders['User-Agent'] =
-      'CottonCandyZ/bangumi-electron/0.0.1 (Electron) (https://github.com/CottonCandyZ/bangumi-electron)'
-    callback({ requestHeaders: details.requestHeaders })
-  })
 
-  session.defaultSession.webRequest.onHeadersReceived(filter, (details, callback) => {
-    details.responseHeaders!['Access-Control-Allow-Origin'] = ['http://localhost:5173']
-    details.responseHeaders!['Access-Control-Allow-Credentials'] = ['true']
-    if (details.responseHeaders!['set-cookie']) {
-      details.responseHeaders!['set-cookie'] = details.responseHeaders!['set-cookie'].map(
-        (item) => {
-          return (item += ' ;SameSite=None; Secure')
-        },
-      )
-    }
-    callback({ responseHeaders: details.responseHeaders })
-  })
   createWindow()
 
   app.on('activate', function () {
