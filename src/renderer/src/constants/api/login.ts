@@ -6,12 +6,21 @@ import { ofetch } from 'ofetch'
 
 // Many TKS ref: https://github.com/czy0729/Bangumi/blob/master/src/screens/login/v2/index.tsx
 
-const tempStore: {
-  formHash: undefined | string | null
-  code: string | undefined | null
+const store: {
+  formHash?: string | null
+  code?: string | null
+  loginInfo: {
+    email?: string
+    password?: string
+  }
+  accessToken: {
+    access_token?: string
+    expires_in?: number
+    refresh_token?: string
+  }
 } = {
-  formHash: undefined,
-  code: undefined,
+  loginInfo: {},
+  accessToken: {},
 }
 
 // TYPES
@@ -36,7 +45,7 @@ export async function getLoginFormHash() {
     parseResponse: (data) => data,
   })
   const match = data.match(/<input type="hidden" name="formhash" value="(.+?)">/)
-  if (match) tempStore.formHash = match[1]
+  if (match) store.formHash = match[1]
   else throw new LoginError('没找着 formHash')
 }
 
@@ -71,7 +80,7 @@ export async function webLogin({ email, password, captcha, save_password }: webL
       'Content-Type': LOGIN.POST_CONTENT_TYPE,
     },
     body: new URLSearchParams({
-      formhash: tempStore.formHash!,
+      formhash: store.formHash!,
       referer: '',
       dreferer: '',
       email,
@@ -93,6 +102,12 @@ export async function webLogin({ email, password, captcha, save_password }: webL
     throw new LoginError('用户名或密码错误')
   }
   if (!redirected) throw new LoginError('未能完成登录，未知错误')
+  if (save_password) {
+    store.loginInfo.email = email
+    store.loginInfo.password = password
+  } else {
+    store.loginInfo = {}
+  }
 }
 
 /**
@@ -109,8 +124,8 @@ export async function getOAuthFormHash() {
   })
   const parse = new DOMParser()
   const doc = parse.parseFromString(data, 'text/html')
-  tempStore.formHash = doc.querySelector('input[name=formhash]')?.getAttribute('value')
-  if (!tempStore.formHash) throw new LoginError('获得授权表单 Hash 失败')
+  store.formHash = doc.querySelector('input[name=formhash]')?.getAttribute('value')
+  if (!store.formHash) throw new LoginError('获得授权表单 Hash 失败')
 }
 
 /**
@@ -130,14 +145,14 @@ export async function getOAuthCode() {
       'Content-Type': LOGIN.POST_CONTENT_TYPE,
     },
     body: new URLSearchParams({
-      formhash: tempStore.formHash!,
+      formhash: store.formHash!,
       redirect_uri: '',
       client_id: APP_ID,
       submit: '授权',
     }),
   })
-  tempStore.code = new URL(url).searchParams.get('code')
-  if (!tempStore.code) throw new LoginError('获取授权 code 失败')
+  store.code = new URL(url).searchParams.get('code')
+  if (!store.code) throw new LoginError('获取授权 code 失败')
 }
 
 /**
@@ -146,7 +161,7 @@ export async function getOAuthCode() {
  * 使用 code 获得 Bearer (Access token)
  */
 export async function getOAuthAccessToken() {
-  const json = await ofetch(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
+  const json = (await ofetch(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
     method: 'post',
     baseURL: HOST,
     headers: {
@@ -156,11 +171,23 @@ export async function getOAuthAccessToken() {
       grant_type: 'authorization_code',
       client_id: APP_ID,
       client_secret: APP_SECRET,
-      code: tempStore.code!,
+      code: store.code!,
       redirect_uri: URL_OAUTH_REDIRECT,
       state: getTimestamp().toString(),
     }),
-  })
+  })) as (typeof store)['accessToken']
   if (!json.access_token) throw new LoginError('获取 Bearer 失败')
-  await client.saveAccessToken(json)
+  store.accessToken = json
+}
+
+/**
+ * LOGIN STEP 5
+ *
+ * 保存登录信息
+ */
+export async function save() {
+  await client.saveAccessToken(store.accessToken as Required<typeof store.accessToken>)
+  if (store.loginInfo.email) {
+    await client.saveLoginInfo(store.loginInfo as Required<typeof store.loginInfo>)
+  }
 }

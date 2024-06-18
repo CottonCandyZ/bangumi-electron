@@ -10,7 +10,7 @@ export default function Wrapper({ children }: PropsWithChildren) {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
         <TooltipProvider>{children}</TooltipProvider>
-        <Toaster richColors />
+        <Toaster richColors className="pointer-events-auto" />
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

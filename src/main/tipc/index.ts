@@ -9,6 +9,11 @@ export interface token {
   expires_in: number
 }
 
+export interface loginInfo {
+  email: string
+  password: string
+}
+
 const store = new Store()
 export const router = {
   saveAccessToken: t.procedure.input<token>().action(async ({ input }) => {
@@ -36,6 +41,28 @@ export const router = {
       access_token,
       refresh_token,
       expires_in: encrypted_token.expires_in,
+    }
+  }),
+  saveLoginInfo: t.procedure.input<loginInfo>().action(async ({ input }) => {
+    const encrypted_email = safeStorage.encryptString(input.email).toString('base64')
+    const encrypted_password = safeStorage.encryptString(input.password).toString('base64')
+    store.set('loginInfo', {
+      encrypted_email,
+      encrypted_password,
+    })
+  }),
+  loadLoginInfo: t.procedure.action(async () => {
+    const encrypted_token = store.get('token') as {
+      encrypted_email: string
+      encrypted_password: string
+    }
+    const [email, password] = await Promise.all([
+      safeStorage.decryptString(Buffer.from(encrypted_token.encrypted_email, 'base64')),
+      safeStorage.decryptString(Buffer.from(encrypted_token.encrypted_password, 'base64')),
+    ])
+    return {
+      email,
+      password,
     }
   }),
   getCookie: t.procedure.input<Electron.CookiesGetFilter>().action(async ({ input }) => {

@@ -19,6 +19,7 @@ import {
   getOAuthAccessToken,
   getOAuthCode,
   getOAuthFormHash,
+  save,
   webLogin,
   webLoginProps,
 } from '@renderer/constants/api/login'
@@ -37,7 +38,7 @@ const login_form_message = CONFIG.login_form
 
 export default function LoginForm() {
   // 步骤
-  const [stage, setStage] = useState(0)
+  const [stage, setStage] = useState(-1)
   const formSchema = z.object({
     email: z
       .string()
@@ -60,6 +61,9 @@ export default function LoginForm() {
   // 显示步骤提示
   useEffect(() => {
     switch (stage) {
+      case 0:
+        toast.info('开始登录啦！')
+        break
       case 1:
         toast.info('网页验证成功 (1/5)')
         break
@@ -80,6 +84,7 @@ export default function LoginForm() {
 
   // 登录流程
   const login = async (props: webLoginProps) => {
+    setStage(0)
     await webLogin({ ...props })
     setStage(1)
     await getOAuthFormHash()
@@ -88,6 +93,8 @@ export default function LoginForm() {
     setStage(3)
     await getOAuthAccessToken()
     setStage(4)
+    await save()
+    setStage(5)
   }
 
   const {
@@ -113,6 +120,7 @@ export default function LoginForm() {
       } else {
         toast.error('未知错误')
       }
+      setStage(-1)
       captcha_refetch()
     },
   })
