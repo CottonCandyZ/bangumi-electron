@@ -1,4 +1,5 @@
 import { APP_ID, APP_SECRET, HOST, LOGIN, URL_OAUTH_REDIRECT } from '@renderer/constants/config'
+import { client } from '@renderer/lib/client'
 import { getTimestamp } from '@renderer/lib/utils/date'
 import { LoginError } from '@renderer/lib/utils/error'
 import { ofetch } from 'ofetch'
@@ -161,5 +162,5 @@ export async function getOAuthAccessToken() {
     }),
   })
   if (!json.access_token) throw new LoginError('获取 Bearer 失败')
-  window.api.saveAccessToken(json)
+  await client.saveAccessToken(json)
 }

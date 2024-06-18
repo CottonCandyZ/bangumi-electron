@@ -1,7 +1,11 @@
 import { app, BrowserWindow, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+import { registerIpcMain } from '@egoist/tipc/main'
+import { router } from './tipc'
+import icon from '../../resources/icon.png'
+
+registerIpcMain(router)
 
 function createWindow(): void {
   // Create the browser window.
@@ -56,8 +60,7 @@ app.whenReady().then(async () => {
 
   // fetch in node env
 
-  await import('./handle.js')
-  await import('./session.js')
+  await import('./session')
 
   session.defaultSession.cookies.remove('https://bgm.tv', 'chii_sid')
   session.defaultSession.cookies.remove('https://bgm.tv', 'chii_sec_id')
