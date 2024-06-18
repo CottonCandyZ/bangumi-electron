@@ -12,7 +12,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@renderer/components/ui/button'
 import { CONFIG } from '@renderer/config/config'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   getCaptcha,
   getLoginFormHash,
@@ -27,18 +27,22 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { Checkbox } from '@renderer/components/ui/checkbox'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import { toast } from 'sonner'
-import { useEffect, useState } from 'react'
 import { AlertCircle, CircleHelp } from 'lucide-react'
 
 import { Alert, AlertDescription, AlertTitle } from '@renderer/components/ui/alert'
 import { LoginError } from '@renderer/lib/utils/error'
 import { FetchError } from 'ofetch'
+import { useSession } from '@renderer/components/wrapper/session'
 
 const login_form_message = CONFIG.login_form
 
-export default function LoginForm() {
-  // 步骤
-  const [stage, setStage] = useState(-1)
+export default function LoginForm({
+  setOpen,
+}: {
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+}) {
+  const queryClient = useQueryClient()
+  const { setLogin } = useSession()
   const formSchema = z.object({
     email: z
       .string()
@@ -57,44 +61,22 @@ export default function LoginForm() {
       save_password: false,
     },
   })
-
-  // 显示步骤提示
-  useEffect(() => {
-    switch (stage) {
-      case 0:
-        toast.info('开始登录啦！')
-        break
-      case 1:
-        toast.info('网页验证成功 (1/5)')
-        break
-      case 2:
-        toast.info('获取授权表单成功 (2/5)')
-        break
-      case 3:
-        toast.info('获得授权 Code 成功 (3/5)')
-        break
-      case 4:
-        toast.info('获得授权 secret 成功 (4/5)')
-        break
-      case 5:
-        toast.success('登陆成功 (5/5)')
-        break
-    }
-  }, [stage])
-
   // 登录流程
   const login = async (props: webLoginProps) => {
-    setStage(0)
+    toast.info('开始登录啦！')
     await webLogin({ ...props })
-    setStage(1)
+    toast.info('网页验证成功 (1/5)')
     await getOAuthFormHash()
-    setStage(2)
+    toast.info('获取授权表单成功 (2/5)')
     await getOAuthCode()
-    setStage(3)
+    toast.info('获得授权 Code 成功 (3/5)')
     await getOAuthAccessToken()
-    setStage(4)
+    toast.info('获得授权 secret 成功 (4/5)')
     await save()
-    setStage(5)
+    queryClient.invalidateQueries({ queryKey: ['accessToken'] })
+    toast.success('登陆成功 (5/5)')
+    setOpen(false)
+    setLogin(true)
   }
 
   const {
@@ -120,7 +102,6 @@ export default function LoginForm() {
       } else {
         toast.error('未知错误')
       }
-      setStage(-1)
       captcha_refetch()
     },
   })

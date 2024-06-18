@@ -3,28 +3,31 @@ import { client } from '@renderer/lib/client'
 import { getTimestamp } from '@renderer/lib/utils/date'
 import { LoginError } from '@renderer/lib/utils/error'
 import { ofetch } from 'ofetch'
+import { token } from 'src/main/tipc'
+
+// 所以这里就是用 web 登录网页啦，非常感谢下面链接里前人的工作给与的参考！
+
+// 1. 我们要要从网页的表单拿到 formHash 和 cookie
+// 2. 使用之前拿到的 cookie 请求得到验证码图片
+// 3. 用 POST 完成登录
+// 4. OAuth 相关的 formHash
+// 5. 获得 OAuth 的 code
+// 6. 使用 code 拿到 key
+// 7. 保存所有信息
 
 // Many TKS ref: https://github.com/czy0729/Bangumi/blob/master/src/screens/login/v2/index.tsx
 
 const store: {
   formHash?: string | null
   code?: string | null
-  loginInfo: {
-    email?: string
-    password?: string
+  loginInfo?: {
+    email: string
+    password: string
   }
-  accessToken: {
-    access_token?: string
-    expires_in?: number
-    refresh_token?: string
-  }
-} = {
-  loginInfo: {},
-  accessToken: {},
-}
+  accessToken?: token
+} = {}
 
 // TYPES
-
 export interface webLoginProps {
   email: string
   password: string
@@ -103,10 +106,9 @@ export async function webLogin({ email, password, captcha, save_password }: webL
   }
   if (!redirected) throw new LoginError('未能完成登录，未知错误')
   if (save_password) {
-    store.loginInfo.email = email
-    store.loginInfo.password = password
+    store.loginInfo = { email, password }
   } else {
-    store.loginInfo = {}
+    store.loginInfo = undefined
   }
 }
 
@@ -175,7 +177,7 @@ export async function getOAuthAccessToken() {
       redirect_uri: URL_OAUTH_REDIRECT,
       state: getTimestamp().toString(),
     }),
-  })) as (typeof store)['accessToken']
+  })) as token
   if (!json.access_token) throw new LoginError('获取 Bearer 失败')
   store.accessToken = json
 }
@@ -186,8 +188,8 @@ export async function getOAuthAccessToken() {
  * 保存登录信息
  */
 export async function save() {
-  await client.saveAccessToken(store.accessToken as Required<typeof store.accessToken>)
-  if (store.loginInfo.email) {
-    await client.saveLoginInfo(store.loginInfo as Required<typeof store.loginInfo>)
+  await client.setAccessToken(store.accessToken!)
+  if (store.loginInfo) {
+    await client.setLoginInfo(store.loginInfo)
   }
 }

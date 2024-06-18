@@ -58,8 +58,6 @@ app.whenReady().then(async () => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // fetch in node env
-
   await import('./session')
 
   session.defaultSession.cookies.remove('https://bgm.tv', 'chii_sid')

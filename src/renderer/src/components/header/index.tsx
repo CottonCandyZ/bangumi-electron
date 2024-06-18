@@ -1,9 +1,9 @@
-import { Button } from '@renderer/components/ui/button'
-import { Dialog, DialogTrigger } from '@renderer/components/ui/dialog'
+import ProfileMenu from '@renderer/components/user/avatarMenu'
 import Login from '@renderer/components/user/login'
+import { useSession } from '@renderer/components/wrapper/session'
 
 export default function Header() {
-  const isLogin = false
+  const { isLogin } = useSession()
   return (
     <header className="flex flex-row items-center py-1 h-12 drag-region">
       <div className="flex flex-row justify-start">
@@ -17,20 +17,7 @@ export default function Header() {
       </div>
 
       <div className="pr-40 justify-end">
-        <div className="no-drag-region">
-          {isLogin ? (
-            <div></div>
-          ) : (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="rounded-3xl">
-                  登录
-                </Button>
-              </DialogTrigger>
-              <Login />
-            </Dialog>
-          )}
-        </div>
+        <div className="no-drag-region">{isLogin ? <ProfileMenu /> : <Login />}</div>
       </div>
     </header>
   )

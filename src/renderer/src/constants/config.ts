@@ -12,9 +12,6 @@ export const APP_SECRET = import.meta.env.VITE_APP_SECRET
 
 export const URL_OAUTH_REDIRECT = `${HOST}/dev/app`
 
-export const UA =
-  'CottonCandyZ/bangumi-electron/0.0.1 (Electron) (https://github.com/CottonCandyZ/bangumi-electron)'
-
 export const LOGIN = {
   FORM_URL: `/login`,
   CAPTCHA: `/signup/captcha?${getTimestamp()}`,
@@ -22,4 +19,5 @@ export const LOGIN = {
   POST_CONTENT_TYPE: 'application/x-www-form-urlencoded',
   OAUTH_FORM_ULR: `/oauth/authorize?client_id=${APP_ID}&response_type=code&redirect_uri=${URL_OAUTH_REDIRECT}`,
   OAUTH_ACCESS_TOKEN_URL: `/oauth/access_token`,
+  OAUTH_ACCESS_TOKEN_STATUS: `/oauth/token_status`,
 }
