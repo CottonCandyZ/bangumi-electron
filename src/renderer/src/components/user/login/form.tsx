@@ -76,7 +76,7 @@ export default function LoginForm({
     queryClient.invalidateQueries({ queryKey: ['accessToken'] })
     toast.success('登陆成功 (5/5)')
     setOpen(false)
-    setLogin(true)
+    setLogin(true) // 这里是唯一的例外，一般不直接设置登录状态，优先展示 UI，随后 Check
   }
 
   const {
