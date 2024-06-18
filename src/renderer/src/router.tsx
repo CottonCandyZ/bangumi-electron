@@ -34,6 +34,14 @@ export const router: ReturnType<typeof createBrowserRouter> = createBrowserRoute
             path: '/real',
             lazy: () => import('@renderer/app/real/page'),
           },
+          {
+            path: '/index',
+            lazy: () => import('@renderer/app/index/page'),
+          },
+          {
+            path: '/talk',
+            lazy: () => import('@renderer/app/talk/page'),
+          },
         ],
       },
     ],
