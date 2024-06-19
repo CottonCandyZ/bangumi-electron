@@ -6,12 +6,12 @@ import React from 'react'
 
 export const Image = React.forwardRef<HTMLImageElement, React.ImgHTMLAttributes<HTMLImageElement>>(
   ({ className, src, ...props }, ref) => {
-    const { data: url } = useQuery({
+    const { data: url, isSuccess } = useQuery({
       queryKey: ['image', src],
       queryFn: async () => await getImage(src!),
       enabled: !!src,
     })
-    return src && url ? (
+    return isSuccess ? (
       <img className={cn('max-w-none', className)} ref={ref} src={url} {...props} />
     ) : (
       <Skeleton className={cn(className)} />
