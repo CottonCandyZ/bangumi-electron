@@ -20,7 +20,8 @@ session.defaultSession.webRequest.onHeadersReceived(
     if (details.responseHeaders!['set-cookie']) {
       details.responseHeaders!['set-cookie'] = details.responseHeaders!['set-cookie'].map(
         (item) => {
-          return (item += ' ;SameSite=None; Secure')
+          if (item.includes('chii_auth')) item += '; Max-Age=7776000'
+          return (item += '; SameSite=None; Secure')
         },
       )
     }

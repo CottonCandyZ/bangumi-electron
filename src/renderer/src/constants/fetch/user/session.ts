@@ -29,5 +29,6 @@ export async function logout() {
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_sid' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_sec_id' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_cookietime' })
+  await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_auth' })
   await client.deleteAccessToken()
 }
