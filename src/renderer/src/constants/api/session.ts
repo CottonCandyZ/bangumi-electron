@@ -1,12 +1,14 @@
-import { HOST, LOGIN } from '@renderer/constants/config'
+import { queryClient } from '@renderer/components/wrapper'
+import { LOGIN, webFetch } from '@renderer/constants/config'
 import { client } from '@renderer/lib/client'
-import { ofetch } from 'ofetch'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { token } from 'src/main/tipc'
 
 // 这里是用来验证相关 session 的地方，如果可能也会刷新 Session
 
 export async function isWebLogin() {
-  const data = (await ofetch(HOST, {
+  const data = (await webFetch('/', {
     credentials: 'include',
     parseResponse: (text) => text,
   })) as string
@@ -14,9 +16,8 @@ export async function isWebLogin() {
 }
 
 export async function isAccessTokenValid(token: token) {
-  const json = (await ofetch(LOGIN.OAUTH_ACCESS_TOKEN_STATUS, {
+  const json = (await webFetch(LOGIN.OAUTH_ACCESS_TOKEN_STATUS, {
     method: 'post',
-    baseURL: HOST,
     headers: {
       'Content-Type': LOGIN.POST_CONTENT_TYPE,
     },

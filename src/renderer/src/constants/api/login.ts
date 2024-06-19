@@ -1,8 +1,7 @@
-import { APP_ID, APP_SECRET, HOST, LOGIN, URL_OAUTH_REDIRECT } from '@renderer/constants/config'
+import { APP_ID, APP_SECRET, LOGIN, URL_OAUTH_REDIRECT, webFetch } from '@renderer/constants/config'
 import { client } from '@renderer/lib/client'
 import { getTimestamp } from '@renderer/lib/utils/date'
 import { LoginError } from '@renderer/lib/utils/error'
-import { ofetch } from 'ofetch'
 import { token } from 'src/main/tipc'
 
 // 所以这里就是用 web 登录网页啦，非常感谢下面链接里前人的工作给与的参考！
@@ -41,9 +40,8 @@ export interface webLoginProps {
  * 得表单 Hash 方便登录提交
  */
 export async function getLoginFormHash() {
-  const data = await ofetch(LOGIN.FORM_URL, {
+  const data = await webFetch(LOGIN.FORM_URL, {
     method: 'get',
-    baseURL: HOST,
     credentials: 'include',
     parseResponse: (data) => data,
   })
@@ -61,9 +59,8 @@ export async function getLoginFormHash() {
  * @returns 由 `URL.createObjectURL` encode `blob` 后的图片地址
  */
 export async function getCaptcha() {
-  const data = await ofetch(LOGIN.CAPTCHA, {
+  const data = await webFetch(LOGIN.CAPTCHA, {
     method: 'get',
-    baseURL: HOST,
     credentials: 'include',
     responseType: 'blob',
   })
@@ -76,9 +73,8 @@ export async function getCaptcha() {
  * Web 登录函数，直接往登录地址 POST 相关信息
  */
 export async function webLogin({ email, password, captcha, save_password }: webLoginProps) {
-  const { _data: data, redirected } = await ofetch.raw(LOGIN.POST_URL, {
+  const { _data: data, redirected } = await webFetch.raw(LOGIN.POST_URL, {
     method: 'post',
-    baseURL: HOST,
     headers: {
       'Content-Type': LOGIN.POST_CONTENT_TYPE,
     },
@@ -118,9 +114,8 @@ export async function webLogin({ email, password, captcha, save_password }: webL
  * 获得授权的表单 HASH
  */
 export async function getOAuthFormHash() {
-  const data = await ofetch(LOGIN.OAUTH_FORM_ULR, {
+  const data = await webFetch(LOGIN.OAUTH_FORM_ULR, {
     method: 'get',
-    baseURL: HOST,
     credentials: 'include',
     parseResponse: (data) => data,
   })
@@ -139,9 +134,8 @@ export async function getOAuthFormHash() {
  * 所以在 main 里将 Referer 修改成了 https://bgm.tv/oauth/authorize
  */
 export async function getOAuthCode() {
-  const { url } = await ofetch.raw(LOGIN.OAUTH_FORM_ULR, {
+  const { url } = await webFetch.raw(LOGIN.OAUTH_FORM_ULR, {
     method: 'post',
-    baseURL: HOST,
     credentials: 'include',
     headers: {
       'Content-Type': LOGIN.POST_CONTENT_TYPE,
@@ -163,9 +157,8 @@ export async function getOAuthCode() {
  * 使用 code 获得 Bearer (Access token)
  */
 export async function getOAuthAccessToken() {
-  const json = (await ofetch(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
+  const json = (await webFetch(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
     method: 'post',
-    baseURL: HOST,
     headers: {
       'Content-Type': LOGIN.POST_CONTENT_TYPE,
     },

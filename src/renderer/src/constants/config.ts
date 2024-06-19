@@ -1,10 +1,15 @@
 // 存储有关 api 的 CONFIG
 
 import { getTimestamp } from '@renderer/lib/utils/date'
+import { ofetch } from 'ofetch'
 
 export const HOST_NAME = 'bgm.tv'
 
+export const API_NAME = 'api.bgm.tv'
+
 export const HOST = `https://${HOST_NAME}`
+
+export const API_HOST = `https://${API_NAME}`
 
 export const APP_ID = import.meta.env.VITE_APP_ID
 
@@ -21,3 +26,11 @@ export const LOGIN = {
   OAUTH_ACCESS_TOKEN_URL: `/oauth/access_token`,
   OAUTH_ACCESS_TOKEN_STATUS: `/oauth/token_status`,
 }
+
+export const USER = {
+  ME: '/v0/me',
+}
+
+export const webFetch = ofetch.create({ baseURL: HOST })
+
+export const apiFetch = ofetch.create({ baseURL: API_HOST })

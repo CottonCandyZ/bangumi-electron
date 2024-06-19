@@ -32,7 +32,6 @@ import { AlertCircle, CircleHelp } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@renderer/components/ui/alert'
 import { LoginError } from '@renderer/lib/utils/error'
 import { FetchError } from 'ofetch'
-import { useSession } from '@renderer/components/wrapper/session'
 
 const login_form_message = CONFIG.login_form
 
@@ -42,7 +41,6 @@ export default function LoginForm({
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
 }) {
   const queryClient = useQueryClient()
-  const { setLogin } = useSession()
   const formSchema = z.object({
     email: z
       .string()
@@ -76,7 +74,6 @@ export default function LoginForm({
     queryClient.invalidateQueries({ queryKey: ['accessToken'] })
     toast.success('登陆成功 (5/5)')
     setOpen(false)
-    setLogin(true) // 这里是唯一的例外，一般不直接设置登录状态，优先展示 UI，随后 Check
   }
 
   const {

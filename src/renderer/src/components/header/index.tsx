@@ -1,9 +1,9 @@
 import ProfileMenu from '@renderer/components/user/avatarMenu'
 import Login from '@renderer/components/user/login'
-import { useSession } from '@renderer/components/wrapper/session'
+import { useIsLoginQuery } from '@renderer/hooks/session'
 
 export default function Header() {
-  const { isLogin } = useSession()
+  const { data: isLogin } = useIsLoginQuery()
   return (
     <header className="flex flex-row items-center py-1 h-12 drag-region">
       <div className="flex flex-row justify-start">
@@ -17,7 +17,7 @@ export default function Header() {
       </div>
 
       <div className="pr-40 justify-end">
-        <div className="no-drag-region">{isLogin ? <ProfileMenu /> : <Login />}</div>
+        <div className="no-drag-region pt-2">{isLogin ? <ProfileMenu /> : <Login />}</div>
       </div>
     </header>
   )

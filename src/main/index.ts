@@ -60,18 +60,14 @@ app.whenReady().then(async () => {
 
   await import('./session')
 
-  session.defaultSession.cookies.remove('https://bgm.tv', 'chii_sid')
-  session.defaultSession.cookies.remove('https://bgm.tv', 'chii_sec_id')
-  session.defaultSession.cookies.remove('https://bgm.tv', 'chii_cookietime')
-
-  session.defaultSession.cookies
-    .get({})
-    .then((cookies) => {
-      console.log(cookies)
-    })
-    .catch((error) => {
-      console.log(error)
-    })
+  // session.defaultSession.cookies
+  //   .get({})
+  //   .then((cookies) => {
+  //     console.log(cookies)
+  //   })
+  //   .catch((error) => {
+  //     console.log(error)
+  //   })
 
   createWindow()
 
