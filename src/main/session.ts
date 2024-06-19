@@ -13,7 +13,7 @@ session.defaultSession.webRequest.onBeforeSendHeaders(
 )
 
 session.defaultSession.webRequest.onHeadersReceived(
-  { urls: ['https://bgm.tv/*'] },
+  { urls: ['https://bgm.tv/*', 'https://lain.bgm.tv/*'] },
   (details, callback) => {
     details.responseHeaders!['Access-Control-Allow-Origin'] = ['http://localhost:5173']
     details.responseHeaders!['Access-Control-Allow-Credentials'] = ['true']

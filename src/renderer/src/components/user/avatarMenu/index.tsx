@@ -1,3 +1,4 @@
+import { Image } from '@renderer/components/base/Image'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,7 +8,6 @@ import {
   DropdownMenuTrigger,
 } from '@renderer/components/ui/dropdown-menu'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import MyAvatar from '@renderer/components/user/avatarMenu/avatar'
 import { getUserInfo } from '@renderer/constants/api/user'
 import { useAccessTokenQuery, useLogoutMutation } from '@renderer/hooks/session'
 import { useQuery } from '@tanstack/react-query'
@@ -28,8 +28,8 @@ export default function ProfileMenu() {
   }
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        <MyAvatar />
+      <DropdownMenuTrigger className="rounded-full overflow-hidden">
+        <Image className="size-9 aspect-square object-cover" src={data?.avatar.small} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>

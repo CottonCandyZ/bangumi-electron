@@ -17,7 +17,9 @@ export default function Header() {
       </div>
 
       <div className="pr-40 justify-end">
-        <div className="no-drag-region pt-2">{isLogin ? <ProfileMenu /> : <Login />}</div>
+        <div className="no-drag-region flex items-center">
+          {isLogin ? <ProfileMenu /> : <Login />}
+        </div>
       </div>
     </header>
   )

@@ -90,6 +90,7 @@ export default function LoginForm({
   })
 
   const mutation = useMutation({
+    mutationKey: ['session'],
     mutationFn: login,
     onError(error) {
       if (error instanceof LoginError) {

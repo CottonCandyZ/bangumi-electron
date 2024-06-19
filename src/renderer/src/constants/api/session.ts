@@ -1,8 +1,5 @@
-import { queryClient } from '@renderer/components/wrapper'
 import { LOGIN, webFetch } from '@renderer/constants/config'
 import { client } from '@renderer/lib/client'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 import { token } from 'src/main/tipc'
 
 // 这里是用来验证相关 session 的地方，如果可能也会刷新 Session

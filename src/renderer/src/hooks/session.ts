@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 export const useLogoutMutation = () => {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationKey: ['logout'],
+    mutationKey: ['session'],
     mutationFn: logout,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['accessToken'] })
