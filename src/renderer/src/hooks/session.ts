@@ -30,6 +30,7 @@ export const useIsLoginQuery = () => {
       if (!accessToken) return false
       return (await isWebLogin()) && (await isAccessTokenValid(accessToken))
     },
+    initialData: true,
     enabled: accessToken !== undefined,
   })
 }
