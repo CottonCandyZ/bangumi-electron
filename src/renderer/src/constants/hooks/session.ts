@@ -1,4 +1,4 @@
-import { isAccessTokenValid, isWebLogin, logout } from '@renderer/constants/api/session'
+import { isAccessTokenValid, isWebLogin, logout } from '@renderer/constants/fetch/user/session'
 import { client } from '@renderer/lib/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 

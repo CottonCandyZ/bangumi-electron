@@ -8,8 +8,8 @@ import {
   DropdownMenuTrigger,
 } from '@renderer/components/ui/dropdown-menu'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { getUserInfo } from '@renderer/constants/api/user'
-import { useAccessTokenQuery, useLogoutMutation } from '@renderer/hooks/session'
+import { getUserInfo } from '@renderer/constants/fetch/user/info'
+import { useAccessTokenQuery, useLogoutMutation } from '@renderer/constants/hooks/session'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
@@ -18,7 +18,7 @@ export default function ProfileMenu() {
   const { data: accessToken } = useAccessTokenQuery()
   const { data, isLoading } = useQuery({
     queryKey: ['userInfo', accessToken],
-    queryFn: () => getUserInfo(accessToken!.access_token),
+    queryFn: async () => await getUserInfo(accessToken!.access_token),
     enabled: !!accessToken,
   })
   if (data && 'title' in data) {

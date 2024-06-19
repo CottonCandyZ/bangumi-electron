@@ -22,13 +22,12 @@ import {
   save,
   webLogin,
   webLoginProps,
-} from '@renderer/constants/api/login'
+} from '@renderer/constants/fetch/user/login'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { Checkbox } from '@renderer/components/ui/checkbox'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import { toast } from 'sonner'
 import { AlertCircle, CircleHelp } from 'lucide-react'
-
 import { Alert, AlertDescription, AlertTitle } from '@renderer/components/ui/alert'
 import { LoginError } from '@renderer/lib/utils/error'
 import { FetchError } from 'ofetch'

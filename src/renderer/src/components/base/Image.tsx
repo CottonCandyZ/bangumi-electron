@@ -1,5 +1,5 @@
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { getImage } from '@renderer/constants/api/image'
+import { getImage } from '@renderer/constants/fetch/image'
 import { cn } from '@renderer/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 import React from 'react'

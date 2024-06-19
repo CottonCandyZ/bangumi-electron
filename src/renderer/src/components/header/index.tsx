@@ -1,6 +1,6 @@
 import ProfileMenu from '@renderer/components/user/avatarMenu'
 import Login from '@renderer/components/user/login'
-import { useIsLoginQuery } from '@renderer/hooks/session'
+import { useIsLoginQuery } from '@renderer/constants/hooks/session'
 
 export default function Header() {
   const { data: isLogin } = useIsLoginQuery()

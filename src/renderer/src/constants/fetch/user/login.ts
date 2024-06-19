@@ -2,6 +2,7 @@ import { APP_ID, APP_SECRET, LOGIN, URL_OAUTH_REDIRECT, webFetch } from '@render
 import { client } from '@renderer/lib/client'
 import { getTimestamp } from '@renderer/lib/utils/date'
 import { LoginError } from '@renderer/lib/utils/error'
+import { domParser } from '@renderer/lib/utils/parser'
 import { token } from 'src/main/tipc'
 
 // 所以这里就是用 web 登录网页啦，非常感谢下面链接里前人的工作给与的参考！
@@ -119,8 +120,7 @@ export async function getOAuthFormHash() {
     credentials: 'include',
     parseResponse: (data) => data,
   })
-  const parse = new DOMParser()
-  const doc = parse.parseFromString(data, 'text/html')
+  const doc = domParser.parseFromString(data, 'text/html')
   store.formHash = doc.querySelector('input[name=formhash]')?.getAttribute('value')
   if (!store.formHash) throw new LoginError('获得授权表单 Hash 失败')
 }
