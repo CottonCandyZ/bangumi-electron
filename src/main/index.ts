@@ -1,4 +1,4 @@
-import { app, BrowserWindow, session } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcMain } from '@egoist/tipc/main'
@@ -10,13 +10,15 @@ registerIpcMain(router)
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
+    minWidth: 660,
+    minHeight: 380,
     width: 900,
     height: 670,
     show: false,
     autoHideMenuBar: true,
     titleBarStyle: 'hidden',
     titleBarOverlay: {
-      color: '#fff',
+      color: 'rgba(0,0,0,0)',
       height: 48,
     },
     ...(process.platform === 'linux' ? { icon } : {}),

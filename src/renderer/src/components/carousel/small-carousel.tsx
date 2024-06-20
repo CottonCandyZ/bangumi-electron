@@ -50,10 +50,13 @@ export default function SmallCarousel({ href, name }: SmallCarouselProps): JSX.E
       </div>
       <CarouselContent>
         {Array.from({ length: 24 }).map((_, index) => (
-          <CarouselItem key={index} className="basis-1/6">
+          <CarouselItem
+            key={index}
+            className="basis-1/4 md:basis-1/5 lg:basis-1/6 xl:basis-[14.285714%] 2xl:basis-[11.111111%]"
+          >
             <div className="p-1">
               <Card>
-                <CardContent className="flex items-center justify-center p-6">
+                <CardContent className="flex items-center justify-center p-6 aspect-[9/16]">
                   <span className="text-3xl font-semibold">{index + 1}</span>
                 </CardContent>
               </Card>
