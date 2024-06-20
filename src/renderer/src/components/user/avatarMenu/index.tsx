@@ -8,24 +8,14 @@ import {
   DropdownMenuTrigger,
 } from '@renderer/components/ui/dropdown-menu'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { getUserInfo } from '@renderer/constants/fetch/user/info'
-import { useAccessTokenQuery, useLogoutMutation } from '@renderer/constants/hooks/session'
-import { useQuery } from '@tanstack/react-query'
+import { useLogoutMutation } from '@renderer/constants/hooks/session'
+import { useQueryUserInfo } from '@renderer/constants/hooks/userInfo'
 import { toast } from 'sonner'
 
 export default function ProfileMenu() {
   const logoutMutation = useLogoutMutation()
-  const { data: accessToken } = useAccessTokenQuery()
-  const { data, isLoading } = useQuery({
-    queryKey: ['userInfo', accessToken],
-    queryFn: async () => await getUserInfo(accessToken!.access_token),
-    enabled: !!accessToken,
-  })
-  if (data && 'title' in data) {
-    toast.error('登陆状态过期了哦')
-    logoutMutation.mutate()
-    return
-  }
+  const { data, isError, isLoading } = useQueryUserInfo()
+  if (isError) return null
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="rounded-full overflow-hidden">
