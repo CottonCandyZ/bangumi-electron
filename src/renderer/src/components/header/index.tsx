@@ -4,8 +4,8 @@ import { useIsLoginQuery } from '@renderer/constants/hooks/session'
 import { toast } from 'sonner'
 
 export default function Header() {
-  const { data: isLogin, isError } = useIsLoginQuery()
-  if (isError) toast.error('获取登陆状态失败')
+  const isLogin = useIsLoginQuery()
+  if (isLogin.isError) toast.error('获取登陆状态失败')
   return (
     <header className="flex flex-row items-center py-1 h-12 drag-region">
       <div className="flex flex-row justify-start">
@@ -20,7 +20,7 @@ export default function Header() {
 
       <div className="pr-40 justify-end">
         <div className="no-drag-region flex items-center">
-          {isLogin ? <ProfileMenu /> : <Login />}
+          {isLogin.data ? <ProfileMenu /> : <Login />}
         </div>
       </div>
     </header>

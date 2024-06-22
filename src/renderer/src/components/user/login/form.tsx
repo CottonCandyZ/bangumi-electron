@@ -76,12 +76,7 @@ export default function LoginForm({
     setOpen(false)
   }
 
-  const {
-    data: captcha_src,
-    isFetching: captcha_isFetching,
-    isError: captcha_isError,
-    refetch: captcha_refetch,
-  } = useQuery({
+  const captcha = useQuery({
     queryKey: ['captcha'],
     queryFn: async () => {
       await getLoginFormHash()
@@ -100,7 +95,7 @@ export default function LoginForm({
       } else {
         toast.error('未知错误')
       }
-      captcha_refetch()
+      captcha.refetch()
     },
   })
 
@@ -151,13 +146,13 @@ export default function LoginForm({
               </FormItem>
             )}
           />
-          {captcha_isFetching ? (
+          {captcha.isFetching ? (
             <Skeleton className="h-[60px] w-[160px]" />
-          ) : captcha_isError ? (
+          ) : captcha.isError ? (
             <Alert
               variant="destructive"
               className="cursor-pointer"
-              onClick={() => captcha_refetch()}
+              onClick={() => captcha.refetch()}
             >
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Ooops 出错啦</AlertTitle>
@@ -165,9 +160,9 @@ export default function LoginForm({
             </Alert>
           ) : (
             <img
-              src={captcha_src}
+              src={captcha.data}
               className="cursor-pointer rounded-md"
-              onClick={() => captcha_refetch()}
+              onClick={() => captcha.refetch()}
             />
           )}
         </div>

@@ -14,16 +14,20 @@ import { toast } from 'sonner'
 
 export default function ProfileMenu() {
   const logoutMutation = useLogoutMutation()
-  const { data, isError } = useQueryUserInfo()
-  if (isError) return null
+  const userInfo = useQueryUserInfo()
+  if (userInfo.isError) return null
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="rounded-full overflow-hidden">
-        <Image className="size-9 aspect-square object-cover" src={data?.avatar.small} />
+        <Image className="size-9 aspect-square object-cover" src={userInfo.data?.avatar.small} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>
-          {data?.nickname ? <span>Hi! {data?.nickname}</span> : <Skeleton className="h-5" />}
+          {userInfo.data?.nickname ? (
+            <span>Hi! {userInfo.data?.nickname}</span>
+          ) : (
+            <Skeleton className="h-5" />
+          )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
