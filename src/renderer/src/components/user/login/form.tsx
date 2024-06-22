@@ -72,13 +72,14 @@ export default function LoginForm({
     await save()
     queryClient.invalidateQueries({ queryKey: ['accessToken'] })
     toast.success('登陆成功 (5/5)')
+    window.localStorage.setItem('isLogin', 'true')
     setOpen(false)
   }
 
   const {
     data: captcha_src,
     isFetching: captcha_isFetching,
-    failureCount: captcha_failureCount,
+    isError: captcha_isError,
     refetch: captcha_refetch,
   } = useQuery({
     queryKey: ['captcha'],
@@ -152,7 +153,7 @@ export default function LoginForm({
           />
           {captcha_isFetching ? (
             <Skeleton className="h-[60px] w-[160px]" />
-          ) : captcha_failureCount == 4 ? (
+          ) : captcha_isError ? (
             <Alert
               variant="destructive"
               className="cursor-pointer"

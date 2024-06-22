@@ -18,4 +18,7 @@ export class AuthError extends Error {
   static expire() {
     return new AuthError('已过期', 2)
   }
+  static notFound() {
+    return new AuthError('没有访问权限或者不存在', 3)
+  }
 }

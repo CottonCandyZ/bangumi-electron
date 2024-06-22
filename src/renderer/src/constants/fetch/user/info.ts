@@ -1,5 +1,5 @@
-import { API_HOST, AuthorizationHeader, USER, apiFetch } from '@renderer/constants/config'
-import { AuthError } from '@renderer/lib/utils/error'
+import { API_HOST, USER, apiFetch } from '@renderer/constants/config'
+import { getAuthHeader } from '@renderer/constants/fetch/utils'
 
 export interface userInfo {
   avatar: {
@@ -15,12 +15,11 @@ export interface userInfo {
 }
 
 export async function getUserInfo({ token }: { token: string }) {
-  const { _data: data, status } = await apiFetch.raw(USER.ME, {
+  const data = await apiFetch<userInfo>(USER.ME, {
     baseURL: API_HOST,
     headers: {
-      Authorization: AuthorizationHeader(token),
+      ...getAuthHeader(token),
     },
   })
-  if (status === 401) throw AuthError.expire()
-  return data as userInfo
+  return data
 }

@@ -17,6 +17,8 @@ export const APP_SECRET = import.meta.env.VITE_APP_SECRET
 
 export const URL_OAUTH_REDIRECT = `${HOST}/dev/app`
 
+export const AuthorizationHeader = (token: string) => `Bearer ${token}`
+
 export const LOGIN = {
   FORM_URL: `/login`,
   CAPTCHA: `/signup/captcha?${getTimestamp()}`,
@@ -29,6 +31,10 @@ export const LOGIN = {
 
 export const USER = {
   ME: '/v0/me',
+}
+
+export const SUBJECTS = {
+  BY_ID: (id: string) => `/v2/subject/${id}`,
 }
 
 export const webFetch = ofetch.create({ baseURL: HOST })

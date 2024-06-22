@@ -4,7 +4,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PropsWithChildren } from 'react'
 import { TooltipProvider } from '@renderer/components/ui/tooltip'
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity,
+      retry: 0,
+    },
+  },
+})
 export default function Wrapper({ children }: PropsWithChildren) {
   return (
     <QueryClientProvider client={queryClient}>

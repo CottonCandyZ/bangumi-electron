@@ -44,6 +44,9 @@ export const router = {
       expires_in: encrypted_token.expires_in,
     }
   }),
+  isStoreAccessToken: t.procedure.action(async () => {
+    return store.has('token')
+  }),
   deleteAccessToken: t.procedure.action(async () => {
     store.delete('token')
   }),

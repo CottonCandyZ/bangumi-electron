@@ -14,7 +14,7 @@ import { toast } from 'sonner'
 
 export default function ProfileMenu() {
   const logoutMutation = useLogoutMutation()
-  const { data, isError, isLoading } = useQueryUserInfo()
+  const { data, isError } = useQueryUserInfo()
   if (isError) return null
   return (
     <DropdownMenu>
@@ -23,7 +23,7 @@ export default function ProfileMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>
-          {isLoading ? <Skeleton className="h-5" /> : <span>Hi! {data?.nickname}</span>}
+          {data?.nickname ? <span>Hi! {data?.nickname}</span> : <Skeleton className="h-5" />}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem
