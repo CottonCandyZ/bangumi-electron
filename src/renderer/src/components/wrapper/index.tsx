@@ -1,13 +1,22 @@
 import { Toaster } from '@renderer/components/ui/sonner'
 import { ThemeProvider } from '@renderer/components/wrapper/theme-wrapper'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PropsWithChildren } from 'react'
 import { TooltipProvider } from '@renderer/components/ui/tooltip'
+import { toast } from 'sonner'
 const queryClient = new QueryClient({
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      // 已经获得了数据，但是在更新时出错
+      if (query.state.data === null) {
+        toast.error(error.message)
+      }
+    },
+  }),
   defaultOptions: {
     queries: {
-      staleTime: Infinity,
+      staleTime: 20 * 1000,
       retry: 0,
     },
   },

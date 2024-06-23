@@ -64,7 +64,7 @@ export const useQueryOptionalAuth = <P, R>({
         data = await queryFn({ ...props } as P)
       } catch (error) {
         if (error instanceof FetchError && error.statusCode === 401) {
-          throw AuthError.notFound()
+          return null
         }
         throw error
       }
@@ -86,15 +86,11 @@ export const useQueryOptionalAuth = <P, R>({
       }
       return data as R
     },
-    enabled:
-      accessToken !== undefined &&
-      withoutAccessToken.isError &&
-      withoutAccessToken.error instanceof AuthError &&
-      withoutAccessToken.error.code === 3,
+    enabled: accessToken !== undefined && withoutAccessToken === null,
   })
   if (query.isError && query.error instanceof FetchError) {
     if (query.error.statusCode === 401) logoutMutation.mutate()
   }
-  if (!withoutAccessToken.isError) return withoutAccessToken
+  if (!withoutAccessToken !== null) return withoutAccessToken
   return query
 }

@@ -70,10 +70,6 @@ export default function LoginForm({
     await getOAuthAccessToken()
     toast.info('获得授权 secret 成功 (4/5)')
     await save()
-    queryClient.invalidateQueries({ queryKey: ['accessToken'] })
-    toast.success('登陆成功 (5/5)')
-    window.localStorage.setItem('isLogin', 'true')
-    setOpen(false)
   }
 
   const captcha = useQuery({
@@ -87,6 +83,12 @@ export default function LoginForm({
   const mutation = useMutation({
     mutationKey: ['session'],
     mutationFn: login,
+    onSuccess() {
+      toast.success('登陆成功 (5/5)')
+      window.localStorage.setItem('isLogin', 'true')
+      queryClient.invalidateQueries({ queryKey: ['accessToken'] })
+      setOpen(false)
+    },
     onError(error) {
       if (error instanceof LoginError) {
         toast.error(error.message)

@@ -8,6 +8,7 @@ export const useLogoutMutation = () => {
     mutationKey: ['session'],
     mutationFn: logout,
     onSuccess: () => {
+      queryClient.setQueryData(['isLogin'], false)
       queryClient.invalidateQueries({ queryKey: ['accessToken'] })
     },
   })
@@ -30,7 +31,7 @@ export const useIsLoginQuery = () => {
       if (!accessToken) return false
       return (await isWebLogin()) && (await isAccessTokenValid(accessToken))
     },
-    initialData: !!window.localStorage.getItem('isLogin'),
+    placeholderData: !!window.localStorage.getItem('isLogin'),
     enabled: accessToken !== undefined,
   })
 }

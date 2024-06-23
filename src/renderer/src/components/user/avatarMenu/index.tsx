@@ -15,7 +15,6 @@ import { toast } from 'sonner'
 export default function ProfileMenu() {
   const logoutMutation = useLogoutMutation()
   const userInfo = useQueryUserInfo()
-  if (userInfo.isError) return null
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="rounded-full overflow-hidden">
