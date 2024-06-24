@@ -15,7 +15,7 @@ interface SmallCarouselProps {
   name: string
 }
 
-export default function SmallCarousel({ href, name }: SmallCarouselProps): JSX.Element {
+export default function SmallCarousel({ href, name }: SmallCarouselProps) {
   return (
     <Carousel
       opts={{

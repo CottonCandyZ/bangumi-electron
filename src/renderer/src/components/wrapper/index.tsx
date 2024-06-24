@@ -16,7 +16,7 @@ const queryClient = new QueryClient({
   }),
   defaultOptions: {
     queries: {
-      staleTime: 20 * 1000,
+      staleTime: import.meta.env.DEV ? Infinity : 20 * 1000,
       retry: 0,
     },
   },
