@@ -11,6 +11,8 @@ export const HOST = `https://${HOST_NAME}`
 
 export const API_HOST = `https://${API_NAME}`
 
+export const ASSERT_HOST = `https://lain.bgm.tv`
+
 export const APP_ID = import.meta.env.VITE_APP_ID
 
 export const APP_SECRET = import.meta.env.VITE_APP_SECRET
