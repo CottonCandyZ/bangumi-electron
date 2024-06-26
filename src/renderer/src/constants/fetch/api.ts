@@ -17,7 +17,6 @@ export async function getSubjectById({ id, token }: { id?: SubjectId; token?: st
     })
   } catch (e) {
     if (!token && e instanceof FetchError && e.statusCode === 404) {
-      console.log(id)
       return null
     }
     throw e
