@@ -10,7 +10,7 @@ function RootLayout() {
         <div className="h-full py-1">
           <NavBar />
         </div>
-        <main className="overflow-auto border-t border-l rounded-tl-lg h-full w-full">
+        <main className="overflow-auto border-t border-l rounded-tl-lg h-full w-full pt-2 pb-20">
           <Outlet />
         </main>
       </div>

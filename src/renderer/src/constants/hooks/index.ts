@@ -51,9 +51,11 @@ export const useQueryOptionalAuth = <P, R>({
   queryKey,
   queryFn,
   props,
+  enabled,
 }: {
   queryKey: QueryOptions['queryKey']
   queryFn: P extends { token?: string } ? Fn<P, R> : never
+  enabled?: boolean
 } & OptionalProps<P>) => {
   const logoutMutation = useLogoutMutation()
   const withoutAccessToken = useQuery({
@@ -70,6 +72,7 @@ export const useQueryOptionalAuth = <P, R>({
       }
       return data as R
     },
+    enabled: enabled,
   })
   const { data: accessToken } = useAccessTokenQuery()
   const query = useQuery({
@@ -86,11 +89,14 @@ export const useQueryOptionalAuth = <P, R>({
       }
       return data as R
     },
-    enabled: accessToken !== undefined && withoutAccessToken === null,
+    enabled:
+      (enabled === undefined ? true : enabled) &&
+      accessToken !== undefined &&
+      withoutAccessToken.data === null,
   })
   if (query.isError && query.error instanceof FetchError) {
     if (query.error.statusCode === 401) logoutMutation.mutate()
   }
-  if (!withoutAccessToken !== null) return withoutAccessToken
+  if (withoutAccessToken.data !== null) return withoutAccessToken
   return query
 }

@@ -4,7 +4,7 @@ import { SubjectId } from '@renderer/constants/types'
 export type Subject = {
   date: string
   platform: string
-  images: CoverImages[]
+  images: CoverImages
   summary: string
   name: string
   name_cn: string

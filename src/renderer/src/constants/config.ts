@@ -36,7 +36,7 @@ export const USER = {
 }
 
 export const SUBJECTS = {
-  BY_ID: (id: string) => `/v2/subject/${id}`,
+  BY_ID: (id: string) => `/v0/subjects/${id}`,
 }
 
 export const webFetch = ofetch.create({ baseURL: HOST })

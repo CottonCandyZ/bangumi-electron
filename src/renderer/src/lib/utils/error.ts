@@ -22,3 +22,10 @@ export class AuthError extends Error {
     return new AuthError('没有访问权限或者不存在', 3)
   }
 }
+
+export class FetchParamError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'FetchParamError'
+  }
+}

@@ -9,14 +9,15 @@ export const selectTopListFromHTML = (HTML: string) => {
   for (const item of Array.from(top)) {
     const a = item.firstElementChild as HTMLAnchorElement | null
     const SubjectId = a?.href.split('/').at(-1)
-    const follow = item.nextElementSibling?.lastElementChild?.firstElementChild?.textContent
+    const follow =
+      item.nextElementSibling?.lastElementChild?.firstElementChild?.textContent ?? undefined
     result.push({ SubjectId, follow })
   }
   const sub = dom.querySelector('#chl_subitem > ul') as HTMLUListElement
   for (const item of Array.from(sub.children)) {
     const a = item.firstElementChild as HTMLAnchorElement
     const SubjectId = a.href.split('/').at(-1)
-    const follow = item.querySelector('.feed')?.textContent
+    const follow = item.querySelector('.feed')?.textContent ?? undefined
     result.push({ SubjectId, follow })
   }
   return result
