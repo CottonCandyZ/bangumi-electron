@@ -2,14 +2,16 @@ import SubjectCard from '@renderer/components/carousel/subject-card-content'
 import { Button } from '@renderer/components/ui/button'
 import {
   Carousel,
-  CarouselContent,
+  CarouselContentNoFlow,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
 } from '@renderer/components/ui/carousel'
 import { sectionPath } from '@renderer/constants/types/web'
+import { cn } from '@renderer/lib/utils'
 import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { create } from 'zustand'
 
 interface SmallCarouselProps {
   href: string
@@ -17,14 +19,25 @@ interface SmallCarouselProps {
   sectionPath: sectionPath
 }
 
+interface carouselSectionPath {
+  sectionPath: sectionPath | null
+  setSectionPath: (sectionPath: sectionPath | null) => void
+}
+export const useCarouselSectionPath = create<carouselSectionPath>()((set) => ({
+  sectionPath: null,
+  setSectionPath: (sectionPath) => set({ sectionPath }),
+}))
+
 export default function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
+  const currentSectionPath = useCarouselSectionPath((state) => state.sectionPath)
   return (
     <Carousel
       opts={{
         align: 'start',
         slidesToScroll: 'auto',
+        // active
       }}
-      className="w-full"
+      className={cn('w-full', currentSectionPath === sectionPath ? 'z-10' : '')}
     >
       <div className="flex justify-between">
         <Button
@@ -49,7 +62,7 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
           <CarouselNext className="relative right-0 top-0 translate-y-0" />
         </div>
       </div>
-      <CarouselContent className="-ml-3">
+      <CarouselContentNoFlow className="-ml-3">
         {Array.from({ length: 11 }).map((_, index) => (
           <CarouselItem
             key={index}
@@ -60,7 +73,7 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
             </div>
           </CarouselItem>
         ))}
-      </CarouselContent>
+      </CarouselContentNoFlow>
     </Carousel>
   )
 }
