@@ -51,7 +51,7 @@ export default function NavBar() {
   ]
 
   return (
-    <nav className="px-1 flex flex-col justify-between h-full">
+    <nav className="flex h-full flex-col justify-between px-1">
       <ul className="flex flex-col gap-1 overflow-auto">
         {route.map((item) => (
           <li key={item.name}>
@@ -61,7 +61,7 @@ export default function NavBar() {
       </ul>
       <div>
         <Button
-          className="size-16 flex flex-col hover:text-primary text-primary/65"
+          className="flex size-16 flex-col text-primary/65 hover:text-primary"
           variant="ghost"
         >
           <span className="i-mingcute-book-5-line text-3xl" />
