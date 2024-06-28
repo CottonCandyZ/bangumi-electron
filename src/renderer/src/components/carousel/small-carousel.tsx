@@ -1,3 +1,4 @@
+import { useCurrentHoverCard } from '@renderer/components/carousel/state'
 import SubjectCard from '@renderer/components/carousel/subject-card-content'
 import { Button } from '@renderer/components/ui/button'
 import {
@@ -7,11 +8,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@renderer/components/ui/carousel'
+import { UI_CONFIG } from '@renderer/config'
 import { sectionPath } from '@renderer/constants/types/web'
 import { cn } from '@renderer/lib/utils'
 import { ChevronRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { create } from 'zustand'
 
 interface SmallCarouselProps {
   href: string
@@ -19,23 +20,13 @@ interface SmallCarouselProps {
   sectionPath: sectionPath
 }
 
-interface carouselSectionPath {
-  sectionPath: sectionPath | null
-  setSectionPath: (sectionPath: sectionPath | null) => void
-}
-export const useCarouselSectionPath = create<carouselSectionPath>()((set) => ({
-  sectionPath: null,
-  setSectionPath: (sectionPath) => set({ sectionPath }),
-}))
-
 export default function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
-  const currentSectionPath = useCarouselSectionPath((state) => state.sectionPath)
+  const currentSectionPath = useCurrentHoverCard((state) => state.sectionPath)
   return (
     <Carousel
       opts={{
         align: 'start',
         slidesToScroll: 'auto',
-        // active
       }}
       className={cn('w-full', currentSectionPath === sectionPath ? 'z-10' : '')}
     >
@@ -63,7 +54,7 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
         </div>
       </div>
       <CarouselContentNoFlow className="-ml-3">
-        {Array.from({ length: 11 }).map((_, index) => (
+        {Array.from({ length: UI_CONFIG.HOME_SECTION_CAROUSEL_NUMBER }).map((_, index) => (
           <CarouselItem
             key={index}
             className="basis-1/4 pl-3 md:basis-1/5 lg:basis-1/6 xl:basis-[14.285714%] 2xl:basis-[11.111111%]"

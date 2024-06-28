@@ -1,11 +1,11 @@
 import { Image } from '@renderer/components/base/Image'
-import { useCarouselSectionPath } from '@renderer/components/carousel/small-carousel'
+import { useCurrentHoverCard } from '@renderer/components/carousel/state'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { useQuerySubjectInfo } from '@renderer/constants/hooks/subjects'
 import { useTopListQuery } from '@renderer/constants/hooks/web'
 import { sectionPath } from '@renderer/constants/types/web'
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 
 export interface SubjectCardProps {
   sectionPath: sectionPath
@@ -17,11 +17,17 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
   const subjectId = topList?.data?.[index].SubjectId
   const follow = topList?.data?.[index].follow
   const subjectInfo = useQuerySubjectInfo({ id: subjectId, enabled: !!subjectId })
+
   const ref = useRef<HTMLDivElement>(null)
   const inset = useRef({ left: 0, right: 0, top: 0, bottom: 0 })
-  const [open, setOpen] = useState(false)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const setActive = useCarouselSectionPath((state) => state.setSectionPath)
+
+  const setActive = useCurrentHoverCard((state) => state.setActive)
+  const active = useCurrentHoverCard((state) => ({
+    sectionPath: state.sectionPath,
+    index: state.index,
+  }))
+
   return (
     <LayoutGroup id={sectionPath}>
       <div className="relative">
@@ -56,13 +62,12 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                   right += 24 - toRight
                   left -= 24 - toRight
                 }
-                if (toBottom < 24) {
-                  bottom += 24 - toBottom
-                  top -= 24 - toBottom
+                if (toBottom < 8) {
+                  bottom += 8 - toBottom
+                  top -= 8 - toBottom
                 }
                 inset.current = { left, right, top, bottom }
-                setOpen(true)
-                setActive(sectionPath)
+                setActive(sectionPath, index)
               }, 500)
             }}
             onMouseLeave={() => clearTimeout(timeoutRef.current)}
@@ -90,7 +95,7 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
           </div>
         </motion.div>
         <AnimatePresence>
-          {open && (
+          {active.sectionPath === sectionPath && active.index === index && (
             <motion.div
               className="absolute z-[10]"
               style={{
@@ -99,10 +104,10 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                 bottom: `${inset.current.bottom}px`,
                 top: `${inset.current.top}px`,
               }}
-              onAnimationComplete={() => setActive(null)}
+              onAnimationComplete={() => setActive(null, null)}
               layoutId={index.toString()}
               onMouseLeave={() => {
-                setOpen(false)
+                setActive(sectionPath, null)
               }}
             >
               <Card className="h-full w-full">

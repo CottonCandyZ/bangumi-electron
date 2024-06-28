@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@renderer/components/ui/button'
-import { CONFIG } from '@renderer/config/config'
+import { TEXT_CONFIG } from '@renderer/config'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   getCaptcha,
@@ -32,7 +32,7 @@ import { Alert, AlertDescription, AlertTitle } from '@renderer/components/ui/ale
 import { LoginError } from '@renderer/lib/utils/error'
 import { FetchError } from 'ofetch'
 
-const login_form_message = CONFIG.login_form
+const login_form_message = TEXT_CONFIG.login_form
 
 export default function LoginForm({
   setOpen,
