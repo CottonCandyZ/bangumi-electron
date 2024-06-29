@@ -1,4 +1,4 @@
-import { useCurrentHoverCard } from '@renderer/components/carousel/state'
+import { useActiveSection } from '@renderer/components/carousel/state'
 import SubjectCard from '@renderer/components/carousel/subject-card-content'
 import { Button } from '@renderer/components/ui/button'
 import {
@@ -21,7 +21,7 @@ interface SmallCarouselProps {
 }
 
 export default function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
-  const currentSectionPath = useCurrentHoverCard((state) => state.sectionPath)
+  const currentSectionPath = useActiveSection((state) => state.sectionPath)
   return (
     <Carousel
       opts={{
