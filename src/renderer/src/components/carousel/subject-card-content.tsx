@@ -61,9 +61,9 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
             >
               <motion.div
                 className="text-2xl font-bold italic text-white"
-                layoutId={`${index}-score`}
+                layoutId={`${layoutId}-score`}
               >
-                {subjectInfo.data?.rating.score}
+                {subjectInfo.data?.rating.score.toFixed(1)}
               </motion.div>
             </div>
           </CardContent>
