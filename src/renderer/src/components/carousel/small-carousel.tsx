@@ -27,6 +27,7 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
       opts={{
         align: 'start',
         slidesToScroll: 'auto',
+        watchDrag: false,
       }}
       className={cn('w-full', currentSectionPath === sectionPath ? 'z-10' : '')}
     >
