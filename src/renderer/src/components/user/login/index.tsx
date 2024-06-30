@@ -26,7 +26,7 @@ export default function Login() {
             登录{' '}
             <HoverCard>
               <HoverCardTrigger asChild>
-                <CircleHelp className="size-4 inline -mt-1" />
+                <CircleHelp className="-mt-1 inline size-4" />
               </HoverCardTrigger>
               <HoverCardContent className="text-sm font-normal">
                 <p>登录将模拟网页版来实现，会执行五个步骤：</p>

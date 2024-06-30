@@ -80,15 +80,14 @@ export default function BigCarousel(): JSX.Element {
   }
 
   return (
-    <div className="relative group">
+    <div className="group relative">
       <Button
         variant="outline"
         size="icon"
         onClick={() => {
           fromTo(currentIndex, currentIndex - 1)
         }}
-        className="absolute z-10 left-2 top-1/2 -translate-y-1/2 opacity-0 h-8 w-8 rounded-full
-         group-hover:opacity-100 transition-opacity"
+        className="absolute left-2 top-1/2 z-10 h-8 w-8 -translate-y-1/2 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
       >
         <ArrowLeft className="h-4 w-4" />
       </Button>
@@ -98,17 +97,16 @@ export default function BigCarousel(): JSX.Element {
         onClick={() => {
           fromTo(currentIndex, currentIndex + 1)
         }}
-        className="absolute z-10 right-2 top-1/2 -translate-y-1/2 opacity-0 h-8 w-8 rounded-full
-        group-hover:opacity-100 transition-opacity"
+        className="absolute right-2 top-1/2 z-10 h-8 w-8 -translate-y-1/2 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
       >
         <ArrowRight className="h-4 w-4" />
       </Button>
 
       <div className="overflow-hidden">
-        <div className="flex flex-row -ml-2" ref={flexBox}>
+        <div className="-ml-2 flex flex-row" ref={flexBox}>
           {Array.from({ length: items * 2 }).map((_, index) => (
             <div
-              className="min-w-0 shrink-0 grow-0 pl-2 w-44"
+              className="w-44 min-w-0 shrink-0 grow-0 pl-2"
               key={index}
               onClick={() => {
                 fromTo(currentIndex, index)
@@ -116,7 +114,7 @@ export default function BigCarousel(): JSX.Element {
             >
               <div className="p-1">
                 <Card>
-                  <CardContent className={clsx(`flex items-center justify-center p-6 h-80`)}>
+                  <CardContent className={clsx(`flex h-80 items-center justify-center p-6`)}>
                     <span className="text-3xl font-semibold">{(index % items) + 1}</span>
                   </CardContent>
                 </Card>

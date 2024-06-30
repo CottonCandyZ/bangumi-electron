@@ -17,8 +17,8 @@ export default function ProfileMenu() {
   const userInfo = useQueryUserInfo()
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="rounded-full overflow-hidden">
-        <Image className="size-9 aspect-square object-cover" src={userInfo.data?.avatar.small} />
+      <DropdownMenuTrigger className="overflow-hidden rounded-full">
+        <Image className="aspect-square size-9 object-cover" src={userInfo.data?.avatar.small} />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>

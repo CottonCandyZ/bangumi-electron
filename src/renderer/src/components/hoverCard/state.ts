@@ -1,9 +1,8 @@
 import { create } from 'zustand'
 
-
 interface activeId {
-  sectionId: string,
-  id: string,
+  sectionId: string
+  id: string
 }
 
 interface activeHoverCard {

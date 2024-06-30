@@ -134,12 +134,12 @@ export default function LoginForm({
             </FormItem>
           )}
         />
-        <div className="flex flex-row gap-2 items-end">
+        <div className="flex flex-row items-end gap-2">
           <FormField
             control={form.control}
             name="captcha"
             render={({ field }) => (
-              <FormItem className="basis-48 shrink-0 grow">
+              <FormItem className="shrink-0 grow basis-48">
                 <FormLabel>验证码</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -180,7 +180,7 @@ export default function LoginForm({
                 记住密码{' '}
                 <HoverCard>
                   <HoverCardTrigger asChild>
-                    <CircleHelp className="size-3 inline -mt-1" />
+                    <CircleHelp className="-mt-1 inline size-3" />
                   </HoverCardTrigger>
                   <HoverCardContent className="text-sm font-normal">
                     <p>会使用 electron safeStore 来保存，除了你，没有人可以得到它！</p>

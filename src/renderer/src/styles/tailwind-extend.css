@@ -4,6 +4,6 @@
     -webkit-app-region: drag;
   }
   .no-drag-region {
-    -webkit-app-region:no-drag;
+    -webkit-app-region: no-drag;
   }
 }
