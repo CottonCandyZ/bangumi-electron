@@ -1,3 +1,6 @@
+/**
+ * 一些有关登陆的错误提示
+ */
 export class LoginError extends Error {
   constructor(message: string) {
     super(message)
@@ -5,6 +8,9 @@ export class LoginError extends Error {
   }
 }
 
+/**
+ * 一些有关验证的错误提示
+ */
 export class AuthError extends Error {
   code: number
   constructor(message: string, code: number = 0) {
@@ -23,6 +29,9 @@ export class AuthError extends Error {
   }
 }
 
+/**
+ * 有关 Fetch 时抛出的参数错误
+ */
 export class FetchParamError extends Error {
   constructor(message: string) {
     super(message)

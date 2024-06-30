@@ -1,4 +1,4 @@
-import { type SubjectId } from '@renderer/constants/types'
+import { type SubjectId } from '@renderer/constants/types/bgm'
 
 /** 主要分区 */
 export type sectionPath = 'anime' | 'book' | 'music' | 'game' | 'real'

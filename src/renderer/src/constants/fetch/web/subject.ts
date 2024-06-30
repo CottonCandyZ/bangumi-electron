@@ -1,4 +1,4 @@
-import { webFetch } from '@renderer/constants/config'
+import { webFetch } from '@renderer/constants/fetch/config'
 import type { sectionPath } from '@renderer/constants/types/web'
 
 /**

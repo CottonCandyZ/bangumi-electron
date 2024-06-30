@@ -1,5 +1,5 @@
-import { fetchSectionHome } from '@renderer/constants/fetch/web'
-import { selectTopListFromHTML } from '@renderer/constants/transformer/web'
+import { fetchSectionHome } from '@renderer/constants/fetch/web/subject'
+import { parseTopListFromHTML } from '@renderer/constants/transformer/web'
 import { useQuery } from '@tanstack/react-query'
 import type { sectionPath } from '@renderer/constants/types/web'
 
@@ -14,6 +14,6 @@ export const useTopListQuery = (sectionPath: sectionPath) => {
   return useQuery({
     queryKey: ['SectionHome', sectionPath],
     queryFn: async () => await fetchSectionHome({ sectionPath }),
-    select: selectTopListFromHTML,
+    select: parseTopListFromHTML,
   })
 }

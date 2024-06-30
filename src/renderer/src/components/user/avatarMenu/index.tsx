@@ -9,7 +9,7 @@ import {
 } from '@renderer/components/ui/dropdown-menu'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useLogoutMutation } from '@renderer/constants/hooks/session'
-import { useQueryUserInfo } from '@renderer/constants/hooks/userInfo'
+import { useQueryUserInfo } from '@renderer/constants/hooks/api/user'
 import { toast } from 'sonner'
 
 export default function ProfileMenu() {

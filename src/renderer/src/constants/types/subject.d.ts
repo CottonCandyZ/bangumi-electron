@@ -1,4 +1,4 @@
-import { SubjectId } from '@renderer/constants/types'
+import { SubjectId } from '@renderer/constants/types/bgm'
 
 /** 条目 */
 export type Subject = {
@@ -48,8 +48,6 @@ export type InfoBox = {
 export type InfoBoxValueList = {
   v: string
 }
-
-// export interface
 
 export type Rating = {
   rank: number

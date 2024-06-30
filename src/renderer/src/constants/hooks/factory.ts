@@ -11,6 +11,11 @@ type OptionalProps<P> = keyof Omit<P, 'token'> extends never
   ? { props?: Omit<P, 'token'> }
   : { props: Omit<P, 'token'> }
 
+/**
+ * 为必须验证的 QueryHook 工厂
+ *
+ * 在验证失败时自动退出登录
+ */
 export const useQueryMustAuth = <P, R>({
   queryKey,
   queryFn,
@@ -47,6 +52,14 @@ export const useQueryMustAuth = <P, R>({
 // 这里的异步考虑真的合理么？是不是应该让两个一起跑？但是这样的话 QueryKey 怎么给？
 // R18 的会走 withoutAccessToken，非 R18 的一定会跑两遍
 // 就分开好了，这样缓存也会非常轻松
+
+/**
+ * 为可选验证的 QueryHook 工厂
+ *
+ * 会先尝试不带 token 的版本，然后验证带 Token 的版本
+ *
+ * 如果发现登陆过期，会重置登录状态
+ */
 export const useQueryOptionalAuth = <P, R>({
   queryKey,
   queryFn,

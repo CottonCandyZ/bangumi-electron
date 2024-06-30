@@ -1,9 +1,12 @@
-import { LOGIN, webFetch } from '@renderer/constants/config'
+import { LOGIN, webFetch } from '@renderer/constants/fetch/config'
 import { client } from '@renderer/lib/client'
 import { token } from 'src/main/tipc'
 
 // 这里是用来验证相关 session 的地方，如果可能也会刷新 Session
 
+/**
+ * 直接用访问主页，看看是不是 guest 来验证 web 登陆，实际上也可以用 /login redirect
+ */
 export async function isWebLogin() {
   const data = (await webFetch('/', {
     credentials: 'include',
@@ -12,6 +15,9 @@ export async function isWebLogin() {
   return !data.includes('<div class="guest">')
 }
 
+/**
+ * 验证 AccessToken 有效性
+ */
 export async function isAccessTokenValid(token: token) {
   const json = (await webFetch(LOGIN.OAUTH_ACCESS_TOKEN_STATUS, {
     method: 'post',
@@ -25,6 +31,9 @@ export async function isAccessTokenValid(token: token) {
   return !!json.user_id
 }
 
+/**
+ * 登出时清除相关内容
+ */
 export async function logout() {
   window.localStorage.removeItem('isLogin')
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_sid' })

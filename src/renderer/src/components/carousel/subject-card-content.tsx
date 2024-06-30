@@ -12,8 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@renderer/components/ui/select'
-import { useQuerySubjectInfo } from '@renderer/constants/hooks/subjects'
-import { useTopListQuery } from '@renderer/constants/hooks/web'
+import { useQuerySubjectInfo } from '@renderer/constants/hooks/api/subject'
+import { useTopListQuery } from '@renderer/constants/hooks/web/subject'
 import { sectionPath } from '@renderer/constants/types/web'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useRef, useState } from 'react'

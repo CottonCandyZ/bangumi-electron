@@ -1,5 +1,5 @@
-import { getSubjectById } from '@renderer/constants/fetch/api'
-import { useQueryOptionalAuth } from '@renderer/constants/hooks'
+import { getSubjectById } from '@renderer/constants/fetch/api/subject'
+import { useQueryOptionalAuth } from '@renderer/constants/hooks/factory'
 import { TopList } from '@renderer/constants/types/web'
 
 /**

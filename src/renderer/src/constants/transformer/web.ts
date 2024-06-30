@@ -2,7 +2,10 @@
 import type { TopList } from '@renderer/constants/types/web'
 import { domParser } from '@renderer/lib/utils/parser'
 
-export const selectTopListFromHTML = (HTML: string) => {
+/**
+ * parse 每个分区右下角的 Top list，获得 subjectId 以及关注信息
+ */
+export const parseTopListFromHTML = (HTML: string) => {
   const dom = domParser.parseFromString(HTML, 'text/html')
   const result: TopList[] = []
   const top = dom.querySelectorAll('.imageCell')

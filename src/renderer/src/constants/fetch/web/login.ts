@@ -1,4 +1,4 @@
-import { APP_ID, APP_SECRET, LOGIN, URL_OAUTH_REDIRECT, webFetch } from '@renderer/constants/config'
+import { APP_ID, APP_SECRET, LOGIN, URL_OAUTH_REDIRECT, webFetch } from '@renderer/constants/fetch/config'
 import { client } from '@renderer/lib/client'
 import { getTimestamp } from '@renderer/lib/utils/date'
 import { LoginError } from '@renderer/lib/utils/error'

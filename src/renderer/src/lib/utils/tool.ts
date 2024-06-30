@@ -1,13 +1,6 @@
-export function urlStringify(
-  data?: Record<string, string | number>,
-  encode: boolean = true,
-): string {
-  if (!data) return ''
-  return Object.entries(data)
-    .map(([key, value]) => `${key}=${encode ? encodeURIComponent(value) : value}`)
-    .join('&')
-}
-
+/**
+ * 由对象构建 FormData
+ */
 export function createFormData(json: Record<string, string>) {
   const formData = new FormData()
   for (const key in json) {
