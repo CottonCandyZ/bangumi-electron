@@ -123,16 +123,14 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                       src={subjectInfo.data?.images.common}
                     />
                   </motion.div>
-                  <section className="flex w-full flex-col">
+                  <section className="flex w-full flex-col justify-between">
                     <motion.div className="flex w-full flex-col" layoutId={`${layoutId}-header`}>
                       {subjectInfo.data ? (
                         <>
-                          <motion.h1 className="truncate text-sm font-semibold">
+                          <motion.h1 className="text-sm font-semibold">
                             {subjectInfo.data.name}
                           </motion.h1>
-                          <motion.h2 className="mt-1 truncate text-xs">
-                            {subjectInfo.data.name_cn}
-                          </motion.h2>
+                          <motion.h2 className="mt-1 text-xs">{subjectInfo.data.name_cn}</motion.h2>
                         </>
                       ) : (
                         <>
@@ -145,22 +143,23 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                       {dayjs(subjectInfo.data?.date, 'YYYY-MM-DD').format('YY·M·D')}
                     </div> */}
                     <div
-                      className="mt-2 w-full"
+                      className="mt-2 flex gap-2"
                       onMouseEnter={() => setOnSelect(true)}
                       onMouseLeave={() => setOnSelect(false)}
                     >
                       <Select onOpenChange={(open) => setOnSelect(open)}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="flex-auto">
                           <SelectValue placeholder="标记为" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="想看">想看</SelectItem>
-                          <SelectItem value="想看">看过</SelectItem>
+                          <SelectItem value="看过">看过</SelectItem>
                           <SelectItem value="在看">在看</SelectItem>
                           <SelectItem value="搁置">搁置</SelectItem>
                           <SelectItem value="抛弃">抛弃</SelectItem>
                         </SelectContent>
                       </Select>
+                      {/* <Button>取消</Button> */}
                     </div>
                   </section>
                 </section>
