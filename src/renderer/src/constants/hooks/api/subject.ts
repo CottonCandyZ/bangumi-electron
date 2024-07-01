@@ -14,7 +14,7 @@ export const useQuerySubjectInfo = ({
 }) =>
   useQueryOptionalAuth({
     queryFn: getSubjectById,
-    queryKey: ['userInfo'],
+    queryKey: ['subject-info'],
     props: { id },
     enabled: enabled,
   })

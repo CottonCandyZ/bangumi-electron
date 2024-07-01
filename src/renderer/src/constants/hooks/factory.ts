@@ -1,6 +1,6 @@
 import { useAccessTokenQuery, useLogoutMutation } from '@renderer/constants/hooks/session'
 import { AuthError } from '@renderer/lib/utils/error'
-import { QueryOptions, useQuery } from '@tanstack/react-query'
+import { QueryOptions, keepPreviousData, useQuery } from '@tanstack/react-query'
 import { FetchError } from 'ofetch'
 
 // 这里面有些类型判断还有些问题，等我精通 TS 了再回来思考吧
@@ -49,14 +49,10 @@ export const useQueryMustAuth = <P, R>({
   return query
 }
 
-// 这里的异步考虑真的合理么？是不是应该让两个一起跑？但是这样的话 QueryKey 怎么给？
-// R18 的会走 withoutAccessToken，非 R18 的一定会跑两遍
-// 就分开好了，这样缓存也会非常轻松
-
 /**
  * 为可选验证的 QueryHook 工厂
  *
- * 会先尝试不带 token 的版本，然后验证带 Token 的版本
+ * 无论有没有 auth token，直接尝试并返回结果
  *
  * 如果发现登陆过期，会重置登录状态
  */
@@ -71,45 +67,26 @@ export const useQueryOptionalAuth = <P, R>({
   enabled?: boolean
 } & OptionalProps<P>) => {
   const logoutMutation = useLogoutMutation()
-  const withoutAccessToken = useQuery({
-    queryKey: [...(queryKey || []), props],
+  const { data: accessToken } = useAccessTokenQuery()
+  const query = useQuery({
+    queryKey: [accessToken, ...(queryKey || []), props],
     queryFn: async () => {
       let data: R | undefined
       try {
-        data = await queryFn({ ...props } as P)
+        data = await queryFn({ token: accessToken?.access_token, ...props } as P)
       } catch (error) {
         if (error instanceof FetchError && error.statusCode === 401) {
-          return null
+          throw AuthError.expire()
         }
         throw error
       }
       return data as R
     },
-    enabled: enabled,
+    enabled: (enabled === undefined ? true : enabled) && accessToken !== undefined,
+    placeholderData: keepPreviousData,
   })
-  const { data: accessToken } = useAccessTokenQuery()
-  const query = useQuery({
-    queryKey: [accessToken, ...(queryKey || []), props],
-    queryFn: async () => {
-      if (!accessToken) throw AuthError.notAuth()
-      let data: R | undefined
-      try {
-        data = await queryFn({ token: accessToken.access_token, ...props } as P)
-      } catch (error) {
-        if (error instanceof FetchError && error.statusCode === 401) {
-          throw AuthError.expire()
-        }
-      }
-      return data as R
-    },
-    enabled:
-      (enabled === undefined ? true : enabled) &&
-      accessToken !== undefined &&
-      withoutAccessToken.data === null,
-  })
-  if (query.isError && query.error instanceof FetchError) {
-    if (query.error.statusCode === 401) logoutMutation.mutate()
+  if (query.isError && query.error instanceof AuthError) {
+    if (query.error.code === 2) logoutMutation.mutate()
   }
-  if (withoutAccessToken.data !== null) return withoutAccessToken
   return query
 }
