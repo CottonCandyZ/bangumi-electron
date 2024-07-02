@@ -1,5 +1,6 @@
 import { useActiveSection } from '@renderer/components/carousel/state'
 import SubjectCard from '@renderer/components/carousel/subject-card-content'
+import { BackCover } from '@renderer/components/hoverCard/close'
 import { Button } from '@renderer/components/ui/button'
 import {
   Carousel,
@@ -29,9 +30,8 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
         slidesToScroll: 'auto',
         watchDrag: false,
       }}
-      className={cn('w-full', currentSectionPath === sectionPath ? 'z-10' : '')}
     >
-      <div className="flex justify-between">
+      <div className="z-[1] flex justify-between">
         <Button
           asChild
           variant="ghost"
@@ -54,7 +54,9 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
           <CarouselNext className="relative right-0 top-0 translate-y-0" />
         </div>
       </div>
-      <CarouselContentNoFlow className="-ml-3">
+      <CarouselContentNoFlow
+        className={cn('relative -ml-3', currentSectionPath === sectionPath ? 'z-10' : '')}
+      >
         {Array.from({ length: UI_CONFIG.HOME_SECTION_CAROUSEL_NUMBER }).map((_, index) => (
           <CarouselItem
             key={index}
@@ -65,6 +67,7 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
             </div>
           </CarouselItem>
         ))}
+        <BackCover className="z-[1]" />
       </CarouselContentNoFlow>
     </Carousel>
   )

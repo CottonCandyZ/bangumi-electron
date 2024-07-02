@@ -16,9 +16,10 @@ import { Separator } from '@renderer/components/ui/separator'
 import { useQuerySubjectInfo } from '@renderer/constants/hooks/api/subject'
 import { useTopListQuery } from '@renderer/constants/hooks/web/subject'
 import { sectionPath } from '@renderer/constants/types/web'
+import { cn } from '@renderer/lib/utils'
 import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useRef, useState } from 'react'
+import { useRef } from 'react'
 
 export interface SubjectCardProps {
   sectionPath: sectionPath
@@ -41,11 +42,10 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
   const setActionSection = useActiveSection((state) => state.setActiveSection)
   const id = `${sectionPath}-${index}`
   const layoutId = `${sectionId}-${id}`
-  const [onSelect, setOnSelect] = useState(false)
 
   return (
     <div className="relative">
-      <motion.div layoutId={layoutId} ref={ref} className="relative z-[1] aspect-[2/3] w-full">
+      <motion.div layoutId={layoutId} ref={ref} className="relative z-[1] w-full">
         <Card
           className="relative overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-500"
           onMouseEnter={() => {
@@ -61,7 +61,10 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
           <CardContent className="p-0">
             <motion.div layoutId={`${layoutId}-image`}>
               <MotionImage
-                className="z-[2] aspect-[2/3] w-full object-cover"
+                className={cn(
+                  'z-[2] aspect-[2/3] w-full object-cover',
+                  sectionPath === 'music' && 'aspect-square',
+                )}
                 src={subjectInfo.data?.images.common}
               />
             </motion.div>
@@ -97,9 +100,9 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
       </motion.div>
       <AnimatePresence>
         {activeId?.sectionId === sectionId && activeId.id === id && (
-        // {(
+          // {(
           <motion.div
-            className="absolute z-[10]"
+            className="absolute z-10"
             style={{
               left: `${inset.current.left}px`,
               right: `${inset.current.right}px`,
@@ -108,20 +111,19 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
             }}
             onAnimationComplete={() => setActionSection(null)}
             layoutId={layoutId}
-            onMouseLeave={() => {
-              if (onSelect) return
-              setActiveId(null)
-            }}
           >
             <Card className="h-full w-full">
               <CardContent className="flex h-full flex-col p-2">
                 <section className="flex w-full flex-row items-start gap-2 p-2">
                   <motion.div
-                    className="shrink-0 basis-1/6 overflow-hidden rounded-lg"
+                    className="shrink-0 basis-1/6 overflow-hidden rounded-lg shadow-lg"
                     layoutId={`${layoutId}-image`}
                   >
                     <MotionImage
-                      className="z-[2] aspect-[2/3] w-full object-cover shadow-md"
+                      className={cn(
+                        'z-[2] aspect-[2/3] w-full object-cover',
+                        sectionPath === 'music' && 'aspect-square',
+                      )}
                       src={subjectInfo.data?.images.common}
                     />
                   </motion.div>
@@ -158,12 +160,8 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                       </motion.div>
                     </div>
                   </section>
-                  <div
-                    className="grow-0"
-                    onMouseEnter={() => setOnSelect(true)}
-                    onMouseLeave={() => setOnSelect(false)}
-                  >
-                    <Select onOpenChange={(open) => setOnSelect(open)}>
+                  <div className="grow-0">
+                    <Select>
                       <SelectTrigger className="flex-auto">
                         <SelectValue placeholder="标记为" />
                       </SelectTrigger>
@@ -187,7 +185,7 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                   {subjectInfo.data?.tags.map((item) => (
                     <Button
                       key={item.name}
-                      className="flex-auto px-1.5 text-xs"
+                      className="h-auto flex-auto justify-center whitespace-normal px-1.5 py-1.5 text-xs"
                       variant={'outline'}
                     >
                       {item.name}
