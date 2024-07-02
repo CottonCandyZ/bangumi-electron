@@ -3,11 +3,11 @@ import { cn } from '@renderer/lib/utils'
 import { HTMLMotionProps, motion } from 'framer-motion'
 import React, { useState } from 'react'
 
-export const MotionImage = React.forwardRef<HTMLImageElement, HTMLMotionProps<'img'>>(
+export const CoverMotionImage = React.forwardRef<HTMLImageElement, HTMLMotionProps<'img'>>(
   ({ className, src, ...props }, ref) => {
     const [isLoad, setIsLoad] = useState(false)
     return (
-      <motion.div className={cn('relative', className)}>
+      <motion.div className={cn('relative', (!src || !isLoad) && 'aspect-[2/3]', className)}>
         <motion.img
           className={cn('max-w-none', className, (!src || !isLoad) && 'invisible')}
           loading="lazy"
@@ -22,4 +22,4 @@ export const MotionImage = React.forwardRef<HTMLImageElement, HTMLMotionProps<'i
   },
 )
 
-MotionImage.displayName = 'MotionImage'
+CoverMotionImage.displayName = 'CoverMotionImage'

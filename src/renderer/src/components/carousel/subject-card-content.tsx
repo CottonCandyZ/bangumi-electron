@@ -1,4 +1,4 @@
-import { MotionImage } from '@renderer/components/base/MotionImage'
+import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
 import { useActiveSection } from '@renderer/components/carousel/state'
 import { useActiveHoverCard } from '@renderer/components/hoverCard/state'
 import { hoverCardSize } from '@renderer/components/hoverCard/utils'
@@ -66,7 +66,7 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
         >
           <CardContent className="p-0">
             <motion.div layoutId={`${layoutId}-image`}>
-              <MotionImage
+              <CoverMotionImage
                 className={cn(
                   'z-[2] aspect-[2/3] w-full object-cover',
                   sectionPath === 'music' && 'aspect-square',
@@ -124,11 +124,8 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                     className="shrink-0 basis-1/6 overflow-hidden rounded-lg shadow-lg"
                     layoutId={`${layoutId}-image`}
                   >
-                    <MotionImage
-                      className={cn(
-                        'z-[2] aspect-[2/3] w-full object-cover',
-                        sectionPath === 'music' && 'aspect-square',
-                      )}
+                    <CoverMotionImage
+                      className={cn('z-[2] w-full object-cover')}
                       src={subjectInfo.data?.images.common}
                     />
                   </motion.div>
