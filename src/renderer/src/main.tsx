@@ -1,4 +1,5 @@
 import './styles/main.css'
+import 'overlayscrollbars/overlayscrollbars.css'
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'

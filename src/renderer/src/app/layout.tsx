@@ -1,5 +1,7 @@
 import Header from '@renderer/components/header'
+import { BackCover } from '@renderer/components/hoverCard/close'
 import NavBar from '@renderer/components/nav'
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import { Outlet } from 'react-router-dom'
 
 function RootLayout() {
@@ -10,9 +12,14 @@ function RootLayout() {
         <div className="h-full py-1">
           <NavBar />
         </div>
-        <main className="h-full w-full overflow-x-hidden rounded-tl-lg border-l border-t pb-8 pt-2">
+        <OverlayScrollbarsComponent
+          className="h-full w-full rounded-tl-lg border-l border-t pb-8 pt-2"
+          element="main"
+          options={{ overflow: { x: 'hidden' }, scrollbars: { autoHide: 'scroll' } }}
+        >
           <Outlet />
-        </main>
+          <BackCover />
+        </OverlayScrollbarsComponent>
       </div>
     </>
   )

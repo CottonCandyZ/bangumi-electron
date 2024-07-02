@@ -19,6 +19,7 @@ import { sectionPath } from '@renderer/constants/types/web'
 import { cn } from '@renderer/lib/utils'
 import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import { useRef } from 'react'
 
 export interface SubjectCardProps {
@@ -52,14 +53,14 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
         onMouseEnter={() => setActiveId(null)}
       >
         <Card
-          className="relative overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-500"
+          className="relative overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
           onMouseEnter={() => {
             timeoutRef.current = setTimeout(() => {
               const bounding = ref.current!.getBoundingClientRect()
-              inset.current = hoverCardSize(bounding, 0.5, 0.05, 8, 8, 24, 8)
+              inset.current = hoverCardSize(bounding, 0.5, 0.05, 8, 8, 8, 8)
               setActionSection(sectionPath)
               setActiveId({ sectionId, id })
-            }, 500)
+            }, 700)
           }}
           onMouseLeave={() => clearTimeout(timeoutRef.current)}
         >
@@ -103,7 +104,7 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
           )}
         </motion.div>
       </motion.div>
-      <AnimatePresence>
+      <AnimatePresence onExitComplete={() => setActionSection(null)}>
         {activeId?.sectionId === sectionId && activeId.id === id && (
           // {(
           <motion.div
@@ -114,12 +115,11 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
               bottom: `${inset.current.bottom}px`,
               top: `${inset.current.top}px`,
             }}
-            onAnimationComplete={() => setActionSection(null)}
             layoutId={layoutId}
           >
             <Card className="h-full w-full">
-              <CardContent className="flex h-full flex-col p-2">
-                <section className="flex w-full flex-row items-start gap-2 p-2">
+              <CardContent className="flex h-full flex-col p-0">
+                <section className="flex w-full flex-row items-start gap-2 p-4">
                   <motion.div
                     className="shrink-0 basis-1/6 overflow-hidden rounded-lg shadow-lg"
                     layoutId={`${layoutId}-image`}
@@ -186,17 +186,23 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                 >
                   {subjectInfo.data?.rating.score.toFixed(1)}
                 </motion.div> */}
-                <div className="mt-2 flex flex-wrap gap-2 overflow-auto p-2">
-                  {subjectInfo.data?.tags.map((item) => (
-                    <Button
-                      key={item.name}
-                      className="h-auto flex-auto justify-center whitespace-normal px-1.5 py-1.5 text-xs"
-                      variant={'outline'}
-                    >
-                      {item.name}
-                    </Button>
-                  ))}
-                </div>
+                <OverlayScrollbarsComponent
+                  className="mb-4 ml-4 mr-1 pr-3"
+                  element="div"
+                  options={{ overflow: { x: 'hidden' }, scrollbars: { autoHide: 'scroll' } }}
+                >
+                  <div className="flex flex-wrap gap-2 py-2">
+                    {subjectInfo.data?.tags.map((item) => (
+                      <Button
+                        key={item.name}
+                        className="h-auto flex-auto justify-center whitespace-normal px-1.5 py-1.5 text-xs"
+                        variant={'outline'}
+                      >
+                        {item.name}
+                      </Button>
+                    ))}
+                  </div>
+                </OverlayScrollbarsComponent>
               </CardContent>
             </Card>
           </motion.div>
