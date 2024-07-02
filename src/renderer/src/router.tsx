@@ -1,7 +1,7 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, createHashRouter } from 'react-router-dom'
 import App from './App'
 
-export const router: ReturnType<typeof createBrowserRouter> = createBrowserRouter([
+export const router: ReturnType<typeof createHashRouter> = createHashRouter([
   {
     path: '/',
     element: <App />,
