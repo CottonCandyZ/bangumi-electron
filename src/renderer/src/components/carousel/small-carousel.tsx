@@ -1,6 +1,5 @@
 import { useActiveSection } from '@renderer/components/carousel/state'
 import SubjectCard from '@renderer/components/carousel/subject-card-content'
-import { BackCover } from '@renderer/components/hoverCard/close'
 import { Button } from '@renderer/components/ui/button'
 import {
   Carousel,
@@ -31,7 +30,7 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
         watchDrag: false,
       }}
     >
-      <div className="z-[1] flex justify-between">
+      <div className="flex justify-between">
         <Button
           asChild
           variant="ghost"
@@ -54,21 +53,20 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
           <CarouselNext className="relative right-0 top-0 translate-y-0" />
         </div>
       </div>
-      <CarouselContentNoFlow
-        className={cn('relative -ml-3', currentSectionPath === sectionPath ? 'z-10' : '')}
-      >
-        {Array.from({ length: UI_CONFIG.HOME_SECTION_CAROUSEL_NUMBER }).map((_, index) => (
-          <CarouselItem
-            key={index}
-            className="basis-1/4 pl-3 md:basis-1/5 lg:basis-1/6 xl:basis-[14.285714%] 2xl:basis-[11.111111%]"
-          >
-            <div className="p-0.5">
-              <SubjectCard index={index} sectionPath={sectionPath} />
-            </div>
-          </CarouselItem>
-        ))}
-        <BackCover className="z-[1]" />
-      </CarouselContentNoFlow>
+      <div className={cn('relative', currentSectionPath === sectionPath ? 'z-10' : '')}>
+        <CarouselContentNoFlow className="-ml-3">
+          {Array.from({ length: UI_CONFIG.HOME_SECTION_CAROUSEL_NUMBER }).map((_, index) => (
+            <CarouselItem
+              key={index}
+              className="basis-1/4 pl-3 md:basis-1/5 lg:basis-1/6 xl:basis-[14.285714%] 2xl:basis-[11.111111%]"
+            >
+              <div className="p-0.5">
+                <SubjectCard index={index} sectionPath={sectionPath} />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContentNoFlow>
+      </div>
     </Carousel>
   )
 }

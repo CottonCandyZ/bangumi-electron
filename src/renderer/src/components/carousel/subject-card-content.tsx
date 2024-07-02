@@ -45,7 +45,12 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
 
   return (
     <div className="relative">
-      <motion.div layoutId={layoutId} ref={ref} className="relative z-[1] w-full">
+      <motion.div
+        layoutId={layoutId}
+        ref={ref}
+        className="relative z-[1] w-full"
+        onMouseEnter={() => setActiveId(null)}
+      >
         <Card
           className="relative overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-500"
           onMouseEnter={() => {
