@@ -15,7 +15,7 @@ function RootLayout() {
         <OverlayScrollbarsComponent
           className="h-full w-full rounded-tl-lg border-l border-t pb-8 pt-2"
           element="main"
-          options={{ overflow: { x: 'hidden' }, scrollbars: { autoHide: 'scroll' } }}
+          options={{ overflow: { x: 'hidden' }, scrollbars: { autoHide: 'scroll'} }}
         >
           <Outlet />
           <BackCover />

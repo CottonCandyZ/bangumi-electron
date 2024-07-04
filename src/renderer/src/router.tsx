@@ -1,4 +1,4 @@
-import { createBrowserRouter, createHashRouter } from 'react-router-dom'
+import { createHashRouter } from 'react-router-dom'
 import App from './App'
 
 export const router: ReturnType<typeof createHashRouter> = createHashRouter([
@@ -15,32 +15,36 @@ export const router: ReturnType<typeof createHashRouter> = createHashRouter([
             lazy: () => import('@renderer/app/home/page'),
           },
           {
-            path: '/anime',
+            path: 'anime',
             lazy: () => import('@renderer/app/anime/page'),
           },
           {
-            path: '/game',
+            path: 'game',
             lazy: () => import('@renderer/app/game/page'),
           },
           {
-            path: '/book',
+            path: 'book',
             lazy: () => import('@renderer/app/book/page'),
           },
           {
-            path: '/music',
+            path: 'music',
             lazy: () => import('@renderer/app/music/page'),
           },
           {
-            path: '/real',
+            path: 'real',
             lazy: () => import('@renderer/app/real/page'),
           },
           {
-            path: '/index',
+            path: 'index',
             lazy: () => import('@renderer/app/index/page'),
           },
           {
-            path: '/talk',
+            path: 'talk',
             lazy: () => import('@renderer/app/talk/page'),
+          },
+          {
+            path: 'subject/:subjectId',
+            lazy: () => import('@renderer/app/subject/page'),
           },
         ],
       },
