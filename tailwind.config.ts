@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss'
 import { iconsPlugin, getIconCollections } from '@egoist/tailwindcss-icons'
+import defaultTheme from 'tailwindcss/defaultTheme'
 
 const config = {
   darkMode: ['class'],
@@ -14,6 +15,10 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['"Noto Sans SC"', '"Noto Sans JP"', '"Noto Sans"', ...defaultTheme.fontFamily.sans],
+        jp: ['"Noto Sans JP"', '"Noto Sans SC"', '"Noto Sans"', ...defaultTheme.fontFamily.sans],
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

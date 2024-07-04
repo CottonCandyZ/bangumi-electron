@@ -34,6 +34,7 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
   const subjectId = topList?.data?.[index].SubjectId
   // const follow = topList?.data?.[index].follow?.replace(/[^0-9]/g, '')
   const subjectInfo = useQuerySubjectInfo({ id: subjectId, enabled: !!subjectId })
+  const subjectInfoData = subjectInfo.data
 
   const ref = useRef<HTMLDivElement>(null)
   const inset = useRef({ left: 0, right: 0, top: 0, bottom: 0 })
@@ -77,7 +78,7 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
               <motion.div layoutId={`${layoutId}-image`}>
                 <CoverMotionImage
                   className={cn('aspect-[2/3]', sectionPath === 'music' && 'aspect-square')}
-                  imageSrc={subjectInfo.data?.images.common}
+                  imageSrc={subjectInfoData?.images.common}
                 />
               </motion.div>
               <div
@@ -87,21 +88,20 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                   className="flex items-center justify-center gap-1 font-bold text-white"
                   layoutId={`${layoutId}-score`}
                 >
-                  {subjectInfo.data?.rating.score.toFixed(1)}
+                  {subjectInfoData?.rating.score.toFixed(1)}
                   <span className="i-mingcute-star-fill text-xs" />
                 </motion.div>
-                {/* <div className="mt-2 text-sm font-bold text-white"></div> */}
               </div>
             </CardContent>
           </Card>
         </Link>
         <motion.div className="mt-2 w-full p-0.5" layoutId={`${layoutId}-header`}>
-          {subjectInfo.data ? (
+          {subjectInfoData ? (
             <>
-              <motion.h1 className="h-6 truncate font-semibold">{subjectInfo.data.name}</motion.h1>
-              <motion.h2 className="mt-1 h-4 truncate text-xs">
-                {subjectInfo.data.name_cn}
-              </motion.h2>
+              <motion.h1 className="font-jp h-6 truncate font-semibold">
+                {subjectInfoData.name}
+              </motion.h1>
+              <motion.h2 className="mt-1 h-4 truncate text-xs">{subjectInfoData.name_cn}</motion.h2>
             </>
           ) : (
             <>
@@ -135,18 +135,18 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                     >
                       <CoverMotionImage
                         style={{ viewTransitionName: isTransitioning ? 'cover-expand' : '' }}
-                        imageSrc={subjectInfo.data?.images.common}
+                        imageSrc={subjectInfoData?.images.common}
                       />
                     </motion.div>
                     {/* 标题描述 */}
                     <section className="flex w-full flex-col justify-between gap-0.5">
                       <motion.div className="flex w-full flex-col" layoutId={`${layoutId}-header`}>
-                        {subjectInfo.data ? (
+                        {subjectInfoData ? (
                           <>
-                            <motion.h1 className="text-xs font-bold">
-                              {subjectInfo.data.name}
+                            <motion.h1 className="font-jp text-xs font-semibold">
+                              {subjectInfoData.name}
                             </motion.h1>
-                            {/* <motion.h2 className="mt-1 text-xs">{subjectInfo.data.name_cn}</motion.h2> */}
+                            {/* <motion.h2 className="mt-1 text-xs">{subjectInfoData.name_cn}</motion.h2> */}
                           </>
                         ) : (
                           <>
@@ -156,12 +156,12 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                         )}
                       </motion.div>
                       {/* meta */}
-                      <div className="flex h-4 flex-wrap items-center justify-start gap-1 font-semibold">
+                      <div className="flex h-4 flex-wrap items-center justify-start gap-1 font-medium">
                         <motion.div
                           className="flex items-center justify-center gap-1 text-xs"
                           layoutId={`${layoutId}-score`}
                         >
-                          {subjectInfo.data?.rating.score.toFixed(1)}
+                          {subjectInfoData?.rating.score.toFixed(1)}
                           <span className="i-mingcute-star-fill mt-[2px] text-[0.6rem]" />
                         </motion.div>
                         <Separator
@@ -174,7 +174,7 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                         >
-                          {dayjs(subjectInfo.data?.date, 'YYYY-MM-DD').format('YY 年 M 月')}
+                          {dayjs(subjectInfoData?.date, 'YYYY-MM-DD').format('YY 年 M 月')}
                         </motion.div>
                       </div>
                     </section>
@@ -211,7 +211,7 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                     >
-                      {subjectInfo.data?.tags.map((item) => (
+                      {subjectInfoData?.tags.map((item) => (
                         <Button
                           key={item.name}
                           className="h-auto flex-auto justify-center whitespace-normal px-1.5 py-1.5 text-xs"
