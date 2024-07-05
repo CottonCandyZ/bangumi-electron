@@ -89,7 +89,7 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                   layoutId={`${layoutId}-score`}
                 >
                   {subjectInfoData?.rating.score.toFixed(1)}
-                  <span className="i-mingcute-star-fill text-xs" />
+                  <span className="i-mingcute-star-fill mt-0.5 text-xs" />
                 </motion.div>
               </div>
             </CardContent>
@@ -98,7 +98,7 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
         <motion.div className="mt-2 w-full p-0.5" layoutId={`${layoutId}-header`}>
           {subjectInfoData ? (
             <>
-              <motion.h1 className="font-jp h-6 truncate font-semibold">
+              <motion.h1 className="h-6 truncate font-jp font-semibold">
                 {subjectInfoData.name}
               </motion.h1>
               <motion.h2 className="mt-1 h-4 truncate text-xs">{subjectInfoData.name_cn}</motion.h2>

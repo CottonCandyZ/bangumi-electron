@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PropsWithChildren } from 'react'
 import { TooltipProvider } from '@renderer/components/ui/tooltip'
 import { toast } from 'sonner'
+import InitStateContextWrapper from '@renderer/components/wrapper/state-warpper'
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -25,10 +26,12 @@ const queryClient = new QueryClient({
 export default function Wrapper({ children }: PropsWithChildren) {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-        <TooltipProvider>{children}</TooltipProvider>
-        <Toaster richColors className="pointer-events-auto" />
-      </ThemeProvider>
+      <InitStateContextWrapper>
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+          <TooltipProvider>{children}</TooltipProvider>
+          <Toaster richColors className="pointer-events-auto" />
+        </ThemeProvider>
+      </InitStateContextWrapper>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   )

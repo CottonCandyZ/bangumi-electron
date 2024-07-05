@@ -19,7 +19,7 @@ function createWindow(): void {
     titleBarStyle: 'hidden',
     titleBarOverlay: {
       color: 'rgba(0,0,0,0)',
-      height: 48,
+      height: 64,
     },
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {

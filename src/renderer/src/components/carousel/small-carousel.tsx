@@ -3,15 +3,18 @@ import SubjectCard from '@renderer/components/carousel/subject-card-content'
 import { Button } from '@renderer/components/ui/button'
 import {
   Carousel,
+  CarouselApi,
   CarouselContentNoFlow,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
 } from '@renderer/components/ui/carousel'
+import { SateContext } from '@renderer/components/wrapper/state-warpper'
 import { UI_CONFIG } from '@renderer/config'
 import { sectionPath } from '@renderer/constants/types/web'
 import { cn } from '@renderer/lib/utils'
 import { ChevronRight } from 'lucide-react'
+import { useContext, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 interface SmallCarouselProps {
@@ -22,12 +25,32 @@ interface SmallCarouselProps {
 
 export default function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
   const currentSectionPath = useActiveSection((state) => state.sectionPath)
+  const [api, setApi] = useState<CarouselApi>()
+  const initState = useContext(SateContext)
+  const initIndex = initState?.currentState.current.carouselState.get(
+    `Home-Small-Carousel-${sectionPath}`,
+  )
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+    api.on('select', () => {
+      if (initState)
+        initState?.currentState.current.carouselState.set(
+          `Home-Small-Carousel-${sectionPath}`,
+          api.selectedScrollSnap(),
+        )
+    })
+  }, [api])
+
   return (
     <Carousel
+      setApi={setApi}
       opts={{
         align: 'start',
         slidesToScroll: 'auto',
         watchDrag: false,
+        startIndex: initIndex ?? 0,
       }}
     >
       <div className="flex justify-between">
