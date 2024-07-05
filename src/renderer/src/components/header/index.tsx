@@ -12,7 +12,7 @@ export default function Header() {
   const navigate = useNavigate()
   const initState = useContext(SateContext)
   return (
-    <header className="drag-region flex h-16 flex-row items-center">
+    <header className="drag-region flex h-16 flex-row items-center gap-10">
       <div className="flex flex-row justify-start gap-1">
         <div className="flex w-[72px] items-center justify-center">
           <Button
@@ -25,12 +25,23 @@ export default function Header() {
           </Button>
         </div>
       </div>
-      <div className="w-full justify-stretch">
-        <div className="mx-auto w-min">
-          <div className="no-drag-region">Search</div>
+      <div className="flex w-full items-center justify-end">
+        <div className="no-drag-region basis-72">
+          <Button
+            variant="outline"
+            className="relative w-full justify-between rounded-[0.5rem] bg-background text-sm font-normal text-muted-foreground shadow-none"
+          >
+            <div className="flex items-center gap-2">
+              <span className="i-mingcute-search-line mt-0.5"></span>
+              <span>搜索</span>
+            </div>
+            <kbd className="pointer-events-none flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium">
+              <span className="text-xs">⌘/ctrl</span>k
+            </kbd>
+          </Button>
         </div>
       </div>
-      <div className="justify-end pr-40">
+      <div className="pr-40">
         <div className="no-drag-region flex items-center">
           {isLogin.data ? <ProfileMenu /> : <Login />}
         </div>
