@@ -29,6 +29,17 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
   )
+  useEffect(() => {
+    const root = window.document.documentElement
+    const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)')
+    darkModePreference.addEventListener('change', (e) => {
+      if (theme === 'system') {
+        root.classList.remove('light', 'dark')
+        const systemTheme = e.matches ? 'dark' : 'light'
+        root.classList.add(systemTheme)
+      }
+    })
+  }, [])
 
   useEffect(() => {
     const root = window.document.documentElement
