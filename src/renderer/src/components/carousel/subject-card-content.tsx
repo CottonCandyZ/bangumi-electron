@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from '@renderer/components/ui/select'
 import { Separator } from '@renderer/components/ui/separator'
+import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectInfo } from '@renderer/constants/hooks/api/subject'
 import { useTopListQuery } from '@renderer/constants/hooks/web/subject'
 import { sectionPath } from '@renderer/constants/types/web'
@@ -52,12 +53,16 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
     return () => clearTimeout(timeoutRef.current)
   }, [])
 
+  if (!subjectId) {
+    return <Skeleton className="aspect-[2/3] w-full"></Skeleton>
+  }
+
   return (
     <div className="relative">
       <motion.div
         layoutId={layoutId}
         ref={ref}
-        className="relative z-[1] aspect-[2/3] w-full"
+        className="relative z-[1] w-full"
         onMouseEnter={() => setActiveId(null)}
       >
         <Link to={`/subject/${subjectId}`} className="cursor-default" unstable_viewTransition>
@@ -88,8 +93,14 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                   className="flex items-center justify-center gap-1 font-bold text-white"
                   layoutId={`${layoutId}-score`}
                 >
-                  {subjectInfoData?.rating.score.toFixed(1)}
-                  <span className="i-mingcute-star-fill mt-0.5 text-xs" />
+                  {subjectInfoData ? (
+                    <>
+                      {subjectInfoData?.rating.score.toFixed(1)}
+                      <span className="i-mingcute-star-fill mt-0.5 text-xs" />
+                    </>
+                  ) : (
+                    <MotionSkeleton className="h-6 w-10" />
+                  )}
                 </motion.div>
               </div>
             </CardContent>
@@ -126,17 +137,15 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
               layoutId={layoutId}
             >
               <Card className="h-full w-full">
-                <CardContent className="flex h-full flex-col p-0">
+                <CardContent className="flex h-full flex-col gap-1 p-0">
                   {/* Cover */}
                   <section className="flex w-full flex-row items-start gap-2 p-4">
                     <motion.div
                       className="shrink-0 basis-1/6 overflow-hidden rounded-lg shadow-lg"
                       layoutId={`${layoutId}-image`}
+                      style={{ viewTransitionName: isTransitioning ? 'cover-expand' : '' }}
                     >
-                      <CoverMotionImage
-                        style={{ viewTransitionName: isTransitioning ? 'cover-expand' : '' }}
-                        imageSrc={subjectInfoData?.images.common}
-                      />
+                      <CoverMotionImage imageSrc={subjectInfoData?.images.common} />
                     </motion.div>
                     {/* 标题描述 */}
                     <section className="flex w-full flex-col justify-between gap-0.5">
@@ -146,7 +155,6 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                             <motion.h1 className="font-jp text-xs font-semibold">
                               {subjectInfoData.name}
                             </motion.h1>
-                            {/* <motion.h2 className="mt-1 text-xs">{subjectInfoData.name_cn}</motion.h2> */}
                           </>
                         ) : (
                           <>
@@ -156,13 +164,19 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                         )}
                       </motion.div>
                       {/* meta */}
-                      <div className="flex h-4 flex-wrap items-center justify-start gap-1 font-medium">
+                      <div className="flex flex-wrap items-center justify-start gap-1 font-medium">
                         <motion.div
                           className="flex items-center justify-center gap-1 text-xs"
                           layoutId={`${layoutId}-score`}
                         >
-                          {subjectInfoData?.rating.score.toFixed(1)}
-                          <span className="i-mingcute-star-fill mt-[2px] text-[0.6rem]" />
+                          {subjectInfoData ? (
+                            <>
+                              {subjectInfoData?.rating.score.toFixed(1)}
+                              <span className="i-mingcute-star-fill mt-[2px] text-[0.6rem]" />
+                            </>
+                          ) : (
+                            <MotionSkeleton className="h-4 w-8" />
+                          )}
                         </motion.div>
                         <Separator
                           orientation="vertical"
@@ -174,7 +188,11 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                         >
-                          {dayjs(subjectInfoData?.date, 'YYYY-MM-DD').format('YY 年 M 月')}
+                          {subjectInfoData ? (
+                            dayjs(subjectInfoData?.date, 'YYYY-MM-DD').format('YY 年 M 月')
+                          ) : (
+                            <MotionSkeleton className="h-4 w-16" />
+                          )}
                         </motion.div>
                       </div>
                     </section>
@@ -200,29 +218,33 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                     </motion.div>
                   </section>
                   {/* 标签 */}
-                  <OverlayScrollbarsComponent
-                    className="mb-4 ml-4 mr-1 mt-1 pr-3"
-                    element="div"
-                    options={{ overflow: { x: 'hidden' }, scrollbars: { autoHide: 'scroll' } }}
-                  >
-                    <motion.div
-                      className="flex flex-wrap gap-2 py-2"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
+                  {subjectInfoData ? (
+                    <OverlayScrollbarsComponent
+                      className="mb-4 ml-4 mr-1 pr-3"
+                      element="div"
+                      options={{ overflow: { x: 'hidden' }, scrollbars: { autoHide: 'scroll' } }}
                     >
-                      {subjectInfoData?.tags.map((item) => (
-                        <Button
-                          key={item.name}
-                          className="h-auto flex-auto justify-center whitespace-normal px-1.5 py-1.5 text-xs"
-                          variant={'outline'}
-                          onClick={(e) => e.preventDefault()}
-                        >
-                          {item.name}
-                        </Button>
-                      ))}
-                    </motion.div>
-                  </OverlayScrollbarsComponent>
+                      <motion.div
+                        className="flex flex-wrap gap-2 py-2"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        {subjectInfoData.tags.map((item) => (
+                          <Button
+                            key={item.name}
+                            className="h-auto flex-auto justify-center whitespace-normal px-1.5 py-1.5 text-xs"
+                            variant={'outline'}
+                            onClick={(e) => e.preventDefault()}
+                          >
+                            {item.name}
+                          </Button>
+                        ))}
+                      </motion.div>
+                    </OverlayScrollbarsComponent>
+                  ) : (
+                    <Skeleton className="mb-4 ml-4 mr-4 h-full" />
+                  )}
                 </CardContent>
               </Card>
             </motion.div>

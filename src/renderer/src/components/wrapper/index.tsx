@@ -19,6 +19,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: import.meta.env.DEV ? Infinity : 20 * 1000,
+      gcTime: import.meta.env.DEV ? Infinity : 60 * 1000 * 5,
       retry: 0,
     },
   },
@@ -32,7 +33,7 @@ export default function Wrapper({ children }: PropsWithChildren) {
           <Toaster richColors className="pointer-events-auto" />
         </ThemeProvider>
       </InitStateContextWrapper>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   )
 }

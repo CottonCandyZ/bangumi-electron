@@ -41,9 +41,27 @@ export type Tag = {
 }
 
 export type InfoBox = {
-  key: string
+  key: string | InfoKey
   value: string | InfoBoxValueList[]
 }
+
+export type InfoKey =
+  | '中文名'
+  | '放送星期'
+  | '原作'
+  | '别名'
+  | '话数'
+  | '放送开始'
+  | '放送星期'
+  | '官方网站'
+  | '播放电视台'
+  | '其他电视台'
+  | 'Copyright'
+  | '原作'
+  | '导演'
+  | '人物原案'
+  | '人物设定'
+  | 'OP・ED 分镜'
 
 export type InfoBoxValueList = {
   v: string

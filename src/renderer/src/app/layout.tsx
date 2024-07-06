@@ -23,6 +23,7 @@ function RootLayout() {
       instance()?.elements().viewport?.scrollTo({ top: scrollStack.current.pop() })
       return
     }
+    instance()?.elements().viewport?.scrollTo({ top: 0 })
     scrollStack.current.push(currentScroll.current!)
   }, [location])
 

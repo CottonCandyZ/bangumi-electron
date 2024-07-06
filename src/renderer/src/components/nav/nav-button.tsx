@@ -28,7 +28,7 @@ export default function NavButton({ name, path, icon, active }: NavButtonProps) 
           )}
           asChild
         >
-          <Link to={path}>
+          <Link to={path} unstable_viewTransition>
             <>
               {isActive ? (
                 <motion.div
