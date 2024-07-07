@@ -1,36 +1,48 @@
-import { ResponsiveBar } from '@nivo/bar'
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@renderer/components/ui/chart'
 import { RatingCount } from '@renderer/constants/types/subject'
+import { cn } from '@renderer/lib/utils'
+import { Bar, BarChart, LabelList, XAxis } from 'recharts'
 
 export default function ScoreChart({
   ratingCount,
   total,
+  className,
 }: {
   ratingCount: RatingCount
   total: number
+  className: string
 }) {
-  const data: { name: string; score: number }[] = []
+  const data: { name: string; score: number; fill: string; percent: string }[] = []
+  const chartConfig = {}
   for (const key in ratingCount) {
-    data.push({ name: key, score: ratingCount[key] })
+    data.push({
+      name: key,
+      score: ratingCount[key],
+      fill: `var(--color-${key})`,
+      percent: `${((ratingCount[key] / total) * 100).toFixed(2)} %`,
+    })
+    chartConfig[key] = { color: `hsl(var(--chart-score-${key}))` }
   }
+  chartConfig['percent'] = { label: '占比' }
   data.reverse()
   return (
-    <ResponsiveBar
-      data={data}
-      indexBy="name"
-      keys={['score']}
-      margin={{ top: 20, right: 0, bottom: 20, left: 0 }}
-      padding={0.2}
-      colors={{ scheme: 'pink_yellowGreen' }}
-      colorBy="indexValue"
-      enableTotals={true}
-      enableLabel={false}
-      enableGridY={false}
-      axisLeft={null}
-      tooltip={({ value, color }) => (
-        <div style={{ color }} className="border bg-card px-4 py-2">
-          {((value / total) * 100).toFixed(2)} %
-        </div>
-      )}
-    />
+    <ChartContainer config={chartConfig} className={cn('', className)}>
+      <BarChart
+        accessibilityLayer
+        data={data}
+        margin={{
+          top: 30,
+        }}
+      >
+        <XAxis dataKey="name" tickLine={false} axisLine={false} tickFormatter={(value) => value} />
+        <ChartTooltip
+          cursor={false}
+          content={<ChartTooltipContent nameKey="percent" hideLabel />}
+        />
+        <Bar dataKey="score" radius={4}>
+          <LabelList position="top" offset={10} className="fill-foreground" fontSize={10} />
+        </Bar>
+      </BarChart>
+    </ChartContainer>
   )
 }

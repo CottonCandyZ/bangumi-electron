@@ -1,4 +1,4 @@
-@tailwind base
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
@@ -24,6 +24,17 @@
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
     --radius: 0.5rem;
+
+    --chart-score-10: 331.83, 80.39%, 60%;
+    --chart-score-9: 345.1, 77.66%, 61.37%;
+    --chart-score-8: 358.73, 74.74%, 62.75%;
+    --chart-score-7: 11.82, 71.74%, 63.92%;
+    --chart-score-6: 25.37, 69.49%, 65.29%;
+    --chart-score-5: 38.76, 66.08%, 66.47%;
+    --chart-score-4: 51.92, 63.41%, 67.84%;
+    --chart-score-3: 65.05, 60.51%, 69.22%;
+    --chart-score-2: 78.62, 58.39%, 70.78%;
+    --chart-score-1: 91.9, 55.24%, 71.96%;
   }
 
   .dark {
@@ -46,6 +57,17 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
+
+    --chart-score-10: 331.83, 80.39%, 60%;
+    --chart-score-9: 345.1, 77.66%, 61.37%;
+    --chart-score-8: 358.73, 74.74%, 62.75%;
+    --chart-score-7: 11.82, 71.74%, 63.92%;
+    --chart-score-6: 25.37, 69.49%, 65.29%;
+    --chart-score-5: 38.76, 66.08%, 66.47%;
+    --chart-score-4: 51.92, 63.41%, 67.84%;
+    --chart-score-3: 65.05, 60.51%, 69.22%;
+    --chart-score-2: 78.62, 58.39%, 70.78%;
+    --chart-score-1: 91.9, 55.24%, 71.96%;
   }
 }
 

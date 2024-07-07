@@ -48,7 +48,7 @@ export function Component() {
           <h2 className="text-2xl font-semibold">章节</h2>
         </section>
         <div className="flex flex-row gap-5">
-          <section className="flex basis-2/3 flex-col gap-2">
+          <section className="flex basis-3/4 flex-col gap-2">
             <h2 className="text-2xl font-semibold">标签</h2>
             <div>
               {subjectInfoData ? (
@@ -58,7 +58,7 @@ export function Component() {
               )}
             </div>
           </section>
-          <section className="flex min-w-0 basis-1/3 flex-col gap-2">
+          <section className="flex min-w-56 flex-1 flex-col gap-2">
             <h2 className="text-2xl font-semibold">评分</h2>
             {subjectInfoData ? (
               <Score rating={subjectInfoData.rating} />
