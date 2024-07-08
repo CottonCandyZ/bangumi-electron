@@ -31,30 +31,35 @@ export interface SubjectCardProps {
 const sectionId = 'Home-Small-Carousel'
 
 export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
+  // 获得数据
   const topList = useTopListQuery(sectionPath)
   const subjectId = topList?.data?.[index].SubjectId
   // const follow = topList?.data?.[index].follow?.replace(/[^0-9]/g, '')
   const subjectInfo = useQuerySubjectInfo({ id: subjectId, enabled: !!subjectId })
   const subjectInfoData = subjectInfo.data
 
+  // 计算 hover card 大小
   const ref = useRef<HTMLDivElement>(null)
   const inset = useRef({ left: 0, right: 0, top: 0, bottom: 0 })
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
-  const setActiveId = useActiveHoverCard((state) => state.setActiveId)
+  // 一些状态
+  const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
   const activeId = useActiveHoverCard((state) => state.activeId)
-  const setActionSection = useActiveSection((state) => state.setActiveSection)
+  const setActionSection = useActiveSection((state) => state.setActiveSection) // 用来防止轮播图相互覆盖
   const id = `${sectionPath}-${index}`
   const layoutId = `${sectionId}-${id}`
 
-  const isTransitioning = unstable_useViewTransitionState(`/subject/${subjectId}`)
+  const isTransitioning = unstable_useViewTransitionState(`/subject/${subjectId}`) // viewTransition API
 
+  // 延迟打开 card
   useEffect(() => {
     return () => clearTimeout(timeoutRef.current)
   }, [])
 
+  // 没拿到 subjectId 的时候拒绝点击
   if (!subjectId) {
-    return <Skeleton className="aspect-[2/3] w-full"></Skeleton>
+    return <Skeleton className="aspect-[2/3] w-full" />
   }
 
   return (

@@ -1,4 +1,5 @@
 import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
+import EpisodesGrid from '@renderer/components/episode/grid'
 import Header from '@renderer/components/subject/header'
 import Meta from '@renderer/components/subject/meta'
 import Score from '@renderer/components/subject/score'
@@ -13,13 +14,14 @@ import { useParams } from 'react-router-dom'
 
 export function Component() {
   const subjectId = useParams().subjectId as SubjectId
+  // const subjectId = 975
   const subjectInfo = useQuerySubjectInfo({ id: subjectId })
   const subjectInfoData = subjectInfo.data
 
   return (
     <div className="">
       {/* cover && info */}
-      <div className="mx-auto mb-40 mt-40 flex max-w-6xl flex-col gap-4 px-10">
+      <div className="mx-auto mb-40 mt-40 flex max-w-6xl flex-col gap-10 px-10">
         <section className="flex w-full flex-row gap-8">
           {/* cover */}
           <Card
@@ -44,11 +46,12 @@ export function Component() {
             </section>
           </div>
         </section>
-        <section className="flex flex-col gap-2">
+        <section className="flex flex-col gap-5">
           <h2 className="text-2xl font-semibold">章节</h2>
+          <EpisodesGrid subjectId={subjectId} />
         </section>
         <div className="flex flex-row gap-5">
-          <section className="flex basis-3/4 flex-col gap-2">
+          <section className="flex basis-3/4 flex-col gap-5">
             <h2 className="text-2xl font-semibold">标签</h2>
             <div>
               {subjectInfoData ? (

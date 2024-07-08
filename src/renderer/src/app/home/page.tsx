@@ -9,7 +9,7 @@ export function Component() {
       <section className="px-9">
         <SmallCarousel href="/anime" name="动画" sectionPath="anime" />
       </section>
-      <section className="px-9">
+      {/* <section className="px-9">
         <SmallCarousel href="/game" name="游戏" sectionPath="game" />
       </section>
       <section className="px-9">
@@ -20,7 +20,7 @@ export function Component() {
       </section>
       <section className="px-9">
         <SmallCarousel href="/real" name="三次元" sectionPath="real" />
-      </section>
+      </section> */}
       {/*  时间线 */}
     </div>
   )
