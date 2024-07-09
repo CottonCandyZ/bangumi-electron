@@ -5,7 +5,7 @@ import { useQueryEpisodesInfoBySubjectId } from '@renderer/constants/hooks/api/e
 import { SubjectId } from '@renderer/constants/types/bgm'
 import { cn } from '@renderer/lib/utils'
 import { EPISODE_TYPE_MAP } from '@renderer/lib/utils/map'
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 
 export default function EpisodesGrid({
   subjectId,
@@ -49,7 +49,7 @@ export default function EpisodesGrid({
               firstTime = firstTime.fill(false, item.type)
             }
             return (
-              <>
+              <Fragment key={item.type}>
                 {/* 换行用 */}
                 <div className="w-full" key={`${item.type}-break-line`}></div>
                 {/* 种类标签 */}
@@ -63,7 +63,7 @@ export default function EpisodesGrid({
                   {item.type <= 3 ? EPISODE_TYPE_MAP[item.type] : '其他'}
                 </div>
                 <EpisodeGridItem episode={item} key={item.id} />
-              </>
+              </Fragment>
             )
           }
           return <EpisodeGridItem episode={item} key={item.id} />
