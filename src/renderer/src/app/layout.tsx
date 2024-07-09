@@ -12,7 +12,10 @@ function RootLayout() {
   const scrollStack = useRef<number[]>([])
   const currentScroll = useRef<number | undefined>(0)
   const [initialize, instance] = useOverlayScrollbars({
-    options: { overflow: { x: 'hidden' }, scrollbars: { autoHide: 'scroll' } },
+    options: {
+      overflow: { x: 'hidden' },
+      scrollbars: { autoHide: 'scroll', theme: 'os-theme-custom' },
+    },
   })
   const scrollListener = () => {
     currentScroll.current = instance()?.elements().viewport?.scrollTop

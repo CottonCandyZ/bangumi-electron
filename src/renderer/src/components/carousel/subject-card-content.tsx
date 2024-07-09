@@ -1,4 +1,5 @@
 import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
+import ScrollWrapper from '@renderer/components/base/scroll-warpper'
 import { useActiveSection } from '@renderer/components/carousel/state'
 import { useActiveHoverCard } from '@renderer/components/hoverCard/state'
 import { hoverCardSize } from '@renderer/components/hoverCard/utils'
@@ -20,7 +21,6 @@ import { sectionPath } from '@renderer/constants/types/web'
 import { cn } from '@renderer/lib/utils'
 import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import { useEffect, useRef } from 'react'
 import { Link, unstable_useViewTransitionState } from 'react-router-dom'
 
@@ -224,7 +224,7 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                   </section>
                   {/* 标签 */}
                   {subjectInfoData ? (
-                    <OverlayScrollbarsComponent
+                    <ScrollWrapper
                       className="mb-4 ml-4 mr-1 pr-3"
                       element="div"
                       options={{ overflow: { x: 'hidden' }, scrollbars: { autoHide: 'scroll' } }}
@@ -246,7 +246,7 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                           </Button>
                         ))}
                       </motion.div>
-                    </OverlayScrollbarsComponent>
+                    </ScrollWrapper>
                   ) : (
                     <Skeleton className="mb-4 ml-4 mr-4 h-full" />
                   )}

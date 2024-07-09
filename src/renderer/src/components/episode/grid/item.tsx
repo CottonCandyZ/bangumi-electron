@@ -1,3 +1,4 @@
+import ScrollWrapper from '@renderer/components/base/scroll-warpper'
 import { Button } from '@renderer/components/ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import { Separator } from '@renderer/components/ui/separator'
@@ -6,7 +7,6 @@ import { cn } from '@renderer/lib/utils'
 import { getDurationFromSeconds } from '@renderer/lib/utils/data-trans'
 import { getOnAirStatus } from '@renderer/lib/utils/date'
 import { isEmpty } from '@renderer/lib/utils/string'
-import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 
 export default function EpisodeGridItem({ episode }: { episode: Episode }) {
   const duration = getDurationFromSeconds(episode.duration_seconds)
@@ -33,9 +33,9 @@ export default function EpisodeGridItem({ episode }: { episode: Episode }) {
           {!isEmpty(episode.name) && <Header {...episode} />}
           {!isEmpty(episode.desc) && (
             <>
-              <OverlayScrollbarsComponent className="max-h-32 pr-2">
+              <ScrollWrapper className="max-h-32 pr-2">
                 <p className="whitespace-pre-wrap">{episode.desc}</p>
-              </OverlayScrollbarsComponent>
+              </ScrollWrapper>
               <Separator />
             </>
           )}

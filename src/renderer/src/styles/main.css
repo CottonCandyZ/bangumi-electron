@@ -1,8 +1,5 @@
 @import './tailwind.css';
 @import './tailwind-extend.css';
 @import './font.css';
-/* @import './base.css' */
-
-::view-transition-group(header) {
-  z-index: 1;
-}
+@import './scroll-bar.css';
+@import './base.css'
