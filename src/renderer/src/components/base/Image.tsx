@@ -4,20 +4,23 @@ import React, { useState } from 'react'
 
 export const Image = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { imageSrc?: string; imageClassName?: string }
->(({ className, imageSrc, imageClassName, ...props }, ref) => {
+  React.HTMLAttributes<HTMLDivElement> & {
+    imageSrc?: string
+    imageClassName?: string
+    loading?: 'eager' | 'lazy'
+  }
+>(({ className, imageSrc, imageClassName, loading = 'lazy', ...props }, ref) => {
   const [isLoad, setIsLoad] = useState(false)
   return (
-    <div className={cn('relative', className)} ref={ref}>
+    <div className={cn('relative', className)} ref={ref} {...props}>
       <img
         className={cn(
           'h-full w-full max-w-none object-cover',
           imageClassName,
           (!imageSrc || !isLoad) && 'invisible',
         )}
-        loading="lazy"
+        loading={loading}
         src={imageSrc}
-        {...props}
         onLoad={() => setIsLoad(true)}
       />
       {(!imageSrc || !isLoad) && <Skeleton className={cn('absolute inset-0')} />}

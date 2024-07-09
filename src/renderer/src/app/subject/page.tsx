@@ -1,4 +1,6 @@
 import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
+import { Image } from '@renderer/components/base/Image'
+import CharactersGrid from '@renderer/components/character/gird'
 import EpisodesGrid from '@renderer/components/episode/grid'
 import Header from '@renderer/components/subject/header'
 import Meta from '@renderer/components/subject/meta'
@@ -19,9 +21,13 @@ export function Component() {
   const subjectInfoData = subjectInfo.data
 
   return (
-    <div className="">
+    <div className="relative">
+      <div className="absolute -top-6 z-0 h-96 w-full overflow-hidden">
+        <Image imageSrc={subjectInfoData?.images.large} className="absolute h-full w-full" />
+        <div className="absolute bottom-0 h-72 w-full bg-gradient-to-t from-card" />
+      </div>
       {/* cover && info */}
-      <div className="mx-auto mb-40 mt-10 flex max-w-6xl flex-col gap-10 px-10">
+      <div className="relative z-10 mx-auto mb-40 flex max-w-6xl flex-col gap-10 px-10 pt-80">
         <section className="flex w-full flex-row gap-8">
           {/* cover */}
           <Card
@@ -70,6 +76,10 @@ export function Component() {
             )}
           </section>
         </div>
+        <section className="flex flex-col gap-5">
+          <h2 className="text-2xl font-semibold">角色</h2>
+          <CharactersGrid subjectId={subjectId} />
+        </section>
       </div>
     </div>
   )
