@@ -2,3 +2,7 @@
 @import './tailwind-extend.css';
 @import './font.css';
 /* @import './base.css' */
+
+::view-transition-group(header) {
+  z-index: 1;
+}

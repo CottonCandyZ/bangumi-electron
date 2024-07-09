@@ -12,7 +12,10 @@ export default function Header() {
   const navigate = useNavigate()
   const initState = useContext(SateContext)
   return (
-    <header className="drag-region flex h-16 flex-row items-center gap-10">
+    <header
+      className="drag-region flex h-16 flex-row items-center gap-10 bg-card"
+      style={{ viewTransitionName: 'header' }}
+    >
       <div className="flex flex-row justify-start gap-1">
         <div className="flex w-[72px] items-center justify-center">
           <Button
