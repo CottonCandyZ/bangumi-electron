@@ -1,16 +1,15 @@
 import { SUBJECTS, apiFetch } from '@renderer/constants/fetch/config'
 import { getAuthHeader } from '@renderer/constants/fetch/utils'
 import { SubjectId } from '@renderer/constants/types/bgm'
-import { Subject } from '@renderer/constants/types/subject'
+import { Character } from '@renderer/constants/types/character'
 import { FetchParamError } from '@renderer/lib/utils/error'
 
 /**
- * 从 v0 获得 subject 的基础信息
+ * 从 v0 获得 subject 相关的角色信息
  */
-export async function getSubjectById({ id, token }: { id?: SubjectId; token?: string }) {
+export async function getSubjectCharactersById({ id, token }: { id?: SubjectId; token?: string }) {
   if (!id) throw new FetchParamError('未获得 id')
-
-  const info = await apiFetch<Subject>(SUBJECTS.BY_ID(id.toString()), {
+  const info = await apiFetch<Character[]>(SUBJECTS.CHARACTERS_BY_ID(id.toString()), {
     headers: {
       ...getAuthHeader(token),
     },

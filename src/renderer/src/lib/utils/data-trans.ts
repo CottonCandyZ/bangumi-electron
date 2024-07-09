@@ -28,3 +28,9 @@ export function getDurationFromSeconds(total_seconds: number) {
   const hours = Math.floor(total_seconds / (60 * 60))
   return { hours, mins, seconds }
 }
+
+export function getCharacterAvatarURL(largeUrl: string) {
+  // lain.bgm.tv/pic/crt/l/8f/16/150623_crt_Yuczy.jpg?r=1705076939
+  // lain.bgm.tv/pic/crt/g/8f/16/150623_crt_Yuczy.jpg?r=1705076939
+  return largeUrl.replace('/l/', '/g/')
+}

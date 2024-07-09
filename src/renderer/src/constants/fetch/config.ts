@@ -50,6 +50,7 @@ export const USER = {
 /** 条目相关 */
 export const SUBJECTS = {
   BY_ID: (id: SubjectId) => `/v0/subjects/${id}`,
+  CHARACTERS_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/characters`,
 }
 
 /** 章节相关 */
