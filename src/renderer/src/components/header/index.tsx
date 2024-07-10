@@ -1,16 +1,13 @@
 import { Button } from '@renderer/components/ui/button'
 import ProfileMenu from '@renderer/components/user/avatarMenu'
 import Login from '@renderer/components/user/login'
-import { SateContext } from '@renderer/components/wrapper/state-warpper'
 import { useIsLoginQuery } from '@renderer/constants/hooks/session'
 import { ChevronLeft } from 'lucide-react'
-import { useContext } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export default function Header() {
   const isLogin = useIsLoginQuery()
   const navigate = useNavigate()
-  const initState = useContext(SateContext)
   return (
     <header
       className="drag-region flex h-16 flex-row items-center gap-10 bg-card"
@@ -21,7 +18,6 @@ export default function Header() {
           <Button
             variant="ghost"
             className="no-drag-region aspect-square p-0.5 shadow-none"
-            disabled={initState?.stateStack.length === 0}
             onClick={() => navigate(-1)}
           >
             <ChevronLeft />

@@ -5,7 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PropsWithChildren } from 'react'
 import { TooltipProvider } from '@renderer/components/ui/tooltip'
 import { toast } from 'sonner'
-import InitStateContextWrapper from '@renderer/components/wrapper/state-warpper'
+import InitStateContextWrapper from '@renderer/components/wrapper/state-wrapper'
 import { createIDBPersister } from '@renderer/lib/persister'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 

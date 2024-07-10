@@ -54,7 +54,10 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
 
   // 延迟打开 card
   useEffect(() => {
-    return () => clearTimeout(timeoutRef.current)
+    return () => {
+      clearTimeout(timeoutRef.current)
+      setActiveId(null)
+    }
   }, [])
 
   // 没拿到 subjectId 的时候拒绝点击

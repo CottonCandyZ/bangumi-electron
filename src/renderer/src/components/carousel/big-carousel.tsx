@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 const items = 9
-const smallWidth = 176
+const smallWidth = 250
 const bias = 36 // (9)
 
 const bigWidth = 512
@@ -114,7 +114,7 @@ export default function BigCarousel(): JSX.Element {
             >
               <div className="p-1">
                 <Card>
-                  <CardContent className={clsx(`flex h-80 items-center justify-center p-6`)}>
+                  <CardContent className={clsx(`flex h-96 items-center justify-center p-6`)}>
                     <span className="text-3xl font-semibold">{(index % items) + 1}</span>
                   </CardContent>
                 </Card>

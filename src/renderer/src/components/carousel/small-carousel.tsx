@@ -9,13 +9,13 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@renderer/components/ui/carousel'
-import { SateContext } from '@renderer/components/wrapper/state-warpper'
+import { SateContext } from '@renderer/components/wrapper/state-wrapper'
 import { UI_CONFIG } from '@renderer/config'
 import { sectionPath } from '@renderer/constants/types/web'
 import { cn } from '@renderer/lib/utils'
 import { ChevronRight } from 'lucide-react'
 import { useContext, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 
 interface SmallCarouselProps {
   href: string
@@ -27,19 +27,21 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
   const currentSectionPath = useActiveSection((state) => state.sectionPath)
   const [api, setApi] = useState<CarouselApi>()
   const initState = useContext(SateContext)
-  const initIndex = initState?.currentState.current.carouselState.get(
-    `Home-Small-Carousel-${sectionPath}`,
-  )
+  const { key } = useLocation()
+
+  if (initState?.carouselCache.get(key) === undefined) {
+    initState?.carouselCache.set(key, new Map<string, number>())
+  }
+  const initIndex = initState?.carouselCache.get(key)?.get(`Home-Small-Carousel-${sectionPath}`)
   useEffect(() => {
     if (!api) {
       return
     }
     api.on('select', () => {
       if (initState)
-        initState?.currentState.current.carouselState.set(
-          `Home-Small-Carousel-${sectionPath}`,
-          api.selectedScrollSnap(),
-        )
+        initState.carouselCache
+          .get(key)
+          ?.set(`Home-Small-Carousel-${sectionPath}`, api.selectedScrollSnap())
     })
   }, [api])
 
