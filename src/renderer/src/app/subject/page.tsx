@@ -54,7 +54,7 @@ export function Component() {
       <Image
         imageSrc={subjectInfoData?.images.large}
         loading="eager"
-        className="absolute top-0 max-h-full w-full -translate-y-1/2"
+        className="absolute top-0 max-h-full w-full"
       />
       {/* cover && info */}
       <div className="relative z-10 h-[calc(100dvh-64px)]" ref={ref}>

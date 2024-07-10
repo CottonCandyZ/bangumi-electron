@@ -2,25 +2,42 @@ import { Button } from '@renderer/components/ui/button'
 import ProfileMenu from '@renderer/components/user/avatarMenu'
 import Login from '@renderer/components/user/login'
 import { useIsLoginQuery } from '@renderer/constants/hooks/session'
-import { ChevronLeft } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export default function Header() {
   const isLogin = useIsLoginQuery()
   const navigate = useNavigate()
+  const { key } = useLocation()
+  const [backDisable, setBackDisable] = useState(true)
+  const [forwardDisable, setForwardDisable] = useState(true)
+  useEffect(() => {
+    setBackDisable(history.state.idx === 0)
+    setForwardDisable(history.state.idx === history.length - 1)
+  }, [key])
   return (
     <header
       className="drag-region flex h-16 flex-row items-center gap-10 bg-card"
       style={{ viewTransitionName: 'header' }}
     >
       <div className="flex flex-row justify-start gap-1">
-        <div className="flex w-[72px] items-center justify-center">
+        <div className="ml-[72px] flex items-center justify-center gap-2">
           <Button
             variant="ghost"
             className="no-drag-region aspect-square p-0.5 shadow-none"
             onClick={() => navigate(-1)}
+            disabled={backDisable}
           >
             <ChevronLeft />
+          </Button>
+          <Button
+            variant="ghost"
+            className="no-drag-region aspect-square p-0.5 shadow-none"
+            onClick={() => navigate(1)}
+            disabled={forwardDisable}
+          >
+            <ChevronRight />
           </Button>
         </div>
       </div>
