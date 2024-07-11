@@ -2,7 +2,7 @@ import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
 import { useActiveSection } from '@renderer/components/carousel/state'
 import { useActiveHoverCard } from '@renderer/components/hoverCard/state'
-import { hoverCardSize } from '@renderer/components/hoverCard/utils'
+import { cHoverCardSize } from '@renderer/components/hoverCard/utils'
 import { MotionSkeleton } from '@renderer/components/ui/MotionSekleton'
 import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent } from '@renderer/components/ui/card'
@@ -21,7 +21,7 @@ import { sectionPath } from '@renderer/constants/types/web'
 import { cn } from '@renderer/lib/utils'
 import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useRef } from 'react'
+import { memo, useEffect, useRef } from 'react'
 import { Link, unstable_useViewTransitionState } from 'react-router-dom'
 
 export interface SubjectCardProps {
@@ -30,7 +30,7 @@ export interface SubjectCardProps {
 }
 const sectionId = 'Home-Small-Carousel'
 
-export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
+export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
   // 获得数据
   const topList = useTopListQuery(sectionPath)
   const subjectId = topList?.data?.[index].SubjectId
@@ -80,9 +80,16 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
             onMouseEnter={() => {
               timeoutRef.current = setTimeout(() => {
                 const bounding = ref.current!.getBoundingClientRect()
-                inset.current = hoverCardSize(bounding, 0.5, 0.05, 8, 8, 8, 8)
+                inset.current = cHoverCardSize(bounding, {
+                  width: 0.5,
+                  height: 0.05,
+                  toViewBottom: 8,
+                  toViewTop: 8,
+                  toViewLeft: 8,
+                  toViewRight: 8,
+                })
                 setActionSection(sectionPath)
-                setActiveId({ sectionId, id })
+                setActiveId(layoutId)
               }, 700)
             }}
             onMouseLeave={() => clearTimeout(timeoutRef.current)}
@@ -131,19 +138,18 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
         </motion.div>
       </motion.div>
       <AnimatePresence onExitComplete={() => setActionSection(null)}>
-        {activeId?.sectionId === sectionId && activeId.id === id && (
-          // {(
-          <Link to={`/subject/${subjectId}`} className="cursor-default" unstable_viewTransition>
-            <motion.div
-              className="absolute z-10"
-              style={{
-                left: `${inset.current.left}px`,
-                right: `${inset.current.right}px`,
-                bottom: `${inset.current.bottom}px`,
-                top: `${inset.current.top}px`,
-              }}
-              layoutId={layoutId}
-            >
+        {activeId === layoutId && (
+          <motion.div
+            className="absolute z-10"
+            style={{
+              left: `${inset.current.left}px`,
+              right: `${inset.current.right}px`,
+              bottom: `${inset.current.bottom}px`,
+              top: `${inset.current.top}px`,
+            }}
+            layoutId={layoutId}
+          >
+            <Link to={`/subject/${subjectId}`} className="cursor-default" unstable_viewTransition>
               <Card className="h-full w-full">
                 <CardContent className="flex h-full flex-col gap-1 p-0">
                   {/* Cover */}
@@ -255,10 +261,13 @@ export default function SubjectCard({ sectionPath, index }: SubjectCardProps) {
                   )}
                 </CardContent>
               </Card>
-            </motion.div>
-          </Link>
+            </Link>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
   )
-}
+})
+
+SubjectCard.displayName = 'SubjectCard'
+export default SubjectCard
