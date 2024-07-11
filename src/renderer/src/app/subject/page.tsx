@@ -139,8 +139,8 @@ export function Component() {
               <CharactersGrid subjectId={subjectId} />
             </section>
           </div>
+          <BackCover />
         </div>
-        <BackCover />
       </div>
     </div>
   )
