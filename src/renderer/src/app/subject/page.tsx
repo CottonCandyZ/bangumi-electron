@@ -15,10 +15,12 @@ import { SateContext } from '@renderer/components/wrapper/state-wrapper'
 import { useQuerySubjectInfo } from '@renderer/constants/hooks/api/subject'
 import { SubjectId } from '@renderer/constants/types/bgm'
 import { useOverlayScrollbars } from 'overlayscrollbars-react'
-import { useContext, useEffect, useRef } from 'react'
-
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-const initScrollTop = 450
+
+const initScrollTop = 700
+const initPercent = 20
+const scrollRange = 2000
 export function Component() {
   const subjectId = useParams().subjectId as SubjectId
   // const subjectId = 372010
@@ -38,8 +40,17 @@ export function Component() {
     throw new Error('PageScrollWrapper need in StateWrapper')
   }
   const { scrollCache } = stateContext
+  const [percent, setPercent] = useState(initPercent)
   const scrollListener = () => {
-    scrollCache.set(key, instance()?.elements().viewport?.scrollTop ?? initScrollTop)
+    const top = instance()?.elements().viewport?.scrollTop
+    scrollCache.set(key, top ?? initScrollTop)
+    setPercent(
+      top === undefined
+        ? initPercent
+        : top >= scrollRange
+          ? 100
+          : (top / scrollRange) * (100 - initPercent) + initPercent,
+    )
   }
   useEffect(() => {
     initialize(ref.current!)
@@ -55,12 +66,17 @@ export function Component() {
       <Image
         imageSrc={subjectInfoData?.images.large}
         loading="eager"
-        className="absolute top-0 max-h-full w-full"
+        className="absolute top-0 aspect-[2/3] max-h-full w-full"
       />
       {/* cover && info */}
       <div className="relative z-10 h-[calc(100dvh-64px)]" ref={ref}>
-        <div className="bottom-top -mr-2 mt-20 h-[40rem] bg-gradient-to-t from-card pr-2" />
-        <div className="-mr-2 bg-card pr-2">
+        <div className="relative -mr-2 pr-2 pt-[60rem]">
+          <div
+            className="absolute inset-0 -z-10"
+            style={{
+              background: `linear-gradient(to top, hsl(var(--card)) ${percent}%, hsl(var(--card) / 0) ${percent + 50}%)`,
+            }}
+          ></div>
           <div className="mx-auto flex max-w-6xl flex-col gap-10 px-10 pb-40">
             <section className="flex w-full flex-row gap-8">
               {/* cover */}
@@ -123,8 +139,8 @@ export function Component() {
               <CharactersGrid subjectId={subjectId} />
             </section>
           </div>
-          <BackCover />
         </div>
+        <BackCover />
       </div>
     </div>
   )
