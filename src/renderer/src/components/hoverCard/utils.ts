@@ -1,14 +1,16 @@
 import { UI_CONFIG } from '@renderer/config'
 
-export function hoverCardSize(
-  hover: DOMRect,
-  width: number,
-  height: number,
-  toViewTop: number,
-  toViewLeft: number,
-  toViewRight: number,
-  toViewBottom: number,
-) {
+export type HoverCardSize = {
+  width: number
+  height: number
+  toViewTop: number
+  toViewLeft: number
+  toViewRight: number
+  toViewBottom: number
+}
+
+export function cHoverCardSize(hover: DOMRect, hoverCardSize: HoverCardSize) {
+  const { width, height, toViewTop, toViewLeft, toViewRight, toViewBottom } = hoverCardSize
   let left = -(hover.width * width)
   let right = -(hover.width * width)
   let top = -(hover.height * height)

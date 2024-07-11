@@ -2,6 +2,7 @@ import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
 import { Image } from '@renderer/components/base/Image'
 import CharactersGrid from '@renderer/components/character/gird'
 import EpisodesGrid from '@renderer/components/episode/grid'
+import { BackCover } from '@renderer/components/hoverCard/close'
 import Header from '@renderer/components/subject/header'
 import Meta from '@renderer/components/subject/meta'
 import Score from '@renderer/components/subject/score'
@@ -122,6 +123,7 @@ export function Component() {
               <CharactersGrid subjectId={subjectId} />
             </section>
           </div>
+          <BackCover />
         </div>
       </div>
     </div>

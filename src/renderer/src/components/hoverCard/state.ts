@@ -1,9 +1,6 @@
 import { create } from 'zustand'
 
-interface activeId {
-  sectionId: string
-  id: string
-}
+type activeId = string
 
 interface activeHoverCard {
   activeId: activeId | null
