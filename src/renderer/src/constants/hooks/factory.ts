@@ -1,6 +1,6 @@
 import { useAccessTokenQuery, useLogoutMutation } from '@renderer/constants/hooks/session'
 import { AuthError } from '@renderer/lib/utils/error'
-import { QueryOptions, keepPreviousData, useQuery } from '@tanstack/react-query'
+import { QueryOptions, keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query'
 import { FetchError } from 'ofetch'
 
 // 这里面有些类型判断还有些问题，等我精通 TS 了再回来思考吧
@@ -25,6 +25,7 @@ export const useQueryMustAuth = <P, R>({
   queryFn: P extends { token: string } ? Fn<P, R> : never
 } & OptionalProps<P>) => {
   const logoutMutation = useLogoutMutation()
+  const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const query = useQuery({
     queryKey: [accessToken, ...(queryKey || []), props],
@@ -44,7 +45,10 @@ export const useQueryMustAuth = <P, R>({
     enabled: accessToken !== undefined,
   })
   if (query.isError && query.error instanceof AuthError) {
-    if (query.error.code === 2) logoutMutation.mutate()
+    if (query.error.code === 2) {
+      queryClient.setQueryData(['accessToken'], null)
+      logoutMutation.mutate()
+    }
   }
   return query
 }
@@ -67,6 +71,7 @@ export const useQueryOptionalAuth = <P, R>({
   enabled?: boolean
 } & OptionalProps<P>) => {
   const logoutMutation = useLogoutMutation()
+  const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const query = useQuery({
     queryKey: [accessToken, ...(queryKey || []), props],
@@ -86,7 +91,10 @@ export const useQueryOptionalAuth = <P, R>({
     placeholderData: keepPreviousData,
   })
   if (query.isError && query.error instanceof AuthError) {
-    if (query.error.code === 2) logoutMutation.mutate()
+    if (query.error.code === 2) {
+      queryClient.setQueryData(['accessToken'], null)
+      logoutMutation.mutate()
+    }
   }
   return query
 }
