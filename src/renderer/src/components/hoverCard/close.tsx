@@ -6,7 +6,7 @@ export function BackCover({ className }: { className?: string }) {
   const setActiveId = useActiveHoverCard((state) => state.setActiveId)
   return (
     activeId && (
-      <div className={cn('fixed inset-0', className)} onMouseEnter={() => setActiveId(null)} />
+      <div className={cn('fixed inset-0 z-20', className)} onMouseEnter={() => setActiveId(null)} />
     )
   )
 }

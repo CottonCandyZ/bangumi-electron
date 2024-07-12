@@ -73,7 +73,7 @@ export default function Item({ character }: { character: Character }) {
         {activeId === layoutId && (
           <motion.div
             layoutId={layoutId}
-            className="absolute z-10"
+            className="absolute z-30"
             style={{
               left: `${inset.current.left}px`,
               right: `${inset.current.right}px`,

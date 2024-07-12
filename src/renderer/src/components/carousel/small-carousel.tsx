@@ -78,7 +78,7 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
           <CarouselNext className="relative right-0 top-0 translate-y-0" />
         </div>
       </div>
-      <div className={cn('relative', currentSectionPath === sectionPath ? 'z-10' : '')}>
+      <div className={cn('relative', currentSectionPath === sectionPath ? 'z-30' : '')}>
         <CarouselContentNoFlow className="-ml-3">
           {Array.from({ length: UI_CONFIG.HOME_SECTION_CAROUSEL_NUMBER }).map((_, index) => (
             <CarouselItem
