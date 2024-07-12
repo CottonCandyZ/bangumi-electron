@@ -55,7 +55,12 @@ export const SUBJECTS = {
 
 /** 章节相关 */
 export const EPISODES = {
-  BY_SUBJECT_ID: `/v0/episodes`,
+  ROOT: `/v0/episodes`,
+}
+
+/** 角色 */
+export const CHARACTERS = {
+  BY_ID: (id: SubjectId) => `/v0/characters/${id}`,
 }
 
 /** ofetch web config */

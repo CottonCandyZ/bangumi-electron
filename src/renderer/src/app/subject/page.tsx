@@ -23,7 +23,7 @@ const initPercent = 20
 const scrollRange = 2000
 export function Component() {
   const subjectId = useParams().subjectId as SubjectId
-  // const subjectId = 372010
+  // const subjectId = 385208
   const subjectInfo = useQuerySubjectInfo({ id: subjectId })
   const subjectInfoData = subjectInfo.data
   const ref = useRef(null)

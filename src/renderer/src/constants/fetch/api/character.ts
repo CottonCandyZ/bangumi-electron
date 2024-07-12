@@ -1,7 +1,7 @@
-import { SUBJECTS, apiFetch } from '@renderer/constants/fetch/config'
+import { CHARACTERS, SUBJECTS, apiFetch } from '@renderer/constants/fetch/config'
 import { getAuthHeader } from '@renderer/constants/fetch/utils'
-import { SubjectId } from '@renderer/constants/types/bgm'
-import { Character } from '@renderer/constants/types/character'
+import { CharacterId, SubjectId } from '@renderer/constants/types/bgm'
+import { Character, CharacterDetail } from '@renderer/constants/types/character'
 import { FetchParamError } from '@renderer/lib/utils/error'
 
 /**
@@ -14,5 +14,13 @@ export async function getSubjectCharactersById({ id, token }: { id?: SubjectId; 
       ...getAuthHeader(token),
     },
   })
+  return info
+}
+
+/**
+ * 从 v0 获得 Character 的详细信息
+ */
+export async function getCharacterDetailById({ id }: { id: CharacterId }) {
+  const info = await apiFetch<CharacterDetail>(CHARACTERS.BY_ID(id.toString()))
   return info
 }

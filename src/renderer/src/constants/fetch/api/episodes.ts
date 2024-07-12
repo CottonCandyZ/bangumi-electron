@@ -21,7 +21,7 @@ export async function getEpisodesBySubjectId({
 }) {
   if (!id) throw new FetchParamError('未获得 id')
 
-  const info = await apiFetch<Episodes>(EPISODES.BY_SUBJECT_ID, {
+  const info = await apiFetch<Episodes>(EPISODES.ROOT, {
     query: {
       subject_id: id,
       limit,

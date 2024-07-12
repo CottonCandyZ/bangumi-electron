@@ -5,12 +5,12 @@ import React, { useState } from 'react'
 
 export const CoverMotionImage = React.forwardRef<
   HTMLDivElement,
-  HTMLMotionProps<'div'> & { imageSrc?: string; imageClassName?: string }
->(({ className, imageClassName, imageSrc, ...props }, ref) => {
+  HTMLMotionProps<'div'> & { imageSrc?: string; imageClassName?: string; loadingClassName?: string }
+>(({ className, imageClassName, imageSrc, loadingClassName = 'aspect-[2/3]', ...props }, ref) => {
   const [isLoad, setIsLoad] = useState(false)
   return (
     <motion.div
-      className={cn('relative', (!imageSrc || !isLoad) && 'aspect-[2/3]', className)}
+      className={cn('relative', (!imageSrc || !isLoad) && loadingClassName, className)}
       ref={ref}
       {...props}
     >

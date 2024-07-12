@@ -1,4 +1,4 @@
-import { SubjectId } from '@renderer/constants/types/bgm'
+import { InfoBoxValueList, SubjectId } from '@renderer/constants/types/bgm'
 
 /** 条目 */
 export type Subject = {
@@ -62,10 +62,6 @@ export type InfoKey =
   | '人物原案'
   | '人物设定'
   | 'OP・ED 分镜'
-
-export type InfoBoxValueList = {
-  v: string
-}
 
 export type Rating = {
   rank: number
