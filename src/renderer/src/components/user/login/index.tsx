@@ -1,4 +1,3 @@
-import { Button } from '@renderer/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -15,11 +14,7 @@ export default function Login() {
   const [open, setOpen] = useState(false)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="rounded-3xl">
-          登录
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>登录</DialogTrigger>
       <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>

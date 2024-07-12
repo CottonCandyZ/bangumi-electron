@@ -1,13 +1,10 @@
 import { Button } from '@renderer/components/ui/button'
 import ProfileMenu from '@renderer/components/user/avatarMenu'
-import Login from '@renderer/components/user/login'
-import { useIsLoginQuery } from '@renderer/constants/hooks/session'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 export default function Header() {
-  const isLogin = useIsLoginQuery()
   const navigate = useNavigate()
   const { key } = useLocation()
   const [backDisable, setBackDisable] = useState(true)
@@ -59,7 +56,7 @@ export default function Header() {
       </div>
       <div className="pr-40">
         <div className="no-drag-region flex items-center">
-          {isLogin.data ? <ProfileMenu /> : <Login />}
+          <ProfileMenu />
         </div>
       </div>
     </header>
