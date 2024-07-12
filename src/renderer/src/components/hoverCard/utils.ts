@@ -25,7 +25,6 @@ export function cHoverCardSize(hover: DOMRect, hoverCardSize: HoverCardSize) {
     hoverCardSize.maxInnerHoverHeight,
     hoverCardSize.minInnerHoverHeight,
   )
-  console.log(hoverWidth)
 
   let left = -(hoverWidth * width)
   let right = -(hoverWidth * width)
