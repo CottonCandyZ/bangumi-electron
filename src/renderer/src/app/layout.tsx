@@ -7,11 +7,11 @@ function RootLayout() {
   return (
     <>
       <Header />
-      <div className="flex flex-row *:h-[calc(100dvh-64px)]">
-        <div className="h-full py-1">
-          <NavBar />
-        </div>
-        <PageScrollWrapper className="min-h-full w-full rounded-tl-lg border-l border-t">
+      <div className="fixed top-16 z-10 h-full bg-card py-1" style={{ viewTransitionName: 'nav' }}>
+        <NavBar />
+      </div>
+      <div className="flex *:h-[calc(100dvh-64px)]">
+        <PageScrollWrapper className="ml-[72px] mt-16 min-h-full w-full rounded-tl-lg border-l border-t">
           <div>
             <Outlet />
           </div>

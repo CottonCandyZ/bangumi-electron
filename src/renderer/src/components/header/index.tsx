@@ -15,7 +15,7 @@ export default function Header() {
   }, [key])
   return (
     <header
-      className="drag-region flex h-16 flex-row items-center gap-10 bg-card"
+      className="drag-region fixed left-0 right-0 z-10 flex h-16 flex-row items-center gap-10 bg-card"
       style={{ viewTransitionName: 'header' }}
     >
       <div className="flex flex-row justify-start gap-1">

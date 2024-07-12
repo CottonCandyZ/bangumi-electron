@@ -1,3 +1,7 @@
 ::view-transition-group(header) {
   z-index: 1;
 }
+
+::view-transition-group(nav) {
+  z-index: 1;
+}
