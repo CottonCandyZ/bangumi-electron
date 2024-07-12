@@ -7,14 +7,30 @@ export type HoverCardSize = {
   toViewLeft: number
   toViewRight: number
   toViewBottom: number
+  maxInnerHoverWidth?: number
+  maxInnerHoverHeight?: number
+  minInnerHoverWidth?: number
+  minInnerHoverHeight?: number
 }
 
 export function cHoverCardSize(hover: DOMRect, hoverCardSize: HoverCardSize) {
   const { width, height, toViewTop, toViewLeft, toViewRight, toViewBottom } = hoverCardSize
-  let left = -(hover.width * width)
-  let right = -(hover.width * width)
-  let top = -(hover.height * height)
-  let bottom = -(hover.height * height)
+  const hoverWidth = threshold(
+    hover.width,
+    hoverCardSize.maxInnerHoverWidth,
+    hoverCardSize.minInnerHoverWidth,
+  )
+  const hoverHight = threshold(
+    hover.height,
+    hoverCardSize.maxInnerHoverHeight,
+    hoverCardSize.minInnerHoverHeight,
+  )
+  console.log(hoverWidth)
+
+  let left = -(hoverWidth * width)
+  let right = -(hoverWidth * width)
+  let top = -(hoverHight * height)
+  let bottom = -(hoverHight * height)
   const toLeft = hover.left + left
   const toTop = hover.top + top
   const toBottom = window.innerHeight - hover.bottom + bottom
@@ -40,4 +56,10 @@ export function cHoverCardSize(hover: DOMRect, hoverCardSize: HoverCardSize) {
     top -= bias
   }
   return { left, right, top, bottom }
+}
+
+function threshold(num: number, max: number | undefined, min: number | undefined) {
+  if (max !== undefined && num > max) return max
+  if (min !== undefined && num < min) return min
+  return num
 }

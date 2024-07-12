@@ -40,12 +40,14 @@ export default function Item({ character }: { character: Character }) {
           timeoutRef.current = setTimeout(() => {
             const bounding = ref.current!.getBoundingClientRect()
             inset.current = cHoverCardSize(bounding, {
-              width: 0.2,
-              height: 1.2,
+              width: 0.4,
+              height: 1,
               toViewTop: 8,
               toViewBottom: 8,
               toViewLeft: 8,
               toViewRight: 8,
+              maxInnerHoverWidth: 200,
+              minInnerHoverHeight: 110,
             })
             setActiveId(layoutId)
           }, 700)
@@ -84,7 +86,7 @@ export default function Item({ character }: { character: Character }) {
                 <div className="flex h-full grow flex-row gap-4">
                   <CoverMotionImage
                     layoutId={`${layoutId}-image`}
-                    className="h-fit basis-1/4 overflow-hidden rounded-xl shadow-md"
+                    className="h-fit shrink basis-1/4 overflow-hidden rounded-xl shadow-md"
                     imageSrc={character.images.grid}
                     loadingClassName="aspect-[9/16]"
                   />

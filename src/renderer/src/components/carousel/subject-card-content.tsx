@@ -87,6 +87,8 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
                   toViewTop: 8,
                   toViewLeft: 8,
                   toViewRight: 8,
+                  minInnerHoverHeight: 270,
+                  minInnerHoverWidth: 150,
                 })
                 setActionSection(sectionPath)
                 setActiveId(layoutId)
