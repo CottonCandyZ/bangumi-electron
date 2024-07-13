@@ -19,13 +19,20 @@ export default function Detail({ characterId }: { characterId: CharacterId }) {
         : null,
     [characterDetailData?.summary],
   )
-  if (!characterDetailData) return <Skeleton className="h-full" />
+  if (!characterDetailData) return <Skeleton className="min-h-72" />
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex h-full min-h-0">
-      <ScrollWrapper className="bbcode whitespace-pre-line" options={{ overflow: { x: 'hidden' } }}>
-        {renderSummery}
-      </ScrollWrapper>
+      {characterDetailData.summary !== '' ? (
+        <ScrollWrapper
+          className="bbcode max-h-56 whitespace-pre-line"
+          options={{ overflow: { x: 'hidden' } }}
+        >
+          {renderSummery}
+        </ScrollWrapper>
+      ) : (
+        <p>暂时还没有说明哦～</p>
+      )}
     </motion.div>
   )
 }
