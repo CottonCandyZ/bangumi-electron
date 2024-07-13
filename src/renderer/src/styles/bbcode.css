@@ -1,0 +1,9 @@
+@layer utilities {
+  .bbcode {
+    .mask {
+      text-shadow: #555 0 0 20px;
+      border-radius: 2px;
+      @apply bg-[#555] text-[#555] hover:text-white transition-all ease-linear duration-500 border border-[#555];
+    }
+  }
+}

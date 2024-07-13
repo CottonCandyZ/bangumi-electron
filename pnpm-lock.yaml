@@ -8,6 +8,15 @@ importers:
 
   .:
     dependencies:
+      '@bbob/core':
+        specifier: ^4.0.3
+        version: 4.0.3
+      '@bbob/preset-react':
+        specifier: ^4.0.3
+        version: 4.0.3(react@18.3.1)
+      '@bbob/react':
+        specifier: ^4.0.3
+        version: 4.0.3(react@18.3.1)
       '@egoist/tipc':
         specifier: ^0.3.1
         version: 0.3.1(electron@28.3.3)(react@18.3.1)
@@ -324,6 +333,37 @@ packages:
   '@babel/types@7.24.6':
     resolution: {integrity: sha512-WaMsgi6Q8zMgMth93GvWPXkhAIEobfsIkLTacoVZoK1J0CevIPGYY2Vo5YvJGqyHqXM6P4ppOYGsIRU8MM9pFQ==}
     engines: {node: '>=6.9.0'}
+
+  '@bbob/core@4.0.3':
+    resolution: {integrity: sha512-vhrOAtqq4aEdcXohl8Lrk3NgcYAbaPsG9dNZfiIIqNLFyf8c95aBE3cE/UeX/jnzpynyg0jv2Wdv9L9Knxs9mA==}
+
+  '@bbob/html@4.0.3':
+    resolution: {integrity: sha512-znuI7OfGzZsmpjE82WjBi6RuPhXf9o1QQH1mZVLHOheXArtc+ePhVj+W29R36MCFIydwlwpBWz8hqf2adoPZQQ==}
+
+  '@bbob/parser@4.0.3':
+    resolution: {integrity: sha512-lWkdFZDn1ZsORr6kl/HHVnAaNTiNdlNhUjYzyASSlvl7bots5cGLjUlKcXvfVM/ds9HwQi4D+tolEzC6vu3tjw==}
+
+  '@bbob/plugin-helper@4.0.3':
+    resolution: {integrity: sha512-nmlGqQ1+ud4KjixMPJ4Xv466o32x9gSZ3xBYiuSNd+uK2q+66l+cI6W4aa3tJIMafeDPr9EMG38EVW0xEC/f9Q==}
+
+  '@bbob/preset-html5@4.0.3':
+    resolution: {integrity: sha512-Hl+UFocu0NA4fi5PBgZL4tFL26zpjqW9fMRw05qbrJE+JSPwE5AEDr80iDb4gJz3/dxUhBf0WnI8l3UixXI3PQ==}
+
+  '@bbob/preset-react@4.0.3':
+    resolution: {integrity: sha512-D39CCprhJE4Qsess6yJ6iNMRMW3TxE+t4zU12YlCi/E0o0fUW5TPRYyCvidndpfDCulLpxnw69fxTooGm72yVQ==}
+    peerDependencies:
+      react: '> 15.0'
+
+  '@bbob/preset@4.0.3':
+    resolution: {integrity: sha512-RC00TRBEGjrkfG8cWsP+aaAMZC2KPGDKly+gv7uF9UufqyOLgOzmq3zlmgKlbnqLGJ8R8XHFPUeswnKmDP513g==}
+
+  '@bbob/react@4.0.3':
+    resolution: {integrity: sha512-K0cEbdV6/i5JsvglFHnXIwp0ScTvd9mKZGcVsK+u4zznMpPBqZ0bL8RjNJ1+ixI5rURlsCbzAeXSd6YNqlLwcw==}
+    peerDependencies:
+      react: '> 15.0'
+
+  '@bbob/types@4.0.3':
+    resolution: {integrity: sha512-mx9wpj8ZSoQICCHgzJpfI7CuBGIi8gItycHLZgyWoTRbOXsE4UZCnZeHYVjs7m/jnl1pO+s58CBlA6bzLyHRsA==}
 
   '@develar/schema-utils@2.6.5':
     resolution: {integrity: sha512-0cp4PsWQ/9avqTVMCtZ+GirikIA36ikvjtHweU4/j8yLtgObI0+JUPhYFScgwlteveGB1rt3Cm8UhN04XayDig==}
@@ -4223,6 +4263,54 @@ snapshots:
       '@babel/helper-string-parser': 7.24.6
       '@babel/helper-validator-identifier': 7.24.6
       to-fast-properties: 2.0.0
+
+  '@bbob/core@4.0.3':
+    dependencies:
+      '@bbob/parser': 4.0.3
+      '@bbob/plugin-helper': 4.0.3
+      '@bbob/types': 4.0.3
+
+  '@bbob/html@4.0.3':
+    dependencies:
+      '@bbob/core': 4.0.3
+      '@bbob/plugin-helper': 4.0.3
+      '@bbob/types': 4.0.3
+
+  '@bbob/parser@4.0.3':
+    dependencies:
+      '@bbob/plugin-helper': 4.0.3
+      '@bbob/types': 4.0.3
+
+  '@bbob/plugin-helper@4.0.3':
+    dependencies:
+      '@bbob/types': 4.0.3
+
+  '@bbob/preset-html5@4.0.3':
+    dependencies:
+      '@bbob/plugin-helper': 4.0.3
+      '@bbob/preset': 4.0.3
+      '@bbob/types': 4.0.3
+
+  '@bbob/preset-react@4.0.3(react@18.3.1)':
+    dependencies:
+      '@bbob/preset-html5': 4.0.3
+      '@bbob/types': 4.0.3
+      react: 18.3.1
+
+  '@bbob/preset@4.0.3':
+    dependencies:
+      '@bbob/plugin-helper': 4.0.3
+      '@bbob/types': 4.0.3
+
+  '@bbob/react@4.0.3(react@18.3.1)':
+    dependencies:
+      '@bbob/core': 4.0.3
+      '@bbob/html': 4.0.3
+      '@bbob/plugin-helper': 4.0.3
+      '@bbob/types': 4.0.3
+      react: 18.3.1
+
+  '@bbob/types@4.0.3': {}
 
   '@develar/schema-utils@2.6.5':
     dependencies:

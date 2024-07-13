@@ -58,7 +58,6 @@ export default function Item({ character }: { character: Character }) {
           <CardContent className="flex flex-row items-start gap-4 p-2">
             {!isEmpty(character.images.large) ? (
               <CoverMotionImage
-                layoutId={`${layoutId}-image`}
                 className="aspect-square size-14 shrink-0 overflow-hidden rounded-full"
                 imageSrc={getCharacterAvatarURL(character.images.large)}
               />
@@ -85,7 +84,6 @@ export default function Item({ character }: { character: Character }) {
               <CardContent className="flex h-full flex-col p-2">
                 <div className="flex h-full flex-row gap-4">
                   <CoverMotionImage
-                    layoutId={`${layoutId}-image`}
                     className="h-fit shrink basis-1/4 overflow-hidden rounded-xl shadow-md"
                     imageSrc={character.images.grid}
                     loadingClassName="aspect-[9/16]"
@@ -93,13 +91,8 @@ export default function Item({ character }: { character: Character }) {
                   <div className="flex h-full w-full flex-col gap-2">
                     <MetaInfo character={character} layoutId={`${layoutId}-meta`} />
                     <Separator />
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="flex min-h-0"
-                    >
+
                       <Detail characterId={character.id} />
-                    </motion.div>
                   </div>
                 </div>
               </CardContent>
