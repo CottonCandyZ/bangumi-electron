@@ -6,7 +6,7 @@ import { cPopSizeByC } from '@renderer/components/hoverCard/utils'
 import { Badge } from '@renderer/components/ui/badge'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
-import { Character } from '@renderer/constants/types/character'
+import { Character, CharacterDetail } from '@renderer/constants/types/character'
 import { cn } from '@renderer/lib/utils'
 import { getCharacterAvatarURL } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
@@ -14,6 +14,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 const sectionId = 'Characters'
+let hover: DOMRect | undefined
 export default function Item({ character }: { character: Character }) {
   const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
   const activeId = useActiveHoverCard((state) => state.activeId)
@@ -24,6 +25,7 @@ export default function Item({ character }: { character: Character }) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const popRef = useRef<HTMLDivElement>(null)
   const [popCod, setPopCod] = useState({ top: 0, left: 0 })
+  const [detailData, setDetailData] = useState<boolean>(false)
 
   useEffect(() => {
     return () => {
@@ -31,14 +33,24 @@ export default function Item({ character }: { character: Character }) {
       setActiveId(null)
     }
   }, [])
+
   useLayoutEffect(() => {
     if (activeId === layoutId) {
       const pop = popRef.current!.getBoundingClientRect()
-      const hover = ref.current!.getBoundingClientRect()
+      hover = ref.current!.getBoundingClientRect()
       const { topOffset, leftOffset } = cPopSizeByC(pop, hover)
       setPopCod({ top: topOffset, left: leftOffset })
     }
   }, [activeId])
+
+  useLayoutEffect(() => {
+    if (activeId === layoutId) {
+      if (!hover) return
+      const pop = popRef.current!.getBoundingClientRect()
+      const { topOffset, leftOffset } = cPopSizeByC(pop, hover)
+      setPopCod({ top: topOffset, left: leftOffset })
+    }
+  }, [detailData])
 
   return (
     <div className="relative">
@@ -95,7 +107,7 @@ export default function Item({ character }: { character: Character }) {
                   <div className="flex w-full flex-col gap-2">
                     <MetaInfo character={character} />
                     <Separator />
-                    <Detail characterId={character.id} />
+                    <Detail characterId={character.id} setDetailData={setDetailData} />
                   </div>
                 </div>
               </CardContent>
