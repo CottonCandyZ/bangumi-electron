@@ -6,7 +6,7 @@ import { cPopSizeByC } from '@renderer/components/hoverCard/utils'
 import { Badge } from '@renderer/components/ui/badge'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
-import { Character, CharacterDetail } from '@renderer/constants/types/character'
+import { Character } from '@renderer/constants/types/character'
 import { cn } from '@renderer/lib/utils'
 import { getCharacterAvatarURL } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
@@ -94,14 +94,14 @@ export default function Item({ character }: { character: Character }) {
               left: `${popCod.left}px`,
             }}
           >
-            <Card className="h-fit w-full">
+            <Card className="w-full">
               <CardContent className="flex h-full flex-col p-2">
                 <div className="flex h-full flex-row gap-4">
                   {!isEmpty(character.images.large) && (
                     <CoverMotionImage
                       className="h-fit basis-1/4 overflow-hidden rounded-xl shadow-md"
                       imageSrc={character.images.grid}
-                      loadingClassName="aspect-[9/16]"
+                      loadingClassName="h-full"
                     />
                   )}
                   <div className="flex w-full flex-col gap-2">
