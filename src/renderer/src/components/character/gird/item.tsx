@@ -83,7 +83,7 @@ export default function Item({ character }: { character: Character }) {
           >
             <Card className="h-full w-full">
               <CardContent className="flex h-full flex-col p-2">
-                <div className="flex h-full grow flex-row gap-4">
+                <div className="flex h-full flex-row gap-4">
                   <CoverMotionImage
                     layoutId={`${layoutId}-image`}
                     className="h-fit shrink basis-1/4 overflow-hidden rounded-xl shadow-md"
@@ -96,7 +96,7 @@ export default function Item({ character }: { character: Character }) {
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="h-full overflow-x-hidden"
+                      className="flex min-h-0"
                     >
                       <Detail characterId={character.id} />
                     </motion.div>

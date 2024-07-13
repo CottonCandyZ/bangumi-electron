@@ -9,7 +9,7 @@ export default function Detail({ characterId }: { characterId: CharacterId }) {
 
   if (!characterDetailData) return <Skeleton className="h-full" />
   return (
-    <ScrollWrapper options={{ overflow: { x: 'hidden' }, scrollbars: { autoHide: 'scroll' } }}>
+    <ScrollWrapper options={{ overflow: { x: 'hidden' } }}>
       {characterDetailData.summary}
     </ScrollWrapper>
   )
