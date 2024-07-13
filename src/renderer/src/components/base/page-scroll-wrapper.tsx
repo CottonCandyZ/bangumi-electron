@@ -1,7 +1,9 @@
 import { SateContext } from '@renderer/components/wrapper/state-wrapper'
-import { useOverlayScrollbars } from 'overlayscrollbars-react'
-import { PropsWithChildren, useContext, useEffect, useRef } from 'react'
+import { useOverlayScrollbars, UseOverlayScrollbarsInstance } from 'overlayscrollbars-react'
+import { createContext, PropsWithChildren, useContext, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
+
+export const ScrollContext = createContext<UseOverlayScrollbarsInstance | null>(null)
 
 export default function PageScrollWrapper({
   initScrollTo = 0,
@@ -40,8 +42,10 @@ export default function PageScrollWrapper({
   }, [initialize, key])
 
   return (
-    <div className={className} ref={ref}>
-      {children}
-    </div>
+    <ScrollContext.Provider value={instance}>
+      <div className={className} ref={ref}>
+        {children}
+      </div>
+    </ScrollContext.Provider>
   )
 }

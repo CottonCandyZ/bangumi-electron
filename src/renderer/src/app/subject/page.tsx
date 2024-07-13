@@ -1,5 +1,6 @@
 import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
 import { Image } from '@renderer/components/base/Image'
+import { ScrollContext } from '@renderer/components/base/page-scroll-wrapper'
 import CharactersGrid from '@renderer/components/character/gird'
 import EpisodesGrid from '@renderer/components/episode/grid'
 import { BackCover } from '@renderer/components/hoverCard/close'
@@ -14,8 +15,7 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { SateContext } from '@renderer/components/wrapper/state-wrapper'
 import { useQuerySubjectInfo } from '@renderer/constants/hooks/api/subject'
 import { SubjectId } from '@renderer/constants/types/bgm'
-import { useOverlayScrollbars } from 'overlayscrollbars-react'
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 
 const initScrollTop = 700
@@ -26,16 +26,10 @@ export function Component() {
   // const subjectId = 385208
   const subjectInfo = useQuerySubjectInfo({ id: subjectId })
   const subjectInfoData = subjectInfo.data
-  const ref = useRef(null)
+  const instance = useContext(ScrollContext)
+  if (!instance) throw Error('Component need to be wrapped in ScrollContext')
   const stateContext = useContext(SateContext)
   const { key } = useLocation()
-
-  const [initialize, instance] = useOverlayScrollbars({
-    options: {
-      overflow: { x: 'hidden' },
-      scrollbars: { autoHide: 'scroll', theme: 'os-theme-custom' },
-    },
-  })
   if (!stateContext) {
     throw new Error('PageScrollWrapper need in StateWrapper')
   }
@@ -43,7 +37,6 @@ export function Component() {
   const [percent, setPercent] = useState(initPercent)
   const scrollListener = () => {
     const top = instance()?.elements().viewport?.scrollTop
-    scrollCache.set(key, top ?? initScrollTop)
     setPercent(
       top === undefined
         ? initPercent
@@ -53,23 +46,22 @@ export function Component() {
     )
   }
   useEffect(() => {
-    initialize(ref.current!)
     instance()
       ?.elements()
       .viewport?.scrollTo({ top: scrollCache.get(key) ?? initScrollTop })
     instance()?.on('scroll', scrollListener)
     return () => instance()?.off('scroll', scrollListener)
-  }, [initialize])
+  }, [])
 
   return (
     <div className="relative h-full overflow-hidden">
       <Image
         imageSrc={subjectInfoData?.images.large}
         loading="eager"
-        className="absolute top-0 aspect-[2/3] max-h-full w-full"
+        className="fixed left-[73px] top-[65px] aspect-[2/3] max-h-full w-full overflow-hidden rounded-tl-lg"
       />
       {/* cover && info */}
-      <div className="relative z-10 h-[calc(100dvh-64px)]" ref={ref}>
+      <div className="relative z-10">
         <div className="relative -mr-2 pr-2 pt-[60rem]">
           <div
             className="absolute inset-0 -z-10"
