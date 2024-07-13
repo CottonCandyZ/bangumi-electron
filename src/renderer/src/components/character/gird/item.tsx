@@ -14,7 +14,6 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 const sectionId = 'Characters'
-let hover: DOMRect | undefined
 export default function Item({ character }: { character: Character }) {
   const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
   const activeId = useActiveHoverCard((state) => state.activeId)
@@ -23,9 +22,6 @@ export default function Item({ character }: { character: Character }) {
 
   const ref = useRef<HTMLDivElement>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const popRef = useRef<HTMLDivElement>(null)
-  const [popCod, setPopCod] = useState({ top: 0, left: 0 })
-  const [detailData, setDetailData] = useState<boolean>(false)
 
   useEffect(() => {
     return () => {
@@ -34,28 +30,10 @@ export default function Item({ character }: { character: Character }) {
     }
   }, [])
 
-  useLayoutEffect(() => {
-    if (activeId === layoutId) {
-      const pop = popRef.current!.getBoundingClientRect()
-      hover = ref.current!.getBoundingClientRect()
-      const { topOffset, leftOffset } = cPopSizeByC(pop, hover)
-      setPopCod({ top: topOffset, left: leftOffset })
-    }
-  }, [activeId])
-
-  useLayoutEffect(() => {
-    if (activeId === layoutId) {
-      if (!hover) return
-      const pop = popRef.current!.getBoundingClientRect()
-      const { topOffset, leftOffset } = cPopSizeByC(pop, hover)
-      setPopCod({ top: topOffset, left: leftOffset })
-    }
-  }, [detailData])
-
   return (
     <div className="relative">
       <motion.div
-        className="h-full"
+        className={cn('h-full', activeId === layoutId && 'invisible')}
         layoutId={layoutId}
         ref={ref}
         onMouseEnter={() => {
@@ -85,37 +63,74 @@ export default function Item({ character }: { character: Character }) {
       </motion.div>
       <AnimatePresence>
         {activeId === layoutId && (
-          <motion.div
+          <PopCard
+            character={character}
             layoutId={layoutId}
-            className="absolute z-30 w-96"
-            ref={popRef}
-            style={{
-              top: `${popCod.top}px`,
-              left: `${popCod.left}px`,
-            }}
-          >
-            <Card className="w-full">
-              <CardContent className="flex h-full flex-col p-2">
-                <div className="flex h-full flex-row gap-4">
-                  {!isEmpty(character.images.large) && (
-                    <CoverMotionImage
-                      className="h-fit basis-1/4 overflow-hidden rounded-xl shadow-md"
-                      imageSrc={character.images.grid}
-                      loadingClassName="h-full"
-                    />
-                  )}
-                  <div className="flex w-full flex-col gap-2">
-                    <MetaInfo character={character} />
-                    <Separator />
-                    <Detail characterId={character.id} setDetailData={setDetailData} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+            hover={ref.current!.getBoundingClientRect()}
+          />
         )}
       </AnimatePresence>
     </div>
+  )
+}
+
+function PopCard({
+  character,
+  layoutId,
+  hover,
+}: {
+  character: Character
+  layoutId: string
+  hover: DOMRect
+}) {
+  const popRef = useRef<HTMLDivElement>(null)
+  const [popCod, setPopCod] = useState({ top: 0, left: 0 })
+  const [detailData, setDetailData] = useState<boolean>(false)
+  const [imageLoad, setImageLoad] = useState<boolean>(false)
+  useLayoutEffect(() => {
+    const pop = popRef.current!.getBoundingClientRect()
+    const { topOffset, leftOffset } = cPopSizeByC(pop, hover)
+    setPopCod({ top: topOffset, left: leftOffset })
+  }, [])
+  useLayoutEffect(() => {
+    if (detailData || imageLoad) {
+      if (!hover) return
+      const pop = popRef.current!.getBoundingClientRect()
+      const { topOffset, leftOffset } = cPopSizeByC(pop, hover)
+      setPopCod({ top: topOffset, left: leftOffset })
+    }
+  }, [detailData, imageLoad])
+  return (
+    <motion.div
+      layoutId={layoutId}
+      className="absolute z-30 w-96"
+      ref={popRef}
+      style={{
+        top: `${popCod.top}px`,
+        left: `${popCod.left}px`,
+      }}
+    >
+      <Card className="w-full">
+        <CardContent className="flex h-full flex-col p-2">
+          <div className="flex h-full flex-row gap-4">
+            {!isEmpty(character.images.large) && (
+              <CoverMotionImage
+                className="h-fit basis-1/4 overflow-hidden rounded-xl shadow-md"
+                imageSrc={character.images.grid}
+                loadingClassName="h-full"
+                loading="eager"
+                onload={(load) => setImageLoad(load)}
+              />
+            )}
+            <div className="flex w-full flex-col gap-2">
+              <MetaInfo character={character} />
+              <Separator />
+              <Detail characterId={character.id} setDetailData={setDetailData} />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   )
 }
 
