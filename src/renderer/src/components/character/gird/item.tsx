@@ -3,6 +3,7 @@ import Actors from '@renderer/components/character/gird/actor'
 import Detail from '@renderer/components/character/gird/detail'
 import { useActiveHoverCard } from '@renderer/components/hoverCard/state'
 import { cHoverCardSize } from '@renderer/components/hoverCard/utils'
+import { Badge } from '@renderer/components/ui/badge'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
 import { Character } from '@renderer/constants/types/character'
@@ -64,7 +65,7 @@ export default function Item({ character }: { character: Character }) {
             ) : (
               <div className="aspect-square size-14 rounded-full bg-secondary" />
             )}
-            <MetaInfo character={character} layoutId={`${layoutId}-meta`} />
+            <MetaInfo character={character} />
           </CardContent>
         </Card>
       </motion.div>
@@ -89,10 +90,9 @@ export default function Item({ character }: { character: Character }) {
                     loadingClassName="aspect-[9/16]"
                   />
                   <div className="flex h-full w-full flex-col gap-2">
-                    <MetaInfo character={character} layoutId={`${layoutId}-meta`} />
+                    <MetaInfo character={character} />
                     <Separator />
-
-                      <Detail characterId={character.id} />
+                    <Detail characterId={character.id} />
                   </div>
                 </div>
               </CardContent>
@@ -104,21 +104,21 @@ export default function Item({ character }: { character: Character }) {
   )
 }
 
-function MetaInfo({ character, layoutId }: { character: Character; layoutId: string }) {
+function MetaInfo({ character }: { character: Character }) {
   return (
-    <motion.section className="flex flex-col gap-1" layoutId={layoutId}>
-      <div className="flex flex-col">
-        <motion.h3 className="font-medium">{character.name}</motion.h3>
-        <motion.h4 className="text-sm font-medium text-muted-foreground">
-          {character.relation}
-        </motion.h4>
+    <section className="flex flex-col gap-1">
+      <div className="flex flex-col gap-0.5">
+        <h3 className="font-medium">{character.name}</h3>
+        <h4 className="text-sm font-medium text-muted-foreground">
+          <Badge variant="outline">{character.relation}</Badge>
+        </h4>
       </div>
       {character.actors.length !== 0 && (
-        <motion.div className="flex flex-row text-sm">
+        <div className="flex flex-row text-sm">
           CV：
           <Actors actors={character.actors} />
-        </motion.div>
+        </div>
       )}
-    </motion.section>
+    </section>
   )
 }
