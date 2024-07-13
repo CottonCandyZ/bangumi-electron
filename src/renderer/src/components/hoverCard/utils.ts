@@ -77,7 +77,6 @@ export function cPopSizeByC(
   const toTop = hover.top + topOffset
   const toBottom = window.innerHeight - toTop - pop.height
   const toRight = window.innerWidth - toLeft - pop.width
-  console.log(toLeft, toTop, toBottom, window.innerWidth - toLeft)
   if (toTop < UI_CONFIG.HEADER_HEIGHT + toView.toViewTop) {
     const bias = UI_CONFIG.HEADER_HEIGHT + 8 - toTop
     topOffset += bias
