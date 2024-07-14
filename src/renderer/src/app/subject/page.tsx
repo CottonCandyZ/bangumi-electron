@@ -18,10 +18,17 @@ import { SubjectId } from '@renderer/constants/types/bgm'
 import { useContext, useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 
+const initScrollTop = 700
+const initPercent = -60
+const scrollRange = 1500
+const init = (top: number | undefined) => {
+  return top === undefined
+    ? initPercent
+    : top >= scrollRange
+      ? 100
+      : (top / scrollRange) * (100 - initPercent) + initPercent
+}
 export function Component() {
-  const initScrollTop = 700
-  const initPercent = -60
-  const scrollRange = 1500
   const subjectId = useParams().subjectId as SubjectId
   // const subjectId = 385208
   const subjectInfo = useQuerySubjectInfo({ id: subjectId })
@@ -29,21 +36,15 @@ export function Component() {
   const instance = useContext(ScrollContext)
   if (!instance) throw Error('Component need to be wrapped in ScrollContext')
   const stateContext = useContext(SateContext)
-  const { key } = useLocation()
   if (!stateContext) {
     throw new Error('PageScrollWrapper need in StateWrapper')
   }
+  const { key } = useLocation()
   const { scrollCache } = stateContext
-  const [percent, setPercent] = useState(initPercent)
+  const [percent, setPercent] = useState(init(scrollCache.get(key) ?? initScrollTop))
   const scrollListener = () => {
     const top = instance()?.elements().viewport?.scrollTop
-    setPercent(
-      top === undefined
-        ? initPercent
-        : top >= scrollRange
-          ? 100
-          : (top / scrollRange) * (100 - initPercent) + initPercent,
-    )
+    setPercent(init(top))
   }
   useEffect(() => {
     instance()
