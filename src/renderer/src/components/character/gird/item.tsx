@@ -52,7 +52,7 @@ function PopCard({ character }: { character: Character }) {
               <CoverMotionImage
                 className="h-fit basis-1/4 overflow-hidden rounded-xl"
                 imageSrc={character.images.grid}
-                loadingClassName="h-full"
+                loadingClassName="aspect-[9/16]"
                 loading="eager"
                 onload={(load) => setImageLoad(load)}
               />
