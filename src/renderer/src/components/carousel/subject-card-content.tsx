@@ -70,7 +70,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
       <motion.div
         layoutId={layoutId}
         ref={ref}
-        className="relative z-[1] w-full"
+        className={cn('relative z-[1] w-full', activeId === layoutId && 'invisible')}
         onMouseEnter={() => setActiveId(null)}
       >
         <Link to={`/subject/${subjectId}`} className="cursor-default" unstable_viewTransition>
