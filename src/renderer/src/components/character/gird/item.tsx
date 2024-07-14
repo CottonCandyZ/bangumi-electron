@@ -1,8 +1,7 @@
 import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
 import Actors from '@renderer/components/character/gird/actor'
 import Detail from '@renderer/components/character/gird/detail'
-import { useActiveHoverCard } from '@renderer/components/hoverCard/state'
-import { cPopSizeByC } from '@renderer/components/hoverCard/utils'
+import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/components/hoverCard'
 import { Badge } from '@renderer/components/ui/badge'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
@@ -10,40 +9,15 @@ import { Character } from '@renderer/constants/types/character'
 import { cn } from '@renderer/lib/utils'
 import { getCharacterAvatarURL } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
-import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 
 const sectionId = 'Characters'
 export default function Item({ character }: { character: Character }) {
-  const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
-  const activeId = useActiveHoverCard((state) => state.activeId)
   const id = character.id
   const layoutId = `${sectionId}-${id}`
-
-  const ref = useRef<HTMLDivElement>(null)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-
-  useEffect(() => {
-    return () => {
-      clearTimeout(timeoutRef.current)
-      setActiveId(null)
-    }
-  }, [])
-
   return (
-    <div className="relative">
-      <motion.div
-        className={cn('h-full', activeId === layoutId && 'invisible')}
-        layoutId={layoutId}
-        ref={ref}
-        onMouseEnter={() => {
-          setActiveId(null)
-          timeoutRef.current = setTimeout(() => {
-            setActiveId(layoutId)
-          }, 700)
-        }}
-        onMouseLeave={() => clearTimeout(timeoutRef.current)}
-      >
+    <HoverPopCard layoutId={layoutId}>
+      <HoverCardContent className="h-full">
         <Card className="h-full hover:-translate-y-0.5 hover:shadow-xl hover:duration-700">
           <CardContent
             className={cn(
@@ -60,56 +34,17 @@ export default function Item({ character }: { character: Character }) {
             <MetaInfo character={character} />
           </CardContent>
         </Card>
-      </motion.div>
-      <AnimatePresence>
-        {activeId === layoutId && (
-          <PopCard
-            character={character}
-            layoutId={layoutId}
-            hover={ref.current!.getBoundingClientRect()}
-          />
-        )}
-      </AnimatePresence>
-    </div>
+      </HoverCardContent>
+      <PopCard character={character} />
+    </HoverPopCard>
   )
 }
 
-function PopCard({
-  character,
-  layoutId,
-  hover,
-}: {
-  character: Character
-  layoutId: string
-  hover: DOMRect
-}) {
-  const popRef = useRef<HTMLDivElement>(null)
-  const [popCod, setPopCod] = useState({ top: 0, left: 0 })
+function PopCard({ character }: { character: Character }) {
   const [detailData, setDetailData] = useState<boolean>(false)
   const [imageLoad, setImageLoad] = useState<boolean>(false)
-  useLayoutEffect(() => {
-    const pop = popRef.current!.getBoundingClientRect()
-    const { topOffset, leftOffset } = cPopSizeByC(pop, hover)
-    setPopCod({ top: topOffset, left: leftOffset })
-  }, [])
-  useLayoutEffect(() => {
-    if (detailData || imageLoad) {
-      if (!hover) return
-      const pop = popRef.current!.getBoundingClientRect()
-      const { topOffset, leftOffset } = cPopSizeByC(pop, hover)
-      setPopCod({ top: topOffset, left: leftOffset })
-    }
-  }, [detailData, imageLoad])
   return (
-    <motion.div
-      layoutId={layoutId}
-      className="absolute z-30 w-96"
-      ref={popRef}
-      style={{
-        top: `${popCod.top}px`,
-        left: `${popCod.left}px`,
-      }}
-    >
+    <PopCardContent className="w-96" updateDeps={[detailData, imageLoad]}>
       <Card className="w-full">
         <CardContent className="flex h-full flex-col p-2">
           <div className="flex h-full flex-row gap-4">
@@ -130,7 +65,7 @@ function PopCard({
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </PopCardContent>
   )
 }
 
