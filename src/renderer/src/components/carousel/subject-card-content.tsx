@@ -70,7 +70,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
       <motion.div
         layoutId={layoutId}
         ref={ref}
-        className={cn('relative z-[1] w-full', activeId === layoutId && 'invisible')}
+        className={cn('relative z-[1] w-full cursor-default', activeId === layoutId && 'invisible')}
         onMouseEnter={() => setActiveId(null)}
       >
         <Link to={`/subject/${subjectId}`} className="cursor-default" unstable_viewTransition>
@@ -142,7 +142,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
       <AnimatePresence onExitComplete={() => setActionSection(null)}>
         {activeId === layoutId && (
           <motion.div
-            className="absolute z-10"
+            className="absolute z-10 cursor-default"
             style={{
               left: `${inset.current.left}px`,
               right: `${inset.current.right}px`,

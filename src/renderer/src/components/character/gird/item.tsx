@@ -17,7 +17,7 @@ export default function Item({ character }: { character: Character }) {
   const layoutId = `${sectionId}-${id}`
   return (
     <HoverPopCard layoutId={layoutId}>
-      <HoverCardContent className="h-full">
+      <HoverCardContent className="h-full cursor-default">
         <Card className="h-full hover:-translate-y-0.5 hover:shadow-xl hover:duration-700">
           <CardContent
             className={cn(
@@ -27,7 +27,7 @@ export default function Item({ character }: { character: Character }) {
           >
             {!isEmpty(character.images.large) && (
               <CoverMotionImage
-                className="aspect-square size-14 shrink-0 overflow-hidden rounded-full"
+                className="aspect-square size-14 shrink-0 overflow-hidden rounded-2xl"
                 imageSrc={getCharacterAvatarURL(character.images.large)}
               />
             )}
@@ -44,13 +44,13 @@ function PopCard({ character }: { character: Character }) {
   const [detailData, setDetailData] = useState<boolean>(false)
   const [imageLoad, setImageLoad] = useState<boolean>(false)
   return (
-    <PopCardContent className="w-96" updateDeps={[detailData, imageLoad]}>
+    <PopCardContent className="w-96 cursor-default" updateDeps={[detailData, imageLoad]}>
       <Card className="w-full">
         <CardContent className="flex h-full flex-col p-2">
           <div className="flex h-full flex-row gap-4">
             {!isEmpty(character.images.large) && (
               <CoverMotionImage
-                className="h-fit basis-1/4 overflow-hidden rounded-xl shadow-md"
+                className="h-fit basis-1/4 overflow-hidden rounded-xl"
                 imageSrc={character.images.grid}
                 loadingClassName="h-full"
                 loading="eager"
