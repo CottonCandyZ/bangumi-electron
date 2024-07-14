@@ -162,6 +162,9 @@ importers:
       '@vitejs/plugin-react':
         specifier: ^4.3.1
         version: 4.3.1(vite@5.3.3(@types/node@20.14.10))
+      ajv:
+        specifier: ^8.17.1
+        version: 8.17.1
       electron:
         specifier: ^31.2.0
         version: 31.2.0
