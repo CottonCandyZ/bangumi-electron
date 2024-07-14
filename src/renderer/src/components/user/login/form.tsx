@@ -74,6 +74,8 @@ export default function LoginForm({
 
   const captcha = useQuery({
     queryKey: ['captcha'],
+    staleTime: 0,
+    refetchOnWindowFocus: false,
     queryFn: async () => {
       await getLoginFormHash()
       return await getCaptcha()
