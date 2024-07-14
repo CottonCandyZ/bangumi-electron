@@ -17,13 +17,19 @@ const HoverPopCardContext = createContext<{
   hoverRef: React.RefObject<HTMLDivElement> | null
   layoutId: string
   timeoutRef: React.MutableRefObject<NodeJS.Timeout | undefined>
+  delay: number
 } | null>(null)
 
 type HoverCardProps = {
   layoutId: string
+  delay?: number
 }
 
-export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({ children, layoutId }) => {
+export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
+  children,
+  layoutId,
+  delay = 700,
+}) => {
   const hoverRef = useRef<HTMLDivElement>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
@@ -41,6 +47,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({ children, 
         hoverRef,
         layoutId,
         timeoutRef,
+        delay,
       }}
     >
       <div className="relative">{children}</div>
@@ -67,7 +74,7 @@ export const HoverCardContent: FC<
         hoverCardContext.timeoutRef.current = setTimeout(() => {
           setActiveId(hoverCardContext.layoutId)
           mouseEnterCallBack && mouseEnterCallBack()
-        }, 700)
+        }, hoverCardContext.delay)
       }}
       onMouseLeave={() => clearTimeout(hoverCardContext.timeoutRef.current)}
       {...props}
