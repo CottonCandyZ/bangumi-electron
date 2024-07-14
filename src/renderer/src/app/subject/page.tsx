@@ -18,10 +18,10 @@ import { SubjectId } from '@renderer/constants/types/bgm'
 import { useContext, useEffect, useState } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 
-const initScrollTop = 700
-const initPercent = 20
-const scrollRange = 2000
 export function Component() {
+  const initScrollTop = 700
+  const initPercent = -10
+  const scrollRange = 2500
   const subjectId = useParams().subjectId as SubjectId
   // const subjectId = 385208
   const subjectInfo = useQuerySubjectInfo({ id: subjectId })
@@ -64,11 +64,12 @@ export function Component() {
       <div className="relative z-10">
         <div className="relative -mr-2 pr-2 pt-[60rem]">
           <div
-            className="absolute inset-0 -z-10"
+            className="absolute left-0 right-0 top-0 -z-10 h-[90rem]"
             style={{
               background: `linear-gradient(to top, hsl(var(--card)) ${percent}%, hsl(var(--card) / 0) ${percent + 50}%)`,
             }}
           ></div>
+          <div className="absolute inset-0 top-[90rem] -z-10 bg-card"></div>
           <div className="mx-auto flex max-w-6xl flex-col gap-10 px-10 pb-40">
             <section className="flex w-full flex-row gap-8">
               {/* cover */}
