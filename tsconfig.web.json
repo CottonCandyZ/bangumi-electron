@@ -9,6 +9,7 @@
   ],
   "compilerOptions": {
     "composite": true,
+    "esModuleInterop": true,
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
