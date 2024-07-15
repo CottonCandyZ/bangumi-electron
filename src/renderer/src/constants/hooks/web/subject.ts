@@ -1,7 +1,12 @@
-import { fetchSectionHome } from '@renderer/constants/fetch/web/subject'
-import { parseTopListFromHTML } from '@renderer/constants/transformer/web'
+import { fetchSectionHome, fetchSubjectInfoById } from '@renderer/constants/fetch/web/subject'
+import {
+  parseInfoBoxFromSubjectPage,
+  parseTopListFromHTML,
+} from '@renderer/constants/transformer/web'
 import { useQuery } from '@tanstack/react-query'
 import type { sectionPath } from '@renderer/constants/types/web'
+import { SubjectId } from '@renderer/constants/types/bgm'
+import { useIsLoginQuery } from '@renderer/constants/hooks/session'
 
 // 分离 parse 和 fetch，方便缓存整个页面的内容
 
@@ -15,5 +20,15 @@ export const useTopListQuery = (sectionPath: sectionPath) => {
     queryKey: ['SectionHome', sectionPath],
     queryFn: async () => await fetchSectionHome({ sectionPath }),
     select: parseTopListFromHTML,
+  })
+}
+
+export const useWebInfoBoxQuery = ({ id, enabled }: { id: SubjectId; enabled?: boolean }) => {
+  const isLogin = useIsLoginQuery()
+  return useQuery({
+    queryKey: ['SubjectInfo', isLogin.data, id],
+    queryFn: async () => await fetchSubjectInfoById({ id }),
+    select: parseInfoBoxFromSubjectPage,
+    enabled: enabled,
   })
 }

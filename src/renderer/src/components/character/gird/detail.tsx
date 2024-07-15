@@ -7,13 +7,7 @@ import { preset } from '@renderer/lib/utils/bbcode'
 import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 
-export default function Detail({
-  characterId,
-  setDetailData,
-}: {
-  characterId: CharacterId
-  setDetailData: React.Dispatch<React.SetStateAction<boolean>>
-}) {
+export default function Detail({ characterId }: { characterId: CharacterId }) {
   const characterDetail = useQueryCharacterDetailByID({ id: characterId })
   const characterDetailData = characterDetail.data
   const renderSummery = useMemo(
@@ -25,7 +19,6 @@ export default function Detail({
         : null,
     [characterDetailData?.summary],
   )
-  setDetailData(characterDetail.isSuccess)
 
   if (!characterDetailData) {
     return <Skeleton className="min-h-8" />

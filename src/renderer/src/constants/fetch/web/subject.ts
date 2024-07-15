@@ -1,5 +1,7 @@
-import { webFetch } from '@renderer/constants/fetch/config'
+import { SUBJECTS_WEB, webFetch } from '@renderer/constants/fetch/config'
+import { SubjectId } from '@renderer/constants/types/bgm'
 import type { sectionPath } from '@renderer/constants/types/web'
+import { AuthError } from '@renderer/lib/utils/error'
 
 /**
  * 通用各分区首页 Fetch
@@ -10,4 +12,15 @@ export async function fetchSectionHome({ sectionPath }: { sectionPath: sectionPa
   return await webFetch<string>(`/${sectionPath}`, {
     parseResponse: (text) => text,
   })
+}
+
+export async function fetchSubjectInfoById({ id }: { id: SubjectId }) {
+  const text = await webFetch<string>(SUBJECTS_WEB.BY_ID(id.toString()), {
+    parseResponse: (text) => text,
+    credentials: 'include',
+  })
+  if (text.includes('数据库中没有查询您所指定的条目')) {
+    throw AuthError.notFound()
+  }
+  return text
 }

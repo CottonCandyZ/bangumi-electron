@@ -18,7 +18,6 @@ export const CoverMotionImage = React.forwardRef<
       className,
       imageClassName,
       imageSrc,
-      onload,
       loading = 'lazy',
       loadingClassName = 'aspect-[2/3]',
       ...props
@@ -26,7 +25,6 @@ export const CoverMotionImage = React.forwardRef<
     ref,
   ) => {
     const [isLoad, setIsLoad] = useState(false)
-    onload && setTimeout(() => onload(isLoad), 400)
     return (
       <motion.div
         className={cn('relative', (!imageSrc || !isLoad) && loadingClassName, className)}

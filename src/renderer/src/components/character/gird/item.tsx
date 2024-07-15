@@ -9,7 +9,6 @@ import { Character } from '@renderer/constants/types/character'
 import { cn } from '@renderer/lib/utils'
 import { getCharacterAvatarURL } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
-import { useState } from 'react'
 
 const sectionId = 'Characters'
 export default function Item({ character }: { character: Character }) {
@@ -41,10 +40,8 @@ export default function Item({ character }: { character: Character }) {
 }
 
 function PopCard({ character }: { character: Character }) {
-  const [detailData, setDetailData] = useState<boolean>(false)
-  const [imageLoad, setImageLoad] = useState<boolean>(false)
   return (
-    <PopCardContent className="w-96 cursor-default" updateDeps={[detailData, imageLoad]}>
+    <PopCardContent className="w-96 cursor-default">
       <Card className="w-full">
         <CardContent className="flex h-full flex-col p-2">
           <div className="flex h-full flex-row gap-4">
@@ -54,13 +51,12 @@ function PopCard({ character }: { character: Character }) {
                 imageSrc={character.images.grid}
                 loadingClassName="aspect-[9/16]"
                 loading="eager"
-                onload={(load) => setImageLoad(load)}
               />
             )}
             <div className="flex w-full flex-col gap-2">
               <MetaInfo character={character} />
               <Separator />
-              <Detail characterId={character.id} setDetailData={setDetailData} />
+              <Detail characterId={character.id} />
             </div>
           </div>
         </CardContent>

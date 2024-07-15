@@ -10,6 +10,9 @@ export type SubjectId = number | string
 /** 角色 */
 export type CharacterId = number | string
 
+/** 人物 */
+export type PersonId = number | string
+
 /** 章节 ID */
 export type EpId = number | string
 
@@ -20,3 +23,19 @@ export type UserId = number | string
 export type InfoBoxValueList = {
   v: string
 }
+
+export type Images = {
+  small: string
+  grid: string
+  large: string
+  medium: string
+}
+
+export type PersonCareer =
+  | 'producer'
+  | 'mangaka'
+  | 'artist'
+  | 'seiyu'
+  | 'writer'
+  | 'illustrator'
+  | 'actor'

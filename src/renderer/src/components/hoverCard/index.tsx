@@ -85,9 +85,11 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = (
   )
 }
 
-export const PopCardContent: FC<
-  PropsWithChildren<HTMLMotionProps<'div'> & { updateDeps?: boolean[] }>
-> = ({ children, className, updateDeps, ...props }) => {
+export const PopCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = ({
+  children,
+  className,
+  ...props
+}) => {
   const hoverCardContext = useContext(HoverPopCardContext)
   if (!hoverCardContext) throw Error('PopCardContent need to be wrapped in HoverPopCard')
 
@@ -98,7 +100,6 @@ export const PopCardContent: FC<
           layoutId={hoverCardContext.layoutId}
           hover={hoverCardContext.hoverRef?.current?.getBoundingClientRect()}
           className={className}
-          updateDeps={updateDeps}
           {...props}
         >
           {children}
@@ -112,25 +113,31 @@ export const PopCardInnerContent: FC<
   PropsWithChildren<HTMLMotionProps<'div'>> & {
     hover: DOMRect | undefined
     layoutId: string
-    updateDeps?: boolean[]
   }
-> = ({ children, layoutId, className, hover, updateDeps, ...props }) => {
+> = ({ children, layoutId, className, hover, ...props }) => {
   if (!hover) throw Error('PopCardContent need to be aside HoverCardContent')
   const hoverRef = useRef(hover)
   const [popCod, setPopCod] = useState({ top: 0, left: 0 })
   const popRef = useRef<HTMLDivElement>(null)
+  const timeOutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useLayoutEffect(() => {
     const pop = popRef.current!.getBoundingClientRect()
     const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)
     setPopCod({ top: topOffset, left: leftOffset })
-  }, [])
-  useEffect(() => {
-    if (updateDeps != undefined && updateDeps.some((item) => item)) {
+    const ob = new ResizeObserver(() => {
+      if (!popRef.current) return
       const pop = popRef.current!.getBoundingClientRect()
       const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)
       setPopCod({ top: topOffset, left: leftOffset })
+    })
+    timeOutRef.current = setTimeout(() => {
+      ob.observe(popRef.current!)
+    }, 400)
+    return () => {
+      clearTimeout(timeOutRef.current)
+      popRef.current && ob.unobserve(popRef.current)
     }
-  }, updateDeps)
+  }, [])
   return (
     <motion.div
       layoutId={layoutId}

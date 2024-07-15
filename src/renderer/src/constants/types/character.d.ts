@@ -1,4 +1,4 @@
-import { CharacterId } from '@renderer/constants/types/bgm'
+import { CharacterId, Images, PersonCareer } from '@renderer/constants/types/bgm'
 import { InfoBoxValueList } from '@renderer/constants/types/subject'
 
 export type Character = {
@@ -43,15 +43,8 @@ export type Actor = {
   images: Images
   name: string
   short_summary: string
-  career: string[]
+  career: PersonCareer[]
   id: number
   type: number
   locked: boolean
-}
-
-export type Images = {
-  small: string
-  grid: string
-  large: string
-  medium: string
 }

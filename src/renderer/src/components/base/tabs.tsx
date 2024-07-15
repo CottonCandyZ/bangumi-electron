@@ -24,19 +24,22 @@ export default function TabsOnly({
       )}
     >
       {[...tabsContent].map((item) => (
-        <div
+        <button
           className={cn(
             'relative inline-flex cursor-pointer items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-            item === currentSelect && 'cursor-default',
+            item === currentSelect && 'cursor-default text-foreground',
           )}
           key={item}
           onClick={() => setCurrentSelect(item)}
         >
           {currentSelect === item && (
-            <motion.div className="absolute inset-0 rounded-md bg-background" layoutId={layoutId} />
+            <motion.div
+              className="absolute inset-0 rounded-md bg-background shadow"
+              layoutId={layoutId}
+            />
           )}
           <span className="z-10">{item}</span>
-        </div>
+        </button>
       ))}
     </div>
   )

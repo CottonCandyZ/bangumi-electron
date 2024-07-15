@@ -1,17 +1,7 @@
-import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
 import { Image } from '@renderer/components/base/Image'
 import { ScrollContext } from '@renderer/components/base/page-scroll-wrapper'
-import EpisodesGrid from '@renderer/components/episode/grid'
 import { BackCover } from '@renderer/components/hoverCard/close'
-import Characters from '@renderer/components/subject/character'
-import Header from '@renderer/components/subject/header'
-import Meta from '@renderer/components/subject/meta'
-import Score from '@renderer/components/subject/score'
-import Summary from '@renderer/components/subject/summary'
-import Tags from '@renderer/components/subject/tags'
-import { Card } from '@renderer/components/ui/card'
-import { Separator } from '@renderer/components/ui/separator'
-import { Skeleton } from '@renderer/components/ui/skeleton'
+import SubjectContent from '@renderer/components/subject/content'
 import { SateContext } from '@renderer/components/wrapper/state-wrapper'
 import { useQuerySubjectInfo } from '@renderer/constants/hooks/api/subject'
 import { SubjectId } from '@renderer/constants/types/bgm'
@@ -31,8 +21,8 @@ const init = (top: number | undefined) => {
 export function Component() {
   const subjectId = useParams().subjectId as SubjectId
   // const subjectId = 385208
-  const subjectInfo = useQuerySubjectInfo({ id: subjectId })
-  const subjectInfoData = subjectInfo.data
+  const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId })
+  const subjectInfo = subjectInfoQuery.data
   const instance = useContext(ScrollContext)
   if (!instance) throw Error('Component need to be wrapped in ScrollContext')
   const stateContext = useContext(SateContext)
@@ -47,9 +37,13 @@ export function Component() {
     setPercent(init(top))
   }
   useEffect(() => {
-    instance()
-      ?.elements()
-      .viewport?.scrollTo({ top: scrollCache.get(key) ?? initScrollTop })
+    setTimeout(
+      () =>
+        instance()
+          ?.elements()
+          .viewport?.scrollTo({ top: scrollCache.get(key) ?? initScrollTop }),
+      0,
+    )
     instance()?.on('scroll', scrollListener)
     return () => instance()?.off('scroll', scrollListener)
   }, [])
@@ -57,7 +51,7 @@ export function Component() {
   return (
     <div className="relative h-full overflow-hidden">
       <Image
-        imageSrc={subjectInfoData?.images.large}
+        imageSrc={subjectInfo?.images.large}
         loading="eager"
         className="fixed left-[73px] top-[65px] aspect-[2/3] max-h-full w-full overflow-hidden rounded-tl-lg"
       />
@@ -71,68 +65,7 @@ export function Component() {
             }}
           ></div>
           <div className="absolute inset-0 top-[100rem] -z-10 bg-card"></div>
-          <div className="mx-auto flex max-w-6xl flex-col gap-10 px-10">
-            <section className="flex w-full flex-row gap-8">
-              {/* cover */}
-              <Card
-                className="h-min w-56 shrink-0 overflow-hidden"
-                style={{ viewTransitionName: 'cover-expand' }}
-              >
-                <CoverMotionImage imageSrc={subjectInfoData?.images.common} />
-              </Card>
-              {/* info */}
-              <div className="flex flex-1 flex-col gap-5">
-                <section className="flex flex-col gap-2">
-                  {/* 标题 */}
-                  {subjectInfoData ? (
-                    <Header {...subjectInfoData} />
-                  ) : (
-                    <Skeleton className="h-14" />
-                  )}
-
-                  {/* {subjectId} */}
-                  {/* 一些 meta 数据 */}
-                  {subjectInfoData ? <Meta {...subjectInfoData} /> : <Skeleton className="h-5" />}
-                </section>
-                <Separator />
-                <section>
-                  {subjectInfoData ? (
-                    <Summary {...subjectInfoData} />
-                  ) : (
-                    <Skeleton className="h-36" />
-                  )}
-                </section>
-              </div>
-            </section>
-            <section className="flex flex-col gap-5">
-              <h2 className="text-2xl font-semibold">章节</h2>
-              <EpisodesGrid subjectId={subjectId} eps={subjectInfoData?.eps} />
-            </section>
-            <div className="flex flex-row gap-5">
-              <section className="flex basis-3/4 flex-col gap-5">
-                <h2 className="text-2xl font-semibold">标签</h2>
-                <div>
-                  {subjectInfoData ? (
-                    <Tags tags={subjectInfoData.tags} />
-                  ) : (
-                    <Skeleton className="h-60" />
-                  )}
-                </div>
-              </section>
-              <section className="flex min-w-56 flex-1 flex-col gap-2">
-                <h2 className="text-2xl font-semibold">评分</h2>
-                {subjectInfoData ? (
-                  <Score rating={subjectInfoData.rating} />
-                ) : (
-                  <Skeleton className="h-60" />
-                )}
-              </section>
-            </div>
-            <Characters subjectId={subjectId} />
-            <section className="flex flex-col gap-5">
-              <h2 className="text-2xl font-semibold">制作相关</h2>
-            </section>
-          </div>
+          <SubjectContent subjectId={subjectId} subjectInfo={subjectInfo} />
           <BackCover />
         </div>
       </div>

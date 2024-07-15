@@ -90,3 +90,12 @@ export type Collection = {
   collect: number
   doing: number
 }
+
+export type InfoBoxWeb = Map<string, InfoBoxWebValue[]>
+
+export type InfoBoxWebValue = string | InfoBoxWebValueLinkItem
+
+export type InfoBoxWebValueLinkItem = {
+  name: string
+  id: string
+}
