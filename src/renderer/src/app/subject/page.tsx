@@ -1,9 +1,9 @@
 import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
 import { Image } from '@renderer/components/base/Image'
 import { ScrollContext } from '@renderer/components/base/page-scroll-wrapper'
-import CharactersGrid from '@renderer/components/character/gird'
 import EpisodesGrid from '@renderer/components/episode/grid'
 import { BackCover } from '@renderer/components/hoverCard/close'
+import Characters from '@renderer/components/subject/character'
 import Header from '@renderer/components/subject/header'
 import Meta from '@renderer/components/subject/meta'
 import Score from '@renderer/components/subject/score'
@@ -63,7 +63,7 @@ export function Component() {
       />
       {/* cover && info */}
       <div className="relative z-10">
-        <div className="relative -mr-2 pr-2 pt-[60rem]">
+        <div className="relative -mr-2 pb-96 pr-2 pt-[60rem]">
           <div
             className="absolute left-0 right-0 top-0 -z-10 h-[100rem]"
             style={{
@@ -71,7 +71,7 @@ export function Component() {
             }}
           ></div>
           <div className="absolute inset-0 top-[100rem] -z-10 bg-card"></div>
-          <div className="mx-auto flex max-w-6xl flex-col gap-10 px-10 pb-40">
+          <div className="mx-auto flex max-w-6xl flex-col gap-10 px-10">
             <section className="flex w-full flex-row gap-8">
               {/* cover */}
               <Card
@@ -128,9 +128,9 @@ export function Component() {
                 )}
               </section>
             </div>
+            <Characters subjectId={subjectId} />
             <section className="flex flex-col gap-5">
-              <h2 className="text-2xl font-semibold">角色</h2>
-              <CharactersGrid subjectId={subjectId} />
+              <h2 className="text-2xl font-semibold">制作相关</h2>
             </section>
           </div>
           <BackCover />

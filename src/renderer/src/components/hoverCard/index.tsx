@@ -16,9 +16,6 @@ import {
 const HoverPopCardContext = createContext<{
   hoverRef: React.RefObject<HTMLDivElement> | null
   layoutId: string
-  timeoutRef: React.MutableRefObject<NodeJS.Timeout | undefined>
-  delay: number
-  setActiveId: (activeId: string | null) => void
   activeId: string | null
 } | null>(null)
 
@@ -49,20 +46,30 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
       value={{
         hoverRef,
         layoutId,
-        timeoutRef,
-        delay,
         activeId,
-        setActiveId
       }}
     >
-      <div className="relative">{children}</div>
+      <div
+        className="relative"
+        onMouseEnter={() => {
+          setActiveId(null)
+          timeoutRef.current = setTimeout(() => {
+            setActiveId(layoutId)
+          }, delay)
+        }}
+        onMouseLeave={() => clearTimeout(timeoutRef.current)}
+      >
+        {children}
+      </div>
     </HoverPopCardContext.Provider>
   )
 }
 
-export const HoverCardContent: FC<
-  PropsWithChildren<HTMLMotionProps<'div'> & { mouseEnterCallBack?: () => void }>
-> = ({ children, className, mouseEnterCallBack, ...props }) => {
+export const HoverCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = ({
+  children,
+  className,
+  ...props
+}) => {
   const hoverCardContext = useContext(HoverPopCardContext)
   if (!hoverCardContext) throw Error('HoverCardContent need to be wrapped in HoverPopCard')
 
@@ -71,14 +78,6 @@ export const HoverCardContent: FC<
       ref={hoverCardContext.hoverRef}
       layoutId={hoverCardContext.layoutId}
       className={className}
-      onMouseEnter={() => {
-        hoverCardContext.setActiveId(null)
-        hoverCardContext.timeoutRef.current = setTimeout(() => {
-          hoverCardContext.setActiveId(hoverCardContext.layoutId)
-          mouseEnterCallBack && mouseEnterCallBack()
-        }, hoverCardContext.delay)
-      }}
-      onMouseLeave={() => clearTimeout(hoverCardContext.timeoutRef.current)}
       {...props}
     >
       {children}

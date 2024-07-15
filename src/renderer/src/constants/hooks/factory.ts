@@ -60,15 +60,17 @@ export const useQueryMustAuth = <P, R>({
  *
  * 如果发现登陆过期，会重置登录状态
  */
-export const useQueryOptionalAuth = <P, R>({
+export const useQueryOptionalAuth = <P, R, S = R>({
   queryKey,
   queryFn,
   props,
   enabled,
+  select,
 }: {
   queryKey: QueryOptions['queryKey']
   queryFn: P extends { token?: string } ? Fn<P, R> : never
   enabled?: boolean
+  select?: (data: R) => S
 } & OptionalProps<P>) => {
   const logoutMutation = useLogoutMutation()
   const queryClient = useQueryClient()
@@ -89,6 +91,7 @@ export const useQueryOptionalAuth = <P, R>({
     },
     enabled: (enabled === undefined ? true : enabled) && accessToken !== undefined,
     placeholderData: keepPreviousData,
+    select: select,
   })
   if (query.isError && query.error instanceof AuthError) {
     if (query.error.code === 2) {

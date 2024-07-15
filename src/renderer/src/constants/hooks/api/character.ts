@@ -3,6 +3,7 @@ import {
   getSubjectCharactersById,
 } from '@renderer/constants/fetch/api/character'
 import { useQueryOptionalAuth } from '@renderer/constants/hooks/factory'
+import { sortCharacterByRelation } from '@renderer/constants/transformer/api'
 import { CharacterId, SubjectId } from '@renderer/constants/types/bgm'
 import { useQuery } from '@tanstack/react-query'
 
@@ -21,6 +22,7 @@ export const useQuerySubjectCharacters = ({
     queryKey: ['subject-characters'],
     props: { id },
     enabled: enabled,
+    select: sortCharacterByRelation(),
   })
 
 export const useQueryCharacterDetailByID = ({ id }: { id: CharacterId }) =>
