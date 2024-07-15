@@ -18,6 +18,8 @@ const HoverPopCardContext = createContext<{
   layoutId: string
   timeoutRef: React.MutableRefObject<NodeJS.Timeout | undefined>
   delay: number
+  setActiveId: (activeId: string | null) => void
+  activeId: string | null
 } | null>(null)
 
 type HoverCardProps = {
@@ -33,6 +35,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
   const hoverRef = useRef<HTMLDivElement>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
+  const activeId = useActiveHoverCard((state) => state.activeId)
 
   useEffect(() => {
     return () => {
@@ -48,6 +51,8 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
         layoutId,
         timeoutRef,
         delay,
+        activeId,
+        setActiveId
       }}
     >
       <div className="relative">{children}</div>
@@ -61,18 +66,15 @@ export const HoverCardContent: FC<
   const hoverCardContext = useContext(HoverPopCardContext)
   if (!hoverCardContext) throw Error('HoverCardContent need to be wrapped in HoverPopCard')
 
-  const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
-  const activeId = useActiveHoverCard((state) => state.activeId)
-
   return (
     <motion.div
       ref={hoverCardContext.hoverRef}
       layoutId={hoverCardContext.layoutId}
-      className={cn(activeId === hoverCardContext.layoutId && 'invisible', className)}
+      className={className}
       onMouseEnter={() => {
-        setActiveId(null)
+        hoverCardContext.setActiveId(null)
         hoverCardContext.timeoutRef.current = setTimeout(() => {
-          setActiveId(hoverCardContext.layoutId)
+          hoverCardContext.setActiveId(hoverCardContext.layoutId)
           mouseEnterCallBack && mouseEnterCallBack()
         }, hoverCardContext.delay)
       }}
@@ -89,11 +91,10 @@ export const PopCardContent: FC<
 > = ({ children, className, updateDeps, ...props }) => {
   const hoverCardContext = useContext(HoverPopCardContext)
   if (!hoverCardContext) throw Error('PopCardContent need to be wrapped in HoverPopCard')
-  const activeId = useActiveHoverCard((state) => state.activeId)
 
   return (
     <AnimatePresence>
-      {activeId === hoverCardContext.layoutId && (
+      {hoverCardContext.activeId === hoverCardContext.layoutId && (
         <PopCardInnerContent
           layoutId={hoverCardContext.layoutId}
           hover={hoverCardContext.hoverRef?.current?.getBoundingClientRect()}
@@ -124,7 +125,7 @@ export const PopCardInnerContent: FC<
     const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)
     setPopCod({ top: topOffset, left: leftOffset })
   }, [])
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (updateDeps != undefined && updateDeps.some((item) => item)) {
       const pop = popRef.current!.getBoundingClientRect()
       const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)

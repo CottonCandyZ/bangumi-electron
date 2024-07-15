@@ -70,7 +70,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
       <motion.div
         layoutId={layoutId}
         ref={ref}
-        className={cn('relative z-[1] w-full cursor-default', activeId === layoutId && 'invisible')}
+        className={cn('relative z-[1] w-full cursor-default')}
         onMouseEnter={() => setActiveId(null)}
       >
         <Link to={`/subject/${subjectId}`} className="cursor-default" unstable_viewTransition>
@@ -97,12 +97,11 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
             onMouseLeave={() => clearTimeout(timeoutRef.current)}
           >
             <CardContent className="p-0">
-              <motion.div layoutId={`${layoutId}-image`}>
-                <CoverMotionImage
-                  className={cn('aspect-[2/3]', sectionPath === 'music' && 'aspect-square')}
-                  imageSrc={subjectInfoData?.images.common}
-                />
-              </motion.div>
+              <CoverMotionImage
+                className={cn('aspect-[2/3]', sectionPath === 'music' && 'aspect-square')}
+                imageSrc={subjectInfoData?.images.common}
+                layoutId={`${layoutId}-image`}
+              />
               <div
                 className={`absolute bottom-0 left-0 right-0 z-10 flex h-12 items-end justify-between bg-gradient-to-t from-black/50 px-2 py-1`}
               >
@@ -156,13 +155,12 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
                 <CardContent className="flex h-full flex-col gap-1 p-0">
                   {/* Cover */}
                   <section className="flex w-full flex-row items-start gap-2 p-4">
-                    <motion.div
+                    <CoverMotionImage
+                      imageSrc={subjectInfoData?.images.common}
                       className="shrink-0 basis-1/6 overflow-hidden rounded-lg shadow-lg"
                       layoutId={`${layoutId}-image`}
                       style={{ viewTransitionName: isTransitioning ? 'cover-expand' : '' }}
-                    >
-                      <CoverMotionImage imageSrc={subjectInfoData?.images.common} />
-                    </motion.div>
+                    />
                     {/* 标题描述 */}
                     <section className="flex w-full flex-col justify-between gap-0.5">
                       <motion.div className="flex w-full flex-col" layoutId={`${layoutId}-header`}>
