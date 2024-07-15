@@ -75,7 +75,7 @@ export function Component() {
             <section className="flex w-full flex-row gap-8">
               {/* cover */}
               <Card
-                className="h-min w-60 shrink-0 overflow-hidden"
+                className="h-min w-56 shrink-0 overflow-hidden"
                 style={{ viewTransitionName: 'cover-expand' }}
               >
                 <CoverMotionImage imageSrc={subjectInfoData?.images.common} />
