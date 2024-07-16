@@ -1,4 +1,4 @@
-import { BloodType, CharacterId, Images, PersonCareer, Stat } from '@renderer/data/types/bgm'
+import { BloodType, Images, PersonCareer, Stat } from '@renderer/data/types/bgm'
 import { InfoBoxValueList } from '@renderer/data/types/subject'
 
 export type Character = {
@@ -7,7 +7,7 @@ export type Character = {
   relation: string
   actors: Actor[]
   type: number
-  id: CharacterId
+  id: number
 }
 
 export interface CharacterDetail {
@@ -21,7 +21,7 @@ export interface CharacterDetail {
   name: string
   infobox: InfoBox
   stat: Stat
-  id: CharacterId
+  id: number
   locked: boolean
   type: number
   nsfw: boolean

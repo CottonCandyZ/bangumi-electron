@@ -1,5 +1,3 @@
-import { EpId } from "@renderer/data/types/bgm"
-
 export type Episodes = {
   data: Episode[]
   total: number
@@ -15,7 +13,7 @@ export type Episode = {
   desc: string
   ep: number
   sort: number
-  id: EpId
+  id: number
   subject_id: number
   comment: number
   type: 0 | 1 | 2 | 3 | 4 | 5 | 6
