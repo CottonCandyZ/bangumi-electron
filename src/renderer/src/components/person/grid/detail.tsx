@@ -36,7 +36,14 @@ export function Detail({ personId }: { personId: PersonId }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row gap-4">
-        {!isEmpty(personDetail.img) && <Image imageSrc={personDetail.img} className="basis-1/3" />}
+        {!isEmpty(personDetail.img) && (
+          <Image
+            imageSrc={personDetail.img}
+            className="basis-1/3 overflow-hidden rounded-md"
+            loadingClassName="aspect-square"
+            loading="eager"
+          />
+        )}
         <section className="flex flex-col">
           <h3 className="text-base font-medium">{personDetail.name}</h3>
           {cn_name && <h4 className="font-medium text-muted-foreground">{cn_name}</h4>}

@@ -8,11 +8,16 @@ export const Image = React.forwardRef<
     imageSrc?: string
     imageClassName?: string
     loading?: 'eager' | 'lazy'
+    loadingClassName?: string
   }
->(({ className, imageSrc, imageClassName, loading = 'lazy', ...props }, ref) => {
+>(({ className, imageSrc, imageClassName, loadingClassName, loading = 'lazy', ...props }, ref) => {
   const [isLoad, setIsLoad] = useState(false)
   return (
-    <div className={cn('relative', className)} ref={ref} {...props}>
+    <div
+      className={cn('relative', (!imageSrc || !isLoad) && loadingClassName, className)}
+      ref={ref}
+      {...props}
+    >
       <img
         className={cn(
           'h-full w-full max-w-none object-cover',

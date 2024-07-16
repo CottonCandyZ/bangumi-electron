@@ -47,7 +47,7 @@ export default function PersonsGrid({ subjectId }: { subjectId: SubjectId }) {
                             {item.name}
                           </button>
                         </HoverCardTrigger>
-                        <HoverCardContent side="top">
+                        <HoverCardContent side="top" className="w-full min-w-64 max-w-72">
                           <Detail personId={item.id} />
                         </HoverCardContent>
                       </HoverCard>
