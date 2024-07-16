@@ -1,17 +1,31 @@
-import { Character } from '@renderer/data/types/character'
-
 /**
  * 按照 relation 的关键词排序
  * @param sortList 想要的关键词顺序
  * @returns 按照关键词排序的结果
  */
 export const sortCharacterByRelation =
-  (sortList: string[] = ['主角', '配角', '客串']) =>
-  (characters: Character[]) => {
-    const result: Character[] = []
-    sortList.forEach((item) => {
-      result.push(...characters.filter((character) => character.relation === item)) // 这里可以用 Map 也可以这样粗暴
+  <T extends { relation: string }[]>(sortList: string[]) =>
+  (items: T) => {
+    const temp = new Map<string, T>()
+    items.forEach((item) => {
+      if (temp.has(item.relation)) {
+        const arr = temp.get(item.relation)!
+        arr.push(item)
+      } else {
+        temp.set(item.relation, [item] as T)
+      }
     })
-    result.push(...characters.filter((character) => !sortList.includes(character.relation)))
-    return result
+    const res = new Map<string, T>()
+    sortList.forEach((name) => {
+      if (temp.has(name)) {
+        res.set(name, temp.get(name)!)
+      }
+    })
+    const otherKeys = Array.from(temp.keys()).filter((name) => !sortList.includes(name))
+    otherKeys.forEach((name) => {
+      if (temp.has(name)) {
+        res.set(name, temp.get(name)!)
+      }
+    })
+    return res
   }

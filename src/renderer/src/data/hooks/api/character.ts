@@ -22,7 +22,7 @@ export const useQuerySubjectCharacters = ({
     queryKey: ['subject-characters'],
     props: { id },
     enabled: enabled,
-    select: sortCharacterByRelation(),
+    select: sortCharacterByRelation(['主角', '配角', '客串']),
   })
 
 export const useQueryCharacterDetailByID = ({ id }: { id: CharacterId }) =>
