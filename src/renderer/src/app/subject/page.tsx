@@ -64,7 +64,7 @@ export function Component() {
               background: `linear-gradient(to top, hsl(var(--card)) ${percent}%, hsl(var(--card) / 0) ${percent + 130}%)`,
             }}
           ></div>
-          <div className="absolute inset-0 top-[100rem] -z-10 bg-card"></div>
+          <div className="absolute inset-0 top-[100rem] -z-10 bg-background"></div>
           <SubjectContent subjectId={subjectId} subjectInfo={subjectInfo} />
           <BackCover />
         </div>

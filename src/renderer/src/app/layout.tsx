@@ -7,7 +7,10 @@ function RootLayout() {
   return (
     <>
       <Header />
-      <div className="fixed top-16 z-10 h-full bg-card py-1" style={{ viewTransitionName: 'nav' }}>
+      <div
+        className="fixed top-16 z-10 h-full bg-background py-1"
+        style={{ viewTransitionName: 'nav' }}
+      >
         <NavBar />
       </div>
       <div className="flex *:h-[calc(100dvh-64px)]">
