@@ -1,4 +1,4 @@
-import { Subject } from '@renderer/constants/types/subject'
+import { Subject } from '@renderer/data/types/subject'
 import { extractInfoBox } from '@renderer/lib/utils/data-trans'
 import dayjs from 'dayjs'
 

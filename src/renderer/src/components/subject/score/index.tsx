@@ -1,5 +1,5 @@
 import ScoreChart from '@renderer/components/subject/score/score-chart'
-import { Rating } from '@renderer/constants/types/subject'
+import { Rating } from '@renderer/data/types/subject'
 import { getRating } from '@renderer/lib/utils/data-trans'
 
 export default function Score({ rating }: { rating: Rating }) {

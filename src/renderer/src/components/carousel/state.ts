@@ -1,4 +1,4 @@
-import { sectionPath } from '@renderer/constants/types/web'
+import { sectionPath } from '@renderer/data/types/web'
 import { create } from 'zustand'
 
 interface activeSection {

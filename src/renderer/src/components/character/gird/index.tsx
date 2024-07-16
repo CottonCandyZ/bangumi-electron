@@ -1,6 +1,6 @@
 import Item from '@renderer/components/character/gird/item'
 import { Button } from '@renderer/components/ui/button'
-import { Character } from '@renderer/constants/types/character'
+import { Character } from '@renderer/data/types/character'
 import { cn } from '@renderer/lib/utils'
 
 import { useState } from 'react'

@@ -15,8 +15,8 @@ import {
   DropdownMenuRadioItem,
 } from '@renderer/components/ui/dropdown-menu'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { useIsLoginQuery, useLogoutMutation } from '@renderer/constants/hooks/session'
-import { useQueryUserInfo } from '@renderer/constants/hooks/api/user'
+import { useIsLoginQuery, useLogoutMutation } from '@renderer/data/hooks/session'
+import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
 import { toast } from 'sonner'
 import { useTheme } from '@renderer/components/wrapper/theme-wrapper'
 import { CircleHelp } from 'lucide-react'

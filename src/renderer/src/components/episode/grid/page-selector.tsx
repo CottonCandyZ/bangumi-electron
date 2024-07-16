@@ -5,7 +5,7 @@ import {
   SelectValue,
   SelectItem,
 } from '@renderer/components/ui/select'
-import { Episodes } from '@renderer/constants/types/episode'
+import { Episodes } from '@renderer/data/types/episode'
 import { cn } from '@renderer/lib/utils'
 import { getPageArrayFromTotal } from '@renderer/lib/utils/data-trans'
 import { UseQueryResult } from '@tanstack/react-query'

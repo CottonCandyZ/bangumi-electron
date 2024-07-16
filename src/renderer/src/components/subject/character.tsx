@@ -2,8 +2,8 @@ import TabsOnly from '@renderer/components/base/tabs'
 import CharactersGrid from '@renderer/components/character/gird'
 import CharactersGridSkeleton from '@renderer/components/character/gird/skeleton'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { useQuerySubjectCharacters } from '@renderer/constants/hooks/api/character'
-import { SubjectId } from '@renderer/constants/types/bgm'
+import { useQuerySubjectCharacters } from '@renderer/data/hooks/api/character'
+import { SubjectId } from '@renderer/data/types/bgm'
 import { useState } from 'react'
 
 export default function Characters({ subjectId }: { subjectId: SubjectId }) {

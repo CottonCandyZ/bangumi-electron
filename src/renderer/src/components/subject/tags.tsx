@@ -1,5 +1,5 @@
 import { Button } from '@renderer/components/ui/button'
-import { Subject } from '@renderer/constants/types/subject'
+import { Subject } from '@renderer/data/types/subject'
 
 export default function Tags({ tags }: Pick<Subject, 'tags'>) {
   return (

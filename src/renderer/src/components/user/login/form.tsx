@@ -22,7 +22,7 @@ import {
   save,
   webLogin,
   webLoginProps,
-} from '@renderer/constants/fetch/web/login'
+} from '@renderer/data/fetch/web/login'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { Checkbox } from '@renderer/components/ui/checkbox'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'

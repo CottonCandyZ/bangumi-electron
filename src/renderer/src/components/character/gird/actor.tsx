@@ -1,4 +1,4 @@
-import { Actor } from '@renderer/constants/types/character'
+import { Actor } from '@renderer/data/types/character'
 import { Fragment } from 'react/jsx-runtime'
 
 export default function Actors({ actors }: { actors: Actor[] }) {

@@ -1,4 +1,4 @@
-import { InfoBox, InfoKey } from '@renderer/constants/types/subject'
+import { InfoBox, InfoKey } from '@renderer/data/types/subject'
 import { RATING_MAP } from '@renderer/lib/utils/map'
 
 /** 获得评分对应的文字描述 */

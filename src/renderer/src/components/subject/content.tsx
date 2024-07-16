@@ -10,8 +10,8 @@ import Tags from '@renderer/components/subject/tags'
 import { Card } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { SubjectId } from '@renderer/constants/types/bgm'
-import { Subject } from '@renderer/constants/types/subject'
+import { SubjectId } from '@renderer/data/types/bgm'
+import { Subject } from '@renderer/data/types/subject'
 import { memo } from 'react'
 
 const SubjectContent = memo(

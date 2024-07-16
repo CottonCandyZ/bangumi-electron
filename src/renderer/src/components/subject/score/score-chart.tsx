@@ -1,5 +1,5 @@
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@renderer/components/ui/chart'
-import { RatingCount } from '@renderer/constants/types/subject'
+import { RatingCount } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { Bar, BarChart, LabelList, XAxis } from 'recharts'
 

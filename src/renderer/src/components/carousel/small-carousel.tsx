@@ -11,7 +11,7 @@ import {
 } from '@renderer/components/ui/carousel'
 import { SateContext } from '@renderer/components/wrapper/state-wrapper'
 import { UI_CONFIG } from '@renderer/config'
-import { sectionPath } from '@renderer/constants/types/web'
+import { sectionPath } from '@renderer/data/types/web'
 import { cn } from '@renderer/lib/utils'
 import { ChevronRight } from 'lucide-react'
 import { useContext, useEffect, useState } from 'react'

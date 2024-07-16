@@ -1,5 +1,5 @@
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
-import { Subject } from '@renderer/constants/types/subject'
+import { Subject } from '@renderer/data/types/subject'
 
 export default function Summary({ summary }: Pick<Subject, 'summary'>) {
   return (

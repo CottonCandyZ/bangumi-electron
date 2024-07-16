@@ -5,7 +5,7 @@ import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/compon
 import { Badge } from '@renderer/components/ui/badge'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
-import { Character } from '@renderer/constants/types/character'
+import { Character } from '@renderer/data/types/character'
 import { cn } from '@renderer/lib/utils'
 import { getCharacterAvatarURL } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
