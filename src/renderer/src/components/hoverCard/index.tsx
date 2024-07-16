@@ -50,7 +50,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
       }}
     >
       <div
-        className="relative"
+        className={cn('relative', activeId === layoutId && 'z-30')}
         onMouseEnter={() => {
           timeoutRef.current = setTimeout(() => {
             setActiveId(layoutId)
@@ -141,7 +141,7 @@ export const PopCardInnerContent: FC<
     <motion.div
       layoutId={layoutId}
       ref={popRef}
-      className={cn('absolute z-30', className)}
+      className={cn('absolute z-10', className)}
       style={{
         top: `${popCod.top}px`,
         left: `${popCod.left}px`,
