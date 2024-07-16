@@ -4,7 +4,7 @@
  * @returns 按照关键词排序的结果
  */
 export const sortCharacterByRelation =
-  <T extends { relation: string }[]>(sortList: string[]) =>
+  <T extends { relation: string }[]>(sortList?: string[]) =>
   (items: T) => {
     const temp = new Map<string, T>()
     items.forEach((item) => {
@@ -15,6 +15,7 @@ export const sortCharacterByRelation =
         temp.set(item.relation, [item] as T)
       }
     })
+    if (!sortList) return temp
     const res = new Map<string, T>()
     sortList.forEach((name) => {
       if (temp.has(name)) {

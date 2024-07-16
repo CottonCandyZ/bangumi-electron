@@ -1,4 +1,4 @@
-import { InfoBoxValueList, SubjectId } from '@renderer/data/types/bgm'
+import { InfoBoxValueList } from '@renderer/data/types/bgm'
 
 /** 条目 */
 export type Subject = {
@@ -13,13 +13,22 @@ export type Subject = {
   rating: Rating
   total_episodes: number
   collection: Collection
-  id: SubjectId
+  id: number
   eps: number
   volumes: number
   series: boolean
   locked: boolean
   nsfw: boolean
   type: number
+}
+
+export type RelatedSubject = {
+  images: CoverImages
+  name: string
+  name_cn: string
+  relation: string
+  type: number
+  id: number
 }
 
 export type CoverImages = {

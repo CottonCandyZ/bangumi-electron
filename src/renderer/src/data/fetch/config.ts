@@ -52,6 +52,7 @@ export const SUBJECTS = {
   BY_ID: (id: SubjectId) => `/v0/subjects/${id}`,
   CHARACTERS_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/characters`,
   PERSONS_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/persons`,
+  RELATED_SUBJECT_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/subjects`,
 }
 
 export const SUBJECTS_WEB = {
