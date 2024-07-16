@@ -1,6 +1,6 @@
 // 存储有关 api 的 CONFIG
 
-import { SubjectId } from '@renderer/data/types/bgm'
+import { CharacterId, PersonId, SubjectId } from '@renderer/data/types/bgm'
 import { getTimestamp } from '@renderer/lib/utils/date'
 import { ofetch } from 'ofetch'
 
@@ -65,7 +65,12 @@ export const EPISODES = {
 
 /** 角色 */
 export const CHARACTERS = {
-  BY_ID: (id: SubjectId) => `/v0/characters/${id}`,
+  BY_ID: (id: CharacterId) => `/v0/characters/${id}`,
+}
+
+/** 人物 */
+export const PERSONS = {
+  BY_ID: (id: PersonId) => `/v0/persons/${id}`,
 }
 
 /** ofetch web config */

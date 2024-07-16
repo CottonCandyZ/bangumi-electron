@@ -1,6 +1,7 @@
-import { getSubjectPPersonsById } from '@renderer/data/fetch/api/person'
+import { getPersonDetailById, getSubjectPersonsById } from '@renderer/data/fetch/api/person'
 import { useQueryOptionalAuth } from '@renderer/data/hooks/factory'
-import { SubjectId } from '@renderer/data/types/bgm'
+import { PersonId, SubjectId } from '@renderer/data/types/bgm'
+import { useQuery } from '@tanstack/react-query'
 
 // 暂时用不到
 /**
@@ -14,8 +15,21 @@ export const useQuerySubjectPersons = ({
   enabled?: boolean
 }) =>
   useQueryOptionalAuth({
-    queryFn: getSubjectPPersonsById,
+    queryFn: getSubjectPersonsById,
     queryKey: ['subject-persons'],
     props: { id },
+    enabled: enabled,
+  })
+
+export const useQueryPersonsById = ({
+  id,
+  enabled,
+}: {
+  id: PersonId | undefined
+  enabled?: boolean
+}) =>
+  useQuery({
+    queryFn: () => getPersonDetailById({ id }),
+    queryKey: ['PersonDetail', id],
     enabled: enabled,
   })

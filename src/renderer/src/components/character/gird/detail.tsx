@@ -4,25 +4,17 @@ import { useQueryCharacterDetailByID } from '@renderer/data/hooks/api/character'
 import { CharacterId } from '@renderer/data/types/bgm'
 import { render } from '@bbob/react'
 import { preset } from '@renderer/lib/utils/bbcode'
-import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 
 export default function Detail({ characterId }: { characterId: CharacterId }) {
   const characterDetail = useQueryCharacterDetailByID({ id: characterId })
   const characterDetailData = characterDetail.data
-  const renderSummery = useMemo(
-    () =>
-      characterDetailData
-        ? render(characterDetailData.summary, preset(), {
-            onlyAllowTags: ['mask'],
-          })
-        : null,
-    [characterDetailData?.summary],
-  )
-
   if (!characterDetailData) {
     return <Skeleton className="min-h-8" />
   }
+  const renderSummery = render(characterDetailData.summary, preset(), {
+    onlyAllowTags: ['mask'],
+  })
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex h-full min-h-0">
       {characterDetailData.summary !== '' ? (

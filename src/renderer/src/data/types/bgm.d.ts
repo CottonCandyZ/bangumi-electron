@@ -5,22 +5,23 @@
 export type Id = number | string
 
 /** 条目 ID */
-export type SubjectId = number | string
+export type SubjectId = Id
 
 /** 角色 */
-export type CharacterId = number | string
+export type CharacterId = Id
 
 /** 人物 */
-export type PersonId = number | string
+export type PersonId = Id
 
 /** 章节 ID */
-export type EpId = number | string
+export type EpId = Id
 
 /** 用户 ID */
-export type UserId = number | string
+export type UserId = Id
 
 /** infoBox 内部 list */
 export type InfoBoxValueList = {
+  k?: string
   v: string
 }
 
@@ -39,3 +40,10 @@ export type PersonCareer =
   | 'writer'
   | 'illustrator'
   | 'actor'
+
+export type BloodType = 1 | 2 | 3 | 4
+
+export interface Stat {
+  comments: number
+  collects: number
+}

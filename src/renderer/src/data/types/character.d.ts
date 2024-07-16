@@ -1,4 +1,4 @@
-import { CharacterId, Images, PersonCareer } from '@renderer/data/types/bgm'
+import { BloodType, CharacterId, Images, PersonCareer, Stat } from '@renderer/data/types/bgm'
 import { InfoBoxValueList } from '@renderer/data/types/subject'
 
 export type Character = {
@@ -11,8 +11,8 @@ export type Character = {
 }
 
 export interface CharacterDetail {
-  birth_mon: number | null
   gender: string
+  birth_mon: number | null
   birth_day: number | null
   birth_year: number | null
   blood_type: BloodType | null
@@ -27,16 +27,9 @@ export interface CharacterDetail {
   nsfw: boolean
 }
 
-export type BloodType = 1 | 2 | 3 | 4
-
 export type InfoBox = {
   key: string
   value: string | InfoBoxValueList[]
-}
-
-export interface Stat {
-  comments: number
-  collects: number
 }
 
 export type Actor = {

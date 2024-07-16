@@ -1,10 +1,10 @@
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
+import { Detail } from '@renderer/components/person/grid/detail'
 import { Button } from '@renderer/components/ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -41,13 +41,15 @@ export default function PersonsGrid({ subjectId }: { subjectId: SubjectId }) {
                   {value.map((item, index) => {
                     if (typeof item === 'string') return <span key={index}>{item}</span>
                     return (
-                      <HoverCard key={index} openDelay={300}>
+                      <HoverCard key={index} openDelay={300} closeDelay={200}>
                         <HoverCardTrigger asChild>
                           <button className="underline decoration-primary/40 underline-offset-2 hover:decoration-primary">
                             {item.name}
                           </button>
                         </HoverCardTrigger>
-                        <HoverCardContent side="top">Hello</HoverCardContent>
+                        <HoverCardContent side="top">
+                          <Detail personId={item.id} />
+                        </HoverCardContent>
                       </HoverCard>
                     )
                   })}
