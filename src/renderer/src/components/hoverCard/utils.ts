@@ -81,16 +81,16 @@ export function cPopSizeByC(
     const bias = UI_CONFIG.HEADER_HEIGHT + toView.toViewTop - toTop
     topOffset += bias
   }
-  if (toLeft < UI_CONFIG.NAV_WIDTH + toView.toViewTop) {
-    const bias = UI_CONFIG.NAV_WIDTH + toView.toViewTop - toLeft
+  if (toLeft < UI_CONFIG.NAV_WIDTH + toView.toViewLeft) {
+    const bias = UI_CONFIG.NAV_WIDTH + toView.toViewLeft - toLeft
     leftOffset += bias
   }
   if (toRight < toView.toViewRight) {
-    const bias = 8 - toRight
+    const bias = toView.toViewRight - toRight
     leftOffset -= bias
   }
   if (toBottom < toView.toViewBottom) {
-    const bias = 8 - toBottom
+    const bias = toView.toViewBottom - toBottom
     topOffset -= bias
   }
   return { topOffset, leftOffset }

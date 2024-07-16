@@ -52,7 +52,6 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
       <div
         className="relative"
         onMouseEnter={() => {
-          setActiveId(null)
           timeoutRef.current = setTimeout(() => {
             setActiveId(layoutId)
           }, delay)
