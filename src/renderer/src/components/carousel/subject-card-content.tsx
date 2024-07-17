@@ -22,7 +22,7 @@ import { cn } from '@renderer/lib/utils'
 import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
 import { memo, useEffect, useRef } from 'react'
-import { Link, unstable_useViewTransitionState } from 'react-router-dom'
+import { Link, unstable_useViewTransitionState, useLocation } from 'react-router-dom'
 
 export interface SubjectCardProps {
   sectionPath: sectionPath
@@ -51,6 +51,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
   const layoutId = `${sectionId}-${id}`
 
   const isTransitioning = unstable_useViewTransitionState(`/subject/${subjectId}`) // viewTransition API
+  const { key } = useLocation()
 
   // 延迟打开 card
   useEffect(() => {
@@ -73,10 +74,15 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
         className={cn('relative z-[1] w-full cursor-default')}
         onMouseEnter={() => setActiveId(null)}
       >
-        <Link to={`/subject/${subjectId}`} className="cursor-default" unstable_viewTransition>
+        <Link
+          to={`/subject/${subjectId}`}
+          className="cursor-default"
+          unstable_viewTransition
+          state={{ viewTransitionName: `${key}-cover-image` }}
+        >
           <Card
             className="relative overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
-            style={{ viewTransitionName: !activeId && isTransitioning ? 'cover-expand' : '' }}
+            style={{ viewTransitionName: !activeId && isTransitioning ? `${key}-cover-image` : '' }}
             onMouseEnter={() => {
               timeoutRef.current = setTimeout(() => {
                 const bounding = ref.current!.getBoundingClientRect()
@@ -150,7 +156,12 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
             }}
             layoutId={layoutId}
           >
-            <Link to={`/subject/${subjectId}`} className="cursor-default" unstable_viewTransition>
+            <Link
+              to={`/subject/${subjectId}`}
+              className="cursor-default"
+              unstable_viewTransition
+              state={{ viewTransitionName: `${key}-cover-image` }}
+            >
               <Card className="h-full w-full">
                 <CardContent className="flex h-full flex-col gap-1 p-0">
                   {/* Cover */}
@@ -159,7 +170,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
                       imageSrc={subjectInfoData?.images.common}
                       className="shrink-0 basis-1/6 overflow-hidden rounded-lg shadow-lg"
                       layoutId={`${layoutId}-image`}
-                      style={{ viewTransitionName: isTransitioning ? 'cover-expand' : '' }}
+                      style={{ viewTransitionName: isTransitioning ? `${key}-cover-image` : '' }}
                     />
                     {/* 标题描述 */}
                     <section className="flex w-full flex-col justify-between gap-0.5">

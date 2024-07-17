@@ -42,7 +42,7 @@ export default function Item({ character }: { character: Character }) {
 function PopCard({ character }: { character: Character }) {
   return (
     <PopCardContent className="w-96 cursor-default">
-      <Card className="w-full">
+      <Card>
         <CardContent className="flex h-full flex-col p-2">
           <div className="flex h-full flex-row gap-4">
             {!isEmpty(character.images.large) && (

@@ -9,15 +9,18 @@ import { SubjectId } from '@renderer/data/types/bgm'
 export const useQuerySubjectInfo = ({
   id,
   enabled,
+  needKeepPreviousData,
 }: {
   id: SubjectId | undefined
   enabled?: boolean
+  needKeepPreviousData?: boolean
 }) =>
   useQueryOptionalAuth({
     queryFn: getSubjectById,
     queryKey: ['subject-info'],
     props: { id },
     enabled: enabled,
+    needKeepPreviousData,
   })
 
 /**
@@ -32,7 +35,7 @@ export const useQueryRelatedSubjects = ({
 }) =>
   useQueryOptionalAuth({
     queryFn: getRelatedSubjects,
-    queryKey: ['subject-info'],
+    queryKey: ['subject-related'],
     props: { id },
     select: sortCharacterByRelation(),
     enabled: enabled,

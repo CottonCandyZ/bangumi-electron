@@ -4,6 +4,7 @@ import PersonsGrid from '@renderer/components/person/grid'
 import Characters from '@renderer/components/subject/character'
 import Header from '@renderer/components/subject/header'
 import Meta from '@renderer/components/subject/meta'
+import RelatedSubjects from '@renderer/components/subject/related'
 import Score from '@renderer/components/subject/score'
 import Summary from '@renderer/components/subject/summary'
 import Tags from '@renderer/components/subject/tags'
@@ -13,16 +14,26 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { Subject } from '@renderer/data/types/subject'
 import { memo } from 'react'
+import { useLocation } from 'react-router-dom'
 
 const SubjectContent = memo(
   ({ subjectId, subjectInfo }: { subjectId: SubjectId; subjectInfo: Subject | undefined }) => {
+    const { state } = useLocation()
     return (
       <div className="mx-auto flex max-w-6xl flex-col gap-10 px-10">
+        {/* <div className="fixed left-[72px] right-0 top-[5rem] z-50 flex justify-center px-20">
+          <TabsOnly
+            layoutId={`${subjectId}-tabs`}
+            tabsContent={new Set(['章节', '标签', '角色', '相关信息', '关联条目'])}
+            className="bg-transparent shadow backdrop-blur-2xl"
+            currentSelect="章节"
+          />
+        </div> */}
         <section className="flex w-full flex-row gap-8">
           {/* cover */}
           <Card
             className="h-min w-56 shrink-0 overflow-hidden"
-            style={{ viewTransitionName: 'cover-expand' }}
+            style={{ viewTransitionName: state.viewTransitionName }}
           >
             <CoverMotionImage imageSrc={subjectInfo?.images.common} />
           </Card>
@@ -59,6 +70,7 @@ const SubjectContent = memo(
           </section>
         </div>
         <Characters subjectId={subjectId} />
+        <RelatedSubjects subjectId={subjectId} />
         <section className="flex flex-col gap-5">
           <h2 className="text-2xl font-semibold">相关信息</h2>
           <PersonsGrid subjectId={subjectId} />

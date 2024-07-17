@@ -25,7 +25,7 @@ export default function Characters({ subjectId }: { subjectId: SubjectId }) {
             />
           ) : null
         ) : (
-          <Skeleton className="h-6" />
+          <Skeleton className="h-9 w-40" />
         )}
       </div>
       {characters ? (

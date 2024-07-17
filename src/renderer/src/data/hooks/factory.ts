@@ -66,11 +66,13 @@ export const useQueryOptionalAuth = <P, R, S = R>({
   props,
   enabled,
   select,
+  needKeepPreviousData = true,
 }: {
   queryKey: QueryOptions['queryKey']
   queryFn: P extends { token?: string } ? Fn<P, R> : never
   enabled?: boolean
   select?: (data: R) => S
+  needKeepPreviousData?: boolean
 } & OptionalProps<P>) => {
   const logoutMutation = useLogoutMutation()
   const queryClient = useQueryClient()
@@ -90,7 +92,7 @@ export const useQueryOptionalAuth = <P, R, S = R>({
       return data as R
     },
     enabled: (enabled === undefined ? true : enabled) && accessToken !== undefined,
-    placeholderData: keepPreviousData,
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     select: select,
   })
   if (query.isError && query.error instanceof AuthError) {
