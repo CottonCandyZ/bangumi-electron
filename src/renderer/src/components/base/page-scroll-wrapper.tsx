@@ -15,7 +15,7 @@ export default function PageScrollWrapper({
 }>) {
   const ref = useRef(null)
   const stateContext = useContext(SateContext)
-  const { key } = useLocation()
+  const { key, pathname } = useLocation()
 
   const [initialize, instance] = useOverlayScrollbars({
     options: {
@@ -36,7 +36,9 @@ export default function PageScrollWrapper({
   useEffect(() => {
     instance()
       ?.elements()
-      .viewport?.scrollTo({ top: scrollCache.get(key) ?? initScrollTo })
+      .viewport?.scrollTo({
+        top: scrollCache.get(key) ?? (pathname.includes('subject') ? 700 : initScrollTo),
+      })
     instance()?.on('scroll', scrollListener)
     return () => instance()?.off('scroll', scrollListener)
   }, [initialize, key])

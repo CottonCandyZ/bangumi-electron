@@ -21,7 +21,7 @@ const init = (top: number | undefined) => {
 export function Component() {
   const subjectId = useParams().subjectId as SubjectId
   // const subjectId = 385208
-  const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId })
+  const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const instance = useContext(ScrollContext)
   if (!instance) throw Error('Component need to be wrapped in ScrollContext')
@@ -37,13 +37,6 @@ export function Component() {
     setPercent(init(top))
   }
   useEffect(() => {
-    setTimeout(
-      () =>
-        instance()
-          ?.elements()
-          .viewport?.scrollTo({ top: scrollCache.get(key) ?? initScrollTop }),
-      0,
-    )
     instance()?.on('scroll', scrollListener)
     return () => instance()?.off('scroll', scrollListener)
   }, [])
