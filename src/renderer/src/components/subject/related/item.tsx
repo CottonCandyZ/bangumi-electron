@@ -48,7 +48,7 @@ export default function Item({ relatedSubject }: { relatedSubject: RelatedSubjec
           <CardContent className="p-2">
             <div className="flex flex-row gap-2">
               <CoverMotionImage
-                layoutId={`${layoutId}-image`}
+                layoutId={`${layoutId}-image-${key}`}
                 imageSrc={relatedSubject.images.common}
                 className="h-fit shrink-0 basis-1/3 overflow-hidden rounded-md"
                 loadingClassName="aspect-[2/3]"
