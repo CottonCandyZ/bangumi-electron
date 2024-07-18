@@ -7,7 +7,7 @@ import { SubjectId } from '@renderer/data/types/bgm'
 import { useState } from 'react'
 
 export default function Characters({ subjectId }: { subjectId: SubjectId }) {
-  const charactersQuery = useQuerySubjectCharacters({ id: subjectId, enabled: !!subjectId })
+  const charactersQuery = useQuerySubjectCharacters({ id: subjectId })
   const characters = charactersQuery.data
   const [filter, setFilter] = useState('全部')
   const relations = new Set<string>(['全部', ...(characters?.keys() || [])])

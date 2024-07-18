@@ -17,11 +17,13 @@ export default function TabsOnly({
   layoutId,
 }: TabsOnlyProps) {
   return (
-    <div
+    <motion.div
       className={cn(
-        'inline-flex min-h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground',
+        'inline-flex min-h-9 flex-wrap items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground',
         className,
       )}
+      layout
+      layoutRoot
     >
       {[...tabsContent].map((item) => (
         <button
@@ -41,6 +43,6 @@ export default function TabsOnly({
           <span className="z-10">{item}</span>
         </button>
       ))}
-    </div>
+    </motion.div>
   )
 }

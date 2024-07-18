@@ -78,11 +78,11 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
           to={`/subject/${subjectId}`}
           className="cursor-default"
           unstable_viewTransition
-          state={{ viewTransitionName: `${key}-cover-image` }}
+          state={{ viewTransitionName: `cover-image-${key}` }}
         >
           <Card
             className="relative overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
-            style={{ viewTransitionName: !activeId && isTransitioning ? `${key}-cover-image` : '' }}
+            style={{ viewTransitionName: !activeId && isTransitioning ? `cover-image-${key}` : '' }}
             onMouseEnter={() => {
               timeoutRef.current = setTimeout(() => {
                 const bounding = ref.current!.getBoundingClientRect()

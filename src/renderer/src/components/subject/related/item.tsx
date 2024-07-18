@@ -7,8 +7,8 @@ import { Link, unstable_useViewTransitionState, useLocation } from 'react-router
 const sectionId = 'RelatedSubjects'
 export default function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
   const layoutId = `${sectionId}-${relatedSubject.id}`
-  const { key } = useLocation()
   const isTransitioning = unstable_useViewTransitionState(`/subject/${relatedSubject.id}`)
+  const { key } = useLocation()
   return (
     <HoverPopCard layoutId={layoutId}>
       <HoverCardContent>
@@ -16,17 +16,19 @@ export default function Item({ relatedSubject }: { relatedSubject: RelatedSubjec
           <Link
             to={`/subject/${relatedSubject.id}`}
             className="cursor-default"
-            state={{ viewTransitionName: `${key}-cover-image` }}
+            state={{ viewTransitionName: `cover-image-${key}` }}
             unstable_viewTransition
           >
             <Card
-              className="overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
-              style={{ viewTransitionName: isTransitioning ? `${key}-cover-image` : '' }}
+              className="relative overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
+              style={{
+                viewTransitionName: isTransitioning ? `cover-image-${key}` : '',
+              }}
             >
               <CardContent className="p-0">
                 {relatedSubject.images.common !== '' ? (
                   <CoverMotionImage
-                    layoutId={`${layoutId}-image`}
+                    layoutId={`${layoutId}-image-${key}`}
                     imageSrc={relatedSubject.images.common}
                     className="aspect-square"
                   />

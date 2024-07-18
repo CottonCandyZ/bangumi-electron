@@ -1,4 +1,4 @@
-import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
+import { Image } from '@renderer/components/base/Image'
 import EpisodesGrid from '@renderer/components/episode/grid'
 import PersonsGrid from '@renderer/components/person/grid'
 import Characters from '@renderer/components/subject/character'
@@ -35,7 +35,7 @@ const SubjectContent = memo(
             className="h-min w-56 shrink-0 overflow-hidden"
             style={{ viewTransitionName: state.viewTransitionName }}
           >
-            <CoverMotionImage imageSrc={subjectInfo?.images.common} />
+            <Image imageSrc={subjectInfo?.images.common} loadingClassName="aspect-[2/3]" />
           </Card>
           {/* info */}
           <div className="flex flex-1 flex-col gap-5">

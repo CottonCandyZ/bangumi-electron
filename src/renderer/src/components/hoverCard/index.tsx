@@ -12,6 +12,7 @@ import {
   useRef,
   useState,
 } from 'react'
+import { useLocation } from 'react-router-dom'
 
 const HoverPopCardContext = createContext<{
   hoverRef: React.RefObject<HTMLDivElement> | null
@@ -33,6 +34,8 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
   const activeId = useActiveHoverCard((state) => state.activeId)
+  const { key } = useLocation()
+  layoutId = `${layoutId}-${key}`
 
   useEffect(() => {
     return () => {
@@ -49,7 +52,8 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
         activeId,
       }}
     >
-      <div
+      <motion.div
+        key={layoutId}
         className={cn('relative', activeId === layoutId && 'z-30')}
         onMouseEnter={() => {
           timeoutRef.current = setTimeout(() => {
@@ -59,7 +63,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
         onMouseLeave={() => clearTimeout(timeoutRef.current)}
       >
         {children}
-      </div>
+      </motion.div>
     </HoverPopCardContext.Provider>
   )
 }

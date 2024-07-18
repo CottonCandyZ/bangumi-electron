@@ -20,7 +20,6 @@ const init = (top: number | undefined) => {
 }
 export function Component() {
   const subjectId = useParams().subjectId as SubjectId
-  // const subjectId = 385208
   const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const instance = useContext(ScrollContext)
@@ -46,6 +45,7 @@ export function Component() {
       <Image
         imageSrc={subjectInfo?.images.large}
         loading="eager"
+        key={key}
         className="fixed left-[73px] top-[65px] aspect-[2/3] max-h-full w-full overflow-hidden rounded-tl-lg"
       />
       {/* cover && info */}
