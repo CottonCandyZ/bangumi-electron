@@ -160,7 +160,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
               to={`/subject/${subjectId}`}
               className="cursor-default"
               unstable_viewTransition
-              state={{ viewTransitionName: `${key}-cover-image` }}
+              state={{ viewTransitionName: `cover-image-${key}` }}
             >
               <Card className="h-full w-full">
                 <CardContent className="flex h-full flex-col gap-1 p-0">
@@ -170,7 +170,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
                       imageSrc={subjectInfoData?.images.common}
                       className="shrink-0 basis-1/6 overflow-hidden rounded-lg shadow-lg"
                       layoutId={`${layoutId}-image`}
-                      style={{ viewTransitionName: isTransitioning ? `${key}-cover-image` : '' }}
+                      style={{ viewTransitionName: isTransitioning ? `cover-image-${key}` : '' }}
                     />
                     {/* 标题描述 */}
                     <section className="flex w-full flex-col justify-between gap-0.5">

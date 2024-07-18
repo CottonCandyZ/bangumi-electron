@@ -1,27 +1,25 @@
 import { Image } from '@renderer/components/base/Image'
-import EpisodesGrid from '@renderer/components/episode/grid'
-import PersonsGrid from '@renderer/components/person/grid'
-import Characters from '@renderer/components/subject/character'
-import Header from '@renderer/components/subject/header'
-import Meta from '@renderer/components/subject/meta'
+import SubjectCharacters from '@renderer/components/subject/character'
+import SubjectEpisodes from '@renderer/components/subject/episode'
+import { SubjectHeaderInfo } from '@renderer/components/subject/header-info'
+import PersonsTable from '@renderer/components/subject/person/table'
 import RelatedSubjects from '@renderer/components/subject/related'
-import Score from '@renderer/components/subject/score'
-import Summary from '@renderer/components/subject/summary'
-import Tags from '@renderer/components/subject/tags'
+import SubjectScore from '@renderer/components/subject/score'
+import SubjectTags from '@renderer/components/subject/tags/indext'
 import { Card } from '@renderer/components/ui/card'
-import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
+import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { Subject } from '@renderer/data/types/subject'
-import { memo } from 'react'
+import { isEmpty } from '@renderer/lib/utils/string'
 import { useLocation } from 'react-router-dom'
 
-const SubjectContent = memo(
-  ({ subjectId, subjectInfo }: { subjectId: SubjectId; subjectInfo: Subject | undefined }) => {
-    const { state } = useLocation()
-    return (
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-10">
-        {/* <div className="fixed left-[72px] right-0 top-[5rem] z-50 flex justify-center px-20">
+const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
+  const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId, needKeepPreviousData: false })
+  const subjectInfo = subjectInfoQuery.data
+  const { state } = useLocation()
+  return (
+    <div className="mx-auto flex max-w-7xl flex-col gap-10 px-10">
+      {/* <div className="fixed left-[72px] right-0 top-[5rem] z-50 flex justify-center px-20">
           <TabsOnly
             layoutId={`${subjectId}-tabs`}
             tabsContent={new Set(['章节', '标签', '角色', '相关信息', '关联条目'])}
@@ -29,56 +27,43 @@ const SubjectContent = memo(
             currentSelect="章节"
           />
         </div> */}
-        <section className="flex w-full flex-row gap-8">
-          {/* cover */}
-          <Card
-            className="h-min w-56 shrink-0 overflow-hidden"
-            style={{ viewTransitionName: state.viewTransitionName }}
-          >
-            <Image imageSrc={subjectInfo?.images.common} loadingClassName="aspect-[2/3]" />
-          </Card>
-          {/* info */}
-          <div className="flex flex-1 flex-col gap-5">
-            <section className="flex flex-col gap-2">
-              {/* 标题 */}
-              {subjectInfo ? <Header {...subjectInfo} /> : <Skeleton className="h-14" />}
-
-              {/* {subjectId} */}
-              {/* 一些 meta 数据 */}
-              {subjectInfo ? <Meta {...subjectInfo} /> : <Skeleton className="h-5" />}
-            </section>
-            <Separator />
-            <section>
-              {subjectInfo ? <Summary {...subjectInfo} /> : <Skeleton className="h-36" />}
-            </section>
-          </div>
+      <section className="flex w-full flex-row gap-8">
+        {/* cover */}
+        <Card
+          className="h-min w-56 shrink-0 overflow-hidden"
+          style={{ viewTransitionName: state.viewTransitionName }}
+        >
+          {subjectInfo !== undefined ? (
+            !isEmpty(subjectInfo.images.common) ? (
+              <Image imageSrc={subjectInfo.images.common} loadingClassName="aspect-[2/3]" />
+            ) : (
+              <div className="flex aspect-[2/3] items-center justify-center">还没有图片哦</div>
+            )
+          ) : (
+            <Skeleton className="aspect-[2/3]" />
+          )}
+        </Card>
+        {/* info */}
+        <SubjectHeaderInfo subjectId={subjectId} />
+      </section>
+      {/* 章节 */}
+      <SubjectEpisodes subjectId={subjectId} />
+      <div className="flex flex-row gap-5">
+        <section className="flex basis-3/4 flex-col gap-5">
+          {/* 标签 */}
+          <SubjectTags subjectId={subjectId} />
         </section>
-        <section className="flex flex-col gap-5">
-          <h2 className="text-2xl font-semibold">章节</h2>
-          <EpisodesGrid subjectId={subjectId} eps={subjectInfo?.eps} />
-        </section>
-        <div className="flex flex-row gap-5">
-          <section className="flex basis-3/4 flex-col gap-5">
-            <h2 className="text-2xl font-semibold">标签</h2>
-            <div>
-              {subjectInfo ? <Tags tags={subjectInfo.tags} /> : <Skeleton className="h-60" />}
-            </div>
-          </section>
-          <section className="flex min-w-56 flex-1 flex-col gap-2">
-            <h2 className="text-2xl font-semibold">评分</h2>
-            {subjectInfo ? <Score rating={subjectInfo.rating} /> : <Skeleton className="h-60" />}
-          </section>
-        </div>
-        <Characters subjectId={subjectId} />
-        <RelatedSubjects subjectId={subjectId} />
-        <section className="flex flex-col gap-5">
-          <h2 className="text-2xl font-semibold">相关信息</h2>
-          <PersonsGrid subjectId={subjectId} />
+        <section className="flex min-w-56 flex-1 flex-col gap-2">
+          {/* 评分 */}
+          <SubjectScore subjectId={subjectId} />
         </section>
       </div>
-    )
-  },
-)
+      <SubjectCharacters subjectId={subjectId} />
+      <RelatedSubjects subjectId={subjectId} />
+      <PersonsTable subjectId={subjectId} />
+    </div>
+  )
+}
 
 SubjectContent.displayName = 'SubjectContent'
 export default SubjectContent

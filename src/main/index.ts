@@ -1,9 +1,8 @@
 import { app, BrowserWindow } from 'electron'
-import { join } from 'path'
+import { join } from 'node:path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcMain } from '@egoist/tipc/main'
 import { router } from './tipc'
-import icon from '../../resources/icon.png'
 
 registerIpcMain(router)
 
@@ -21,7 +20,7 @@ function createWindow(): void {
       color: 'rgba(0,0,0,0)',
       height: 64,
     },
-    ...(process.platform === 'linux' ? { icon } : {}),
+    ...(process.platform === 'linux' ? { icon: join(__dirname, '../../resources/icon.png') } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,

@@ -1,5 +1,5 @@
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
-import { Detail } from '@renderer/components/person/grid/detail'
+import { Detail } from '@renderer/components/subject/person/table/detail'
 import { Button } from '@renderer/components/ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import {
@@ -15,13 +15,13 @@ import { SubjectId } from '@renderer/data/types/bgm'
 import { cn } from '@renderer/lib/utils'
 import { useState } from 'react'
 
-export default function PersonsGrid({ subjectId }: { subjectId: SubjectId }) {
-  const personsQuery = useWebInfoBoxQuery({ id: subjectId, enabled: !!subjectId })
+export default function PersonsTable({ subjectId }: { subjectId: SubjectId }) {
+  const personsQuery = useWebInfoBoxQuery({ id: subjectId })
   const persons = personsQuery.data
   const [sateFold, setStateFold] = useState(true)
-
   if (!persons) return null
-  const needFold = persons.size > 8
+  if (persons.size === 0) return null
+  const needFold = persons.size > 9
   const fold = needFold && sateFold
   return (
     <div className={cn('relative flex flex-row justify-between gap-2')}>

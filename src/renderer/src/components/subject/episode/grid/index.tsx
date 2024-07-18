@@ -1,5 +1,5 @@
-import EpisodeGridItem from '@renderer/components/episode/grid/item'
-import PageSelector from '@renderer/components/episode/grid/page-selector'
+import EpisodeGridItem from '@renderer/components/subject/episode/grid/item'
+import PageSelector from '@renderer/components/subject/episode/grid/page-selector'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQueryEpisodesInfoBySubjectId } from '@renderer/data/hooks/api/episodes'
 import { SubjectId } from '@renderer/data/types/bgm'
@@ -7,18 +7,11 @@ import { cn } from '@renderer/lib/utils'
 import { EPISODE_TYPE_MAP } from '@renderer/lib/utils/map'
 import { Fragment, useState } from 'react'
 
-export default function EpisodesGrid({
-  subjectId,
-  eps,
-}: {
-  subjectId: SubjectId
-  eps: number | undefined
-}) {
+export default function EpisodesGrid({ subjectId, eps }: { subjectId: SubjectId; eps: number }) {
   const [offset, setOffSet] = useState(0)
   const limit = 100
   const episodes = useQueryEpisodesInfoBySubjectId({
     id: subjectId,
-    enabled: !!subjectId,
     offset,
     limit,
   })

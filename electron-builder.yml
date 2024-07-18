@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: bangumi-electron
+productName: Bangumi
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: bangumi-electron
+  executableName: Bangumi
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}

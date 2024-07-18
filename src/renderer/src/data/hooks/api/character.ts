@@ -13,15 +13,18 @@ import { useQuery } from '@tanstack/react-query'
 export const useQuerySubjectCharacters = ({
   id,
   enabled,
+  needKeepPreviousData,
 }: {
   id: SubjectId | undefined
   enabled?: boolean
+  needKeepPreviousData?: boolean
 }) =>
   useQueryOptionalAuth({
     queryFn: getSubjectCharactersById,
     queryKey: ['subject-characters'],
     props: { id },
-    enabled: enabled,
+    enabled,
+    needKeepPreviousData,
     select: sortCharacterByRelation(['主角', '配角', '客串']),
   })
 

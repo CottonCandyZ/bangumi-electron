@@ -27,12 +27,14 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
   const currentSectionPath = useActiveSection((state) => state.sectionPath)
   const [api, setApi] = useState<CarouselApi>()
   const initState = useContext(SateContext)
-  const { key } = useLocation()
+  const { pathname } = useLocation()
 
-  if (initState?.carouselCache.get(key) === undefined) {
-    initState?.carouselCache.set(key, new Map<string, number>())
+  if (initState?.carouselCache.get(pathname) === undefined) {
+    initState?.carouselCache.set(pathname, new Map<string, number>())
   }
-  const initIndex = initState?.carouselCache.get(key)?.get(`Home-Small-Carousel-${sectionPath}`)
+  const initIndex = initState?.carouselCache
+    .get(pathname)
+    ?.get(`Home-Small-Carousel-${sectionPath}`)
   useEffect(() => {
     if (!api) {
       return
@@ -40,7 +42,7 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
     api.on('select', () => {
       if (initState)
         initState.carouselCache
-          .get(key)
+          .get(pathname)
           ?.set(`Home-Small-Carousel-${sectionPath}`, api.selectedScrollSnap())
     })
   }, [api])

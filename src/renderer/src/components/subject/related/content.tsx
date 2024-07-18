@@ -12,16 +12,16 @@ export default function RelatedSubjectsContent({
 }) {
   const res =
     filter !== '全部'
-      ? new Map<string, RelatedSubject[]>([[filter, relatedSubjects.get(filter)!]])
+      ? new Map<string, RelatedSubject[] | undefined>([[filter, relatedSubjects.get(filter)]])
       : relatedSubjects
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,_minmax(8rem,_1fr))] gap-1 py-2">
+    <div className="grid grid-cols-[repeat(auto-fill,_minmax(8rem,_1fr))] gap-x-2 gap-y-5 py-2">
       {[...res].map(([key, items]) => (
         <Fragment key={`${key}-fag`}>
-          {items.map((item, index) => (
+          {items?.map((item, index) => (
             <div key={item.id} className="flex flex-row">
               {index === 0 ? (
-                <div className="ml-2 flex w-full flex-row gap-3 text-sm">
+                <div className="flex w-full flex-row gap-3 text-sm">
                   <Separator orientation="vertical" />
                   <div className="flex w-full flex-col gap-2">
                     <span className="font-semibold">{key}</span>
@@ -29,7 +29,7 @@ export default function RelatedSubjectsContent({
                   </div>
                 </div>
               ) : (
-                <div className="ml-5 mt-7 w-full">
+                <div className="ml-3 mt-7 w-full">
                   <Item relatedSubject={item} />
                 </div>
               )}

@@ -1,8 +1,5 @@
 import { fetchSectionHome, fetchSubjectInfoById } from '@renderer/data/fetch/web/subject'
-import {
-  parseInfoBoxFromSubjectPage,
-  parseTopListFromHTML,
-} from '@renderer/data/transformer/web'
+import { parseInfoBoxFromSubjectPage, parseTopListFromHTML } from '@renderer/data/transformer/web'
 import { useQuery } from '@tanstack/react-query'
 import type { sectionPath } from '@renderer/data/types/web'
 import { SubjectId } from '@renderer/data/types/bgm'

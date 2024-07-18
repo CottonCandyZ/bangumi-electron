@@ -29,14 +29,17 @@ export const useQuerySubjectInfo = ({
 export const useQueryRelatedSubjects = ({
   id,
   enabled,
+  needKeepPreviousData,
 }: {
   id: SubjectId | undefined
   enabled?: boolean
+  needKeepPreviousData?: boolean
 }) =>
   useQueryOptionalAuth({
     queryFn: getRelatedSubjects,
     queryKey: ['subject-related'],
     props: { id },
     select: sortCharacterByRelation(),
-    enabled: enabled,
+    enabled,
+    needKeepPreviousData,
   })
