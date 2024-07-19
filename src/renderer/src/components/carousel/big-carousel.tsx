@@ -5,10 +5,11 @@ import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 const items = 9
-const smallWidth = 250
+const smallWidth = 350
 const bias = 36 // (9)
 
-const bigWidth = 512
+const bigWidth = 660
+const height = 450
 
 const animateConfig: KeyframeAnimationOptions = {
   duration: 500,
