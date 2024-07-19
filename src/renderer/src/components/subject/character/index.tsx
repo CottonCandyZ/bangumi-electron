@@ -18,14 +18,12 @@ export default function SubjectCharacters({ subjectId }: { subjectId: SubjectId 
       <div className="flex flex-row items-center justify-between">
         <h2 className="text-2xl font-semibold">角色</h2>
         {characters ? (
-          relations.size !== 1 ? (
-            <TabsOnly
-              tabsContent={relations}
-              layoutId={id}
-              currentSelect={filter}
-              setCurrentSelect={setFilter}
-            />
-          ) : null
+          <TabsOnly
+            tabsContent={relations}
+            layoutId={id}
+            currentSelect={filter}
+            setCurrentSelect={setFilter}
+          />
         ) : (
           <Skeleton className="h-9 w-40" />
         )}
