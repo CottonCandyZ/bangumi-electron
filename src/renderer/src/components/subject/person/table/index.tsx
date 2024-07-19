@@ -54,15 +54,17 @@ export default function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
           </TableBody>
         </Table>
       </ScrollWrapper>
-      <div>
-        <Button
-          className="h-full whitespace-normal"
-          onClick={() => setStateFold((fold) => !fold)}
-          variant={'outline'}
-        >
-          {fold ? '展开' : '收起'}
-        </Button>
-      </div>
+      {needFold && (
+        <div>
+          <Button
+            className="h-full whitespace-normal"
+            onClick={() => setStateFold((fold) => !fold)}
+            variant={'outline'}
+          >
+            {fold ? '展开' : '收起'}
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
