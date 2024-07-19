@@ -10,20 +10,19 @@ export default function CharactersGrid({ characters }: { characters: Character[]
   const slice = fold ? 8 : characters.length
   const needFold = characters.length > 8
   return (
-    <div className={cn('relative', (!fold || !needFold) && 'max-h-none')}>
-      <div className="grid grid-cols-[repeat(auto-fill,_minmax(15rem,_1fr))] gap-3 py-2">
+    <div className={cn('relative flex flex-row gap-2', (!fold || !needFold) && 'max-h-none')}>
+      <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(15rem,_1fr))] gap-3 py-2">
         {characters.slice(0, slice).map((item) => (
           <Item character={item} key={item.id} />
         ))}
       </div>
       {needFold && (
-        <div
-          className={cn(
-            'absolute bottom-0 left-0 right-0 flex h-20 items-end justify-center bg-gradient-to-t from-card',
-            !fold && 'relative h-auto',
-          )}
-        >
-          <Button variant="outline" onClick={() => setFold((fold) => !fold)}>
+        <div>
+          <Button
+            variant="outline"
+            className="h-full whitespace-normal"
+            onClick={() => setFold((fold) => !fold)}
+          >
             {fold ? '展开' : '收起'}
           </Button>
         </div>
