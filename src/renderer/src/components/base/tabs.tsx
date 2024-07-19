@@ -1,10 +1,9 @@
 import { cn } from '@renderer/lib/utils'
 import { motion } from 'framer-motion'
-import { useLocation } from 'react-router-dom'
 
 type TabsOnlyProps = {
   currentSelect: string
-  setCurrentSelect: React.Dispatch<React.SetStateAction<string>>
+  setCurrentSelect: (id: string, value: string) => void
   tabsContent: Set<string>
   layoutId: string
   className?: string
@@ -17,13 +16,13 @@ export default function TabsOnly({
   className,
   layoutId,
 }: TabsOnlyProps) {
-  const { key } = useLocation()
   return (
     <motion.div
       className={cn(
         'inline-flex min-h-9 flex-wrap items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground',
         className,
       )}
+      layout
       layoutRoot
     >
       {[...tabsContent].map((item) => (
@@ -33,13 +32,13 @@ export default function TabsOnly({
             item === currentSelect && 'cursor-default text-foreground',
           )}
           key={item}
-          onClick={() => setCurrentSelect(item)}
+          onClick={() => setCurrentSelect(layoutId, item)}
         >
           {currentSelect === item && (
             <motion.div
-              key={`${layoutId}-${key}`}
+              // key={`${layoutId}-${key}`}
               className="absolute inset-0 rounded-md bg-background shadow"
-              layoutId={`${layoutId}-${key}`}
+              layoutId={`${layoutId}`}
             />
           )}
           <span className="z-10">{item}</span>

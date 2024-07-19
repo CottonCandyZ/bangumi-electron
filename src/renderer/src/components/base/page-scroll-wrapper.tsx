@@ -1,4 +1,4 @@
-import { SateContext } from '@renderer/components/wrapper/state-wrapper'
+import { SateContext } from '../wrapper/SateContext'
 import { useOverlayScrollbars, UseOverlayScrollbarsInstance } from 'overlayscrollbars-react'
 import { createContext, PropsWithChildren, useContext, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'

@@ -4,16 +4,14 @@ import CharactersGridSkeleton from '@renderer/components/subject/character/gird/
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectCharacters } from '@renderer/data/hooks/api/character'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { useEffect, useState } from 'react'
+import { useTabFilterHook } from '@renderer/hooks/path-state'
 
 export default function SubjectCharacters({ subjectId }: { subjectId: SubjectId }) {
   const charactersQuery = useQuerySubjectCharacters({ id: subjectId, needKeepPreviousData: false })
+  const id = `subject-characters-tab-${subjectId}`
+  const { filter, setFilter } = useTabFilterHook({ id, placeHolder: '全部' })
   const characters = charactersQuery.data
-  const [filter, setFilter] = useState('全部')
   const relations = new Set<string>(['全部', ...(characters?.keys() || [])])
-  useEffect(() => {
-    setFilter('全部')
-  }, [subjectId])
   if (characters?.size === 0) return null
   return (
     <section className="flex flex-col gap-5">
@@ -22,10 +20,10 @@ export default function SubjectCharacters({ subjectId }: { subjectId: SubjectId 
         {characters ? (
           relations.size !== 1 ? (
             <TabsOnly
+              tabsContent={relations}
+              layoutId={id}
               currentSelect={filter}
               setCurrentSelect={setFilter}
-              tabsContent={relations}
-              layoutId="subject-characters-tab"
             />
           ) : null
         ) : (

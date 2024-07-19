@@ -25,11 +25,11 @@ export default function Item({ relatedSubject }: { relatedSubject: RelatedSubjec
                 viewTransitionName: isTransitioning ? `cover-image-${key}` : '',
               }}
             >
-              <CardContent className="p-0">
+              <CardContent className="aspect-square p-0">
                 {relatedSubject.images.common !== '' ? (
                   <CoverMotionImage
                     layoutId={`${layoutId}-image-${key}`}
-                    imageSrc={relatedSubject.images.common}
+                    imageSrc={relatedSubject.images.small}
                     className="aspect-square"
                   />
                 ) : (

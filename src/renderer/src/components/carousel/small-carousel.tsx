@@ -9,13 +9,13 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@renderer/components/ui/carousel'
-import { SateContext } from '@renderer/components/wrapper/state-wrapper'
 import { UI_CONFIG } from '@renderer/config'
 import { sectionPath } from '@renderer/data/types/web'
+import useStateHook from '@renderer/hooks/cache-state'
 import { cn } from '@renderer/lib/utils'
 import { ChevronRight } from 'lucide-react'
-import { useContext, useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 
 interface SmallCarouselProps {
   href: string
@@ -26,24 +26,15 @@ interface SmallCarouselProps {
 export default function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
   const currentSectionPath = useActiveSection((state) => state.sectionPath)
   const [api, setApi] = useState<CarouselApi>()
-  const initState = useContext(SateContext)
-  const { pathname } = useLocation()
-
-  if (initState?.carouselCache.get(pathname) === undefined) {
-    initState?.carouselCache.set(pathname, new Map<string, number>())
-  }
-  const initIndex = initState?.carouselCache
-    .get(pathname)
-    ?.get(`Home-Small-Carousel-${sectionPath}`)
+  const { init: initIndex, setter: setIndex } = useStateHook({
+    key: `Home-Small-Carousel-${sectionPath}`,
+  })
   useEffect(() => {
     if (!api) {
       return
     }
     api.on('select', () => {
-      if (initState)
-        initState.carouselCache
-          .get(pathname)
-          ?.set(`Home-Small-Carousel-${sectionPath}`, api.selectedScrollSnap())
+      if (setIndex) setIndex?.set(`Home-Small-Carousel-${sectionPath}`, api.selectedScrollSnap())
     })
   }, [api])
 
@@ -54,7 +45,7 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
         align: 'start',
         slidesToScroll: 'auto',
         watchDrag: false,
-        startIndex: initIndex ?? 0,
+        startIndex: (initIndex as number | undefined) ?? 0,
       }}
     >
       <div className="flex justify-between">

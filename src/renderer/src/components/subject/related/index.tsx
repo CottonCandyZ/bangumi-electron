@@ -3,7 +3,7 @@ import RelatedSubjectsContent from '@renderer/components/subject/related/content
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQueryRelatedSubjects } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { useEffect, useState } from 'react'
+import { useTabFilterHook } from '@renderer/hooks/path-state'
 
 export default function RelatedSubjects({ subjectId }: { subjectId: SubjectId }) {
   const relatedSubjectsQuery = useQueryRelatedSubjects({
@@ -11,12 +11,9 @@ export default function RelatedSubjects({ subjectId }: { subjectId: SubjectId })
     needKeepPreviousData: false,
   })
   const relatedSubjects = relatedSubjectsQuery.data
-  const [filter, setFilter] = useState('全部')
+  const id = `subject-related-tab-${subjectId}`
+  const { filter, setFilter } = useTabFilterHook({ id, placeHolder: '全部' })
   const relations = new Set<string>(['全部', ...(relatedSubjects?.keys() || [])])
-
-  useEffect(() => {
-    setFilter('全部')
-  }, [subjectId])
 
   if (!relatedSubjects) return null
   if (relatedSubjects.size === 0) return null
@@ -30,7 +27,7 @@ export default function RelatedSubjects({ subjectId }: { subjectId: SubjectId })
               currentSelect={filter}
               setCurrentSelect={setFilter}
               tabsContent={relations}
-              layoutId="subject-related-tab"
+              layoutId={id}
             />
           ) : null
         ) : (
