@@ -1,5 +1,5 @@
 import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
-import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/components/hoverCard'
+import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/components/hover-card'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { RelatedSubject } from '@renderer/data/types/subject'
 import { Link, unstable_useViewTransitionState, useLocation } from 'react-router-dom'

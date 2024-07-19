@@ -1,4 +1,4 @@
-import { useActiveHoverCard } from '@renderer/components/hoverCard/state'
+import { useActiveHoverCard } from '@renderer/components/hover-card/state'
 import { cn } from '@renderer/lib/utils'
 
 export function BackCover({ className }: { className?: string }) {

@@ -1,5 +1,5 @@
-import { useActiveHoverCard } from '@renderer/components/hoverCard/state'
-import { cPopSizeByC } from '@renderer/components/hoverCard/utils'
+import { useActiveHoverCard } from '@renderer/components/hover-card/state'
+import { cPopSizeByC } from '@renderer/components/hover-card/utils'
 import { cn } from '@renderer/lib/utils'
 import { AnimatePresence, HTMLMotionProps, motion } from 'framer-motion'
 import {

@@ -1,5 +1,5 @@
 import SmallCarousel from '@renderer/components/carousel/small-carousel'
-import { BackCover } from '@renderer/components/hoverCard/close'
+import { BackCover } from '@renderer/components/hover-card/close'
 
 export function Component() {
   return (

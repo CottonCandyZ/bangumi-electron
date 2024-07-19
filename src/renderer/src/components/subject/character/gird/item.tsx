@@ -1,5 +1,5 @@
 import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
-import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/components/hoverCard'
+import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/components/hover-card'
 import Actors from '@renderer/components/subject/character/gird/actor'
 import Detail from '@renderer/components/subject/character/gird/detail'
 import { Badge } from '@renderer/components/ui/badge'
