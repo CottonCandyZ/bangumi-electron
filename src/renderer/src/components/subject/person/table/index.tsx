@@ -10,17 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from '@renderer/components/ui/table'
-import { useWebInfoBoxQuery } from '@renderer/data/hooks/web/subject'
-import { SubjectId } from '@renderer/data/types/bgm'
+import { InfoBoxWeb } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { useState } from 'react'
 
-export default function PersonsTable({ subjectId }: { subjectId: SubjectId }) {
-  const personsQuery = useWebInfoBoxQuery({ id: subjectId })
-  const persons = personsQuery.data
+export default function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
   const [sateFold, setStateFold] = useState(true)
-  if (!persons) return null
-  if (persons.size === 0) return null
   const needFold = persons.size > 9
   const fold = needFold && sateFold
   return (

@@ -2,7 +2,7 @@ import { Image } from '@renderer/components/base/Image'
 import SubjectCharacters from '@renderer/components/subject/character'
 import SubjectEpisodes from '@renderer/components/subject/episode'
 import { SubjectHeaderInfo } from '@renderer/components/subject/header-info'
-import PersonsTable from '@renderer/components/subject/person/table'
+import SubjectPersonTable from '@renderer/components/subject/person'
 import RelatedSubjects from '@renderer/components/subject/related'
 import SubjectScore from '@renderer/components/subject/score'
 import SubjectTags from '@renderer/components/subject/tags/indext'
@@ -60,7 +60,7 @@ const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
       </div>
       <SubjectCharacters subjectId={subjectId} />
       <RelatedSubjects subjectId={subjectId} />
-      <PersonsTable subjectId={subjectId} />
+      <SubjectPersonTable subjectId={subjectId} />
     </div>
   )
 }
