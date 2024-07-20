@@ -46,10 +46,10 @@ export default function RelatedSubjectsContent({
         ))}
       </div>
       {needFold && (
-        <div>
+        <div className="py-9">
           <Button
             variant="outline"
-            className="h-full whitespace-normal"
+            className="h-full whitespace-normal rounded-xl"
             onClick={() => setFold((fold) => !fold)}
           >
             {fold ? '展开' : '收起'}

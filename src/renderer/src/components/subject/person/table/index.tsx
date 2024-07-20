@@ -57,7 +57,7 @@ export default function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
       {needFold && (
         <div>
           <Button
-            className="h-full whitespace-normal"
+            className="h-full whitespace-normal rounded-xl"
             onClick={() => setStateFold((fold) => !fold)}
             variant={'outline'}
           >

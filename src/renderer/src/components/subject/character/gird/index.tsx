@@ -16,10 +16,10 @@ export default function CharactersGrid({ characters }: { characters: Character[]
         ))}
       </div>
       {needFold && (
-        <div>
+        <div className="py-2">
           <Button
             variant="outline"
-            className="h-full whitespace-normal"
+            className="h-full whitespace-normal rounded-xl"
             onClick={() => setFold((fold) => !fold)}
           >
             {fold ? '展开' : '收起'}
