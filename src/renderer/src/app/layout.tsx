@@ -8,7 +8,7 @@ function RootLayout() {
     <>
       <Header />
       <div
-        className="fixed top-16 z-10 h-full bg-background py-1"
+        className="fixed top-16 z-10 h-[calc(100dvh-64px)] bg-background py-1"
         style={{ viewTransitionName: 'nav' }}
       >
         <NavBar />
