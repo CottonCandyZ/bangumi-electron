@@ -19,7 +19,7 @@ export default function Detail({ characterId }: { characterId: CharacterId }) {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex h-full min-h-0">
       {characterDetailData.summary !== '' ? (
         <ScrollWrapper
-          className="bbcode max-h-56 whitespace-pre-line"
+          className="bbcode max-h-56 whitespace-pre-line py-0.5"
           options={{ overflow: { x: 'hidden' } }}
         >
           {renderSummery}
