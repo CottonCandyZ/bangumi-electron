@@ -79,6 +79,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
           className="cursor-default"
           unstable_viewTransition
           state={{ viewTransitionName: `cover-image-${key}` }}
+          draggable={false}
         >
           <Card
             className="relative overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"

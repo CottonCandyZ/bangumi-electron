@@ -44,7 +44,6 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
       opts={{
         align: 'start',
         slidesToScroll: 'auto',
-        watchDrag: false,
         startIndex: (initIndex as number | undefined) ?? 0,
       }}
     >

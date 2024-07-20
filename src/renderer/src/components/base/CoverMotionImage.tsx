@@ -30,10 +30,11 @@ export const CoverMotionImage = React.forwardRef<
         className={cn('relative', (!imageSrc || !isLoad) && loadingClassName, className)}
         ref={ref}
         {...props}
+        draggable={false}
       >
         <motion.img
           className={cn(
-            'h-full w-full max-w-none object-cover',
+            'h-full w-full max-w-none select-none object-cover',
             imageClassName,
             (!imageSrc || !isLoad) && 'invisible',
             'z-0',
@@ -41,6 +42,7 @@ export const CoverMotionImage = React.forwardRef<
           loading={loading}
           src={imageSrc}
           onLoad={() => setIsLoad(true)}
+          draggable={false}
         />
         {(!imageSrc || !isLoad) && <MotionSkeleton className={cn('absolute inset-0')} />}
       </motion.div>
