@@ -3,24 +3,24 @@ import PageSelector from '@renderer/components/subject/episode/grid/page-selecto
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQueryEpisodesInfoBySubjectId } from '@renderer/data/hooks/api/episodes'
 import { SubjectId } from '@renderer/data/types/bgm'
+import { EpisodeType } from '@renderer/data/types/episode'
 import { cn } from '@renderer/lib/utils'
-import { EPISODE_TYPE_MAP } from '@renderer/lib/utils/map'
 import { Fragment, useState } from 'react'
 
 export default function EpisodesGrid({ subjectId, eps }: { subjectId: SubjectId; eps: number }) {
   const [offset, setOffSet] = useState(0)
   const limit = 100
-  const episodes = useQueryEpisodesInfoBySubjectId({
+  const episodesQuery = useQueryEpisodesInfoBySubjectId({
     id: subjectId,
     offset,
     limit,
   })
-  const episodesData = episodes.data
+  const episodes = episodesQuery.data
   let firstTime = Array(7).fill(true) // 用来显示不同种类的数组, type 字段
   firstTime[0] = false // 本篇就不显示了
   let skeletonNumber = eps ?? 12
   if (skeletonNumber > 100) skeletonNumber = 100
-  if (!episodesData)
+  if (!episodes)
     return (
       <div className="flex flex-row flex-wrap gap-2 after:grow-[999]">
         {Array(skeletonNumber)
@@ -32,9 +32,9 @@ export default function EpisodesGrid({ subjectId, eps }: { subjectId: SubjectId;
     )
   return (
     <div className={cn('flex flex-col gap-4')}>
-      <PageSelector episodes={episodes} limit={limit} setOffSet={setOffSet} />
+      <PageSelector episodes={episodesQuery} limit={limit} setOffSet={setOffSet} />
       <div className={cn('flex flex-row flex-wrap gap-2 after:grow-[999]')}>
-        {episodesData.data.map((item) => {
+        {episodes.data.map((item) => {
           if (firstTime[item.type]) {
             firstTime[item.type] = false
             // 如果 type 比 3 大的话，均认为是“其他”类型
@@ -53,7 +53,7 @@ export default function EpisodesGrid({ subjectId, eps }: { subjectId: SubjectId;
                   )}
                   key={`${item.type}-tag`}
                 >
-                  {item.type <= 3 ? EPISODE_TYPE_MAP[item.type] : '其他'}
+                  {item.type <= 3 ? EpisodeType[item.type] : '其他'}
                 </div>
                 <EpisodeGridItem episode={item} key={item.id} />
               </Fragment>

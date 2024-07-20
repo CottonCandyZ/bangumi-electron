@@ -20,6 +20,7 @@ function createWindow(): void {
       color: 'rgba(0,0,0,0)',
       height: 64,
     },
+    trafficLightPosition: { x: 12, y: 25 },
     ...(process.platform === 'linux' ? { icon: join(__dirname, '../../resources/icon.png') } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

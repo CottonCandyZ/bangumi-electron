@@ -14,12 +14,13 @@ export type Subject = {
   total_episodes: number
   collection: Collection
   id: number
+  /** eps 不可信 */
   eps: number
   volumes: number
   series: boolean
   locked: boolean
   nsfw: boolean
-  type: number
+  type: SubjectType
 }
 
 export type RelatedSubject = {
@@ -29,6 +30,23 @@ export type RelatedSubject = {
   relation: string
   type: number
   id: number
+}
+
+export type SlimSubject = Pick<
+  Subject,
+  'date' | 'images' | 'name' | 'name_cn' | 'tags' | 'type' | 'id' | 'eps' | 'volumes'
+> & {
+  score: number
+  rank: number
+  collection_total: number
+}
+
+export enum SubjectType {
+  '书籍' = 1,
+  '动画',
+  '音乐',
+  '游戏',
+  '三次元' = 6,
 }
 
 export type CoverImages = {

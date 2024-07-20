@@ -41,9 +41,20 @@ export type PersonCareer =
   | 'illustrator'
   | 'actor'
 
-export type BloodType = 1 | 2 | 3 | 4
+export enum BloodType {
+  A = 1,
+  B,
+  AB,
+  O,
+}
 
-export interface Stat {
+export type Stat = {
   comments: number
   collects: number
+}
+
+export type Pagination = {
+  total: number
+  limit: number
+  offset: number
 }

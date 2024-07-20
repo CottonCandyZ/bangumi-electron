@@ -1,5 +1,4 @@
-import { BloodType, Images, PersonCareer, Stat } from '@renderer/data/types/bgm'
-import { InfoBoxValueList } from '@renderer/data/types/subject'
+import { BloodType, Images, InfoBoxValueList, PersonCareer, Stat } from '@renderer/data/types/bgm'
 
 export type Character = {
   images: Images
@@ -10,8 +9,8 @@ export type Character = {
   id: number
 }
 
-export interface CharacterDetail {
-  gender: string
+export type CharacterDetail = {
+  gender: string | null
   birth_mon: number | null
   birth_day: number | null
   birth_year: number | null
@@ -25,6 +24,13 @@ export interface CharacterDetail {
   locked: boolean
   type: number
   nsfw: boolean
+}
+
+export enum CharacterType {
+  '角色' = 1,
+  '机体',
+  '舰船',
+  '组织',
 }
 
 export type InfoBox = {

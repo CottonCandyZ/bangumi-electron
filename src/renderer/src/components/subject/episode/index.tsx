@@ -9,7 +9,7 @@ export default function SubjectEpisodes({ subjectId }: { subjectId: SubjectId })
     return null
   }
   // 如果不是动画或者三次元的话
-  if ((subjectInfo.type !== 2 && subjectInfo.type !== 6) || subjectInfo.eps === 0) return null
+  if (subjectInfo.type !== 2 && subjectInfo.type !== 6) return null
   // TODO:音乐的章节待做...
   return (
     <section className="flex flex-col gap-5">

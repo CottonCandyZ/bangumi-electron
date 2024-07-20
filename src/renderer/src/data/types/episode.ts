@@ -1,9 +1,8 @@
+import { Pagination } from '@renderer/data/types/bgm'
+
 export type Episodes = {
   data: Episode[]
-  total: number
-  limit: number
-  offset: number
-}
+} & Pagination
 
 export type Episode = {
   airdate: string
@@ -16,7 +15,14 @@ export type Episode = {
   id: number
   subject_id: number
   comment: number
-  type: 0 | 1 | 2 | 3 | 4 | 5 | 6
+  type: EpisodeType | 4 | 5 | 6
   disc: number
   duration_seconds: number
+}
+
+export enum EpisodeType {
+  '本篇' = 0,
+  'SP',
+  'OP',
+  'ED',
 }
