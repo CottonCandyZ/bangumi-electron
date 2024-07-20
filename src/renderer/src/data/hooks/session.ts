@@ -36,11 +36,16 @@ export const useAccessTokenQuery = () => {
  */
 export const useIsLoginQuery = () => {
   const { data: accessToken } = useAccessTokenQuery()
+  const logoutMutation = useLogoutMutation()
   return useQuery({
     queryKey: ['isLogin', accessToken],
     queryFn: async () => {
       if (!accessToken) return false
-      return (await isWebLogin()) && (await isAccessTokenValid(accessToken))
+      if (!(await isWebLogin()) && (await isAccessTokenValid(accessToken))) {
+        logoutMutation.mutate()
+        return false
+      }
+      return true
     },
     placeholderData: !!window.localStorage.getItem('isLogin'),
     enabled: accessToken !== undefined,
