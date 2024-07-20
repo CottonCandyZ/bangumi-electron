@@ -37,7 +37,7 @@ export default function SubjectBackground() {
       <div
         className="absolute left-0 right-0 top-0 -z-10 h-[100rem]"
         style={{
-          background: `linear-gradient(to top, hsl(var(--card)) ${percent}%, hsl(var(--card) / 0) ${percent + 130}%)`,
+          background: `linear-gradient(to top, hsl(var(--background)) ${percent}%, hsl(var(--background) / 0) ${percent + 130}%)`,
         }}
       ></div>
       <div className="absolute inset-0 top-[100rem] -z-10 bg-background"></div>
