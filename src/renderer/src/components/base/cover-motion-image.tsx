@@ -1,4 +1,4 @@
-import { MotionSkeleton } from '@renderer/components/ui/MotionSekleton'
+import { MotionSkeleton } from '@renderer/components/ui/motion-skeleton'
 import { cn } from '@renderer/lib/utils'
 import { HTMLMotionProps, motion } from 'framer-motion'
 import React, { useState } from 'react'

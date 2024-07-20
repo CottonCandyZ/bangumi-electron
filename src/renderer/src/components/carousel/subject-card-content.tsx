@@ -1,9 +1,9 @@
-import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
+import { CoverMotionImage } from '@renderer/components/base/cover-motion-image'
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
 import { useActiveSection } from '@renderer/components/carousel/state'
 import { useActiveHoverCard } from '@renderer/components/hover-card/state'
 import { cHoverCardSize } from '@renderer/components/hover-card/utils'
-import { MotionSkeleton } from '@renderer/components/ui/MotionSekleton'
+import { MotionSkeleton } from '@renderer/components/ui/motion-skeleton'
 import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import {

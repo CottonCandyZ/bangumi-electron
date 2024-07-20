@@ -1,4 +1,4 @@
-import { CoverMotionImage } from '@renderer/components/base/CoverMotionImage'
+import { CoverMotionImage } from '@renderer/components/base/cover-motion-image'
 import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/components/hover-card'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { RelatedSubject } from '@renderer/data/types/subject'
