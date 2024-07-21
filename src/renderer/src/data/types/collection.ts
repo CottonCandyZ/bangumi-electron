@@ -2,7 +2,7 @@ import { Pagination } from '@renderer/data/types/bgm'
 import { Episode } from '@renderer/data/types/episode'
 import { SlimSubject, SubjectType } from '@renderer/data/types/subject'
 
-export type Collection = {
+export type Collections = {
   data: CollectionData[]
 } & Pagination
 

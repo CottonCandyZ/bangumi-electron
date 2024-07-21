@@ -12,7 +12,7 @@ export type Subject = {
   infobox: InfoBox[]
   rating: Rating
   total_episodes: number
-  collection: Collection
+  collection: SubjectCollection
   id: number
   /** eps 不可信 */
   eps: number
@@ -110,7 +110,7 @@ export type RatingCount = {
   '10': number
 }
 
-export type Collection = {
+export type SubjectCollection = {
   on_hold: number
   dropped: number
   wish: number
