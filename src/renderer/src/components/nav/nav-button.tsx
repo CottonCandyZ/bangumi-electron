@@ -1,8 +1,9 @@
+import { MyLink } from '@renderer/components/base/my-link'
 import { Button } from '@renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import clsx from 'clsx'
 import { motion } from 'framer-motion'
-import { Link, useMatch } from 'react-router-dom'
+import { useMatch } from 'react-router-dom'
 
 export interface NavButtonProps {
   name: string
@@ -28,7 +29,7 @@ export default function NavButton({ name, path, icon, active }: NavButtonProps) 
           )}
           asChild
         >
-          <Link to={path} unstable_viewTransition>
+          <MyLink to={path} unstable_viewTransition>
             <>
               {isActive ? (
                 <motion.div
@@ -39,7 +40,7 @@ export default function NavButton({ name, path, icon, active }: NavButtonProps) 
               {isActive ? active : icon}
               {/* <span>{name}</span> */}
             </>
-          </Link>
+          </MyLink>
         </Button>
       </TooltipTrigger>
       <TooltipContent side="bottom">{name}</TooltipContent>

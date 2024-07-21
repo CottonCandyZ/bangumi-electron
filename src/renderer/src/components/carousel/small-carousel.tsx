@@ -1,3 +1,4 @@
+import { MyLink } from '@renderer/components/base/my-link'
 import { useActiveSection } from '@renderer/components/carousel/state'
 import SubjectCard from '@renderer/components/carousel/subject-card-content'
 import { Button } from '@renderer/components/ui/button'
@@ -15,7 +16,6 @@ import useStateHook from '@renderer/hooks/cache-state'
 import { cn } from '@renderer/lib/utils'
 import { ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 
 interface SmallCarouselProps {
   href: string
@@ -53,7 +53,7 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
           variant="ghost"
           className="group ml-1 h-min px-2 py-1 text-xl font-bold duration-100"
         >
-          <Link to={href}>
+          <MyLink to={href}>
             <div
               className={`flex -translate-x-2 items-center justify-center gap-1 transition-all duration-100 group-hover:translate-x-0 group-hover:text-red-600/70 dark:group-hover:text-red-400`}
             >
@@ -63,7 +63,7 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
                 strokeWidth={4}
               />
             </div>
-          </Link>
+          </MyLink>
         </Button>
         <div className="mb-2 ml-auto flex w-min gap-2">
           <CarouselPrevious className="relative left-0 top-0 translate-y-0" />

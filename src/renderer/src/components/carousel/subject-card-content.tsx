@@ -22,7 +22,8 @@ import { cn } from '@renderer/lib/utils'
 import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
 import { memo, useEffect, useRef } from 'react'
-import { Link, unstable_useViewTransitionState, useLocation } from 'react-router-dom'
+import { unstable_useViewTransitionState, useLocation } from 'react-router-dom'
+import { MyLink } from '@renderer/components/base/my-link'
 
 export interface SubjectCardProps {
   sectionPath: sectionPath
@@ -74,12 +75,11 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
         className={cn('relative z-[1] w-full cursor-default')}
         onMouseEnter={() => setActiveId(null)}
       >
-        <Link
+        <MyLink
           to={`/subject/${subjectId}`}
           className="cursor-default"
           unstable_viewTransition
           state={{ viewTransitionName: `cover-image-${key}` }}
-          draggable={false}
         >
           <Card
             className="relative overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
@@ -128,7 +128,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
               </div>
             </CardContent>
           </Card>
-        </Link>
+        </MyLink>
         <motion.div className="mt-2 w-full p-0.5" layoutId={`${layoutId}-header`}>
           {subjectInfoData ? (
             <>
@@ -157,7 +157,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
             }}
             layoutId={layoutId}
           >
-            <Link
+            <MyLink
               to={`/subject/${subjectId}`}
               className="cursor-default"
               unstable_viewTransition
@@ -273,7 +273,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
                   )}
                 </CardContent>
               </Card>
-            </Link>
+            </MyLink>
           </motion.div>
         )}
       </AnimatePresence>

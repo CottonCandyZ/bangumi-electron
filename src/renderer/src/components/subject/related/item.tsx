@@ -1,8 +1,9 @@
 import { CoverMotionImage } from '@renderer/components/base/cover-motion-image'
+import { MyLink } from '@renderer/components/base/my-link'
 import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/components/hover-card'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { RelatedSubject } from '@renderer/data/types/subject'
-import { Link, unstable_useViewTransitionState, useLocation } from 'react-router-dom'
+import { unstable_useViewTransitionState, useLocation } from 'react-router-dom'
 
 const sectionId = 'RelatedSubjects'
 export default function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
@@ -13,7 +14,7 @@ export default function Item({ relatedSubject }: { relatedSubject: RelatedSubjec
     <HoverPopCard layoutId={layoutId}>
       <HoverCardContent>
         <div className="flex flex-col gap-2">
-          <Link
+          <MyLink
             to={`/subject/${relatedSubject.id}`}
             className="cursor-default"
             state={{ viewTransitionName: `cover-image-${key}` }}
@@ -37,7 +38,7 @@ export default function Item({ relatedSubject }: { relatedSubject: RelatedSubjec
                 )}
               </CardContent>
             </Card>
-          </Link>
+          </MyLink>
           <div className="flex flex-col">
             <span className="line-clamp-3 text-xs">{relatedSubject.name}</span>
           </div>
