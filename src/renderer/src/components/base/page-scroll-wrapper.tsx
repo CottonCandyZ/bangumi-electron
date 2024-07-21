@@ -22,6 +22,7 @@ export default function PageScrollWrapper({
       overflow: { x: 'hidden' },
       scrollbars: { autoHide: 'scroll', theme: 'os-theme-custom' },
     },
+    defer: true,
   })
   if (!stateContext) {
     throw new Error('PageScrollWrapper need in StateWrapper')

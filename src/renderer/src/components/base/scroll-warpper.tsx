@@ -19,6 +19,7 @@ export default function ScrollWrapper({
         ...typeOptions,
         scrollbars: { ...typeOptions?.scrollbars, theme: 'os-theme-custom' },
       }}
+      defer
       {...props}
     >
       {children}
