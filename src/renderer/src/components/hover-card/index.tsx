@@ -18,6 +18,7 @@ const HoverPopCardContext = createContext<{
   layoutId: string
   activeId: string | null
   finished: boolean
+  delay: number
   setFinished: React.Dispatch<React.SetStateAction<boolean>>
 } | null>(null)
 
@@ -32,17 +33,8 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
   delay = 700,
 }) => {
   const hoverRef = useRef<HTMLDivElement>(null)
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
   const activeId = useActiveHoverCard((state) => state.activeId)
   const [finished, setFinished] = useState(true)
-
-  useEffect(() => {
-    return () => {
-      clearTimeout(timeoutRef.current)
-      setActiveId(null)
-    }
-  }, [])
 
   return (
     <HoverPopCardContext.Provider
@@ -51,21 +43,11 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
         layoutId,
         activeId,
         finished,
+        delay,
         setFinished,
       }}
     >
-      <motion.div
-        className={cn('relative', activeId === layoutId && 'z-30')}
-        onMouseEnter={() => {
-          timeoutRef.current = setTimeout(() => {
-            setActiveId(layoutId)
-            setFinished(false)
-          }, delay)
-        }}
-        onMouseLeave={() => clearTimeout(timeoutRef.current)}
-      >
-        {children}
-      </motion.div>
+      <div className={cn('relative', activeId === layoutId && 'z-30')}>{children}</div>
     </HoverPopCardContext.Provider>
   )
 }
@@ -77,12 +59,28 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = (
 }) => {
   const hoverCardContext = useContext(HoverPopCardContext)
   if (!hoverCardContext) throw Error('HoverCardContent need to be wrapped in HoverPopCard')
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(timeoutRef.current)
+      setActiveId(null)
+    }
+  }, [])
 
   return (
     <motion.div
       ref={hoverCardContext.hoverRef}
       layoutId={hoverCardContext.layoutId}
       className={className}
+      onMouseEnter={() => {
+        timeoutRef.current = setTimeout(() => {
+          setActiveId(hoverCardContext.layoutId)
+          hoverCardContext.setFinished(false)
+        }, hoverCardContext.delay)
+      }}
+      onMouseLeave={() => clearTimeout(timeoutRef.current)}
       transition={{
         duration:
           hoverCardContext.activeId !== hoverCardContext.layoutId && hoverCardContext.finished
