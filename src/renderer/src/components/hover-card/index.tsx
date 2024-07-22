@@ -47,7 +47,9 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
         setFinished,
       }}
     >
-      <div className={cn('relative', activeId === layoutId && 'z-30')}>{children}</div>
+      <div key={layoutId} className={cn('relative', activeId === layoutId && 'z-30')}>
+        {children}
+      </div>
     </HoverPopCardContext.Provider>
   )
 }
@@ -71,6 +73,7 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = (
 
   return (
     <motion.div
+      key={hoverCardContext.layoutId}
       ref={hoverCardContext.hoverRef}
       layoutId={hoverCardContext.layoutId}
       className={className}

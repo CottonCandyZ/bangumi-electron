@@ -9,11 +9,13 @@ import { Character } from '@renderer/data/types/character'
 import { cn } from '@renderer/lib/utils'
 import { getCharacterAvatarURL } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
+import { useLocation } from 'react-router-dom'
 
 const sectionId = 'Characters'
 export default function Item({ character }: { character: Character }) {
+  const { key } = useLocation()
   const id = character.id
-  const layoutId = `${sectionId}-${id}`
+  const layoutId = `${sectionId}-${id}-${key}`
   return (
     <HoverPopCard layoutId={layoutId}>
       <HoverCardContent className="h-full cursor-default">

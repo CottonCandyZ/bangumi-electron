@@ -7,9 +7,9 @@ import { unstable_useViewTransitionState, useLocation } from 'react-router-dom'
 
 const sectionId = 'RelatedSubjects'
 export default function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
-  const layoutId = `${sectionId}-${relatedSubject.id}`
-  const isTransitioning = unstable_useViewTransitionState(`/subject/${relatedSubject.id}`)
   const { key } = useLocation()
+  const layoutId = `${sectionId}-${relatedSubject.id}-${key}`
+  const isTransitioning = unstable_useViewTransitionState(`/subject/${relatedSubject.id}`)
   return (
     <HoverPopCard layoutId={layoutId}>
       <HoverCardContent>
@@ -29,7 +29,7 @@ export default function Item({ relatedSubject }: { relatedSubject: RelatedSubjec
               <CardContent className="aspect-square p-0">
                 {relatedSubject.images.common !== '' ? (
                   <CoverMotionImage
-                    layoutId={`${layoutId}-image-${key}`}
+                    layoutId={`${layoutId}-image`}
                     imageSrc={relatedSubject.images.small}
                     className="aspect-square"
                   />
@@ -49,8 +49,8 @@ export default function Item({ relatedSubject }: { relatedSubject: RelatedSubjec
           <CardContent className="p-2">
             <div className="flex flex-row gap-2">
               <CoverMotionImage
-                layoutId={`${layoutId}-image-${key}`}
-                imageSrc={relatedSubject.images.common}
+                layoutId={`${layoutId}-image`}
+                imageSrc={relatedSubject.images.small}
                 className="h-fit shrink-0 basis-1/3 overflow-hidden rounded-md"
                 loadingClassName="aspect-[2/3]"
               />
