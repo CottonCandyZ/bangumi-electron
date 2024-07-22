@@ -12,12 +12,13 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useLocation } from 'react-router-dom'
 
 const HoverPopCardContext = createContext<{
   hoverRef: React.RefObject<HTMLDivElement> | null
   layoutId: string
   activeId: string | null
+  finished: boolean
+  setFinished: React.Dispatch<React.SetStateAction<boolean>>
 } | null>(null)
 
 type HoverCardProps = {
@@ -34,8 +35,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
   const activeId = useActiveHoverCard((state) => state.activeId)
-  const { key } = useLocation()
-  layoutId = `${layoutId}-${key}`
+  const [finished, setFinished] = useState(true)
 
   useEffect(() => {
     return () => {
@@ -50,14 +50,16 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
         hoverRef,
         layoutId,
         activeId,
+        finished,
+        setFinished,
       }}
     >
       <motion.div
-        key={layoutId}
         className={cn('relative', activeId === layoutId && 'z-30')}
         onMouseEnter={() => {
           timeoutRef.current = setTimeout(() => {
             setActiveId(layoutId)
+            setFinished(false)
           }, delay)
         }}
         onMouseLeave={() => clearTimeout(timeoutRef.current)}
@@ -81,6 +83,12 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = (
       ref={hoverCardContext.hoverRef}
       layoutId={hoverCardContext.layoutId}
       className={className}
+      transition={{
+        duration:
+          hoverCardContext.activeId !== hoverCardContext.layoutId && hoverCardContext.finished
+            ? 0
+            : undefined,
+      }}
       {...props}
     >
       {children}
@@ -97,7 +105,7 @@ export const PopCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = ({
   if (!hoverCardContext) throw Error('PopCardContent need to be wrapped in HoverPopCard')
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={() => hoverCardContext.setFinished(true)}>
       {hoverCardContext.activeId === hoverCardContext.layoutId && (
         <PopCardInnerContent
           layoutId={hoverCardContext.layoutId}
