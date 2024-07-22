@@ -14,7 +14,7 @@ function RootLayout() {
         <NavBar />
       </div>
       <div className="flex *:h-[calc(100dvh-64px)]">
-        <PageScrollWrapper className="ml-[72px] mt-16 min-h-full w-full rounded-tl-lg border-l border-t">
+        <PageScrollWrapper className="ml-[72px] mt-16 min-h-full w-full overflow-x-hidden rounded-tl-lg border-l border-t">
           <div>
             <Outlet />
           </div>
