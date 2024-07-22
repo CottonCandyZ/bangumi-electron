@@ -1,4 +1,5 @@
 import SmallCarousel from '@renderer/components/carousel/small-carousel'
+import CollectionsGrid from '@renderer/components/collections/grid/indext'
 import { BackCover } from '@renderer/components/hover-card/close'
 
 export function Component() {
@@ -7,7 +8,7 @@ export function Component() {
       {/* <section>
         <BigCarousel />
       </section> */}
-      <section className="px-9">
+      {/* <section className="px-9">
         <SmallCarousel href="/anime" name="动画" sectionPath="anime" />
       </section>
       <section className="px-9">
@@ -21,7 +22,11 @@ export function Component() {
       </section>
       <section className="px-9">
         <SmallCarousel href="/real" name="三次元" sectionPath="real" />
+      </section> */}
+      <section className="px-9">
+        <CollectionsGrid />
       </section>
+
       {/*  时间线 */}
       <BackCover />
     </div>
