@@ -1,13 +1,16 @@
 import SmallCarousel from '@renderer/components/carousel/small-carousel'
-import CollectionsGrid from '@renderer/components/collections/grid/indext'
+import CollectionsGrid from '@renderer/components/collections/grid'
 import { BackCover } from '@renderer/components/hover-card/close'
+import { useIsLoginQuery } from '@renderer/data/hooks/session'
 
 export function Component() {
+  const isLogin = useIsLoginQuery()
   return (
-    <div className="flex flex-col gap-2 pb-20 pt-2">
+    <div className="flex flex-col gap-2 pb-20 pt-10">
       {/* <section>
         <BigCarousel />
       </section> */}
+      <section className="px-9">{isLogin && <CollectionsGrid />}</section>
       {/* <section className="px-9">
         <SmallCarousel href="/anime" name="动画" sectionPath="anime" />
       </section>
@@ -23,9 +26,6 @@ export function Component() {
       <section className="px-9">
         <SmallCarousel href="/real" name="三次元" sectionPath="real" />
       </section> */}
-      <section className="px-9">
-        <CollectionsGrid />
-      </section>
 
       {/*  时间线 */}
       <BackCover />

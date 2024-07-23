@@ -25,6 +25,16 @@
     --ring: 240 5.9% 10%;
     --radius: 0.5rem;
 
+    --want-to-watch: #ffb4c3;
+    --want-to-watch-foreground: #FFF;
+    --want-to-watch-accent: #ffdfea;
+    --want-to-watch-accent-foreground: #8b5a64;
+    --watched: #52c2fe;
+    --watched-foreground: #FFF;
+    --watched-accent: #c0ecfb;
+    --watched-accent-foreground: #429ccd;
+
+
     --chart-score-10: 331.83, 80.39%, 60%;
     --chart-score-9: 345.1, 77.66%, 61.37%;
     --chart-score-8: 358.73, 74.74%, 62.75%;
@@ -57,6 +67,14 @@
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
     --ring: 240 4.9% 83.9%;
+
+    --want-to-watch: #cfa4ad;
+    --want-to-watch-foreground: #FFF;
+    --want-to-watch--accent: #cdb7be;
+    --watched: #78abc7;
+    --watched-foreground: #FFF;
+    --watched-accent: #a1c2c9;
+    --watched-accent-foreground: #295e7b;
 
     --chart-score-10: 331.83, 80.39%, 60%;
     --chart-score-9: 345.1, 77.66%, 61.37%;

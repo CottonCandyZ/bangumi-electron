@@ -1,6 +1,6 @@
 import { Toaster } from '@renderer/components/ui/sonner'
 import { ThemeProvider } from '@renderer/components/wrapper/theme-wrapper'
-import { QueryCache, QueryClient } from '@tanstack/react-query'
+import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PropsWithChildren } from 'react'
 import { TooltipProvider } from '@renderer/components/ui/tooltip'
@@ -30,9 +30,9 @@ const queryClient = new QueryClient({
 const persister = createIDBPersister()
 export default function Wrapper({ children }: PropsWithChildren) {
   return (
-    <PersistQueryClientProvider
+    <QueryClientProvider
       client={queryClient}
-      persistOptions={{ persister, maxAge: 60 * 1000 * 60 * 24 }}
+      // persistOptions={{ persister, maxAge: 60 * 1000 * 60 * 24 }}
     >
       <InitStateContextWrapper>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
@@ -41,6 +41,6 @@ export default function Wrapper({ children }: PropsWithChildren) {
         </ThemeProvider>
       </InitStateContextWrapper>
       <ReactQueryDevtools initialIsOpen={false} />
-    </PersistQueryClientProvider>
+    </QueryClientProvider>
   )
 }

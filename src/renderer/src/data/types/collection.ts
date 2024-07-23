@@ -26,14 +26,14 @@ export type CollectionEpisodes = {
 
 export type CollectionEpisode = {
   episode: Episode
-  type: CollectionType
+  type: EpisodeCollectionType
 }
 
 export enum EpisodeCollectionType {
-  '未收藏' = 0,
-  '想看',
-  '看过',
-  '抛弃',
+  'notCollected' = 0,
+  'wantToWatch',
+  'watched',
+  'abandoned',
 }
 
 export enum CollectionType {

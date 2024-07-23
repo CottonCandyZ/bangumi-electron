@@ -58,3 +58,5 @@ export type Pagination = {
   limit: number
   offset: number
 }
+
+export type OnAirStatus = 'noAired' | 'onAir' | 'aired'

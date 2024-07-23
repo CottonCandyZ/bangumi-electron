@@ -3,6 +3,7 @@ import { AuthError } from '@renderer/lib/utils/error'
 import {
   GetNextPageParamFunction,
   QueryOptions,
+  UseQueryOptions,
   keepPreviousData,
   useInfiniteQuery,
   useQuery,
@@ -15,8 +16,8 @@ import { FetchError } from 'ofetch'
 
 type Fn<P, R> = (P: P) => Promise<R>
 type OptionalProps<P> = keyof Omit<P, 'token'> extends never
-  ? { props?: Omit<P, 'token'> }
-  : { props: Omit<P, 'token'> }
+  ? { queryProps?: Omit<P, 'token'> }
+  : { queryProps: Omit<P, 'token'> }
 
 /**
  * 为必须验证的 QueryHook 工厂
@@ -26,21 +27,25 @@ type OptionalProps<P> = keyof Omit<P, 'token'> extends never
 export const useQueryMustAuth = <P, R>({
   queryKey,
   queryFn,
-  props,
+  queryProps,
+  enabled = true,
+  ...props
 }: {
   queryKey: QueryOptions['queryKey']
   queryFn: P extends { token: string } ? Fn<P, R> : never
-} & OptionalProps<P>) => {
+  enabled?: boolean
+} & OptionalProps<P> &
+  Omit<UseQueryOptions<R, Error, R>, 'queryFn'>) => {
   const logoutMutation = useLogoutMutation()
   const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const query = useQuery({
-    queryKey: [accessToken, ...(queryKey || []), props],
+    queryKey: [accessToken, ...(queryKey || []), queryProps],
     queryFn: async () => {
       if (!accessToken) throw AuthError.notAuth()
       let data: R | undefined
       try {
-        data = await queryFn({ token: accessToken.access_token, ...props } as P)
+        data = await queryFn({ token: accessToken.access_token, ...queryProps } as P)
       } catch (error) {
         if (error instanceof FetchError && error.statusCode === 401) {
           throw AuthError.expire()
@@ -49,7 +54,8 @@ export const useQueryMustAuth = <P, R>({
       }
       return data as R
     },
-    enabled: accessToken !== undefined,
+    enabled: enabled && accessToken !== undefined,
+    ...props,
   })
   if (query.isError && query.error instanceof AuthError) {
     if (query.error.code === 2) {
@@ -70,26 +76,27 @@ export const useQueryMustAuth = <P, R>({
 export const useQueryOptionalAuth = <P, R, S = R>({
   queryKey,
   queryFn,
-  props,
-  enabled,
+  queryProps,
+  enabled = true,
   select,
   needKeepPreviousData = true,
+  ...props
 }: {
   queryKey: QueryOptions['queryKey']
   queryFn: P extends { token?: string } ? Fn<P, R> : never
-  enabled?: boolean
   select?: (data: R) => S
   needKeepPreviousData?: boolean
-} & OptionalProps<P>) => {
+} & OptionalProps<P> &
+  Omit<UseQueryOptions<R, Error, R>, 'select' | 'queryFn'>) => {
   const logoutMutation = useLogoutMutation()
   const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const query = useQuery({
-    queryKey: [accessToken, ...(queryKey || []), props],
+    queryKey: [accessToken, ...(queryKey || []), queryProps],
     queryFn: async () => {
       let data: R | undefined
       try {
-        data = await queryFn({ token: accessToken?.access_token, ...props } as P)
+        data = await queryFn({ token: accessToken?.access_token, ...queryProps } as P)
       } catch (error) {
         if (error instanceof FetchError && error.statusCode === 401) {
           throw AuthError.expire()
@@ -98,9 +105,10 @@ export const useQueryOptionalAuth = <P, R, S = R>({
       }
       return data as R
     },
-    enabled: (enabled === undefined ? true : enabled) && accessToken !== undefined,
+    enabled: enabled && accessToken !== undefined,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     select,
+    ...props,
   })
   if (query.isError && query.error instanceof AuthError) {
     if (query.error.code === 2) {
@@ -120,7 +128,7 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam, SR = QR>({
   queryFn,
   props,
   qFLimit,
-  enabled,
+  enabled = true,
   needKeepPreviousData = true,
   initialPageParam,
   getNextPageParam,
@@ -156,7 +164,7 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam, SR = QR>({
       }
       return data as QR
     },
-    enabled: (enabled === undefined ? true : enabled) && accessToken !== undefined,
+    enabled: enabled && accessToken !== undefined,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     initialPageParam,
     getNextPageParam,

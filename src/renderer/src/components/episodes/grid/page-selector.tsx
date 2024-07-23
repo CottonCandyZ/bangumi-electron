@@ -5,6 +5,7 @@ import {
   SelectValue,
   SelectItem,
 } from '@renderer/components/ui/select'
+import { CollectionEpisodes } from '@renderer/data/types/collection'
 import { Episodes } from '@renderer/data/types/episode'
 import { cn } from '@renderer/lib/utils'
 import { getPageArrayFromTotal } from '@renderer/lib/utils/data-trans'
@@ -15,7 +16,7 @@ export default function PageSelector({
   setOffSet,
   limit,
 }: {
-  episodes: UseQueryResult<Episodes, Error>
+  episodes: UseQueryResult<Episodes | CollectionEpisodes, Error>
   setOffSet: React.Dispatch<React.SetStateAction<number>>
   limit: number
 }) {

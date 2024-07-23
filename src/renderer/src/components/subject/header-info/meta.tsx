@@ -10,7 +10,7 @@ export default function Meta({
 }: Pick<Subject, 'date' | 'eps' | 'platform' | 'infobox'>) {
   const week_day = extractInfoBox(infobox, '放送星期')?.value as string | undefined
   return (
-    <div className="flex flex-row gap-1 text-sm">
+    <div className="flex flex-row gap-1 text-sm font-medium">
       <MetaItem inner={date} content={dayjs(date, 'YYYY-MM-DD').format('YYYY 年 7 月')} first />
       <MetaItem inner={platform} content={platform} />
       <MetaItem inner={eps} content={`共 ${eps} 话`} />

@@ -1,5 +1,9 @@
-import { getCollectionsByUsername } from '@renderer/data/fetch/api/collection'
-import { useInfinityQueryOptionalAuth } from '@renderer/data/hooks/factory'
+import {
+  getCollectionEpisodesBySubjectId,
+  getCollectionsByUsername,
+} from '@renderer/data/fetch/api/collection'
+import { useInfinityQueryOptionalAuth, useQueryMustAuth } from '@renderer/data/hooks/factory'
+import { SubjectId } from '@renderer/data/types/bgm'
 import { UserInfo } from '@renderer/data/types/user'
 
 type OmitInfinityQFP<P> = Omit<P, 'token' | 'offset'>
@@ -28,4 +32,25 @@ export const useInfinityQueryCollectionsByUsername = ({
     },
     initialPageParam: initialPageParm,
     enabled,
+  })
+
+export const useQueryCollectionEpisodesInfoBySubjectId = ({
+  subjectId,
+  limit = 100,
+  offset = 0,
+  episodeType,
+  enabled,
+}: {
+  subjectId: SubjectId | undefined
+  limit?: number
+  offset?: number
+  episodeType?: number
+  enabled?: boolean
+}) =>
+  useQueryMustAuth({
+    queryFn: getCollectionEpisodesBySubjectId,
+    queryKey: ['episodes-info'],
+    queryProps: { subjectId, limit, offset, episodeType },
+    enabled,
+    staleTime: 0,
   })

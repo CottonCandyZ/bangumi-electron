@@ -7,23 +7,23 @@ import { FetchParamError } from '@renderer/lib/utils/error'
 /** 用 subjectId 获得一个 Episodes 对象
  */
 export async function getEpisodesBySubjectId({
-  id,
+  subjectId,
   limit,
   offset,
   type,
   token,
 }: {
-  id?: SubjectId
+  subjectId?: SubjectId
   limit?: number
   offset?: number
   type?: number
   token?: string
 }) {
-  if (!id) throw new FetchParamError('未获得 id')
+  if (!subjectId) throw new FetchParamError('未获得 id')
 
   const info = await apiFetch<Episodes>(EPISODES.ROOT, {
     query: {
-      subject_id: id,
+      subject_id: subjectId,
       limit,
       offset,
       type,

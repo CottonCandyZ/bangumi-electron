@@ -22,7 +22,7 @@ export const useQuerySubjectCharacters = ({
   useQueryOptionalAuth({
     queryFn: getSubjectCharactersById,
     queryKey: ['subject-characters'],
-    props: { id },
+    queryProps: { id },
     enabled,
     needKeepPreviousData,
     select: sortCharacterByRelation(['主角', '配角', '客串']),

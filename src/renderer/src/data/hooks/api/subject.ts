@@ -18,7 +18,7 @@ export const useQuerySubjectInfo = ({
   useQueryOptionalAuth({
     queryFn: getSubjectById,
     queryKey: ['subject-info'],
-    props: { id },
+    queryProps: { id },
     enabled: enabled,
     needKeepPreviousData,
   })
@@ -38,7 +38,7 @@ export const useQueryRelatedSubjects = ({
   useQueryOptionalAuth({
     queryFn: getRelatedSubjects,
     queryKey: ['subject-related'],
-    props: { id },
+    queryProps: { id },
     select: sortCharacterByRelation(),
     enabled,
     needKeepPreviousData,

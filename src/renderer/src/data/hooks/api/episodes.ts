@@ -7,13 +7,13 @@ import { SubjectId } from '@renderer/data/types/bgm'
  *
  */
 export const useQueryEpisodesInfoBySubjectId = ({
-  id,
+  subjectId,
   limit = 100,
   offset = 0,
   type,
   enabled,
 }: {
-  id: SubjectId | undefined
+  subjectId: SubjectId | undefined
   limit?: number
   offset?: number
   type?: number
@@ -22,6 +22,6 @@ export const useQueryEpisodesInfoBySubjectId = ({
   useQueryOptionalAuth({
     queryFn: getEpisodesBySubjectId,
     queryKey: ['episodes-info'],
-    props: { id, limit, offset, type },
+    queryProps: { subjectId, limit, offset, type },
     enabled: enabled,
   })

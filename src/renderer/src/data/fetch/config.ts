@@ -78,6 +78,7 @@ export const PERSONS = {
 /** 收藏 */
 export const COLLECTIONS = {
   BY_USERNAME: (username: UserInfo['username']) => `/v0/users/${username}/collections`,
+  EPISODES_BY_SUBJECT_ID: (subjectId: SubjectId) => `/v0/users/-/collections/${subjectId}/episodes`,
 }
 
 /** ofetch web config */

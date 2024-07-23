@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@renderer/components/ui/card'
+import CollectionItem from '@renderer/components/collections/grid/item'
 import { useInfinityQueryCollectionsByUsername } from '@renderer/data/hooks/api/collection'
 import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
 import { CollectionType } from '@renderer/data/types/collection'
@@ -24,7 +24,6 @@ export default function CollectionsGrid() {
     }
   }, [])
   useEffect(() => {
-    console.log(bottomRef.current)
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -49,27 +48,21 @@ export default function CollectionsGrid() {
   if (!collections) return null
   return (
     <div className="relative flex flex-col items-center justify-center gap-5">
-      <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(24rem,_1fr))] gap-5">
+      <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(24rem,_1fr))] gap-2">
         {collections.pages.map((group, page) => (
           <Fragment key={page}>
             {group.data.map((collection) => (
-              <Card key={collection.subject_id} className="h-32">
-                <CardContent className="p-2">
-                  <div>{collection.subject.name_cn}</div>
-                </CardContent>
-              </Card>
+              <CollectionItem key={collection.subject_id} collectionItemInfo={collection} />
             ))}
           </Fragment>
         ))}
       </div>
-      <div className="absolute bottom-0 left-0 right-0 h-64" ref={bottomRef}></div>
+      <div className="absolute bottom-0 left-0 right-0 -z-10 h-64" ref={bottomRef}></div>
       <div>
         {collectionsQuery.isFetchingNextPage ? (
           <span className="i-mingcute-loading-line animate-spin text-2xl" />
-        ) : collectionsQuery.hasNextPage ? (
-          ''
         ) : (
-          'Nothing more to load'
+          !collectionsQuery.hasNextPage && '已经到底啦'
         )}
       </div>
     </div>

@@ -1,36 +1,60 @@
+import { MediumHeader } from '@renderer/components/base/headers'
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
+import { EpisodeGridSize } from '@renderer/components/episodes/grid'
 import { Button } from '@renderer/components/ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import { Separator } from '@renderer/components/ui/separator'
+import { UI_CONFIG } from '@renderer/config'
+import { EpisodeCollectionType } from '@renderer/data/types/collection'
 import { Episode } from '@renderer/data/types/episode'
 import { cn } from '@renderer/lib/utils'
 import { getDurationFromSeconds } from '@renderer/lib/utils/data-trans'
 import { getOnAirStatus } from '@renderer/lib/utils/date'
 import { isEmpty } from '@renderer/lib/utils/string'
 
-export default function EpisodeGridItem({ episode }: { episode: Episode }) {
+export default function EpisodeGridItem({
+  episode,
+  size = 'default',
+  collectionType = EpisodeCollectionType.notCollected,
+}: {
+  episode: Episode
+  collectionType?: EpisodeCollectionType
+} & EpisodeGridSize) {
   const duration = getDurationFromSeconds(episode.duration_seconds)
-  const variants = ['ghost', 'onAir', 'outline'] as const
-  const status = getOnAirStatus(episode.airdate)
-  const variant = variants[status]
+  const status =
+    collectionType === EpisodeCollectionType.notCollected
+      ? getOnAirStatus(episode.airdate)
+      : (EpisodeCollectionType[collectionType] as Exclude<
+          keyof typeof EpisodeCollectionType,
+          'notCollected'
+        >)
+
   return (
     <HoverCard openDelay={300}>
-      <HoverCardTrigger>
+      <HoverCardTrigger asChild>
         <Button
           key={episode.id}
           className={cn(
-            `size-10`,
-            episode.sort.toString().length > 3 && 'w-12',
-            episode.sort.toString().length > 4 && 'w-14',
+            `h-10 min-w-10 rounded-md p-2`,
+            size === 'small' && 'h-6 min-w-6 rounded-sm p-1 text-xs',
           )}
-          variant={variant}
+          variant={status}
         >
           {episode.sort}
         </Button>
       </HoverCardTrigger>
-      <HoverCardContent align="start" className="w-full min-w-64 max-w-96">
+      <HoverCardContent
+        align="center"
+        className="w-full min-w-64 max-w-96"
+        collisionPadding={{
+          right: 8,
+          left: UI_CONFIG.NAV_WIDTH + 8,
+          bottom: 8,
+          top: UI_CONFIG.HEADER_HEIGHT + 8,
+        }}
+      >
         <div className="flex flex-col gap-2">
-          {!isEmpty(episode.name) && <Header {...episode} />}
+          {!isEmpty(episode.name) && <MediumHeader {...episode} />}
           {!isEmpty(episode.desc) && (
             <>
               <ScrollWrapper className="max-h-32 pr-2">
@@ -52,16 +76,5 @@ export default function EpisodeGridItem({ episode }: { episode: Episode }) {
         </div>
       </HoverCardContent>
     </HoverCard>
-  )
-}
-
-// 没有 CN 标题就直接显示
-function Header({ name, name_cn }: { name: string; name_cn: string }) {
-  if (isEmpty(name_cn)) return <h3 className="font-jp font-bold">{name}</h3>
-  return (
-    <header>
-      <h3 className="font-bold">{name_cn}</h3>
-      <h4 className="font font-jp text-sm font-medium text-muted-foreground">{name}</h4>
-    </header>
   )
 }

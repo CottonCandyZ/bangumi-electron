@@ -34,7 +34,7 @@ export const useAccessTokenQuery = () => {
 /**
  * 查询登录状态，验证 cookie 和 token 均有效
  */
-export const useIsLoginQuery = () => {
+export const useIsLoginQuery = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const { data: accessToken } = useAccessTokenQuery()
   const logoutMutation = useLogoutMutation()
   return useQuery({
@@ -48,6 +48,6 @@ export const useIsLoginQuery = () => {
       return true
     },
     placeholderData: !!window.localStorage.getItem('isLogin'),
-    enabled: accessToken !== undefined,
+    enabled: enabled && accessToken !== undefined,
   })
 }

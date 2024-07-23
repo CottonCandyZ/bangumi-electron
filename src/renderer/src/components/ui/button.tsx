@@ -17,10 +17,16 @@ const buttonVariants = cva(
           "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
         secondary:
           "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
-        onAir:
-          "border border-input bg-background text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        wantToWatch: "bg-[var(--want-to-watch)] text-[var(--want-to-watch-foreground)] shadow-inner hover:bg-[var(--want-to-watch-accent)] hover:text-[var(--want-to-watch-accent-foreground)]",
+        watched: "border border-input bg-[var(--watched)] text-[var(--watched-foreground)] shadow-inner hover:bg-[var(--watched-accent)] hover:text-[var(--watched-accent-foreground)]",
+        abandoned: "border border-primary-foreground line-through shadow-inner hover:bg-accent hover:text-accent-foreground text-muted-foreground",
+        noAired: "hover:bg-accent hover:text-accent-foreground text-muted-foreground",
+        onAir:
+          "border border-input bg-background text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground",
+        aired:
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:shadow-inner",
       },
       size: {
         default: "h-9 px-4 py-2",

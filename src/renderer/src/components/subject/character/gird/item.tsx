@@ -28,7 +28,7 @@ export default function Item({ character }: { character: Character }) {
           >
             {!isEmpty(character.images.large) && (
               <CoverMotionImage
-                className="aspect-square size-14 shrink-0 overflow-hidden rounded-2xl"
+                className="aspect-square size-14 shrink-0 overflow-hidden rounded-lg"
                 imageSrc={getCharacterAvatarURL(character.images.large)}
               />
             )}
@@ -49,7 +49,7 @@ function PopCard({ character }: { character: Character }) {
           <div className="flex h-full flex-row gap-4">
             {!isEmpty(character.images.large) && (
               <CoverMotionImage
-                className="h-fit basis-1/4 overflow-hidden rounded-xl"
+                className="h-fit basis-1/4 overflow-hidden rounded-lg"
                 imageSrc={character.images.grid}
                 loadingClassName="aspect-square"
                 loading="eager"
