@@ -30,6 +30,7 @@ export default function ScoreChart({
       <BarChart
         accessibilityLayer
         data={data}
+        barCategoryGap={2}
         margin={{
           top: 30,
         }}
