@@ -48,7 +48,7 @@ export default function CollectionsGrid() {
   if (!collections) return null
   return (
     <div className="relative flex flex-col items-center justify-center gap-5">
-      <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(24rem,_1fr))] gap-2">
+      <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(15rem,_1fr))] gap-2">
         {collections.pages.map((group, page) => (
           <Fragment key={page}>
             {group.data.map((collection) => (

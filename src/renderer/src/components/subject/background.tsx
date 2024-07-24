@@ -1,5 +1,5 @@
 import { ScrollContext } from '@renderer/components/base/page-scroll-wrapper'
-import { SateContext } from '../wrapper/SateContext'
+import { SateContext } from '@renderer/components/wrapper/state-wrapper'
 import { useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 

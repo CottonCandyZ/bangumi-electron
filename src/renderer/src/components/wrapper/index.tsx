@@ -40,7 +40,7 @@ export default function Wrapper({ children }: PropsWithChildren) {
           <Toaster richColors className="pointer-events-auto" />
         </ThemeProvider>
       </InitStateContextWrapper>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   )
 }

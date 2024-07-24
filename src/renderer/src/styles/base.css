@@ -9,3 +9,27 @@
 ::-webkit-scrollbar {
   display: none;
 }
+/*
+::-webkit-scrollbar {
+  background-color: transparent;
+  width: 11px;
+  z-index: 999999;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.44);
+}
+
+main::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0);
+}
+main:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.3);
+} */

@@ -7,9 +7,9 @@ export default function SubjectScore({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   return (
-    <>
+    <section className="flex min-w-56 flex-col gap-2">
       <h2 className="text-2xl font-semibold">评分</h2>
       {subjectInfo ? <Score rating={subjectInfo.rating} /> : <Skeleton className="h-60" />}
-    </>
+    </section>
   )
 }

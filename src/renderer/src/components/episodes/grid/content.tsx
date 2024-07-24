@@ -18,7 +18,7 @@ export function EpisodeGridContent({
   let firstTime = Array(7).fill(true) // 用来显示不同种类的数组, type 字段
   firstTime[0] = false // 本篇就不显示了
   return (
-    <div className={cn('flex flex-row flex-wrap items-center gap-2', size === 'small' && 'gap-1')}>
+    <div className={cn('flex flex-row flex-wrap items-center gap-1', size === 'small' && 'gap-1')}>
       {episodes.map((episode: Episode | CollectionEpisode) => {
         let item: Episode
         let collectionType = EpisodeCollectionType.notCollected

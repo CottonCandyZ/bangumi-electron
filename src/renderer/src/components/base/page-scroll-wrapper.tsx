@@ -1,4 +1,4 @@
-import { SateContext } from '../wrapper/SateContext'
+import { SateContext } from '@renderer/components/wrapper/state-wrapper'
 import { useOverlayScrollbars, UseOverlayScrollbarsInstance } from 'overlayscrollbars-react'
 import { createContext, PropsWithChildren, useContext, useEffect, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -9,9 +9,11 @@ export default function PageScrollWrapper({
   initScrollTo = 0,
   className,
   children,
+  needSaveScroll = true,
 }: PropsWithChildren<{
   initScrollTo?: number
   className?: string
+  needSaveScroll?: boolean
 }>) {
   const ref = useRef(null)
   const stateContext = useContext(SateContext)
@@ -35,13 +37,17 @@ export default function PageScrollWrapper({
     initialize(ref.current!)
   }, [initialize])
   useEffect(() => {
-    instance()
-      ?.elements()
-      .viewport?.scrollTo({
-        top: scrollCache.get(key) ?? (pathname.includes('subject') ? 700 : initScrollTo),
-      })
-    instance()?.on('scroll', scrollListener)
-    return () => instance()?.off('scroll', scrollListener)
+    if (needSaveScroll) {
+      instance()
+        ?.elements()
+        .viewport?.scrollTo({
+          top: scrollCache.get(key) ?? (pathname.includes('subject') ? 700 : initScrollTo),
+        })
+      instance()?.on('scroll', scrollListener)
+    }
+    return () => {
+      if (needSaveScroll) instance()?.off('scroll', scrollListener)
+    }
   }, [initialize, key])
 
   return (

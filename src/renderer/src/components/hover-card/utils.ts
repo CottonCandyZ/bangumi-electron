@@ -95,3 +95,33 @@ export function cPopSizeByC(
   }
   return { topOffset, leftOffset }
 }
+
+export function cPopSizeByCForFixed(
+  pop: DOMRect,
+  hover: DOMRect,
+  toView: toView = { toViewTop: 8, toViewBottom: 8, toViewLeft: 8, toViewRight: 8 },
+) {
+  let topOffset = -(pop.height - hover.height) / 2
+  let leftOffset = -(pop.width - hover.width) / 2
+  const toLeft = hover.left + leftOffset
+  const toTop = hover.top + topOffset
+  const toBottom = window.innerHeight - toTop - pop.height
+  const toRight = window.innerWidth - toLeft - pop.width
+  if (toTop < UI_CONFIG.HEADER_HEIGHT + toView.toViewTop) {
+    const bias = UI_CONFIG.HEADER_HEIGHT + toView.toViewTop - toTop
+    topOffset += bias
+  }
+  if (toLeft < UI_CONFIG.NAV_WIDTH + toView.toViewLeft) {
+    const bias = UI_CONFIG.NAV_WIDTH + toView.toViewLeft - toLeft
+    leftOffset += bias
+  }
+  if (toRight < toView.toViewRight) {
+    const bias = toView.toViewRight - toRight
+    leftOffset -= bias
+  }
+  if (toBottom < toView.toViewBottom) {
+    const bias = toView.toViewBottom - toBottom
+    topOffset -= bias
+  }
+  return { topOffset, leftOffset }
+}

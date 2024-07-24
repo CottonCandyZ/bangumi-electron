@@ -26,17 +26,17 @@ const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
         <SubjectHeaderInfo subjectId={subjectId} />
       </section>
       {/* 章节 */}
-      <SubjectEpisodes subjectId={subjectId} />
-      <div className="flex flex-row gap-5">
-        <section className="flex basis-3/4 flex-col gap-5">
+      <section className="flex flex-row gap-5">
+        <div className="flex w-full flex-col gap-5">
+          <SubjectEpisodes subjectId={subjectId} />
           {/* 标签 */}
           <SubjectTags subjectId={subjectId} />
-        </section>
-        <section className="flex min-w-56 flex-1 flex-col gap-2">
+        </div>
+        <section className="flex w-56 flex-1">
           {/* 评分 */}
           <SubjectScore subjectId={subjectId} />
         </section>
-      </div>
+      </section>
       <SubjectCharacters subjectId={subjectId} />
       <RelatedSubjects subjectId={subjectId} />
       <SubjectPersonTable subjectId={subjectId} />

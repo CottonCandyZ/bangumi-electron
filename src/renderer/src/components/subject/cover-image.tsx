@@ -32,7 +32,7 @@ export default function SubjectCoverImage({ subjectId }: { subjectId: SubjectId 
   return (
     <Card
       className="h-min w-56 shrink-0 overflow-hidden"
-      style={{ viewTransitionName: state.viewTransitionName }}
+      style={{ viewTransitionName: state?.viewTransitionName ? state.viewTransitionName : '' }}
       ref={cardRef}
     >
       {subjectInfo !== undefined ? (

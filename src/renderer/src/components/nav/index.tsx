@@ -1,7 +1,20 @@
 import NavButton, { NavButtonProps } from '@renderer/components/nav/nav-button'
 import { Button } from '@renderer/components/ui/button'
+import { cn } from '@renderer/lib/utils'
+import { create } from 'zustand'
+
+type OpenCollectionType = {
+  isOpen: boolean
+  toggle: () => void
+}
+
+export const useOpenCollection = create<OpenCollectionType>()((set) => ({
+  isOpen: false,
+  toggle: () => set((pre) => ({ isOpen: !pre.isOpen })),
+}))
 
 export default function NavBar() {
+  const openCollectionState = useOpenCollection((state) => state)
   const route: NavButtonProps[] = [
     {
       name: '发现',
@@ -61,9 +74,16 @@ export default function NavBar() {
       </ul>
       <div>
         <Button
-          className="flex size-16 flex-col text-primary/65 hover:text-primary"
+          className={cn(
+            'relative flex size-16 flex-col text-primary/65 hover:text-primary',
+            openCollectionState.isOpen && 'text-primary',
+          )}
+          onClick={() => openCollectionState.toggle()}
           variant="ghost"
         >
+          {openCollectionState.isOpen ? (
+            <div className="absolute bottom-6 left-0.5 top-6 w-1 rounded-xl bg-primary" />
+          ) : null}
           <span className="i-mingcute-book-5-line text-3xl" />
         </Button>
       </div>

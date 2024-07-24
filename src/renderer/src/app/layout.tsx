@@ -1,26 +1,50 @@
 import PageScrollWrapper from '@renderer/components/base/page-scroll-wrapper'
+import CollectionsGrid from '@renderer/components/collections/grid'
 import Header from '@renderer/components/header'
-import NavBar from '@renderer/components/nav'
+import NavBar, { useOpenCollection } from '@renderer/components/nav'
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@renderer/components/ui/resizable'
+import { useIsLoginQuery } from '@renderer/data/hooks/session'
 import { Outlet } from 'react-router-dom'
 
 function RootLayout() {
+  const isLogin = useIsLoginQuery()
+  const sideIsOpen = useOpenCollection((state) => state.isOpen)
+
   return (
-    <>
-      <Header />
-      <div
-        className="fixed top-16 z-10 h-[calc(100dvh-64px)] bg-background py-1"
-        style={{ viewTransitionName: 'nav' }}
-      >
+    <div className="flex *:h-[calc(100dvh-64px)]">
+      <div className="z-10 bg-background py-1" style={{ viewTransitionName: 'nav' }}>
+        <div className="drag-region h-16" />
         <NavBar />
       </div>
-      <div className="flex *:h-[calc(100dvh-64px)]">
-        <PageScrollWrapper className="ml-[72px] mt-16 min-h-full w-full overflow-x-hidden rounded-tl-lg border-l border-t">
-          <div>
-            <Outlet />
-          </div>
-        </PageScrollWrapper>
-      </div>
-    </>
+      <ResizablePanelGroup direction="horizontal" className="gap-1" autoSaveId="main">
+        {sideIsOpen && (
+          <>
+            <ResizablePanel defaultSize={25} minSize={20} order={1}>
+              <div className="drag-region h-16" />
+              <PageScrollWrapper
+                className="z-10 h-[calc(100dvh-72px)] shrink-0 overflow-x-hidden rounded-lg border bg-background p-3"
+                needSaveScroll={false}
+              >
+                <div>{isLogin && <CollectionsGrid />}</div>
+              </PageScrollWrapper>
+            </ResizablePanel>
+            <ResizableHandle className="w-0" />
+          </>
+        )}
+        <ResizablePanel minSize={65} order={2}>
+          <Header />
+          <PageScrollWrapper className="h-[calc(100dvh-64px)] w-full rounded-tl-lg border">
+            <div>
+              <Outlet />
+            </div>
+          </PageScrollWrapper>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </div>
   )
 }
 

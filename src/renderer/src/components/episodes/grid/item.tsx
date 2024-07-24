@@ -44,7 +44,7 @@ export default function EpisodeGridItem({
         </Button>
       </HoverCardTrigger>
       <HoverCardContent
-        align="center"
+        align="start"
         className="w-full min-w-64 max-w-96"
         collisionPadding={{
           right: 8,

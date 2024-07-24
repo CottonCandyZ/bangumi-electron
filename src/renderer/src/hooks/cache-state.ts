@@ -1,4 +1,4 @@
-import { SateContext } from '@renderer/components/wrapper/SateContext'
+import { SateContext } from '@renderer/components/wrapper/state-wrapper'
 import { useContext } from 'react'
 import { useLocation } from 'react-router-dom'
 
