@@ -20,7 +20,7 @@ const buttonVariants = cva(
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         wantToWatch: "bg-[var(--want-to-watch-accent)] text-[var(--want-to-watch-accent-foreground] shadow-inner hover:bg-[var(--want-to-watch)] hover:text-[var(--want-to-watch-foreground)]",
-        watched: "border border-input bg-[var(--watched-accent)] text-[var(--watched-accent-foreground)] shadow-inner hover:bg-[var(--watched)] hover:text-[var(--watched-foreground)]",
+        watched: "border border-input bg-[var(--watched-accent)] text-[var(--watched-accent-foreground)] shadow-inner hover:shadow-none hover:bg-[var(--watched)] hover:text-[var(--watched-foreground)]",
         abandoned: "border border-primary-foreground line-through shadow-inner hover:bg-accent hover:text-accent-foreground text-muted-foreground",
         noAired: "hover:bg-accent hover:text-accent-foreground text-muted-foreground",
         onAir:
