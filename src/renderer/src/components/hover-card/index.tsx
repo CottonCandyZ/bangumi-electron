@@ -1,5 +1,5 @@
 import { useActiveHoverCard } from '@renderer/components/hover-card/state'
-import { cPopSizeByC } from '@renderer/components/hover-card/utils'
+import { cPopSizeByCForFixed } from '@renderer/components/hover-card/utils'
 import { cn } from '@renderer/lib/utils'
 import { AnimatePresence, HTMLMotionProps, motion } from 'framer-motion'
 import {
@@ -134,13 +134,13 @@ export const PopCardInnerContent: FC<
   const timeOutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useLayoutEffect(() => {
     const pop = popRef.current!.getBoundingClientRect()
-    const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)
-    setPopCod({ top: topOffset, left: leftOffset })
+    const { toTop, toLeft } = cPopSizeByCForFixed(pop, hoverRef.current)
+    setPopCod({ top: toTop, left: toLeft })
     const ob = new ResizeObserver(() => {
       if (!popRef.current) return
       const pop = popRef.current!.getBoundingClientRect()
-      const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)
-      setPopCod({ top: topOffset, left: leftOffset })
+      const { toTop, toLeft } = cPopSizeByCForFixed(pop, hoverRef.current)
+      setPopCod({ top: toTop, left: toLeft })
     })
     timeOutRef.current = setTimeout(() => {
       ob.observe(popRef.current!)
@@ -154,7 +154,7 @@ export const PopCardInnerContent: FC<
     <motion.div
       layoutId={layoutId}
       ref={popRef}
-      className={cn('absolute z-10', className)}
+      className={cn('fixed z-50', className)}
       style={{
         top: `${popCod.top}px`,
         left: `${popCod.left}px`,

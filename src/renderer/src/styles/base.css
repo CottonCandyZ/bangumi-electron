@@ -6,6 +6,10 @@
   z-index: 1;
 }
 
+[data-overlayscrollbars-viewport] {
+  z-index: auto;
+}
+
 ::-webkit-scrollbar {
   display: none;
 }

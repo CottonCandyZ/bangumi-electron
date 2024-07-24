@@ -8,6 +8,7 @@ import {
   ResizablePanelGroup,
 } from '@renderer/components/ui/resizable'
 import { useIsLoginQuery } from '@renderer/data/hooks/session'
+import { cn } from '@renderer/lib/utils'
 import { Outlet } from 'react-router-dom'
 
 function RootLayout() {
@@ -26,7 +27,9 @@ function RootLayout() {
             <ResizablePanel defaultSize={25} minSize={20} order={1}>
               <div className="drag-region h-16" />
               <PageScrollWrapper
-                className="z-10 h-[calc(100dvh-72px)] shrink-0 overflow-x-hidden rounded-lg border bg-background p-3"
+                className={cn(
+                  'h-[calc(100dvh-72px)] shrink-0 overflow-x-hidden rounded-lg border bg-background p-3',
+                )}
                 needSaveScroll={false}
               >
                 <div>{isLogin && <CollectionsGrid />}</div>
