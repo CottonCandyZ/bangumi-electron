@@ -33,13 +33,15 @@ export default function PageScrollWrapper({
     throw new Error('PageScrollWrapper need in StateWrapper')
   }
   const { scrollCache } = stateContext
-  const scrollListener = useCallback(() => {
-    if (instance) {
-      scrollCache.set(pathname, instance.elements().viewport.scrollTop)
-      setScrollPosition(instance.elements().viewport.scrollTop)
-    }
-  }, [instance, pathname])
+
+  //TODO: 需要优化
   useEffect(() => {
+    const scrollListener = () => {
+      if (instance) {
+        scrollCache.set(pathname, instance.elements().viewport.scrollTop)
+        setScrollPosition(instance.elements().viewport.scrollTop)
+      }
+    }
     instance?.elements().viewport.scrollTo({
       top: scrollCache.get(pathname) ?? (pathname.includes('subject') ? 700 : initScrollTo),
     })
@@ -47,7 +49,7 @@ export default function PageScrollWrapper({
     return () => {
       instance?.off('scroll', scrollListener)
     }
-  }, [instance, pathname])
+  })
 
   return (
     <OverlayScrollbarsComponent
