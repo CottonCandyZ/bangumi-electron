@@ -18,8 +18,8 @@ importers:
         specifier: ^4.0.3
         version: 4.0.3(react@18.3.1)
       '@egoist/tipc':
-        specifier: ^0.3.1
-        version: 0.3.1(electron@31.2.0)(react@18.3.1)
+        specifier: ^0.3.2
+        version: 0.3.2(electron@31.2.0)(react@18.3.1)
       '@electron-toolkit/preload':
         specifier: ^3.0.1
         version: 3.0.1(electron@31.2.0)
@@ -389,8 +389,8 @@ packages:
     peerDependencies:
       tailwindcss: '*'
 
-  '@egoist/tipc@0.3.1':
-    resolution: {integrity: sha512-jnolALBsPffkUUoBMYNX3/ONX019D94KR/cQwPDF7Ns7eHwbHhormAFr445BjFbtxEifAlt/KWwehrE+0HS5Zg==}
+  '@egoist/tipc@0.3.2':
+    resolution: {integrity: sha512-p8g35BhErVkYIgDqkw/HQJSli1TOsZRIUU9U7PYnYfwru6J/Ep1lwFGH2N6+sQMFi1HkqGTTUlJEISJ1DClfQw==}
     peerDependencies:
       electron: '>=26.0.0'
 
@@ -3921,7 +3921,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@egoist/tipc@0.3.1(electron@31.2.0)(react@18.3.1)':
+  '@egoist/tipc@0.3.2(electron@31.2.0)(react@18.3.1)':
     dependencies:
       electron: 31.2.0
     optionalDependencies:

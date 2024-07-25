@@ -3,6 +3,8 @@ import { join } from 'node:path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcMain } from '@egoist/tipc/main'
 import { router } from './tipc'
+import { getRendererHandlers } from "@egoist/tipc/main"
+import { RendererHandlers } from 'src/main/tipc/renderer-handlers'
 
 registerIpcMain(router)
 
@@ -16,16 +18,23 @@ function createWindow(): void {
     show: false,
     autoHideMenuBar: true,
     titleBarStyle: 'hidden',
-    titleBarOverlay: {
-      color: 'rgba(0,0,0,0)',
-      height: 64,
-    },
+    // titleBarOverlay: {
+    //   color: 'rgba(0,0,0,0)',
+    //   height: 64,
+    // },
     trafficLightPosition: { x: 12, y: 25 },
     ...(process.platform === 'linux' ? { icon: join(__dirname, '../../resources/icon.png') } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
     },
+  })
+  const handlers = getRendererHandlers<RendererHandlers>(mainWindow.webContents)
+  mainWindow.addListener('maximize', () => {
+    handlers.isMaximize.send(true)
+  })
+  mainWindow.addListener('unmaximize', () => {
+    handlers.isMaximize.send(false)
   })
 
   mainWindow.on('ready-to-show', () => {

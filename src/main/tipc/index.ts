@@ -1,5 +1,5 @@
 import { tipc } from '@egoist/tipc/main'
-import { safeStorage, session } from 'electron'
+import { BrowserWindow, safeStorage, session } from 'electron'
 import Store from 'electron-store'
 const t = tipc.create()
 
@@ -80,6 +80,21 @@ export const router = {
   }),
   setCookie: t.procedure.input<Electron.CookiesSetDetails>().action(async ({ input }) => {
     return await session.defaultSession.cookies.set(input)
+  }),
+  closeCurrentWindow: t.procedure.input().action(async () => {
+    BrowserWindow.getFocusedWindow()?.close()
+  }),
+  minimizeCurrentWindow: t.procedure.input().action(async () => {
+    BrowserWindow.getFocusedWindow()?.minimize()
+  }),
+  toggleMaximizeCurrentWindow: t.procedure.input().action(async () => {
+    const currentWindow = BrowserWindow.getFocusedWindow()
+    if (currentWindow) {
+      currentWindow.isMaximized() ? currentWindow.unmaximize() : currentWindow.maximize()
+    }
+  }),
+  platform: t.procedure.input().action(async () => {
+    return process.platform
   }),
 }
 
