@@ -1,13 +1,13 @@
 import { Toaster } from '@renderer/components/ui/sonner'
 import { ThemeProvider } from '@renderer/components/wrapper/theme-wrapper'
-import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryCache, QueryClient } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PropsWithChildren } from 'react'
 import { TooltipProvider } from '@renderer/components/ui/tooltip'
 import { toast } from 'sonner'
 import InitStateContextWrapper from '@renderer/components/wrapper/state-wrapper'
-import { createIDBPersister } from '@renderer/lib/persister'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -27,12 +27,14 @@ const queryClient = new QueryClient({
   },
 })
 
-const persister = createIDBPersister()
+const persister = createSyncStoragePersister({
+  storage: window.localStorage,
+})
 export default function Wrapper({ children }: PropsWithChildren) {
   return (
-    <QueryClientProvider
+    <PersistQueryClientProvider
       client={queryClient}
-      // persistOptions={{ persister, maxAge: 60 * 1000 * 60 * 24 }}
+      persistOptions={{ persister, maxAge: 60 * 1000 * 60 * 24 }}
     >
       <InitStateContextWrapper>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
@@ -40,7 +42,7 @@ export default function Wrapper({ children }: PropsWithChildren) {
           <Toaster richColors className="pointer-events-auto" />
         </ThemeProvider>
       </InitStateContextWrapper>
-      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
-    </QueryClientProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </PersistQueryClientProvider>
   )
 }

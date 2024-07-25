@@ -1,7 +1,7 @@
 import { MotionSkeleton } from '@renderer/components/ui/motion-skeleton'
 import { cn } from '@renderer/lib/utils'
 import { HTMLMotionProps, motion } from 'framer-motion'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 export const CoverMotionImage = React.forwardRef<
   HTMLDivElement,
@@ -25,6 +25,9 @@ export const CoverMotionImage = React.forwardRef<
     ref,
   ) => {
     const [isLoad, setIsLoad] = useState(false)
+    useEffect(() => {
+      setIsLoad(false)
+    }, [imageSrc])
     return (
       <motion.div
         className={cn('relative', (!imageSrc || !isLoad) && loadingClassName, className)}

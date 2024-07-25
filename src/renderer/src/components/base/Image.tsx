@@ -1,6 +1,6 @@
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 export const Image = React.forwardRef<
   HTMLDivElement,
@@ -12,6 +12,9 @@ export const Image = React.forwardRef<
   }
 >(({ className, imageSrc, imageClassName, loadingClassName, loading = 'lazy', ...props }, ref) => {
   const [isLoad, setIsLoad] = useState(false)
+  useEffect(() => {
+    setIsLoad(false)
+  }, [imageSrc])
   return (
     <div
       className={cn('relative', (!imageSrc || !isLoad) && loadingClassName, className)}
