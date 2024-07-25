@@ -14,7 +14,6 @@ export default function CollectionItem({
 }) {
   const { pathname } = useLocation()
   const mainSubjectId = pathname.split('/').at(-1)
-
   return (
     <MyLink
       to={`/subject/${collectionItemInfo.subject_id}`}
@@ -25,7 +24,7 @@ export default function CollectionItem({
     >
       <Card
         className={cn(
-          'h-full border-none shadow-none group-hover:bg-accent group-hover:duration-500',
+          'h-full rounded-md border-none shadow-none group-hover:bg-accent group-hover:duration-500',
           mainSubjectId === collectionItemInfo.subject_id.toString() && 'bg-accent',
         )}
       >
@@ -33,7 +32,7 @@ export default function CollectionItem({
           <div className="flex flex-row gap-2">
             <CoverMotionImage
               imageSrc={collectionItemInfo.subject.images.grid}
-              className="aspect-square h-fit w-14 shrink-0 overflow-hidden rounded-md border shadow-sm"
+              className="size-12 shrink-0 overflow-hidden rounded-md border shadow-sm"
             />
             <div className="flex flex-col gap-2">
               <CollectionHeader {...collectionItemInfo.subject} />
