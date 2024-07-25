@@ -18,7 +18,7 @@ function RootLayout() {
 
   return (
     <div className="flex *:h-[calc(100dvh-64px)]">
-      <div className="z-10 bg-background py-1" style={{ viewTransitionName: 'nav' }}>
+      <div className="z-10 bg-background" style={{ viewTransitionName: 'nav' }}>
         <div className="drag-region h-16" />
         <NavBar />
       </div>

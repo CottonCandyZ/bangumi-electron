@@ -64,7 +64,7 @@ export default function NavBar() {
   ]
 
   return (
-    <nav className="flex h-full flex-col justify-between px-1">
+    <nav className="w-18 flex h-full flex-col items-center justify-between px-2 pb-2">
       <ul className="flex flex-col gap-1 overflow-auto">
         {route.map((item) => (
           <li key={item.name}>
@@ -75,8 +75,8 @@ export default function NavBar() {
       <div>
         <Button
           className={cn(
-            'relative flex size-16 flex-col text-primary/65 hover:text-primary',
-            openCollectionState.isOpen && 'text-primary',
+            'relative flex aspect-square h-auto w-full flex-col text-primary/65 hover:text-primary',
+            openCollectionState.isOpen && 'bg-accent text-primary',
           )}
           onClick={() => openCollectionState.toggle()}
           variant="ghost"

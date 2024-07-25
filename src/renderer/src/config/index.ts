@@ -9,5 +9,5 @@ export const TEXT_CONFIG = {
 export const UI_CONFIG = {
   HOME_SECTION_CAROUSEL_NUMBER: 11,
   HEADER_HEIGHT: 64,
-  NAV_WIDTH: 72,
+  NAV_WIDTH: 78,
 }
