@@ -1,9 +1,5 @@
-import { ScrollContext } from '@renderer/components/base/page-scroll-wrapper'
-import { SateContext } from '@renderer/components/wrapper/state-wrapper'
-import { useContext, useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useScrollPosition } from '@renderer/components/base/page-scroll-wrapper'
 
-const initScrollTop = 700
 const initPercent = -60
 const scrollRange = 1500
 const init = (top: number | undefined) => {
@@ -15,23 +11,9 @@ const init = (top: number | undefined) => {
 }
 
 export default function SubjectBackground() {
-  const instance = useContext(ScrollContext)
-  if (!instance) throw Error('Component need to be wrapped in ScrollContext')
-  const stateContext = useContext(SateContext)
-  if (!stateContext) {
-    throw new Error('PageScrollWrapper need in StateWrapper')
-  }
-  const { key } = useLocation()
-  const { scrollCache } = stateContext
-  const [percent, setPercent] = useState(init(scrollCache.get(key) ?? initScrollTop))
-  const scrollListener = () => {
-    const top = instance()?.elements().viewport?.scrollTop
-    setPercent(init(top))
-  }
-  useEffect(() => {
-    instance()?.on('scroll', scrollListener)
-    return () => instance()?.off('scroll', scrollListener)
-  }, [])
+  const scrollPosition = useScrollPosition((state) => state.scrollPosition)
+  const percent = init(scrollPosition)
+
   return (
     <>
       <div

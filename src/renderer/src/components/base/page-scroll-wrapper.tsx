@@ -1,9 +1,20 @@
 import { SateContext } from '@renderer/components/wrapper/state-wrapper'
-import { useOverlayScrollbars, UseOverlayScrollbarsInstance } from 'overlayscrollbars-react'
-import { createContext, PropsWithChildren, useContext, useEffect, useRef } from 'react'
-import { useLocation } from 'react-router-dom'
+import { OverlayScrollbars } from 'overlayscrollbars'
 
-export const ScrollContext = createContext<UseOverlayScrollbarsInstance | null>(null)
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
+import { PropsWithChildren, useCallback, useContext, useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { create } from 'zustand'
+
+type ScrollPosition = {
+  scrollPosition: number
+  setScrollPosition: (ScrollPosition: number) => void
+}
+
+export const useScrollPosition = create<ScrollPosition>()((set) => ({
+  scrollPosition: 0,
+  setScrollPosition: (scrollPosition) => set({ scrollPosition }),
+}))
 
 export default function PageScrollWrapper({
   initScrollTo = 0,
@@ -13,45 +24,46 @@ export default function PageScrollWrapper({
   initScrollTo?: number
   className?: string
 }>) {
-  const ref = useRef(null)
   const stateContext = useContext(SateContext)
-  const { key, pathname } = useLocation()
+  const { pathname } = useLocation()
+  const [instance, setInstance] = useState<OverlayScrollbars | null>(null)
+  const setScrollPosition = useScrollPosition((state) => state.setScrollPosition)
 
-  const [initialize, instance] = useOverlayScrollbars({
-    options: {
-      overflow: { x: 'hidden' },
-      scrollbars: { autoHide: 'scroll', theme: 'os-theme-custom' },
-    },
-    defer: true,
-  })
   if (!stateContext) {
     throw new Error('PageScrollWrapper need in StateWrapper')
   }
   const { scrollCache } = stateContext
-  const scrollListener = () => {
-    scrollCache.set(key, instance()?.elements().viewport?.scrollTop ?? initScrollTo)
-  }
-  useEffect(() => {
-    initialize(ref.current!)
-  }, [initialize])
-  useEffect(() => {
-    instance()
-      ?.elements()
-      .viewport?.scrollTo({
-        top: scrollCache.get(key) ?? (pathname.includes('subject') ? 700 : initScrollTo),
-      })
-    instance()?.on('scroll', scrollListener)
-
-    return () => {
-      instance()?.off('scroll', scrollListener)
+  const scrollListener = useCallback(() => {
+    if (instance) {
+      scrollCache.set(pathname, instance.elements().viewport.scrollTop)
+      setScrollPosition(instance.elements().viewport.scrollTop)
     }
-  }, [initialize, key])
+  }, [instance, pathname])
+  useEffect(() => {
+    instance?.elements().viewport.scrollTo({
+      top: scrollCache.get(pathname) ?? (pathname.includes('subject') ? 700 : initScrollTo),
+    })
+    instance?.on('scroll', scrollListener)
+    return () => {
+      instance?.off('scroll', scrollListener)
+    }
+  }, [instance, pathname])
 
   return (
-    <ScrollContext.Provider value={instance}>
-      <div className={className} ref={ref}>
-        {children}
-      </div>
-    </ScrollContext.Provider>
+    <OverlayScrollbarsComponent
+      options={{
+        overflow: { x: 'hidden' },
+        scrollbars: { autoHide: 'scroll', theme: 'os-theme-custom' },
+      }}
+      className={className}
+      events={{
+        initialized(instance) {
+          setInstance(instance)
+        },
+      }}
+      defer
+    >
+      {children}
+    </OverlayScrollbarsComponent>
   )
 }

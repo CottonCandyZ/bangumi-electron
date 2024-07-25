@@ -36,7 +36,7 @@ export function Component() {
           ref={backImageRef}
         />
       )}
-      <div className="relative -mr-2 pb-96 pr-2 pt-[60rem]">
+      <div className="relative -mr-2 pb-10 pr-2 pt-[60rem]">
         <SubjectBackground />
         <SubjectContent subjectId={subjectId} />
         <BackCover />
