@@ -7,7 +7,7 @@
 }
 
 [data-overlayscrollbars-viewport] {
-  z-index: auto;
+  z-index: auto !important;
 }
 
 ::-webkit-scrollbar {
