@@ -6,7 +6,7 @@ import { cn } from '@renderer/lib/utils'
 import { Fragment } from 'react/jsx-runtime'
 
 function isCollectionEpisode(episodes: Episode | CollectionEpisode): episodes is CollectionEpisode {
-  return (episodes as CollectionEpisode).type !== undefined
+  return (episodes as CollectionEpisode).episode !== undefined
 }
 
 export function EpisodeGridContent({
