@@ -19,7 +19,7 @@ export default function NavButton({ name, path, icon, active }: NavButtonProps) 
     <Button
       variant="ghost"
       className={clsx(
-        'relative flex aspect-square h-auto w-full flex-col p-2 text-primary/65 hover:text-primary',
+        'relative aspect-square h-auto w-full p-2 text-primary/65 hover:text-primary',
         {
           'text-primary': isActive,
         },
@@ -28,12 +28,12 @@ export default function NavButton({ name, path, icon, active }: NavButtonProps) 
     >
       <MyLink to={path} unstable_viewTransition>
         <>
-          {isActive ? (
+          {/* {isActive ? (
             <motion.div
               className="absolute bottom-3 left-0.5 top-3 w-0.5 rounded-xl bg-primary"
               layoutId="underline"
             />
-          ) : null}
+          ) : null} */}
           {isActive ? active : icon}
         </>
       </MyLink>

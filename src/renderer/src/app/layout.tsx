@@ -18,31 +18,28 @@ function RootLayout() {
   const sideIsOpen = useOpenCollection((state) => state.isOpen)
 
   return (
-    <div className="flex *:h-[calc(100dvh-64px)]">
-      <div className="z-10 bg-background" style={{ viewTransitionName: 'nav' }}>
-        <div className="drag-region h-16" />
+    <div className="flex">
+      <div className="flex flex-col border-r bg-background" style={{ viewTransitionName: 'nav' }}>
         <NavBar />
       </div>
-      <ResizablePanelGroup direction="horizontal" className="gap-0.5" autoSaveId="main">
+      <ResizablePanelGroup direction="horizontal" autoSaveId="main">
         {sideIsOpen && (
           <>
             <ResizablePanel defaultSize={25} minSize={20} order={1} id="side">
-              <div className="drag-region h-16" />
+              <div className="drag-region h-16 border-b" />
               <ScrollWrapper
-                className={cn(
-                  'h-[calc(100dvh-72px)] shrink-0 overflow-x-hidden rounded-lg border bg-background p-1',
-                )}
-                options={{ scrollbars: { autoHide: 'scroll' } }}
+                className={cn('h-[calc(100dvh-72px)] shrink-0 overflow-x-hidden bg-background p-1')}
+                options={{ scrollbars: { autoHide: 'leave' } }}
               >
                 <div>{isLogin && <CollectionsGrid />}</div>
               </ScrollWrapper>
             </ResizablePanel>
-            <ResizableHandle className="w-0" />
+            <ResizableHandle />
           </>
         )}
         <ResizablePanel minSize={65} order={2} id="main">
           <Header />
-          <PageScrollWrapper className="h-[calc(100dvh-64px)] w-full overflow-x-hidden rounded-tl-lg border">
+          <PageScrollWrapper className="h-[calc(100dvh-64px)] w-full overflow-x-hidden">
             <div>
               <Outlet />
             </div>

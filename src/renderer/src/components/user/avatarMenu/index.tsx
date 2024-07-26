@@ -41,14 +41,14 @@ export default function ProfileMenu() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DropdownMenu>
-        <DropdownMenuTrigger className="overflow-hidden rounded-full shadow-sm">
+        <DropdownMenuTrigger className="w-full overflow-hidden rounded-full shadow-sm">
           {isLogin.data ? (
-            <Image className="aspect-square size-9" imageSrc={userInfo.data?.avatar.small} />
+            <Image className="aspect-square" imageSrc={userInfo.data?.avatar.small} />
           ) : (
-            <div className="aspect-square size-9 bg-accent"></div>
+            <div className="aspect-square bg-accent"></div>
           )}
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" side="right">
           {isLogin.data && (
             <DropdownMenuLabel>
               {userInfo.data?.nickname ? (

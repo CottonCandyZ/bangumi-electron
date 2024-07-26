@@ -1,8 +1,6 @@
 import { MaximizeIcon } from '@renderer/assets/svg-icons'
 import HeaderTitle from '@renderer/components/header/subject-title'
-import { useOpenCollection } from '@renderer/components/nav'
 import { Button } from '@renderer/components/ui/button'
-import ProfileMenu from '@renderer/components/user/avatarMenu'
 import { client, handlers } from '@renderer/lib/client'
 import { cn } from '@renderer/lib/utils'
 import { AnimatePresence } from 'framer-motion'
@@ -18,7 +16,6 @@ export default function Header() {
   const [backDisable, setBackDisable] = useState(true)
   const [forwardDisable, setForwardDisable] = useState(true)
   const [isMaximize, setIsMaximize] = useState(false)
-  const sidePanelOpen = useOpenCollection((state) => state.isOpen)
   useEffect(() => {
     setBackDisable(history.state.idx === 0)
     setForwardDisable(history.state.idx === history.length - 1)
@@ -33,8 +30,7 @@ export default function Header() {
   return (
     <header
       className={cn(
-        'drag-region flex h-16 flex-row items-center justify-between gap-10 overflow-hidden bg-background',
-        platform === 'darwin' && !sidePanelOpen && 'pl-6',
+        'drag-region flex h-16 flex-row items-center justify-between gap-10 overflow-hidden border-b bg-background',
       )}
       style={{ viewTransitionName: 'header' }}
     >
@@ -62,8 +58,8 @@ export default function Header() {
         </AnimatePresence>
       </div>
       <div className="flex h-full basis-[30rem] flex-row justify-end">
-        <div className="mr-5 flex h-full w-full max-w-[20rem] gap-5">
-          <div className="flex grow items-center">
+        <div className="mr-5 flex h-full max-w-[20rem] gap-5">
+          {/* <div className="flex grow items-center">
             <div className="no-drag-region w-full">
               <Button
                 variant="outline"
@@ -78,10 +74,8 @@ export default function Header() {
                 </kbd>
               </Button>
             </div>
-          </div>
-          <div className="no-drag-region flex items-center">
-            <ProfileMenu />
-          </div>
+          </div> */}
+          <div className="no-drag-region flex items-center"></div>
         </div>
         {platform === 'win32' && (
           <div className="no-drag-region flex flex-row items-center">

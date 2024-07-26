@@ -32,7 +32,7 @@ export function Component() {
         <Image
           imageSrc={subjectInfo.images.large}
           loading="eager"
-          className="fixed -z-10 h-full overflow-hidden rounded-tl-lg"
+          className="fixed -z-10 h-full overflow-hidden"
           ref={backImageRef}
         >
           <SubjectBackground />
