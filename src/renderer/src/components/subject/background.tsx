@@ -11,7 +11,7 @@ export default function SubjectBackground() {
 
   return (
     <div
-      className="fixed -z-10 h-full w-full"
+      className="absolute inset-0"
       style={{
         background: `linear-gradient(to top, hsl(var(--background)) ${percent - 100}%, hsl(var(--background) / 0) ${percent + 30}%)`,
       }}
