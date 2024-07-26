@@ -1,8 +1,9 @@
 import { SateContext } from '@renderer/components/wrapper/state-wrapper'
+import { UI_CONFIG } from '@renderer/config'
 import { OverlayScrollbars } from 'overlayscrollbars'
 
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
-import { PropsWithChildren, useCallback, useContext, useEffect, useState } from 'react'
+import { PropsWithChildren, useContext, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { create } from 'zustand'
 
@@ -43,7 +44,9 @@ export default function PageScrollWrapper({
       }
     }
     instance?.elements().viewport.scrollTo({
-      top: scrollCache.get(pathname) ?? (pathname.includes('subject') ? 700 : initScrollTo),
+      top:
+        scrollCache.get(pathname) ??
+        (pathname.includes('subject') ? UI_CONFIG.SUBJECT_INIT_SCROLL : initScrollTo),
     })
     instance?.on('scroll', scrollListener)
     return () => {
