@@ -60,6 +60,50 @@ export function cHoverCardSize(hover: DOMRect, hoverCardSize: HoverCardSize) {
   return { left, right, top, bottom }
 }
 
+export function cHoverCardSizeFixed(hover: DOMRect, hoverCardSize: HoverCardSize) {
+  const { width, height, toViewTop, toViewLeft, toViewRight, toViewBottom } = hoverCardSize
+  const hoverWidth = threshold(
+    hover.width,
+    hoverCardSize.maxInnerHoverWidth,
+    hoverCardSize.minInnerHoverWidth,
+  )
+  const hoverHight = threshold(
+    hover.height,
+    hoverCardSize.maxInnerHoverHeight,
+    hoverCardSize.minInnerHoverHeight,
+  )
+
+  const left = -(hoverWidth * width)
+  const right = -(hoverWidth * width)
+  const top = -(hoverHight * height)
+  const bottom = -(hoverHight * height)
+  let toLeft = hover.left + left
+  let toTop = hover.top + top
+  let toBottom = window.innerHeight - hover.bottom + bottom
+  let toRight = window.innerWidth - hover.right + right
+  if (toTop < UI_CONFIG.HEADER_HEIGHT + toViewTop) {
+    const bias = UI_CONFIG.HEADER_HEIGHT + toViewTop - toTop
+    toTop = UI_CONFIG.HEADER_HEIGHT + toViewTop - toTop
+    toBottom -= bias
+  }
+  if (toLeft < UI_CONFIG.NAV_WIDTH + toViewLeft) {
+    const bias = UI_CONFIG.NAV_WIDTH + toViewLeft - toLeft
+    toLeft = UI_CONFIG.NAV_WIDTH + toViewLeft - toLeft
+    toRight -= bias
+  }
+  if (toRight < toViewRight) {
+    const bias = toViewRight - toRight
+    toRight = toViewRight
+    toLeft -= bias
+  }
+  if (toBottom < toViewBottom) {
+    const bias = toViewBottom - toBottom
+    toBottom = toViewBottom
+    toTop -= bias
+  }
+  return { left: toLeft, right: toRight, top: toTop, bottom: toBottom }
+}
+
 function threshold(num: number, max: number | undefined, min: number | undefined) {
   if (max !== undefined && num > max) return max
   if (min !== undefined && num < min) return min

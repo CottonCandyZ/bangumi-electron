@@ -80,6 +80,7 @@ const config = {
       collections: getIconCollections(['mingcute']),
     }),
     require('tailwindcss-animate'),
+    require('@tailwindcss/container-queries')
   ],
 } satisfies Config
 

@@ -70,12 +70,12 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
           <CarouselNext className="relative right-0 top-0 translate-y-0" />
         </div>
       </div>
-      <div className={cn('relative', currentSectionPath === sectionPath ? 'z-30' : '')}>
+      <div className={cn('@container relative', currentSectionPath === sectionPath ? 'z-30' : '')}>
         <CarouselContentNoFlow className="-ml-3">
           {Array.from({ length: UI_CONFIG.HOME_SECTION_CAROUSEL_NUMBER }).map((_, index) => (
             <CarouselItem
               key={index}
-              className="basis-1/5 pl-3 lg:basis-1/6 xl:basis-[14.285714%] 2xl:basis-[11.111111%]"
+              className="@[1024px]:basis-1/6 @[1280px]:basis-[14.285714%] @[1536px]:basis-[11.111111%] basis-1/5 pl-3"
             >
               <div className="p-0.5">
                 <SubjectCard index={index} sectionPath={sectionPath} />
