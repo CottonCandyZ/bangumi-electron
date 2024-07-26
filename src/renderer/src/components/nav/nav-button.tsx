@@ -19,7 +19,7 @@ export default function NavButton({ name, path, icon, active }: NavButtonProps) 
     <Button
       variant="ghost"
       className={clsx(
-        'relative aspect-square h-auto w-full cursor-default text-primary/65 hover:text-primary',
+        'relative flex aspect-square h-auto w-full flex-col p-2 text-primary/65 hover:text-primary',
         {
           'text-primary': isActive,
         },
@@ -30,7 +30,7 @@ export default function NavButton({ name, path, icon, active }: NavButtonProps) 
         <>
           {isActive ? (
             <motion.div
-              className="absolute bottom-6 left-0.5 top-6 w-1 rounded-xl bg-primary"
+              className="absolute bottom-3 left-0.5 top-3 w-0.5 rounded-xl bg-primary"
               layoutId="underline"
             />
           ) : null}

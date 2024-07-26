@@ -33,7 +33,7 @@ export default function Header() {
       style={{ viewTransitionName: 'header' }}
     >
       <div className="flex flex-row justify-start gap-3">
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-0.5">
           <Button
             variant="ghost"
             className="no-drag-region aspect-square p-0.5 shadow-none"
