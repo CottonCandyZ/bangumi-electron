@@ -1,8 +1,10 @@
 import { MaximizeIcon } from '@renderer/assets/svg-icons'
 import HeaderTitle from '@renderer/components/header/subject-title'
+import { useOpenCollection } from '@renderer/components/nav'
 import { Button } from '@renderer/components/ui/button'
 import ProfileMenu from '@renderer/components/user/avatarMenu'
 import { client, handlers } from '@renderer/lib/client'
+import { cn } from '@renderer/lib/utils'
 import { AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Minus, Square, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -16,6 +18,7 @@ export default function Header() {
   const [backDisable, setBackDisable] = useState(true)
   const [forwardDisable, setForwardDisable] = useState(true)
   const [isMaximize, setIsMaximize] = useState(false)
+  const sidePanelOpen = useOpenCollection((state) => state.isOpen)
   useEffect(() => {
     setBackDisable(history.state.idx === 0)
     setForwardDisable(history.state.idx === history.length - 1)
@@ -29,7 +32,10 @@ export default function Header() {
 
   return (
     <header
-      className="drag-region flex h-16 flex-row items-center justify-between gap-10 overflow-hidden bg-background"
+      className={cn(
+        'drag-region flex h-16 flex-row items-center justify-between gap-10 overflow-hidden bg-background',
+        platform === 'darwin' && !sidePanelOpen && 'pl-6',
+      )}
       style={{ viewTransitionName: 'header' }}
     >
       <div className="flex flex-row justify-start gap-3">
