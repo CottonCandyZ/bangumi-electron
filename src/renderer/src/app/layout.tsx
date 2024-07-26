@@ -12,6 +12,7 @@ import { useIsLoginQuery } from '@renderer/data/hooks/session'
 import { cn } from '@renderer/lib/utils'
 import { Outlet } from 'react-router-dom'
 
+// 对于 windows 暂时先用 overlay scroll bar，等后面 fluent 稳定了就可以上 Windows fluent scroll bar https://source.chromium.org/chromium/chromium/src/+/main:ui/native_theme/native_theme_features.cc;l=5?q=native_theme_features&ss=chromium%2Fchromium%2Fsrc
 function RootLayout() {
   const isLogin = useIsLoginQuery()
   const sideIsOpen = useOpenCollection((state) => state.isOpen)
