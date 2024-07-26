@@ -30,7 +30,7 @@ export default function Header() {
   return (
     <header
       className={cn(
-        'drag-region flex h-16 flex-row items-center justify-between gap-10 overflow-hidden border-b bg-background',
+        'drag-region flex h-16 flex-row items-center justify-between gap-10 overflow-hidden border-b bg-background pl-2',
       )}
       style={{ viewTransitionName: 'header' }}
     >
@@ -57,9 +57,9 @@ export default function Header() {
           <HeaderTitle />
         </AnimatePresence>
       </div>
-      <div className="flex h-full basis-[30rem] flex-row justify-end">
-        <div className="mr-5 flex h-full max-w-[20rem] gap-5">
-          {/* <div className="flex grow items-center">
+      <div className="flex h-full flex-row justify-end">
+        {/* <div className="mr-5 flex h-full max-w-[20rem] gap-5">
+          <div className="flex grow items-center">
             <div className="no-drag-region w-full">
               <Button
                 variant="outline"
@@ -74,9 +74,9 @@ export default function Header() {
                 </kbd>
               </Button>
             </div>
-          </div> */}
+          </div>
           <div className="no-drag-region flex items-center"></div>
-        </div>
+        </div> */}
         {platform === 'win32' && (
           <div className="no-drag-region flex flex-row items-center">
             <Button
