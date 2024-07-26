@@ -13,7 +13,7 @@ export default function SubjectBackground() {
     <div
       className="absolute inset-0"
       style={{
-        background: `linear-gradient(to top, hsl(var(--background)) ${percent - 100}%, hsl(var(--background) / 0) ${percent + 30}%)`,
+        background: `linear-gradient(to top, hsl(var(--background)) ${percent - 110}%, hsl(var(--background) / 0) ${percent + 30}%)`,
       }}
     />
   )
