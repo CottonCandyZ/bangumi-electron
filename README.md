@@ -6,4 +6,4 @@ Build with Electron-vite & React & shadcn/ui.
 
 ## Preview
 
-![Preview Image](doc/preview.png)
+![Preview Image](doc/preview.webp)
