@@ -2,6 +2,7 @@ import PageScrollWrapper from '@renderer/components/base/page-scroll-wrapper'
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
 import CollectionsGrid from '@renderer/components/collections/grid'
 import Header from '@renderer/components/header'
+import { BackCover } from '@renderer/components/hover-card/close'
 import NavBar, { useOpenCollection } from '@renderer/components/nav'
 import {
   ResizableHandle,
@@ -46,6 +47,7 @@ function RootLayout() {
           </PageScrollWrapper>
         </ResizablePanel>
       </ResizablePanelGroup>
+      <BackCover />
     </div>
   )
 }

@@ -6,6 +6,15 @@
   z-index: 1;
 }
 
+:root {
+  view-transition-name: none;
+}
+
+::view-transition-group(pop-card) {
+  animation-duration: 0.3s;
+  animation-timing-function: ease;
+}
+
 [data-overlayscrollbars-viewport] {
   z-index: auto !important;
 }

@@ -24,7 +24,7 @@ export function Component() {
       </section> */}
 
       {/*  时间线 */}
-      <BackCover />
+      {/* <BackCover /> */}
     </div>
   )
 }

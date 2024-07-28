@@ -1,4 +1,4 @@
-import { CoverMotionImage } from '@renderer/components/base/cover-motion-image'
+import { Image } from '@renderer/components/base/Image'
 import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/components/hover-card'
 import Actors from '@renderer/components/subject/character/gird/actor'
 import Detail from '@renderer/components/subject/character/gird/detail'
@@ -27,7 +27,7 @@ export default function Item({ character }: { character: Character }) {
             )}
           >
             {!isEmpty(character.images.large) && (
-              <CoverMotionImage
+              <Image
                 className="aspect-square size-14 shrink-0 overflow-hidden rounded-lg"
                 imageSrc={getCharacterAvatarURL(character.images.large)}
               />
@@ -48,7 +48,7 @@ function PopCard({ character }: { character: Character }) {
         <CardContent className="flex h-full flex-col p-2">
           <div className="flex h-full flex-row gap-4">
             {!isEmpty(character.images.large) && (
-              <CoverMotionImage
+              <Image
                 className="h-fit basis-1/4 overflow-hidden rounded-lg"
                 imageSrc={character.images.grid}
                 loadingClassName="aspect-square"

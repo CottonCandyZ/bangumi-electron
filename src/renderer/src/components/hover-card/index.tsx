@@ -1,10 +1,14 @@
-import { useActiveHoverCard } from '@renderer/components/hover-card/state'
+import {
+  useActiveHoverCard,
+  useViewTransitionStatusState,
+} from '@renderer/components/hover-card/state'
 import { cPopSizeByCForFixed } from '@renderer/components/hover-card/utils'
 import { cn } from '@renderer/lib/utils'
-import { AnimatePresence, HTMLMotionProps, motion } from 'framer-motion'
+import { HTMLMotionProps, motion } from 'framer-motion'
 import {
   createContext,
   FC,
+  HTMLAttributes,
   PropsWithChildren,
   useContext,
   useEffect,
@@ -12,14 +16,13 @@ import {
   useRef,
   useState,
 } from 'react'
+import { flushSync } from 'react-dom'
 
 const HoverPopCardContext = createContext<{
   hoverRef: React.RefObject<HTMLDivElement> | null
   layoutId: string
   activeId: string | null
-  finished: boolean
   delay: number
-  setFinished: React.Dispatch<React.SetStateAction<boolean>>
 } | null>(null)
 
 type HoverCardProps = {
@@ -34,7 +37,6 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
 }) => {
   const hoverRef = useRef<HTMLDivElement>(null)
   const activeId = useActiveHoverCard((state) => state.activeId)
-  const [finished, setFinished] = useState(true)
 
   return (
     <HoverPopCardContext.Provider
@@ -42,9 +44,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
         hoverRef,
         layoutId,
         activeId,
-        finished,
         delay,
-        setFinished,
       }}
     >
       <div key={layoutId} className={cn('relative', activeId === layoutId && 'z-30')}>
@@ -54,7 +54,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
   )
 }
 
-export const HoverCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = ({
+export const HoverCardContent: FC<PropsWithChildren<HTMLAttributes<HTMLDivElement>>> = ({
   children,
   className,
   ...props
@@ -63,6 +63,8 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = (
   if (!hoverCardContext) throw Error('HoverCardContent need to be wrapped in HoverPopCard')
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
+  const { status: viewTransitionStatus, setStatus: setViewTransitionStatus } =
+    useViewTransitionStatusState((state) => state)
 
   useEffect(() => {
     return () => {
@@ -72,28 +74,29 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = (
   }, [])
 
   return (
-    <motion.div
-      key={hoverCardContext.layoutId}
+    <div
       ref={hoverCardContext.hoverRef}
-      layoutId={hoverCardContext.layoutId}
-      className={className}
+      className={cn(
+        hoverCardContext.layoutId === hoverCardContext.activeId && 'invisible',
+        className,
+      )}
+      style={{
+        viewTransitionName: viewTransitionStatus === hoverCardContext.layoutId ? 'pop-card' : '',
+      }}
       onMouseEnter={() => {
         timeoutRef.current = setTimeout(() => {
-          setActiveId(hoverCardContext.layoutId)
-          hoverCardContext.setFinished(false)
+          flushSync(() => setViewTransitionStatus(hoverCardContext.layoutId))
+          document.startViewTransition(() => {
+            flushSync(() => setViewTransitionStatus(null))
+            setActiveId(hoverCardContext.layoutId)
+          })
         }, hoverCardContext.delay)
       }}
       onMouseLeave={() => clearTimeout(timeoutRef.current)}
-      transition={{
-        duration:
-          hoverCardContext.activeId !== hoverCardContext.layoutId && hoverCardContext.finished
-            ? 0
-            : undefined,
-      }}
       {...props}
     >
       {children}
-    </motion.div>
+    </div>
   )
 }
 
@@ -106,32 +109,29 @@ export const PopCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = ({
   if (!hoverCardContext) throw Error('PopCardContent need to be wrapped in HoverPopCard')
 
   return (
-    <AnimatePresence onExitComplete={() => hoverCardContext.setFinished(true)}>
-      {hoverCardContext.activeId === hoverCardContext.layoutId && (
-        <PopCardInnerContent
-          layoutId={hoverCardContext.layoutId}
-          hover={hoverCardContext.hoverRef?.current?.getBoundingClientRect()}
-          className={className}
-          {...props}
-        >
-          {children}
-        </PopCardInnerContent>
-      )}
-    </AnimatePresence>
+    hoverCardContext.activeId === hoverCardContext.layoutId && (
+      <PopCardInnerContent
+        viewTransitionName="pop-card"
+        hover={hoverCardContext.hoverRef?.current?.getBoundingClientRect()}
+        className={className}
+        {...props}
+      >
+        {children}
+      </PopCardInnerContent>
+    )
   )
 }
 
 export const PopCardInnerContent: FC<
   PropsWithChildren<HTMLMotionProps<'div'>> & {
     hover: DOMRect | undefined
-    layoutId: string
+    viewTransitionName: string
   }
-> = ({ children, layoutId, className, hover, ...props }) => {
-  if (!hover) throw Error('PopCardContent need to be aside HoverCardContent')
+> = ({ children, viewTransitionName, className, hover, ...props }) => {
+  if (!hover) return
   const hoverRef = useRef(hover)
   const [popCod, setPopCod] = useState({ top: 0, left: 0 })
   const popRef = useRef<HTMLDivElement>(null)
-  const timeOutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useLayoutEffect(() => {
     const pop = popRef.current!.getBoundingClientRect()
     const { toTop, toLeft } = cPopSizeByCForFixed(pop, hoverRef.current)
@@ -142,22 +142,20 @@ export const PopCardInnerContent: FC<
       const { toTop, toLeft } = cPopSizeByCForFixed(pop, hoverRef.current)
       setPopCod({ top: toTop, left: toLeft })
     })
-    timeOutRef.current = setTimeout(() => {
-      ob.observe(popRef.current!)
-    }, 400)
+    ob.observe(popRef.current!)
     return () => {
-      clearTimeout(timeOutRef.current)
       popRef.current && ob.unobserve(popRef.current)
     }
   }, [])
   return (
     <motion.div
-      layoutId={layoutId}
+      layout
       ref={popRef}
       className={cn('fixed z-50', className)}
       style={{
         top: `${popCod.top}px`,
         left: `${popCod.left}px`,
+        viewTransitionName,
       }}
       {...props}
     >

@@ -1,5 +1,4 @@
 import { Image } from '@renderer/components/base/Image'
-import { BackCover } from '@renderer/components/hover-card/close'
 import SubjectBackground from '@renderer/components/subject/background'
 import SubjectContent from '@renderer/components/subject/content'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
@@ -41,7 +40,6 @@ export function Component() {
 
       <div className="relative pb-10 pt-[60rem]">
         <SubjectContent subjectId={subjectId} />
-        <BackCover />
       </div>
     </div>
   )
