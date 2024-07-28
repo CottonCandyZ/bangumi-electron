@@ -43,16 +43,7 @@ export default function EpisodeGridItem({
           {episode.sort}
         </Button>
       </HoverCardTrigger>
-      <HoverCardContent
-        align="start"
-        className="w-full min-w-64 max-w-96"
-        collisionPadding={{
-          right: 8,
-          left: UI_CONFIG.NAV_WIDTH + 8,
-          bottom: 8,
-          top: UI_CONFIG.HEADER_HEIGHT + 8,
-        }}
-      >
+      <HoverCardContent align="start" className="w-full min-w-64 max-w-96">
         <div className="flex flex-col gap-2">
           {!isEmpty(episode.name) && <MediumHeader {...episode} />}
           {!isEmpty(episode.desc) && (
