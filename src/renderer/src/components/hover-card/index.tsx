@@ -163,3 +163,23 @@ export const PopCardInnerContent: FC<
     </motion.div>
   )
 }
+
+export const HoverCardItem: FC<
+  PropsWithChildren<HTMLAttributes<HTMLDivElement> & { layoutId: string }>
+> = ({ children, layoutId, className, ...props }) => {
+  const hoverCardContext = useContext(HoverPopCardContext)
+  if (!hoverCardContext) throw Error('HoverCardContent need to be wrapped in HoverPopCard')
+  const viewTransitionStatus = useViewTransitionStatusState((state) => state.status)
+
+  return (
+    <div
+      className={className}
+      style={{
+        viewTransitionName: viewTransitionStatus === hoverCardContext.layoutId ? layoutId : '',
+      }}
+      {...props}
+    >
+      {children}
+    </div>
+  )
+}

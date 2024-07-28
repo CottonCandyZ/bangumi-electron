@@ -14,6 +14,14 @@
   animation-duration: 0.3s;
   animation-timing-function: ease;
 }
+::view-transition-group(pop-image) {
+  animation-duration: 0.3s;
+  animation-timing-function: ease;
+}
+::view-transition-group(pop-title) {
+  animation-duration: 0.3s;
+  animation-timing-function: ease;
+}
 
 [data-overlayscrollbars-viewport] {
   z-index: auto !important;

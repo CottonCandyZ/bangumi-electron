@@ -1,5 +1,6 @@
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
+import { isEmpty } from '@renderer/lib/utils/string'
 import { forwardRef, useState } from 'react'
 
 export const Image = forwardRef<
@@ -24,7 +25,11 @@ export const Image = forwardRef<
         draggable={false}
       >
         <img
-          className={cn('h-full w-full max-w-none select-none object-cover', imageClassName)}
+          className={cn(
+            'h-full w-full max-w-none select-none object-cover',
+            imageClassName,
+            !imageSrc && 'invisible',
+          )}
           loading={loading}
           src={imageSrc}
           onLoad={() => setIsLoad(true)}
