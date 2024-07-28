@@ -30,7 +30,7 @@ function RootLayout() {
               <div className="drag-region h-16 border-b" />
               <ScrollWrapper
                 className={cn('h-[calc(100dvh-72px)] shrink-0 overflow-x-hidden bg-background p-1')}
-                options={{ scrollbars: { autoHide: 'leave' } }}
+                options={{ scrollbars: { autoHide: 'scroll' } }}
               >
                 <div>{isLogin && <CollectionsGrid />}</div>
               </ScrollWrapper>

@@ -58,7 +58,7 @@ export default function PageScrollWrapper({
     <OverlayScrollbarsComponent
       options={{
         overflow: { x: 'hidden' },
-        scrollbars: { autoHide: 'leave', theme: 'os-theme-custom' },
+        scrollbars: { autoHide: 'scroll', theme: 'os-theme-custom' },
       }}
       className={className}
       events={{
