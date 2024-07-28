@@ -1,8 +1,8 @@
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
-import React, { useEffect, useState } from 'react'
+import { forwardRef, useState } from 'react'
 
-export const Image = React.forwardRef<
+export const Image = forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & {
     imageSrc?: string
@@ -16,28 +16,21 @@ export const Image = React.forwardRef<
     ref,
   ) => {
     const [isLoad, setIsLoad] = useState(false)
-    useEffect(() => {
-      setIsLoad(false)
-    }, [imageSrc])
     return (
       <div
-        className={cn('relative', (!imageSrc || !isLoad) && loadingClassName, className)}
+        className={cn('relative z-0', (!imageSrc || !isLoad) && loadingClassName, className)}
         ref={ref}
         {...props}
         draggable={false}
       >
         <img
-          className={cn(
-            'h-full w-full max-w-none select-none object-cover',
-            imageClassName,
-            (!imageSrc || !isLoad) && 'invisible',
-          )}
+          className={cn('h-full w-full max-w-none select-none object-cover', imageClassName)}
           loading={loading}
           src={imageSrc}
           onLoad={() => setIsLoad(true)}
           draggable={false}
         />
-        {(!imageSrc || !isLoad) && <Skeleton className={cn('absolute inset-0')} />}
+        <Skeleton className={cn('absolute inset-0 -z-10')} />
         {children}
       </div>
     )

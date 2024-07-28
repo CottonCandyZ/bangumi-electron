@@ -1,9 +1,9 @@
 import { MotionSkeleton } from '@renderer/components/ui/motion-skeleton'
 import { cn } from '@renderer/lib/utils'
 import { HTMLMotionProps, motion } from 'framer-motion'
-import React, { useEffect, useState } from 'react'
+import { forwardRef, useState } from 'react'
 
-export const CoverMotionImage = React.forwardRef<
+export const CoverMotionImage = forwardRef<
   HTMLDivElement,
   HTMLMotionProps<'div'> & {
     imageSrc?: string
@@ -25,29 +25,21 @@ export const CoverMotionImage = React.forwardRef<
     ref,
   ) => {
     const [isLoad, setIsLoad] = useState(false)
-    useEffect(() => {
-      setIsLoad(false)
-    }, [imageSrc])
     return (
       <motion.div
-        className={cn('relative', (!imageSrc || !isLoad) && loadingClassName, className)}
+        className={cn('relative z-0', (!imageSrc || !isLoad) && loadingClassName, className)}
         ref={ref}
         {...props}
         draggable={false}
       >
         <motion.img
-          className={cn(
-            'h-full w-full max-w-none select-none object-cover',
-            imageClassName,
-            (!imageSrc || !isLoad) && 'invisible',
-            'z-0',
-          )}
+          className={cn('h-full w-full max-w-none select-none object-cover', imageClassName, 'z-0')}
           loading={loading}
           src={imageSrc}
           onLoad={() => setIsLoad(true)}
           draggable={false}
         />
-        {(!imageSrc || !isLoad) && <MotionSkeleton className={cn('absolute inset-0')} />}
+        <MotionSkeleton className={cn('absolute inset-0 -z-10')} />
       </motion.div>
     )
   },
