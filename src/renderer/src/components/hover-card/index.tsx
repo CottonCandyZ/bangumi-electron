@@ -14,6 +14,7 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
+  useState,
 } from 'react'
 import { flushSync } from 'react-dom'
 
@@ -130,6 +131,7 @@ export const PopCardInnerContent: FC<
   if (!hover) return
   const hoverRef = useRef(hover)
   const popRef = useRef<HTMLDivElement>(null)
+  const [popCod, setPopCod] = useState({ top: 0, left: 0 })
   useLayoutEffect(() => {
     const pop = popRef.current!.getBoundingClientRect()
     const { toTop, toLeft } = cPopSizeByCForFixed(pop, hoverRef.current)
@@ -140,8 +142,7 @@ export const PopCardInnerContent: FC<
       if (!popRef.current) return
       const pop = popRef.current!.getBoundingClientRect()
       const { toTop, toLeft } = cPopSizeByCForFixed(pop, hoverRef.current)
-      popRef.current!.style.top = `${toTop}px`
-      popRef.current!.style.left = `${toLeft}px`
+      setPopCod({ top: toTop, left: toLeft })
     })
     ob.observe(popRef.current!)
     return () => {
@@ -154,6 +155,8 @@ export const PopCardInnerContent: FC<
       ref={popRef}
       className={cn('fixed z-50', className)}
       style={{
+        top: `${popCod.top}px`,
+        left: `${popCod.left}px`,
         viewTransitionName,
       }}
       {...props}
