@@ -1,6 +1,5 @@
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
-import { isEmpty } from '@renderer/lib/utils/string'
 import { forwardRef, useState } from 'react'
 
 export const Image = forwardRef<
