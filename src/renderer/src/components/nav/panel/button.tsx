@@ -6,10 +6,12 @@ import { PanelName, useNavCollapsed, usePanelName } from '@renderer/state/panel'
 type Props = (typeof route)[number]
 
 export default function PanelButton({ name, panelName, icon, active }: Props) {
-  const navCollapsed = useNavCollapsed((state) => state.collapsed)
   const { panelName: currentPanelName, setPanelName } = usePanelName((state) => state)
   const isActive = currentPanelName === panelName
   const typedPanelName = panelName as PanelName
+  const { collapsed: navCollapsed, setCollapsed: setNavCollapsed } = useNavCollapsed(
+    (state) => state,
+  )
 
   return (
     <Button
@@ -20,6 +22,7 @@ export default function PanelButton({ name, panelName, icon, active }: Props) {
         !navCollapsed && 'aspect-auto w-full justify-start gap-2',
       )}
       onClick={() => {
+        if (!navCollapsed) setNavCollapsed(true)
         setPanelName(!isActive ? typedPanelName : null)
       }}
     >

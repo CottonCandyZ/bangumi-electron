@@ -20,48 +20,47 @@ function RootLayout() {
   )
 
   return (
-    <div className="flex">
-      <ResizablePanelGroup direction="horizontal" autoSaveId="main-panel">
-        <ResizablePanel
-          minSize={10}
-          maxSize={20}
-          collapsedSize={10}
-          collapsible
-          order={1}
-          id="nav"
-          className={cn(
-            navCollapsed && 'min-w-16 max-w-16 transition-all duration-300 ease-in-out',
-          )}
-          onCollapse={() => {
-            setNavCollapsed(true)
-          }}
-          onResize={() => {
-            setNavCollapsed(false)
-          }}
-        >
-          <NavBar />
-        </ResizablePanel>
-
-        <ResizableHandle />
-        {currentPanelName && (
-          <>
-            <ResizablePanel defaultSize={25} minSize={15} order={2} id="list" className="min-w-64">
-              <SidePanel currentPanelName={currentPanelName} />
-            </ResizablePanel>
-            <ResizableHandle />
-          </>
+    <>
+      <div
+        className={cn(
+          'fixed z-20 w-16 max-w-16 border-r bg-background transition-[width]',
+          !navCollapsed && 'w-60 max-w-none',
         )}
-        <ResizablePanel minSize={65} order={3} id="main">
-          <Header />
-          <PageScrollWrapper className="h-[calc(100dvh-64px)] w-full overflow-x-hidden">
-            <div>
-              <Outlet />
-            </div>
-          </PageScrollWrapper>
-        </ResizablePanel>
-      </ResizablePanelGroup>
-      <BackCover />
-    </div>
+      >
+        <NavBar />
+      </div>
+      <div className="ml-16 flex">
+        <ResizablePanelGroup direction="horizontal" autoSaveId="main-panel">
+          {currentPanelName && (
+            <>
+              <ResizablePanel
+                defaultSize={25}
+                minSize={20}
+                maxSize={70}
+                order={2}
+                id="list"
+                className="min-w-64 backdrop-blur-2xl"
+              >
+                <SidePanel currentPanelName={currentPanelName} />
+              </ResizablePanel>
+              <ResizableHandle />
+            </>
+          )}
+          <ResizablePanel order={3} id="main">
+            <Header />
+            <PageScrollWrapper className="h-[calc(100dvh-64px)] w-full overflow-x-hidden">
+              <div>
+                <Outlet />
+              </div>
+            </PageScrollWrapper>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+        <BackCover />
+      </div>
+      {!navCollapsed && (
+        <div className="fixed inset-0 z-10" onClick={() => setNavCollapsed(true)}></div>
+      )}
+    </>
   )
 }
 

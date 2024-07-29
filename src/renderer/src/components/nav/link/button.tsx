@@ -9,7 +9,9 @@ type Props = (typeof route)[number]
 
 export default function NavButton({ name, path, icon, active }: Props) {
   const isActive = useMatch(path)
-  const navCollapsed = useNavCollapsed((state) => state.collapsed)
+  const { collapsed: navCollapsed, setCollapsed: setNavCollapsed } = useNavCollapsed(
+    (state) => state,
+  )
 
   return (
     <Button
@@ -21,7 +23,13 @@ export default function NavButton({ name, path, icon, active }: Props) {
       )}
       asChild
     >
-      <MyLink to={path} unstable_viewTransition>
+      <MyLink
+        to={path}
+        unstable_viewTransition
+        onClick={() => {
+          if (!navCollapsed) setNavCollapsed(true)
+        }}
+      >
         <div className="flex">{isActive ? active : icon}</div>
         {!navCollapsed && <span>{name}</span>}
       </MyLink>

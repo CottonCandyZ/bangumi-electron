@@ -68,7 +68,7 @@ export default function ProfileMenu() {
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align={navCollapsed ? 'end' : 'center'}
-          side={navCollapsed ? 'right' : 'top'}
+          side={'top'}
           collisionPadding={{
             right: 8,
             left: 8,
