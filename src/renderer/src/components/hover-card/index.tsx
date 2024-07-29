@@ -14,7 +14,6 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
-  useState,
 } from 'react'
 import { flushSync } from 'react-dom'
 
@@ -130,17 +129,19 @@ export const PopCardInnerContent: FC<
 > = ({ children, viewTransitionName, className, hover, ...props }) => {
   if (!hover) return
   const hoverRef = useRef(hover)
-  const [popCod, setPopCod] = useState({ top: 0, left: 0 })
   const popRef = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
     const pop = popRef.current!.getBoundingClientRect()
     const { toTop, toLeft } = cPopSizeByCForFixed(pop, hoverRef.current)
-    setPopCod({ top: toTop, left: toLeft })
+    // 这里如果用状态管理的话，第一次会有 bug
+    popRef.current!.style.top = `${toTop}px`
+    popRef.current!.style.left = `${toLeft}px`
     const ob = new ResizeObserver(() => {
       if (!popRef.current) return
       const pop = popRef.current!.getBoundingClientRect()
       const { toTop, toLeft } = cPopSizeByCForFixed(pop, hoverRef.current)
-      setPopCod({ top: toTop, left: toLeft })
+      popRef.current!.style.top = `${toTop}px`
+      popRef.current!.style.left = `${toLeft}px`
     })
     ob.observe(popRef.current!)
     return () => {
@@ -153,8 +154,6 @@ export const PopCardInnerContent: FC<
       ref={popRef}
       className={cn('fixed z-50', className)}
       style={{
-        top: `${popCod.top}px`,
-        left: `${popCod.left}px`,
         viewTransitionName,
       }}
       {...props}
