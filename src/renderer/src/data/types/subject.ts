@@ -42,11 +42,11 @@ export type SlimSubject = Pick<
 }
 
 export enum SubjectType {
-  '书籍' = 1,
-  '动画',
-  '音乐',
-  '游戏',
-  '三次元' = 6,
+  'book' = 1,
+  'anime',
+  'music',
+  'game',
+  'real' = 6,
 }
 
 export type CoverImages = {

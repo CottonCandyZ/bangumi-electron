@@ -30,6 +30,8 @@ import {
 } from '@renderer/components/ui/dialog'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import LoginForm from '@renderer/components/user/login/form'
+import { useNavCollapsed } from '@renderer/state/panel'
+import { cn } from '@renderer/lib/utils'
 
 export default function ProfileMenu() {
   const logoutMutation = useLogoutMutation()
@@ -37,18 +39,43 @@ export default function ProfileMenu() {
   const { theme, setTheme } = useTheme()
   const isLogin = useIsLoginQuery()
   const [open, setOpen] = useState(false)
+  const navCollapsed = useNavCollapsed((state) => state.collapsed)
+  const [dropdownOpen, setDropDownOpen] = useState(false)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DropdownMenu>
-        <DropdownMenuTrigger className="w-full overflow-hidden rounded-full shadow-sm">
+      <DropdownMenu onOpenChange={(open) => setDropDownOpen(open)}>
+        <DropdownMenuTrigger
+          className={cn(
+            'flex w-full flex-row items-center gap-3 rounded-full text-muted-foreground shadow-sm hover:text-primary',
+            !navCollapsed && 'group border p-2 shadow-none hover:bg-accent',
+            dropdownOpen && 'bg-accent text-primary',
+          )}
+        >
           {isLogin.data ? (
-            <Image className="aspect-square" imageSrc={userInfo.data?.avatar.small} />
+            <Image
+              className="aspect-square w-8 overflow-hidden rounded-full"
+              imageSrc={userInfo.data?.avatar.small}
+            />
           ) : (
-            <div className="aspect-square bg-accent"></div>
+            <div className="aspect-square w-8 overflow-hidden rounded-full bg-accent"></div>
+          )}
+          {!navCollapsed && (
+            <span className="shrink-0 font-semibold">
+              {isLogin.data && userInfo.data?.nickname}
+            </span>
           )}
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" side="right">
+        <DropdownMenuContent
+          align={navCollapsed ? 'end' : 'center'}
+          side={navCollapsed ? 'right' : 'top'}
+          collisionPadding={{
+            right: 8,
+            left: 8,
+            bottom: 8,
+            top: 8,
+          }}
+        >
           {isLogin.data && (
             <DropdownMenuLabel>
               {userInfo.data?.nickname ? (

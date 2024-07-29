@@ -4,6 +4,7 @@ import { MyLink } from '@renderer/components/base/my-link'
 import EpisodesGrid from '@renderer/components/episodes/grid'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { CollectionData } from '@renderer/data/types/collection'
+import { SubjectType } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { useLocation } from 'react-router-dom'
 
@@ -14,6 +15,12 @@ export default function CollectionItem({
 }) {
   const { pathname } = useLocation()
   const mainSubjectId = pathname.split('/').at(-1)
+
+  // 判断是否要显示 episode
+  const needEpisodes =
+    collectionItemInfo.subject.type === SubjectType.anime ||
+    collectionItemInfo.subject.type === SubjectType.real
+
   return (
     <MyLink
       to={`/subject/${collectionItemInfo.subject_id}`}
@@ -36,14 +43,16 @@ export default function CollectionItem({
             />
             <div className="flex flex-col gap-2">
               <CollectionHeader {...collectionItemInfo.subject} />
-              <section>
-                <EpisodesGrid
-                  eps={collectionItemInfo.subject.eps}
-                  size="small"
-                  selector={false}
-                  subjectId={collectionItemInfo.subject_id}
-                />
-              </section>
+              {needEpisodes && (
+                <section>
+                  <EpisodesGrid
+                    eps={collectionItemInfo.subject.eps}
+                    size="small"
+                    selector={false}
+                    subjectId={collectionItemInfo.subject_id}
+                  />
+                </section>
+              )}
             </div>
           </div>
         </CardContent>

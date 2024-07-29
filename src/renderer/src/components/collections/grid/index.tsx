@@ -1,4 +1,5 @@
 import CollectionItem from '@renderer/components/collections/grid/item'
+import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useInfinityQueryCollectionsByUsername } from '@renderer/data/hooks/api/collection'
 import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
 import { CollectionType } from '@renderer/data/types/collection'
@@ -6,23 +7,23 @@ import { SubjectType } from '@renderer/data/types/subject'
 import { useEffect, useRef } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 
-export default function CollectionsGrid() {
+export default function CollectionsGrid({
+  collectionType,
+  subjectType,
+}: {
+  collectionType: CollectionType
+  subjectType: SubjectType
+}) {
   const userInfoQuery = useQueryUserInfo()
   const userInfo = userInfoQuery.data
   const collectionsQuery = useInfinityQueryCollectionsByUsername({
     username: userInfo?.username,
-    collectionType: CollectionType['在看'],
-    subjectType: SubjectType['动画'],
+    collectionType: collectionType,
+    subjectType: subjectType,
     enabled: !!userInfo,
   })
   const collections = collectionsQuery.data
   const bottomRef = useRef<HTMLDivElement | null>(null)
-  const timeRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined)
-  useEffect(() => {
-    return () => {
-      clearInterval(timeRef.current)
-    }
-  }, [])
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -42,10 +43,20 @@ export default function CollectionsGrid() {
       if (bottomRef.current) {
         observer.unobserve(bottomRef.current)
       }
-      clearInterval(timeRef.current)
     }
   }, [bottomRef, collections])
-  if (!collections) return null
+  if (!collections)
+    return (
+      <div className="relative flex flex-col items-center justify-center gap-5">
+        <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(15rem,_1fr))] gap-1">
+          {Array(10)
+            .fill(undefined)
+            .map((_, index) => (
+              <Skeleton key={index} className="h-20 w-full" />
+            ))}
+        </div>
+      </div>
+    )
   return (
     <div className="relative flex flex-col items-center justify-center gap-5">
       <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(15rem,_1fr))] gap-1">
