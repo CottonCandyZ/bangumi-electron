@@ -1,5 +1,6 @@
 import { SubjectType } from '@renderer/data/types/subject'
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 export type PanelName = keyof typeof SubjectType
 
@@ -18,7 +19,14 @@ type currentPanel = {
   setPanelName: (panelName: PanelName | null) => void
 }
 
-export const usePanelName = create<currentPanel>()((set) => ({
-  panelName: null,
-  setPanelName: (panelName) => set({ panelName }),
-}))
+export const usePanelName = create<currentPanel>()(
+  persist(
+    (set) => ({
+      panelName: null,
+      setPanelName: (panelName) => set({ panelName }),
+    }),
+    {
+      name: 'current-panel-name',
+    },
+  ),
+)
