@@ -10,6 +10,7 @@ import {
 } from '@renderer/components/ui/resizable'
 import { cn } from '@renderer/lib/utils'
 import { useNavCollapsed, usePanelName } from '@renderer/state/panel'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Outlet } from 'react-router-dom'
 
 // 对于 windows 暂时先用 overlay scroll bar，等后面 fluent 稳定了就可以上 Windows fluent scroll bar https://source.chromium.org/chromium/chromium/src/+/main:ui/native_theme/native_theme_features.cc;l=5?q=native_theme_features&ss=chromium%2Fchromium%2Fsrc
@@ -57,9 +58,17 @@ function RootLayout() {
         </ResizablePanelGroup>
         <BackCover />
       </div>
-      {!navCollapsed && (
-        <div className="fixed inset-0 z-10" onClick={() => setNavCollapsed(true)}></div>
-      )}
+      <AnimatePresence>
+        {!navCollapsed && (
+          <motion.div
+            className="fixed inset-0 z-10 bg-black"
+            onClick={() => setNavCollapsed(true)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.5 }}
+            exit={{ opacity: 0 }}
+          />
+        )}
+      </AnimatePresence>
     </>
   )
 }
