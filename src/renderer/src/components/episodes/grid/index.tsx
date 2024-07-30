@@ -43,22 +43,15 @@ export default function EpisodesGrid({
   if (isLogin.data === undefined)
     return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
 
-  if (episodesQuery.data === undefined || collectionEpisodesQuery.data === undefined)
+  const episode = isLogin.data ? collectionEpisodesQuery : episodesQuery
+  if (episode.data === undefined) {
     return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
+  }
 
   return (
     <div className={cn('flex flex-col gap-4')}>
-      {selector && (
-        <PageSelector
-          episodes={isLogin.data ? collectionEpisodesQuery : episodesQuery}
-          limit={limit}
-          setOffSet={setOffSet}
-        />
-      )}
-      <EpisodeGridContent
-        episodes={isLogin.data ? collectionEpisodesQuery.data.data : episodesQuery.data.data}
-        size={size}
-      />
+      {selector && <PageSelector episodes={episode} limit={limit} setOffSet={setOffSet} />}
+      <EpisodeGridContent episodes={episode.data.data} size={size} />
     </div>
   )
 }
