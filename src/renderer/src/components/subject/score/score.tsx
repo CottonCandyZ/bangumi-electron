@@ -18,7 +18,7 @@ export default function Score({ rating }: { rating: Rating }) {
           )}
         </div>
         <div className="text-sm font-medium text-muted-foreground">
-          Rank: # <span>{rating.rank}</span>
+          Rank: # <span>{rating.rank !== 0 ? rating.rank : '--'}</span>
         </div>
       </section>
       <div></div>
