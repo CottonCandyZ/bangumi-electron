@@ -19,7 +19,6 @@ export const useCollectionTypeFilter = create<CollectionTypeFilter>()(
       storage: {
         getItem: (name) => {
           const str = localStorage.getItem(name)
-          console.log(str)
           if (!str) return null
           const { state } = JSON.parse(str)
           return {
