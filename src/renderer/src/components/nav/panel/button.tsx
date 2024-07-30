@@ -17,7 +17,7 @@ export default function PanelButton({ name, panelName, icon, active }: Props) {
     <Button
       variant="ghost"
       className={cn(
-        'relative aspect-square h-full w-fit p-2 text-primary/65 hover:text-primary',
+        'relative aspect-square h-full w-fit p-2 text-primary/65 hover:text-primary active:scale-95',
         isActive && 'bg-accent text-primary',
         !navCollapsed && 'aspect-auto w-full justify-start gap-2',
       )}
