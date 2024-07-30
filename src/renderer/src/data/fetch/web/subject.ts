@@ -1,4 +1,4 @@
-import { SUBJECTS_WEB, webFetch } from '@renderer/data/fetch/config'
+import { HTML_SUBJECTS, webFetch } from '@renderer/data/fetch/config'
 import { SubjectId } from '@renderer/data/types/bgm'
 import type { sectionPath } from '@renderer/data/types/web'
 import { AuthError } from '@renderer/lib/utils/error'
@@ -15,7 +15,7 @@ export async function fetchSectionHome({ sectionPath }: { sectionPath: sectionPa
 }
 
 export async function fetchSubjectInfoById({ id }: { id: SubjectId }) {
-  const text = await webFetch<string>(SUBJECTS_WEB.BY_ID(id.toString()), {
+  const text = await webFetch<string>(HTML_SUBJECTS.BY_ID(id.toString()), {
     parseResponse: (text) => text,
     credentials: 'include',
   })

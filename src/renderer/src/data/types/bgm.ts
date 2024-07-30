@@ -60,3 +60,9 @@ export type Pagination = {
 }
 
 export type OnAirStatus = 'noAired' | 'onAir' | 'aired'
+
+export type APIError = {
+  title: string
+  description: string
+  detail?: string
+}

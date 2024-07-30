@@ -30,9 +30,8 @@ export default function Header() {
   return (
     <header
       className={cn(
-        'drag-region flex h-16 flex-row items-center justify-between gap-10 overflow-hidden border-b bg-background pl-2',
+        'drag-region flex h-16 flex-row items-center justify-between gap-10 border-b pl-2 backdrop-blur-2xl',
       )}
-      style={{ viewTransitionName: 'header' }}
     >
       <div className="flex flex-row justify-start gap-3">
         <div className="flex items-center justify-center gap-0.5">
@@ -57,7 +56,7 @@ export default function Header() {
           <HeaderTitle />
         </AnimatePresence>
       </div>
-      <div className="flex h-full flex-row justify-end">
+      <div className="flex h-full flex-row items-center justify-end gap-2">
         {/* <div className="mr-5 flex h-full max-w-[20rem] gap-5">
           <div className="flex grow items-center">
             <div className="no-drag-region w-full">
@@ -78,32 +77,34 @@ export default function Header() {
           <div className="no-drag-region flex items-center"></div>
         </div> */}
         {platform === 'win32' && (
-          <div className="no-drag-region flex flex-row items-center">
-            <Button
-              className="h-full w-fit rounded-none px-3"
-              variant="ghost"
-              onClick={() => client.minimizeCurrentWindow({})}
-            >
-              <Minus strokeWidth={0.6} className="w-4" />
-            </Button>
-            <Button
-              className="relative h-full w-fit rounded-none px-3"
-              variant="ghost"
-              onClick={() => client.toggleMaximizeCurrentWindow({})}
-            >
-              {isMaximize ? (
-                <MaximizeIcon className="w-[15px]" />
-              ) : (
-                <Square strokeWidth={1} className="w-[15px]" />
-              )}
-            </Button>
-            <Button
-              className="h-full w-fit rounded-none px-3 pr-4 hover:bg-red-600 hover:text-white"
-              variant="ghost"
-              onClick={() => client.closeCurrentWindow({})}
-            >
-              <X strokeWidth={1} className="w-[20px]" />
-            </Button>
+          <div className="flex h-full">
+            <div className="no-drag-region flex h-full flex-row items-center">
+              <Button
+                className="h-full w-fit rounded-none px-3"
+                variant="ghost"
+                onClick={() => client.minimizeCurrentWindow({})}
+              >
+                <Minus strokeWidth={0.6} className="w-4" />
+              </Button>
+              <Button
+                className="relative h-full w-fit rounded-none px-3"
+                variant="ghost"
+                onClick={() => client.toggleMaximizeCurrentWindow({})}
+              >
+                {isMaximize ? (
+                  <MaximizeIcon className="w-[15px]" />
+                ) : (
+                  <Square strokeWidth={1} className="w-[15px]" />
+                )}
+              </Button>
+              <Button
+                className="h-full w-fit rounded-none px-3 pr-4 hover:bg-red-600 hover:text-white"
+                variant="ghost"
+                onClick={() => client.closeCurrentWindow({})}
+              >
+                <X strokeWidth={1} className="w-[20px]" />
+              </Button>
+            </div>
           </div>
         )}
       </div>

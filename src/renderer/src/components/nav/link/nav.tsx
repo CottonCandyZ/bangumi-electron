@@ -25,7 +25,7 @@ export function LinkNav() {
   return (
     <ul className="flex w-full flex-col gap-1">
       {route.map((item) => (
-        <li key={item.name} className="flex w-full justify-center">
+        <li key={item.name} className={'flex w-full justify-center'}>
           <NavButton {...item} />
         </li>
       ))}

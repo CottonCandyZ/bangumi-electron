@@ -16,7 +16,7 @@ export type CollectionData = {
   ep_status: number
   subject_type: SubjectType
   type: CollectionType
-  rate: number
+  rate: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
   private: false
 }
 
@@ -37,9 +37,9 @@ export enum EpisodeCollectionType {
 }
 
 export enum CollectionType {
-  '想看' = 1,
-  '看过',
-  '在看',
-  '搁置',
-  '抛弃',
+  'wantToWatch' = 1,
+  'watched',
+  'watching',
+  'aside',
+  'abandoned',
 }

@@ -1,8 +1,13 @@
 import {
-  getCollectionEpisodesBySubjectId,
-  getCollectionsByUsername,
+  getEpisodesCollectionBySubjectId,
+  getSubjectCollectionBySubjectIdAndUsername,
+  getSubjectCollectionsByUsername,
 } from '@renderer/data/fetch/api/collection'
-import { useInfinityQueryOptionalAuth, useQueryMustAuth } from '@renderer/data/hooks/factory'
+import {
+  useInfinityQueryOptionalAuth,
+  useQueryMustAuth,
+  useQueryOptionalAuth,
+} from '@renderer/data/hooks/factory'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { UserInfo } from '@renderer/data/types/user'
 
@@ -15,14 +20,14 @@ export const useInfinityQueryCollectionsByUsername = ({
   limit = 3,
   initialPageParm = 0,
   enabled,
-}: OmitInfinityQFP<Parameters<typeof getCollectionsByUsername>[0]> & {
+}: OmitInfinityQFP<Parameters<typeof getSubjectCollectionsByUsername>[0]> & {
   username: UserInfo['username'] | undefined
   initialPageParm?: number
   enabled?: boolean
 }) =>
   useInfinityQueryOptionalAuth({
-    queryFn: getCollectionsByUsername,
-    queryKey: ['episodes-info'],
+    queryFn: getSubjectCollectionsByUsername,
+    queryKey: ['collection-subjects'],
     props: { username, collectionType, subjectType },
     qFLimit: limit,
     getNextPageParam: (lastPage) => {
@@ -48,9 +53,28 @@ export const useQueryCollectionEpisodesInfoBySubjectId = ({
   enabled?: boolean
 }) =>
   useQueryMustAuth({
-    queryFn: getCollectionEpisodesBySubjectId,
-    queryKey: ['episodes-info'],
+    queryFn: getEpisodesCollectionBySubjectId,
+    queryKey: ['collection-episodes'],
     queryProps: { subjectId, limit, offset, episodeType },
     enabled,
     staleTime: 1000 * 60 * 10,
+  })
+
+export const useQuerySubjectCollection = ({
+  subjectId,
+  username,
+  enabled,
+  needKeepPreviousData,
+}: {
+  subjectId: SubjectId | undefined
+  username: UserInfo['username'] | undefined
+  enabled?: boolean
+  needKeepPreviousData?: boolean
+}) =>
+  useQueryOptionalAuth({
+    queryFn: getSubjectCollectionBySubjectIdAndUsername,
+    queryKey: ['collection-subject'],
+    queryProps: { subjectId, username },
+    enabled: enabled,
+    needKeepPreviousData,
   })

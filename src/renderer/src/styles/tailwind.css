@@ -26,25 +26,24 @@
     --radius: 0.5rem;
 
     --want-to-watch: #ffb4c3;
-    --want-to-watch-foreground: #FFF;
+    --want-to-watch-foreground: #fff;
     --want-to-watch-accent: #ffdfea;
     --want-to-watch-accent-foreground: #8b5a64;
     --watched: #52c2fe;
-    --watched-foreground: #FFF;
+    --watched-foreground: #fff;
     --watched-accent: #f1fbff;
     --watched-accent-foreground: #3b86ae;
 
-
-    --chart-score-10: 331.83, 80.39%, 60%;
-    --chart-score-9: 345.1, 77.66%, 61.37%;
-    --chart-score-8: 358.73, 74.74%, 62.75%;
-    --chart-score-7: 11.82, 71.74%, 63.92%;
-    --chart-score-6: 25.37, 69.49%, 65.29%;
-    --chart-score-5: 38.76, 66.08%, 66.47%;
-    --chart-score-4: 51.92, 63.41%, 67.84%;
-    --chart-score-3: 65.05, 60.51%, 69.22%;
-    --chart-score-2: 78.62, 58.39%, 70.78%;
-    --chart-score-1: 91.9, 55.24%, 71.96%;
+    --chart-score-10: 346.29, 54.97%, 62.55%;
+    --chart-score-9: 357.69, 58.43%, 65.1%;
+    --chart-score-8: 9.47, 61.96%, 63.92%;
+    --chart-score-7: 19.18, 62.24%, 61.57%;
+    --chart-score-6: 28.8, 59.81%, 59.02%;
+    --chart-score-5: 37.69, 54.75%, 56.67%;
+    --chart-score-4: 48.55, 47.41%, 54.51%;
+    --chart-score-3: 63.16, 40.43%, 53.92%;
+    --chart-score-2: 80.43, 44.34%, 58.43%;
+    --chart-score-1: 101.59, 47.83%, 63.92%;
   }
 
   .dark {
@@ -69,10 +68,10 @@
     --ring: 240 4.9% 83.9%;
 
     --want-to-watch: #cfa4ad;
-    --want-to-watch-foreground: #FFF;
+    --want-to-watch-foreground: #fff;
     --want-to-watch--accent: #cdb7be;
     --watched: #78abc7;
-    --watched-foreground: #FFF;
+    --watched-foreground: #fff;
     --watched-accent: #afc7cd;
     --watched-accent-foreground: #295e7b;
 

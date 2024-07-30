@@ -56,7 +56,7 @@ export const SUBJECTS = {
   RELATED_SUBJECT_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/subjects`,
 }
 
-export const SUBJECTS_WEB = {
+export const HTML_SUBJECTS = {
   BY_ID: (id: SubjectId) => `/subject/${id}`,
 }
 
@@ -78,7 +78,14 @@ export const PERSONS = {
 /** 收藏 */
 export const COLLECTIONS = {
   BY_USERNAME: (username: UserInfo['username']) => `/v0/users/${username}/collections`,
+  BY_USERNAME_AND_SUBJECT_ID: (username: UserInfo['username'], subjectId: SubjectId) =>
+    `/v0/users/${username}/collections/${subjectId}`,
   EPISODES_BY_SUBJECT_ID: (subjectId: SubjectId) => `/v0/users/-/collections/${subjectId}/episodes`,
+  ADD_OR_MODIFY_SUBJECT_BY_ID: (subjectId: SubjectId) => `/v0/users/-/collections/${subjectId}`,
+}
+
+export const HTML_COLLECTION = {
+  DELETE_SUBJECT_BY_ID: (subjectId: SubjectId) => `/subject/${subjectId}/remove`,
 }
 
 /** ofetch web config */
