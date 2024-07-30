@@ -38,16 +38,16 @@ function RootLayout() {
                 defaultSize={25}
                 minSize={20}
                 maxSize={70}
-                order={2}
+                order={1}
                 id="list"
-                className="min-w-64 backdrop-blur-2xl"
+                className="min-w-64"
               >
                 <SidePanel currentPanelName={currentPanelName} />
               </ResizablePanel>
               <ResizableHandle />
             </>
           )}
-          <ResizablePanel order={3} id="main">
+          <ResizablePanel order={2} id="main">
             <Header />
             <PageScrollWrapper className="h-[calc(100dvh-64px)] w-full overflow-x-hidden">
               <div>
