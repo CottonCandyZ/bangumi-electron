@@ -47,7 +47,7 @@ export default function LoginForm({
       .email(login_form_message.mail_format_error),
     password: z.string().min(1, { message: login_form_message.required }),
     captcha: z.string().length(5, { message: login_form_message.captcha_length_error }),
-    save_password: z.boolean().default(false),
+    savePassword: z.boolean(),
   })
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -55,7 +55,7 @@ export default function LoginForm({
       email: '',
       password: '',
       captcha: '',
-      save_password: false,
+      savePassword: false,
     },
   })
   // 登录流程
@@ -172,7 +172,7 @@ export default function LoginForm({
         </div>
         <FormField
           control={form.control}
-          name="save_password"
+          name="savePassword"
           render={({ field }) => (
             <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
               <FormControl>

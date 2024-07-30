@@ -38,7 +38,7 @@ export interface webLoginProps {
   email: string
   password: string
   captcha: string
-  save_password: boolean
+  savePassword: boolean
 }
 
 /**
@@ -79,7 +79,7 @@ export async function getCaptcha() {
  *
  * Web 登录函数，直接往登录地址 POST 相关信息
  */
-export async function webLogin({ email, password, captcha, save_password }: webLoginProps) {
+export async function webLogin({ email, password, captcha, savePassword }: webLoginProps) {
   const { _data: data, redirected } = await webFetch.raw(LOGIN.POST_URL, {
     method: 'post',
     headers: {
@@ -108,7 +108,7 @@ export async function webLogin({ email, password, captcha, save_password }: webL
     throw new LoginError('用户名或密码错误')
   }
   if (!redirected) throw new LoginError('未能完成登录，未知错误')
-  if (save_password) {
+  if (savePassword) {
     store.loginInfo = { email, password }
   } else {
     store.loginInfo = undefined
