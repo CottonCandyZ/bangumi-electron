@@ -22,14 +22,14 @@ export function SubjectHeaderInfo({ subjectId }: { subjectId: SubjectId }) {
       </div>
     )
   return (
-    <div className="flex flex-1 flex-col gap-5">
+    <div className="flex flex-1 flex-col gap-3">
       <section className="flex flex-col gap-2">
         {/* 标题 */}
         <Header {...subjectInfo} />
         {/* 一些 meta 数据 */}
         <Meta {...subjectInfo} />
       </section>
-      <Separator />
+      <Separator className="bg-primary/10" />
       <section>
         <Summary {...subjectInfo} />
       </section>
