@@ -2,13 +2,12 @@ import { Image } from '@renderer/components/base/Image'
 import SubjectBackground from '@renderer/components/subject/background'
 import SubjectContent from '@renderer/components/subject/content'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
-import { SubjectId } from '@renderer/data/types/bgm'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 
 export function Component() {
-  const subjectId = useParams().subjectId as SubjectId
+  const subjectId = useParams().subjectId
   const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const backImageRef = useRef<HTMLDivElement | null>(null)
@@ -25,6 +24,8 @@ export function Component() {
     }
   }, [backImageRef, containerRef])
 
+  if (!subjectId) throw Error('Get Params Error')
+
   return (
     <div ref={containerRef}>
       {subjectInfo?.images.large && !isEmpty(subjectInfo.images.large) && (
@@ -37,7 +38,6 @@ export function Component() {
           <SubjectBackground />
         </Image>
       )}
-
       <div className="relative pb-10 pt-[60rem]">
         <SubjectContent subjectId={subjectId} />
       </div>
