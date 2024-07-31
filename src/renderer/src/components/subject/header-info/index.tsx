@@ -13,7 +13,7 @@ export function SubjectHeaderInfo({ subjectId }: { subjectId: SubjectId }) {
     return (
       <div className="flex flex-1 flex-col gap-5">
         <section className="flex flex-col gap-2">
-          <Skeleton className="h-5" />
+          <Skeleton className="h-10" />
           <Skeleton className="h-5" />
         </section>
         <section>
