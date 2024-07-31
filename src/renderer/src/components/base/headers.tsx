@@ -11,7 +11,7 @@ export function MediumHeader({ name, name_cn }: { name: string; name_cn: string 
 }
 
 export function CollectionHeader({ name, name_cn }: { name: string; name_cn: string }) {
-  if (isEmpty(name_cn)) return <h3 className="font-jp font-bold">{name}</h3>
+  if (isEmpty(name_cn)) return <h3 className="font-jp text-sm font-medium">{name}</h3>
   return (
     <header>
       <h3 className="text-sm font-medium">{name_cn}</h3>
