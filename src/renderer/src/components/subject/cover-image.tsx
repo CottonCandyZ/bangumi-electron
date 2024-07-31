@@ -8,7 +8,6 @@ import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { create } from 'zustand'
 import { useInView } from 'framer-motion'
 import { useEffect, useRef } from 'react'
-import { useViewTransitionStatusState } from '@renderer/components/hover-card/state'
 
 type CoverImageInView = {
   isInView: boolean
@@ -42,7 +41,7 @@ export default function SubjectCoverImage({ subjectId }: { subjectId: SubjectId 
     >
       {subjectInfo !== undefined ? (
         !isEmpty(subjectInfo.images.common) ? (
-          <Image imageSrc={subjectInfo.images.common} loadingClassName="aspect-[2/3]" />
+          <Image imageSrc={subjectInfo.images.common} loadingClassName="aspect-[22/31]" />
         ) : (
           <div className="flex aspect-[2/3] items-center justify-center">还没有图片哦</div>
         )
