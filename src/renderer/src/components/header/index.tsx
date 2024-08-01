@@ -3,7 +3,6 @@ import HeaderTitle from '@renderer/components/header/subject-title'
 import { Button } from '@renderer/components/ui/button'
 import { client, handlers } from '@renderer/lib/client'
 import { cn } from '@renderer/lib/utils'
-import { AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Minus, Square, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -30,7 +29,7 @@ export default function Header() {
   return (
     <header
       className={cn(
-        'drag-region flex h-16 flex-row items-center justify-between gap-10 border-b pl-2 backdrop-blur-2xl',
+        'drag-region flex h-16 flex-row items-center justify-between gap-10 overflow-hidden border-b pl-2 backdrop-blur-2xl',
       )}
     >
       <div className="flex flex-row justify-start gap-3">
@@ -52,9 +51,7 @@ export default function Header() {
             <ChevronRight />
           </Button>
         </div>
-        <AnimatePresence>
-          <HeaderTitle />
-        </AnimatePresence>
+        <HeaderTitle />
       </div>
       <div className="flex h-full flex-row items-center justify-end gap-2">
         {/* <div className="mr-5 flex h-full max-w-[20rem] gap-5">
