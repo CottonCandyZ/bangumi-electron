@@ -22,7 +22,7 @@ export function Component() {
     return () => {
       if (containerRef.current) resizeObserver.unobserve(containerRef.current)
     }
-  }, [backImageRef, containerRef])
+  }, [backImageRef, containerRef, subjectId])
 
   if (!subjectId) throw Error('Get Params Error')
 
