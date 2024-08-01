@@ -14,6 +14,7 @@ import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
 import { useAccessTokenQuery, useIsLoginQuery } from '@renderer/data/hooks/session'
 import { SubjectId } from '@renderer/data/types/bgm'
+import { CollectionType } from '@renderer/data/types/collection'
 import { useCollectionIsInView } from '@renderer/state/inView'
 import { useInView } from 'framer-motion'
 import { useEffect, useRef } from 'react'
@@ -81,11 +82,13 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
             </DropdownMenu>
           </div>
 
-          <QuickRate
-            subjectCollection={subjectCollection}
-            userInfo={userInfo}
-            accessToken={accessToken.access_token}
-          />
+          {subjectCollection.type !== CollectionType.wantToWatch && (
+            <QuickRate
+              subjectCollection={subjectCollection}
+              userInfo={userInfo}
+              accessToken={accessToken.access_token}
+            />
+          )}
         </div>
       ) : (
         <AddCollection subjectId={subjectId} dropdown={false} />
