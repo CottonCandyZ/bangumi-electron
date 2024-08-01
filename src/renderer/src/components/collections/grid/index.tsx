@@ -4,6 +4,7 @@ import { useInfinityQueryCollectionsByUsername } from '@renderer/data/hooks/api/
 import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
 import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
+import { cn } from '@renderer/lib/utils'
 import { useEffect, useRef } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 
@@ -21,6 +22,7 @@ export default function CollectionsGrid({
     collectionType: collectionType,
     subjectType: subjectType,
     enabled: !!userInfo,
+    needKeepPreviousData: false,
   })
   const collections = collectionsQuery.data
   const bottomRef = useRef<HTMLDivElement | null>(null)
@@ -58,7 +60,7 @@ export default function CollectionsGrid({
       </div>
     )
   return (
-    <div className="relative flex flex-col items-center justify-center gap-5">
+    <div className={cn('relative flex flex-col items-center justify-center gap-5')}>
       <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(15rem,_1fr))] gap-1">
         {collections.pages.map((group, page) => (
           <Fragment key={page}>
@@ -69,11 +71,13 @@ export default function CollectionsGrid({
         ))}
       </div>
       <div className="absolute bottom-0 left-0 right-0 -z-10 h-64" ref={bottomRef}></div>
-      <div>
+      <div className="w-full text-center">
         {collectionsQuery.isFetchingNextPage ? (
           <span className="i-mingcute-loading-line animate-spin text-2xl" />
         ) : (
-          !collectionsQuery.hasNextPage && '已经到底啦'
+          !collectionsQuery.hasNextPage && (
+            <span className="text-sm font-medium text-muted-foreground">就这么多了！</span>
+          )
         )}
       </div>
     </div>

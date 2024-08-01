@@ -5,7 +5,7 @@ export const TEXT_CONFIG = {
     captcha_length_error: '验证码需要五位',
   },
   add_subject_collection: {
-    comment_max_length: '短评太长了的说',
+    comment_max_length: '不可以超过 380 个字哦',
   },
 } as const
 
@@ -14,4 +14,8 @@ export const UI_CONFIG = {
   HEADER_HEIGHT: 64,
   NAV_WIDTH: 64,
   SUBJECT_INIT_SCROLL: 800,
+}
+
+export const INPUT_LIMIT_CONFIG = {
+  short_comment_length_limit: 380,
 }

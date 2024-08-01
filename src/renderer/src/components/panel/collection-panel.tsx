@@ -1,6 +1,6 @@
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
 import CollectionsGrid from '@renderer/components/collections/grid'
-import SubjectCollectionSelector from '@renderer/components/collections/subject-select'
+import SubjectCollectionSelectorContent from '@renderer/components/collections/subject-select-content'
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { useIsLoginQuery } from '@renderer/data/hooks/session'
 import { CollectionType } from '@renderer/data/types/collection'
@@ -19,14 +19,14 @@ export default function CollectionPanel({ subjectType }: { subjectType: SubjectT
         {isLogin && (
           <Select
             onValueChange={(value) =>
-              setCurrentTypeFilter(subjectType.toString(), value as unknown as CollectionType)
+              setCurrentTypeFilter(subjectType.toString(), Number(value) as CollectionType)
             }
             value={currentSelect.toString()}
           >
             <SelectTrigger className="no-drag-region w-fit">
               <SelectValue />
             </SelectTrigger>
-            <SubjectCollectionSelector subjectType={subjectType} />
+            <SubjectCollectionSelectorContent subjectType={subjectType} />
           </Select>
         )}
       </div>

@@ -7,6 +7,7 @@ import SubjectPersonTable from '@renderer/components/subject/person'
 import RelatedSubjects from '@renderer/components/subject/related'
 import SubjectScore from '@renderer/components/subject/score'
 import SubjectTags from '@renderer/components/subject/tags/indext'
+import { Card } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
 import { SubjectId } from '@renderer/data/types/bgm'
 
@@ -26,13 +27,15 @@ const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
           {/* 标签 */}
           <SubjectTags subjectId={subjectId} />
         </div>
-        <section className="flex min-w-56 flex-1 flex-col gap-2">
-          <SubjectCollection subjectId={subjectId} />
-          <Separator />
-          <div className="w-56">
-            <SubjectScore subjectId={subjectId} />
-          </div>
-        </section>
+        <Card className="h-fit bg-transparent p-4">
+          <section className="flex min-w-56 flex-1 flex-col gap-2">
+            <SubjectCollection subjectId={subjectId} />
+            <Separator />
+            <div className="w-56">
+              <SubjectScore subjectId={subjectId} />
+            </div>
+          </section>
+        </Card>
       </section>
       <SubjectCharacters subjectId={subjectId} />
       <RelatedSubjects subjectId={subjectId} />

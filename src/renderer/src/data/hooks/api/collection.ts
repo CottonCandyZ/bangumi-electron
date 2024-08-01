@@ -1,15 +1,18 @@
 import {
+  AddOrModifySubjectCollectionById,
   getEpisodesCollectionBySubjectId,
   getSubjectCollectionBySubjectIdAndUsername,
   getSubjectCollectionsByUsername,
 } from '@renderer/data/fetch/api/collection'
 import {
   useInfinityQueryOptionalAuth,
+  useMutationMustAuth,
   useQueryMustAuth,
   useQueryOptionalAuth,
 } from '@renderer/data/hooks/factory'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { UserInfo } from '@renderer/data/types/user'
+import { MutationKey } from '@tanstack/react-query'
 
 type OmitInfinityQFP<P> = Omit<P, 'token' | 'offset'>
 
@@ -20,15 +23,17 @@ export const useInfinityQueryCollectionsByUsername = ({
   limit = 3,
   initialPageParm = 0,
   enabled,
+  needKeepPreviousData,
 }: OmitInfinityQFP<Parameters<typeof getSubjectCollectionsByUsername>[0]> & {
   username: UserInfo['username'] | undefined
   initialPageParm?: number
   enabled?: boolean
+  needKeepPreviousData?: boolean
 }) =>
   useInfinityQueryOptionalAuth({
     queryFn: getSubjectCollectionsByUsername,
     queryKey: ['collection-subjects'],
-    props: { username, collectionType, subjectType },
+    queryProps: { username, collectionType, subjectType },
     qFLimit: limit,
     getNextPageParam: (lastPage) => {
       const next = lastPage.offset + lastPage.limit
@@ -37,6 +42,7 @@ export const useInfinityQueryCollectionsByUsername = ({
     },
     initialPageParam: initialPageParm,
     enabled,
+    needKeepPreviousData,
   })
 
 export const useQueryCollectionEpisodesInfoBySubjectId = ({
@@ -77,4 +83,31 @@ export const useQuerySubjectCollection = ({
     queryProps: { subjectId, username },
     enabled: enabled,
     needKeepPreviousData,
+  })
+
+export const useMutationSubjectCollection = ({
+  mutationKey,
+  onSuccess,
+  onMutate,
+  onSettled,
+  onError,
+}: {
+  mutationKey?: MutationKey
+  onSuccess?: (
+    data: Awaited<ReturnType<typeof AddOrModifySubjectCollectionById>>,
+    variable: Omit<Parameters<typeof AddOrModifySubjectCollectionById>[0], 'token'>,
+  ) => void
+  onMutate?: (
+    variable: Omit<Parameters<typeof AddOrModifySubjectCollectionById>[0], 'token'>,
+  ) => void
+  onSettled?: () => void
+  onError?: () => void
+} = {}) =>
+  useMutationMustAuth({
+    mutationKey,
+    mutationFn: AddOrModifySubjectCollectionById,
+    onSuccess,
+    onMutate,
+    onSettled,
+    onError,
   })

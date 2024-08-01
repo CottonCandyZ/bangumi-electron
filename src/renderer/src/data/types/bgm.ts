@@ -2,7 +2,7 @@
 // https://github.com/czy0729/Bangumi/blob/master/src/types/bangumi.ts
 
 /** 任意 ID */
-export type Id = number | string
+export type Id = string
 
 /** 条目 ID */
 export type SubjectId = Id

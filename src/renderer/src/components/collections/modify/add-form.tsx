@@ -13,6 +13,7 @@ export default function AddSubjectCollectionForm({
     <AddOrModifySubjectCollectionForm
       collectionType={collectionType}
       subjectType={subjectInfo.type}
+      subjectTags={subjectInfo.tags}
     />
   )
 }

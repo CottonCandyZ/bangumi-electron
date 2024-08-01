@@ -1,5 +1,5 @@
-import { CoverMotionImage } from '@renderer/components/base/cover-motion-image'
 import { CollectionHeader } from '@renderer/components/base/headers'
+import { Image } from '@renderer/components/base/Image'
 import { MyLink } from '@renderer/components/base/my-link'
 import EpisodesGrid from '@renderer/components/episodes/grid'
 import { Card, CardContent } from '@renderer/components/ui/card'
@@ -37,7 +37,7 @@ export default function CollectionItem({
       >
         <CardContent className="p-2">
           <div className="flex flex-row gap-2">
-            <CoverMotionImage
+            <Image
               imageSrc={collectionItemInfo.subject.images.grid}
               className="size-12 shrink-0 overflow-hidden rounded-md border shadow-sm"
             />
@@ -49,7 +49,7 @@ export default function CollectionItem({
                     eps={collectionItemInfo.subject.eps}
                     size="small"
                     selector={false}
-                    subjectId={collectionItemInfo.subject_id}
+                    subjectId={collectionItemInfo.subject_id.toString()}
                   />
                 </section>
               )}

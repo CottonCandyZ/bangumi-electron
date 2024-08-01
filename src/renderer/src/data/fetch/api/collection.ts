@@ -114,7 +114,7 @@ export async function AddOrModifySubjectCollectionById({
   isPrivate,
   tags,
 }: {
-  subjectId: SubjectId
+  subjectId?: SubjectId
   token: string
   collectionType?: CollectionType
   rate?: CollectionData['rate']
@@ -132,7 +132,7 @@ export async function AddOrModifySubjectCollectionById({
         rate,
         comment,
         private: isPrivate,
-        tags: JSON.stringify(tags),
+        tags: tags,
       },
       headers: {
         ...getAuthHeader(token),

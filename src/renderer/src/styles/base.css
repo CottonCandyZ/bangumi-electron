@@ -10,6 +10,12 @@
   view-transition-name: none;
 }
 
+:where([data-sonner-toaster]) {
+  @apply !font-sans;
+  & :where([data-title]) {
+    @apply font-medium text-sm;
+  }
+}
 ::view-transition-group(pop-card) {
   animation-duration: 0.3s;
   animation-timing-function: ease;

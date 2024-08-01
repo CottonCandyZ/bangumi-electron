@@ -2,10 +2,14 @@ import { useAccessTokenQuery, useLogoutMutation } from '@renderer/data/hooks/ses
 import { AuthError } from '@renderer/lib/utils/error'
 import {
   GetNextPageParamFunction,
-  QueryOptions,
+  InfiniteData,
+  QueryKey,
+  UseInfiniteQueryOptions,
+  UseMutationOptions,
   UseQueryOptions,
   keepPreviousData,
   useInfiniteQuery,
+  useMutation,
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
@@ -31,18 +35,17 @@ export const useQueryMustAuth = <P, R>({
   enabled = true,
   ...props
 }: {
-  queryKey: QueryOptions['queryKey']
   queryFn: P extends { token: string } ? Fn<P, R> : never
   enabled?: boolean
 } & OptionalProps<P> &
-  Omit<UseQueryOptions<R, Error, R>, 'queryFn'>) => {
+  Omit<UseQueryOptions<R, Error, R, QueryKey>, 'queryFn'>) => {
   const logoutMutation = useLogoutMutation()
   const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const query = useQuery({
-    queryKey: [accessToken, ...(queryKey || []), queryProps],
+    queryKey: [...(queryKey || []), queryProps, accessToken?.access_token],
     queryFn: async () => {
-      if (!accessToken) throw AuthError.notAuth()
+      if (!accessToken?.access_token) throw AuthError.notAuth()
       let data: R | undefined
       try {
         data = await queryFn({ token: accessToken.access_token, ...queryProps } as P)
@@ -82,17 +85,16 @@ export const useQueryOptionalAuth = <P, R, S = R>({
   needKeepPreviousData = true,
   ...props
 }: {
-  queryKey: QueryOptions['queryKey']
   queryFn: P extends { token?: string } ? Fn<P, R> : never
   select?: (data: R) => S
   needKeepPreviousData?: boolean
 } & OptionalProps<P> &
-  Omit<UseQueryOptions<R, Error, R>, 'select' | 'queryFn'>) => {
+  Omit<UseQueryOptions<R, Error, R, QueryKey>, 'select' | 'queryFn'>) => {
   const logoutMutation = useLogoutMutation()
   const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const query = useQuery({
-    queryKey: [accessToken, ...(queryKey || []), queryProps],
+    queryKey: [...(queryKey || []), queryProps, accessToken?.access_token],
     queryFn: async () => {
       let data: R | undefined
       try {
@@ -119,34 +121,37 @@ export const useQueryOptionalAuth = <P, R, S = R>({
   return query
 }
 
-type InfinityOptionalAuthProps<P> = keyof Omit<P, 'token' | 'offset'> extends never
-  ? { props?: Omit<P, 'token' | 'offset'> }
-  : { props: Omit<P, 'token' | 'offset'> }
+type InfinityOptionalAuthProps<P> = keyof Omit<P, 'token' | 'offset' | 'limit'> extends never
+  ? { queryProps?: Omit<P, 'token' | 'offset' | 'limit'> }
+  : { queryProps: Omit<P, 'token' | 'offset' | 'limit'> }
 
-export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam, SR = QR>({
+export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
   queryKey,
   queryFn,
-  props,
+  queryProps,
   qFLimit,
   enabled = true,
   needKeepPreviousData = true,
   initialPageParam,
   getNextPageParam,
+  ...props
 }: {
-  queryKey: QueryOptions['queryKey']
   queryFn: QP extends { token?: string; offset: TPageParam; limit?: number } ? Fn<QP, QR> : never
   enabled?: boolean
-  select?: (data: QR) => SR
   qFLimit?: number
   needKeepPreviousData?: boolean
   initialPageParam: TPageParam
   getNextPageParam: GetNextPageParamFunction<TPageParam, QR>
-} & InfinityOptionalAuthProps<QP>) => {
+} & InfinityOptionalAuthProps<QP> &
+  Omit<
+    UseInfiniteQueryOptions<QR, Error, InfiniteData<QR, TPageParam>, QR, QueryKey, TPageParam>,
+    'queryFn'
+  >) => {
   const logoutMutation = useLogoutMutation()
   const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const query = useInfiniteQuery({
-    queryKey: [accessToken, ...(queryKey || []), props],
+    queryKey: [...(queryKey || []), queryProps, accessToken?.access_token],
     queryFn: async ({ pageParam }) => {
       let data: QR | undefined
       try {
@@ -154,7 +159,7 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam, SR = QR>({
           token: accessToken?.access_token,
           limit: qFLimit,
           offset: pageParam as TPageParam,
-          ...props,
+          ...queryProps,
         } as QP)
       } catch (error) {
         if (error instanceof FetchError && error.statusCode === 401) {
@@ -168,6 +173,7 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam, SR = QR>({
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     initialPageParam,
     getNextPageParam,
+    ...props,
   })
   if (query.isError && query.error instanceof AuthError) {
     if (query.error.code === 2) {
@@ -176,4 +182,40 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam, SR = QR>({
     }
   }
   return query
+}
+
+export const useMutationMustAuth = <P, R>({
+  mutationKey,
+  mutationFn,
+  ...props
+}: {
+  mutationFn: P extends { token: string } ? Fn<P, R> : never
+} & Omit<UseMutationOptions<R, Error, Omit<P, 'token'>>, 'mutationFn'>) => {
+  const logoutMutation = useLogoutMutation()
+  const queryClient = useQueryClient()
+  const { data: accessToken } = useAccessTokenQuery()
+  const mutate = useMutation({
+    mutationKey,
+    mutationFn: async (mutateProps: Omit<P, 'token'>) => {
+      if (!accessToken) throw AuthError.notAuth()
+      let data: R | undefined
+      try {
+        data = await mutationFn({ token: accessToken.access_token, ...mutateProps } as P)
+      } catch (error) {
+        if (error instanceof FetchError && error.statusCode === 401) {
+          throw AuthError.expire()
+        }
+        throw error
+      }
+      return data as R
+    },
+    ...props,
+  })
+  if (mutate.isError && mutate.error instanceof AuthError) {
+    if (mutate.error.code === 2) {
+      queryClient.setQueryData(['accessToken'], null)
+      logoutMutation.mutate()
+    }
+  }
+  return mutate
 }
