@@ -134,7 +134,7 @@ export default function AddOrModifySubjectCollectionForm({
             name="collectionType"
             render={({ field }) => (
               <FormItem className="flex flex-row items-center gap-2 space-y-0">
-                <FormLabel className="shrink-0">标记为</FormLabel>
+                <FormLabel className="shrink-0 text-base">标记为</FormLabel>
                 <Select
                   onValueChange={(value) => field.onChange(Number(value))}
                   defaultValue={field.value.toString()}
@@ -219,7 +219,7 @@ export default function AddOrModifySubjectCollectionForm({
           )}
         />
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={subjectCollectionMutation.isPending}>
           {modify ? '修改' : '添加'}
         </Button>
       </form>
