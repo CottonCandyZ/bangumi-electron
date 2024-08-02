@@ -26,6 +26,13 @@ export default function PrivateSwitch({
       toast.error('呀，出了点错误...')
     },
     onMutate(variable) {
+      queryClient.cancelQueries({
+        queryKey: [
+          'collection-subject',
+          { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
+          accessToken,
+        ],
+      })
       queryClient.setQueryData(
         [
           'collection-subject',

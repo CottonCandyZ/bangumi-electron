@@ -46,7 +46,14 @@ export default function QuickTags({
       toast.error('呀，出了点错误...')
     },
     onMutate(variable) {
-      if (subjectCollection && userInfo)
+      if (subjectCollection && userInfo) {
+        queryClient.cancelQueries({
+          queryKey: [
+            'collection-subject',
+            { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
+            accessToken,
+          ],
+        })
         queryClient.setQueryData(
           [
             'collection-subject',
@@ -55,6 +62,7 @@ export default function QuickTags({
           ],
           { ...subjectCollection, tags: variable.tags },
         )
+      }
     },
     onSettled() {
       if (subjectCollection && userInfo)

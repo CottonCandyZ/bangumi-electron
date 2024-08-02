@@ -31,6 +31,14 @@ export default function SubjectCollectionSelector({
           { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
           accessToken,
         ],
+        { ...subjectCollection, tags: variable.tags },
+      )
+      queryClient.setQueryData(
+        [
+          'collection-subject',
+          { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
+          accessToken,
+        ],
         { ...subjectCollection, type: variable.collectionType },
       )
     },
