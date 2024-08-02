@@ -98,7 +98,7 @@ export default function QuickTags({
               })
             }
           />
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row items-center gap-2">
             <Button
               disabled={exceed || subjectCollectionMutation.isPending}
               onClick={() =>
