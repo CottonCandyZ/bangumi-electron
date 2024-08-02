@@ -20,7 +20,7 @@ import { INPUT_LIMIT_CONFIG, TEXT_CONFIG } from '@renderer/config'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
-import { ModifyCollectionType } from '@renderer/data/types/modify'
+import { ModifyCollectionOptType } from '@renderer/data/types/modify'
 import { Subject, SubjectType } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
@@ -54,7 +54,7 @@ export default function AddOrModifySubjectCollectionForm({
   tags?: CollectionData['tags']
   modify?: boolean
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
-} & ModifyCollectionType) {
+} & ModifyCollectionOptType) {
   const queryClient = useQueryClient()
   const formSchema = z.object({
     collectionType: z.number(),
@@ -88,7 +88,6 @@ export default function AddOrModifySubjectCollectionForm({
       toast.error('呀，出了点错误...')
     },
     onMutate(variable) {
-      console.log(variable)
       queryClient.cancelQueries({
         queryKey: ['collection-subject', { subjectId, username }, accessToken],
       })
@@ -123,6 +122,7 @@ export default function AddOrModifySubjectCollectionForm({
       subjectId: subjectId,
       ...values,
       tags: [...values.tags],
+      modify: modify,
     })
   }
   return (

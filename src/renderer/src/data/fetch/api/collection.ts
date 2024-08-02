@@ -113,9 +113,11 @@ export async function AddOrModifySubjectCollectionById({
   comment,
   isPrivate,
   tags,
+  modify = true,
 }: {
-  subjectId?: SubjectId
+  subjectId: SubjectId
   token: string
+  modify?: boolean
   collectionType?: CollectionType
   rate?: CollectionData['rate']
   comment?: string
@@ -126,7 +128,7 @@ export async function AddOrModifySubjectCollectionById({
   const result = await apiFetch<APIError | undefined>(
     COLLECTIONS.ADD_OR_MODIFY_SUBJECT_BY_ID(subjectId),
     {
-      method: 'POST',
+      method: modify ? 'PATCH' : 'POST',
       body: {
         type: collectionType,
         rate,

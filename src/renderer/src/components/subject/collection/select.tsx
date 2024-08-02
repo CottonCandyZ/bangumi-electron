@@ -2,7 +2,7 @@ import SubjectCollectionSelectorContent from '@renderer/components/collections/s
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
-import { ModifyCollectionType } from '@renderer/data/types/modify'
+import { ModifyCollectionOptType } from '@renderer/data/types/modify'
 import {} from '@renderer/data/types/user'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { useQueryClient } from '@tanstack/react-query'
@@ -14,7 +14,7 @@ export default function SubjectCollectionSelector({
   accessToken,
 }: {
   subjectCollection: CollectionData
-} & ModifyCollectionType) {
+} & ModifyCollectionOptType) {
   const queryClient = useQueryClient()
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
@@ -45,7 +45,7 @@ export default function SubjectCollectionSelector({
       queryClient.invalidateQueries({
         queryKey: [
           'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username },
+          { subjectId: subjectCollection.subject_id.toString(), username, accessToken },
         ],
       })
       queryClient.invalidateQueries({

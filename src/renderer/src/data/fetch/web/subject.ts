@@ -14,8 +14,8 @@ export async function fetchSectionHome({ sectionPath }: { sectionPath: sectionPa
   })
 }
 
-export async function fetchSubjectInfoById({ id }: { id: SubjectId }) {
-  const text = await webFetch<string>(HTML_SUBJECTS.BY_ID(id.toString()), {
+export async function fetchSubjectInfoById({ subjectId }: { subjectId: SubjectId }) {
+  const text = await webFetch<string>(HTML_SUBJECTS.BY_ID(subjectId.toString()), {
     parseResponse: (text) => text,
     credentials: 'include',
   })

@@ -1,6 +1,6 @@
 import AddOrModifySubjectCollectionForm from '@renderer/components/collections/modify/form/form'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
-import { ModifyCollectionType } from '@renderer/data/types/modify'
+import { ModifyCollectionOptType } from '@renderer/data/types/modify'
 import { Subject } from '@renderer/data/types/subject'
 
 type Add = {
@@ -22,7 +22,7 @@ export default function FormWrapper({
 }: {
   info: Add | Modify
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
-} & ModifyCollectionType) {
+} & ModifyCollectionOptType) {
   if (isAdd(info)) {
     const { subjectInfo } = info
     return (

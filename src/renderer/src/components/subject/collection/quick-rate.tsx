@@ -1,7 +1,7 @@
 import RateButtons from '@renderer/components/collections/rate'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'
-import { ModifyCollectionType } from '@renderer/data/types/modify'
+import { ModifyCollectionOptType } from '@renderer/data/types/modify'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
@@ -11,7 +11,7 @@ export default function QuickRate({
   accessToken,
 }: {
   subjectCollection: CollectionData
-} & ModifyCollectionType) {
+} & ModifyCollectionOptType) {
   const queryClient = useQueryClient()
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
@@ -43,6 +43,7 @@ export default function QuickRate({
         queryKey: [
           'collection-subject',
           { subjectId: subjectCollection.subject_id.toString(), username },
+          accessToken,
         ],
       })
       queryClient.invalidateQueries({

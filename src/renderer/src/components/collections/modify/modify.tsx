@@ -9,7 +9,7 @@ import { CollectionData } from '@renderer/data/types/collection'
 import { PropsWithChildren, useState } from 'react'
 import FormWrapper from '@renderer/components/collections/modify/form/form-wrapper'
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
-import { ModifyCollectionType } from '@renderer/data/types/modify'
+import { ModifyCollectionOptType } from '@renderer/data/types/modify'
 
 export function ModifySubjectCollection({
   subjectCollection,
@@ -20,7 +20,7 @@ export function ModifySubjectCollection({
   {
     subjectCollection: CollectionData
     dropdown?: boolean
-  } & ModifyCollectionType
+  } & ModifyCollectionOptType
 >) {
   const [open, setOpen] = useState(false)
   return (

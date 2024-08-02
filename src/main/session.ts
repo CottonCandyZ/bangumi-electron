@@ -3,8 +3,8 @@ import { session } from 'electron'
 session.defaultSession.webRequest.onBeforeSendHeaders(
   { urls: ['https://*.bgm.tv/*'] },
   (details, callback) => {
-    if (details.url.startsWith('https://bgm.tv/oauth/authorize')) {
-      details.requestHeaders['Referer'] = 'https://bgm.tv/oauth/authorize'
+    if (details.url.startsWith('https://bgm.tv/')) {
+      details.requestHeaders['Referer'] = 'https://bgm.tv/'
     }
     details.requestHeaders['User-Agent'] =
       'CottonCandyZ/bangumi-electron/0.0.1 (Electron) (https://github.com/CottonCandyZ/bangumi-electron)'

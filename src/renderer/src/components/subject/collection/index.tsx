@@ -1,15 +1,9 @@
-import { DropdownMenu } from '@radix-ui/react-dropdown-menu'
 import { AddSubjectCollection } from '@renderer/components/collections/modify/add'
 import { ModifySubjectCollection } from '@renderer/components/collections/modify/modify'
 import PrivateSwitch from '@renderer/components/subject/collection/private-switch'
 import QuickRate from '@renderer/components/subject/collection/quick-rate'
 import SubjectCollectionSelector from '@renderer/components/subject/collection/select'
 import { Button } from '@renderer/components/ui/button'
-import {
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@renderer/components/ui/dropdown-menu'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
@@ -19,6 +13,7 @@ import { CollectionType } from '@renderer/data/types/collection'
 import { useCollectionIsInView } from '@renderer/state/inView'
 import { useInView } from 'framer-motion'
 import { useEffect, useRef } from 'react'
+import MoreActionDropDown from '@renderer/components/subject/collection/more-action-drop-down'
 
 export default function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const isLogin = useIsLoginQuery().data
@@ -77,15 +72,11 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
             >
               <Button variant="outline">修改详情</Button>
             </ModifySubjectCollection>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <span className="i-mingcute-more-2-fill text-base" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="min-w-fit" align="start">
-                <DropdownMenuItem>删除收藏</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <MoreActionDropDown
+              subjectId={subjectId}
+              accessToken={accessToken.access_token}
+              username={userInfo.username}
+            />
           </div>
           {subjectCollection.type !== CollectionType.wantToWatch && (
             <QuickRate

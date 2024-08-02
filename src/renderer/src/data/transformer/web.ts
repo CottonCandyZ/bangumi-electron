@@ -27,6 +27,9 @@ export const parseTopListFromHTML = (HTML: string) => {
   return result
 }
 
+/**
+ * parse 左侧的 infobox
+ */
 export const parseInfoBoxFromSubjectPage = (HTML: string) => {
   const dom = domParser.parseFromString(HTML, 'text/html')
   const result: InfoBoxWeb = new Map()
@@ -62,4 +65,11 @@ export const parseInfoBoxFromSubjectPage = (HTML: string) => {
     }
   }
   return result
+}
+
+export const parseDeleteCollectionHash = (HTML: string) => {
+  const match = HTML.match(/eraseSubjectCollect\(\d+,\s*'([^']+)'\)/)
+  if (!match) return null
+  const hash = match[1]
+  return hash ?? null
 }

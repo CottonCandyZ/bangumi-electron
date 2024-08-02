@@ -20,11 +20,17 @@ export const useTopListQuery = (sectionPath: sectionPath) => {
   })
 }
 
-export const useWebInfoBoxQuery = ({ id, enabled }: { id: SubjectId; enabled?: boolean }) => {
+export const useWebInfoBoxQuery = ({
+  subjectId,
+  enabled,
+}: {
+  subjectId: SubjectId
+  enabled?: boolean
+}) => {
   const isLogin = useIsLoginQuery()
   return useQuery({
-    queryKey: ['SubjectInfo', isLogin.data, id],
-    queryFn: async () => await fetchSubjectInfoById({ id }),
+    queryKey: ['SubjectHomePage', isLogin.data, subjectId],
+    queryFn: async () => await fetchSubjectInfoById({ subjectId }),
     select: parseInfoBoxFromSubjectPage,
     enabled: enabled,
   })

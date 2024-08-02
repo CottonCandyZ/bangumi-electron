@@ -21,7 +21,7 @@ import FormWrapper from '@renderer/components/collections/modify/form/form-wrapp
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
-import { ModifyCollectionType } from '@renderer/data/types/modify'
+import { ModifyCollectionOptType } from '@renderer/data/types/modify'
 
 export function AddSubjectCollection({
   subjectId,
@@ -31,7 +31,7 @@ export function AddSubjectCollection({
 }: {
   subjectId: SubjectId
   dropdown?: boolean
-} & ModifyCollectionType) {
+} & ModifyCollectionOptType) {
   const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const [collectionType, setCollectionType] = useState<CollectionType>(CollectionType.wantToWatch)

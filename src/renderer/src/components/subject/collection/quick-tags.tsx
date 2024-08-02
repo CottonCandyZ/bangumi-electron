@@ -69,7 +69,11 @@ export default function QuickTags({
         queryClient.invalidateQueries({
           queryKey: [
             'collection-subject',
-            { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
+            {
+              subjectId: subjectCollection.subject_id.toString(),
+              username: userInfo.username,
+              accessToken,
+            },
           ],
         })
       queryClient.invalidateQueries({
@@ -111,12 +115,14 @@ export default function QuickTags({
           <div className="flex flex-row items-center gap-2">
             <Button
               disabled={exceed || subjectCollectionMutation.isPending}
-              onClick={() =>
-                subjectCollectionMutation.mutate({
-                  subjectId: subjectCollection?.subject_id.toString(),
-                  tags: [...tags],
-                })
-              }
+              onClick={() => {
+                if (subjectCollection) {
+                  subjectCollectionMutation.mutate({
+                    subjectId: subjectCollection.subject_id.toString(),
+                    tags: [...tags],
+                  })
+                }
+              }}
             >
               更新
             </Button>

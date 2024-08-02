@@ -2,7 +2,7 @@ import { Label } from '@renderer/components/ui/label'
 import { Switch } from '@renderer/components/ui/switch'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'
-import { ModifyCollectionType } from '@renderer/data/types/modify'
+import { ModifyCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -13,7 +13,7 @@ export default function PrivateSwitch({
   accessToken,
 }: {
   subjectCollection: CollectionData
-} & ModifyCollectionType) {
+} & ModifyCollectionOptType) {
   const queryClient = useQueryClient()
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
