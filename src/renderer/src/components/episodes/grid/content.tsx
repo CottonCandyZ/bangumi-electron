@@ -41,9 +41,9 @@ export function EpisodeGridContent({
               {/* 种类标签 */}
               <div
                 className={cn(
-                  'relative flex size-10 items-center justify-center font-bold before:absolute before:bottom-2 before:left-0 before:top-2 before:w-1 before:rounded-lg before:bg-primary',
+                  'relative flex h-10 min-w-10 items-center justify-center font-bold before:absolute before:bottom-2 before:left-0 before:top-2 before:w-1 before:rounded-lg before:bg-primary',
                   size === 'small' &&
-                    'size-6 pl-1 text-xs font-normal before:bottom-1 before:left-[1px] before:top-1 before:w-[2.5px]',
+                    'h-6 min-w-6 pl-1 text-xs font-normal before:bottom-1 before:left-[1px] before:top-1 before:w-[2.5px]',
                   item.type > 3 && 'pl-2',
                 )}
                 key={`${item.type}-tag`}
