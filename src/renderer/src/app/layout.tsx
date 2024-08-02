@@ -44,7 +44,7 @@ function RootLayout() {
               >
                 <SidePanel currentPanelName={currentPanelName} />
               </ResizablePanel>
-              <ResizableHandle />
+              <ResizableHandle className="w-0 border-r" />
             </>
           )}
           <ResizablePanel order={2} id="main">
