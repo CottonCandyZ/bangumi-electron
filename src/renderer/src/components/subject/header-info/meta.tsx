@@ -16,11 +16,13 @@ export default function Meta({
       {rating.score !== 0 && (
         <>
           <div className="flex items-center gap-0.5 text-base font-medium">
-            {rating.score.toFixed(1)} <span className="i-mingcute-star-fill text-yellow-500" />
+            {rating.score == 0 ? '-.-' : rating.score.toFixed(1)}{' '}
+            <span className="i-mingcute-star-fill text-yellow-500" />
           </div>
           <Separator orientation="vertical" className="bg-primary/20" />
           <div className="flex items-center gap-0.5 text-sm font-medium">
-            <span className="i-mingcute-hashtag-line mt-0.5" /> {rating.rank}
+            <span className="i-mingcute-hashtag-line mt-0.5" />{' '}
+            {rating.rank === 0 ? '--' : rating.rank}
           </div>
           <Separator orientation="vertical" className="bg-primary/20" />
         </>
