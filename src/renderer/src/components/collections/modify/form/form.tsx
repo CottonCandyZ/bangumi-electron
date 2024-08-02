@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import ScrollWrapper from '@renderer/components/base/scroll-warpper'
+import FormTags from '@renderer/components/collections/modify/tags-form'
 import RateButtons from '@renderer/components/collections/rate'
 import SubjectCollectionSelectorContent from '@renderer/components/collections/subject-select-content'
 import { Button } from '@renderer/components/ui/button'
@@ -12,29 +12,39 @@ import {
   FormLabel,
   FormMessage,
 } from '@renderer/components/ui/form'
-import { Input } from '@renderer/components/ui/input'
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { Separator } from '@renderer/components/ui/separator'
 import { Switch } from '@renderer/components/ui/switch'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { INPUT_LIMIT_CONFIG, TEXT_CONFIG } from '@renderer/config'
+import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
+import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
+import { ModifyCollectionType } from '@renderer/data/types/modify'
 import { Subject, SubjectType } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
+import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
 
 const add_subject_collection_message = TEXT_CONFIG.add_subject_collection
 
 export default function AddOrModifySubjectCollectionForm({
+  subjectId,
   subjectType,
   subjectTags,
   collectionType,
+  username,
+  accessToken,
   rate = 0,
   comment = '',
   isPrivate = false,
   tags = [],
+  modify = false,
+  setOpen,
 }: {
+  subjectId: SubjectId
   subjectType: SubjectType
   subjectTags: Subject['tags']
   collectionType: CollectionType
@@ -42,14 +52,19 @@ export default function AddOrModifySubjectCollectionForm({
   comment?: string
   isPrivate?: boolean
   tags?: CollectionData['tags']
-}) {
+  modify?: boolean
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+} & ModifyCollectionType) {
+  const queryClient = useQueryClient()
   const formSchema = z.object({
     collectionType: z.number(),
     rate: z.custom<CollectionData['rate']>(),
     comment: z.string().max(INPUT_LIMIT_CONFIG.short_comment_length_limit, {
-      message: add_subject_collection_message.comment_max_length,
+      message: add_subject_collection_message.comment_exceed_max_length,
     }),
-    tags: z.array(z.string()),
+    tags: z.set(z.string()).max(INPUT_LIMIT_CONFIG.tags_max_length_limit, {
+      message: add_subject_collection_message.tags_exceed_max_length,
+    }),
     isPrivate: z.boolean(),
   })
   const form = useForm<z.infer<typeof formSchema>>({
@@ -59,12 +74,56 @@ export default function AddOrModifySubjectCollectionForm({
       rate: rate,
       comment: comment,
       isPrivate: isPrivate,
-      tags: tags,
+      tags: new Set<string>(tags),
+    },
+  })
+
+  const subjectCollectionMutation = useMutationSubjectCollection({
+    mutationKey: ['subject-collection'],
+    onSuccess() {
+      setOpen(false)
+      toast.success(modify ? '修改成功！' : '添加成功！')
+    },
+    onError() {
+      toast.error('呀，出了点错误...')
+    },
+    onMutate(variable) {
+      console.log(variable)
+      queryClient.cancelQueries({
+        queryKey: ['collection-subject', { subjectId, username }, accessToken],
+      })
+      if (!modify) return
+      const preQuery = queryClient.getQueryData([
+        'collection-subject',
+        { subjectId, username },
+        accessToken,
+      ]) as CollectionData | null | undefined
+      if (!preQuery) return
+      queryClient.setQueryData(['collection-subject', { subjectId, username }, accessToken], {
+        ...preQuery,
+        type: variable.collectionType!,
+        rate: variable.rate!,
+        private: variable.isPrivate!,
+        tags: variable.tags!,
+        comment: variable.comment!,
+      } satisfies CollectionData)
+    },
+    onSettled() {
+      queryClient.invalidateQueries({
+        queryKey: ['collection-subject', { subjectId, username }],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['collection-subjects'],
+      })
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values)
+    subjectCollectionMutation.mutate({
+      subjectId: subjectId,
+      ...values,
+      tags: [...values.tags],
+    })
   }
   return (
     <Form {...form}>
@@ -75,7 +134,7 @@ export default function AddOrModifySubjectCollectionForm({
             name="collectionType"
             render={({ field }) => (
               <FormItem className="flex flex-row items-center gap-2 space-y-0">
-                <FormLabel>标记为</FormLabel>
+                <FormLabel className="shrink-0">标记为</FormLabel>
                 <Select
                   onValueChange={(value) => field.onChange(Number(value))}
                   defaultValue={field.value.toString()}
@@ -110,35 +169,39 @@ export default function AddOrModifySubjectCollectionForm({
           name="rate"
           render={({ field }) => (
             <FormItem>
+              <FormLabel className="text-base">评价</FormLabel>
               <FormControl>
-                <RateButtons rate={field.value} onRateChanged={field.onChange} />
+                <RateButtons rate={field.value} onRateChanged={field.onChange} form />
               </FormControl>
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name="tags"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-base">收藏标签</FormLabel>
+              <FormControl>
+                <FormTags
+                  collectionTags={tags}
+                  selectedTags={field.value}
+                  subjectTags={subjectTags}
+                  onTagsChanges={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Separator />
-        {/* <ScrollWrapper className="max-h-40 pr-4">
-          <div className="flex flex-row flex-wrap gap-2 after:grow-[999]">
-            {subjectTags.map((item) => (
-              <Button
-                key={item.name}
-                className="h-auto flex-auto items-baseline justify-center gap-1 whitespace-normal px-1.5 py-1.5 text-xs"
-                variant={'outline'}
-                onClick={(e) => e.preventDefault()}
-              >
-                <span className="text-sm">{item.name}</span>
-                <span className="text-xs text-muted-foreground">{item.count}</span>
-              </Button>
-            ))}
-          </div>
-        </ScrollWrapper> */}
         <FormField
           control={form.control}
           name="comment"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="flex flex-row gap-2">
-                短评{' '}
+              <FormLabel className="flex flex-row items-center gap-2">
+                <span className="text-base">短评</span>{' '}
                 <FormDescription
                   className={cn(
                     field.value.length > INPUT_LIMIT_CONFIG.short_comment_length_limit &&
@@ -157,7 +220,7 @@ export default function AddOrModifySubjectCollectionForm({
         />
 
         <Button type="submit" className="w-full">
-          添加
+          {modify ? '修改' : '添加'}
         </Button>
       </form>
     </Form>

@@ -18,6 +18,7 @@ export default function TagInput({
         >
           {value}
           <button
+            type="button"
             onClick={() => remove(value)}
             className="i-mingcute-close-line inline-flex h-full items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
           />

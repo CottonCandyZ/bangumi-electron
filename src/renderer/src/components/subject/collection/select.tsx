@@ -2,20 +2,19 @@ import SubjectCollectionSelectorContent from '@renderer/components/collections/s
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
-import { UserInfo } from '@renderer/data/types/user'
+import { ModifyCollectionType } from '@renderer/data/types/modify'
+import {} from '@renderer/data/types/user'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 export default function SubjectCollectionSelector({
   subjectCollection,
-  userInfo,
+  username,
   accessToken,
 }: {
   subjectCollection: CollectionData
-  userInfo: UserInfo
-  accessToken: string
-}) {
+} & ModifyCollectionType) {
   const queryClient = useQueryClient()
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
@@ -28,7 +27,7 @@ export default function SubjectCollectionSelector({
       queryClient.setQueryData(
         [
           'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
+          { subjectId: subjectCollection.subject_id.toString(), username },
           accessToken,
         ],
         { ...subjectCollection, tags: variable.tags },
@@ -36,17 +35,17 @@ export default function SubjectCollectionSelector({
       queryClient.setQueryData(
         [
           'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
+          { subjectId: subjectCollection.subject_id.toString(), username },
           accessToken,
         ],
-        { ...subjectCollection, type: variable.collectionType },
+        { ...subjectCollection, type: variable.collectionType! } satisfies CollectionData,
       )
     },
     onSettled() {
       queryClient.invalidateQueries({
         queryKey: [
           'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
+          { subjectId: subjectCollection.subject_id.toString(), username },
         ],
       })
       queryClient.invalidateQueries({

@@ -1,5 +1,6 @@
 import { DropdownMenu } from '@radix-ui/react-dropdown-menu'
-import { AddCollection } from '@renderer/components/collections/modify/add'
+import { AddSubjectCollection } from '@renderer/components/collections/modify/add'
+import { ModifySubjectCollection } from '@renderer/components/collections/modify/modify'
 import PrivateSwitch from '@renderer/components/subject/collection/private-switch'
 import QuickRate from '@renderer/components/subject/collection/quick-rate'
 import SubjectCollectionSelector from '@renderer/components/subject/collection/select'
@@ -51,12 +52,11 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
         {!loading && subjectCollection !== null && (
           <PrivateSwitch
             subjectCollection={subjectCollection}
-            userInfo={userInfo}
+            username={userInfo.username}
             accessToken={accessToken.access_token}
           />
         )}
       </div>
-
       {loading ? (
         <div className="flex flex-col gap-2">
           <Skeleton className="h-9 w-full" />
@@ -67,11 +67,17 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
           <div className="flex flex-row items-center gap-2">
             <SubjectCollectionSelector
               subjectCollection={subjectCollection}
-              userInfo={userInfo}
+              username={userInfo.username}
               accessToken={accessToken.access_token}
             />
+            <ModifySubjectCollection
+              subjectCollection={subjectCollection}
+              accessToken={accessToken.access_token}
+              username={userInfo.username}
+            >
+              <Button variant="outline">修改详情</Button>
+            </ModifySubjectCollection>
 
-            <Button variant="outline">修改详情</Button>
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <span className="i-mingcute-more-2-fill text-base" />
@@ -81,20 +87,21 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
           {subjectCollection.type !== CollectionType.wantToWatch && (
             <QuickRate
               subjectCollection={subjectCollection}
-              userInfo={userInfo}
+              username={userInfo.username}
               accessToken={accessToken.access_token}
             />
           )}
         </div>
       ) : (
-        <AddCollection subjectId={subjectId} dropdown={false} />
+        <AddSubjectCollection
+          subjectId={subjectId}
+          username={userInfo.username}
+          accessToken={accessToken.access_token}
+        />
       )}
-
-      {/* <RateButtons rate={subjectCollection.rate} /> */}
     </div>
   )
 }

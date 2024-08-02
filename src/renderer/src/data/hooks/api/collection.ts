@@ -101,7 +101,7 @@ export const useMutationSubjectCollection = ({
     variable: Omit<Parameters<typeof AddOrModifySubjectCollectionById>[0], 'token'>,
   ) => void
   onSettled?: () => void
-  onError?: () => void
+  onError?: (err: Error) => void
 } = {}) =>
   useMutationMustAuth({
     mutationKey,

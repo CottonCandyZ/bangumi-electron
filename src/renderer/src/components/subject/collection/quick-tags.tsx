@@ -60,7 +60,7 @@ export default function QuickTags({
             { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
             accessToken,
           ],
-          { ...subjectCollection, tags: variable.tags },
+          { ...subjectCollection, tags: variable.tags! } satisfies CollectionData,
         )
       }
     },
@@ -92,6 +92,8 @@ export default function QuickTags({
           })
         }
         selectedTags={tags}
+        edit={edit}
+        setEdit={setEdit}
       />
       {edit && (
         <div className="flex w-full flex-col items-start gap-2 rounded-md border border-input bg-transparent p-2 text-sm shadow-sm transition-colors">
@@ -125,7 +127,11 @@ export default function QuickTags({
               清除
             </Button>
             <div>
-              已选 <span className={cn(exceed && 'text-destructive')}>{tags.size}</span> 个
+              已选{' '}
+              <span className={cn('font-bold text-blue-500', exceed && 'text-destructive')}>
+                {tags.size}
+              </span>{' '}
+              个
             </div>
           </div>
         </div>

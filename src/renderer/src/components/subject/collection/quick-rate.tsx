@@ -1,19 +1,17 @@
 import RateButtons from '@renderer/components/collections/rate'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'
-import { UserInfo } from '@renderer/data/types/user'
+import { ModifyCollectionType } from '@renderer/data/types/modify'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 export default function QuickRate({
   subjectCollection,
-  userInfo,
+  username,
   accessToken,
 }: {
   subjectCollection: CollectionData
-  userInfo: UserInfo
-  accessToken: string
-}) {
+} & ModifyCollectionType) {
   const queryClient = useQueryClient()
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
@@ -27,24 +25,24 @@ export default function QuickRate({
       queryClient.cancelQueries({
         queryKey: [
           'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
+          { subjectId: subjectCollection.subject_id.toString(), username },
           accessToken,
         ],
       })
       queryClient.setQueryData(
         [
           'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
+          { subjectId: subjectCollection.subject_id.toString(), username },
           accessToken,
         ],
-        { ...subjectCollection, rate: variable.rate },
+        { ...subjectCollection, rate: variable.rate! } satisfies CollectionData,
       )
     },
     onSettled() {
       queryClient.invalidateQueries({
         queryKey: [
           'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
+          { subjectId: subjectCollection.subject_id.toString(), username },
         ],
       })
       queryClient.invalidateQueries({
