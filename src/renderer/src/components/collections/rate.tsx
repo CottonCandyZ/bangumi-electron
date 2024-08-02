@@ -47,10 +47,13 @@ export default function RateButtons({
               type="button"
               key={key}
               className={cn(
-                Number(key) > hoverValue && 'i-mingcute-star-line',
-                Number(key) <= hoverValue && 'i-mingcute-star-fill',
+                Number(key) > hoverValue ? 'i-mingcute-star-line' : 'i-mingcute-star-fill',
               )}
-              style={{ color: `hsl(var(--chart-score-${key}))` }}
+              style={
+                Number(key) <= hoverValue
+                  ? { color: `hsl(var(--chart-score-${hoverValue}))` }
+                  : { color: `hsl(var(--chart-score-${key}))` }
+              }
               onClick={() =>
                 rate !== Number(key) && onRateChanged(Number(key) as CollectionData['rate'])
               }
