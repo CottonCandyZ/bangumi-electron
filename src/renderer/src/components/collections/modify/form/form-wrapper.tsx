@@ -8,10 +8,11 @@ type Add = {
   collectionType: CollectionType
 }
 type Modify = {
+  subjectInfo: Subject
   collectionData: CollectionData
 }
 function isAdd(episodes: Add | Modify): episodes is Add {
-  return (episodes as Add).subjectInfo !== undefined
+  return (episodes as Add).collectionType !== undefined
 }
 
 export default function FormWrapper({
@@ -24,11 +25,11 @@ export default function FormWrapper({
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
 } & ModifyCollectionOptType) {
   if (isAdd(info)) {
-    const { subjectInfo } = info
+    const { subjectInfo, collectionType } = info
     return (
       <AddOrModifySubjectCollectionForm
         subjectId={subjectInfo.id.toString()}
-        collectionType={info.collectionType}
+        collectionType={collectionType}
         subjectType={subjectInfo.type}
         subjectTags={subjectInfo.tags}
         username={username}
@@ -37,7 +38,7 @@ export default function FormWrapper({
       />
     )
   } else {
-    const { collectionData } = info
+    const { collectionData, subjectInfo } = info
     return (
       <AddOrModifySubjectCollectionForm
         subjectId={collectionData.subject_id.toString()}
@@ -47,7 +48,7 @@ export default function FormWrapper({
         rate={collectionData.rate}
         isPrivate={collectionData.private}
         tags={collectionData.tags}
-        subjectTags={collectionData.subject.tags}
+        subjectTags={subjectInfo.tags}
         username={username}
         accessToken={accessToken}
         setOpen={setOpen}

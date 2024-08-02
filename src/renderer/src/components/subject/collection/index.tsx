@@ -14,6 +14,7 @@ import { useCollectionIsInView } from '@renderer/state/inView'
 import { useInView } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import MoreActionDropDown from '@renderer/components/subject/collection/more-action-drop-down'
+import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 
 export default function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const isLogin = useIsLoginQuery().data
@@ -26,6 +27,8 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
     needKeepPreviousData: false,
   })
   const subjectCollection = subjectCollectionQuery.data
+  const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId, needKeepPreviousData: false })
+  const subjectInfo = subjectInfoQuery.data
 
   const ref = useRef<null | HTMLDivElement>(null)
   const isInView = useInView(ref)
@@ -35,6 +38,7 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
   }, [isInView])
 
   const loading =
+    subjectInfo === undefined ||
     subjectCollection === undefined ||
     userInfo === undefined ||
     isLogin === undefined ||
@@ -66,6 +70,7 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
               accessToken={accessToken.access_token}
             />
             <ModifySubjectCollection
+              subjectInfo={subjectInfo}
               subjectCollection={subjectCollection}
               accessToken={accessToken.access_token}
               username={userInfo.username}

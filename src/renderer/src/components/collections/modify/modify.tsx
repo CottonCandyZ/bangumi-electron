@@ -10,15 +10,18 @@ import { PropsWithChildren, useState } from 'react'
 import FormWrapper from '@renderer/components/collections/modify/form/form-wrapper'
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
 import { ModifyCollectionOptType } from '@renderer/data/types/modify'
+import { Subject } from '@renderer/data/types/subject'
 
 export function ModifySubjectCollection({
   subjectCollection,
+  subjectInfo,
   username,
   accessToken,
   children,
 }: PropsWithChildren<
   {
     subjectCollection: CollectionData
+    subjectInfo: Subject
     dropdown?: boolean
   } & ModifyCollectionOptType
 >) {
@@ -35,7 +38,7 @@ export function ModifySubjectCollection({
         </SheetHeader>
         <ScrollWrapper className="pl-6 pr-4 pt-2" options={{ scrollbars: { autoHide: 'leave' } }}>
           <FormWrapper
-            info={{ collectionData: subjectCollection }}
+            info={{ collectionData: subjectCollection, subjectInfo }}
             username={username}
             accessToken={accessToken}
             setOpen={setOpen}
