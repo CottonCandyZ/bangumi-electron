@@ -27,6 +27,14 @@ const buttonVariants = cva(
           "border border-input bg-background text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground",
         aired:
           "border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:shadow-inner",
+        wantToWatchHover: "shadow-inner bg-[var(--want-to-watch)] text-[var(--want-to-watch-foreground)]",
+        watchedHover: "border border-input shadow-inner hover:shadow-none bg-[var(--watched)] text-[var(--watched-foreground)]",
+        abandonedHover: "border border-primary-foreground line-through shadow-inner bg-accent text-accent-foreground text-muted-foreground",
+        noAiredHover: "bg-accent text-accent-foreground",
+        onAirHover:
+          "border border-input text-muted-foreground shadow-sm bg-accent text-accent-foreground",
+        airedHover:
+          "border border-input bg-accent text-accent-foreground shadow-inner",
       },
       size: {
         default: "h-9 px-4 py-2",

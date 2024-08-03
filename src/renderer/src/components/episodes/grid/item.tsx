@@ -16,6 +16,7 @@ import { cn } from '@renderer/lib/utils'
 import { getDurationFromSeconds } from '@renderer/lib/utils/data-trans'
 import { getOnAirStatus } from '@renderer/lib/utils/date'
 import { isEmpty } from '@renderer/lib/utils/string'
+import { useState } from 'react'
 
 function isCollectionEpisode(
   episodes: Episode[] | CollectionEpisode[],
@@ -47,9 +48,10 @@ export default function EpisodeGridItem({
           keyof typeof EpisodeCollectionType,
           'notCollected'
         >)
+  const [open, setOpen] = useState(false)
 
   return (
-    <HoverCard openDelay={300}>
+    <HoverCard openDelay={300} open={open} onOpenChange={setOpen}>
       <HoverCardTrigger asChild>
         <Button
           key={episode.id}
@@ -57,7 +59,7 @@ export default function EpisodeGridItem({
             `h-10 min-w-10 rounded-md p-2`,
             size === 'small' && 'h-6 min-w-6 rounded-sm p-1 text-xs',
           )}
-          variant={status}
+          variant={open ? `${status}Hover` : status}
         >
           {episode.sort}
         </Button>
