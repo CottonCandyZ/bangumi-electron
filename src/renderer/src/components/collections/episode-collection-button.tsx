@@ -134,7 +134,7 @@ export default function EpisodeCollectionButton({
               )}
               disabled={episodeCollectionMutation.isPending}
               key={item}
-              onClick={() => {
+              onClick={(e) => {
                 if (item === EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType]) return
                 if (item !== '看到') {
                   const action = EPISODE_COLLECTION_ACTION_MAP[item]
@@ -153,6 +153,7 @@ export default function EpisodeCollectionButton({
                     episodesId: episodes.slice(start, index + 1).map((item) => item.episode.id),
                   })
                 }
+                e.preventDefault()
               }}
               onMouseEnter={() => setHover(item)}
             >
@@ -164,12 +165,13 @@ export default function EpisodeCollectionButton({
       {episodeCollectionType !== EpisodeCollectionType.notCollected && (
         <Button
           variant="outline"
-          onClick={() => {
+          onClick={(e) => {
             episodeCollectionMutation.mutate({
               episodeCollectionType: EpisodeCollectionType.notCollected,
               subjectId: episodes[index].episode.subject_id.toString(),
               episodesId: [episodes[index].episode.id],
             })
+            e.preventDefault()
           }}
           disabled={episodeCollectionMutation.isPending}
         >
