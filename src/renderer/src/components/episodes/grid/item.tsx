@@ -1,29 +1,49 @@
 import { MediumHeader } from '@renderer/components/base/headers'
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
+import EpisodeCollectionButton from '@renderer/components/collections/episode-collection-button'
 import { EpisodeGridSize } from '@renderer/components/episodes/grid'
 import { Button } from '@renderer/components/ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import { Separator } from '@renderer/components/ui/separator'
-import { EpisodeCollectionType } from '@renderer/data/types/collection'
+import {
+  CollectionEpisode,
+  CollectionType,
+  EpisodeCollectionType,
+} from '@renderer/data/types/collection'
 import { Episode } from '@renderer/data/types/episode'
+import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
 import { getDurationFromSeconds } from '@renderer/lib/utils/data-trans'
 import { getOnAirStatus } from '@renderer/lib/utils/date'
 import { isEmpty } from '@renderer/lib/utils/string'
 
+function isCollectionEpisode(
+  episodes: Episode[] | CollectionEpisode[],
+): episodes is CollectionEpisode[] {
+  return (episodes as CollectionEpisode[])[0].episode !== undefined
+}
+
 export default function EpisodeGridItem({
-  episode,
   size = 'default',
-  collectionType = EpisodeCollectionType.notCollected,
+  index,
+  episodes,
+  modifyEpisodeCollectionOpt,
+  collectionType,
 }: {
-  episode: Episode
-  collectionType?: EpisodeCollectionType
-} & EpisodeGridSize) {
+  index: number
+  episodes: Episode[] | CollectionEpisode[]
+  collectionType: CollectionType | undefined
+} & EpisodeGridSize &
+  ModifyEpisodeCollectionOptType) {
+  const episode = isCollectionEpisode(episodes) ? episodes[index].episode : episodes[index]
+  const episodeCollectionType = isCollectionEpisode(episodes)
+    ? episodes[index].type
+    : EpisodeCollectionType.notCollected
   const duration = getDurationFromSeconds(episode.duration_seconds)
   const status =
-    collectionType === EpisodeCollectionType.notCollected
+    episodeCollectionType === EpisodeCollectionType.notCollected
       ? getOnAirStatus(episode.airdate)
-      : (EpisodeCollectionType[collectionType] as Exclude<
+      : (EpisodeCollectionType[episodeCollectionType] as Exclude<
           keyof typeof EpisodeCollectionType,
           'notCollected'
         >)
@@ -44,7 +64,18 @@ export default function EpisodeGridItem({
       </HoverCardTrigger>
       <HoverCardContent align="start" className="w-full min-w-64 max-w-96">
         <div className="flex flex-col gap-2">
-          {!isEmpty(episode.name) && <MediumHeader {...episode} />}
+          {isCollectionEpisode(episodes) && (
+            <EpisodeCollectionButton
+              episodes={episodes}
+              index={index}
+              modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
+              collectionType={collectionType}
+            />
+          )}
+          <div className="flex flex-row flex-wrap gap-x-2">
+            <span className="font-bold">ep.{episode.sort}</span>
+            {!isEmpty(episode.name) && <MediumHeader {...episode} />}
+          </div>
           {!isEmpty(episode.desc) && (
             <>
               <ScrollWrapper className="max-h-32 pr-2">

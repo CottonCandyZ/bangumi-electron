@@ -3,6 +3,7 @@ import {
   getEpisodesCollectionBySubjectId,
   getSubjectCollectionBySubjectIdAndUsername,
   getSubjectCollectionsByUsername,
+  ModifyEpisodeCollectionBySubjectId,
 } from '@renderer/data/fetch/api/collection'
 import {
   useInfinityQueryOptionalAuth,
@@ -11,6 +12,7 @@ import {
   useQueryOptionalAuth,
 } from '@renderer/data/hooks/factory'
 import { SubjectId } from '@renderer/data/types/bgm'
+import { EpisodeType } from '@renderer/data/types/episode'
 import { UserInfo } from '@renderer/data/types/user'
 import { MutationKey } from '@tanstack/react-query'
 
@@ -55,7 +57,7 @@ export const useQueryCollectionEpisodesInfoBySubjectId = ({
   subjectId: SubjectId | undefined
   limit?: number
   offset?: number
-  episodeType?: number
+  episodeType?: EpisodeType
   enabled?: boolean
 }) =>
   useQueryMustAuth({
@@ -106,6 +108,33 @@ export const useMutationSubjectCollection = ({
   useMutationMustAuth({
     mutationKey,
     mutationFn: AddOrModifySubjectCollectionById,
+    onSuccess,
+    onMutate,
+    onSettled,
+    onError,
+  })
+
+export const useMutationEpisodesCollectionBySubjectId = ({
+  mutationKey,
+  onSuccess,
+  onMutate,
+  onSettled,
+  onError,
+}: {
+  mutationKey?: MutationKey
+  onSuccess?: (
+    data: Awaited<ReturnType<typeof ModifyEpisodeCollectionBySubjectId>>,
+    variable: Omit<Parameters<typeof ModifyEpisodeCollectionBySubjectId>[0], 'token'>,
+  ) => void
+  onMutate?: (
+    variable: Omit<Parameters<typeof ModifyEpisodeCollectionBySubjectId>[0], 'token'>,
+  ) => void
+  onSettled?: () => void
+  onError?: (err: Error) => void
+} = {}) =>
+  useMutationMustAuth({
+    mutationKey,
+    mutationFn: ModifyEpisodeCollectionBySubjectId,
     onSuccess,
     onMutate,
     onSettled,

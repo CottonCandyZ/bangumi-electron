@@ -50,6 +50,7 @@ export default function CollectionItem({
                     size="small"
                     selector={false}
                     subjectId={collectionItemInfo.subject_id.toString()}
+                    collectionType={collectionItemInfo.type}
                   />
                 </section>
               )}

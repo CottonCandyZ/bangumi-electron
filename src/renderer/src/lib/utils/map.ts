@@ -1,4 +1,4 @@
-import { CollectionType } from '@renderer/data/types/collection'
+import { CollectionType, EpisodeCollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 
 export const RATING_MAP = {
@@ -39,3 +39,15 @@ export const COLLECTION_TYPE_MAP = (subjectType: SubjectType) => {
     [CollectionType.abandoned]: `抛弃`,
   }
 }
+
+export const EPISODE_COLLECTION_TYPE_MAP = {
+  [EpisodeCollectionType.wantToWatch]: '想看',
+  [EpisodeCollectionType.abandoned]: '抛弃',
+  [EpisodeCollectionType.watched]: '看过',
+} as const
+
+export const EPISODE_COLLECTION_ACTION_MAP = {
+  想看: EpisodeCollectionType.wantToWatch,
+  抛弃: EpisodeCollectionType.abandoned,
+  看过: EpisodeCollectionType.watched,
+} as const

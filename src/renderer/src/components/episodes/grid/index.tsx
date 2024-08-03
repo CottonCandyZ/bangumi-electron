@@ -5,6 +5,7 @@ import { useSession } from '@renderer/components/wrapper/session-wrapper'
 import { useQueryCollectionEpisodesInfoBySubjectId } from '@renderer/data/hooks/api/collection'
 import { useQueryEpisodesInfoBySubjectId } from '@renderer/data/hooks/api/episodes'
 import { SubjectId } from '@renderer/data/types/bgm'
+import { CollectionType } from '@renderer/data/types/collection'
 import { cn } from '@renderer/lib/utils'
 import { useState } from 'react'
 
@@ -16,10 +17,12 @@ export default function EpisodesGrid({
   eps,
   size = 'default',
   selector = true,
+  collectionType,
 }: {
   subjectId: SubjectId
   eps: number
   selector?: boolean
+  collectionType?: CollectionType
 } & EpisodeGridSize) {
   const { isLogin } = useSession()
   const [offset, setOffSet] = useState(0)
@@ -50,7 +53,12 @@ export default function EpisodesGrid({
   return (
     <div className={cn('flex flex-col gap-4')}>
       {selector && <PageSelector episodes={episode} limit={limit} setOffSet={setOffSet} />}
-      <EpisodeGridContent episodes={episode.data.data} size={size} />
+      <EpisodeGridContent
+        episodes={episode.data.data}
+        size={size}
+        modifyEpisodeCollectionOpt={{ limit, offset }}
+        collectionType={collectionType}
+      />
     </div>
   )
 }

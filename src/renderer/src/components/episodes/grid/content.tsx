@@ -1,7 +1,8 @@
 import { EpisodeGridSize } from '@renderer/components/episodes/grid'
 import EpisodeGridItem from '@renderer/components/episodes/grid/item'
-import { CollectionEpisode, EpisodeCollectionType } from '@renderer/data/types/collection'
+import { CollectionEpisode, CollectionType } from '@renderer/data/types/collection'
 import { Episode, EpisodeType } from '@renderer/data/types/episode'
+import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
 import { Fragment } from 'react/jsx-runtime'
 
@@ -12,19 +13,21 @@ function isCollectionEpisode(episodes: Episode | CollectionEpisode): episodes is
 export function EpisodeGridContent({
   episodes,
   size = 'default',
+  modifyEpisodeCollectionOpt,
+  collectionType,
 }: {
   episodes: Episode[] | CollectionEpisode[]
-} & EpisodeGridSize) {
+  collectionType: CollectionType | undefined
+} & EpisodeGridSize &
+  ModifyEpisodeCollectionOptType) {
   let firstTime = Array(7).fill(true) // 用来显示不同种类的数组, type 字段
   firstTime[0] = false // 本篇就不显示了
   return (
     <div className={cn('flex flex-row flex-wrap items-center gap-1', size === 'small' && 'gap-1')}>
-      {episodes.map((episode: Episode | CollectionEpisode) => {
+      {episodes.map((episode: Episode | CollectionEpisode, index: number) => {
         let item: Episode
-        let collectionType = EpisodeCollectionType.notCollected
         if (isCollectionEpisode(episode)) {
           item = episode.episode
-          collectionType = episode.type
         } else {
           item = episode
         }
@@ -51,9 +54,11 @@ export function EpisodeGridContent({
                 {item.type <= 3 ? EpisodeType[item.type] : '其他'}
               </div>
               <EpisodeGridItem
-                episode={item}
                 key={item.id}
                 size={size}
+                index={index}
+                episodes={episodes}
+                modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
                 collectionType={collectionType}
               />
             </Fragment>
@@ -61,9 +66,11 @@ export function EpisodeGridContent({
         }
         return (
           <EpisodeGridItem
-            episode={item}
             key={item.id}
             size={size}
+            index={index}
+            episodes={episodes}
+            modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
             collectionType={collectionType}
           />
         )

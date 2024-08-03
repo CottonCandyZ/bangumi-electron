@@ -82,6 +82,8 @@ export const COLLECTIONS = {
     `/v0/users/${username}/collections/${subjectId}`,
   EPISODES_BY_SUBJECT_ID: (subjectId: SubjectId) => `/v0/users/-/collections/${subjectId}/episodes`,
   ADD_OR_MODIFY_SUBJECT_BY_ID: (subjectId: SubjectId) => `/v0/users/-/collections/${subjectId}`,
+  MODIFY_EPISODE_BY_SUBJECT_ID: (subjectId: SubjectId) =>
+    `/v0/users/-/collections/${subjectId}/episodes`,
 }
 
 export const HTML_COLLECTION = {

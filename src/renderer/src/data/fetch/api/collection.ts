@@ -7,6 +7,7 @@ import {
   CollectionEpisodes,
   Collections,
   CollectionType,
+  EpisodeCollectionType,
 } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import { APIError, SubjectId } from '@renderer/data/types/bgm'
@@ -124,7 +125,6 @@ export async function AddOrModifySubjectCollectionById({
   isPrivate?: boolean
   tags?: string[]
 }) {
-  if (!subjectId) throw new FetchParamError('未获得 id')
   const result = await apiFetch<APIError | undefined>(
     COLLECTIONS.ADD_OR_MODIFY_SUBJECT_BY_ID(subjectId),
     {
@@ -135,6 +135,33 @@ export async function AddOrModifySubjectCollectionById({
         comment,
         private: isPrivate,
         tags: tags,
+      },
+      headers: {
+        ...getAuthHeader(token),
+      },
+    },
+  )
+  return result
+}
+
+export async function ModifyEpisodeCollectionBySubjectId({
+  token,
+  subjectId,
+  episodesId,
+  episodeCollectionType,
+}: {
+  token: string
+  subjectId: SubjectId
+  episodesId: number[]
+  episodeCollectionType: EpisodeCollectionType
+}) {
+  const result = await apiFetch<APIError | undefined>(
+    COLLECTIONS.MODIFY_EPISODE_BY_SUBJECT_ID(subjectId),
+    {
+      method: 'PATCH',
+      body: {
+        type: episodeCollectionType,
+        episode_id: episodesId,
       },
       headers: {
         ...getAuthHeader(token),

@@ -9,30 +9,32 @@ export default function Meta({
   platform,
   infobox,
   rating,
-}: Pick<Subject, 'date' | 'eps' | 'platform' | 'infobox' | 'rating'>) {
+}: Pick<Subject, 'date' | 'eps' | 'platform' | 'infobox' | 'rating' | 'collection'>) {
   const week_day = extractInfoBox(infobox, '放送星期')?.value as string | undefined
   return (
-    <div className="flex flex-row items-center gap-1.5">
-      {rating.score !== 0 && (
-        <>
-          <div className="flex items-center gap-0.5 text-base font-medium">
-            {rating.score == 0 ? '-.-' : rating.score.toFixed(1)}{' '}
-            <span className="i-mingcute-star-fill text-yellow-500" />
-          </div>
-          <Separator orientation="vertical" className="bg-primary/20" />
-          <div className="flex items-center gap-0.5 text-sm font-medium">
-            <span className="i-mingcute-hashtag-line mt-0.5" />{' '}
-            {rating.rank === 0 ? '--' : rating.rank}
-          </div>
-          <Separator orientation="vertical" className="bg-primary/20" />
-        </>
-      )}
-      <div className="flex flex-row flex-wrap items-center gap-1 text-sm font-medium">
-        <MetaItem inner={date} content={dayjs(date, 'YYYY-MM-DD').format('YYYY 年 7 月')} first />
-        <MetaItem inner={platform} content={platform} />
-        <MetaItem inner={eps} content={`共 ${eps} 话`} />
-        <MetaItem inner={week_day} content={week_day} />
-      </div>
+    <div className="flex flex-col gap-1">
+      <section className="flex flex-row items-center gap-1.5">
+        {rating.score !== 0 && (
+          <>
+            <div className="flex items-center gap-0.5 text-base font-medium">
+              {rating.score == 0 ? '-.-' : rating.score.toFixed(1)}{' '}
+              <span className="i-mingcute-star-fill text-yellow-500" />
+            </div>
+            <Separator orientation="vertical" className="bg-primary/20" />
+            <div className="flex items-center gap-0.5 text-sm font-medium">
+              <span className="i-mingcute-hashtag-line mt-0.5" />{' '}
+              {rating.rank === 0 ? '--' : rating.rank}
+            </div>
+            <Separator orientation="vertical" className="bg-primary/20" />
+          </>
+        )}
+        <div className="flex flex-row flex-wrap items-center gap-1 text-sm font-medium">
+          <MetaItem inner={date} content={dayjs(date, 'YYYY-MM-DD').format('YYYY 年 7 月')} first />
+          <MetaItem inner={platform} content={platform} />
+          <MetaItem inner={eps} content={`共 ${eps} 话`} />
+          <MetaItem inner={week_day} content={week_day} />
+        </div>
+      </section>
     </div>
   )
 }
