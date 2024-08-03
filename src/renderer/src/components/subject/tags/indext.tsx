@@ -18,7 +18,7 @@ export default function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
 
   if (subjectInfo === undefined)
     return (
-      <section className="flex flex-col gap-5">
+      <section className="flex w-full flex-col gap-5">
         <h2 className="text-2xl font-semibold">标签</h2>
         <Skeleton className="h-60" />
       </section>

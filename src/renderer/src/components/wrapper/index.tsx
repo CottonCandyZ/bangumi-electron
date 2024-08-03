@@ -9,6 +9,9 @@ import InitStateContextWrapper from '@renderer/components/wrapper/state-wrapper'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import SessionWrapper from '@renderer/components/wrapper/session-wrapper'
+import { ClickScrollPlugin, OverlayScrollbars } from 'overlayscrollbars'
+
+OverlayScrollbars.plugin(ClickScrollPlugin);
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({

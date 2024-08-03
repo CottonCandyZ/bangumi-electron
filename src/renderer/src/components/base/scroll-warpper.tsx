@@ -17,7 +17,7 @@ export default function ScrollWrapper({
       className={cn('pr-2', className)}
       options={{
         ...typeOptions,
-        scrollbars: { ...typeOptions?.scrollbars, theme: 'os-theme-custom' },
+        scrollbars: { ...typeOptions?.scrollbars, theme: 'os-theme-custom', clickScroll: true },
       }}
       defer
       {...props}

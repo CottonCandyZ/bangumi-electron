@@ -13,7 +13,7 @@ import { SubjectId } from '@renderer/data/types/bgm'
 
 const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-10 px-10">
+    <div className="mx-auto flex max-w-[86rem] flex-col gap-10 px-10">
       <section className="flex w-full flex-row gap-8">
         {/* cover */}
         <SubjectCoverImage subjectId={subjectId} />
@@ -21,25 +21,30 @@ const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
         <SubjectHeaderInfo subjectId={subjectId} />
       </section>
       {/* 章节 */}
-      <section className="flex flex-row gap-5">
-        <div className="flex w-full flex-col gap-5">
-          <SubjectEpisodes subjectId={subjectId} />
-          {/* 标签 */}
-          <SubjectTags subjectId={subjectId} />
-        </div>
-        <Card className="h-fit bg-transparent p-4">
-          <section className="flex min-w-56 flex-1 flex-col gap-2">
-            <SubjectCollection subjectId={subjectId} />
-            <Separator />
-            <div className="w-56">
-              <SubjectScore subjectId={subjectId} />
+
+      <div className="flex w-full flex-col gap-10">
+        <section className="flex flex-row gap-5">
+          <SubjectPersonTable subjectId={subjectId} />
+          <div className="flex w-full flex-col gap-5">
+            <SubjectEpisodes subjectId={subjectId} />
+            <div className="flex w-full flex-row">
+              <SubjectTags subjectId={subjectId} />
             </div>
-          </section>
-        </Card>
-      </section>
-      <SubjectCharacters subjectId={subjectId} />
-      <RelatedSubjects subjectId={subjectId} />
-      <SubjectPersonTable subjectId={subjectId} />
+          </div>
+          <Card className="h-fit bg-transparent p-4">
+            <section className="flex min-w-56 flex-1 flex-col gap-2">
+              <SubjectCollection subjectId={subjectId} />
+              <Separator />
+              <div className="w-56">
+                <SubjectScore subjectId={subjectId} />
+              </div>
+            </section>
+          </Card>
+        </section>
+
+        <SubjectCharacters subjectId={subjectId} />
+        <RelatedSubjects subjectId={subjectId} />
+      </div>
     </div>
   )
 }
