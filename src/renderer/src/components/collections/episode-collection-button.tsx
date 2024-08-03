@@ -145,7 +145,7 @@ export default function EpisodeCollectionButton({
                   })
                 } else {
                   const start = episodes.findIndex(
-                    (item) => item.type === EpisodeCollectionType.notCollected,
+                    (item) => item.type !== EpisodeCollectionType.watched,
                   )
                   episodeCollectionMutation.mutate({
                     episodeCollectionType: EpisodeCollectionType.watched,
