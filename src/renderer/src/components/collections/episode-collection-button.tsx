@@ -62,12 +62,6 @@ export default function EpisodeCollectionButton({
         ],
       })
       const { episodesId, episodeCollectionType } = variable
-      const newEpisodeCollection = episodes.map((item) => {
-        if (episodesId.includes(item.episode.id)) {
-          return { ...item, type: episodeCollectionType }
-        } else return item
-      })
-      console.log(newEpisodeCollection)
       queryClient.setQueryData(
         [
           'collection-episodes',
