@@ -8,3 +8,4 @@ Build with Electron-vite & React & shadcn/ui.
 
 ![Preview Image](doc/preview.webp)
 ![Preview Dark Image](doc/preview_dark.webp)
+![Preview Dark Image](doc/preview_dark_game.webp)
