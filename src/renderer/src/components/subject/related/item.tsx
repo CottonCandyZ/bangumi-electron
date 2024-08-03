@@ -23,7 +23,7 @@ export default function Item({ relatedSubject }: { relatedSubject: RelatedSubjec
             to={`/subject/${relatedSubject.id}`}
             className="cursor-default"
             state={{ viewTransitionName: `cover-image-${key}` }}
-            unstable_viewTransition
+            // unstable_viewTransition
           >
             <Card
               className="relative overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"

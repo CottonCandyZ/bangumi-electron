@@ -25,7 +25,7 @@ export default function NavButton({ name, path, icon, active }: Props) {
     >
       <MyLink
         to={path}
-        unstable_viewTransition
+        // unstable_viewTransition
         onClick={() => {
           if (!navCollapsed) setNavCollapsed(true)
         }}

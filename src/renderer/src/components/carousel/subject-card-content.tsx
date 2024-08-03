@@ -78,7 +78,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
         <MyLink
           to={`/subject/${subjectId}`}
           className="cursor-default"
-          unstable_viewTransition
+          // unstable_viewTransition
           state={{ viewTransitionName: `cover-image-${key}` }}
         >
           <Card
@@ -160,7 +160,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
             <MyLink
               to={`/subject/${subjectId}`}
               className="cursor-default"
-              unstable_viewTransition
+              // unstable_viewTransition
               state={{ viewTransitionName: `cover-image-${key}` }}
             >
               <Card className="h-full w-full">
