@@ -51,7 +51,7 @@ export default function EpisodeGridItem({
   const [open, setOpen] = useState(false)
 
   return (
-    <HoverCard openDelay={300} open={open} onOpenChange={setOpen}>
+    <HoverCard openDelay={150} open={open} onOpenChange={setOpen} closeDelay={100}>
       <HoverCardTrigger asChild>
         <Button
           key={episode.id}
