@@ -1,3 +1,5 @@
+import { useRef } from 'react'
+
 export default function TagInput({
   tags,
   remove,
@@ -9,6 +11,7 @@ export default function TagInput({
   add: (value: string) => void
   placeholder?: string
 }) {
+  const onComposition = useRef(false)
   return (
     <div className="flex w-full flex-row flex-wrap gap-2 bg-transparent text-sm">
       {tags.map((value) => (
@@ -27,16 +30,19 @@ export default function TagInput({
       <input
         className="flex h-9 min-w-fit flex-1 resize-none bg-background px-3 py-2 placeholder:text-muted-foreground focus-visible:outline-none"
         onChange={(event) => {
+          console.log(event.type)
           const value = event.target.value
           if (value === ' ') {
             event.target.value = ''
             return
           }
-          if (event.target.value.includes(' ')) {
+          if (!onComposition.current && event.target.value.includes(' ')) {
             add(value)
             event.target.value = ''
           }
         }}
+        onCompositionStart={() => (onComposition.current = true)}
+        onCompositionEnd={() => (onComposition.current = false)}
         placeholder={placeholder}
       />
     </div>
