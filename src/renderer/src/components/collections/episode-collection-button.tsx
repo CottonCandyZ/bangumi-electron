@@ -16,6 +16,7 @@ import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
 import { EPISODE_COLLECTION_ACTION_MAP, EPISODE_COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 export default function EpisodeCollectionButton({
@@ -39,6 +40,9 @@ export default function EpisodeCollectionButton({
 
   const queryClient = useQueryClient()
   const episodeCollectionType = episodes[index].type
+  const [hover, setHover] = useState<(typeof EPISODE_COLLECTION_ACTION)[number] | null>(
+    EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null,
+  )
 
   const episodeCollectionMutation = useMutationEpisodesCollectionBySubjectId({
     mutationKey: ['subject-collection'],
@@ -116,6 +120,7 @@ export default function EpisodeCollectionButton({
         className={cn(
           'inline-flex min-h-9 w-fit flex-wrap items-center justify-center rounded-md bg-muted text-muted-foreground',
         )}
+        onMouseLeave={() => setHover(EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null)}
       >
         {EPISODE_COLLECTION_ACTION.map((item) => {
           if (episodeCollectionType === EpisodeCollectionType.watched && item === '看到')
@@ -124,12 +129,13 @@ export default function EpisodeCollectionButton({
             <button
               className={cn(
                 `relative inline-flex h-full cursor-pointer items-center justify-center whitespace-nowrap rounded-md border border-transparent px-3 py-1 text-sm font-medium ring-offset-background hover:border-border hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50`,
-                EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] === item &&
-                  'pointer-events-none border-border bg-background text-foreground',
+                hover === item && 'border-border bg-background text-foreground',
+                EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] == item && 'cursor-default',
               )}
               disabled={episodeCollectionMutation.isPending}
               key={item}
               onClick={() => {
+                if (item === EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType]) return
                 if (item !== '看到') {
                   const action = EPISODE_COLLECTION_ACTION_MAP[item]
                   episodeCollectionMutation.mutate({
@@ -148,6 +154,7 @@ export default function EpisodeCollectionButton({
                   })
                 }
               }}
+              onMouseEnter={() => setHover(item)}
             >
               {item}
             </button>
