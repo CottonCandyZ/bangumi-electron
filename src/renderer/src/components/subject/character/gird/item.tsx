@@ -58,7 +58,7 @@ function PopCard({ character }: { character: Character }) {
             <div className="flex w-full flex-col gap-2">
               <MetaInfo character={character} />
               <Separator />
-              <Detail characterId={character.id} />
+              <Detail characterId={character.id.toString()} />
             </div>
           </div>
         </CardContent>
