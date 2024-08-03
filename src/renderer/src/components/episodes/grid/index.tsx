@@ -1,9 +1,9 @@
 import { EpisodeGridContent } from '@renderer/components/episodes/grid/content'
 import PageSelector from '@renderer/components/episodes/grid/page-selector'
 import { Skeleton } from '@renderer/components/ui/skeleton'
+import { useSession } from '@renderer/components/wrapper/session-wrapper'
 import { useQueryCollectionEpisodesInfoBySubjectId } from '@renderer/data/hooks/api/collection'
 import { useQueryEpisodesInfoBySubjectId } from '@renderer/data/hooks/api/episodes'
-import { useIsLoginQuery } from '@renderer/data/hooks/session'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { cn } from '@renderer/lib/utils'
 import { useState } from 'react'
@@ -21,7 +21,7 @@ export default function EpisodesGrid({
   eps: number
   selector?: boolean
 } & EpisodeGridSize) {
-  const isLogin = useIsLoginQuery()
+  const { isLogin } = useSession()
   const [offset, setOffSet] = useState(0)
   const limit = 100
   let skeletonNumber = eps ?? 12
@@ -30,20 +30,19 @@ export default function EpisodesGrid({
     subjectId,
     offset,
     limit,
-    enabled: isLogin.data !== undefined && !isLogin.data,
+    enabled: isLogin !== undefined && !isLogin,
   })
 
   const collectionEpisodesQuery = useQueryCollectionEpisodesInfoBySubjectId({
     subjectId,
     offset,
     limit,
-    enabled: isLogin.data !== undefined && isLogin.data,
+    enabled: isLogin !== undefined && isLogin,
   })
 
-  if (isLogin.data === undefined)
-    return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
+  if (isLogin === undefined) return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
 
-  const episode = isLogin.data ? collectionEpisodesQuery : episodesQuery
+  const episode = isLogin ? collectionEpisodesQuery : episodesQuery
   if (episode.data === undefined) {
     return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
   }

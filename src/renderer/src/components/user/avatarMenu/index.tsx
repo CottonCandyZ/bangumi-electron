@@ -15,7 +15,7 @@ import {
   DropdownMenuRadioItem,
 } from '@renderer/components/ui/dropdown-menu'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { useIsLoginQuery, useLogoutMutation } from '@renderer/data/hooks/session'
+import { useLogoutMutation } from '@renderer/data/hooks/session'
 import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
 import { toast } from 'sonner'
 import { useTheme } from '@renderer/components/wrapper/theme-wrapper'
@@ -32,12 +32,13 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/compone
 import LoginForm from '@renderer/components/user/login/form'
 import { useNavCollapsed } from '@renderer/state/panel'
 import { cn } from '@renderer/lib/utils'
+import { useSession } from '@renderer/components/wrapper/session-wrapper'
 
 export default function ProfileMenu() {
   const logoutMutation = useLogoutMutation()
   const userInfo = useQueryUserInfo()
   const { theme, setTheme } = useTheme()
-  const isLogin = useIsLoginQuery()
+  const { isLogin } = useSession()
   const [open, setOpen] = useState(false)
   const navCollapsed = useNavCollapsed((state) => state.collapsed)
   const [dropdownOpen, setDropDownOpen] = useState(false)
@@ -52,7 +53,7 @@ export default function ProfileMenu() {
             dropdownOpen && 'bg-accent text-primary',
           )}
         >
-          {isLogin.data ? (
+          {isLogin ? (
             <Image
               className="aspect-square w-8 overflow-hidden rounded-full"
               imageSrc={userInfo.data?.avatar.small}
@@ -61,9 +62,7 @@ export default function ProfileMenu() {
             <div className="aspect-square w-8 overflow-hidden rounded-full bg-accent"></div>
           )}
           {!navCollapsed && (
-            <span className="shrink-0 font-semibold">
-              {isLogin.data && userInfo.data?.nickname}
-            </span>
+            <span className="shrink-0 font-semibold">{isLogin && userInfo.data?.nickname}</span>
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -76,7 +75,7 @@ export default function ProfileMenu() {
             top: 8,
           }}
         >
-          {isLogin.data && (
+          {isLogin && (
             <DropdownMenuLabel>
               {userInfo.data?.nickname ? (
                 <span>Hi! {userInfo.data?.nickname}</span>
@@ -85,7 +84,7 @@ export default function ProfileMenu() {
               )}
             </DropdownMenuLabel>
           )}
-          {!isLogin.data && (
+          {!isLogin && (
             <DialogTrigger asChild>
               <DropdownMenuItem>登录</DropdownMenuItem>
             </DialogTrigger>
@@ -108,7 +107,7 @@ export default function ProfileMenu() {
               </DropdownMenuPortal>
             </DropdownMenuSub>
           </DropdownMenuGroup>
-          {isLogin.data && (
+          {isLogin && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>

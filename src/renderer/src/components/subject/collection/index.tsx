@@ -6,8 +6,6 @@ import SubjectCollectionSelector from '@renderer/components/subject/collection/s
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
-import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
-import { useAccessTokenQuery, useIsLoginQuery } from '@renderer/data/hooks/session'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionType } from '@renderer/data/types/collection'
 import { useCollectionIsInView } from '@renderer/state/inView'
@@ -15,11 +13,10 @@ import { useInView } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import MoreActionDropDown from '@renderer/components/subject/collection/more-action-drop-down'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
+import { useSession } from '@renderer/components/wrapper/session-wrapper'
 
 export default function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
-  const isLogin = useIsLoginQuery().data
-  const userInfo = useQueryUserInfo({ enabled: !!isLogin }).data
-  const { data: accessToken } = useAccessTokenQuery()
+  const { isLogin, userInfo, accessToken } = useSession()
   const subjectCollectionQuery = useQuerySubjectCollection({
     subjectId,
     username: userInfo?.username,
@@ -52,7 +49,7 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
           <PrivateSwitch
             subjectCollection={subjectCollection}
             username={userInfo.username}
-            accessToken={accessToken.access_token}
+            accessToken={accessToken}
           />
         )}
       </div>
@@ -67,19 +64,19 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
             <SubjectCollectionSelector
               subjectCollection={subjectCollection}
               username={userInfo.username}
-              accessToken={accessToken.access_token}
+              accessToken={accessToken}
             />
             <ModifySubjectCollection
               subjectInfo={subjectInfo}
               subjectCollection={subjectCollection}
-              accessToken={accessToken.access_token}
+              accessToken={accessToken}
               username={userInfo.username}
             >
               <Button variant="outline">修改详情</Button>
             </ModifySubjectCollection>
             <MoreActionDropDown
               subjectId={subjectId}
-              accessToken={accessToken.access_token}
+              accessToken={accessToken}
               username={userInfo.username}
             />
           </div>
@@ -87,7 +84,7 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
             <QuickRate
               subjectCollection={subjectCollection}
               username={userInfo.username}
-              accessToken={accessToken.access_token}
+              accessToken={accessToken}
             />
           )}
         </div>
@@ -95,7 +92,7 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
         <AddSubjectCollection
           subjectId={subjectId}
           username={userInfo.username}
-          accessToken={accessToken.access_token}
+          accessToken={accessToken}
         />
       )}
     </div>

@@ -3,7 +3,7 @@ import { parseInfoBoxFromSubjectPage, parseTopListFromHTML } from '@renderer/dat
 import { useQuery } from '@tanstack/react-query'
 import type { sectionPath } from '@renderer/data/types/web'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { useIsLoginQuery } from '@renderer/data/hooks/session'
+import { useSession } from '@renderer/components/wrapper/session-wrapper'
 
 // 分离 parse 和 fetch，方便缓存整个页面的内容
 
@@ -27,9 +27,9 @@ export const useWebInfoBoxQuery = ({
   subjectId: SubjectId
   enabled?: boolean
 }) => {
-  const isLogin = useIsLoginQuery()
+  const { isLogin } = useSession()
   return useQuery({
-    queryKey: ['SubjectHomePage', isLogin.data, subjectId],
+    queryKey: ['SubjectHomePage', isLogin, subjectId],
     queryFn: async () => await fetchSubjectInfoById({ subjectId }),
     select: parseInfoBoxFromSubjectPage,
     enabled: enabled,

@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import InitStateContextWrapper from '@renderer/components/wrapper/state-wrapper'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
+import SessionWrapper from '@renderer/components/wrapper/session-wrapper'
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -36,12 +37,14 @@ export default function Wrapper({ children }: PropsWithChildren) {
       client={queryClient}
       persistOptions={{ persister, maxAge: 60 * 1000 * 60 * 24 }}
     >
-      <InitStateContextWrapper>
-        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <TooltipProvider>{children}</TooltipProvider>
-          <Toaster richColors className="pointer-events-auto" />
-        </ThemeProvider>
-      </InitStateContextWrapper>
+      <SessionWrapper>
+        <InitStateContextWrapper>
+          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+            <TooltipProvider>{children}</TooltipProvider>
+            <Toaster richColors className="pointer-events-auto" />
+          </ThemeProvider>
+        </InitStateContextWrapper>
+      </SessionWrapper>
       <ReactQueryDevtools initialIsOpen={false} />
     </PersistQueryClientProvider>
   )
