@@ -77,10 +77,10 @@ const config = {
   },
   plugins: [
     iconsPlugin({
-      collections: getIconCollections(['mingcute']),
+      collections: getIconCollections(['mingcute', 'tabler']),
     }),
     require('tailwindcss-animate'),
-    require('@tailwindcss/container-queries')
+    require('@tailwindcss/container-queries'),
   ],
 } satisfies Config
 

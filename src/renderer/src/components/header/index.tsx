@@ -58,13 +58,13 @@ export default function Header() {
       <div className="flex h-full flex-row items-center justify-end gap-2">
         <Button
           variant="ghost"
-          className={cn('no-drag-region mr-3 p-2 text-[1.4rem]', open && 'bg-accent')}
+          className="no-drag-region mr-3 p-2 text-[1.4rem]"
           onClick={() => setOpen(!open)}
         >
           {open ? (
-            <span className="i-mingcute-layout-right-fill" />
+            <span className="i-tabler-layout-sidebar-right-filled" />
           ) : (
-            <span className="i-mingcute-layout-right-line" />
+            <span className="i-tabler-layout-sidebar-right" />
           )}
         </Button>
         {/* <div className="mr-5 flex h-full max-w-[20rem] gap-5">
