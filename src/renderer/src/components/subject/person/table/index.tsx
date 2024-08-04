@@ -9,7 +9,7 @@ export default function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
   return (
     <div className={cn('relative flex flex-row justify-between gap-2')}>
       <ScrollWrapper
-        className={cn('max-h-[36rem] w-64 pr-3')}
+        className={cn('max-h-[28rem] w-64 pr-3')}
         options={{ scrollbars: { autoHide: 'leave' } }}
       >
         <Table className="w-full">

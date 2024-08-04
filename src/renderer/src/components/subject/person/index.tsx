@@ -6,7 +6,7 @@ import { SubjectId } from '@renderer/data/types/bgm'
 export default function SubjectPersonTable({ subjectId }: { subjectId: SubjectId }) {
   const personsQuery = useWebInfoBoxQuery({ subjectId })
   const persons = personsQuery.data
-  if (!persons) return <Skeleton className="h-[36rem] w-64 shrink-0" />
+  if (!persons) return <Skeleton className="h-[28rem] w-64 shrink-0" />
   if (persons.size === 0) return null
   return (
     <section className="flex flex-col gap-5">
