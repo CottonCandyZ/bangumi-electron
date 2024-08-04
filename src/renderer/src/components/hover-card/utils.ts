@@ -1,4 +1,4 @@
-import { leftPanelSize } from '@renderer/components/wrapper/state-wrapper'
+import { panelSize } from '@renderer/components/wrapper/state-wrapper'
 import { UI_CONFIG } from '@renderer/config'
 
 type toView = {
@@ -92,8 +92,8 @@ export function cHoverCardSizeFixed(hover: DOMRect, hoverCardSize: HoverCardSize
     toLeft = UI_CONFIG.NAV_WIDTH + toViewLeft - toLeft
     toRight -= bias
   }
-  if (toRight < toViewRight) {
-    const bias = toViewRight - toRight
+  if (toRight < toViewRight + panelSize.right_width) {
+    const bias = toViewRight + panelSize.right_width - toRight
     toRight = toViewRight
     toLeft -= bias
   }
@@ -126,12 +126,12 @@ export function cPopSizeByC(
     const bias = UI_CONFIG.HEADER_HEIGHT + toView.toViewTop - toTop
     topOffset += bias
   }
-  if (toLeft < UI_CONFIG.NAV_WIDTH + toView.toViewLeft + leftPanelSize.width) {
-    const bias = UI_CONFIG.NAV_WIDTH + toView.toViewLeft + leftPanelSize.width - toLeft
+  if (toLeft < UI_CONFIG.NAV_WIDTH + toView.toViewLeft + panelSize.left_width) {
+    const bias = UI_CONFIG.NAV_WIDTH + toView.toViewLeft + panelSize.left_width - toLeft
     leftOffset += bias
   }
-  if (toRight < toView.toViewRight) {
-    const bias = toView.toViewRight - toRight
+  if (toRight < toView.toViewRight + panelSize.right_width) {
+    const bias = toView.toViewRight + panelSize.right_width - toRight
     leftOffset -= bias
   }
   if (toBottom < toView.toViewBottom) {
@@ -155,8 +155,8 @@ export function cPopSizeByCForFixed(
   if (toTop < UI_CONFIG.HEADER_HEIGHT + toView.toViewTop) {
     toTop = UI_CONFIG.HEADER_HEIGHT + toView.toViewTop
   }
-  if (toLeft < UI_CONFIG.NAV_WIDTH + leftPanelSize.width + toView.toViewLeft) {
-    toLeft = UI_CONFIG.NAV_WIDTH + leftPanelSize.width + toView.toViewLeft
+  if (toLeft < UI_CONFIG.NAV_WIDTH + panelSize.left_width + toView.toViewLeft) {
+    toLeft = UI_CONFIG.NAV_WIDTH + panelSize.left_width + toView.toViewLeft
   }
   if (toRight < toView.toViewRight) {
     const bias = toView.toViewRight - toRight

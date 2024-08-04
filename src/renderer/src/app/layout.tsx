@@ -10,7 +10,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@renderer/components/ui/resizable'
-import { leftPanelSize } from '@renderer/components/wrapper/state-wrapper'
+import { panelSize } from '@renderer/components/wrapper/state-wrapper'
 import { cn } from '@renderer/lib/utils'
 import { useNavCollapsed, usePanelName, useRightPanelState } from '@renderer/state/panel'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -24,16 +24,26 @@ function RootLayout() {
     (state) => state,
   )
   const rightPanelOpen = useRightPanelState((state) => state.open)
-  const ref = useRef<HTMLDivElement>(null)
+  const leftRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
-      leftPanelSize.width = entries[0].target.getBoundingClientRect().width
+      panelSize.left_width = entries[0].target.getBoundingClientRect().width
     })
-    if (ref.current) resizeObserver.observe(ref.current)
+    if (leftRef.current) resizeObserver.observe(leftRef.current)
     return () => {
-      if (ref.current) resizeObserver.unobserve(ref.current)
+      if (leftRef.current) resizeObserver.unobserve(leftRef.current)
     }
   }, [currentPanelName])
+  const rightRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
+      panelSize.right_width = entries[0].target.getBoundingClientRect().width
+    })
+    if (rightRef.current) resizeObserver.observe(rightRef.current)
+    return () => {
+      if (rightRef.current) resizeObserver.unobserve(rightRef.current)
+    }
+  }, [rightPanelOpen])
 
   return (
     <>
@@ -57,7 +67,7 @@ function RootLayout() {
                 id="list"
                 className="min-w-64"
               >
-                <div ref={ref}>
+                <div ref={leftRef}>
                   <SidePanel currentPanelName={currentPanelName} />
                 </div>
               </ResizablePanel>
@@ -78,12 +88,14 @@ function RootLayout() {
                 <>
                   <ResizableHandle className="w-0 border-r" />
                   <ResizablePanel order={2} id="right">
-                    <ScrollWrapper
-                      className="h-[calc(100dvh-64px)] w-full overflow-x-hidden"
-                      options={{ scrollbars: { autoHide: 'scroll' } }}
-                    >
-                      <MainRightPanel />
-                    </ScrollWrapper>
+                    <div ref={rightRef}>
+                      <ScrollWrapper
+                        className="h-[calc(100dvh-64px)] w-full overflow-x-hidden"
+                        options={{ scrollbars: { autoHide: 'scroll' } }}
+                      >
+                        <MainRightPanel />
+                      </ScrollWrapper>
+                    </div>
                   </ResizablePanel>
                 </>
               )}

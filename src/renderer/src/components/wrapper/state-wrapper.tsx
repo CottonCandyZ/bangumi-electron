@@ -1,8 +1,9 @@
 import { createContext, PropsWithChildren, useRef } from 'react'
 import { create } from 'zustand'
 
-export const leftPanelSize = {
-  width: 0,
+export const panelSize = {
+  left_width: 0,
+  right_width: 0,
 }
 
 type TabsFilter = {
