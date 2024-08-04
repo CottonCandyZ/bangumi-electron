@@ -1,8 +1,10 @@
 import PageScrollWrapper from '@renderer/components/base/page-scroll-wrapper'
+import ScrollWrapper from '@renderer/components/base/scroll-warpper'
 import Header from '@renderer/components/header'
 import { BackCover } from '@renderer/components/hover-card/close'
 import NavBar from '@renderer/components/nav'
 import SidePanel from '@renderer/components/panel'
+import MainRightPanel from '@renderer/components/panel/main-right-panel'
 import {
   ResizableHandle,
   ResizablePanel,
@@ -10,7 +12,7 @@ import {
 } from '@renderer/components/ui/resizable'
 import { leftPanelSize } from '@renderer/components/wrapper/state-wrapper'
 import { cn } from '@renderer/lib/utils'
-import { useNavCollapsed, usePanelName } from '@renderer/state/panel'
+import { useNavCollapsed, usePanelName, useRightPanelState } from '@renderer/state/panel'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import { Outlet } from 'react-router-dom'
@@ -21,6 +23,7 @@ function RootLayout() {
   const { collapsed: navCollapsed, setCollapsed: setNavCollapsed } = useNavCollapsed(
     (state) => state,
   )
+  const rightPanelOpen = useRightPanelState((state) => state.open)
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
@@ -63,11 +66,28 @@ function RootLayout() {
           )}
           <ResizablePanel order={2} id="main">
             <Header />
-            <PageScrollWrapper className="h-[calc(100dvh-64px)] w-full overflow-x-hidden">
-              <div>
-                <Outlet />
-              </div>
-            </PageScrollWrapper>
+            <ResizablePanelGroup direction="horizontal" autoSaveId="sub-panel">
+              <ResizablePanel order={1} id="left">
+                <PageScrollWrapper className="h-[calc(100dvh-64px)] w-full overflow-x-hidden">
+                  <div>
+                    <Outlet />
+                  </div>
+                </PageScrollWrapper>
+              </ResizablePanel>
+              {rightPanelOpen && (
+                <>
+                  <ResizableHandle className="w-0 border-r" />
+                  <ResizablePanel order={2} id="right">
+                    <ScrollWrapper
+                      className="h-[calc(100dvh-64px)] w-full overflow-x-hidden"
+                      options={{ scrollbars: { autoHide: 'scroll' } }}
+                    >
+                      <MainRightPanel />
+                    </ScrollWrapper>
+                  </ResizablePanel>
+                </>
+              )}
+            </ResizablePanelGroup>
           </ResizablePanel>
         </ResizablePanelGroup>
         <BackCover />

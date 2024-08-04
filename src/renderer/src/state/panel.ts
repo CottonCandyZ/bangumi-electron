@@ -30,3 +30,13 @@ export const usePanelName = create<currentPanel>()(
     },
   ),
 )
+
+type rightPanelState = {
+  open: boolean
+  setOpen: (open: boolean) => void
+}
+
+export const useRightPanelState = create<rightPanelState>()((set) => ({
+  open: true,
+  setOpen: (open) => set({ open }),
+}))

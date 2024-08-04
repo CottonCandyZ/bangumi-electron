@@ -3,7 +3,6 @@ import SubjectCollection from '@renderer/components/subject/collection'
 import SubjectCoverImage from '@renderer/components/subject/cover-image'
 import SubjectEpisodes from '@renderer/components/subject/episode'
 import { SubjectHeaderInfo } from '@renderer/components/subject/header-info'
-import SubjectPersonTable from '@renderer/components/subject/person'
 import RelatedSubjects from '@renderer/components/subject/related'
 import SubjectScore from '@renderer/components/subject/score'
 import SubjectTags from '@renderer/components/subject/tags/indext'
@@ -24,7 +23,6 @@ const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
 
       <div className="flex w-full flex-col gap-10">
         <section className="flex flex-row gap-5">
-          <SubjectPersonTable subjectId={subjectId} />
           <div className="flex w-full flex-col gap-5">
             <SubjectEpisodes subjectId={subjectId} />
             <div className="flex w-full flex-row">

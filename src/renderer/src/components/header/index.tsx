@@ -3,6 +3,7 @@ import HeaderTitle from '@renderer/components/header/subject-title'
 import { Button } from '@renderer/components/ui/button'
 import { client, handlers } from '@renderer/lib/client'
 import { cn } from '@renderer/lib/utils'
+import { useRightPanelState } from '@renderer/state/panel'
 import { ChevronLeft, ChevronRight, Minus, Square, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -15,6 +16,7 @@ export default function Header() {
   const [backDisable, setBackDisable] = useState(true)
   const [forwardDisable, setForwardDisable] = useState(true)
   const [isMaximize, setIsMaximize] = useState(false)
+  const { open, setOpen } = useRightPanelState((state) => state)
   useEffect(() => {
     setBackDisable(history.state.idx === 0)
     setForwardDisable(history.state.idx === history.length - 1)
@@ -54,6 +56,17 @@ export default function Header() {
         <HeaderTitle />
       </div>
       <div className="flex h-full flex-row items-center justify-end gap-2">
+        <Button
+          variant="ghost"
+          className={cn('no-drag-region mr-3 p-2 text-[1.4rem]', open && 'bg-accent')}
+          onClick={() => setOpen(!open)}
+        >
+          {open ? (
+            <span className="i-mingcute-layout-right-fill" />
+          ) : (
+            <span className="i-mingcute-layout-right-line" />
+          )}
+        </Button>
         {/* <div className="mr-5 flex h-full max-w-[20rem] gap-5">
           <div className="flex grow items-center">
             <div className="no-drag-region w-full">
