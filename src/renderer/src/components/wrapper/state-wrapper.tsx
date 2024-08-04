@@ -1,6 +1,10 @@
 import { createContext, PropsWithChildren, useRef } from 'react'
 import { create } from 'zustand'
 
+export const leftPanelSize = {
+  width: 0,
+}
+
 type TabsFilter = {
   filter: Map<string, string>
   setFilter: (id: string, value: string) => void

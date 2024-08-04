@@ -8,9 +8,11 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from '@renderer/components/ui/resizable'
+import { leftPanelSize } from '@renderer/components/wrapper/state-wrapper'
 import { cn } from '@renderer/lib/utils'
 import { useNavCollapsed, usePanelName } from '@renderer/state/panel'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useRef } from 'react'
 import { Outlet } from 'react-router-dom'
 
 // 对于 windows 暂时先用 overlay scroll bar，等后面 fluent 稳定了就可以上 Windows fluent scroll bar https://source.chromium.org/chromium/chromium/src/+/main:ui/native_theme/native_theme_features.cc;l=5?q=native_theme_features&ss=chromium%2Fchromium%2Fsrc
@@ -19,6 +21,16 @@ function RootLayout() {
   const { collapsed: navCollapsed, setCollapsed: setNavCollapsed } = useNavCollapsed(
     (state) => state,
   )
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
+      leftPanelSize.width = entries[0].target.getBoundingClientRect().width
+    })
+    if (ref.current) resizeObserver.observe(ref.current)
+    return () => {
+      if (ref.current) resizeObserver.unobserve(ref.current)
+    }
+  }, [currentPanelName])
 
   return (
     <>
@@ -42,7 +54,9 @@ function RootLayout() {
                 id="list"
                 className="min-w-64"
               >
-                <SidePanel currentPanelName={currentPanelName} />
+                <div ref={ref}>
+                  <SidePanel currentPanelName={currentPanelName} />
+                </div>
               </ResizablePanel>
               <ResizableHandle className="w-0 border-r" />
             </>

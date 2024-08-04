@@ -2,7 +2,7 @@ import {
   useActiveHoverCard,
   useViewTransitionStatusState,
 } from '@renderer/components/hover-card/state'
-import { cPopSizeByCForFixed } from '@renderer/components/hover-card/utils'
+import { cPopSizeByC } from '@renderer/components/hover-card/utils'
 import { cn } from '@renderer/lib/utils'
 import { HTMLMotionProps, motion } from 'framer-motion'
 import {
@@ -134,15 +134,15 @@ export const PopCardInnerContent: FC<
   const [popCod, setPopCod] = useState({ top: 0, left: 0 })
   useLayoutEffect(() => {
     const pop = popRef.current!.getBoundingClientRect()
-    const { toTop, toLeft } = cPopSizeByCForFixed(pop, hoverRef.current)
+    const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)
     // 这里如果用状态管理的话，第一次会有 bug
-    popRef.current!.style.top = `${toTop}px`
-    popRef.current!.style.left = `${toLeft}px`
+    popRef.current!.style.top = `${topOffset}px`
+    popRef.current!.style.left = `${leftOffset}px`
     const ob = new ResizeObserver(() => {
       if (!popRef.current) return
       const pop = popRef.current!.getBoundingClientRect()
-      const { toTop, toLeft } = cPopSizeByCForFixed(pop, hoverRef.current)
-      setPopCod({ top: toTop, left: toLeft })
+      const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)
+      setPopCod({ top: topOffset, left: leftOffset })
     })
     ob.observe(popRef.current!)
     return () => {
@@ -153,7 +153,7 @@ export const PopCardInnerContent: FC<
     <motion.div
       layout
       ref={popRef}
-      className={cn('fixed z-50', className)}
+      className={cn('absolute z-50', className)}
       style={{
         top: `${popCod.top}px`,
         left: `${popCod.left}px`,

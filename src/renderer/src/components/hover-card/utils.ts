@@ -1,3 +1,4 @@
+import { leftPanelSize } from '@renderer/components/wrapper/state-wrapper'
 import { UI_CONFIG } from '@renderer/config'
 
 type toView = {
@@ -125,8 +126,8 @@ export function cPopSizeByC(
     const bias = UI_CONFIG.HEADER_HEIGHT + toView.toViewTop - toTop
     topOffset += bias
   }
-  if (toLeft < UI_CONFIG.NAV_WIDTH + toView.toViewLeft) {
-    const bias = UI_CONFIG.NAV_WIDTH + toView.toViewLeft - toLeft
+  if (toLeft < UI_CONFIG.NAV_WIDTH + toView.toViewLeft + leftPanelSize.width) {
+    const bias = UI_CONFIG.NAV_WIDTH + toView.toViewLeft + leftPanelSize.width - toLeft
     leftOffset += bias
   }
   if (toRight < toView.toViewRight) {
@@ -154,8 +155,8 @@ export function cPopSizeByCForFixed(
   if (toTop < UI_CONFIG.HEADER_HEIGHT + toView.toViewTop) {
     toTop = UI_CONFIG.HEADER_HEIGHT + toView.toViewTop
   }
-  if (toLeft < UI_CONFIG.NAV_WIDTH + toView.toViewLeft) {
-    toLeft = UI_CONFIG.NAV_WIDTH + toView.toViewLeft
+  if (toLeft < UI_CONFIG.NAV_WIDTH + leftPanelSize.width + toView.toViewLeft) {
+    toLeft = UI_CONFIG.NAV_WIDTH + leftPanelSize.width + toView.toViewLeft
   }
   if (toRight < toView.toViewRight) {
     const bias = toView.toViewRight - toRight
