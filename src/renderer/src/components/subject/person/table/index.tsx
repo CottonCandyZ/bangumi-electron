@@ -10,11 +10,11 @@ export default function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
       <TableBody>
         {Array.from(persons).map(([key, value]) => (
           <TableRow key={key}>
-            <TableCell className="min-w-16 text-center font-medium">{key.slice(0, -2)}</TableCell>
+            <TableCell className="min-w-20 text-center font-medium">{key.slice(0, -2)}</TableCell>
             <TableCell className="break-all">
               {value.map((item, index) => {
                 if (typeof item === 'string') {
-                  if (key.slice(0, -2) === '别名')
+                  if (key.slice(0, -2) === '别名' || key.slice(0, -2) === '平台')
                     return (
                       <span
                         className={cn('block', index !== value.length - 1 && 'pb-2')}
