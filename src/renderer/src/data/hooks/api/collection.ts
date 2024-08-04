@@ -103,7 +103,11 @@ export const useMutationSubjectCollection = ({
     variable: Omit<Parameters<typeof AddOrModifySubjectCollectionById>[0], 'token'>,
   ) => void
   onSettled?: () => void
-  onError?: (err: Error) => void
+  onError?: (
+    err: Error,
+    variable: Omit<Parameters<typeof AddOrModifySubjectCollectionById>[0], 'token'>,
+    context: unknown,
+  ) => void
 } = {}) =>
   useMutationMustAuth({
     mutationKey,
@@ -130,7 +134,11 @@ export const useMutationEpisodesCollectionBySubjectId = ({
     variable: Omit<Parameters<typeof ModifyEpisodeCollectionBySubjectId>[0], 'token'>,
   ) => void
   onSettled?: () => void
-  onError?: (err: Error) => void
+  onError?: (
+    err: Error,
+    variable: Omit<Parameters<typeof ModifyEpisodeCollectionBySubjectId>[0], 'token'>,
+    context: unknown,
+  ) => void
 } = {}) =>
   useMutationMustAuth({
     mutationKey,

@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui
 import { deleteSubjectCollectionById } from '@renderer/data/fetch/web/collection'
 import { useWebDeleteCollectionHash } from '@renderer/data/hooks/web/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
+import { CollectionData } from '@renderer/data/types/collection'
 import { ModifyCollectionOptType } from '@renderer/data/types/modify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -27,14 +28,24 @@ export default function DeleteSubjectCollectionAlert({
     onSuccess() {
       toast.success('删除成功！')
     },
-    onError() {
+    onError(_error, _variable, context) {
       toast.error('呀，出了点错误...')
+      queryClient.setQueryData(
+        ['collection-subject', { subjectId, username }, accessToken],
+        (context as { pre: CollectionData }).pre,
+      )
     },
     onMutate() {
       queryClient.cancelQueries({
         queryKey: ['collection-subject', { subjectId, username }, accessToken],
       })
+      const pre = queryClient.getQueryData([
+        'collection-subject',
+        { subjectId, username },
+        accessToken,
+      ])
       queryClient.setQueryData(['collection-subject', { subjectId, username }, accessToken], null)
+      return { pre }
     },
     onSettled() {
       queryClient.invalidateQueries({

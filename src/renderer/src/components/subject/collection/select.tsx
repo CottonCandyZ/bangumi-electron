@@ -16,6 +16,11 @@ export default function SubjectCollectionSelector({
   subjectCollection: CollectionData
 } & ModifyCollectionOptType) {
   const queryClient = useQueryClient()
+  const queryKey = [
+    'collection-subject',
+    { subjectId: subjectCollection.subject_id.toString(), username },
+    accessToken,
+  ]
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
     onSuccess(_, variable) {
@@ -24,36 +29,25 @@ export default function SubjectCollectionSelector({
       )
     },
     onMutate(variable) {
-      queryClient.setQueryData(
-        [
-          'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username },
-          accessToken,
-        ],
-        { ...subjectCollection, tags: variable.tags },
-      )
-      queryClient.setQueryData(
-        [
-          'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username },
-          accessToken,
-        ],
-        { ...subjectCollection, type: variable.collectionType! } satisfies CollectionData,
-      )
+      queryClient.cancelQueries({ queryKey })
+      const pre = queryClient.getQueryData(queryKey)
+      queryClient.setQueryData(queryKey, {
+        ...subjectCollection,
+        type: variable.collectionType!,
+      } satisfies CollectionData)
+      return { pre }
     },
     onSettled() {
       queryClient.invalidateQueries({
-        queryKey: [
-          'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username, accessToken },
-        ],
+        queryKey,
       })
       queryClient.invalidateQueries({
         queryKey: ['collection-subjects'],
       })
     },
-    onError() {
+    onError(_error, _variable, context) {
       toast.error('呀，出了点错误...')
+      queryClient.setQueryData(queryKey, (context as { pre: CollectionData }).pre)
     },
   })
 

@@ -84,28 +84,34 @@ export default function AddOrModifySubjectCollectionForm({
       setOpen(false)
       toast.success(modify ? '修改成功！' : '添加成功！')
     },
-    onError() {
+    onError(_error, _variable, context) {
       toast.error('呀，出了点错误...')
+      if (!modify) return
+      queryClient.setQueryData(
+        ['collection-subject', { subjectId, username }, accessToken],
+        (context as { pre: CollectionData }).pre,
+      )
     },
     onMutate(variable) {
       queryClient.cancelQueries({
         queryKey: ['collection-subject', { subjectId, username }, accessToken],
       })
       if (!modify) return
-      const preQuery = queryClient.getQueryData([
+      const pre = queryClient.getQueryData([
         'collection-subject',
         { subjectId, username },
         accessToken,
       ]) as CollectionData | null | undefined
-      if (!preQuery) return
+      if (!pre) return { pre }
       queryClient.setQueryData(['collection-subject', { subjectId, username }, accessToken], {
-        ...preQuery,
+        ...pre,
         type: variable.collectionType!,
         rate: variable.rate!,
         private: variable.isPrivate!,
         tags: variable.tags!,
         comment: variable.comment!,
       } satisfies CollectionData)
+      return { pre }
     },
     onSettled() {
       queryClient.invalidateQueries({

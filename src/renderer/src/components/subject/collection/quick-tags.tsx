@@ -42,8 +42,18 @@ export default function QuickTags({
       toast.success(subjectCollection && '修改成功')
       setEdit(false)
     },
-    onError() {
+    onError(_error, _variable, context) {
       toast.error('呀，出了点错误...')
+      if (subjectCollection && userInfo) {
+        queryClient.setQueryData(
+          [
+            'collection-subject',
+            { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
+            accessToken,
+          ],
+          (context as { pre: CollectionData }).pre,
+        )
+      }
     },
     onMutate(variable) {
       if (subjectCollection && userInfo) {
@@ -54,6 +64,11 @@ export default function QuickTags({
             accessToken,
           ],
         })
+        const pre = queryClient.getQueryData([
+          'collection-subject',
+          { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
+          accessToken,
+        ])
         queryClient.setQueryData(
           [
             'collection-subject',
@@ -62,7 +77,9 @@ export default function QuickTags({
           ],
           { ...subjectCollection, tags: variable.tags! } satisfies CollectionData,
         )
+        return { pre }
       }
+      return { pre: null }
     },
     onSettled() {
       if (subjectCollection && userInfo)

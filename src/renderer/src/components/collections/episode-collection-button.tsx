@@ -43,65 +43,48 @@ export default function EpisodeCollectionButton({
   const [hover, setHover] = useState<(typeof EPISODE_COLLECTION_ACTION)[number] | null>(
     EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null,
   )
+  const queryKey = [
+    'collection-episodes',
+    {
+      subjectId: episodes[index].episode.subject_id.toString(),
+      limit: modifyEpisodeCollectionOpt.limit,
+      offset: modifyEpisodeCollectionOpt.offset,
+      episodeType: undefined,
+    },
+    accessToken,
+  ]
 
   const episodeCollectionMutation = useMutationEpisodesCollectionBySubjectId({
     mutationKey: ['subject-collection'],
     onSuccess() {
       toast.success('修改成功')
     },
-    onError() {
+    onError(_error, _variable, context) {
       toast.error('呀，出了点错误...')
+      const pre = (context as { pre: CollectionEpisodes }).pre
+      queryClient.setQueryData(queryKey, pre)
     },
     onMutate(variable) {
       queryClient.cancelQueries({
-        queryKey: [
-          'collection-episodes',
-          {
-            subjectId: episodes[index].episode.subject_id.toString(),
-            limit: modifyEpisodeCollectionOpt.limit,
-            offset: modifyEpisodeCollectionOpt.offset,
-            episodeType: undefined,
-          },
-          accessToken,
-        ],
+        queryKey,
       })
       const { episodesId, episodeCollectionType } = variable
-      queryClient.setQueryData(
-        [
-          'collection-episodes',
-          {
-            subjectId: episodes[index].episode.subject_id.toString(),
-            limit: modifyEpisodeCollectionOpt.limit,
-            offset: modifyEpisodeCollectionOpt.offset,
-            episodeType: undefined,
-          },
-          accessToken,
-        ],
-        (pre) => {
-          const typePre = pre as CollectionEpisodes
-          return {
-            ...typePre,
-            data: episodes.map((item) => {
-              if (episodesId.includes(item.episode.id)) {
-                return { ...item, type: episodeCollectionType }
-              } else return item
-            }),
-          }
-        },
-      )
+      const pre = queryClient.getQueryData(queryKey) as CollectionEpisodes
+      queryClient.setQueryData(queryKey, (pre: CollectionEpisodes) => {
+        return {
+          ...pre,
+          data: episodes.map((item) => {
+            if (episodesId.includes(item.episode.id)) {
+              return { ...item, type: episodeCollectionType }
+            } else return item
+          }),
+        }
+      })
+      return { pre }
     },
     onSettled() {
       queryClient.invalidateQueries({
-        queryKey: [
-          'collection-episodes',
-          {
-            subjectId: episodes[index].episode.subject_id.toString(),
-            limit: modifyEpisodeCollectionOpt.limit,
-            offset: modifyEpisodeCollectionOpt.offset,
-            episodeType: undefined,
-          },
-          accessToken,
-        ],
+        queryKey,
       })
     },
   })

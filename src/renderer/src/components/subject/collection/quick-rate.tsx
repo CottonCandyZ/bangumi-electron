@@ -13,38 +13,34 @@ export default function QuickRate({
   subjectCollection: CollectionData
 } & ModifyCollectionOptType) {
   const queryClient = useQueryClient()
+  const queryKey = [
+    'collection-subject',
+    { subjectId: subjectCollection.subject_id.toString(), username },
+    accessToken,
+  ]
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
     onSuccess() {
       toast.success(subjectCollection.rate !== 0 ? '评分成功！' : '移除成功！')
     },
-    onError() {
+    onError(_error, _variable, context) {
       toast.error('呀，出了点错误...')
+      queryClient.setQueryData(queryKey, (context as { pre: CollectionData }).pre)
     },
     onMutate(variable) {
       queryClient.cancelQueries({
-        queryKey: [
-          'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username },
-          accessToken,
-        ],
+        queryKey,
       })
-      queryClient.setQueryData(
-        [
-          'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username },
-          accessToken,
-        ],
-        { ...subjectCollection, rate: variable.rate! } satisfies CollectionData,
-      )
+      const pre = queryClient.getQueryData(queryKey)
+      queryClient.setQueryData(queryKey, {
+        ...subjectCollection,
+        rate: variable.rate!,
+      } satisfies CollectionData)
+      return { pre }
     },
     onSettled() {
       queryClient.invalidateQueries({
-        queryKey: [
-          'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username },
-          accessToken,
-        ],
+        queryKey,
       })
       queryClient.invalidateQueries({
         queryKey: ['collection-subjects'],
