@@ -43,13 +43,13 @@ export function cHoverCardSize(hover: DOMRect, hoverCardSize: HoverCardSize) {
     top += bias
     bottom -= bias
   }
-  if (toLeft < UI_CONFIG.NAV_WIDTH + toViewLeft) {
-    const bias = UI_CONFIG.NAV_WIDTH + toViewLeft - toLeft
+  if (toLeft < UI_CONFIG.NAV_WIDTH + toViewLeft + panelSize.left_width) {
+    const bias = UI_CONFIG.NAV_WIDTH + toViewLeft + panelSize.left_width - toLeft
     left += bias
     right -= bias
   }
-  if (toRight < toViewRight) {
-    const bias = toViewRight - toRight
+  if (toRight < toViewRight + panelSize.right_width) {
+    const bias = toViewRight + panelSize.right_width - toRight
     right += bias
     left -= bias
   }
@@ -88,8 +88,8 @@ export function cHoverCardSizeFixed(hover: DOMRect, hoverCardSize: HoverCardSize
     toBottom -= bias
   }
   if (toLeft < UI_CONFIG.NAV_WIDTH + toViewLeft) {
-    const bias = UI_CONFIG.NAV_WIDTH + toViewLeft - toLeft
-    toLeft = UI_CONFIG.NAV_WIDTH + toViewLeft - toLeft
+    const bias = UI_CONFIG.NAV_WIDTH + toViewLeft + panelSize.left_width - toLeft
+    toLeft = UI_CONFIG.NAV_WIDTH + toViewLeft + panelSize.left_width - toLeft
     toRight -= bias
   }
   if (toRight < toViewRight + panelSize.right_width) {

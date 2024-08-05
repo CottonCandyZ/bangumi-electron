@@ -9,7 +9,7 @@ const smallWidth = 350
 const bias = 36 // (9)
 
 const bigWidth = 660
-const height = 450
+// const height = 450
 
 const animateConfig: KeyframeAnimationOptions = {
   duration: 500,
@@ -21,11 +21,11 @@ export default function BigCarousel(): JSX.Element {
   // index
   const [currentIndex, setCurrentIndex] = useState(items)
   const flexBox = useRef<HTMLDivElement>(null)
-  // const timeId = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  // useEffect(() => {
-  //   clearTimeout(timeId.current)
-  //   timeId.current = setTimeout(() => fromTo(currentIndex, currentIndex + 1), 5000)
-  // }, [currentIndex])
+  const timeId = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => {
+    clearTimeout(timeId.current)
+    timeId.current = setTimeout(() => fromTo(currentIndex, currentIndex + 1), 5000)
+  }, [currentIndex])
 
   useEffect(() => {
     if (!flexBox.current) return

@@ -45,7 +45,6 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
         align: 'start',
         slidesToScroll: 'auto',
         startIndex: (initIndex as number | undefined) ?? 0,
-        active: false
       }}
 
     >

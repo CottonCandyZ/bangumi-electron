@@ -1,13 +1,13 @@
+import BigCarousel from '@renderer/components/carousel/big-carousel'
 import SmallCarousel from '@renderer/components/carousel/small-carousel'
-import { BackCover } from '@renderer/components/hover-card/close'
 
 export function Component() {
   return (
     <div className="flex flex-col gap-2 pb-20 pt-10">
-      {/* <section>
+      <section>
         <BigCarousel />
-      </section> */}
-      {/* <section className="px-9">
+      </section>
+      <section className="px-9">
         <SmallCarousel href="/anime" name="动画" sectionPath="anime" />
       </section>
       <section className="px-9">
@@ -21,10 +21,9 @@ export function Component() {
       </section>
       <section className="px-9">
         <SmallCarousel href="/real" name="三次元" sectionPath="real" />
-      </section> */}
+      </section>
 
       {/*  时间线 */}
-      {/* <BackCover /> */}
     </div>
   )
 }
