@@ -1,7 +1,7 @@
 import { fetchSectionHome, fetchSubjectInfoById } from '@renderer/data/fetch/web/subject'
 import { parseInfoBoxFromSubjectPage, parseTopListFromHTML } from '@renderer/data/transformer/web'
 import { useQuery } from '@tanstack/react-query'
-import type { sectionPath } from '@renderer/data/types/web'
+import type { SectionPath } from '@renderer/data/types/web'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { useSession } from '@renderer/components/wrapper/session-wrapper'
 
@@ -12,7 +12,7 @@ import { useSession } from '@renderer/components/wrapper/session-wrapper'
  * @param sectionPath 分区路径名
  * @returns 关注的 SubjectId 和 关注人数 数组
  */
-export const useTopListQuery = (sectionPath: sectionPath) => {
+export const useTopListQuery = (sectionPath: SectionPath) => {
   return useQuery({
     queryKey: ['SectionHome', sectionPath],
     queryFn: async () => await fetchSectionHome({ sectionPath }),

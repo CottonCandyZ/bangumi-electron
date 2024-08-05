@@ -5,13 +5,12 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PropsWithChildren } from 'react'
 import { TooltipProvider } from '@renderer/components/ui/tooltip'
 import { toast } from 'sonner'
-import InitStateContextWrapper from '@renderer/components/wrapper/state-wrapper'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import SessionWrapper from '@renderer/components/wrapper/session-wrapper'
 import { ClickScrollPlugin, OverlayScrollbars } from 'overlayscrollbars'
 
-OverlayScrollbars.plugin(ClickScrollPlugin);
+OverlayScrollbars.plugin(ClickScrollPlugin)
 
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -41,12 +40,10 @@ export default function Wrapper({ children }: PropsWithChildren) {
       persistOptions={{ persister, maxAge: 60 * 1000 * 60 * 24 }}
     >
       <SessionWrapper>
-        <InitStateContextWrapper>
-          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-            <TooltipProvider>{children}</TooltipProvider>
-            <Toaster richColors className="pointer-events-auto" />
-          </ThemeProvider>
-        </InitStateContextWrapper>
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+          <TooltipProvider>{children}</TooltipProvider>
+          <Toaster richColors className="pointer-events-auto" />
+        </ThemeProvider>
       </SessionWrapper>
       <ReactQueryDevtools initialIsOpen={false} />
     </PersistQueryClientProvider>

@@ -6,7 +6,6 @@ import { CollectionData } from '@renderer/data/types/collection'
 import { Subject } from '@renderer/data/types/subject'
 import { UserInfo } from '@renderer/data/types/user'
 import { cn } from '@renderer/lib/utils'
-import { useEditTags } from '@renderer/state/edit'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -24,7 +23,7 @@ export default function QuickTags({
 }) {
   const [tags, setTags] = useState(new Set<string>())
   const queryClient = useQueryClient()
-  const { edit, setEdit } = useEditTags((state) => state)
+  const [edit, setEdit] = useState(false)
 
   useEffect(() => {
     setEdit(false)

@@ -1,4 +1,5 @@
-import { useScrollPosition } from '@renderer/components/base/page-scroll-wrapper'
+import { mainPanelScrollPositionAtom } from '@renderer/state/scroll'
+import { useAtomValue } from 'jotai'
 
 const scrollRange = 500
 const init = (top: number) => {
@@ -6,7 +7,7 @@ const init = (top: number) => {
 }
 
 export default function SubjectBackground() {
-  const scrollPosition = useScrollPosition((state) => state.scrollPosition)
+  const scrollPosition = useAtomValue(mainPanelScrollPositionAtom)
   const percent = init(scrollPosition)
 
   return (

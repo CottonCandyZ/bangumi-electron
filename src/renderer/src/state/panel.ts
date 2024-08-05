@@ -1,42 +1,49 @@
 import { SubjectType } from '@renderer/data/types/subject'
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { atom } from 'jotai'
 
-export type PanelName = keyof typeof SubjectType
+export type LeftPanelName = 'collection'
 
-type navCollapsed = {
-  collapsed: boolean
-  setCollapsed: (collapsed: boolean) => void
-}
+export type RightPanelName = 'subjectInfo'
 
-export const useNavCollapsed = create<navCollapsed>()((set) => ({
-  collapsed: true,
-  setCollapsed: (collapsed) => set({ collapsed }),
-}))
+export const navOpenAtom = atom(false)
 
-type currentPanel = {
-  panelName: PanelName | null
-  setPanelName: (panelName: PanelName | null) => void
-}
+export const leftPanelOpenAtom = atom(false)
 
-export const usePanelName = create<currentPanel>()(
-  persist(
-    (set) => ({
-      panelName: null,
-      setPanelName: (panelName) => set({ panelName }),
-    }),
-    {
-      name: 'current-panel-name',
-    },
-  ),
+export const rightPanelOpenAtom = atom(false)
+
+export const leftPanelOpenContentAtom = atom<LeftPanelName | null>(null)
+
+export const rightPanelOpenContentAtom = atom<RightPanelName | null>(null)
+
+// left
+
+export const collectionPanelSubjectTypeAtom = atom<keyof typeof SubjectType>('anime')
+
+// action
+export const nvaCollectionButtonAtomAction = atom(
+  (get) => ({
+    openState: get(leftPanelOpenAtom),
+    subjectType: get(collectionPanelSubjectTypeAtom),
+  }),
+  (_get, set, subjectType: keyof typeof SubjectType, open: boolean) => {
+    if (!open) set(leftPanelOpenAtom, false)
+    else {
+      set(leftPanelOpenAtom, true)
+      set(leftPanelOpenContentAtom, 'collection')
+      set(collectionPanelSubjectTypeAtom, subjectType)
+    }
+  },
 )
 
-type rightPanelState = {
-  open: boolean
-  setOpen: (open: boolean) => void
-}
+// right
 
-export const useRightPanelState = create<rightPanelState>()((set) => ({
-  open: true,
-  setOpen: (open) => set({ open }),
-}))
+export const rightPanelButtonAtomAction = atom(
+  (get) => get(rightPanelOpenAtom),
+  (_get, set, name: RightPanelName | null, open: boolean) => {
+    if (!open) set(rightPanelOpenAtom, false)
+    else {
+      set(rightPanelOpenAtom, true)
+      set(rightPanelOpenContentAtom, name)
+    }
+  },
+)

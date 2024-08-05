@@ -30,17 +30,15 @@ import {
 } from '@renderer/components/ui/dialog'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import LoginForm from '@renderer/components/user/login/form'
-import { useNavCollapsed } from '@renderer/state/panel'
 import { cn } from '@renderer/lib/utils'
 import { useSession } from '@renderer/components/wrapper/session-wrapper'
 
-export default function ProfileMenu() {
+export default function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   const logoutMutation = useLogoutMutation()
   const userInfo = useQueryUserInfo()
   const { theme, setTheme } = useTheme()
   const { isLogin } = useSession()
   const [open, setOpen] = useState(false)
-  const navCollapsed = useNavCollapsed((state) => state.collapsed)
   const [dropdownOpen, setDropDownOpen] = useState(false)
 
   return (
@@ -49,7 +47,7 @@ export default function ProfileMenu() {
         <DropdownMenuTrigger
           className={cn(
             'flex w-full flex-row items-center gap-3 rounded-full text-muted-foreground shadow-sm hover:text-primary',
-            !navCollapsed && 'group border p-2 shadow-none hover:bg-accent',
+            type === 'expend' && 'group border p-2 shadow-none hover:bg-accent',
             dropdownOpen && 'bg-accent text-primary',
           )}
         >
@@ -61,12 +59,12 @@ export default function ProfileMenu() {
           ) : (
             <div className="aspect-square w-8 overflow-hidden rounded-full bg-accent"></div>
           )}
-          {!navCollapsed && (
+          {type === 'expend' && (
             <span className="shrink-0 font-semibold">{isLogin && userInfo.data?.nickname}</span>
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent
-          align={navCollapsed ? 'end' : 'center'}
+          align={type === 'expend' ? 'end' : 'center'}
           side={'top'}
           collisionPadding={{
             right: 8,

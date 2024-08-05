@@ -15,6 +15,7 @@ export const UI_CONFIG = {
   HEADER_HEIGHT: 64,
   NAV_WIDTH: 64,
   SUBJECT_INIT_SCROLL: 800,
+  INFO_BOX_INLINE_BLOCK: ['别名', '平台', '制作'],
 }
 
 export const INPUT_LIMIT_CONFIG = {

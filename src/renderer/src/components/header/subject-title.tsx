@@ -1,10 +1,11 @@
 import { Image } from '@renderer/components/base/Image'
-import { useCoverImageInView } from '@renderer/components/subject/cover-image'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { Subject } from '@renderer/data/types/subject'
 import { isEmpty } from '@renderer/lib/utils/string'
+import { subjectCoverImageInViewAtom } from '@renderer/state/in-view'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useAtomValue } from 'jotai'
 import { useLocation } from 'react-router-dom'
 
 export default function HeaderTitle() {
@@ -15,10 +16,9 @@ export default function HeaderTitle() {
 }
 
 function SubjectHeaderTitle({ subjectId }: { subjectId: SubjectId }) {
-  // const { state } = useLocation()
   const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
-  const isInView = useCoverImageInView((state) => state.isInView)
+  const isInView = useAtomValue(subjectCoverImageInViewAtom)
   if (!subjectInfo) return null
   return (
     <AnimatePresence>
@@ -32,7 +32,6 @@ function SubjectHeaderTitle({ subjectId }: { subjectId: SubjectId }) {
           <Image
             className="aspect-square w-10 shrink-0 overflow-hidden rounded-lg"
             imageSrc={subjectInfo.images.small}
-            // style={{ viewTransitionName: state.viewTransitionName }}
           />
           <Header {...subjectInfo} />
         </motion.div>

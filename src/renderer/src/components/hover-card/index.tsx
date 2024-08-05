@@ -1,10 +1,11 @@
-import {
-  useActiveHoverCard,
-  useViewTransitionStatusState,
-} from '@renderer/components/hover-card/state'
 import { cPopSizeByC } from '@renderer/components/hover-card/utils'
 import { cn } from '@renderer/lib/utils'
+import {
+  activeHoverPopCardAtom,
+  hoverPopCardViewTransitionStatusAtom,
+} from '@renderer/state/hover-pop-card'
 import { HTMLMotionProps, motion } from 'framer-motion'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import {
   createContext,
   FC,
@@ -36,7 +37,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
   delay = 700,
 }) => {
   const hoverRef = useRef<HTMLDivElement>(null)
-  const activeId = useActiveHoverCard((state) => state.activeId)
+  const activeId = useAtomValue(activeHoverPopCardAtom)
 
   return (
     <HoverPopCardContext.Provider
@@ -62,9 +63,12 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLAttributes<HTMLDivElemen
   const hoverCardContext = useContext(HoverPopCardContext)
   if (!hoverCardContext) throw Error('HoverCardContent need to be wrapped in HoverPopCard')
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
-  const { status: viewTransitionStatus, setStatus: setViewTransitionStatus } =
-    useViewTransitionStatusState((state) => state)
+  const setActiveId = useSetAtom(activeHoverPopCardAtom) // 全局 activeId 唯一
+  const activeId = useAtomValue(activeHoverPopCardAtom)
+  // const viewTransitionStatus = useViewTransitionStatusState((state) => state.status)
+  const [viewTransitionStatus, setViewTransitionStatus] = useAtom(
+    hoverPopCardViewTransitionStatusAtom,
+  )
 
   useEffect(() => {
     return () => {
@@ -76,19 +80,19 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLAttributes<HTMLDivElemen
   return (
     <div
       ref={hoverCardContext.hoverRef}
-      className={cn(
-        hoverCardContext.layoutId === hoverCardContext.activeId && 'invisible',
-        className,
-      )}
+      className={cn(hoverCardContext.layoutId === activeId && 'invisible', className)}
       style={{
         viewTransitionName: viewTransitionStatus === hoverCardContext.layoutId ? 'pop-card' : '',
       }}
       onMouseEnter={() => {
+        setActiveId(null)
         timeoutRef.current = setTimeout(() => {
           flushSync(() => setViewTransitionStatus(hoverCardContext.layoutId))
           document.startViewTransition(() => {
-            flushSync(() => setViewTransitionStatus(null))
-            setActiveId(hoverCardContext.layoutId)
+            flushSync(() => {
+              setViewTransitionStatus(null)
+              setActiveId(hoverCardContext.layoutId)
+            })
           })
         }, hoverCardContext.delay)
       }}
@@ -171,7 +175,7 @@ export const HoverCardItem: FC<
 > = ({ children, layoutId, className, ...props }) => {
   const hoverCardContext = useContext(HoverPopCardContext)
   if (!hoverCardContext) throw Error('HoverCardContent need to be wrapped in HoverPopCard')
-  const viewTransitionStatus = useViewTransitionStatusState((state) => state.status)
+  const viewTransitionStatus = useAtomValue(hoverPopCardViewTransitionStatusAtom)
 
   return (
     <div

@@ -2,8 +2,9 @@ import { Image } from '@renderer/components/base/Image'
 import SubjectBackground from '@renderer/components/subject/background'
 import SubjectContent from '@renderer/components/subject/content'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
+import { useResizeOb } from '@renderer/hooks/resize'
 import { isEmpty } from '@renderer/lib/utils/string'
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { useParams } from 'react-router-dom'
 
 export function Component() {
@@ -12,20 +13,16 @@ export function Component() {
   const subjectInfo = subjectInfoQuery.data
   const backImageRef = useRef<HTMLDivElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
-  useEffect(() => {
-    const resizeObserver = new ResizeObserver((entries) => {
+  useResizeOb({
+    ref: containerRef,
+    callback: (entries) => {
       if (backImageRef.current) {
         backImageRef.current.style.width = entries[0].target.getBoundingClientRect().width + 'px'
       }
-    })
-    if (containerRef.current) resizeObserver.observe(containerRef.current)
-    return () => {
-      if (containerRef.current) resizeObserver.unobserve(containerRef.current)
-    }
-  }, [backImageRef, containerRef, subjectId])
-
+    },
+    deps: [backImageRef, subjectId],
+  })
   if (!subjectId) throw Error('Get Params Error')
-
   return (
     <div ref={containerRef}>
       {subjectInfo?.images.large && !isEmpty(subjectInfo.images.large) && (

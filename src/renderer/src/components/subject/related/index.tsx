@@ -4,7 +4,8 @@ import RelatedGridSkeleton from '@renderer/components/subject/related/skelen'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQueryRelatedSubjects } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { useTabFilterHook } from '@renderer/hooks/path-state'
+import { tabFilerAtom } from '@renderer/state/simple-tab'
+import { useAtom } from 'jotai'
 
 export default function RelatedSubjects({ subjectId }: { subjectId: SubjectId }) {
   const relatedSubjectsQuery = useQueryRelatedSubjects({
@@ -13,7 +14,8 @@ export default function RelatedSubjects({ subjectId }: { subjectId: SubjectId })
   })
   const relatedSubjects = relatedSubjectsQuery.data
   const id = `subject-related-tab-${subjectId}`
-  const { filter, setFilter } = useTabFilterHook({ id, placeHolder: '全部' })
+  const [filterMap, setFilter] = useAtom(tabFilerAtom)
+  const filter = filterMap.get(id) ?? '全部'
   const relations = new Set<string>(['全部', ...(relatedSubjects?.keys() || [])])
 
   if (relatedSubjects?.size === 0) return null

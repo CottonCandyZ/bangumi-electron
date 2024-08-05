@@ -1,7 +1,5 @@
 import { CoverMotionImage } from '@renderer/components/base/cover-motion-image'
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
-import { useActiveSection } from '@renderer/components/carousel/state'
-import { useActiveHoverCard } from '@renderer/components/hover-card/state'
 import { cHoverCardSize } from '@renderer/components/hover-card/utils'
 import { MotionSkeleton } from '@renderer/components/ui/motion-skeleton'
 import { Button } from '@renderer/components/ui/button'
@@ -17,16 +15,19 @@ import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { useTopListQuery } from '@renderer/data/hooks/web/subject'
-import { sectionPath } from '@renderer/data/types/web'
+import { SectionPath } from '@renderer/data/types/web'
 import { cn } from '@renderer/lib/utils'
 import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
 import { memo, useEffect, useRef } from 'react'
 import { unstable_useViewTransitionState, useLocation } from 'react-router-dom'
 import { MyLink } from '@renderer/components/base/my-link'
+import { useAtom, useSetAtom } from 'jotai'
+import { activeSectionAtom } from '@renderer/state/small-carousel'
+import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
 
 export interface SubjectCardProps {
-  sectionPath: sectionPath
+  sectionPath: SectionPath
   index: number
 }
 const sectionId = 'Home-Small-Carousel'
@@ -45,9 +46,8 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   // 一些状态
-  const setActiveId = useActiveHoverCard((state) => state.setActiveId) // 全局 activeId 唯一
-  const activeId = useActiveHoverCard((state) => state.activeId)
-  const setActionSection = useActiveSection((state) => state.setActiveSection) // 用来防止轮播图相互覆盖
+  const [activeId, setActiveId] = useAtom(activeHoverPopCardAtom) // 全局 activeId 唯一
+  const setActionSection = useSetAtom(activeSectionAtom) // 用来防止轮播图相互覆盖
   const id = `${sectionPath}-${index}`
   const layoutId = `${sectionId}-${id}`
 

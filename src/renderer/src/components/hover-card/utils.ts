@@ -1,5 +1,5 @@
-import { panelSize } from '@renderer/components/wrapper/state-wrapper'
 import { UI_CONFIG } from '@renderer/config'
+import { panelSize } from '@renderer/state/global-var'
 
 type toView = {
   toViewTop: number

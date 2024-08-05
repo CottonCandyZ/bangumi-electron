@@ -1,17 +1,15 @@
 import { route } from '@renderer/components/nav/panel/nav'
 import { Button } from '@renderer/components/ui/button'
 import { cn } from '@renderer/lib/utils'
-import { PanelName, useNavCollapsed, usePanelName } from '@renderer/state/panel'
+import { navOpenAtom, nvaCollectionButtonAtomAction } from '@renderer/state/panel'
+import { useAtom } from 'jotai'
 
 type Props = (typeof route)[number]
 
 export default function PanelButton({ name, panelName, icon, active }: Props) {
-  const { panelName: currentPanelName, setPanelName } = usePanelName((state) => state)
-  const isActive = currentPanelName === panelName
-  const typedPanelName = panelName as PanelName
-  const { collapsed: navCollapsed, setCollapsed: setNavCollapsed } = useNavCollapsed(
-    (state) => state,
-  )
+  const [panelState, setPanelState] = useAtom(nvaCollectionButtonAtomAction)
+  const isActive = panelState.openState && panelState.subjectType === panelName
+  const [navOpen, setNavOpen] = useAtom(navOpenAtom)
 
   return (
     <Button
@@ -19,16 +17,16 @@ export default function PanelButton({ name, panelName, icon, active }: Props) {
       className={cn(
         'relative aspect-square h-full w-fit p-2 text-primary/65 hover:text-primary active:scale-95',
         isActive && 'bg-accent text-primary',
-        !navCollapsed && 'aspect-auto w-full justify-start gap-2',
+        navOpen && 'aspect-auto w-full justify-start gap-2',
       )}
       onClick={() => {
-        if (!navCollapsed) setNavCollapsed(true)
-        setPanelName(!isActive ? typedPanelName : null)
+        if (navOpen) setNavOpen(false)
+        setPanelState(panelName, !isActive)
       }}
     >
       <>
         <div className="flex">{isActive ? active : icon}</div>
-        {!navCollapsed && <span>{name}</span>}
+        {navOpen && <span>{name}</span>}
       </>
     </Button>
   )

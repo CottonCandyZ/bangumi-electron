@@ -1,6 +1,6 @@
 import { HTML_SUBJECTS, webFetch } from '@renderer/data/fetch/config'
 import { SubjectId } from '@renderer/data/types/bgm'
-import type { sectionPath } from '@renderer/data/types/web'
+import type { SectionPath } from '@renderer/data/types/web'
 import { AuthError } from '@renderer/lib/utils/error'
 
 /**
@@ -8,7 +8,7 @@ import { AuthError } from '@renderer/lib/utils/error'
  * @param sectionPath 各分区路径
  * @returns HTML
  */
-export async function fetchSectionHome({ sectionPath }: { sectionPath: sectionPath }) {
+export async function fetchSectionHome({ sectionPath }: { sectionPath: SectionPath }) {
   return await webFetch<string>(`/${sectionPath}`, {
     parseResponse: (text) => text,
   })

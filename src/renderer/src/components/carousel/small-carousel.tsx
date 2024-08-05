@@ -1,5 +1,4 @@
 import { MyLink } from '@renderer/components/base/my-link'
-import { useActiveSection } from '@renderer/components/carousel/state'
 import SubjectCard from '@renderer/components/carousel/subject-card-content'
 import { Button } from '@renderer/components/ui/button'
 import {
@@ -11,20 +10,22 @@ import {
   CarouselPrevious,
 } from '@renderer/components/ui/carousel'
 import { UI_CONFIG } from '@renderer/config'
-import { sectionPath } from '@renderer/data/types/web'
+import { SectionPath } from '@renderer/data/types/web'
 import useStateHook from '@renderer/hooks/cache-state'
 import { cn } from '@renderer/lib/utils'
+import { activeSectionAtom } from '@renderer/state/small-carousel'
+import { useAtomValue } from 'jotai'
 import { ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 interface SmallCarouselProps {
   href: string
   name: string
-  sectionPath: sectionPath
+  sectionPath: SectionPath
 }
 
 export default function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
-  const currentSectionPath = useActiveSection((state) => state.sectionPath)
+  const currentSectionPath = useAtomValue(activeSectionAtom)
   const [api, setApi] = useState<CarouselApi>()
   const { init: initIndex, setter: setIndex } = useStateHook({
     key: `Home-Small-Carousel-${sectionPath}`,
@@ -46,7 +47,6 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
         slidesToScroll: 'auto',
         startIndex: (initIndex as number | undefined) ?? 0,
       }}
-
     >
       <div className="flex justify-between">
         <Button
@@ -71,12 +71,12 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
           <CarouselNext className="relative right-0 top-0 translate-y-0" />
         </div>
       </div>
-      <div className={cn('@container relative', currentSectionPath === sectionPath ? 'z-30' : '')}>
+      <div className={cn('relative @container', currentSectionPath === sectionPath ? 'z-30' : '')}>
         <CarouselContentNoFlow className="-ml-3">
           {Array.from({ length: UI_CONFIG.HOME_SECTION_CAROUSEL_NUMBER }).map((_, index) => (
             <CarouselItem
               key={index}
-              className="@[1024px]:basis-1/6 @[1280px]:basis-[14.285714%] @[1536px]:basis-[11.111111%] basis-1/5 pl-3"
+              className="basis-1/5 pl-3 @[1024px]:basis-1/6 @[1280px]:basis-[14.285714%] @[1536px]:basis-[11.111111%]"
             >
               <div className="p-0.5">
                 <SubjectCard index={index} sectionPath={sectionPath} />

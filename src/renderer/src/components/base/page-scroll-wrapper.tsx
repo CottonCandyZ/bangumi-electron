@@ -1,21 +1,12 @@
-import { SateContext } from '@renderer/components/wrapper/state-wrapper'
 import { UI_CONFIG } from '@renderer/config'
+import { scrollCache } from '@renderer/state/global-var'
+import { mainPanelScrollPositionAtom } from '@renderer/state/scroll'
+import { useSetAtom } from 'jotai'
 import { OverlayScrollbars } from 'overlayscrollbars'
 
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
-import { PropsWithChildren, useContext, useEffect, useState } from 'react'
+import { PropsWithChildren, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
-import { create } from 'zustand'
-
-type ScrollPosition = {
-  scrollPosition: number
-  setScrollPosition: (ScrollPosition: number) => void
-}
-
-export const useScrollPosition = create<ScrollPosition>()((set) => ({
-  scrollPosition: 0,
-  setScrollPosition: (scrollPosition) => set({ scrollPosition }),
-}))
 
 export default function PageScrollWrapper({
   initScrollTo = 0,
@@ -25,15 +16,9 @@ export default function PageScrollWrapper({
   initScrollTo?: number
   className?: string
 }>) {
-  const stateContext = useContext(SateContext)
   const { pathname } = useLocation()
   const [instance, setInstance] = useState<OverlayScrollbars | null>(null)
-  const setScrollPosition = useScrollPosition((state) => state.setScrollPosition)
-
-  if (!stateContext) {
-    throw new Error('PageScrollWrapper need in StateWrapper')
-  }
-  const { scrollCache } = stateContext
+  const setScrollPosition = useSetAtom(mainPanelScrollPositionAtom)
 
   //TODO: 需要优化
   useEffect(() => {

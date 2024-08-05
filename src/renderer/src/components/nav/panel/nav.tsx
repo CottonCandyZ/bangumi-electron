@@ -31,7 +31,7 @@ export const route = [
     icon: <span className="i-mingcute-tv-1-line text-[1.4rem]" />,
     active: <span className="i-mingcute-tv-1-fill text-[1.4rem]" />,
   },
-]
+] as const
 
 export function PanelNav() {
   return (

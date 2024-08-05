@@ -8,12 +8,13 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionType } from '@renderer/data/types/collection'
-import { useCollectionIsInView } from '@renderer/state/inView'
 import { useInView } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import MoreActionDropDown from '@renderer/components/subject/collection/more-action-drop-down'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { useSession } from '@renderer/components/wrapper/session-wrapper'
+import { useSetAtom } from 'jotai'
+import { collectionBoxInViewAtom } from '@renderer/state/in-view'
 
 export default function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const { isLogin, userInfo, accessToken } = useSession()
@@ -29,7 +30,7 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
 
   const ref = useRef<null | HTMLDivElement>(null)
   const isInView = useInView(ref)
-  const setIsInView = useCollectionIsInView((state) => state.setInView)
+  const setIsInView = useSetAtom(collectionBoxInViewAtom)
   useEffect(() => {
     setIsInView(isInView)
   }, [isInView])

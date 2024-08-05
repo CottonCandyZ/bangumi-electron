@@ -19,7 +19,7 @@ export const route = [
     icon: <span className="i-mingcute-chat-3-line text-[1.4rem]" />,
     active: <span className="i-mingcute-chat-3-fill text-[1.4rem]" />,
   },
-]
+] as const
 
 export function LinkNav() {
   return (

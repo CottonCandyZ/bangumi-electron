@@ -6,13 +6,15 @@ import { useSession } from '@renderer/components/wrapper/session-wrapper'
 import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
-import { useCollectionTypeFilter } from '@renderer/state/collection'
+import { sidePanelCollectionTypeFilterAtom } from '@renderer/state/collection'
+import { collectionPanelSubjectTypeAtom } from '@renderer/state/panel'
+import { useAtom, useAtomValue } from 'jotai'
 
-export default function CollectionPanel({ subjectType }: { subjectType: SubjectType }) {
+export default function CollectionPanel() {
+  const subjectType = SubjectType[useAtomValue(collectionPanelSubjectTypeAtom)]
   const { isLogin } = useSession()
-  const { currentTypeFilter, setCurrentTypeFilter } = useCollectionTypeFilter((state) => state)
-  const currentSelect = currentTypeFilter.get(subjectType.toString()) ?? CollectionType['watching']
-
+  const [filterMap, setCurrentTypeFilter] = useAtom(sidePanelCollectionTypeFilterAtom)
+  const currentSelect = filterMap.get(subjectType.toString()) ?? CollectionType['watching']
   return (
     <>
       <div className="drag-region flex h-16 items-center justify-end border-b px-5">

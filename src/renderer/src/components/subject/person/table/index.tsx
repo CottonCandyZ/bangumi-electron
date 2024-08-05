@@ -1,6 +1,7 @@
 import { Detail } from '@renderer/components/subject/person/table/detail'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import { Table, TableBody, TableCell, TableRow } from '@renderer/components/ui/table'
+import { UI_CONFIG } from '@renderer/config'
 import { InfoBoxWeb } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 
@@ -14,10 +15,10 @@ export default function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
             <TableCell className="break-all">
               {value.map((item, index) => {
                 if (typeof item === 'string') {
-                  if (key.slice(0, -2) === '别名' || key.slice(0, -2) === '平台')
+                  if (UI_CONFIG.INFO_BOX_INLINE_BLOCK.includes(key.slice(0, -2)))
                     return (
                       <span
-                        className={cn('block', index !== value.length - 1 && 'pb-2')}
+                        className={cn('inline-block', index !== value.length - 1 && 'pb-2')}
                         key={index}
                       >
                         {item}
@@ -28,7 +29,7 @@ export default function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
 
                 return (
                   <HoverCard key={index} openDelay={300} closeDelay={200}>
-                    <HoverCardTrigger className="cursor-default underline decoration-primary/40 underline-offset-2 hover:decoration-primary">
+                    <HoverCardTrigger className="inline-block cursor-pointer underline decoration-primary/40 underline-offset-2 hover:decoration-primary">
                       {item.name}
                     </HoverCardTrigger>
                     <HoverCardContent side="top" className="w-full min-w-64 max-w-72">
