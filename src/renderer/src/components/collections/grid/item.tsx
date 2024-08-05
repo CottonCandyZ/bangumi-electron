@@ -31,7 +31,7 @@ export default function CollectionItem({
     >
       <Card
         className={cn(
-          'h-full rounded-md border-none shadow-none group-hover:bg-accent group-hover:duration-500',
+          'h-full rounded border-none shadow-none group-hover:bg-accent group-hover:duration-500',
           mainSubjectId === collectionItemInfo.subject_id.toString() && 'bg-accent',
         )}
       >
