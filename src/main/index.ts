@@ -4,7 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpcMain } from '@egoist/tipc/main'
 import { router } from './tipc'
 import { getRendererHandlers } from "@egoist/tipc/main"
-import { RendererHandlers } from 'src/main/tipc/renderer-handlers'
+import { RendererHandlers } from './tipc/renderer-handlers'
 
 registerIpcMain(router)
 

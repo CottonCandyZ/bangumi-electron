@@ -1,4 +1,11 @@
-import { BloodType, Images, InfoBoxValueList, PersonCareer, Stat } from '@renderer/data/types/bgm'
+import {
+  BloodType,
+  Images,
+  InfoBoxValueList,
+  PersonCareer,
+  PersonId,
+  Stat,
+} from '@renderer/data/types/bgm'
 
 export type PersonGrid = {
   images: Images | null
