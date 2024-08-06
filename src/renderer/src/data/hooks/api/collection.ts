@@ -23,12 +23,12 @@ export const useInfinityQueryCollectionsByUsername = ({
   subjectType,
   collectionType,
   limit = 3,
-  initialPageParm = 0,
+  initialPageParam = 0,
   enabled,
   needKeepPreviousData,
 }: OmitInfinityQFP<Parameters<typeof getSubjectCollectionsByUsername>[0]> & {
   username: UserInfo['username'] | undefined
-  initialPageParm?: number
+  initialPageParam?: number
   enabled?: boolean
   needKeepPreviousData?: boolean
 }) =>
@@ -42,7 +42,7 @@ export const useInfinityQueryCollectionsByUsername = ({
       if (next >= lastPage.total) return null
       else return next
     },
-    initialPageParam: initialPageParm,
+    initialPageParam: initialPageParam,
     enabled,
     needKeepPreviousData,
   })

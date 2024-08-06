@@ -90,6 +90,12 @@ export const HTML_COLLECTION = {
   DELETE_SUBJECT_BY_ID: (subjectId: SubjectId) => `/subject/${subjectId}/remove`,
 }
 
+/** 搜索 */
+
+export const SEARCH = {
+  V0: '/v0/search/subjects',
+}
+
 /** ofetch web config */
 export const webFetch = ofetch.create({ baseURL: HOST })
 
