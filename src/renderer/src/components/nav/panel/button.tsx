@@ -3,6 +3,7 @@ import { Button } from '@renderer/components/ui/button'
 import { cn } from '@renderer/lib/utils'
 import { navOpenAtom, nvaCollectionButtonAtomAction } from '@renderer/state/panel'
 import { useAtom } from 'jotai'
+import { startTransition } from 'react'
 
 type Props = (typeof route)[number]
 
@@ -20,8 +21,10 @@ export default function PanelButton({ name, panelName, icon, active }: Props) {
         navOpen && 'aspect-auto w-full justify-start gap-2',
       )}
       onClick={() => {
-        if (navOpen) setNavOpen(false)
-        setPanelState(panelName, !isActive)
+        startTransition(() => {
+          if (navOpen) setNavOpen(false)
+          setPanelState(panelName, !isActive)
+        })
       }}
     >
       <>
