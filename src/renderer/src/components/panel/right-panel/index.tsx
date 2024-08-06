@@ -20,7 +20,7 @@ export default function RightResizablePanel() {
     open && (
       <>
         <ResizableHandle className="w-0 border-r" />
-        <ResizablePanel defaultSize={25} minSize={20} maxSize={40} order={2} id="right">
+        <ResizablePanel defaultSize={25} minSize={15} maxSize={40} order={2} id="right">
           <div ref={ref} className="flex">
             <RightPanel />
           </div>
