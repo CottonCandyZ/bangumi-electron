@@ -1,4 +1,5 @@
 import { Button } from '@renderer/components/ui/button'
+import { cn } from '@renderer/lib/utils'
 import { rightPanelButtonAtomAction } from '@renderer/state/panel'
 import { useAtom } from 'jotai'
 import { useLocation } from 'react-router-dom'
@@ -7,10 +8,16 @@ export default function RightPanelButton() {
   const [openState, panelAction] = useAtom(rightPanelButtonAtomAction)
   const { pathname } = useLocation()
   const showSubjectId = pathname.includes('subject')
+  if (!showSubjectId) panelAction(null, false)
+
   return (
     <Button
       variant="ghost"
-      className="no-drag-region mr-3 p-2 text-[1.4rem]"
+      className={cn(
+        'no-drag-region mr-3 p-2 text-[1.4rem] text-muted-foreground',
+        openState && 'text-primary',
+      )}
+      disabled={!showSubjectId}
       onClick={() => panelAction(showSubjectId ? 'subjectInfo' : null, !openState)}
     >
       {openState ? (

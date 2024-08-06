@@ -11,11 +11,11 @@ export default function Header() {
         'drag-region flex h-16 flex-row items-center justify-between gap-10 overflow-hidden border-b pl-2 backdrop-blur-2xl',
       )}
     >
-      <div className="flex flex-row justify-start gap-3">
+      <div className="flex flex-row gap-3">
         <NavButton />
         <HeaderTitle />
       </div>
-      <div className="flex h-full flex-row items-center justify-end gap-2">
+      <div className="flex h-full flex-row items-center gap-2">
         <RightPanelButton />
         <WindowsButton />
       </div>
