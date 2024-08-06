@@ -9,13 +9,23 @@ export const Image = forwardRef<
     imageClassName?: string
     loading?: 'eager' | 'lazy'
     loadingClassName?: string
+    isLoadInit?: boolean
   }
 >(
   (
-    { className, imageSrc, imageClassName, loadingClassName, loading = 'lazy', children, ...props },
+    {
+      className,
+      imageSrc,
+      imageClassName,
+      loadingClassName,
+      loading = 'lazy',
+      isLoadInit = false,
+      children,
+      ...props
+    },
     ref,
   ) => {
-    const [isLoad, setIsLoad] = useState(false)
+    const [isLoad, setIsLoad] = useState(isLoadInit)
     return (
       <div
         className={cn('relative z-0', (!imageSrc || !isLoad) && loadingClassName, className)}
