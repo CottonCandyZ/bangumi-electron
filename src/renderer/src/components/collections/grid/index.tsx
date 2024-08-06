@@ -5,6 +5,8 @@ import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
 import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
+import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
+import { useSetAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 
@@ -26,6 +28,7 @@ export default function CollectionsGrid({
   })
   const collections = collectionsQuery.data
   const bottomRef = useRef<HTMLDivElement | null>(null)
+  const setIsRefetching = useSetAtom(collectionPanelIsRefetchingAtom)
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -59,6 +62,7 @@ export default function CollectionsGrid({
         </div>
       </div>
     )
+  setIsRefetching(collectionsQuery.isRefetching)
   return (
     <div className={cn('relative flex flex-col items-center justify-center gap-5')}>
       <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(15rem,_1fr))] gap-1">

@@ -24,15 +24,19 @@ export default function EpisodeCollectionButton({
   episodes,
   modifyEpisodeCollectionOpt,
   collectionType,
+  setEnabledForm,
 }: {
   index: number
   episodes: CollectionEpisode[]
   collectionType: CollectionType | undefined
+  setEnabledForm: (enabled: boolean) => void
 } & ModifyEpisodeCollectionOptType) {
   const { userInfo, accessToken } = useSession()
+  const username = userInfo?.username
+  const subjectId = episodes[index].episode.subject_id.toString()
   const subjectCollectionQuery = useQuerySubjectCollection({
-    subjectId: episodes[index].episode.subject_id.toString(),
-    username: userInfo?.username,
+    subjectId,
+    username,
     enabled: !!userInfo && !!collectionType,
     needKeepPreviousData: false,
   })
@@ -46,7 +50,7 @@ export default function EpisodeCollectionButton({
   const queryKey = [
     'collection-episodes',
     {
-      subjectId: episodes[index].episode.subject_id.toString(),
+      subjectId,
       limit: modifyEpisodeCollectionOpt.limit,
       offset: modifyEpisodeCollectionOpt.offset,
       episodeType: undefined,
@@ -58,6 +62,7 @@ export default function EpisodeCollectionButton({
     mutationKey: ['subject-collection'],
     onSuccess() {
       toast.success('修改成功')
+      setEnabledForm(true)
     },
     onError(_error, _variable, context) {
       toast.error('呀，出了点错误...')
@@ -65,6 +70,7 @@ export default function EpisodeCollectionButton({
       queryClient.setQueryData(queryKey, pre)
     },
     onMutate(variable) {
+      setEnabledForm(false)
       queryClient.cancelQueries({
         queryKey,
       })
@@ -85,6 +91,9 @@ export default function EpisodeCollectionButton({
     onSettled() {
       queryClient.invalidateQueries({
         queryKey,
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['collection-subject', { subjectId, username }, accessToken],
       })
     },
   })
@@ -123,7 +132,7 @@ export default function EpisodeCollectionButton({
                   const action = EPISODE_COLLECTION_ACTION_MAP[item]
                   episodeCollectionMutation.mutate({
                     episodeCollectionType: action,
-                    subjectId: episodes[index].episode.subject_id.toString(),
+                    subjectId,
                     episodesId: [episodes[index].episode.id],
                   })
                 } else {
@@ -132,7 +141,7 @@ export default function EpisodeCollectionButton({
                   )
                   episodeCollectionMutation.mutate({
                     episodeCollectionType: EpisodeCollectionType.watched,
-                    subjectId: episodes[index].episode.subject_id.toString(),
+                    subjectId,
                     episodesId: episodes.slice(start, index + 1).map((item) => item.episode.id),
                   })
                 }
@@ -151,7 +160,7 @@ export default function EpisodeCollectionButton({
           onClick={(e) => {
             episodeCollectionMutation.mutate({
               episodeCollectionType: EpisodeCollectionType.notCollected,
-              subjectId: episodes[index].episode.subject_id.toString(),
+              subjectId,
               episodesId: [episodes[index].episode.id],
             })
             e.preventDefault()

@@ -30,10 +30,12 @@ export default function EpisodeGridItem({
   episodes,
   modifyEpisodeCollectionOpt,
   collectionType,
+  setEnabledForm,
 }: {
   index: number
   episodes: Episode[] | CollectionEpisode[]
   collectionType: CollectionType | undefined
+  setEnabledForm: (enabled: boolean) => void
 } & EpisodeGridSize &
   ModifyEpisodeCollectionOptType) {
   const episode = isCollectionEpisode(episodes) ? episodes[index].episode : episodes[index]
@@ -72,6 +74,7 @@ export default function EpisodeGridItem({
               index={index}
               modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
               collectionType={collectionType}
+              setEnabledForm={setEnabledForm}
             />
           )}
           <div className="flex flex-row flex-wrap gap-x-2">

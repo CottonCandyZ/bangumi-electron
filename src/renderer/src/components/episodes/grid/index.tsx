@@ -54,6 +54,7 @@ export default function EpisodesGrid({
     <div className={cn('flex flex-col gap-4')}>
       {selector && <PageSelector episodes={episode} limit={limit} setOffSet={setOffSet} />}
       <EpisodeGridContent
+        subjectId={subjectId}
         episodes={episode.data.data}
         size={size}
         modifyEpisodeCollectionOpt={{ limit, offset }}

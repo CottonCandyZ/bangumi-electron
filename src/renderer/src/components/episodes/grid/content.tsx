@@ -1,27 +1,94 @@
 import { EpisodeGridSize } from '@renderer/components/episodes/grid'
 import EpisodeGridItem from '@renderer/components/episodes/grid/item'
+import { useSession } from '@renderer/components/wrapper/session-wrapper'
+import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
+import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
+import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionEpisode, CollectionType } from '@renderer/data/types/collection'
 import { Episode, EpisodeType } from '@renderer/data/types/episode'
 import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
+import { subjectCollectionSheetFormActionAtom } from '@renderer/state/sheet'
+import { useSetAtom } from 'jotai'
+import { useEffect, useState } from 'react'
 import { Fragment } from 'react/jsx-runtime'
+import { toast } from 'sonner'
 
-function isCollectionEpisode(episodes: Episode | CollectionEpisode): episodes is CollectionEpisode {
-  return (episodes as CollectionEpisode).episode !== undefined
+function isCollectionEpisode(episode: Episode | CollectionEpisode): episode is CollectionEpisode {
+  return (episode as CollectionEpisode).episode !== undefined
 }
-
 export function EpisodeGridContent({
   episodes,
   size = 'default',
   modifyEpisodeCollectionOpt,
   collectionType,
+  subjectId,
 }: {
+  subjectId: SubjectId
   episodes: Episode[] | CollectionEpisode[]
   collectionType: CollectionType | undefined
 } & EpisodeGridSize &
   ModifyEpisodeCollectionOptType) {
   let firstTime = Array(7).fill(true) // 用来显示不同种类的数组, type 字段
   firstTime[0] = false // 本篇就不显示了
+  const { userInfo } = useSession()
+  const username = userInfo?.username
+  const [enabled, setEnabled] = useState(false)
+  const subjectCollectionQuery = useQuerySubjectCollection({
+    subjectId,
+    username,
+    enabled: !!userInfo && enabled,
+    needKeepPreviousData: false,
+  })
+  const subjectCollection = subjectCollectionQuery.data
+  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false, enabled })
+  const subjectInfo = subjectInfoQuery.data
+  const sheetAction = useSetAtom(subjectCollectionSheetFormActionAtom)
+  /** 在严格模式下会跑两次，所以让我们用 Effect 包裹它吧 */
+  useEffect(() => {
+    if (subjectCollection && subjectInfo && enabled) {
+      if (
+        subjectCollection.ep_status === subjectInfo.eps &&
+        subjectCollectionQuery.fetchStatus === 'idle' &&
+        subjectInfoQuery.fetchStatus === 'idle'
+      ) {
+        toast('观察到你已经看完了', {
+          action: {
+            label: '标记',
+            onClick: () => {
+              sheetAction({
+                sheetTitle: '修改收藏',
+                collectionType: CollectionType.watched,
+                subjectId: subjectCollection.subject_id.toString(),
+                subjectTags: subjectInfo.tags,
+                subjectType: subjectCollection.subject_type,
+                comment: subjectCollection.comment ?? '',
+                isPrivate: subjectCollection.private,
+                rate: subjectCollection.rate,
+                tags: subjectCollection.tags,
+                modify: true,
+              })
+            },
+          },
+        })
+        setEnabled(false)
+      } else {
+        if (
+          subjectCollectionQuery.fetchStatus === 'idle' &&
+          subjectInfoQuery.fetchStatus === 'idle'
+        ) {
+          setEnabled(false)
+        }
+      }
+    }
+  }, [
+    subjectCollection,
+    subjectInfo,
+    enabled,
+    subjectCollectionQuery.fetchStatus,
+    subjectInfoQuery.fetchStatus,
+  ])
+
   return (
     <div className={cn('flex flex-row flex-wrap items-center gap-1', size === 'small' && 'gap-1')}>
       {episodes.map((episode: Episode | CollectionEpisode, index: number) => {
@@ -60,6 +127,7 @@ export function EpisodeGridContent({
                 episodes={episodes}
                 modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
                 collectionType={collectionType}
+                setEnabledForm={setEnabled}
               />
             </Fragment>
           )
@@ -72,6 +140,7 @@ export function EpisodeGridContent({
             episodes={episodes}
             modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
             collectionType={collectionType}
+            setEnabledForm={setEnabled}
           />
         )
       })}
