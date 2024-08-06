@@ -12,8 +12,10 @@ export default function LeftResizablePanel() {
   useResizeOb({
     ref,
     callback: (entries) => {
+      console.log(entries[0].target.getBoundingClientRect().width)
       panelSize.left_width = entries[0].target.getBoundingClientRect().width
     },
+    deps: [open],
   })
   return (
     open && (

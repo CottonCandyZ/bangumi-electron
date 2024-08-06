@@ -14,6 +14,7 @@ export default function RightResizablePanel() {
     callback: (entries) => {
       panelSize.right_width = entries[0].target.getBoundingClientRect().width
     },
+    deps: [open],
   })
   return (
     open && (
