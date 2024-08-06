@@ -24,7 +24,7 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
     needKeepPreviousData: false,
   })
   const subjectCollection = subjectCollectionQuery.data
-  const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId, needKeepPreviousData: false })
+  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
 
   const ref = useRef<null | HTMLDivElement>(null)

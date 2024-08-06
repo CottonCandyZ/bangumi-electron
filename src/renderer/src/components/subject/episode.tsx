@@ -3,7 +3,7 @@ import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 
 export default function SubjectEpisodes({ subjectId }: { subjectId: SubjectId }) {
-  const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId, needKeepPreviousData: false })
+  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   if (!subjectInfo) {
     return null

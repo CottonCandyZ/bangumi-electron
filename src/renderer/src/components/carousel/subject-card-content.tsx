@@ -37,7 +37,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
   const topList = useTopListQuery(sectionPath)
   const subjectId = topList?.data?.[index].SubjectId
   // const follow = topList?.data?.[index].follow?.replace(/[^0-9]/g, '')
-  const subjectInfo = useQuerySubjectInfo({ id: subjectId, enabled: !!subjectId })
+  const subjectInfo = useQuerySubjectInfo({ subjectId, enabled: !!subjectId })
   const subjectInfoData = subjectInfo.data
 
   // 计算 hover card 大小

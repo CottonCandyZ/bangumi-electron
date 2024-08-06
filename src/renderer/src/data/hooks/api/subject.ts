@@ -7,11 +7,11 @@ import { SubjectId } from '@renderer/data/types/bgm'
  * 使用 id 获得 Subject 的基础信息，走 v0 接口
  */
 export const useQuerySubjectInfo = ({
-  id,
+  subjectId: id,
   enabled,
   needKeepPreviousData,
 }: {
-  id: SubjectId | undefined
+  subjectId: SubjectId | undefined
   enabled?: boolean
   needKeepPreviousData?: boolean
 }) =>

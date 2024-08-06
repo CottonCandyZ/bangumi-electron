@@ -16,7 +16,7 @@ export default function HeaderTitle() {
 }
 
 function SubjectHeaderTitle({ subjectId }: { subjectId: SubjectId }) {
-  const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId, needKeepPreviousData: false })
+  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const isInView = useAtomValue(subjectCoverImageInViewAtom)
   if (!subjectInfo) return null

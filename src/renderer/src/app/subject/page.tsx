@@ -9,7 +9,7 @@ import { useParams } from 'react-router-dom'
 
 export function Component() {
   const subjectId = useParams().subjectId
-  const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId, needKeepPreviousData: false })
+  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const backImageRef = useRef<HTMLDivElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)

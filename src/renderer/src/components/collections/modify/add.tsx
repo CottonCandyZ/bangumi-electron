@@ -21,7 +21,7 @@ export function AddSubjectCollection({
   subjectId: SubjectId
   dropdown?: boolean
 }) {
-  const subjectInfoQuery = useQuerySubjectInfo({ id: subjectId, needKeepPreviousData: false })
+  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const sheetAction = useSetAtom(subjectCollectionSheetFormActionAtom)
   if (subjectInfo === undefined) return <Skeleton className="h-10 w-full" />
