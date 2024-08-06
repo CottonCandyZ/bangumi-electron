@@ -19,8 +19,12 @@ export default function PageScrollWrapper({
   const { pathname } = useLocation()
   const [instance, setInstance] = useState<OverlayScrollbars | null>(null)
   const setScrollPosition = useSetAtom(mainPanelScrollPositionAtom)
+  if (pathname.includes('subject'))
+    setScrollPosition(
+      scrollCache.get(pathname) ??
+        (pathname.includes('subject') ? UI_CONFIG.SUBJECT_INIT_SCROLL : initScrollTo),
+    )
 
-  //TODO: 需要优化
   useEffect(() => {
     const scrollListener = () => {
       if (instance) {
@@ -37,7 +41,7 @@ export default function PageScrollWrapper({
     return () => {
       instance?.off('scroll', scrollListener)
     }
-  })
+  }, [instance, pathname])
 
   return (
     <OverlayScrollbarsComponent
