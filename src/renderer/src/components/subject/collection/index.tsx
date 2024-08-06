@@ -14,6 +14,8 @@ import { useSession } from '@renderer/components/wrapper/session-wrapper'
 import { useSetAtom } from 'jotai'
 import { collectionBoxInViewAtom } from '@renderer/state/in-view'
 import ModifySubjectCollection from '@renderer/components/subject/collection/modify-action'
+import ScrollWrapper from '@renderer/components/base/scroll-warpper'
+import { isEmpty } from '@renderer/lib/utils/string'
 
 export default function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const { isLogin, userInfo, accessToken } = useSession()
@@ -61,11 +63,15 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
               subjectCollection={subjectCollection}
               subjectInfo={subjectInfo}
             />
-
             <MoreActionDropDown subjectId={subjectId} />
           </div>
           {subjectCollection.type !== CollectionType.wantToWatch && (
             <QuickRate subjectCollection={subjectCollection} />
+          )}
+          {subjectCollection.comment && !isEmpty(subjectCollection.comment) && (
+            <ScrollWrapper className="max-h-40 max-w-56 rounded-md border border-border p-2 text-sm">
+              <p className="">{subjectCollection.comment}</p>
+            </ScrollWrapper>
           )}
         </div>
       ) : (
