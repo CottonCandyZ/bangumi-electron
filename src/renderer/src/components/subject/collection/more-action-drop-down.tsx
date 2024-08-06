@@ -7,13 +7,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@renderer/components/ui/dropdown-menu'
-import { ModifyCollectionOptType } from '@renderer/data/types/modify'
 
-export default function MoreActionDropDown({
-  subjectId,
-  accessToken,
-  username,
-}: { subjectId: string } & ModifyCollectionOptType) {
+export default function MoreActionDropDown({ subjectId }: { subjectId: string }) {
   return (
     <AlertDialog>
       <DropdownMenu>
@@ -26,11 +21,7 @@ export default function MoreActionDropDown({
           </AlertDialogTrigger>
         </DropdownMenuContent>
       </DropdownMenu>
-      <DeleteSubjectCollectionAlert
-        subjectId={subjectId}
-        accessToken={accessToken}
-        username={username}
-      />
+      <DeleteSubjectCollectionAlert subjectId={subjectId} />
     </AlertDialog>
   )
 }

@@ -8,19 +8,17 @@ import {
   AlertDialogTitle,
 } from '@renderer/components/ui/alert-dialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
+import { useSession } from '@renderer/components/wrapper/session-wrapper'
 import { deleteSubjectCollectionById } from '@renderer/data/fetch/web/collection'
 import { useWebDeleteCollectionHash } from '@renderer/data/hooks/web/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionData } from '@renderer/data/types/collection'
-import { ModifyCollectionOptType } from '@renderer/data/types/modify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-export default function DeleteSubjectCollectionAlert({
-  subjectId,
-  username,
-  accessToken,
-}: { subjectId: SubjectId } & ModifyCollectionOptType) {
+export default function DeleteSubjectCollectionAlert({ subjectId }: { subjectId: SubjectId }) {
+  const { userInfo, accessToken } = useSession()
+  const username = userInfo?.username
   const hash = useWebDeleteCollectionHash({ subjectId }).data
   const queryClient = useQueryClient()
   const subjectCollectionMutation = useMutation({

@@ -1,9 +1,7 @@
 import { AddSubjectCollection } from '@renderer/components/collections/modify/add'
-import { ModifySubjectCollection } from '@renderer/components/collections/modify/modify'
 import PrivateSwitch from '@renderer/components/subject/collection/private-switch'
 import QuickRate from '@renderer/components/subject/collection/quick-rate'
 import SubjectCollectionSelector from '@renderer/components/subject/collection/select'
-import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
@@ -15,6 +13,7 @@ import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { useSession } from '@renderer/components/wrapper/session-wrapper'
 import { useSetAtom } from 'jotai'
 import { collectionBoxInViewAtom } from '@renderer/state/in-view'
+import ModifySubjectCollection from '@renderer/components/subject/collection/modify-action'
 
 export default function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const { isLogin, userInfo, accessToken } = useSession()
@@ -39,19 +38,14 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
     subjectInfo === undefined ||
     subjectCollection === undefined ||
     userInfo === undefined ||
-    isLogin === undefined ||
-    accessToken === undefined
+    isLogin === undefined
   if (!isLogin || !accessToken) return <div>登录按钮</div>
   return (
     <div className="flex flex-col gap-2" ref={ref}>
       <div className="flex flex-row items-center justify-between">
         <h2 className="text-xl font-semibold">收藏盒</h2>
         {!loading && subjectCollection !== null && (
-          <PrivateSwitch
-            subjectCollection={subjectCollection}
-            username={userInfo.username}
-            accessToken={accessToken}
-          />
+          <PrivateSwitch subjectCollection={subjectCollection} />
         )}
       </div>
       {loading ? (
@@ -62,39 +56,20 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
       ) : subjectCollection !== null ? (
         <div className="flex flex-col gap-2">
           <div className="flex flex-row items-center gap-2">
-            <SubjectCollectionSelector
-              subjectCollection={subjectCollection}
-              username={userInfo.username}
-              accessToken={accessToken}
-            />
+            <SubjectCollectionSelector subjectCollection={subjectCollection} />
             <ModifySubjectCollection
-              subjectInfo={subjectInfo}
               subjectCollection={subjectCollection}
-              accessToken={accessToken}
-              username={userInfo.username}
-            >
-              <Button variant="outline">修改详情</Button>
-            </ModifySubjectCollection>
-            <MoreActionDropDown
-              subjectId={subjectId}
-              accessToken={accessToken}
-              username={userInfo.username}
+              subjectInfo={subjectInfo}
             />
+
+            <MoreActionDropDown subjectId={subjectId} />
           </div>
           {subjectCollection.type !== CollectionType.wantToWatch && (
-            <QuickRate
-              subjectCollection={subjectCollection}
-              username={userInfo.username}
-              accessToken={accessToken}
-            />
+            <QuickRate subjectCollection={subjectCollection} />
           )}
         </div>
       ) : (
-        <AddSubjectCollection
-          subjectId={subjectId}
-          username={userInfo.username}
-          accessToken={accessToken}
-        />
+        <AddSubjectCollection subjectId={subjectId} />
       )}
     </div>
   )

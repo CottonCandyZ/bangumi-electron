@@ -9,6 +9,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import SessionWrapper from '@renderer/components/wrapper/session-wrapper'
 import { ClickScrollPlugin, OverlayScrollbars } from 'overlayscrollbars'
+import SheetWrapper from '@renderer/components/wrapper/sheet-wrapper'
 
 OverlayScrollbars.plugin(ClickScrollPlugin)
 
@@ -41,7 +42,9 @@ export default function Wrapper({ children }: PropsWithChildren) {
     >
       <SessionWrapper>
         <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <TooltipProvider>{children}</TooltipProvider>
+          <TooltipProvider>
+            <SheetWrapper>{children}</SheetWrapper>
+          </TooltipProvider>
           <Toaster richColors className="pointer-events-auto" />
         </ThemeProvider>
       </SessionWrapper>

@@ -1,0 +1,36 @@
+import { Button } from '@renderer/components/ui/button'
+import { CollectionData } from '@renderer/data/types/collection'
+import { Subject } from '@renderer/data/types/subject'
+import { subjectCollectionSheetFormActionAtom } from '@renderer/state/sheet'
+import { useSetAtom } from 'jotai'
+
+export default function ModifySubjectCollection({
+  subjectCollection,
+  subjectInfo,
+}: {
+  subjectCollection: CollectionData
+  subjectInfo: Subject
+}) {
+  const sheetAction = useSetAtom(subjectCollectionSheetFormActionAtom)
+  return (
+    <Button
+      variant="outline"
+      onClick={() => {
+        sheetAction({
+          sheetTitle: '修改收藏',
+          collectionType: subjectCollection.type,
+          subjectId: subjectCollection.subject_id.toString(),
+          subjectTags: subjectInfo.tags,
+          subjectType: subjectCollection.subject_type,
+          comment: subjectCollection.comment ?? '',
+          isPrivate: subjectCollection.private,
+          rate: subjectCollection.rate,
+          tags: subjectCollection.tags,
+          modify: true,
+        })
+      }}
+    >
+      修改详情
+    </Button>
+  )
+}

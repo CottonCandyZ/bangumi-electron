@@ -16,11 +16,11 @@ import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/sele
 import { Separator } from '@renderer/components/ui/separator'
 import { Switch } from '@renderer/components/ui/switch'
 import { Textarea } from '@renderer/components/ui/textarea'
+import { useSession } from '@renderer/components/wrapper/session-wrapper'
 import { INPUT_LIMIT_CONFIG, TEXT_CONFIG } from '@renderer/config'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
-import { ModifyCollectionOptType } from '@renderer/data/types/modify'
 import { Subject, SubjectType } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
@@ -35,8 +35,6 @@ export default function AddOrModifySubjectCollectionForm({
   subjectType,
   subjectTags,
   collectionType,
-  username,
-  accessToken,
   rate = 0,
   comment = '',
   isPrivate = false,
@@ -53,9 +51,11 @@ export default function AddOrModifySubjectCollectionForm({
   isPrivate?: boolean
   tags?: CollectionData['tags']
   modify?: boolean
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>
-} & ModifyCollectionOptType) {
+  setOpen: (open: boolean) => void
+}) {
   const queryClient = useQueryClient()
+  const { userInfo, accessToken } = useSession()
+  const username = userInfo?.username
   const formSchema = z.object({
     collectionType: z.number(),
     rate: z.custom<CollectionData['rate']>(),
@@ -224,7 +224,6 @@ export default function AddOrModifySubjectCollectionForm({
             </FormItem>
           )}
         />
-
         <Button type="submit" className="w-full" disabled={subjectCollectionMutation.isPending}>
           {modify ? '修改' : '添加'}
         </Button>

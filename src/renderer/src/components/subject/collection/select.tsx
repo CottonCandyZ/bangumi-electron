@@ -1,8 +1,8 @@
 import SubjectCollectionSelectorContent from '@renderer/components/collections/subject-select-content'
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
+import { useSession } from '@renderer/components/wrapper/session-wrapper'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
-import { ModifyCollectionOptType } from '@renderer/data/types/modify'
 import {} from '@renderer/data/types/user'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { useQueryClient } from '@tanstack/react-query'
@@ -10,12 +10,12 @@ import { toast } from 'sonner'
 
 export default function SubjectCollectionSelector({
   subjectCollection,
-  username,
-  accessToken,
 }: {
   subjectCollection: CollectionData
-} & ModifyCollectionOptType) {
+}) {
   const queryClient = useQueryClient()
+  const { userInfo, accessToken } = useSession()
+  const username = userInfo?.username
   const queryKey = [
     'collection-subject',
     { subjectId: subjectCollection.subject_id.toString(), username },
