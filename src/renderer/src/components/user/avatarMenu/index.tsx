@@ -53,7 +53,7 @@ export default function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
         >
           {isLogin ? (
             <Image
-              className="aspect-square w-8 overflow-hidden rounded-full"
+              className="aspect-square w-8 shrink-0 overflow-hidden rounded-full"
               imageSrc={userInfo.data?.avatar.small}
             />
           ) : (
