@@ -1,45 +1,37 @@
-import ScrollWrapper from '@renderer/components/base/scroll-warpper'
-import CollectionsGrid from '@renderer/components/collections/grid'
 import SubjectCollectionSelectorContent from '@renderer/components/collections/subject-select-content'
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { useSession } from '@renderer/components/wrapper/session-wrapper'
 import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
-import { cn } from '@renderer/lib/utils'
 import { sidePanelCollectionTypeFilterAtom } from '@renderer/state/collection'
+import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
 import { collectionPanelSubjectTypeAtom } from '@renderer/state/panel'
 import { useAtom, useAtomValue } from 'jotai'
 
-export default function CollectionPanel() {
+export default function SubjectCollectionPanelHeader() {
   const subjectType = SubjectType[useAtomValue(collectionPanelSubjectTypeAtom)]
-  const { isLogin } = useSession()
   const [filterMap, setCurrentTypeFilter] = useAtom(sidePanelCollectionTypeFilterAtom)
+  const { isLogin } = useSession()
   const currentSelect = filterMap.get(subjectType.toString()) ?? CollectionType['watching']
+  const isRefetching = useAtomValue(collectionPanelIsRefetchingAtom)
   return (
-    <>
-      <div className="drag-region flex h-16 items-center justify-end border-b px-5">
-        {isLogin && (
+    <div className="drag-region flex h-16 flex-row items-center justify-end gap-5 border-b px-5">
+      {isLogin && (
+        <>
+          {isRefetching && <span className="i-mingcute-loading-line animate-spin text-2xl" />}
           <Select
             onValueChange={(value) =>
               setCurrentTypeFilter(subjectType.toString(), Number(value) as CollectionType)
             }
             value={currentSelect.toString()}
           >
-            <SelectTrigger className="no-drag-region w-fit">
+            <SelectTrigger className="no-drag-region w-fit justify-end">
               <SelectValue />
             </SelectTrigger>
             <SubjectCollectionSelectorContent subjectType={subjectType} />
           </Select>
-        )}
-      </div>
-      {isLogin && (
-        <ScrollWrapper
-          className={cn('h-[calc(100dvh-72px)] shrink-0 overflow-x-hidden bg-background p-1')}
-          options={{ scrollbars: { autoHide: 'scroll' } }}
-        >
-          <CollectionsGrid subjectType={subjectType} collectionType={currentSelect} />
-        </ScrollWrapper>
+        </>
       )}
-    </>
+    </div>
   )
 }
