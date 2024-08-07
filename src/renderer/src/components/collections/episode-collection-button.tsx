@@ -97,12 +97,12 @@ export default function EpisodeCollectionButton({
       })
     },
   })
-
+  if (subjectCollection === null) return null
   if (accessToken === undefined) return null
   if (collectionType !== undefined) {
     if (collectionType !== CollectionType.watching) return null
   } else {
-    if (!subjectCollection) return <Skeleton className="h-9 w-52" />
+    if (subjectCollection === undefined) return <Skeleton className="h-9 w-52" />
     else if (subjectCollection.type !== CollectionType.watching) return null
   }
 
