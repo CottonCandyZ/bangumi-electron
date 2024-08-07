@@ -21,22 +21,24 @@ function SubjectHeaderTitle({ subjectId }: { subjectId: SubjectId }) {
   const isInView = useAtomValue(subjectCoverImageInViewAtom)
   if (!subjectInfo) return null
   return (
-    <AnimatePresence>
-      {!isInView && (
-        <motion.div
-          className="flex flex-row items-center gap-3"
-          animate={{ y: 0, opacity: 1 }}
-          initial={{ y: '120%', opacity: 0 }}
-          exit={{ y: '120%', opacity: 0 }}
-        >
-          <Image
-            className="aspect-square w-10 shrink-0 overflow-hidden rounded-lg"
-            imageSrc={subjectInfo.images.small}
-          />
-          <Header {...subjectInfo} />
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <div className="flex h-full items-center overflow-hidden">
+      <AnimatePresence>
+        {!isInView && (
+          <motion.div
+            className="flex flex-row items-center gap-3"
+            animate={{ y: 0, opacity: 1 }}
+            initial={{ y: '120%', opacity: 0 }}
+            exit={{ y: '120%', opacity: 0 }}
+          >
+            <Image
+              className="aspect-square w-10 shrink-0 overflow-hidden rounded-lg"
+              imageSrc={subjectInfo.images.small}
+            />
+            <Header {...subjectInfo} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
 
