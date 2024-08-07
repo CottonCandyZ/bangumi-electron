@@ -1,4 +1,5 @@
 import NavButton from '@renderer/components/header/nav-button'
+import OriginalLink from '@renderer/components/header/o-link'
 import RightPanelButton from '@renderer/components/header/right-panel-button'
 import HeaderTitle from '@renderer/components/header/subject-title'
 import WindowsButton from '@renderer/components/header/windows-button'
@@ -16,7 +17,9 @@ export default function Header() {
         <HeaderTitle />
       </div>
       <div className="flex h-full flex-row items-center gap-2">
+        <OriginalLink />
         <RightPanelButton />
+
         <WindowsButton />
       </div>
     </header>
