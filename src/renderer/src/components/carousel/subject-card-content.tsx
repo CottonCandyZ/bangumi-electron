@@ -105,7 +105,10 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
           >
             <CardContent className="p-0">
               <CoverMotionImage
-                className={cn('aspect-[2/3]', sectionPath === 'music' && 'aspect-square')}
+                className={cn(
+                  'aspect-[2/3] overflow-hidden rounded-xl',
+                  sectionPath === 'music' && 'aspect-square',
+                )}
                 imageSrc={subjectInfoData?.images.common}
                 layoutId={`${layoutId}-image`}
               />
