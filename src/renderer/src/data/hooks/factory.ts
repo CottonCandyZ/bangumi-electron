@@ -33,10 +33,12 @@ export const useQueryMustAuth = <P, R>({
   queryFn,
   queryProps,
   enabled = true,
+  needKeepPreviousData = true,
   ...props
 }: {
   queryFn: P extends { token: string } ? Fn<P, R> : never
   enabled?: boolean
+  needKeepPreviousData?: boolean
 } & OptionalProps<P> &
   Omit<UseQueryOptions<R, Error, R, QueryKey>, 'queryFn'>) => {
   const logoutMutation = useLogoutMutation()
@@ -57,6 +59,7 @@ export const useQueryMustAuth = <P, R>({
       }
       return data as R
     },
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     enabled: enabled && accessToken !== undefined,
     ...props,
   })

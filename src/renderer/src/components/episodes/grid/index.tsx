@@ -49,17 +49,21 @@ export default function EpisodesGrid({
   if (episode.data === undefined) {
     return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
   }
+  if (episode.data.data === null) return null
 
   return (
-    <div className={cn('flex flex-col gap-4')}>
-      {selector && <PageSelector episodes={episode} limit={limit} setOffSet={setOffSet} />}
-      <EpisodeGridContent
-        subjectId={subjectId}
-        episodes={episode.data.data}
-        size={size}
-        modifyEpisodeCollectionOpt={{ limit, offset }}
-        collectionType={collectionType}
-      />
+    <div className="flex flex-col gap-5">
+      {size === 'default' && <h2 className="text-2xl font-semibold">章节</h2>}
+      <div className={cn('flex flex-col gap-4')}>
+        {selector && <PageSelector episodes={episode} limit={limit} setOffSet={setOffSet} />}
+        <EpisodeGridContent
+          subjectId={subjectId}
+          episodes={episode.data.data}
+          size={size}
+          modifyEpisodeCollectionOpt={{ limit, offset }}
+          collectionType={collectionType}
+        />
+      </div>
     </div>
   )
 }
@@ -69,12 +73,15 @@ function EpisodeSkeleton({
   size = 'default',
 }: { skeletonNumber: number } & EpisodeGridSize) {
   return (
-    <div className={cn('flex flex-row flex-wrap gap-1')}>
-      {Array(skeletonNumber)
-        .fill(0)
-        .map((_, index) => (
-          <Skeleton className={cn('size-10', size === 'small' && 'size-6')} key={index} />
-        ))}
+    <div className="flex flex-col gap-5">
+      {size === 'default' && <h2 className="text-2xl font-semibold">章节</h2>}
+      <div className={cn('flex flex-row flex-wrap gap-1')}>
+        {Array(skeletonNumber)
+          .fill(0)
+          .map((_, index) => (
+            <Skeleton className={cn('size-10', size === 'small' && 'size-6')} key={index} />
+          ))}
+      </div>
     </div>
   )
 }
