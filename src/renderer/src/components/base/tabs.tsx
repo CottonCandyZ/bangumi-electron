@@ -37,8 +37,9 @@ export default function TabsOnly({
           {currentSelect === item && (
             <motion.div
               // key={`${layoutId}-${key}`}
+              layoutId={layoutId}
               className="absolute inset-0 rounded-md bg-background shadow"
-              layoutId={`${layoutId}`}
+              style={{ originY: 'top' }}
             />
           )}
           <span className="z-10">{item}</span>
