@@ -13,7 +13,7 @@ export const rightPanelOpenAtom = atom(false)
 
 export const leftPanelOpenContentAtom = atom<LeftPanelName | null>(null)
 
-export const rightPanelOpenContentAtom = atom<RightPanelName | null>(null)
+// export const rightPanelOpenContentAtom = atom<RightPanelName | null>(null)
 
 // left
 
@@ -37,13 +37,13 @@ export const nvaCollectionButtonAtomAction = atom(
 
 // right
 
-export const rightPanelButtonAtomAction = atom(
-  (get) => get(rightPanelOpenAtom),
-  (_get, set, name: RightPanelName | null, open: boolean) => {
-    if (!open) set(rightPanelOpenAtom, false)
-    else {
-      set(rightPanelOpenAtom, true)
-      set(rightPanelOpenContentAtom, name)
-    }
-  },
-)
+// export const rightPanelButtonAtomAction = atom(
+//   (get) => get(rightPanelOpenAtom),
+//   (_get, set, name: RightPanelName | null, open: boolean) => {
+//     if (!open) set(rightPanelOpenAtom, false)
+//     else {
+//       set(rightPanelOpenAtom, true)
+//       set(rightPanelOpenContentAtom, name)
+//     }
+//   },
+// )

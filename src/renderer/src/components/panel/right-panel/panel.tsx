@@ -1,8 +1,7 @@
 import SubjectInfoPanel from '@renderer/components/panel/right-panel/panels/subject-info'
-import { rightPanelOpenContentAtom } from '@renderer/state/panel'
-import { useAtomValue } from 'jotai'
+import { useLocation } from 'react-router-dom'
 
 export default function RightPanel() {
-  const panelName = useAtomValue(rightPanelOpenContentAtom)
-  return panelName === 'subjectInfo' && <SubjectInfoPanel />
+  const { pathname } = useLocation()
+  return pathname.includes('subject') && <SubjectInfoPanel />
 }
