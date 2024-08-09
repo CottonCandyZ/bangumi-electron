@@ -51,3 +51,11 @@ export const EPISODE_COLLECTION_ACTION_MAP = {
   抛弃: EpisodeCollectionType.abandoned,
   看过: EpisodeCollectionType.watched,
 } as const
+
+export const SUBJECT_TYPE_MAP = {
+  [SubjectType.anime]: '动画',
+  [SubjectType.book]: '书籍',
+  [SubjectType.game]: '游戏',
+  [SubjectType.music]: '音乐',
+  [SubjectType.real]: '三次元',
+}

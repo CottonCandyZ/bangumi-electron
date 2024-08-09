@@ -2,7 +2,7 @@ import { Pagination } from '@renderer/data/types/bgm'
 import { SubjectType, Tag } from '@renderer/data/types/subject'
 
 export type SearchDataPage = {
-  data: SearchData
+  data: SearchData[]
 } & Pagination
 
 export type SearchData = {
@@ -20,9 +20,14 @@ export type SearchData = {
 }
 
 export type SearchParm = {
-  type?: SubjectType
+  keyword?: string
+  sort?: 'rank' | 'air_date' | 'rating'
+  filter?: Filter
+}
+export type Filter = {
+  type?: SubjectType[]
   tag?: string[]
-  airdate?: string[]
+  airDate?: string[]
   rating?: string[]
   rank?: string[]
   nsfw?: boolean

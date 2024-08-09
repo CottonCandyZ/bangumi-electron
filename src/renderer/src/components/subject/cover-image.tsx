@@ -31,12 +31,11 @@ export default function SubjectCoverImage({ subjectId }: { subjectId: SubjectId 
       ref={cardRef}
     >
       {subjectInfo !== undefined ? (
-        !isEmpty(subjectInfo.images.large) ? (
+        !isEmpty(subjectInfo.images.common) ? (
           <Image
             imageSrc={subjectInfo.images.common}
             loadingClassName="aspect-[22/31]"
             isLoadInit
-            className="min-h-28"
           />
         ) : (
           <div className="flex aspect-[2/3] items-center justify-center">还没有图片哦</div>

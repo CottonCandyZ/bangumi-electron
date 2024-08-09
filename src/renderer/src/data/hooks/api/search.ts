@@ -1,6 +1,6 @@
 import { searchV0 } from '@renderer/data/fetch/api/serach'
+import { useInfinityQueryOptionalAuth } from '@renderer/data/hooks/factory'
 import { SearchParm } from '@renderer/data/types/search'
-import { useInfiniteQuery } from '@tanstack/react-query'
 
 export const useInfinityQuerySearch = ({
   searchParm,
@@ -11,13 +11,16 @@ export const useInfinityQuerySearch = ({
   initialPageParam?: number
   searchParm: SearchParm
 }) =>
-  useInfiniteQuery({
-    queryKey: ['search', limit, searchParm],
-    queryFn: async ({ pageParam }) => searchV0({ offset: pageParam, limit: limit, searchParm }),
+  useInfinityQueryOptionalAuth({
+    queryKey: ['search'],
+    queryFn: searchV0,
+    qFLimit: limit,
+    queryProps: { searchParm },
     getNextPageParam: (lastPage) => {
       const next = lastPage.offset + lastPage.limit
       if (next >= lastPage.total) return null
       else return next
     },
     initialPageParam,
+    staleTime: 0,
   })
