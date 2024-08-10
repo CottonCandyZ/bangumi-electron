@@ -82,7 +82,7 @@ export default function SearchItemCard({ searchItem }: { searchItem: SearchData 
                     variant="outline"
                     size="sm"
                     key={item.name}
-                    className="h-auto flex-auto px-1 py-1 shadow-none"
+                    className="h-auto flex-auto whitespace-normal px-1 py-1 shadow-none"
                   >
                     {item.name}
                   </Button>
