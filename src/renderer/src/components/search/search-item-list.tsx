@@ -1,6 +1,6 @@
 import { Image } from '@renderer/components/base/Image'
 import { MyLink } from '@renderer/components/base/my-link'
-import ScoreStarHalf from '@renderer/components/serach/score-half'
+import ScoreStarHalf from '@renderer/components/search/score-half'
 import { Button } from '@renderer/components/ui/button'
 import { Card } from '@renderer/components/ui/card'
 import { SearchData } from '@renderer/data/types/search'

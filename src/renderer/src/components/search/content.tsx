@@ -1,4 +1,4 @@
-import SearchItemCard from '@renderer/components/serach/search-item-card'
+import SearchItemCard from '@renderer/components/search/search-item-card'
 import { useInfinityQuerySearch } from '@renderer/data/hooks/api/search'
 import { SearchParm } from '@renderer/data/types/search'
 import { useEffect, useRef } from 'react'
@@ -30,7 +30,7 @@ export default function SearchContent({ searchParm }: { searchParm: SearchParm }
         observer.unobserve(bottomRef.current)
       }
     }
-  }, [bottomRef, searchResult])
+  }, [bottomRef, searchResult, searchParm])
   if (!searchResult) return null
 
   return (

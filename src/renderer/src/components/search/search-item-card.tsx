@@ -1,7 +1,8 @@
 import { Image } from '@renderer/components/base/Image'
 import { MyLink } from '@renderer/components/base/my-link'
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
-import ScoreStarHalf from '@renderer/components/serach/score-half'
+import ScoreStarHalf from '@renderer/components/search/score-half'
+import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
 import { Card } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
@@ -34,10 +35,15 @@ export default function SearchItemCard({ searchItem }: { searchItem: SearchData 
               还没有图片哦
             </div>
           )}
-          <div className="flex h-full flex-col">
-            <div className="flex flex-col pr-2">
-              <section className="flex flex-row items-start gap-1">
+          <div className="flex h-full w-full flex-col">
+            <div className="flex w-full flex-col pr-2">
+              <section className="w-fll flex flex-row items-start justify-between gap-1">
                 <Header {...searchItem} />
+                {searchItem.rank !== 0 && (
+                  <Badge className="shrink-0 bg-sky-600 text-white shadow-none hover:bg-sky-600">
+                    Rank {searchItem.rank}
+                  </Badge>
+                )}
               </section>
               <div className="flex flex-row items-center gap-1">
                 <div className="text-base text-muted-foreground">{ICON_MAP[searchItem.type]}</div>
@@ -60,7 +66,13 @@ export default function SearchItemCard({ searchItem }: { searchItem: SearchData 
                   )}
                 </section>
                 <Separator orientation="vertical" className="h-4" />
-                <span className="text-xs font-medium text-muted-foreground">{searchItem.date}</span>
+                {!isEmpty(searchItem.date) ? (
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {searchItem.date}
+                  </span>
+                ) : (
+                  <span>--</span>
+                )}
               </div>
             </div>
             <ScrollWrapper className="pb-2 pr-3" options={{ scrollbars: { autoHide: 'leave' } }}>
