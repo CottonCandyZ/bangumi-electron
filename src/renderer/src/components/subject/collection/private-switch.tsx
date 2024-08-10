@@ -55,11 +55,13 @@ export default function PrivateSwitch({
       className={cn('flex items-center gap-2', subjectCollectionMutation.isPending && 'opacity-50')}
     >
       <Label
+        htmlFor="private-switch"
         className={cn('text-muted-foreground/70', subjectCollection.private && 'text-primary')}
       >
         {subjectCollection.private ? '私密' : '设为私密'}
       </Label>
       <Switch
+        id="private-switch"
         checked={subjectCollection.private}
         disabled={subjectCollectionMutation.isPending}
         onCheckedChange={(checked) => {
