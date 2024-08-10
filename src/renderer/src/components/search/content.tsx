@@ -1,4 +1,5 @@
-import SearchItemCard from '@renderer/components/search/search-item-card'
+import SearchItemCard from '@renderer/components/search/item-card'
+import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useInfinityQuerySearch } from '@renderer/data/hooks/api/search'
 import { SearchParm } from '@renderer/data/types/search'
 import { useEffect, useRef } from 'react'
@@ -31,11 +32,20 @@ export default function SearchContent({ searchParm }: { searchParm: SearchParm }
       }
     }
   }, [bottomRef, searchResult, searchParm])
-  if (!searchResult) return null
+  if (searchResult === undefined)
+    return (
+      <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(25rem,_1fr))] gap-4">
+        {Array(9)
+          .fill(0)
+          .map((_, index) => (
+            <Skeleton key={index} className="h-52 w-full" />
+          ))}
+      </div>
+    )
 
   return (
     <div className="relative flex flex-col items-center justify-center gap-5">
-      <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(25rem,_1fr))] gap-4 py-2">
+      <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(25rem,_1fr))] gap-4">
         {searchResult.pages.map((group, page) => (
           <Fragment key={page}>
             {group.data.map((item) => (
