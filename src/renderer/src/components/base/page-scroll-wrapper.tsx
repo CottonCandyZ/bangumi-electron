@@ -1,7 +1,7 @@
 import { UI_CONFIG } from '@renderer/config'
 import { scrollCache } from '@renderer/state/global-var'
-import { mainPanelScrollPositionAtom } from '@renderer/state/scroll'
-import { useSetAtom } from 'jotai'
+import { mainPanelScrollPositionAtom, updateMainScrollPositionAtom } from '@renderer/state/scroll'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { OverlayScrollbars } from 'overlayscrollbars'
 
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
@@ -24,6 +24,12 @@ export default function PageScrollWrapper({
       scrollCache.get(pathname) ??
         (pathname.includes('subject') ? UI_CONFIG.SUBJECT_INIT_SCROLL : initScrollTo),
     )
+  const updateScrollPosition = useAtomValue(updateMainScrollPositionAtom)
+  useEffect(() => {
+    instance?.elements().viewport.scrollTo({
+      top: updateScrollPosition.position,
+    })
+  }, [updateScrollPosition])
 
   useEffect(() => {
     const scrollListener = () => {

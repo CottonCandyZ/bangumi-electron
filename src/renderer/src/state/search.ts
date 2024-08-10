@@ -6,9 +6,12 @@ export const searchParamAtom = atom<SearchParm | null>(null)
 
 export const searchSubjectTypeFilterAtom = atom(new Set<SubjectType>())
 
+export const searchPaginationOffsetAtom = atom(0)
+
 export const searchSortAtom = atom<'rank' | undefined>(undefined)
 
 export const searchKeywordActionAtom = atom(null, (get, set, keyword: string) => {
+  set(searchPaginationOffsetAtom, 0)
   set(searchParamAtom, {
     keyword,
     filter: { type: [...get(searchSubjectTypeFilterAtom)] },
@@ -18,6 +21,7 @@ export const searchKeywordActionAtom = atom(null, (get, set, keyword: string) =>
 
 export const searchSubjectTypeFilterActionAtom = atom(null, (get, set) => {
   if (get(searchParamAtom) !== null) {
+    set(searchPaginationOffsetAtom, 0)
     set(searchParamAtom, {
       ...get(searchParamAtom),
       filter: { type: [...get(searchSubjectTypeFilterAtom)] },
@@ -28,6 +32,7 @@ export const searchSubjectTypeFilterActionAtom = atom(null, (get, set) => {
 
 export const searchSortActionAtom = atom(null, (get, set) => {
   if (get(searchParamAtom) !== null) {
+    set(searchPaginationOffsetAtom, 0)
     set(searchParamAtom, {
       ...get(searchParamAtom),
       filter: { ...get(searchParamAtom)?.filter },
