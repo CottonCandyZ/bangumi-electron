@@ -4,7 +4,7 @@ import { SearchParm } from '@renderer/data/types/search'
 
 export const useInfinityQuerySearch = ({
   searchParm,
-  limit = 3,
+  limit = 9,
   initialPageParam = 0,
 }: {
   limit?: number
@@ -22,5 +22,4 @@ export const useInfinityQuerySearch = ({
       else return next
     },
     initialPageParam,
-    staleTime: 0,
   })
