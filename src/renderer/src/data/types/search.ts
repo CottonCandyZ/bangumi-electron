@@ -21,7 +21,7 @@ export type SearchData = {
 
 export type SearchParm = {
   keyword?: string
-  sort?: 'rank' | 'air_date' | 'rating'
+  sort?: 'rank'
   filter?: Filter
 }
 export type Filter = {
