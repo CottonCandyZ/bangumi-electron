@@ -25,6 +25,7 @@ export default function SearchInput() {
         onKeyDownCapture={(e) => {
           if (keyword !== '' && e.code === 'Enter') {
             searchAction(keyword)
+            inputRef.current?.blur()
           }
         }}
       />
@@ -41,8 +42,12 @@ export default function SearchInput() {
       />
       <Button
         className="rounded-lg"
-        onClick={() => {
-          if (keyword !== '') searchAction(keyword)
+        onClick={(e) => {
+          if (keyword !== '') {
+            searchAction(keyword)
+            inputRef.current?.blur()
+            e.currentTarget.blur()
+          }
         }}
       >
         搜索
