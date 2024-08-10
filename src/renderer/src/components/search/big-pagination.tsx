@@ -23,7 +23,7 @@ export default function BigPagination({
         <PaginationContent>
           {/* 上一页 */}
           <PaginationItem>
-            <PaginationPrevious onClick={() => value !== 1 && onValueChanged(value - 1)} />
+            <PaginationPrevious disabled={value === 1} onClick={() => onValueChanged(value - 1)} />
           </PaginationItem>
           {Array(total)
             .fill(0)
@@ -39,7 +39,7 @@ export default function BigPagination({
             ))}
           {/* 下一页 */}
           <PaginationItem>
-            <PaginationNext onClick={() => value !== total && onValueChanged(value + 1)} />
+            <PaginationNext disabled={value === total} onClick={() => onValueChanged(value + 1)} />
           </PaginationItem>
         </PaginationContent>
       </Pagination>
@@ -49,7 +49,7 @@ export default function BigPagination({
       <PaginationContent>
         {/* 上一页 */}
         <PaginationItem>
-          <PaginationPrevious onClick={() => value !== 1 && onValueChanged(value - 1)} />
+          <PaginationPrevious disabled={value === 1} onClick={() => onValueChanged(value - 1)} />
         </PaginationItem>
 
         {/* 第一页 */}
@@ -125,7 +125,7 @@ export default function BigPagination({
         </PaginationItem>
         {/* 下一页 */}
         <PaginationItem>
-          <PaginationNext onClick={() => value !== total && onValueChanged(value + 1)} />
+          <PaginationNext disabled={value === total} onClick={() => onValueChanged(value + 1)} />
         </PaginationItem>
       </PaginationContent>
     </Pagination>
