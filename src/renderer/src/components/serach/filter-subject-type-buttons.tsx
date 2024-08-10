@@ -28,18 +28,18 @@ export default function SubjectTypeFilterButtons({
             'cursor-default rounded-2xl shadow-none transition-all duration-500',
             ((item.type === null && filter.size === 0) ||
               (item.type !== null && filter.has(item.type))) &&
-              'bg-accent',
-            item.type !== null && filter.has(item.type) && 'gap-2',
+              'gap-2 bg-accent',
           )}
           onClick={() => {
             onFilterClick(item.type)
-
           }}
         >
           <span
             className={cn(
               'i-mingcute-check-line !w-0 transition-[width]',
-              item.type !== null && filter.has(item.type) && '!w-4',
+              ((item.type === null && filter.size === 0) ||
+                (item.type !== null && filter.has(item.type))) &&
+                '!w-4',
             )}
           />
           {item.name}
