@@ -4,7 +4,6 @@ import { BackCover } from '@renderer/components/hover-card/close'
 import NavBar from '@renderer/components/nav'
 import LeftResizablePanel from '@renderer/components/panel/left-panel'
 import RightResizablePanel from '@renderer/components/panel/right-panel'
-import SheetContentWrapper from '@renderer/components/sheet'
 import { ResizablePanel, ResizablePanelGroup } from '@renderer/components/ui/resizable'
 import { Outlet } from 'react-router-dom'
 
@@ -31,7 +30,6 @@ function RootLayout() {
           </ResizablePanel>
         </ResizablePanelGroup>
         <BackCover />
-        <SheetContentWrapper />
       </div>
     </>
   )
