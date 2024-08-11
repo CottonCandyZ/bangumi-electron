@@ -1,21 +1,21 @@
 import { searchV0 } from '@renderer/data/fetch/api/serach'
 import { useInfinityQueryOptionalAuth, useQueryOptionalAuth } from '@renderer/data/hooks/factory'
-import { SearchParm } from '@renderer/data/types/search'
+import { SearchParam } from '@renderer/data/types/search'
 
 export const useInfinityQuerySearch = ({
-  searchParm,
+  searchParam,
   limit = 9,
   initialPageParam = 0,
 }: {
   limit?: number
   initialPageParam?: number
-  searchParm: SearchParm
+  searchParam: SearchParam
 }) =>
   useInfinityQueryOptionalAuth({
     queryKey: ['search'],
     queryFn: searchV0,
     qFLimit: limit,
-    queryProps: { searchParm },
+    queryProps: { searchParam },
     getNextPageParam: (lastPage) => {
       const next = lastPage.offset + lastPage.limit
       if (next >= lastPage.total) return null
@@ -25,16 +25,16 @@ export const useInfinityQuerySearch = ({
   })
 
 export const useQuerySearch = ({
-  searchParm,
+  searchParam,
   limit = 20,
   offset = 0,
 }: {
   limit?: number
   offset?: number
-  searchParm: SearchParm
+  searchParam: SearchParam
 }) =>
   useQueryOptionalAuth({
     queryKey: ['search'],
     queryFn: searchV0,
-    queryProps: { offset, limit, searchParm },
+    queryProps: { offset, limit, searchParam },
   })

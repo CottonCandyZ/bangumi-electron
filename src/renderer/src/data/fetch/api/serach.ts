@@ -1,16 +1,16 @@
 import { apiFetch, SEARCH } from '@renderer/data/fetch/config'
 import { getAuthHeader } from '@renderer/data/fetch/utils'
-import { SearchDataPage, SearchParm } from '@renderer/data/types/search'
+import { SearchDataPage, SearchParam } from '@renderer/data/types/search'
 
 export async function searchV0({
   limit,
   offset,
-  searchParm,
+  searchParam,
   token,
 }: {
   limit?: number
   offset: number
-  searchParm: SearchParm
+  searchParam: SearchParam
   token?: string
 }) {
   const result = await apiFetch<SearchDataPage>(SEARCH.V0, {
@@ -23,15 +23,15 @@ export async function searchV0({
       offset,
     },
     body: {
-      keyword: searchParm.keyword,
-      sort: searchParm.sort,
+      keyword: searchParam.keyword,
+      sort: searchParam.sort,
       filter: {
-        type: searchParm.filter?.type,
-        tag: searchParm.filter?.tag,
-        air_date: searchParm.filter?.airDate,
-        rating: searchParm.filter?.rating,
-        rank: searchParm.filter?.rank,
-        nsfw: searchParm.filter?.nsfw,
+        type: searchParam.filter?.type,
+        tag: searchParam.filter?.tag,
+        air_date: searchParam.filter?.airDate,
+        rating: searchParam.filter?.rating,
+        rank: searchParam.filter?.rank,
+        nsfw: searchParam.filter?.nsfw,
       },
     },
   })

@@ -19,7 +19,7 @@ export type SearchData = {
   nsfw: boolean
 }
 
-export type SearchParm = {
+export type SearchParam = {
   keyword?: string
   sort?: 'rank'
   filter?: Filter

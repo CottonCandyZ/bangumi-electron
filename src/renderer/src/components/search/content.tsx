@@ -3,16 +3,16 @@ import SearchItemCard from '@renderer/components/search/item-card'
 
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySearch } from '@renderer/data/hooks/api/search'
-import { SearchParm } from '@renderer/data/types/search'
+import { SearchParam } from '@renderer/data/types/search'
 import { updateMainScrollPositionAtom } from '@renderer/state/scroll'
 import { searchPaginationOffsetAtom } from '@renderer/state/search'
 import { useAtom, useSetAtom } from 'jotai'
 
-export default function SearchContent({ searchParm }: { searchParm: SearchParm }) {
+export default function SearchContent({ searchParam }: { searchParam: SearchParam }) {
   const [offset, setOffset] = useAtom(searchPaginationOffsetAtom)
   const updateScrollPosition = useSetAtom(updateMainScrollPositionAtom)
   const searchResultQuery = useQuerySearch({
-    searchParm,
+    searchParam,
     offset,
   })
   const searchResult = searchResultQuery.data

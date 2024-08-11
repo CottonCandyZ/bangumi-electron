@@ -7,12 +7,12 @@ import { useEffect, useRef, useState } from 'react'
 export default function SearchInput() {
   const [keyword, setKeyword] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
-  const searchParm = useAtomValue(searchParamAtom)
+  const searchParam = useAtomValue(searchParamAtom)
   const searchAction = useSetAtom(searchKeywordActionAtom)
 
   useEffect(() => {
-    setKeyword(searchParm?.keyword ?? '')
-  }, [searchParm])
+    setKeyword(searchParam?.keyword ?? '')
+  }, [searchParam])
 
   return (
     <search className="group flex w-full max-w-xl items-center gap-2 rounded-xl border bg-accent px-2 py-2 pl-4 transition-all duration-300 focus-within:bg-background focus-within:ring-1 focus-within:ring-ring hover:bg-background">

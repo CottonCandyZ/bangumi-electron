@@ -5,16 +5,16 @@ import { searchParamAtom } from '@renderer/state/search'
 import { useAtomValue } from 'jotai'
 
 export default function SearchContentWrapper() {
-  const searchParm = useAtomValue(searchParamAtom)
+  const searchParam = useAtomValue(searchParamAtom)
   return (
-    searchParm && (
+    searchParam && (
       <div className="flex flex-col gap-5">
         <Separator className="w-full" />
         <div className="px-10">
           <Sort />
         </div>
         <div className="px-10">
-          <SearchContent searchParm={searchParm} />
+          <SearchContent searchParam={searchParam} />
         </div>
       </div>
     )

@@ -1,8 +1,8 @@
-import { SearchParm } from '@renderer/data/types/search'
+import { SearchParam } from '@renderer/data/types/search'
 import { SubjectType } from '@renderer/data/types/subject'
 import { atom } from 'jotai'
 
-export const searchParamAtom = atom<SearchParm | null>(null)
+export const searchParamAtom = atom<SearchParam | null>(null)
 
 export const searchSubjectTypeFilterAtom = atom(new Set<SubjectType>())
 
