@@ -15,7 +15,7 @@ export default function SearchInput() {
   }, [searchParam])
 
   return (
-    <search className="group flex w-full max-w-xl items-center gap-2 rounded-xl border bg-accent px-2 py-2 pl-4 transition-all duration-300 focus-within:bg-background focus-within:ring-1 focus-within:ring-ring hover:bg-background">
+    <search className="group flex w-full max-w-xl items-center gap-2 rounded-xl border bg-accent px-2 py-2 pl-4 transition-all duration-300 focus-within:max-w-2xl focus-within:bg-background focus-within:ring-1 focus-within:ring-ring hover:bg-background">
       <span className="i-mingcute-search-2-line text-4xl" />
       <input
         value={keyword}
