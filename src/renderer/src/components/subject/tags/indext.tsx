@@ -20,7 +20,13 @@ export default function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
     return (
       <section className="flex w-full flex-col gap-5">
         <h2 className="text-2xl font-semibold">标签</h2>
-        <Skeleton className="h-60" />
+        <div className="flex flex-row flex-wrap gap-2 after:grow-[999]">
+          {Array(25)
+            .fill(undefined)
+            .map((_, index) => (
+              <Skeleton key={index} className="h-9 w-20" />
+            ))}
+        </div>
       </section>
     )
 
