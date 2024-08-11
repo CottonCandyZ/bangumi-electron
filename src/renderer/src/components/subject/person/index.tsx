@@ -21,7 +21,6 @@ export default function SubjectPersonTable({ subjectId }: { subjectId: SubjectId
             .map((_, index) => (
               <Fragment key={index}>
                 <div className="flex flex-row gap-1">
-                  <Skeleton className="h-9 basis-1/3" />
                   <Skeleton className="h-9 w-full" />
                 </div>
                 {index !== 9 && <Separator />}
