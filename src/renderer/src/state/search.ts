@@ -8,7 +8,7 @@ export const searchSubjectTypeFilterAtom = atom(new Set<SubjectType>())
 
 export const searchPaginationOffsetAtom = atom(0)
 
-export const searchSortAtom = atom<'rank' | undefined>(undefined)
+export const searchSortAtom = atom<SearchParam['sort']>('match')
 
 export const searchKeywordActionAtom = atom(null, (get, set, keyword: string) => {
   set(searchPaginationOffsetAtom, 0)

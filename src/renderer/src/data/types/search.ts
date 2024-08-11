@@ -21,7 +21,8 @@ export type SearchData = {
 
 export type SearchParam = {
   keyword?: string
-  sort?: 'rank'
+  // https://github.com/bangumi/server/blob/5c576e267268c490a0b97686d0668ffc36bf1dd9/internal/search/handle.go#L172-L183
+  sort?: 'match' | 'score' | 'heat' | 'rank'
   filter?: Filter
 }
 export type Filter = {

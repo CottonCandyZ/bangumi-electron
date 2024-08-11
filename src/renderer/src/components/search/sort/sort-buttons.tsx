@@ -1,17 +1,20 @@
 import { Button } from '@renderer/components/ui/button'
+import { SearchParam } from '@renderer/data/types/search'
 import { cn } from '@renderer/lib/utils'
 
 const sort = [
-  { type: undefined, name: '默认排序' },
-  { type: 'rank', name: '最高排名' },
+  { type: 'match', name: '最匹配' },
+  { type: 'rank', name: '排名' },
+  { type: 'score', name: '评分' },
+  { type: 'heat', name: '热度' },
 ] as const
 
 export default function SortButton({
   value,
   onValueChanged,
 }: {
-  value: 'rank' | undefined
-  onValueChanged: (value: 'rank' | undefined) => void
+  value: SearchParam['sort']
+  onValueChanged: (value: SearchParam['sort']) => void
 }) {
   return (
     <div className="flex flex-row gap-2">
