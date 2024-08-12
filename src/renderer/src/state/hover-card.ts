@@ -9,11 +9,11 @@ let timeId: ReturnType<typeof setTimeout> | undefined
 
 export const hoverCardOpenAtomAction = atom(
   null,
-  (_get, set, value: boolean, delay: number = 50) => {
+  (_get, set, value: boolean, closeDelay: number = 50, openDelay: number = 200) => {
     clearTimeout(timeId)
     if (!value) {
-      timeId = setTimeout(() => set(hoverCardOpenAtom, value), delay)
-    } else setTimeout(() => set(hoverCardOpenAtom, value))
+      timeId = setTimeout(() => set(hoverCardOpenAtom, value), closeDelay)
+    } else timeId = setTimeout(() => set(hoverCardOpenAtom, value), openDelay)
   },
 )
 
