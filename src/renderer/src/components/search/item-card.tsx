@@ -21,7 +21,7 @@ const ICON_MAP = {
 export default function SearchItemCard({ searchItem }: { searchItem: SearchData }) {
   return (
     <MyLink to={`/subject/${searchItem.id}`}>
-      <Card className="flex h-full max-h-52 shrink-0 flex-col gap-2 overflow-hidden py-2 pl-2 shadow-none hover:shadow-lg hover:duration-500">
+      <Card className="flex h-full max-h-52 shrink-0 flex-col gap-2 overflow-hidden p-2 shadow-none hover:shadow-lg hover:duration-500">
         <div className="flex h-full flex-row gap-2">
           {!isEmpty(searchItem.image) ? (
             <Image
@@ -36,7 +36,7 @@ export default function SearchItemCard({ searchItem }: { searchItem: SearchData 
             </div>
           )}
           <div className="flex h-full w-full flex-col">
-            <div className="flex w-full flex-col pr-2">
+            <div className="flex w-full flex-col">
               <section className="w-fll flex flex-row items-start justify-between gap-1">
                 <Header {...searchItem} />
                 {searchItem.rank !== 0 && (
@@ -75,20 +75,22 @@ export default function SearchItemCard({ searchItem }: { searchItem: SearchData 
                 )}
               </div>
             </div>
-            <ScrollWrapper className="pb-2 pr-2" options={{ scrollbars: { autoHide: 'leave' } }}>
-              <div className="mt-1 flex flex-row flex-wrap gap-1.5 after:grow-[999]">
-                {searchItem.tags.map((item) => (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    key={item.name}
-                    className="h-auto flex-auto whitespace-normal px-1 py-1 shadow-none"
-                  >
-                    {item.name}
-                  </Button>
-                ))}
-              </div>
-            </ScrollWrapper>
+            <div className="h-full overflow-hidden">
+              <ScrollWrapper className="h-full pb-2 pr-1">
+                <div className="mt-1 flex flex-row flex-wrap gap-1.5 after:grow-[999]">
+                  {searchItem.tags.map((item) => (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      key={item.name}
+                      className="h-auto flex-auto whitespace-normal px-1 py-1 shadow-none"
+                    >
+                      {item.name}
+                    </Button>
+                  ))}
+                </div>
+              </ScrollWrapper>
+            </div>
           </div>
         </div>
       </Card>
