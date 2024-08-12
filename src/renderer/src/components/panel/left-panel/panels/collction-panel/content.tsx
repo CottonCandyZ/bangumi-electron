@@ -17,7 +17,7 @@ export default function SubjectCollectionPanelContent() {
     isLogin && (
       <ScrollWrapper
         className={cn(
-          'scroll h-[calc(100dvh-72px)] shrink-0 overflow-x-hidden bg-background p-1 pr-0.5',
+          'scroll h-[calc(100dvh-64px)] shrink-0 overflow-x-hidden bg-background p-1 pr-0.5',
         )}
         // options={{ scrollbars: { autoHide: 'scroll' } }}
       >
