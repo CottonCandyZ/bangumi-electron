@@ -16,8 +16,8 @@ export default function SubjectCollectionPanelContent() {
   return (
     isLogin && (
       <ScrollWrapper
-        className={cn('h-[calc(100dvh-72px)] shrink-0 overflow-x-hidden bg-background p-1')}
-        options={{ scrollbars: { autoHide: 'scroll' } }}
+        className={cn('scroll h-[calc(100dvh-72px)] shrink-0 overflow-x-hidden bg-background p-1')}
+        // options={{ scrollbars: { autoHide: 'scroll' } }}
       >
         <CollectionsGrid subjectType={subjectType} collectionType={currentSelect} />
       </ScrollWrapper>

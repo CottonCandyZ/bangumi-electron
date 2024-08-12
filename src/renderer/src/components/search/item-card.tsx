@@ -75,7 +75,7 @@ export default function SearchItemCard({ searchItem }: { searchItem: SearchData 
                 )}
               </div>
             </div>
-            <ScrollWrapper className="pb-2 pr-3" options={{ scrollbars: { autoHide: 'leave' } }}>
+            <ScrollWrapper className="pb-2 pr-2" options={{ scrollbars: { autoHide: 'leave' } }}>
               <div className="mt-1 flex flex-row flex-wrap gap-1.5 after:grow-[999]">
                 {searchItem.tags.map((item) => (
                   <Button

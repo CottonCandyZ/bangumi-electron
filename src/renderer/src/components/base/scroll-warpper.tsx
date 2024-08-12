@@ -12,17 +12,18 @@ export default function ScrollWrapper({
   ...props
 }: OverlayScrollbarsComponentProps) {
   const typeOptions = options as PartialOptions | undefined
-  return (
-    <OverlayScrollbarsComponent
-      className={cn('pr-2', className)}
-      options={{
-        ...typeOptions,
-        scrollbars: { ...typeOptions?.scrollbars, theme: 'os-theme-custom', clickScroll: true },
-      }}
-      defer
-      {...props}
-    >
-      {children}
-    </OverlayScrollbarsComponent>
-  )
+  // return (
+  //   <OverlayScrollbarsComponent
+  //     className={cn('pr-2', className)}
+  //     options={{
+  //       ...typeOptions,
+  //       scrollbars: { ...typeOptions?.scrollbars, theme: 'os-theme-custom', clickScroll: true },
+  //     }}
+  //     defer
+  //     {...props}
+  //   >
+  //     {children}
+  //   </OverlayScrollbarsComponent>
+  // )
+  return <div className={cn('scroll overflow-auto', className)}>{children}</div>
 }
