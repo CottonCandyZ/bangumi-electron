@@ -1,6 +1,6 @@
 import PageScrollWrapper from '@renderer/components/base/page-scroll-wrapper'
 import Header from '@renderer/components/header'
-import { BackCover } from '@renderer/components/hover-card/close'
+import { BackCover } from '@renderer/components/hover-pop-card/close'
 import NavBar from '@renderer/components/nav'
 import LeftResizablePanel from '@renderer/components/panel/left-panel'
 import RightResizablePanel from '@renderer/components/panel/right-panel'

@@ -5,7 +5,7 @@ import {
   HoverCardItem,
   HoverPopCard,
   PopCardContent,
-} from '@renderer/components/hover-card'
+} from '@renderer/components/hover-pop-card'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { RelatedSubject } from '@renderer/data/types/subject'
 import { unstable_useViewTransitionState, useLocation } from 'react-router-dom'

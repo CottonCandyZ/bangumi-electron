@@ -1,4 +1,4 @@
-import { cPopSizeByC } from '@renderer/components/hover-card/utils'
+import { cPopSizeByC } from '@renderer/components/hover-pop-card/utils'
 import { cn } from '@renderer/lib/utils'
 import {
   activeHoverPopCardAtom,

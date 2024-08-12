@@ -1,6 +1,6 @@
 import { CoverMotionImage } from '@renderer/components/base/cover-motion-image'
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
-import { cHoverCardSize } from '@renderer/components/hover-card/utils'
+import { cHoverCardSize } from '@renderer/components/hover-pop-card/utils'
 import { MotionSkeleton } from '@renderer/components/ui/motion-skeleton'
 import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent } from '@renderer/components/ui/card'

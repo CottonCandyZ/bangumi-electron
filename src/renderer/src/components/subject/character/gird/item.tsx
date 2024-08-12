@@ -1,5 +1,5 @@
 import { Image } from '@renderer/components/base/Image'
-import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/components/hover-card'
+import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/components/hover-pop-card'
 import Actors from '@renderer/components/subject/character/gird/actor'
 import Detail from '@renderer/components/subject/character/gird/detail'
 import { Badge } from '@renderer/components/ui/badge'
