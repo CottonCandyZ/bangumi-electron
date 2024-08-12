@@ -10,6 +10,7 @@ import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persist
 import SessionWrapper from '@renderer/components/wrapper/session-wrapper'
 import { ClickScrollPlugin, OverlayScrollbars } from 'overlayscrollbars'
 import SheetWrapper from '@renderer/components/wrapper/sheet-wrapper'
+import HoverCard from '@renderer/components/base/hover-card/wrapper'
 
 OverlayScrollbars.plugin(ClickScrollPlugin)
 
@@ -45,6 +46,7 @@ export default function Wrapper({ children }: PropsWithChildren) {
           <TooltipProvider>
             <SheetWrapper>{children}</SheetWrapper>
           </TooltipProvider>
+          <HoverCard />
           <Toaster richColors className="pointer-events-auto" />
         </ThemeProvider>
       </SessionWrapper>

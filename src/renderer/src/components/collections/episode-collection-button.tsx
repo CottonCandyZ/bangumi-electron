@@ -16,7 +16,7 @@ import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
 import { EPISODE_COLLECTION_ACTION_MAP, EPISODE_COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 export default function EpisodeCollectionButton({
@@ -47,6 +47,9 @@ export default function EpisodeCollectionButton({
   const [hover, setHover] = useState<(typeof EPISODE_COLLECTION_ACTION)[number] | null>(
     EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null,
   )
+  useEffect(() => {
+    setHover(EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null)
+  }, [episodeCollectionType])
   const queryKey = [
     'collection-episodes',
     {
