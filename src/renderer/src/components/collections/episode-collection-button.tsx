@@ -4,10 +4,11 @@ import { useSession } from '@renderer/components/wrapper/session-wrapper'
 import { EPISODE_COLLECTION_ACTION } from '@renderer/constant/collection'
 import {
   useMutationEpisodesCollectionBySubjectId,
+  useQueryCollectionEpisodesInfoBySubjectId,
   useQuerySubjectCollection,
 } from '@renderer/data/hooks/api/collection'
+import { SubjectId } from '@renderer/data/types/bgm'
 import {
-  CollectionEpisode,
   CollectionEpisodes,
   CollectionType,
   EpisodeCollectionType,
@@ -21,19 +22,25 @@ import { toast } from 'sonner'
 
 export default function EpisodeCollectionButton({
   index,
-  episodes,
+  subjectId,
   modifyEpisodeCollectionOpt,
   collectionType,
   setEnabledForm,
 }: {
   index: number
-  episodes: CollectionEpisode[]
+  subjectId: SubjectId
   collectionType: CollectionType | undefined
   setEnabledForm: (enabled: boolean) => void
 } & ModifyEpisodeCollectionOptType) {
-  const { userInfo, accessToken } = useSession()
+  const { isLogin, userInfo, accessToken } = useSession()
   const username = userInfo?.username
-  const subjectId = episodes[index].episode.subject_id.toString()
+  const collectionEpisodesQuery = useQueryCollectionEpisodesInfoBySubjectId({
+    ...modifyEpisodeCollectionOpt,
+    subjectId,
+    enabled: isLogin !== undefined && isLogin,
+  })
+  const collectionEpisodes = collectionEpisodesQuery.data
+  const episodes = collectionEpisodes?.data
   const subjectCollectionQuery = useQuerySubjectCollection({
     subjectId,
     username,
@@ -43,12 +50,14 @@ export default function EpisodeCollectionButton({
   const subjectCollection = subjectCollectionQuery.data
 
   const queryClient = useQueryClient()
-  const episodeCollectionType = episodes[index].type
+  const episodeCollectionType = episodes?.[index].type
   const [hover, setHover] = useState<(typeof EPISODE_COLLECTION_ACTION)[number] | null>(
-    EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null,
+    episodeCollectionType ? (EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null) : null,
   )
   useEffect(() => {
-    setHover(EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null)
+    setHover(
+      episodeCollectionType ? (EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null) : null,
+    )
   }, [episodeCollectionType])
   const queryKey = [
     'collection-episodes',
@@ -79,16 +88,17 @@ export default function EpisodeCollectionButton({
       })
       const { episodesId, episodeCollectionType } = variable
       const pre = queryClient.getQueryData(queryKey) as CollectionEpisodes
-      queryClient.setQueryData(queryKey, (pre: CollectionEpisodes) => {
-        return {
-          ...pre,
-          data: episodes.map((item) => {
-            if (episodesId.includes(item.episode.id)) {
-              return { ...item, type: episodeCollectionType }
-            } else return item
-          }),
-        }
-      })
+      if (episodes)
+        queryClient.setQueryData(queryKey, (pre: CollectionEpisodes) => {
+          return {
+            ...pre,
+            data: episodes.map((item) => {
+              if (episodesId.includes(item.episode.id)) {
+                return { ...item, type: episodeCollectionType }
+              } else return item
+            }),
+          }
+        })
       return { pre }
     },
     onSettled() {
@@ -102,6 +112,8 @@ export default function EpisodeCollectionButton({
   })
   if (subjectCollection === null) return null
   if (accessToken === undefined) return null
+  if (episodes === undefined || episodeCollectionType == undefined)
+    return <Skeleton className="h-9 w-52" />
   if (collectionType !== undefined) {
     if (collectionType !== CollectionType.watching) return null
   } else {
@@ -127,7 +139,6 @@ export default function EpisodeCollectionButton({
                 hover === item && 'border-border bg-background text-foreground',
                 EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] == item && 'cursor-default',
               )}
-              disabled={episodeCollectionMutation.isPending}
               key={item}
               onClick={(e) => {
                 if (item === EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType]) return
@@ -168,7 +179,6 @@ export default function EpisodeCollectionButton({
             })
             e.preventDefault()
           }}
-          disabled={episodeCollectionMutation.isPending}
         >
           撤销
         </Button>
