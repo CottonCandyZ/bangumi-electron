@@ -35,7 +35,7 @@ export default function HoverEpisodeDetail() {
       <div className="flex flex-col gap-2">
         {bottom && isCollectionEpisode(episodes) && (
           <EpisodeCollectionButton
-            episodes={episodes}
+            subjectId={episode.subject_id.toString()}
             index={index}
             modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
             collectionType={collectionType}
@@ -66,7 +66,7 @@ export default function HoverEpisodeDetail() {
         <span className="text-sm">讨论：{episode.comment}</span>
         {!bottom && isCollectionEpisode(episodes) && (
           <EpisodeCollectionButton
-            episodes={episodes}
+            subjectId={episode.subject_id.toString()}
             index={index}
             modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
             collectionType={collectionType}

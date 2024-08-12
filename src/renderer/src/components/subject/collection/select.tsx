@@ -60,7 +60,6 @@ export default function SubjectCollectionSelector({
           collectionType: Number(value) as CollectionType,
         })
       }}
-      disabled={subjectCollectionMutation.isPending}
     >
       <SelectTrigger className="w-fit bg-background font-medium">
         <SelectValue />

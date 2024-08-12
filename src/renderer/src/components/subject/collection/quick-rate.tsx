@@ -45,7 +45,6 @@ export default function QuickRate({ subjectCollection }: { subjectCollection: Co
   })
   return (
     <RateButtons
-      disabled={subjectCollectionMutation.isPending}
       rate={subjectCollection.rate}
       onRateChanged={(value) => {
         subjectCollectionMutation.mutate({

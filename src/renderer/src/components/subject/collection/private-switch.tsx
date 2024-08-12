@@ -51,9 +51,7 @@ export default function PrivateSwitch({
   })
 
   return (
-    <div
-      className={cn('flex items-center gap-2', subjectCollectionMutation.isPending && 'opacity-50')}
-    >
+    <div className={cn('flex items-center gap-2')}>
       <Label
         htmlFor="private-switch"
         className={cn('text-muted-foreground/70', subjectCollection.private && 'text-primary')}
@@ -63,7 +61,6 @@ export default function PrivateSwitch({
       <Switch
         id="private-switch"
         checked={subjectCollection.private}
-        disabled={subjectCollectionMutation.isPending}
         onCheckedChange={(checked) => {
           subjectCollectionMutation.mutate({
             subjectId: subjectCollection.subject_id.toString(),
