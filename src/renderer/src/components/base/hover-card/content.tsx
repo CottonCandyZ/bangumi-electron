@@ -5,7 +5,7 @@ import { hoverCardOpenAtomAction, triggerClientRectAtom } from '@renderer/state/
 import { Align, Side } from '@renderer/type/ui'
 import { motion } from 'framer-motion'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { HTMLProps, PropsWithChildren, useLayoutEffect, useRef, useState } from 'react'
+import { HTMLProps, PropsWithChildren, useCallback, useLayoutEffect, useRef, useState } from 'react'
 
 export default function HoverCardContent({
   children,
@@ -29,9 +29,10 @@ export default function HoverCardContent({
 >) {
   const triggerClientRect = useAtomValue(triggerClientRectAtom)
   const ref = useRef<HTMLDivElement>(null)
-  const [transition, setTransition] = useState({ X: 0, Y: 0 })
+  const [translate, setTranslate] = useState({ X: 0, Y: 0 })
   const [position, setPosition] = useState<Record<'X' | 'Y', number> | null>(null)
-  useLayoutEffect(() => {
+
+  const calc = useCallback(() => {
     if (!triggerClientRect || !ref.current) return
     const c = calcPos({
       margin,
@@ -41,20 +42,24 @@ export default function HoverCardContent({
       content: ref.current.getBoundingClientRect(),
     })
     if (position === null) setPosition({ ...c })
-    else setTransition({ X: c.X - position.X, Y: c.Y - position.Y })
+    else setTranslate({ X: c.X - position.X, Y: c.Y - position.Y })
     isBottom && isBottom(c.bottom)
+  }, [
+    margin,
+    collisionPadding,
+    align,
+    triggerClientRect,
+    ref.current,
+    setPosition,
+    setTranslate,
+    isBottom,
+  ])
+
+  useLayoutEffect(() => {
+    if (!ref.current) return
+    calc()
     const ob = new ResizeObserver(() => {
-      if (!ref.current) return
-      const c = calcPos({
-        margin,
-        collisionPadding,
-        align,
-        trigger: triggerClientRect,
-        content: ref.current.getBoundingClientRect(),
-      })
-      if (position === null) setPosition({ ...c })
-      else setTransition({ X: c.X - position.X, Y: c.Y - position.Y })
-      isBottom && isBottom(c.bottom)
+      calc()
     })
     ob.observe(ref.current)
     return () => {
@@ -72,8 +77,8 @@ export default function HoverCardContent({
       )}
       animate={{
         opacity: [0, 1],
-        translateX: transition.X,
-        translateY: transition.Y,
+        translateX: translate.X,
+        translateY: translate.Y,
       }}
       transition={{
         duration: 0.2,
