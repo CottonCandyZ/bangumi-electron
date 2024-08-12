@@ -38,7 +38,7 @@ export default function NavBar() {
             <span className="i-mingcute-menu-line flex text-[1.4rem]" />
           </Button>
         </div>
-        <div className="flex h-full w-full flex-col justify-between overflow-x-scroll px-2.5 pb-2 pt-2">
+        <div className="flex h-full w-full flex-col justify-between overflow-auto px-2.5 pb-2 pt-2">
           <div className="flex w-full flex-col gap-2">
             <LinkNav />
             <Separator />
