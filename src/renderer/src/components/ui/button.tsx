@@ -22,7 +22,7 @@ const buttonVariants = cva(
         wantToWatch: "bg-[var(--want-to-watch-accent)] text-[var(--want-to-watch-accent-foreground)] shadow-inner hover:bg-[var(--want-to-watch)] hover:text-[var(--want-to-watch-foreground)]",
         watched: "border border-input bg-[var(--watched-accent)] text-[var(--watched-accent-foreground)] shadow-inner hover:shadow-none hover:bg-[var(--watched)] hover:text-[var(--watched-foreground)]",
         abandoned: "border border-primary-foreground line-through shadow-inner hover:bg-accent hover:text-accent-foreground text-muted-foreground",
-        noAired: "hover:bg-accent hover:text-accent-foreground text-muted-foreground",
+        noAired: "hover:bg-accent hover:text-accent-foreground text-muted-foreground hover:shadow",
         onAir:
           "border border-input bg-background text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground",
         aired:
@@ -30,7 +30,7 @@ const buttonVariants = cva(
         wantToWatchHover: "shadow-inner bg-[var(--want-to-watch)] text-[var(--want-to-watch-foreground)]",
         watchedHover: "border border-input shadow-inner hover:shadow-none bg-[var(--watched)] text-[var(--watched-foreground)]",
         abandonedHover: "border border-primary-foreground line-through shadow-inner bg-accent text-accent-foreground text-muted-foreground",
-        noAiredHover: "bg-accent text-accent-foreground",
+        noAiredHover: "bg-accent text-accent-foreground shadow",
         onAirHover:
           "border border-input text-muted-foreground shadow-sm bg-accent text-accent-foreground",
         airedHover:

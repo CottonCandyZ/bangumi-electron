@@ -10,8 +10,9 @@ import { Episode } from '@renderer/data/types/episode'
 import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
 import { getOnAirStatus } from '@renderer/lib/utils/date'
-import { hoverCardEpisodeContentAtom } from '@renderer/state/hover-card'
-import { useSetAtom } from 'jotai'
+import { hoverCardEpisodeContentAtom, hoverCardOpenAtom } from '@renderer/state/hover-card'
+import { useAtom, useAtomValue } from 'jotai'
+import { useEffect, useState } from 'react'
 
 function isCollectionEpisode(
   episodes: Episode[] | CollectionEpisode[],
@@ -34,7 +35,7 @@ export default function EpisodeGridItem({
 } & EpisodeGridSize &
   ModifyEpisodeCollectionOptType) {
   const episode = isCollectionEpisode(episodes) ? episodes[index].episode : episodes[index]
-  const setHoverCardContent = useSetAtom(hoverCardEpisodeContentAtom)
+  const [hoverCardContent, setHoverCardContent] = useAtom(hoverCardEpisodeContentAtom)
   const episodeCollectionType = isCollectionEpisode(episodes)
     ? episodes[index].type
     : EpisodeCollectionType.notCollected
@@ -45,6 +46,11 @@ export default function EpisodeGridItem({
           keyof typeof EpisodeCollectionType,
           'notCollected'
         >)
+  const [selfOpen, setSelfOpen] = useState(false)
+  const open = useAtomValue(hoverCardOpenAtom)
+  useEffect(() => {
+    if (hoverCardContent?.episodes[hoverCardContent.index] !== episodes[index]) setSelfOpen(false)
+  }, [hoverCardContent])
 
   return (
     <HoverCardTrigger
@@ -56,6 +62,7 @@ export default function EpisodeGridItem({
           setEnabledForm,
           modifyEpisodeCollectionOpt,
         })
+        setSelfOpen(true)
       }}
     >
       <Button
@@ -64,7 +71,7 @@ export default function EpisodeGridItem({
           `h-10 min-w-10 rounded-md p-2`,
           size === 'small' && 'h-6 min-w-6 rounded-sm p-1 text-xs',
         )}
-        variant={status}
+        variant={selfOpen && open ? `${status}Hover` : status}
       >
         {episode.sort}
       </Button>
