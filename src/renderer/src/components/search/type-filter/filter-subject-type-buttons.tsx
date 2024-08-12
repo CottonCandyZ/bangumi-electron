@@ -19,7 +19,7 @@ export default function SubjectTypeFilterButtons({
   onFilterClick: (filter: null | SubjectType) => void
 }) {
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-wrap gap-2">
       {subjectTypeFilter.map((item) => (
         <Button
           key={item.name}
