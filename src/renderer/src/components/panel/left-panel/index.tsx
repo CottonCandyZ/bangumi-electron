@@ -21,7 +21,7 @@ export default function LeftResizablePanel() {
       <>
         <ResizablePanel
           defaultSize={25}
-          minSize={20}
+          minSize={15}
           maxSize={70}
           order={1}
           id="list"

@@ -22,7 +22,7 @@ export const useInfinityQueryCollectionsByUsername = ({
   username,
   subjectType,
   collectionType,
-  limit = 3,
+  limit = 5,
   initialPageParam = 0,
   enabled,
   needKeepPreviousData,
