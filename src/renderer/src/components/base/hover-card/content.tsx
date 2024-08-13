@@ -42,7 +42,10 @@ export default function HoverCardContent({
       content: ref.current.getBoundingClientRect(),
     })
     if (position === null) setPosition({ ...c })
-    else setTranslate({ X: c.X - position.X, Y: c.Y - position.Y })
+    else {
+      setTranslate({ X: c.X - position.X, Y: 0 })
+      setPosition({ ...position, Y: c.Y })
+    }
     isBottom && isBottom(c.bottom)
   }, [
     margin,
@@ -78,10 +81,9 @@ export default function HoverCardContent({
       animate={{
         opacity: [0, 1],
         translateX: translate.X,
-        translateY: translate.Y,
       }}
       transition={{
-        duration: 0.2,
+        duration: 0.1,
       }}
       style={{
         top: position?.Y ?? 0,
