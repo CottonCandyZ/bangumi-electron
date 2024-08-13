@@ -3,7 +3,6 @@ import { UI_CONFIG } from '@renderer/config'
 import { cn } from '@renderer/lib/utils'
 import { hoverCardOpenAtomAction, triggerClientRectAtom } from '@renderer/state/hover-card'
 import { Align, Side } from '@renderer/type/ui'
-import { motion } from 'framer-motion'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { HTMLProps, PropsWithChildren, useCallback, useLayoutEffect, useRef, useState } from 'react'
 
@@ -72,27 +71,21 @@ export default function HoverCardContent({
   const setOpen = useSetAtom(hoverCardOpenAtomAction)
 
   return (
-    <motion.div
+    <div
       ref={ref}
       className={cn(
-        'fixed z-50 w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none',
+        'fixed z-50 w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none transition-transform duration-100 animate-in fade-in-0',
         className,
       )}
-      animate={{
-        opacity: [0, 1],
-        translateX: translate.X,
-      }}
-      transition={{
-        duration: 0.1,
-      }}
       style={{
         top: position?.Y ?? 0,
         left: position?.X ?? 0,
+        transform: `translateX(${translate.X}px)`,
       }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
       {children}
-    </motion.div>
+    </div>
   )
 }
