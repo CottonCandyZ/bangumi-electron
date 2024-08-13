@@ -10,26 +10,25 @@ export default function SubjectPersonTable({ subjectId }: { subjectId: SubjectId
   const personsQuery = useWebInfoBoxQuery({ subjectId })
   const persons = personsQuery.data
   return (
-    <ScrollWrapper
-      className="h-[calc(100dvh-64px)] w-full pr-0"
-      options={{ scrollbars: { autoHide: 'leave' } }}
-    >
-      {persons === undefined ? (
-        <div className="flex w-full flex-col gap-1 p-2">
-          {Array(10)
-            .fill(0)
-            .map((_, index) => (
-              <Fragment key={index}>
-                <div className="flex flex-row gap-1">
-                  <Skeleton className="h-9 w-full" />
-                </div>
-                {index !== 9 && <Separator />}
-              </Fragment>
-            ))}
-        </div>
-      ) : (
-        persons.size !== 0 && <PersonsTable persons={persons} />
-      )}
-    </ScrollWrapper>
+    <div className="h-full pr-1">
+      <ScrollWrapper className="h-full w-full pr-1" options={{ scrollbars: { autoHide: 'leave' } }}>
+        {persons === undefined ? (
+          <div className="flex w-full flex-col gap-1 p-2">
+            {Array(10)
+              .fill(0)
+              .map((_, index) => (
+                <Fragment key={index}>
+                  <div className="flex flex-row gap-1">
+                    <Skeleton className="h-9 w-full" />
+                  </div>
+                  {index !== 9 && <Separator />}
+                </Fragment>
+              ))}
+          </div>
+        ) : (
+          persons.size !== 0 && <PersonsTable persons={persons} />
+        )}
+      </ScrollWrapper>
+    </div>
   )
 }

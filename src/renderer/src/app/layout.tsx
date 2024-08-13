@@ -15,11 +15,11 @@ function RootLayout() {
       <div className="ml-16 flex">
         <ResizablePanelGroup direction="horizontal" autoSaveId="main-panel">
           <LeftResizablePanel />
-          <ResizablePanel order={2} id="main">
+          <ResizablePanel order={2} id="main" className="flex h-dvh flex-col">
             <Header />
             <ResizablePanelGroup direction="horizontal" autoSaveId="sub-panel">
               <ResizablePanel order={1} id="left">
-                <PageScrollWrapper className="h-[calc(100dvh-64px)] w-full">
+                <PageScrollWrapper className="h-full w-full overflow-hidden">
                   <div>
                     <Outlet />
                   </div>

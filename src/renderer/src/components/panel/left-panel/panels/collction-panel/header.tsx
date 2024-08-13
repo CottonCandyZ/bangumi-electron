@@ -15,7 +15,7 @@ export default function SubjectCollectionPanelHeader() {
   const currentSelect = filterMap.get(subjectType.toString()) ?? CollectionType['watching']
   const isRefetching = useAtomValue(collectionPanelIsRefetchingAtom)
   return (
-    <div className="drag-region flex h-16 flex-row items-center justify-end gap-5 border-b px-5">
+    <div className="drag-region flex h-16 shrink-0 flex-row items-center justify-end gap-5 border-b px-5">
       {isLogin && (
         <>
           {isRefetching && <span className="i-mingcute-loading-line animate-spin text-2xl" />}

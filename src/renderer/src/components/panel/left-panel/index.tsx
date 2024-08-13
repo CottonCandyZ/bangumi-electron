@@ -27,7 +27,7 @@ export default function LeftResizablePanel() {
           id="list"
           className="min-w-64"
         >
-          <div ref={ref} className="pr-0.5">
+          <div ref={ref}>
             <LeftPanel />
           </div>
         </ResizablePanel>

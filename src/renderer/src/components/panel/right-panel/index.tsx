@@ -21,7 +21,7 @@ export default function RightResizablePanel() {
       <>
         <ResizableHandle className="w-0 border-r" />
         <ResizablePanel defaultSize={25} minSize={15} maxSize={40} order={2} id="right">
-          <div ref={ref} className="flex">
+          <div ref={ref} className="h-full">
             <RightPanel />
           </div>
         </ResizablePanel>

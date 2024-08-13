@@ -3,9 +3,9 @@ import SubjectCollectionPanelHeader from '@renderer/components/panel/left-panel/
 
 export default function CollectionPanel() {
   return (
-    <>
+    <div className="flex h-dvh flex-col">
       <SubjectCollectionPanelHeader />
       <SubjectCollectionPanelContent />
-    </>
+    </div>
   )
 }
