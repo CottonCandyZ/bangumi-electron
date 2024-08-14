@@ -9,7 +9,7 @@ export default function SearchContentWrapper() {
   return (
     searchParam && (
       <div className="flex flex-col gap-5">
-        <Separator className="w-full" />
+        <Separator className="h-0 w-full border-b" />
         <div className="px-10">
           <Sort />
         </div>

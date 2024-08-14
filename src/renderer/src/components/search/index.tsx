@@ -5,7 +5,7 @@ import SubjectTypeFilter from '@renderer/components/search/type-filter'
 export default function Search() {
   return (
     <div className="flex w-full flex-col gap-5">
-      <div className="px-10">
+      <div>
         <SearchInput />
       </div>
       <div className="px-10">

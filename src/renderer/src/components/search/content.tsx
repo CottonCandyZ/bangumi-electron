@@ -28,7 +28,7 @@ export default function SearchContent({ searchParam }: { searchParam: SearchPara
     )
 
   return (
-    <div className="flex flex-col items-center justify-center gap-5 pb-10">
+    <div className="flex flex-col items-center justify-center gap-5">
       <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(25rem,_1fr))] gap-4 px-10">
         {searchResultQuery.isRefetching
           ? Array(9)

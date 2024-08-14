@@ -15,7 +15,7 @@ export default function SearchInput() {
   }, [searchParam])
 
   return (
-    <search className="group flex h-12 w-full max-w-xl items-center gap-2 rounded-xl border bg-accent px-2 pl-4 transition-colors focus-within:bg-background focus-within:ring-1 focus-within:ring-ring hover:bg-background">
+    <search className="group flex h-12 w-full items-center gap-2 border-b bg-accent/50 px-2 pl-4 transition-colors focus-within:bg-background hover:bg-background">
       <span className="i-mingcute-search-2-line text-4xl" />
       <input
         value={keyword}
