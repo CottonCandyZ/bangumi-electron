@@ -42,7 +42,7 @@ export default function SearchContent({ searchParam }: { searchParam: SearchPara
           value={Math.floor(offset / 20) + 1}
           onValueChanged={(value) => {
             setOffset((value - 1) * searchResult.limit)
-            updateScrollPosition({ position: 160 })
+            updateScrollPosition({ position: 125 })
           }}
         />
       </div>
