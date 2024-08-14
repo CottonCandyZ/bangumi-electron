@@ -37,5 +37,4 @@ export const useQuerySearch = ({
     queryKey: ['search'],
     queryFn: searchV0,
     queryProps: { offset, limit, searchParam },
-    needKeepPreviousData: false,
   })

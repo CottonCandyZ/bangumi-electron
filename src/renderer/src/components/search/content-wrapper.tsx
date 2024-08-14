@@ -13,9 +13,7 @@ export default function SearchContentWrapper() {
         <div className="px-10">
           <Sort />
         </div>
-        <div className="px-10">
-          <SearchContent searchParam={searchParam} />
-        </div>
+        <SearchContent searchParam={searchParam} />
       </div>
     )
   )
