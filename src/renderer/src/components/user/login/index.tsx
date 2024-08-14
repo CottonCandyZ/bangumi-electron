@@ -8,13 +8,13 @@ import {
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import LoginForm from '@renderer/components/user/login/form'
 import { CircleHelp } from 'lucide-react'
-import { useState } from 'react'
+import { PropsWithChildren, useState } from 'react'
 
-export default function Login() {
+export default function Login({ children }: PropsWithChildren) {
   const [open, setOpen] = useState(false)
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>登录</DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>

@@ -16,6 +16,8 @@ import { collectionBoxInViewAtom } from '@renderer/state/in-view'
 import ModifySubjectCollection from '@renderer/components/subject/collection/modify-action'
 import ScrollWrapper from '@renderer/components/base/scroll-warpper'
 import { isEmpty } from '@renderer/lib/utils/string'
+import Login from '@renderer/components/user/login'
+import { Button } from '@renderer/components/ui/button'
 
 export default function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const { isLogin, userInfo, accessToken } = useSession()
@@ -41,7 +43,12 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
     subjectCollection === undefined ||
     userInfo === undefined ||
     isLogin === undefined
-  if (!isLogin || !accessToken) return <div>登录按钮</div>
+  if (!isLogin || !accessToken)
+    return (
+      <Login>
+        <Button className="">登录</Button>
+      </Login>
+    )
   return (
     <div className="flex flex-col gap-2" ref={ref}>
       <div className="flex flex-row items-center justify-between">
