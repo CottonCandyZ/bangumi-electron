@@ -8,8 +8,8 @@ export const route = [
     active: <span className="i-mingcute-home-2-fill text-[1.4rem]" />,
   },
   {
-    name: '索引',
-    path: '/index',
+    name: '搜索',
+    path: '/search',
     icon: <span className="i-mingcute-search-line text-[1.4rem]" />,
     active: <span className="i-mingcute-search-fill text-[1.4rem]" />,
   },

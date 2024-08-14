@@ -35,7 +35,7 @@ export const router: ReturnType<typeof createHashRouter> = createHashRouter([
             lazy: () => import('@renderer/app/real/page'),
           },
           {
-            path: 'index',
+            path: 'search',
             lazy: () => import('@renderer/app/search/page'),
           },
           {
