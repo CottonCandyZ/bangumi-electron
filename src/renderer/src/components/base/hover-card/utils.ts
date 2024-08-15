@@ -14,15 +14,16 @@ export function calcPos({
   trigger: DOMRect
   content: DOMRect
 }) {
-  // const toTop = trigger.top - margin - undefinedToZero(collisionPadding?.top)
+  const toTop = trigger.top - margin - undefinedToZero(collisionPadding?.top)
   // const toLeft = trigger.left - undefinedToZero(collisionPadding?.left)
   const toBottom =
     window.innerHeight - trigger.bottom - margin - undefinedToZero(collisionPadding?.bottom)
   // const toRight = window.innerWidth - trigger.right - undefinedToZero(collisionPadding?.right)
-  let bottom = true
 
-  let X = 0,
-    Y = 0
+  let X: number | undefined,
+    top: number | undefined,
+    bottom: number | undefined,
+    height: number | undefined
   if (align == 'start') {
     X = trigger.left
     if (X + content.width > window.innerWidth - undefinedToZero(collisionPadding?.right)) {
@@ -35,11 +36,18 @@ export function calcPos({
   }
   if (toBottom >= content.height) {
     // bottom
-    Y = trigger.bottom + margin
-  } else {
+    top = trigger.bottom + margin
+  } else if (toTop >= content.height) {
     // top
-    bottom = false
-    Y = trigger.top - margin - content.height
+    bottom = window.innerHeight - trigger.top + margin
+  } else {
+    if (toTop > toBottom) {
+      bottom = window.innerHeight - trigger.top + margin
+      height = toTop
+    } else {
+      top = trigger.bottom + margin
+      height = toBottom
+    }
   }
   if (X < 0) {
     X = undefinedToZero(collisionPadding?.left)
@@ -47,5 +55,5 @@ export function calcPos({
   if (X + content.width > window.innerWidth - undefinedToZero(collisionPadding?.right)) {
     X = window.innerWidth - content.width - undefinedToZero(collisionPadding?.right)
   }
-  return { X, Y, bottom }
+  return { X, top, bottom, height }
 }

@@ -122,10 +122,10 @@ export default function EpisodeCollectionButton({
   }
 
   return (
-    <div className="flex flex-row gap-1">
+    <div className="flex h-9 flex-row gap-1">
       <div
         className={cn(
-          'inline-flex min-h-9 w-fit flex-wrap items-center justify-center rounded-md bg-muted text-muted-foreground',
+          'inline-flex h-9 w-fit flex-wrap items-center justify-center rounded-md bg-muted text-muted-foreground',
         )}
         onMouseLeave={() => setHover(EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null)}
       >

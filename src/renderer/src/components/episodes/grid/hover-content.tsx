@@ -5,6 +5,7 @@ import EpisodeCollectionButton from '@renderer/components/collections/episode-co
 import { Separator } from '@renderer/components/ui/separator'
 import { CollectionEpisode } from '@renderer/data/types/collection'
 import { Episode } from '@renderer/data/types/episode'
+import { cn } from '@renderer/lib/utils'
 import { getDurationFromSeconds } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { hoverCardEpisodeContentAtom } from '@renderer/state/hover-card'
@@ -27,22 +28,25 @@ export default function HoverEpisodeDetail() {
   const [bottom, setBottom] = useState(true)
 
   return (
-    <HoverCardContent
-      align="start"
-      className="w-fit min-w-64 max-w-96"
-      isBottom={(value) => setBottom(value)}
-    >
-      <div className="flex flex-col gap-2">
-        {bottom && isCollectionEpisode(episodes) && (
-          <EpisodeCollectionButton
-            subjectId={episode.subject_id.toString()}
-            index={index}
-            modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
-            collectionType={collectionType}
-            setEnabledForm={setEnabledForm}
-          />
+    <HoverCardContent align="start" isBottom={(value) => setBottom(value)}>
+      <div
+        className={cn(
+          'flex min-w-64 max-w-96 flex-col gap-2 px-4',
+          isCollectionEpisode(episodes) ? (bottom ? 'pb-4' : 'pt-4') : 'py-4',
         )}
-        <div className="flex flex-row flex-wrap gap-x-2">
+      >
+        {bottom && isCollectionEpisode(episodes) && (
+          <div className="sticky top-0 bg-background pb-2 pt-4">
+            <EpisodeCollectionButton
+              subjectId={episode.subject_id.toString()}
+              index={index}
+              modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
+              collectionType={collectionType}
+              setEnabledForm={setEnabledForm}
+            />
+          </div>
+        )}
+        <div className="flex flex-row gap-x-2">
           <span className="font-bold">ep.{episode.sort}</span>
           {!isEmpty(episode.name) && <MediumHeader {...episode} />}
         </div>
@@ -65,13 +69,15 @@ export default function HoverEpisodeDetail() {
 
         <span className="text-sm">讨论：{episode.comment}</span>
         {!bottom && isCollectionEpisode(episodes) && (
-          <EpisodeCollectionButton
-            subjectId={episode.subject_id.toString()}
-            index={index}
-            modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
-            collectionType={collectionType}
-            setEnabledForm={setEnabledForm}
-          />
+          <div className="sticky bottom-0 bg-background pb-4 pt-2">
+            <EpisodeCollectionButton
+              subjectId={episode.subject_id.toString()}
+              index={index}
+              modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
+              collectionType={collectionType}
+              setEnabledForm={setEnabledForm}
+            />
+          </div>
         )}
       </div>
     </HoverCardContent>

@@ -28,8 +28,14 @@ export default function HoverCardContent({
 >) {
   const triggerClientRect = useAtomValue(triggerClientRectAtom)
   const ref = useRef<HTMLDivElement>(null)
-  const [translate, setTranslate] = useState({ X: 0, Y: 0 })
-  const [position, setPosition] = useState<Record<'X' | 'Y', number> | null>(null)
+  const [translate, setTranslate] = useState({ X: 0 })
+  const [position, setPosition] = useState<Record<'X' | 'top' | 'bottom', number | undefined>>({
+    X: undefined,
+    top: undefined,
+    bottom: undefined,
+  })
+  const [isCollision, setIsCollision] = useState(false)
+  const [height, setHeight] = useState<number | 'auto'>('auto')
 
   const calc = useCallback(() => {
     if (!triggerClientRect || !ref.current) return
@@ -40,12 +46,19 @@ export default function HoverCardContent({
       trigger: triggerClientRect,
       content: ref.current.getBoundingClientRect(),
     })
-    if (position === null) setPosition({ ...c })
-    else {
-      setTranslate({ X: c.X - position.X, Y: 0 })
-      setPosition({ ...position, Y: c.Y })
+    if (c.height != undefined) {
+      setHeight(c.height)
+      setIsCollision(true)
+    } else {
+      setHeight(ref.current.getBoundingClientRect().height)
+      setIsCollision(false)
     }
-    isBottom && isBottom(c.bottom)
+    if (position.X === undefined) setPosition({ ...c })
+    else {
+      setTranslate({ X: c.X - (position.X ?? 0) })
+      setPosition({ ...position, top: c.top, bottom: c.bottom })
+    }
+    isBottom && isBottom(c.bottom === undefined)
   }, [
     margin,
     collisionPadding,
@@ -72,20 +85,23 @@ export default function HoverCardContent({
 
   return (
     <div
-      ref={ref}
       className={cn(
-        'fixed z-50 w-64 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none transition-transform duration-100 animate-in fade-in-0',
-        className,
+        'scroll fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md transition-[transform_height] duration-150 animate-in fade-in-0',
+        isCollision ? 'overflow-x-hidden' : 'overflow-hidden',
       )}
       style={{
-        top: position?.Y ?? 0,
-        left: position?.X ?? 0,
+        top: position.top,
+        left: position.X,
+        bottom: position.bottom,
         transform: `translateX(${translate.X}px)`,
+        height,
       }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      {children}
+      <div ref={ref} className={className}>
+        {children}
+      </div>
     </div>
   )
 }
