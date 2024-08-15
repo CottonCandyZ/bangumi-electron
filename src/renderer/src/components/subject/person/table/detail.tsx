@@ -1,6 +1,6 @@
 import { render } from '@bbob/react'
 import { Image } from '@renderer/components/base/Image'
-import ScrollWrapper from '@renderer/components/base/scroll-warpper'
+import ScrollWrapper from '@renderer/components/base/scroll-wrapper'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQueryPersonsById } from '@renderer/data/hooks/api/pesron'
 import { PersonId } from '@renderer/data/types/bgm'

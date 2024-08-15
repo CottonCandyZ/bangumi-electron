@@ -1,6 +1,6 @@
 import { MediumHeader } from '@renderer/components/base/headers'
 import HoverCardContent from '@renderer/components/base/hover-card/content'
-import ScrollWrapper from '@renderer/components/base/scroll-warpper'
+import ScrollWrapper from '@renderer/components/base/scroll-wrapper'
 import EpisodeCollectionButton from '@renderer/components/collections/episode-collection-button'
 import { Separator } from '@renderer/components/ui/separator'
 import { CollectionEpisode } from '@renderer/data/types/collection'

@@ -1,4 +1,4 @@
-import ScrollWrapper from '@renderer/components/base/scroll-warpper'
+import ScrollWrapper from '@renderer/components/base/scroll-wrapper'
 import AddOrModifySubjectCollectionForm from '@renderer/components/collections/modify/form/subject-form'
 import { SheetHeader, SheetTitle } from '@renderer/components/ui/sheet'
 import { openSheetAtom, subjectCollectionSheetFormPropsAtom } from '@renderer/state/sheet'

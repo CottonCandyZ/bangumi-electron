@@ -1,4 +1,4 @@
-import ScrollWrapper from '@renderer/components/base/scroll-warpper'
+import ScrollWrapper from '@renderer/components/base/scroll-wrapper'
 import PersonsTable from '@renderer/components/subject/person/table'
 import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'

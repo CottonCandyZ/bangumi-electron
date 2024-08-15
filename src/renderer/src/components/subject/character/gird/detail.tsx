@@ -1,4 +1,4 @@
-import ScrollWrapper from '@renderer/components/base/scroll-warpper'
+import ScrollWrapper from '@renderer/components/base/scroll-wrapper'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQueryCharacterDetailByID } from '@renderer/data/hooks/api/character'
 import { CharacterId } from '@renderer/data/types/bgm'

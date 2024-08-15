@@ -1,6 +1,6 @@
 import { Image } from '@renderer/components/base/Image'
 import { MyLink } from '@renderer/components/base/my-link'
-import ScrollWrapper from '@renderer/components/base/scroll-warpper'
+import ScrollWrapper from '@renderer/components/base/scroll-wrapper'
 import ScoreStarHalf from '@renderer/components/search/score-half'
 import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
