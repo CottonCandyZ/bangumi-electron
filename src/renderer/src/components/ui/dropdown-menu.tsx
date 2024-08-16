@@ -54,6 +54,12 @@ const DropdownMenuSubContent = React.forwardRef<
       className
     )}
     {...props}
+    collisionPadding={{
+      right: 8,
+      left: UI_CONFIG.NAV_WIDTH + 8,
+      bottom: 8,
+      top: UI_CONFIG.HEADER_HEIGHT + 8,
+    }}
   />
 ))
 DropdownMenuSubContent.displayName =
