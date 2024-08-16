@@ -4,7 +4,6 @@ import { useQueryCharacterDetailByID } from '@renderer/data/hooks/api/character'
 import { CharacterId } from '@renderer/data/types/bgm'
 import { render } from '@bbob/react'
 import { preset } from '@renderer/lib/utils/bbcode'
-import { motion } from 'framer-motion'
 
 export default function Detail({ characterId }: { characterId: CharacterId }) {
   const characterDetail = useQueryCharacterDetailByID({ id: characterId })
@@ -16,7 +15,7 @@ export default function Detail({ characterId }: { characterId: CharacterId }) {
     onlyAllowTags: ['mask'],
   })
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex h-full min-h-0">
+    <div className="flex h-full min-h-0">
       {characterDetailData.summary !== '' ? (
         <ScrollWrapper
           className="bbcode max-h-56 whitespace-pre-line py-0.5"
@@ -27,6 +26,6 @@ export default function Detail({ characterId }: { characterId: CharacterId }) {
       ) : (
         <p>暂时还没有说明哦～</p>
       )}
-    </motion.div>
+    </div>
   )
 }
