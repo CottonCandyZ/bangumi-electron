@@ -33,7 +33,11 @@ export const CoverMotionImage = forwardRef<
         draggable={false}
       >
         <motion.img
-          className={cn('h-full w-full max-w-none select-none object-cover', imageClassName, 'z-0')}
+          className={cn(
+            'h-full w-full max-w-none select-none object-cover',
+            imageClassName,
+            !imageSrc && 'invisible',
+          )}
           loading={loading}
           src={imageSrc}
           onLoad={() => setIsLoad(true)}
