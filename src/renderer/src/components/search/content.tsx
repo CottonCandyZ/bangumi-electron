@@ -19,7 +19,7 @@ export default function SearchContent({ searchParam }: { searchParam: SearchPara
   if (searchResult === undefined)
     return (
       <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(25rem,_1fr))] gap-4 px-10">
-        {Array(9)
+        {Array(20)
           .fill(0)
           .map((_, index) => (
             <Skeleton key={index} className="h-52 w-full" />
@@ -31,7 +31,7 @@ export default function SearchContent({ searchParam }: { searchParam: SearchPara
     <div className="flex flex-col items-center justify-center gap-5">
       <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(25rem,_1fr))] gap-4 px-10">
         {searchResultQuery.isRefetching
-          ? Array(9)
+          ? Array(20)
               .fill(0)
               .map((_, index) => <Skeleton key={index} className="h-52 w-full" />)
           : searchResult.data.map((item) => <SearchItemCard searchItem={item} key={item.id} />)}
