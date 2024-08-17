@@ -28,7 +28,6 @@ export default function SearchItemCard({ searchItem }: { searchItem: SearchData 
               imageSrc={searchItem.image}
               className="h-fit w-24 shrink-0 overflow-hidden rounded-lg shadow"
               loadingClassName="aspect-[2/3]"
-              isLoadInit
             />
           ) : (
             <div className="flex size-24 shrink-0 items-center justify-center rounded-lg border text-xs shadow">

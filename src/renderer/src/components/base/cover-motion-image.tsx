@@ -1,7 +1,8 @@
 import { MotionSkeleton } from '@renderer/components/ui/motion-skeleton'
 import { cn } from '@renderer/lib/utils'
+import { imageLoadCache } from '@renderer/state/global-var'
 import { HTMLMotionProps, motion } from 'framer-motion'
-import { forwardRef, useState } from 'react'
+import { forwardRef, useEffect, useState } from 'react'
 
 export const CoverMotionImage = forwardRef<
   HTMLDivElement,
@@ -24,7 +25,10 @@ export const CoverMotionImage = forwardRef<
     },
     ref,
   ) => {
-    const [isLoad, setIsLoad] = useState(false)
+    const [isLoad, setIsLoad] = useState(imageSrc ? (imageLoadCache.get(imageSrc) ?? false) : false)
+    useEffect(() => {
+      if (imageSrc) imageLoadCache.set(imageSrc, isLoad)
+    }, [isLoad])
     return (
       <motion.div
         className={cn('relative z-0', (!imageSrc || !isLoad) && loadingClassName, className)}

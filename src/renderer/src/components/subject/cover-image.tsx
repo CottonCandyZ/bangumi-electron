@@ -23,7 +23,7 @@ export default function SubjectCoverImage({ subjectId }: { subjectId: SubjectId 
   }, [isInView, subjectId])
   return (
     <Card
-      className="h-min w-60 shrink-0 overflow-hidden"
+      className="h-min w-56 shrink-0 overflow-hidden border-none"
       style={{
         viewTransitionName:
           isTransitioning && state?.viewTransitionName ? state.viewTransitionName : '',
@@ -32,11 +32,7 @@ export default function SubjectCoverImage({ subjectId }: { subjectId: SubjectId 
     >
       {subjectInfo !== undefined ? (
         !isEmpty(subjectInfo.images.common) ? (
-          <Image
-            imageSrc={subjectInfo.images.common}
-            loadingClassName="aspect-[22/31]"
-            isLoadInit
-          />
+          <Image imageSrc={subjectInfo.images.common} loadingClassName="aspect-[22/31]" />
         ) : (
           <div className="flex aspect-[2/3] items-center justify-center">还没有图片哦</div>
         )
