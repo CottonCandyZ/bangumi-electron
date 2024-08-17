@@ -1,3 +1,8 @@
+<p align='center'>
+  <img width="120"  height="120" src="build/icon.png">
+</p>
+<p align='center'>icon is from <a href='https://next.bgm.tv'>next.bgm.tv</a></p>
+
 # 🚧 Developing 🚧
 
 Will be a Electron Desktop Application for [bgm.tv](https://bgm.tv) 🎉
