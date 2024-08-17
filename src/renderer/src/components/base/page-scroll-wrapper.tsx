@@ -29,6 +29,7 @@ export default function PageScrollWrapper({
     instance?.elements().viewport.scrollTo({
       top: updateScrollPosition.position,
     })
+    if (instance) scrollCache.set(pathname, instance.elements().viewport.scrollTop)
   }, [updateScrollPosition])
 
   useEffect(() => {
