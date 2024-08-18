@@ -5,14 +5,9 @@ import { EPISODE_COLLECTION_ACTION } from '@renderer/constant/collection'
 import {
   useMutationEpisodesCollectionBySubjectId,
   useQueryCollectionEpisodesInfoBySubjectId,
-  useQuerySubjectCollection,
 } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
-import {
-  CollectionEpisodes,
-  CollectionType,
-  EpisodeCollectionType,
-} from '@renderer/data/types/collection'
+import { CollectionEpisodes, EpisodeCollectionType } from '@renderer/data/types/collection'
 import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
 import { EPISODE_COLLECTION_ACTION_MAP, EPISODE_COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
@@ -24,12 +19,10 @@ export default function EpisodeCollectionButton({
   index,
   subjectId,
   modifyEpisodeCollectionOpt,
-  collectionType,
   setEnabledForm,
 }: {
   index: number
   subjectId: SubjectId
-  collectionType: CollectionType | undefined
   setEnabledForm: (enabled: boolean) => void
 } & ModifyEpisodeCollectionOptType) {
   const { isLogin, userInfo, accessToken } = useSession()
@@ -41,14 +34,6 @@ export default function EpisodeCollectionButton({
   })
   const collectionEpisodes = collectionEpisodesQuery.data
   const episodes = collectionEpisodes?.data
-  const subjectCollectionQuery = useQuerySubjectCollection({
-    subjectId,
-    username,
-    enabled: !!userInfo && !!collectionType,
-    needKeepPreviousData: false,
-  })
-  const subjectCollection = subjectCollectionQuery.data
-
   const queryClient = useQueryClient()
   const episodeCollectionType = episodes?.[index].type
   const [hover, setHover] = useState<(typeof EPISODE_COLLECTION_ACTION)[number] | null>(
@@ -110,16 +95,8 @@ export default function EpisodeCollectionButton({
       })
     },
   })
-  if (subjectCollection === null) return null
-  if (accessToken === undefined) return null
   if (episodes === undefined || episodeCollectionType == undefined)
     return <Skeleton className="h-9 w-52" />
-  if (collectionType !== undefined) {
-    if (collectionType !== CollectionType.watching) return null
-  } else {
-    if (subjectCollection === undefined) return <Skeleton className="h-9 w-52" />
-    else if (subjectCollection.type !== CollectionType.watching) return null
-  }
 
   return (
     <div className="flex h-9 flex-row gap-1">

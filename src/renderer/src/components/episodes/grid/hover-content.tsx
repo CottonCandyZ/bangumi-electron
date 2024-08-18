@@ -3,7 +3,10 @@ import HoverCardContent from '@renderer/components/base/hover-card/content'
 import ScrollWrapper from '@renderer/components/base/scroll-wrapper'
 import EpisodeCollectionButton from '@renderer/components/collections/episode-collection-button'
 import { Separator } from '@renderer/components/ui/separator'
-import { CollectionEpisode } from '@renderer/data/types/collection'
+import { Skeleton } from '@renderer/components/ui/skeleton'
+import { useSession } from '@renderer/components/wrapper/session-wrapper'
+import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
+import { CollectionEpisode, CollectionType } from '@renderer/data/types/collection'
 import { Episode } from '@renderer/data/types/episode'
 import { cn } from '@renderer/lib/utils'
 import { getDurationFromSeconds } from '@renderer/lib/utils/data-trans'
@@ -26,26 +29,48 @@ export default function HoverEpisodeDetail() {
   const episode = isCollectionEpisode(episodes) ? episodes[index].episode : episodes[index]
   const duration = getDurationFromSeconds(episode.duration_seconds)
   const [bottom, setBottom] = useState(true)
+  const { userInfo } = useSession()
+  const username = userInfo?.username
+  const subjectCollectionQuery = useQuerySubjectCollection({
+    subjectId: episode.subject_id.toString(),
+    username,
+    enabled: !!userInfo && !!collectionType,
+    needKeepPreviousData: false,
+  })
+  const subjectCollection = subjectCollectionQuery.data
+  const subjectCollectionType = collectionType ?? subjectCollection?.type
 
   return (
     <HoverCardContent align="start" isBottom={(value) => setBottom(value)}>
       <div
         className={cn(
           'flex min-w-64 max-w-96 flex-col gap-2 px-4',
-          isCollectionEpisode(episodes) ? (bottom ? 'pb-4' : 'pt-4') : 'py-4',
+          isCollectionEpisode(episodes) &&
+            (subjectCollection === undefined || subjectCollectionType === CollectionType.watching)
+            ? bottom
+              ? 'pb-4'
+              : 'pt-4'
+            : 'py-4',
         )}
       >
-        {bottom && isCollectionEpisode(episodes) && (
-          <div className="sticky top-0 bg-background pb-2 pt-4">
-            <EpisodeCollectionButton
-              subjectId={episode.subject_id.toString()}
-              index={index}
-              modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
-              collectionType={collectionType}
-              setEnabledForm={setEnabledForm}
-            />
-          </div>
-        )}
+        {bottom &&
+          isCollectionEpisode(episodes) &&
+          (subjectCollection === undefined ? (
+            <div className="sticky top-0 bg-background pb-2 pt-4">
+              <Skeleton className="h-9 w-52" />
+            </div>
+          ) : (
+            subjectCollectionType === CollectionType.watching && (
+              <div className="sticky top-0 bg-background pb-2 pt-4">
+                <EpisodeCollectionButton
+                  subjectId={episode.subject_id.toString()}
+                  index={index}
+                  modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
+                  setEnabledForm={setEnabledForm}
+                />
+              </div>
+            )
+          ))}
         <div className="flex flex-row gap-x-2">
           <span className="font-bold">ep.{episode.sort}</span>
           {!isEmpty(episode.name) && <MediumHeader {...episode} />}
@@ -68,17 +93,24 @@ export default function HoverEpisodeDetail() {
         )}
 
         <span className="text-sm">讨论：{episode.comment}</span>
-        {!bottom && isCollectionEpisode(episodes) && (
-          <div className="sticky bottom-0 bg-background pb-4 pt-2">
-            <EpisodeCollectionButton
-              subjectId={episode.subject_id.toString()}
-              index={index}
-              modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
-              collectionType={collectionType}
-              setEnabledForm={setEnabledForm}
-            />
-          </div>
-        )}
+        {!bottom &&
+          isCollectionEpisode(episodes) &&
+          (subjectCollection === undefined ? (
+            <div className="sticky bottom-0 z-0 bg-background pb-4 pt-2">
+              <Skeleton className="h-9 w-52" />
+            </div>
+          ) : (
+            subjectCollectionType === CollectionType.watching && (
+              <div className="sticky bottom-0 z-0 bg-background pb-4 pt-2">
+                <EpisodeCollectionButton
+                  subjectId={episode.subject_id.toString()}
+                  index={index}
+                  modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
+                  setEnabledForm={setEnabledForm}
+                />
+              </div>
+            )
+          ))}
       </div>
     </HoverCardContent>
   )
