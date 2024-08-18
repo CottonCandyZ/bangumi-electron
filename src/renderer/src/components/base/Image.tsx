@@ -10,7 +10,6 @@ export const Image = forwardRef<
     imageClassName?: string
     loading?: 'eager' | 'lazy'
     loadingClassName?: string
-    isLoadInit?: boolean
   }
 >(
   (

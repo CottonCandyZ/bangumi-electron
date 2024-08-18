@@ -31,7 +31,6 @@ export function Component() {
           loading="eager"
           className="fixed -z-10 h-full overflow-hidden"
           ref={backImageRef}
-          isLoadInit
         >
           <SubjectBackground />
         </Image>

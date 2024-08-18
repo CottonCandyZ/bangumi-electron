@@ -24,7 +24,6 @@ export default function SearchItemList({ searchItem }: { searchItem: SearchData 
             imageSrc={searchItem.image}
             className="h-fit w-full"
             loadingClassName="aspect-[2/3]"
-            isLoadInit
           />
         </Card>
       </MyLink>
