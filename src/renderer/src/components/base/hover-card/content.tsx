@@ -86,7 +86,7 @@ export default function HoverCardContent({
   return (
     <div
       className={cn(
-        'scroll fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md transition-[transform_height] duration-150 animate-in fade-in-0',
+        'fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md transition-[transform_height] duration-150 animate-in fade-in-0',
         isCollision ? 'overflow-x-hidden' : 'overflow-hidden',
       )}
       style={{

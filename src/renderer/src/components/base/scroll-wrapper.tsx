@@ -25,5 +25,5 @@ export default function ScrollWrapper({
   //     {children}
   //   </OverlayScrollbarsComponent>
   // )
-  return <div className={cn('scroll overflow-auto', className)}>{children}</div>
+  return <div className={cn('overflow-auto', className)}>{children}</div>
 }

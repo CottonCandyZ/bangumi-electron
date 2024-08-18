@@ -64,7 +64,7 @@ export default function CollectionsGrid({
         onRenderComplete={() => {
           gridCache.set(`${subjectType}-${collectionType}`, igRef.current?.getStatus())
         }}
-        className="scroll h-full overflow-x-hidden px-1 pr-0.5"
+        className="h-full overflow-x-hidden px-1 pr-0.5"
         useResizeObserver
         container
         observeChildren
