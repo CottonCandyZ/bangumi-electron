@@ -6,6 +6,8 @@ import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
 import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import { gridCache } from '@renderer/state/global-var'
+import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
+import { useSetAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
 
 export default function CollectionsGrid({
@@ -25,6 +27,7 @@ export default function CollectionsGrid({
     needKeepPreviousData: false,
   })
   const igRef = useRef<MasonryInfiniteGrid>(null)
+  const setIsRefetching = useSetAtom(collectionPanelIsRefetchingAtom)
   useEffect(() => {
     if (gridCache.has(`${subjectType}-${collectionType}`)) {
       const status = gridCache.get(`${subjectType}-${collectionType}`)
@@ -42,6 +45,8 @@ export default function CollectionsGrid({
         })),
       )
     : []
+  setIsRefetching(collectionsQuery.isRefetching)
+
   if (!collections)
     return (
       <div className="relative flex flex-col items-center justify-start gap-5 overflow-hidden p-1">
