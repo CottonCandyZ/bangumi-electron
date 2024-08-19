@@ -45,8 +45,9 @@ export default function CollectionsGrid({
         })),
       )
     : []
-  setIsRefetching(collectionsQuery.isRefetching)
-
+  useEffect(() => {
+    setIsRefetching(collectionsQuery.isRefetching)
+  }, [collectionsQuery.isFetching])
   if (!collections)
     return (
       <div className="relative flex flex-col items-center justify-start gap-5 overflow-hidden p-1">
