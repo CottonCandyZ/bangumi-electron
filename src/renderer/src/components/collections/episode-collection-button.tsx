@@ -7,8 +7,13 @@ import {
   useQueryCollectionEpisodesInfoBySubjectId,
 } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { CollectionEpisodes, EpisodeCollectionType } from '@renderer/data/types/collection'
+import {
+  CollectionEpisodes,
+  CollectionType,
+  EpisodeCollectionType,
+} from '@renderer/data/types/collection'
 import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
+import { SubjectType } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { EPISODE_COLLECTION_ACTION_MAP, EPISODE_COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { useQueryClient } from '@tanstack/react-query'
@@ -18,10 +23,12 @@ import { toast } from 'sonner'
 export default function EpisodeCollectionButton({
   index,
   subjectId,
+  subjectType,
   modifyEpisodeCollectionOpt,
   setEnabledForm,
 }: {
   index: number
+  subjectType: SubjectType
   subjectId: SubjectId
   setEnabledForm: (enabled: boolean) => void
 } & ModifyEpisodeCollectionOptType) {
@@ -90,6 +97,13 @@ export default function EpisodeCollectionButton({
       queryClient.invalidateQueries({
         queryKey,
       })
+      if (episodes)
+        queryClient.invalidateQueries({
+          queryKey: [
+            'collection-subjects',
+            { username, collectionType: CollectionType.watching, subjectType },
+          ],
+        })
       queryClient.invalidateQueries({
         queryKey: ['collection-subject', { subjectId, username }, accessToken],
       })

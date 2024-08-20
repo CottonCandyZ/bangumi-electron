@@ -60,9 +60,11 @@ export default function HoverEpisodeDetail() {
               <Skeleton className="h-9 w-52" />
             </div>
           ) : (
+            subjectCollection !== null &&
             subjectCollectionType === CollectionType.watching && (
               <div className="sticky top-0 bg-background pb-2 pt-4">
                 <EpisodeCollectionButton
+                  subjectType={subjectCollection.subject_type}
                   subjectId={episode.subject_id.toString()}
                   index={index}
                   modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
@@ -100,9 +102,11 @@ export default function HoverEpisodeDetail() {
               <Skeleton className="h-9 w-52" />
             </div>
           ) : (
+            subjectCollection !== null &&
             subjectCollectionType === CollectionType.watching && (
               <div className="sticky bottom-0 z-0 bg-background pb-4 pt-2">
                 <EpisodeCollectionButton
+                  subjectType={subjectCollection.subject_type}
                   subjectId={episode.subject_id.toString()}
                   index={index}
                   modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
