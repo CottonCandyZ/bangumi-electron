@@ -20,7 +20,7 @@ function RootLayout() {
             <ResizablePanelGroup direction="horizontal" autoSaveId="sub-panel">
               <ResizablePanel order={1} id="left">
                 <PageScrollWrapper className="h-full w-full overflow-hidden">
-                  <div>
+                  <div className="h-full">
                     <Outlet />
                   </div>
                 </PageScrollWrapper>
