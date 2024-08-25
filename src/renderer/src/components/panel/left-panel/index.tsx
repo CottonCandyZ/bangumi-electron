@@ -3,11 +3,11 @@ import { ResizableHandle, ResizablePanel } from '@renderer/components/ui/resizab
 import { useResizeOb } from '@renderer/hooks/resize'
 import { panelSize } from '@renderer/state/global-var'
 import { leftPanelOpenAtom } from '@renderer/state/panel'
-import { useAtomValue } from 'jotai'
-import { useRef } from 'react'
+import { useAtom } from 'jotai'
+import { useEffect, useRef } from 'react'
 
 export default function LeftResizablePanel() {
-  const open = useAtomValue(leftPanelOpenAtom)
+  const [open, setOpen] = useAtom(leftPanelOpenAtom)
   const ref = useRef<HTMLDivElement>(null)
   useResizeOb({
     ref,
@@ -15,6 +15,16 @@ export default function LeftResizablePanel() {
       panelSize.left_width = entries[0].target.getBoundingClientRect().width
     },
     deps: [open],
+  })
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'b' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setOpen((open) => !open)
+      }
+    }
+    document.addEventListener('keydown', down)
+    return () => document.removeEventListener('keydown', down)
   })
   return (
     open && (
