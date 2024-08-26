@@ -35,6 +35,18 @@ export const nvaCollectionButtonAtomAction = atom(
   },
 )
 
+export const triggerLeftOpenAtomAction = atom(null, (get, set) => {
+  if (get(leftPanelOpenAtom)) set(leftPanelOpenAtom, false)
+  else {
+    if (get(leftPanelOpenContentAtom) === null) {
+      set(leftPanelOpenAtom, true)
+      set(leftPanelOpenContentAtom, 'collection')
+    } else {
+      set(leftPanelOpenAtom, true)
+    }
+  }
+})
+
 // right
 
 // export const rightPanelButtonAtomAction = atom(
