@@ -22,7 +22,7 @@ function SubjectHeaderTitle({ subjectId }: { subjectId: SubjectId }) {
   if (!subjectInfo) return null
   return (
     <div className="flex h-full items-center overflow-hidden">
-      <AnimatePresence>
+      <AnimatePresence key={subjectId}>
         {!isInView && (
           <motion.div
             className="flex flex-row items-center gap-3"
