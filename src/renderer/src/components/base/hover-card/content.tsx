@@ -36,6 +36,7 @@ export default function HoverCardContent({
   })
   const [isCollision, setIsCollision] = useState(false)
   const [height, setHeight] = useState<number | 'auto'>('auto')
+  const [width, setWidth] = useState<number | 'auto'>('auto')
 
   const calc = useCallback(() => {
     if (!triggerClientRect || !ref.current) return
@@ -51,6 +52,7 @@ export default function HoverCardContent({
       setIsCollision(true)
     } else {
       setHeight(ref.current.getBoundingClientRect().height)
+      setWidth(ref.current.getBoundingClientRect().width)
       setIsCollision(false)
     }
     if (position.X === undefined) setPosition({ ...c })
@@ -86,7 +88,7 @@ export default function HoverCardContent({
   return (
     <div
       className={cn(
-        'fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md transition-[transform_height] duration-150 animate-in fade-in-0',
+        'fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md transition-[transform_height_width] duration-150 animate-in fade-in-0',
         isCollision ? 'overflow-x-hidden' : 'overflow-hidden',
       )}
       style={{
@@ -95,11 +97,12 @@ export default function HoverCardContent({
         bottom: position.bottom,
         transform: `translateX(${translate.X}px)`,
         height,
+        width,
       }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
     >
-      <div ref={ref} className={className}>
+      <div ref={ref} className={cn('h-max w-max', className)}>
         {children}
       </div>
     </div>
