@@ -52,9 +52,9 @@ export default function HoverCardContent({
       setIsCollision(true)
     } else {
       setHeight(ref.current.getBoundingClientRect().height)
-      setWidth(ref.current.getBoundingClientRect().width)
       setIsCollision(false)
     }
+    setWidth(ref.current.getBoundingClientRect().width)
     if (position.X === undefined) setPosition({ ...c })
     else {
       setTranslate({ X: c.X - (position.X ?? 0) })
@@ -89,7 +89,7 @@ export default function HoverCardContent({
     <div
       className={cn(
         'fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md transition-[transform_height_width] duration-150 animate-in fade-in-0',
-        isCollision ? 'overflow-x-hidden' : 'overflow-hidden',
+        isCollision ? 'w-max overflow-x-hidden' : 'overflow-hidden',
       )}
       style={{
         top: position.top,
