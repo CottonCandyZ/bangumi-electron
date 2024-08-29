@@ -11,6 +11,7 @@ import {
   FC,
   HTMLAttributes,
   PropsWithChildren,
+  RefObject,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -20,7 +21,7 @@ import {
 import { flushSync } from 'react-dom'
 
 const HoverPopCardContext = createContext<{
-  hoverRef: React.RefObject<HTMLDivElement> | null
+  hoverRef: RefObject<HTMLDivElement> | null
   layoutId: string
   activeId: string | null
   delay: number
