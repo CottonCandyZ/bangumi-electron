@@ -1,10 +1,9 @@
-import { render } from '@bbob/react'
 import { Image } from '@renderer/components/base/Image'
 import ScrollWrapper from '@renderer/components/base/scroll-wrapper'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQueryPersonsById } from '@renderer/data/hooks/api/pesron'
 import { PersonId } from '@renderer/data/types/bgm'
-import { preset } from '@renderer/lib/utils/bbcode'
+import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { isEmpty } from '@renderer/lib/utils/string'
 
 export function Detail({ personId }: { personId: PersonId }) {
@@ -30,9 +29,7 @@ export function Detail({ personId }: { personId: PersonId }) {
       cn_name = item.value as string
     }
   }
-  const renderSummery = render(personDetail.summary, preset(), {
-    onlyAllowTags: ['mask'],
-  })
+  const renderSummery = renderBBCode(personDetail.summary)
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row gap-4">

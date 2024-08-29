@@ -2,8 +2,7 @@ import ScrollWrapper from '@renderer/components/base/scroll-wrapper'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQueryCharacterDetailByID } from '@renderer/data/hooks/api/character'
 import { CharacterId } from '@renderer/data/types/bgm'
-import { render } from '@bbob/react'
-import { preset } from '@renderer/lib/utils/bbcode'
+import { renderBBCode } from '@renderer/lib/utils/bbcode'
 
 export default function Detail({ characterId }: { characterId: CharacterId }) {
   const characterDetail = useQueryCharacterDetailByID({ id: characterId })
@@ -11,9 +10,7 @@ export default function Detail({ characterId }: { characterId: CharacterId }) {
   if (!characterDetailData) {
     return <Skeleton className="min-h-8" />
   }
-  const renderSummery = render(characterDetailData.summary, preset(), {
-    onlyAllowTags: ['mask'],
-  })
+  const renderSummery = renderBBCode(characterDetailData.summary)
   return (
     <div className="flex h-full min-h-0">
       {characterDetailData.summary !== '' ? (
