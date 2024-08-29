@@ -24,7 +24,7 @@ export function cHoverCardSize(hover: DOMRect, hoverCardSize: HoverCardSize) {
     hoverCardSize.maxInnerHoverWidth,
     hoverCardSize.minInnerHoverWidth,
   )
-  const hoverHight = threshold(
+  const hoverHeight = threshold(
     hover.height,
     hoverCardSize.maxInnerHoverHeight,
     hoverCardSize.minInnerHoverHeight,
@@ -32,8 +32,8 @@ export function cHoverCardSize(hover: DOMRect, hoverCardSize: HoverCardSize) {
 
   let left = -(hoverWidth * width)
   let right = -(hoverWidth * width)
-  let top = -(hoverHight * height)
-  let bottom = -(hoverHight * height)
+  let top = -(hoverHeight * height)
+  let bottom = -(hoverHeight * height)
   const toLeft = hover.left + left
   const toTop = hover.top + top
   const toBottom = window.innerHeight - hover.bottom + bottom
@@ -68,7 +68,7 @@ export function cHoverCardSizeFixed(hover: DOMRect, hoverCardSize: HoverCardSize
     hoverCardSize.maxInnerHoverWidth,
     hoverCardSize.minInnerHoverWidth,
   )
-  const hoverHight = threshold(
+  const hoverHeight = threshold(
     hover.height,
     hoverCardSize.maxInnerHoverHeight,
     hoverCardSize.minInnerHoverHeight,
@@ -76,8 +76,8 @@ export function cHoverCardSizeFixed(hover: DOMRect, hoverCardSize: HoverCardSize
 
   const left = -(hoverWidth * width)
   const right = -(hoverWidth * width)
-  const top = -(hoverHight * height)
-  const bottom = -(hoverHight * height)
+  const top = -(hoverHeight * height)
+  const bottom = -(hoverHeight * height)
   let toLeft = hover.left + left
   let toTop = hover.top + top
   let toBottom = window.innerHeight - hover.bottom + bottom
