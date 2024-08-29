@@ -1,4 +1,7 @@
 import { createPreset } from '@bbob/preset'
+import { render } from '@bbob/react'
+// noinspection ES6UnusedImports
+import {} from '@bbob/types'
 
 export const preset = createPreset({
   mask: (node) => ({
@@ -7,3 +10,7 @@ export const preset = createPreset({
     content: node.content,
   }),
 })
+
+export const renderBBCode = (content: string) => {
+  return render(content, preset(), { onlyAllowTags: ['mask'] })
+}
