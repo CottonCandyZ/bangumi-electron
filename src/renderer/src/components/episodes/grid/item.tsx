@@ -68,8 +68,8 @@ export default function EpisodeGridItem({
       <Button
         key={episode.id}
         className={cn(
-          `h-10 min-w-10 rounded-md p-2`,
-          size === 'small' && 'h-6 min-w-6 rounded-sm p-1 text-xs',
+          `flex h-9 min-w-9 rounded-md px-2 py-0`,
+          size === 'small' && 'h-6 min-w-6 rounded-sm px-1 text-xs',
         )}
         variant={selfOpen && open ? `${status}Hover` : status}
       >
