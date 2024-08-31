@@ -37,6 +37,8 @@ export default function HoverCardContent({
   const [isCollision, setIsCollision] = useState(false)
   const [height, setHeight] = useState<number | 'auto'>('auto')
   const [width, setWidth] = useState<number | 'auto'>('auto')
+  const beforeBottom = useRef(true)
+  const [isFlip, setIsFlip] = useState(false)
 
   const calc = useCallback(() => {
     if (!triggerClientRect || !ref.current) return
@@ -61,6 +63,13 @@ export default function HoverCardContent({
       setPosition({ ...position, top: c.top, bottom: c.bottom })
     }
     isBottom && isBottom(c.bottom === undefined)
+    if (beforeBottom.current !== (c.bottom === undefined)) {
+      setIsFlip(true)
+      console.log('hello')
+    } else {
+      setIsFlip(false)
+    }
+    beforeBottom.current = c.bottom === undefined
   }, [
     margin,
     collisionPadding,
@@ -88,7 +97,8 @@ export default function HoverCardContent({
   return (
     <div
       className={cn(
-        'fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md transition-[transform_height_width] duration-150 animate-in fade-in-0',
+        'fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-0',
+        !isFlip && 'transition-[transform_height_width] duration-150',
         isCollision ? 'w-max overflow-x-hidden' : 'overflow-hidden',
       )}
       style={{
