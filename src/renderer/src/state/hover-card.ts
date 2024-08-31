@@ -1,6 +1,4 @@
-import { CollectionEpisode, CollectionType } from '@renderer/data/types/collection'
-import { Episode } from '@renderer/data/types/episode'
-import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
+import { HoverEpisodeDetailType } from '@renderer/components/episodes/grid/hover-content'
 import { atom } from 'jotai'
 
 export const hoverCardOpenAtom = atom(false)
@@ -19,14 +17,4 @@ export const hoverCardOpenAtomAction = atom(
 
 export const triggerClientRectAtom = atom<DOMRect | null>(null)
 
-export const hoverCardContentTypeAtom = atom('episode')
-
-export const hoverCardEpisodeContentAtom = atom<
-  | ({
-      index: number
-      episodes: Episode[] | CollectionEpisode[]
-      collectionType: CollectionType | undefined
-      setEnabledForm: (enabled: boolean) => void
-    } & ModifyEpisodeCollectionOptType)
-  | null
->(null)
+export const hoverCardEpisodeContentAtom = atom<HoverEpisodeDetailType | null>(null)

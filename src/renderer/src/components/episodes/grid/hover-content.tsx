@@ -8,6 +8,7 @@ import { useSession } from '@renderer/components/wrapper/session-wrapper'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionEpisode, CollectionType } from '@renderer/data/types/collection'
 import { Episode } from '@renderer/data/types/episode'
+import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
 import { getDurationFromSeconds } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
@@ -20,6 +21,14 @@ function isCollectionEpisode(
 ): episodes is CollectionEpisode[] {
   return (episodes as CollectionEpisode[])[0].episode !== undefined
 }
+
+export type HoverEpisodeDetailType = {
+  id: 'episode-content'
+  index: number
+  episodes: Episode[] | CollectionEpisode[]
+  collectionType: CollectionType | undefined
+  setEnabledForm: (enabled: boolean) => void
+} & ModifyEpisodeCollectionOptType
 
 export default function HoverEpisodeDetail() {
   const hoverCardContent = useAtomValue(hoverCardEpisodeContentAtom)

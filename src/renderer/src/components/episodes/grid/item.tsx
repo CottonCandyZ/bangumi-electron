@@ -49,13 +49,19 @@ export default function EpisodeGridItem({
   const [selfOpen, setSelfOpen] = useState(false)
   const open = useAtomValue(hoverCardOpenAtom)
   useEffect(() => {
-    if (hoverCardContent?.episodes[hoverCardContent.index] !== episodes[index]) setSelfOpen(false)
+    if (
+      hoverCardContent !== null &&
+      hoverCardContent.id === 'episode-content' &&
+      hoverCardContent.episodes[hoverCardContent.index] !== episodes[index]
+    )
+      setSelfOpen(false)
   }, [hoverCardContent])
 
   return (
     <HoverCardTrigger
       onOpen={() => {
         setHoverCardContent({
+          id: 'episode-content',
           index,
           episodes,
           collectionType,
