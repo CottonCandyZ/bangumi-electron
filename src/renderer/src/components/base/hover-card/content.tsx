@@ -17,7 +17,7 @@ export default function HoverCardContent({
     bottom: 8,
     top: UI_CONFIG.HEADER_HEIGHT + 8,
   },
-  isBottom,
+  isBottom = () => {},
 }: PropsWithChildren<
   HTMLProps<'div'> & {
     margin?: number
@@ -62,7 +62,7 @@ export default function HoverCardContent({
       setTranslate({ X: c.X - (position.X ?? 0) })
       setPosition({ ...position, top: c.top, bottom: c.bottom })
     }
-    isBottom && isBottom(c.bottom === undefined)
+    isBottom(c.bottom === undefined)
     if (beforeBottom.current !== (c.bottom === undefined)) {
       setIsFlip(true)
       console.log('hello')
