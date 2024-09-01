@@ -83,7 +83,7 @@ export default function HoverEpisodeDetail() {
             )
           ))}
         <div className="flex flex-row gap-x-2">
-          <span className="font-bold">ep.{episode.sort}</span>
+          <span className="font-semibold">ep.{episode.sort}</span>
           {!isEmpty(episode.name) && <MediumHeader {...episode} />}
         </div>
         {!isEmpty(episode.desc) && (

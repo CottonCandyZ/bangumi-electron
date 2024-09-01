@@ -136,7 +136,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
           {subjectInfoData ? (
             <>
               <motion.h1
-                className="h-6 truncate font-jp font-semibold"
+                className="h-6 truncate font-jp font-medium"
                 layoutId={`${layoutId}-header`}
               >
                 {subjectInfoData.name}
@@ -185,7 +185,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
                         {subjectInfoData ? (
                           <>
                             <motion.h1
-                              className="font-jp text-xs font-semibold"
+                              className="font-jp text-sm font-medium"
                               layoutId={`${layoutId}-header`}
                             >
                               {subjectInfoData.name}

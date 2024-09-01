@@ -31,7 +31,7 @@ export default function RelatedSubjectsContent({
                     <div className="flex w-full flex-row gap-3 text-sm">
                       <Separator orientation="vertical" />
                       <div className="flex w-full flex-col gap-2">
-                        <span className="font-semibold">{key}</span>
+                        <span className="font-medium">{key}</span>
                         <Item relatedSubject={item} />
                       </div>
                     </div>

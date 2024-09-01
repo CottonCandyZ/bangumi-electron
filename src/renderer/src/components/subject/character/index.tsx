@@ -19,7 +19,7 @@ export default function SubjectCharacters({ subjectId }: { subjectId: SubjectId 
   return (
     <section className="flex flex-col gap-5">
       <div className="flex flex-row items-center justify-between">
-        <h2 className="text-2xl font-semibold">角色</h2>
+        <h2 className="text-2xl font-medium">角色</h2>
         {characters ? (
           <TabsOnly
             tabsContent={relations}

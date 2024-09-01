@@ -52,7 +52,7 @@ export default function SmallCarousel({ href, name, sectionPath }: SmallCarousel
         <Button
           asChild
           variant="ghost"
-          className="group ml-1 h-min px-2 py-1 text-xl font-bold duration-100"
+          className="group ml-1 h-min px-2 py-1 text-xl font-medium duration-100"
         >
           <MyLink to={href}>
             <div

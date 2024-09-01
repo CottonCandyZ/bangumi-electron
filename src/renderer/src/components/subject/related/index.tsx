@@ -22,7 +22,7 @@ export default function RelatedSubjects({ subjectId }: { subjectId: SubjectId })
   return (
     <section className="flex flex-col gap-5">
       <div className="flex flex-row items-start justify-between gap-10">
-        <h2 className="shrink-0 text-2xl font-semibold">关联条目</h2>
+        <h2 className="shrink-0 text-2xl font-medium">关联条目</h2>
         {relatedSubjects ? (
           <TabsOnly
             currentSelect={filter}

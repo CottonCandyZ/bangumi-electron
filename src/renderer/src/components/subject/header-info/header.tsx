@@ -5,10 +5,10 @@ export default function Header({ name, name_cn }: Pick<Subject, 'name' | 'name_c
   return (
     <header>
       {isEmpty(name_cn) ? (
-        <h1 className="text-2xl font-semibold">{name}</h1>
+        <h1 className="text-2xl font-medium">{name}</h1>
       ) : (
         <>
-          <h1 className="text-2xl font-semibold">{name_cn}</h1>
+          <h1 className="text-2xl font-medium">{name_cn}</h1>
           <h2 className="font-jp text-muted-foreground">{name}</h2>
         </>
       )}

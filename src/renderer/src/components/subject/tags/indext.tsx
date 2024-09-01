@@ -19,7 +19,7 @@ export default function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
   if (subjectInfo === undefined)
     return (
       <section className="flex w-full flex-col gap-5">
-        <h2 className="text-2xl font-semibold">标签</h2>
+        <h2 className="text-2xl font-medium">标签</h2>
         <div className="flex flex-row flex-wrap gap-2 after:grow-[999]">
           {Array(5)
             .fill(undefined)
@@ -33,13 +33,13 @@ export default function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
   if (subjectInfo?.tags.length === 0)
     return (
       <section className="flex flex-col gap-5">
-        <h2 className="text-2xl font-semibold">标签</h2>
+        <h2 className="text-2xl font-medium">标签</h2>
         <p>暂无标签</p>
       </section>
     )
   return (
     <section className="flex flex-col gap-5">
-      <h2 className="text-2xl font-semibold">标签</h2>
+      <h2 className="text-2xl font-medium">标签</h2>
       <QuickTags
         subjectTags={subjectInfo.tags}
         accessToken={accessToken}

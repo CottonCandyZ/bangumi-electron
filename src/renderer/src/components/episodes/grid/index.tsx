@@ -53,7 +53,7 @@ export default function EpisodesGrid({
 
   return (
     <div className="flex flex-col gap-5">
-      {size === 'default' && <h2 className="text-2xl font-semibold">章节</h2>}
+      {size === 'default' && <h2 className="text-2xl font-medium">章节</h2>}
       <div className={cn('flex flex-col gap-4')}>
         {selector && <PageSelector episodes={episode} limit={limit} setOffSet={setOffSet} />}
         <EpisodeGridContent
@@ -74,7 +74,7 @@ function EpisodeSkeleton({
 }: { skeletonNumber: number } & EpisodeGridSize) {
   return (
     <div className="flex flex-col gap-5">
-      {size === 'default' && <h2 className="text-2xl font-semibold">章节</h2>}
+      {size === 'default' && <h2 className="text-2xl font-medium">章节</h2>}
       <div className={cn('flex flex-row flex-wrap gap-1')}>
         {Array(skeletonNumber)
           .fill(0)

@@ -74,14 +74,14 @@ function Header({ name, name_cn, id }: { name: string; name_cn: string; id: numb
   if (isEmpty(name_cn))
     return (
       <MyLink to={`/subject/${id}`}>
-        <h2 className="font-semibold text-sky-500">{name}</h2>
+        <h2 className="font-medium text-sky-500">{name}</h2>
       </MyLink>
     )
   else
     return (
       <div className="flex flex-row items-baseline gap-2">
         <MyLink to={`/subject/${id}`}>
-          <h2 className="font-semibold text-sky-600 hover:text-sky-900">{name_cn}</h2>
+          <h2 className="font-medium text-sky-600 hover:text-sky-900">{name_cn}</h2>
         </MyLink>
         <h3 className="text-sm font-medium text-muted-foreground">{name}</h3>
       </div>

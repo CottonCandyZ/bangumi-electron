@@ -52,7 +52,7 @@ export default function SubjectCollection({ subjectId }: { subjectId: SubjectId 
   return (
     <div className="flex flex-col gap-2" ref={ref}>
       <div className="flex flex-row items-center justify-between">
-        <h2 className="text-xl font-semibold">收藏盒</h2>
+        <h2 className="text-xl font-medium">收藏盒</h2>
         {!loading && subjectCollection !== null && (
           <PrivateSwitch subjectCollection={subjectCollection} />
         )}
