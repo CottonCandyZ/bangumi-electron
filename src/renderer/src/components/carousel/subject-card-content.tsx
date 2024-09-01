@@ -132,21 +132,24 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
             </CardContent>
           </Card>
         </MyLink>
-        <motion.div className="mt-2 w-full p-0.5" layoutId={`${layoutId}-header`}>
+        <div className="mt-2 w-full p-0.5">
           {subjectInfoData ? (
             <>
-              <motion.h1 className="h-6 truncate font-jp font-semibold">
+              <motion.h1
+                className="h-6 truncate font-jp font-semibold"
+                layoutId={`${layoutId}-header`}
+              >
                 {subjectInfoData.name}
               </motion.h1>
               <motion.h2 className="mt-1 h-4 truncate text-xs">{subjectInfoData.name_cn}</motion.h2>
             </>
           ) : (
             <>
-              <MotionSkeleton className="h-6" />
+              <MotionSkeleton className="h-6" layoutId={`${layoutId}-header`} />
               <MotionSkeleton className="mt-1 h-4" />
             </>
           )}
-        </motion.div>
+        </div>
       </motion.div>
       <AnimatePresence onExitComplete={() => setActionSection(null)}>
         {activeId === layoutId && (
@@ -178,20 +181,22 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
                     />
                     {/* 标题描述 */}
                     <section className="flex w-full flex-col justify-between gap-0.5">
-                      <motion.div className="flex w-full flex-col" layoutId={`${layoutId}-header`}>
+                      <div className="flex w-full flex-col">
                         {subjectInfoData ? (
                           <>
-                            <motion.h1 className="font-jp text-xs font-semibold">
+                            <motion.h1
+                              className="font-jp text-xs font-semibold"
+                              layoutId={`${layoutId}-header`}
+                            >
                               {subjectInfoData.name}
                             </motion.h1>
                           </>
                         ) : (
                           <>
-                            <MotionSkeleton className="h-5" />
-                            <MotionSkeleton className="mt-1 h-4" />
+                            <MotionSkeleton className="h-5" layoutId={`${layoutId}-header`} />
                           </>
                         )}
-                      </motion.div>
+                      </div>
                       {/* meta */}
                       <div className="flex flex-wrap items-center justify-start gap-1 font-medium">
                         <motion.div
