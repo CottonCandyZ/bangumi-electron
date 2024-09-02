@@ -19,25 +19,25 @@ export default function WindowsButton() {
       <div className="flex h-full">
         <div className="no-drag-region flex h-full flex-row items-center">
           <Button
-            className="h-full w-fit rounded-none px-3"
+            className="h-full w-fit cursor-default rounded-none px-3"
             variant="ghost"
             onClick={() => client.minimizeCurrentWindow({})}
           >
-            <Minus strokeWidth={0.6} className="w-4" />
+            <Minus strokeWidth={1} className="w-4" />
           </Button>
           <Button
-            className="relative h-full w-fit rounded-none px-3"
+            className="relative h-full w-fit cursor-default rounded-none px-3"
             variant="ghost"
             onClick={() => client.toggleMaximizeCurrentWindow({})}
           >
             {isMaximize ? (
               <MaximizeIcon className="w-[15px]" />
             ) : (
-              <Square strokeWidth={1} className="w-[15px]" />
+              <Square strokeWidth={1.2} className="w-[15px]" />
             )}
           </Button>
           <Button
-            className="h-full w-fit rounded-none px-3 pr-4 hover:bg-red-600 hover:text-white"
+            className="h-full w-fit cursor-default rounded-none px-3 pr-4 hover:bg-red-600 hover:text-white"
             variant="ghost"
             onClick={() => client.closeCurrentWindow({})}
           >
