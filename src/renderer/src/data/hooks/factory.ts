@@ -1,4 +1,4 @@
-import { useAccessTokenQuery, useLogoutMutation } from '@renderer/data/hooks/session'
+import { useAccessTokenQuery } from '@renderer/data/hooks/session'
 import { AuthError } from '@renderer/lib/utils/error'
 import {
   GetNextPageParamFunction,
@@ -41,7 +41,6 @@ export const useQueryMustAuth = <P, R>({
   needKeepPreviousData?: boolean
 } & OptionalProps<P> &
   Omit<UseQueryOptions<R, Error, R, QueryKey>, 'queryFn'>) => {
-  const logoutMutation = useLogoutMutation()
   const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const query = useQuery({
@@ -65,8 +64,7 @@ export const useQueryMustAuth = <P, R>({
   })
   if (query.isError && query.error instanceof AuthError) {
     if (query.error.code === 2) {
-      queryClient.setQueryData(['accessToken'], null)
-      logoutMutation.mutate()
+      queryClient.invalidateQueries({ queryKey: ['isLogin'] })
     }
   }
   return query
@@ -93,7 +91,6 @@ export const useQueryOptionalAuth = <P, R, S = R>({
   needKeepPreviousData?: boolean
 } & OptionalProps<P> &
   Omit<UseQueryOptions<R, Error, R, QueryKey>, 'select' | 'queryFn'>) => {
-  const logoutMutation = useLogoutMutation()
   const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const query = useQuery({
@@ -117,8 +114,7 @@ export const useQueryOptionalAuth = <P, R, S = R>({
   })
   if (query.isError && query.error instanceof AuthError) {
     if (query.error.code === 2) {
-      queryClient.setQueryData(['accessToken'], null)
-      logoutMutation.mutate()
+      queryClient.invalidateQueries({ queryKey: ['isLogin'] })
     }
   }
   return query
@@ -150,7 +146,6 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
     UseInfiniteQueryOptions<QR, Error, InfiniteData<QR, TPageParam>, QR, QueryKey, TPageParam>,
     'queryFn'
   >) => {
-  const logoutMutation = useLogoutMutation()
   const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const query = useInfiniteQuery({
@@ -180,8 +175,7 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
   })
   if (query.isError && query.error instanceof AuthError) {
     if (query.error.code === 2) {
-      queryClient.setQueryData(['accessToken'], null)
-      logoutMutation.mutate()
+      queryClient.invalidateQueries({ queryKey: ['isLogin'] })
     }
   }
   return query
@@ -194,7 +188,6 @@ export const useMutationMustAuth = <P, R>({
 }: {
   mutationFn: P extends { token: string } ? Fn<P, R> : never
 } & Omit<UseMutationOptions<R, Error, Omit<P, 'token'>>, 'mutationFn'>) => {
-  const logoutMutation = useLogoutMutation()
   const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const mutate = useMutation({
@@ -216,8 +209,7 @@ export const useMutationMustAuth = <P, R>({
   })
   if (mutate.isError && mutate.error instanceof AuthError) {
     if (mutate.error.code === 2) {
-      queryClient.setQueryData(['accessToken'], null)
-      logoutMutation.mutate()
+      queryClient.invalidateQueries({ queryKey: ['isLogin'] })
     }
   }
   return mutate

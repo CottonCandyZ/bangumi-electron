@@ -87,7 +87,6 @@ export default function LoginForm({
     mutationFn: login,
     onSuccess() {
       toast.success('登陆成功 (5/5)')
-      window.localStorage.setItem('isLogin', 'true')
       queryClient.invalidateQueries({ queryKey: ['accessToken'] })
       setOpen(false)
     },

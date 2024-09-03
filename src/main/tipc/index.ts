@@ -3,7 +3,7 @@ import { BrowserWindow, safeStorage, session } from 'electron'
 import Store from 'electron-store'
 const t = tipc.create()
 
-export interface token {
+export interface Token {
   access_token: string
   refresh_token: string
   expires_in: number
@@ -16,7 +16,7 @@ export interface loginInfo {
 
 const store = new Store()
 export const router = {
-  setAccessToken: t.procedure.input<token>().action(async ({ input }) => {
+  setAccessToken: t.procedure.input<Token>().action(async ({ input }) => {
     const encrypted_access_token = safeStorage.encryptString(input.access_token).toString('base64')
     const encrypted_refresh_token = safeStorage
       .encryptString(input.refresh_token)

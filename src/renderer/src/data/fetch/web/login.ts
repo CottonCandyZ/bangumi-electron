@@ -9,7 +9,7 @@ import { client } from '@renderer/lib/client'
 import { getTimestamp } from '@renderer/lib/utils/date'
 import { LoginError } from '@renderer/lib/utils/error'
 import { domParser } from '@renderer/lib/utils/parser'
-import { token } from 'src/main/tipc'
+import { Token } from 'src/main/tipc'
 
 // 所以这里就是用 web 登录网页啦，非常感谢下面链接里前人的工作给与的参考！
 
@@ -30,7 +30,7 @@ const store: {
     email: string
     password: string
   }
-  accessToken?: token
+  accessToken?: Token
 } = {}
 
 // TYPES
@@ -163,7 +163,8 @@ export async function getOAuthCode() {
  * 使用 code 获得 Bearer (Access token)
  */
 export async function getOAuthAccessToken() {
-  const json = (await webFetch(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
+  if (!store.code) throw new LoginError('获取授权 code 失败')
+  const token = await webFetch<Token>(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
     method: 'post',
     headers: {
       'Content-Type': LOGIN.POST_CONTENT_TYPE,
@@ -172,13 +173,14 @@ export async function getOAuthAccessToken() {
       grant_type: 'authorization_code',
       client_id: APP_ID,
       client_secret: APP_SECRET,
-      code: store.code!,
+      code: store.code,
       redirect_uri: URL_OAUTH_REDIRECT,
       state: getTimestamp().toString(),
     }),
-  })) as token
-  if (!json.access_token) throw new LoginError('获取 Bearer 失败')
-  store.accessToken = json
+  })
+  if (!token.access_token) throw new LoginError('获取 Bearer 失败')
+  store.accessToken = token
+  return token
 }
 
 /**
@@ -191,4 +193,26 @@ export async function save() {
   if (store.loginInfo) {
     await client.setLoginInfo(store.loginInfo)
   }
+}
+
+/**
+ * 刷新 token
+ * @param refreshToken refresh token
+ */
+export async function refreshToken(refreshToken: string) {
+  const token = await webFetch<Token>(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
+    method: 'post',
+    headers: {
+      'Content-Type': LOGIN.POST_CONTENT_TYPE,
+    },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      client_id: APP_ID,
+      client_secret: APP_SECRET,
+      refresh_token: refreshToken,
+      redirect_uri: URL_OAUTH_REDIRECT,
+    }),
+  })
+  if (!token) throw new LoginError('刷新 Token 失败')
+  await client.setAccessToken(token)
 }
