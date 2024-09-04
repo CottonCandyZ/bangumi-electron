@@ -1,6 +1,7 @@
 // web 的 data transition
 import { InfoBoxWeb, InfoBoxWebValue } from '@renderer/data/types/subject'
 import type { TopList } from '@renderer/data/types/web'
+import { AuthError } from '@renderer/lib/utils/error'
 import { domParser } from '@renderer/lib/utils/parser'
 
 /**
@@ -69,7 +70,7 @@ export const parseInfoBoxFromSubjectPage = (HTML: string) => {
 
 export const parseDeleteCollectionHash = (HTML: string) => {
   const match = HTML.match(/eraseSubjectCollect\(\d+,\s*'([^']+)'\)/)
-  if (!match) return null
+  if (!match) throw new AuthError('cookie 可能已过期', 2)
   const hash = match[1]
-  return hash ?? null
+  return hash
 }

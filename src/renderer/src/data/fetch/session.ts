@@ -1,6 +1,6 @@
 import { LOGIN, webFetch } from '@renderer/data/fetch/config'
 import { client } from '@renderer/lib/client'
-import { token } from 'src/main/tipc'
+import { Token } from 'src/main/tipc'
 
 // 这里是用来验证相关 session 的地方，如果可能也会刷新 Session
 
@@ -18,7 +18,7 @@ export async function isWebLogin() {
 /**
  * 验证 AccessToken 有效性
  */
-export async function isAccessTokenValid(token: token) {
+export async function isAccessTokenValid(token: Token) {
   const json = (await webFetch(LOGIN.OAUTH_ACCESS_TOKEN_STATUS, {
     method: 'post',
     headers: {
@@ -27,7 +27,7 @@ export async function isAccessTokenValid(token: token) {
     body: new URLSearchParams({
       access_token: token.access_token,
     }),
-  })) as token & { user_id: string }
+  })) as Token & { user_id: string }
   return !!json.user_id
 }
 

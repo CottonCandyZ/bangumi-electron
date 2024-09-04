@@ -11,7 +11,6 @@ import {
   useInfiniteQuery,
   useMutation,
   useQuery,
-  useQueryClient,
 } from '@tanstack/react-query'
 import { FetchError } from 'ofetch'
 
@@ -41,7 +40,6 @@ export const useQueryMustAuth = <P, R>({
   needKeepPreviousData?: boolean
 } & OptionalProps<P> &
   Omit<UseQueryOptions<R, Error, R, QueryKey>, 'queryFn'>) => {
-  const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const query = useQuery({
     queryKey: [...(queryKey || []), queryProps, accessToken?.access_token],
@@ -62,11 +60,6 @@ export const useQueryMustAuth = <P, R>({
     enabled: enabled && accessToken !== undefined,
     ...props,
   })
-  if (query.isError && query.error instanceof AuthError) {
-    if (query.error.code === 2) {
-      queryClient.invalidateQueries({ queryKey: ['isLogin'] })
-    }
-  }
   return query
 }
 
@@ -91,7 +84,6 @@ export const useQueryOptionalAuth = <P, R, S = R>({
   needKeepPreviousData?: boolean
 } & OptionalProps<P> &
   Omit<UseQueryOptions<R, Error, R, QueryKey>, 'select' | 'queryFn'>) => {
-  const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const query = useQuery({
     queryKey: [...(queryKey || []), queryProps, accessToken?.access_token],
@@ -112,11 +104,6 @@ export const useQueryOptionalAuth = <P, R, S = R>({
     select,
     ...props,
   })
-  if (query.isError && query.error instanceof AuthError) {
-    if (query.error.code === 2) {
-      queryClient.invalidateQueries({ queryKey: ['isLogin'] })
-    }
-  }
   return query
 }
 
@@ -146,7 +133,6 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
     UseInfiniteQueryOptions<QR, Error, InfiniteData<QR, TPageParam>, QR, QueryKey, TPageParam>,
     'queryFn'
   >) => {
-  const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const query = useInfiniteQuery({
     queryKey: [...(queryKey || []), queryProps, accessToken?.access_token],
@@ -173,11 +159,6 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
     getNextPageParam,
     ...props,
   })
-  if (query.isError && query.error instanceof AuthError) {
-    if (query.error.code === 2) {
-      queryClient.invalidateQueries({ queryKey: ['isLogin'] })
-    }
-  }
   return query
 }
 
@@ -188,7 +169,6 @@ export const useMutationMustAuth = <P, R>({
 }: {
   mutationFn: P extends { token: string } ? Fn<P, R> : never
 } & Omit<UseMutationOptions<R, Error, Omit<P, 'token'>>, 'mutationFn'>) => {
-  const queryClient = useQueryClient()
   const { data: accessToken } = useAccessTokenQuery()
   const mutate = useMutation({
     mutationKey,
@@ -207,10 +187,5 @@ export const useMutationMustAuth = <P, R>({
     },
     ...props,
   })
-  if (mutate.isError && mutate.error instanceof AuthError) {
-    if (mutate.error.code === 2) {
-      queryClient.invalidateQueries({ queryKey: ['isLogin'] })
-    }
-  }
   return mutate
 }
