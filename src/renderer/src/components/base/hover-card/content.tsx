@@ -65,7 +65,6 @@ export default function HoverCardContent({
     isBottom(c.bottom === undefined)
     if (beforeBottom.current !== (c.bottom === undefined)) {
       setIsFlip(true)
-      console.log('hello')
     } else {
       setIsFlip(false)
     }
