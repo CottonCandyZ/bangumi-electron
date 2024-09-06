@@ -1,4 +1,4 @@
-import { Image } from '@renderer/components/base/Image'
+import { CoverMotionImage } from '@renderer/components/base/cover-motion-image'
 import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/components/hover-pop-card'
 import Actors from '@renderer/components/subject/character/gird/actor'
 import Detail from '@renderer/components/subject/character/gird/detail'
@@ -9,6 +9,7 @@ import { Character } from '@renderer/data/types/character'
 import { cn } from '@renderer/lib/utils'
 import { getCharacterAvatarURL } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
+import { motion } from 'framer-motion'
 import { useLocation } from 'react-router-dom'
 
 const sectionId = 'Characters'
@@ -27,7 +28,7 @@ export default function Item({ character }: { character: Character }) {
             )}
           >
             {!isEmpty(character.images.large) && (
-              <Image
+              <CoverMotionImage
                 className="aspect-square size-14 shrink-0 overflow-hidden rounded-lg"
                 imageSrc={getCharacterAvatarURL(character.images.large)}
               />
@@ -45,10 +46,10 @@ function PopCard({ character }: { character: Character }) {
   return (
     <PopCardContent className="w-96 cursor-default">
       <Card>
-        <CardContent className="flex h-full flex-col p-2">
-          <div className="flex h-full flex-row gap-4">
+        <CardContent className="flex h-full flex-col overflow-hidden p-2">
+          <motion.div className="flex h-full flex-row gap-4" layout>
             {!isEmpty(character.images.large) && (
-              <Image
+              <CoverMotionImage
                 className="h-fit basis-1/4 overflow-hidden rounded-lg"
                 imageSrc={character.images.grid}
                 loadingClassName="aspect-square"
@@ -60,7 +61,7 @@ function PopCard({ character }: { character: Character }) {
               <Separator />
               <Detail characterId={character.id.toString()} />
             </div>
-          </div>
+          </motion.div>
         </CardContent>
       </Card>
     </PopCardContent>

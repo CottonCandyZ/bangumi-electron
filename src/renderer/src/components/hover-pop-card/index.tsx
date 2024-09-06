@@ -1,30 +1,26 @@
 import { cPopSizeByC } from '@renderer/components/hover-pop-card/utils'
 import { cn } from '@renderer/lib/utils'
-import {
-  activeHoverPopCardAtom,
-  hoverPopCardViewTransitionStatusAtom,
-} from '@renderer/state/hover-pop-card'
-import { HTMLMotionProps, motion } from 'framer-motion'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
+import { AnimatePresence, HTMLMotionProps, motion } from 'framer-motion'
+import { useAtomValue, useSetAtom } from 'jotai'
 import {
   createContext,
   FC,
-  HTMLAttributes,
   PropsWithChildren,
-  RefObject,
   useContext,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from 'react'
-import { flushSync } from 'react-dom'
 
 const HoverPopCardContext = createContext<{
-  hoverRef: RefObject<HTMLDivElement> | null
+  hoverRef: React.RefObject<HTMLDivElement> | null
   layoutId: string
   activeId: string | null
+  finished: boolean
   delay: number
+  setFinished: React.Dispatch<React.SetStateAction<boolean>>
 } | null>(null)
 
 type HoverCardProps = {
@@ -39,6 +35,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
 }) => {
   const hoverRef = useRef<HTMLDivElement>(null)
   const activeId = useAtomValue(activeHoverPopCardAtom)
+  const [finished, setFinished] = useState(true)
 
   return (
     <HoverPopCardContext.Provider
@@ -46,7 +43,9 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
         hoverRef,
         layoutId,
         activeId,
+        finished,
         delay,
+        setFinished,
       }}
     >
       <div key={layoutId} className={cn('relative', activeId === layoutId && 'z-30')}>
@@ -56,7 +55,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
   )
 }
 
-export const HoverCardContent: FC<PropsWithChildren<HTMLAttributes<HTMLDivElement>>> = ({
+export const HoverCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = ({
   children,
   className,
   ...props
@@ -65,11 +64,6 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLAttributes<HTMLDivElemen
   if (!hoverCardContext) throw Error('HoverCardContent need to be wrapped in HoverPopCard')
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const setActiveId = useSetAtom(activeHoverPopCardAtom) // 全局 activeId 唯一
-  const activeId = useAtomValue(activeHoverPopCardAtom)
-  // const viewTransitionStatus = useViewTransitionStatusState((state) => state.status)
-  const [viewTransitionStatus, setViewTransitionStatus] = useAtom(
-    hoverPopCardViewTransitionStatusAtom,
-  )
 
   useEffect(() => {
     return () => {
@@ -79,29 +73,28 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLAttributes<HTMLDivElemen
   }, [])
 
   return (
-    <div
+    <motion.div
+      key={hoverCardContext.layoutId}
       ref={hoverCardContext.hoverRef}
-      className={cn(hoverCardContext.layoutId === activeId && 'invisible', className)}
-      style={{
-        viewTransitionName: viewTransitionStatus === hoverCardContext.layoutId ? 'pop-card' : '',
-      }}
+      layoutId={hoverCardContext.layoutId}
+      className={className}
       onMouseEnter={() => {
-        setActiveId(null)
         timeoutRef.current = setTimeout(() => {
-          flushSync(() => setViewTransitionStatus(hoverCardContext.layoutId))
-          document.startViewTransition(() => {
-            flushSync(() => {
-              setViewTransitionStatus(null)
-              setActiveId(hoverCardContext.layoutId)
-            })
-          })
+          setActiveId(hoverCardContext.layoutId)
+          hoverCardContext.setFinished(false)
         }, hoverCardContext.delay)
       }}
       onMouseLeave={() => clearTimeout(timeoutRef.current)}
+      transition={{
+        duration:
+          hoverCardContext.activeId !== hoverCardContext.layoutId && hoverCardContext.finished
+            ? 0
+            : undefined,
+      }}
       {...props}
     >
       {children}
-    </div>
+    </motion.div>
   )
 }
 
@@ -114,79 +107,69 @@ export const PopCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = ({
   if (!hoverCardContext) throw Error('PopCardContent need to be wrapped in HoverPopCard')
 
   return (
-    hoverCardContext.activeId === hoverCardContext.layoutId && (
-      <PopCardInnerContent
-        viewTransitionName="pop-card"
-        hover={hoverCardContext.hoverRef?.current?.getBoundingClientRect()}
-        className={className}
-        {...props}
-      >
-        {children}
-      </PopCardInnerContent>
-    )
+    <AnimatePresence onExitComplete={() => hoverCardContext.setFinished(true)}>
+      {hoverCardContext.activeId === hoverCardContext.layoutId && (
+        <PopCardInnerContent
+          layoutId={hoverCardContext.layoutId}
+          hover={hoverCardContext.hoverRef?.current?.getBoundingClientRect()}
+          className={className}
+          {...props}
+        >
+          {children}
+        </PopCardInnerContent>
+      )}
+    </AnimatePresence>
   )
 }
 
 export const PopCardInnerContent: FC<
   PropsWithChildren<HTMLMotionProps<'div'>> & {
     hover: DOMRect | undefined
-    viewTransitionName: string
+    layoutId: string
   }
-> = ({ children, viewTransitionName, className, hover, ...props }) => {
-  if (!hover) return
+> = ({ children, layoutId, className, hover, ...props }) => {
+  if (!hover) throw Error('PopCardContent need to be aside HoverCardContent')
   const hoverRef = useRef(hover)
-  const popRef = useRef<HTMLDivElement>(null)
   const [popCod, setPopCod] = useState({ top: 0, left: 0 })
+  const popRef = useRef<HTMLDivElement>(null)
+  const timeOutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const [translate, setTranslate] = useState({ x: 0, y: 0 })
   useLayoutEffect(() => {
     const pop = popRef.current!.getBoundingClientRect()
     const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)
-    // 这里如果用状态管理的话，第一次会有 bug
-    popRef.current!.style.top = `${topOffset}px`
-    popRef.current!.style.left = `${leftOffset}px`
+    setPopCod({ top: topOffset, left: leftOffset })
     const ob = new ResizeObserver(() => {
       if (!popRef.current) return
       const pop = popRef.current!.getBoundingClientRect()
-      const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)
-      setPopCod({ top: topOffset, left: leftOffset })
+      const { topOffset: newTopOffset, leftOffset: newLeftOffset } = cPopSizeByC(
+        pop,
+        hoverRef.current,
+      )
+      setTranslate({ x: newLeftOffset - leftOffset, y: newTopOffset - topOffset })
     })
-    ob.observe(popRef.current!)
+    timeOutRef.current = setTimeout(() => {
+      ob.observe(popRef.current!)
+    }, 500)
     return () => {
+      clearTimeout(timeOutRef.current)
       popRef.current && ob.unobserve(popRef.current)
     }
   }, [])
   return (
     <motion.div
-      layout
+      layoutId={layoutId}
       ref={popRef}
       className={cn('absolute z-50', className)}
+      animate={{ x: translate.x, y: translate.y, transition: { duration: 0.2 } }}
       style={{
         top: `${popCod.top}px`,
         left: `${popCod.left}px`,
-        viewTransitionName,
+        // translateX: translate.x,
+        // translateY: translate.y
       }}
       {...props}
     >
       {children}
     </motion.div>
-  )
-}
-
-export const HoverCardItem: FC<
-  PropsWithChildren<HTMLAttributes<HTMLDivElement> & { layoutId: string }>
-> = ({ children, layoutId, className, ...props }) => {
-  const hoverCardContext = useContext(HoverPopCardContext)
-  if (!hoverCardContext) throw Error('HoverCardContent need to be wrapped in HoverPopCard')
-  const viewTransitionStatus = useAtomValue(hoverPopCardViewTransitionStatusAtom)
-
-  return (
-    <div
-      className={className}
-      style={{
-        viewTransitionName: viewTransitionStatus === hoverCardContext.layoutId ? layoutId : '',
-      }}
-      {...props}
-    >
-      {children}
-    </div>
   )
 }
