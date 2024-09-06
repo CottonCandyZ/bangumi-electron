@@ -77,7 +77,10 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = (
       key={hoverCardContext.layoutId}
       ref={hoverCardContext.hoverRef}
       layoutId={hoverCardContext.layoutId}
-      className={className}
+      className={cn(
+        hoverCardContext.activeId === hoverCardContext.layoutId && 'opacity-0',
+        className,
+      )}
       onMouseEnter={() => {
         timeoutRef.current = setTimeout(() => {
           setActiveId(hoverCardContext.layoutId)
@@ -164,8 +167,6 @@ export const PopCardInnerContent: FC<
       style={{
         top: `${popCod.top}px`,
         left: `${popCod.left}px`,
-        // translateX: translate.x,
-        // translateY: translate.y
       }}
       {...props}
     >
