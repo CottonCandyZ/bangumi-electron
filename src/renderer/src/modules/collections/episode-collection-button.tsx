@@ -20,7 +20,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-export default function EpisodeCollectionButton({
+export function EpisodeCollectionButton({
   index,
   subjectId,
   subjectType,

@@ -1,11 +1,11 @@
-import SubjectTypeFilterButtons from '@renderer/modules/search/type-filter/filter-subject-type-buttons'
+import { SubjectTypeFilterButtons } from '@renderer/modules/search/type-filter/filter-subject-type-buttons'
 import {
   searchSubjectTypeFilterActionAtom,
   searchSubjectTypeFilterAtom,
 } from '@renderer/state/search'
 import { useAtom, useSetAtom } from 'jotai'
 
-export default function SubjectTypeFilter() {
+export function SubjectTypeFilter() {
   const [typeFilter, setTypeFilter] = useAtom(searchSubjectTypeFilterAtom)
   const searchSubjectTypeFilterAction = useSetAtom(searchSubjectTypeFilterActionAtom)
   return (

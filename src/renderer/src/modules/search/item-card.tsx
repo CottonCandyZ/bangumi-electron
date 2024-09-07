@@ -1,6 +1,6 @@
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
-import ScrollWrapper from '@renderer/components/scroll/scroll-wrapper'
+import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
 import { Card } from '@renderer/components/ui/card'
@@ -8,7 +8,7 @@ import { Separator } from '@renderer/components/ui/separator'
 import { SearchData } from '@renderer/data/types/search'
 import { SubjectType } from '@renderer/data/types/subject'
 import { isEmpty } from '@renderer/lib/utils/string'
-import ScoreStarHalf from '@renderer/modules/search/score-half'
+import { ScoreStarHalf } from '@renderer/modules/search/score-half'
 
 const ICON_MAP = {
   [SubjectType.anime]: <span className="i-mingcute-tv-2-fill mt-[6px]" />,
@@ -18,7 +18,7 @@ const ICON_MAP = {
   [SubjectType.real]: <span className="i-mingcute-tv-1-fill mt-[6px]" />,
 }
 
-export default function SearchItemCard({ searchItem }: { searchItem: SearchData }) {
+export function SearchItemCard({ searchItem }: { searchItem: SearchData }) {
   return (
     <MyLink to={`/subject/${searchItem.id}`}>
       <Card className="flex h-full max-h-52 shrink-0 flex-col gap-2 overflow-hidden p-2 shadow-none hover:shadow-lg hover:duration-500">

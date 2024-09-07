@@ -1,5 +1,5 @@
-import BigCarousel from '@renderer/components/carousel/big-carousel'
-import Index from '@renderer/modules/home/small-carousel'
+import { BigCarousel } from '@renderer/components/carousel/big-carousel'
+import { SmallCarousel } from '@renderer/modules/home/small-carousel'
 
 export function Component() {
   return (
@@ -8,19 +8,19 @@ export function Component() {
         <BigCarousel />
       </section>
       <section className="px-9">
-        <Index href="/anime" name="动画" sectionPath="anime" />
+        <SmallCarousel href="/anime" name="动画" sectionPath="anime" />
       </section>
       <section className="px-9">
-        <Index href="/game" name="游戏" sectionPath="game" />
+        <SmallCarousel href="/game" name="游戏" sectionPath="game" />
       </section>
       <section className="px-9">
-        <Index href="/book" name="书" sectionPath="book" />
+        <SmallCarousel href="/book" name="书" sectionPath="book" />
       </section>
       <section className="px-9">
-        <Index href="/music" name="音乐" sectionPath="music" />
+        <SmallCarousel href="/music" name="音乐" sectionPath="music" />
       </section>
       <section className="px-9">
-        <Index href="/real" name="三次元" sectionPath="real" />
+        <SmallCarousel href="/real" name="三次元" sectionPath="real" />
       </section>
 
       {/*  时间线 */}

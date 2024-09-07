@@ -1,12 +1,12 @@
 import { ResizableHandle, ResizablePanel } from '@renderer/components/ui/resizable'
 import { useResizeOb } from '@renderer/hooks/resize'
-import LeftPanel from '@renderer/modules/panel/left-panel/panel'
+import { LeftPanel } from '@renderer/modules/panel/left-panel/panel'
 import { panelSize } from '@renderer/state/global-var'
 import { leftPanelOpenAtom, triggerLeftOpenAtomAction } from '@renderer/state/panel'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
 
-export default function LeftResizablePanel() {
+export function LeftResizablePanel() {
   const open = useAtomValue(leftPanelOpenAtom)
   const triggerOpen = useSetAtom(triggerLeftOpenAtomAction)
   const ref = useRef<HTMLDivElement>(null)

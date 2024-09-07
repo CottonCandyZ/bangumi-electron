@@ -9,17 +9,17 @@ import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useSetAtom } from 'jotai'
 import { collectionBoxInViewAtom } from '@renderer/state/in-view'
-import ScrollWrapper from '@renderer/components/scroll/scroll-wrapper'
+import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { Button } from '@renderer/components/ui/button'
-import Login from '@renderer/modules/user/login'
-import PrivateSwitch from '@renderer/modules/subject/collection/private-switch'
-import SubjectCollectionSelector from '@renderer/modules/subject/collection/select'
-import ModifySubjectCollection from '@renderer/modules/subject/collection/modify-action'
-import MoreActionDropDown from '@renderer/modules/subject/collection/more-action-drop-down'
-import QuickRate from '@renderer/modules/subject/collection/quick-rate'
+import { Login } from '@renderer/modules/user/login'
+import { PrivateSwitch } from '@renderer/modules/subject/collection/private-switch'
+import { SubjectCollectionSelector } from '@renderer/modules/subject/collection/select'
+import { ModifySubjectCollection } from '@renderer/modules/subject/collection/modify-action'
+import { MoreActionDropDown } from '@renderer/modules/subject/collection/more-action-drop-down'
+import { QuickRate } from '@renderer/modules/subject/collection/quick-rate'
 
-export default function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
+export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const { isLogin, userInfo, accessToken } = useSession()
   const subjectCollectionQuery = useQuerySubjectCollection({
     subjectId,

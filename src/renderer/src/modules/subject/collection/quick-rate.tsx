@@ -1,11 +1,11 @@
-import RateButtons from '@renderer/modules/collections/rate'
+import { RateButtons } from '@renderer/modules/collections/rate'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-export default function QuickRate({ subjectCollection }: { subjectCollection: CollectionData }) {
+export function QuickRate({ subjectCollection }: { subjectCollection: CollectionData }) {
   const queryClient = useQueryClient()
   const { userInfo, accessToken } = useSession()
   const username = userInfo?.username

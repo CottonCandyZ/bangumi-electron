@@ -7,7 +7,7 @@ import { startTransition } from 'react'
 
 type Props = (typeof route)[number]
 
-export default function PanelButton({ name, panelName, icon, active }: Props) {
+export function PanelButton({ name, panelName, icon, active }: Props) {
   const [panelState, setPanelState] = useAtom(nvaCollectionButtonAtomAction)
   const isActive = panelState.openState && panelState.subjectType === panelName
   const [navOpen, setNavOpen] = useAtom(navOpenAtom)

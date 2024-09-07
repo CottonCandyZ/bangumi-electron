@@ -9,7 +9,7 @@ type TabsOnlyProps = {
   className?: string
 }
 
-export default function Tabs({
+export function Tabs({
   currentSelect,
   setCurrentSelect,
   tabsContent,

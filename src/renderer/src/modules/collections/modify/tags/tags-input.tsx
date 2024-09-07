@@ -1,6 +1,6 @@
 import { useRef } from 'react'
 
-export default function TagInput({
+export function TagInput({
   tags,
   remove,
   add,

@@ -1,9 +1,9 @@
 import { Button } from '@renderer/components/ui/button'
 import { Character } from '@renderer/data/types/character'
-import Item from '@renderer/modules/subject/character/gird/item'
+import { Item } from '@renderer/modules/subject/character/gird/item'
 import { useState } from 'react'
 
-export default function CharactersGrid({ characters }: { characters: Character[] }) {
+export function CharactersGrid({ characters }: { characters: Character[] }) {
   const [fold, setFold] = useState(true)
   const slice = fold ? 8 : characters.length
   const needFold = characters.length > 8

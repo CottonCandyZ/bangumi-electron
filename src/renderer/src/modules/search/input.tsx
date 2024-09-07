@@ -4,7 +4,7 @@ import { searchKeywordActionAtom, searchParamAtom } from '@renderer/state/search
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useRef, useState } from 'react'
 
-export default function SearchInput() {
+export function SearchInput() {
   const [keyword, setKeyword] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const searchParam = useAtomValue(searchParamAtom)

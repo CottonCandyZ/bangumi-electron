@@ -6,7 +6,7 @@ import { Align, Side } from '@renderer/type/ui'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { HTMLProps, PropsWithChildren, useCallback, useLayoutEffect, useRef, useState } from 'react'
 
-export default function HoverCardContent({
+export function HoverCardContent({
   children,
   className,
   margin = 5,

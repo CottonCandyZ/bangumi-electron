@@ -5,7 +5,7 @@ import { InfoBoxWeb } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { Detail } from '@renderer/modules/subject/person/table/detail'
 
-export default function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
+export function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
   return (
     <Table className="w-full">
       <TableBody>

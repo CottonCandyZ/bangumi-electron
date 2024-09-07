@@ -7,7 +7,7 @@ import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
 import { PropsWithChildren, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
-export default function PageScrollWrapper({
+export function PageScrollWrapper({
   initScrollTo = 0,
   className,
   children,

@@ -8,7 +8,7 @@ import { useMatch } from 'react-router-dom'
 
 type Props = (typeof route)[number]
 
-export default function NavButton({ name, path, icon, active }: Props) {
+export function NavButton({ name, path, icon, active }: Props) {
   const isActive = useMatch(path)
   const [open, setOpen] = useAtom(navOpenAtom)
 

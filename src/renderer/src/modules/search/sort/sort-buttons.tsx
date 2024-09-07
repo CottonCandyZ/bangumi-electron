@@ -9,7 +9,7 @@ const sort = [
   { type: 'heat', name: '热度' },
 ] as const
 
-export default function SortButton({
+export function SortButton({
   value,
   onValueChanged,
 }: {

@@ -4,7 +4,7 @@ import { cn } from '@renderer/lib/utils'
 import { RATING_MAP } from '@renderer/lib/utils/map'
 import { useEffect, useState } from 'react'
 
-export default function RateButtons({
+export function RateButtons({
   rate,
   onRateChanged,
   disabled = false,

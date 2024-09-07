@@ -8,7 +8,7 @@ import {
   PaginationPrevious,
 } from '@renderer/components/ui/pagination'
 
-export default function BigPagination({
+export function BigPagination({
   value,
   onValueChanged,
   total,

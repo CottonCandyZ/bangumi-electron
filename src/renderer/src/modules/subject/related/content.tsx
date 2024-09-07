@@ -1,11 +1,11 @@
 import { Button } from '@renderer/components/ui/button'
 import { Separator } from '@renderer/components/ui/separator'
 import { RelatedSubject } from '@renderer/data/types/subject'
-import Item from '@renderer/modules/subject/related/item'
+import { Item } from '@renderer/modules/subject/related/item'
 import { useState } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 
-export default function RelatedSubjectsContent({
+export function RelatedSubjectsContent({
   relatedSubjects,
   filter,
 }: {

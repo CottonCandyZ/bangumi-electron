@@ -6,9 +6,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@renderer/components/ui/dropdown-menu'
-import DeleteSubjectCollectionAlert from '@renderer/modules/subject/collection/delete-action'
+import { DeleteSubjectCollectionAlert } from '@renderer/modules/subject/collection/delete-action'
 
-export default function MoreActionDropDown({ subjectId }: { subjectId: string }) {
+export function MoreActionDropDown({ subjectId }: { subjectId: string }) {
   return (
     <AlertDialog>
       <DropdownMenu>

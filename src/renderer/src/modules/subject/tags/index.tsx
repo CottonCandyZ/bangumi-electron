@@ -3,9 +3,9 @@ import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
-import QuickTags from '@renderer/modules/subject/collection/quick-tags'
+import { QuickTags } from '@renderer/modules/subject/collection/quick-tags'
 
-export default function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
+export function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const { userInfo, accessToken } = useSession()

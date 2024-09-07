@@ -1,5 +1,5 @@
 import { EpisodeGridContent } from '@renderer/modules/episodes/grid/content'
-import PageSelector from '@renderer/modules/episodes/grid/page-selector'
+import { PageSelector } from '@renderer/modules/episodes/grid/page-selector'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useQueryCollectionEpisodesInfoBySubjectId } from '@renderer/data/hooks/api/collection'
@@ -12,7 +12,7 @@ import { useState } from 'react'
 export type EpisodeGridSize = {
   size?: 'small' | 'default'
 }
-export default function EpisodesGrid({
+export function EpisodesGrid({
   subjectId,
   eps,
   size = 'default',

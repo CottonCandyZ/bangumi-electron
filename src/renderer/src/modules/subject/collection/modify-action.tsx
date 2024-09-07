@@ -4,7 +4,7 @@ import { Subject } from '@renderer/data/types/subject'
 import { subjectCollectionSheetFormActionAtom } from '@renderer/state/sheet'
 import { useSetAtom } from 'jotai'
 
-export default function ModifySubjectCollection({
+export function ModifySubjectCollection({
   subjectCollection,
   subjectInfo,
 }: {

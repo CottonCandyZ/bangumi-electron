@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 
 const platform = await client.platform({})
 
-export default function WindowsButton() {
+export function WindowsButton() {
   const [isMaximize, setIsMaximize] = useState(false)
   useEffect(() => {
     const unlisten = handlers.isMaximize.listen((maximize) => {

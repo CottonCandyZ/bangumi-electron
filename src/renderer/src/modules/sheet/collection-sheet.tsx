@@ -1,10 +1,10 @@
-import ScrollWrapper from '@renderer/components/scroll/scroll-wrapper'
-import AddOrModifySubjectCollectionForm from '@renderer/modules/collections/modify/form/subject-form'
+import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
+import { AddOrModifySubjectCollectionForm } from '@renderer/modules/collections/modify/form/subject-form'
 import { SheetHeader, SheetTitle } from '@renderer/components/ui/sheet'
 import { openSheetAtom, subjectCollectionSheetFormPropsAtom } from '@renderer/state/sheet'
 import { useAtomValue, useSetAtom } from 'jotai'
 
-export default function SubjectCollectionContent() {
+export function SubjectCollectionContent() {
   const formProps = useAtomValue(subjectCollectionSheetFormPropsAtom)
   const setOpen = useSetAtom(openSheetAtom)
   if (!formProps) return null

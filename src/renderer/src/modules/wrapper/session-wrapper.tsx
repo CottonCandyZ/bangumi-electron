@@ -18,7 +18,7 @@ export const useSession = () => {
   return useContext(SessionContext)
 }
 
-export default function SessionWrapper({ children }: PropsWithChildren) {
+export function SessionWrapper({ children }: PropsWithChildren) {
   const token = useAccessTokenQuery().data
   const isLogin = token === undefined ? undefined : !!token
   const userInfo = useQueryUserInfo({ enabled: !!isLogin }).data

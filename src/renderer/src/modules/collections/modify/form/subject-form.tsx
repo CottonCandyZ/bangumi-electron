@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import FormTags from '@renderer/modules/collections/modify/tags-form'
-import RateButtons from '@renderer/modules/collections/rate'
-import SubjectCollectionSelectorContent from '@renderer/modules/collections/subject-select-content'
+import { RateButtons } from '@renderer/modules/collections/rate'
+import { SubjectCollectionSelectorContent } from '@renderer/modules/collections/subject-select-content'
 import { Button } from '@renderer/components/ui/button'
 import {
   Form,
@@ -27,10 +26,11 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { FormTags } from '@renderer/modules/collections/modify/tags/tags-form'
 
 const add_subject_collection_message = TEXT_CONFIG.add_subject_collection
 
-export default function AddOrModifySubjectCollectionForm({
+export function AddOrModifySubjectCollectionForm({
   subjectId,
   subjectType,
   subjectTags,

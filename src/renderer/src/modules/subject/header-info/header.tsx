@@ -1,7 +1,7 @@
 import { Subject } from '@renderer/data/types/subject'
 import { isEmpty } from '@renderer/lib/utils/string'
 
-export default function Header({ name, name_cn }: Pick<Subject, 'name' | 'name_cn'>) {
+export function Header({ name, name_cn }: Pick<Subject, 'name' | 'name_cn'>) {
   return (
     <header>
       {isEmpty(name_cn) ? (

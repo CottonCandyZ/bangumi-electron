@@ -3,7 +3,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui
 import { HOST } from '@renderer/data/fetch/config'
 import { useLocation } from 'react-router-dom'
 
-export default function OriginalLink() {
+export function OriginalLink() {
   const { pathname } = useLocation()
   let href = ''
   const isSubject = pathname.includes('subject')

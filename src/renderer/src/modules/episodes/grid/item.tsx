@@ -1,4 +1,4 @@
-import HoverCardTrigger from '@renderer/components/hover-card/trigger'
+import { HoverCardTrigger } from '@renderer/components/hover-card/trigger'
 import { EpisodeGridSize } from '@renderer/modules/episodes/grid/index'
 import { Button } from '@renderer/components/ui/button'
 import {
@@ -20,7 +20,7 @@ function isCollectionEpisode(
   return (episodes as CollectionEpisode[])[0].episode !== undefined
 }
 
-export default function EpisodeGridItem({
+export function EpisodeGridItem({
   size = 'default',
   index,
   episodes,

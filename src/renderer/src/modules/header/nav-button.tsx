@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-export default function NavButton() {
+export function NavButton() {
   const navigate = useNavigate()
   const { key } = useLocation()
   const [backDisable, setBackDisable] = useState(true)

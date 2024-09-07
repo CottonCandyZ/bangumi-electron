@@ -1,14 +1,13 @@
-import SubjectCollectionSelectorContent from '@renderer/modules/collections/subject-select-content'
+import { SubjectCollectionSelectorContent } from '@renderer/modules/collections/subject-select-content'
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
-import {} from '@renderer/data/types/user'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-export default function SubjectCollectionSelector({
+export function SubjectCollectionSelector({
   subjectCollection,
 }: {
   subjectCollection: CollectionData

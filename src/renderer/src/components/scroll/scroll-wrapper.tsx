@@ -5,7 +5,7 @@ import {
   OverlayScrollbarsComponentProps,
 } from 'overlayscrollbars-react'
 
-export default function ScrollWrapper({
+export function ScrollWrapper({
   className,
   children,
   // options,

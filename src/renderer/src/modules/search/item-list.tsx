@@ -5,7 +5,7 @@ import { Card } from '@renderer/components/ui/card'
 import { SearchData } from '@renderer/data/types/search'
 import { SubjectType } from '@renderer/data/types/subject'
 import { isEmpty } from '@renderer/lib/utils/string'
-import ScoreStarHalf from '@renderer/modules/search/score-half'
+import { ScoreStarHalf } from '@renderer/modules/search/score-half'
 
 const ICON_MAP = {
   [SubjectType.anime]: <span className="i-mingcute-tv-2-fill" />,
@@ -15,7 +15,7 @@ const ICON_MAP = {
   [SubjectType.real]: <span className="i-mingcute-tv-1-fill" />,
 }
 
-export default function SearchItemList({ searchItem }: { searchItem: SearchData }) {
+export function SearchItemList({ searchItem }: { searchItem: SearchData }) {
   return (
     <div className="flex flex-row gap-3">
       <MyLink to={`/subject/${searchItem.id}`}>

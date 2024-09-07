@@ -1,6 +1,6 @@
 import { LinkNav } from '@renderer/modules/nav/link/nav'
 import { PanelNav } from '@renderer/modules/nav/panel/nav'
-import NavProfile from '@renderer/modules/nav/profile'
+import { NavProfile } from '@renderer/modules/nav/profile'
 import { Button } from '@renderer/components/ui/button'
 import { Separator } from '@renderer/components/ui/separator'
 import { client } from '@renderer/lib/client'
@@ -11,7 +11,7 @@ import { useAtom } from 'jotai'
 
 const platform = await client.platform({})
 
-export default function NavBar() {
+export function NavBar() {
   const [open, setOpen] = useAtom(navOpenAtom)
   return (
     <div>

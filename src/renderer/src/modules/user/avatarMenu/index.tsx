@@ -31,9 +31,9 @@ import {
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import { cn } from '@renderer/lib/utils'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
-import LoginForm from '@renderer/modules/user/login/form'
+import { LoginForm } from '@renderer/modules/user/login/form'
 
-export default function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
+export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   const logoutMutation = useLogoutMutation()
   const userInfo = useQueryUserInfo()
   const { theme, setTheme } = useTheme()

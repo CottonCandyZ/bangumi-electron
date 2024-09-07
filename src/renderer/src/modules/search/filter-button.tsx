@@ -3,7 +3,7 @@ import { cn } from '@renderer/lib/utils'
 import { rightPanelOpenAtom } from '@renderer/state/panel'
 import { useAtom } from 'jotai'
 
-export default function FilterButton() {
+export function FilterButton() {
   const [sideOpen, setSideOpen] = useAtom(rightPanelOpenAtom)
   return (
     <Button

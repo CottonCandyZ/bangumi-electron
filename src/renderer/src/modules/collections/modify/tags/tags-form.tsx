@@ -1,11 +1,11 @@
-import TagInput from '@renderer/modules/collections/modify/tags-input'
+import { TagInput } from '@renderer/modules/collections/modify/tags/tags-input'
 import { Button } from '@renderer/components/ui/button'
 import { CollectionData } from '@renderer/data/types/collection'
 import { Subject } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
-import Tags from '@renderer/modules/subject/tags/tags'
+import { Tags } from '@renderer/modules/subject/tags/tags'
 
-export default function FormTags({
+export function FormTags({
   subjectTags,
   selectedTags,
   collectionTags,

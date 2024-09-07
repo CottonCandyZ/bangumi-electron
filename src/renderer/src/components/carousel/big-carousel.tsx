@@ -17,7 +17,7 @@ const animateConfig: KeyframeAnimationOptions = {
   easing: 'ease',
 }
 
-export default function BigCarousel(): JSX.Element {
+export function BigCarousel(): JSX.Element {
   // index
   const [currentIndex, setCurrentIndex] = useState(items)
   const flexBox = useRef<HTMLDivElement>(null)

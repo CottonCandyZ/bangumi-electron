@@ -10,7 +10,7 @@ import { useEffect, useRef } from 'react'
 import { useSetAtom } from 'jotai'
 import { subjectCoverImageInViewAtom } from '@renderer/state/in-view'
 
-export default function SubjectCoverImage({ subjectId }: { subjectId: SubjectId }) {
+export function SubjectCoverImage({ subjectId }: { subjectId: SubjectId }) {
   const { state } = useLocation()
   const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data

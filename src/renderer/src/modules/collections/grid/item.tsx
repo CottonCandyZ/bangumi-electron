@@ -1,18 +1,14 @@
 import { CollectionHeader } from '@renderer/components/headers'
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
-import EpisodesGrid from '@renderer/modules/episodes/grid'
+import { EpisodesGrid } from '@renderer/modules/episodes/grid'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { CollectionData } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { useLocation } from 'react-router-dom'
 
-export default function CollectionItem({
-  collectionItemInfo,
-}: {
-  collectionItemInfo: CollectionData
-}) {
+export function CollectionItem({ collectionItemInfo }: { collectionItemInfo: CollectionData }) {
   const { pathname } = useLocation()
   const mainSubjectId = pathname.split('/').at(-1)
 

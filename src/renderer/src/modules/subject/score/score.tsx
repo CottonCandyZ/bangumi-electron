@@ -1,8 +1,8 @@
 import { Rating } from '@renderer/data/types/subject'
 import { getRating } from '@renderer/lib/utils/data-trans'
-import ScoreChart from '@renderer/modules/subject/score/score-chart'
+import { ScoreChart } from '@renderer/modules/subject/score/score-chart'
 
-export default function Score({ rating }: { rating: Rating }) {
+export function Score({ rating }: { rating: Rating }) {
   return (
     <div className="flex flex-col gap-1">
       <section className="flex flex-row items-center justify-between gap-2">

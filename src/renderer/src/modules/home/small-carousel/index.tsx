@@ -1,5 +1,5 @@
 import { MyLink } from '@renderer/components/my-link'
-import SubjectCard from '@renderer/modules/home/small-carousel/subject-card-content'
+import { SubjectCard } from '@renderer/modules/home/small-carousel/subject-card-content'
 import { Button } from '@renderer/components/ui/button'
 import {
   Carousel,
@@ -11,7 +11,7 @@ import {
 } from '@renderer/components/ui/carousel'
 import { UI_CONFIG } from '@renderer/config'
 import { SectionPath } from '@renderer/data/types/web'
-import useStateHook from '@renderer/hooks/cache-state'
+import { useStateHook } from '@renderer/hooks/cache-state'
 import { cn } from '@renderer/lib/utils'
 import { activeSectionAtom } from '@renderer/state/small-carousel'
 import { useAtomValue } from 'jotai'
@@ -24,7 +24,7 @@ interface SmallCarouselProps {
   sectionPath: SectionPath
 }
 
-export default function Index({ href, name, sectionPath }: SmallCarouselProps) {
+export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
   const currentSectionPath = useAtomValue(activeSectionAtom)
   const [api, setApi] = useState<CarouselApi>()
   const { init: initIndex, setter: setIndex } = useStateHook({

@@ -1,7 +1,7 @@
 import { otherCache } from '@renderer/state/global-var'
 import { useLocation } from 'react-router-dom'
 
-export default function useStateHook({ key }: { key: string }) {
+export function useStateHook({ key }: { key: string }) {
   const { pathname } = useLocation()
 
   if (otherCache.get(pathname) === undefined) {

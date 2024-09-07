@@ -1,10 +1,10 @@
-import ScrollWrapper from '@renderer/components/scroll/scroll-wrapper'
+import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQueryCharacterDetailByID } from '@renderer/data/hooks/api/character'
 import { CharacterId } from '@renderer/data/types/bgm'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 
-export default function Detail({ characterId }: { characterId: CharacterId }) {
+export function Detail({ characterId }: { characterId: CharacterId }) {
   const characterDetail = useQueryCharacterDetailByID({ id: characterId })
   const characterDetailData = characterDetail.data
   if (!characterDetailData) {

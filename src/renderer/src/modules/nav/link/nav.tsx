@@ -1,4 +1,4 @@
-import NavButton from '@renderer/modules/nav/link/button'
+import { NavButton } from '@renderer/modules/nav/link/button'
 
 export const route = [
   {

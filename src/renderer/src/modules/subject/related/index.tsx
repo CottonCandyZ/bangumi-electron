@@ -1,13 +1,13 @@
-import Tabs from '@renderer/components/tabs'
+import { Tabs } from '@renderer/components/tabs'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQueryRelatedSubjects } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
-import RelatedSubjectsContent from '@renderer/modules/subject/related/content'
-import RelatedGridSkeleton from '@renderer/modules/subject/related/skelen'
+import { RelatedSubjectsContent } from '@renderer/modules/subject/related/content'
+import { RelatedGridSkeleton } from '@renderer/modules/subject/related/skelen'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
 import { useAtom } from 'jotai'
 
-export default function RelatedSubjects({ subjectId }: { subjectId: SubjectId }) {
+export function RelatedSubjects({ subjectId }: { subjectId: SubjectId }) {
   const relatedSubjectsQuery = useQueryRelatedSubjects({
     id: subjectId,
     needKeepPreviousData: false,

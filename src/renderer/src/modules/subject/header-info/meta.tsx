@@ -3,7 +3,7 @@ import { Subject } from '@renderer/data/types/subject'
 import { extractInfoBox } from '@renderer/lib/utils/data-trans'
 import dayjs from 'dayjs'
 
-export default function Meta({
+export function Meta({
   date,
   eps,
   platform,

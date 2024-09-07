@@ -1,4 +1,4 @@
-import PanelButton from '@renderer/modules/nav/panel/button'
+import { PanelButton } from '@renderer/modules/nav/panel/button'
 
 export const route = [
   {

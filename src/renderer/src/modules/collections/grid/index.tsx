@@ -1,5 +1,5 @@
 import { MasonryInfiniteGrid } from '@egjs/react-infinitegrid'
-import CollectionItem from '@renderer/modules/collections/grid/item'
+import { CollectionItem } from '@renderer/modules/collections/grid/item'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useInfinityQueryCollectionsByUsername } from '@renderer/data/hooks/api/collection'
 import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
@@ -10,7 +10,7 @@ import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
 import { useSetAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
 
-export default function CollectionsGrid({
+export function CollectionsGrid({
   collectionType,
   subjectType,
 }: {

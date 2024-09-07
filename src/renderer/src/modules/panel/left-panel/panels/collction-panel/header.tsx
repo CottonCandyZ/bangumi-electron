@@ -1,4 +1,4 @@
-import SubjectCollectionSelectorContent from '@renderer/modules/collections/subject-select-content'
+import { SubjectCollectionSelectorContent } from '@renderer/modules/collections/subject-select-content'
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { CollectionType } from '@renderer/data/types/collection'
@@ -8,7 +8,7 @@ import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
 import { collectionPanelSubjectTypeAtom } from '@renderer/state/panel'
 import { useAtom, useAtomValue } from 'jotai'
 
-export default function SubjectCollectionPanelHeader() {
+export function SubjectCollectionPanelHeader() {
   const subjectType = SubjectType[useAtomValue(collectionPanelSubjectTypeAtom)]
   const [filterMap, setCurrentTypeFilter] = useAtom(sidePanelCollectionTypeFilterAtom)
   const { isLogin } = useSession()

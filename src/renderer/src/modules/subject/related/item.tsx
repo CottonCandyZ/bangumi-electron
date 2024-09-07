@@ -5,7 +5,7 @@ import { RelatedSubject } from '@renderer/data/types/subject'
 import { Link } from 'react-router-dom'
 
 const sectionId = 'RelatedSubjects'
-export default function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
+export function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
   const layoutId = `${sectionId}-${relatedSubject.id}`
   // const { key } = useLocation()
   // const isTransitioning = unstable_useViewTransitionState(`/subject/${relatedSubject.id}`)

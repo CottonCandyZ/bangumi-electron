@@ -1,5 +1,5 @@
 import { CoverMotionImage } from '@renderer/components/image/cover-motion-image'
-import ScrollWrapper from '@renderer/components/scroll/scroll-wrapper'
+import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { cHoverCardSize } from '@renderer/components/hover-pop-card/utils'
 import { MotionSkeleton } from '@renderer/components/ui/motion-skeleton'
 import { Button } from '@renderer/components/ui/button'
@@ -290,4 +290,3 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
 })
 
 SubjectCard.displayName = 'SubjectCard'
-export default SubjectCard

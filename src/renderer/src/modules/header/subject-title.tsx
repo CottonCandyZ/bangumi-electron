@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useAtomValue } from 'jotai'
 import { useLocation } from 'react-router-dom'
 
-export default function HeaderTitle() {
+export function HeaderTitle() {
   const { pathname } = useLocation()
   if (!pathname.includes('subject')) return null
   const subjectId = pathname.split('/').at(-1)

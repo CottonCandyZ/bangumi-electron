@@ -9,11 +9,11 @@ import { getCharacterAvatarURL } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { motion } from 'framer-motion'
 import { useLocation } from 'react-router-dom'
-import Detail from '@renderer/modules/subject/character/gird/detail'
-import Actors from '@renderer/modules/subject/character/gird/actor'
+import { Detail } from '@renderer/modules/subject/character/gird/detail'
+import { Actors } from '@renderer/modules/subject/character/gird/actor'
 
 const sectionId = 'Characters'
-export default function Item({ character }: { character: Character }) {
+export function Item({ character }: { character: Character }) {
   const { key } = useLocation()
   const id = character.id
   const layoutId = `${sectionId}-${id}-${key}`

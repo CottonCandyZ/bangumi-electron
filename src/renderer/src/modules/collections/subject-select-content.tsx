@@ -3,11 +3,7 @@ import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 
-export default function SubjectCollectionSelectorContent({
-  subjectType,
-}: {
-  subjectType: SubjectType
-}) {
+export function SubjectCollectionSelectorContent({ subjectType }: { subjectType: SubjectType }) {
   return (
     <SelectContent>
       {Object.keys(CollectionType)

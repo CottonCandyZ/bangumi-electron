@@ -1,4 +1,4 @@
-import TagInput from '@renderer/modules/collections/modify/tags-input'
+import { TagInput } from '@renderer/modules/collections/modify/tags/tags-input'
 import { Button } from '@renderer/components/ui/button'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'
@@ -8,9 +8,9 @@ import { cn } from '@renderer/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import Tags from '@renderer/modules/subject/tags/tags'
+import { Tags } from '@renderer/modules/subject/tags/tags'
 
-export default function QuickTags({
+export function QuickTags({
   subjectTags,
   subjectCollection,
   userInfo,

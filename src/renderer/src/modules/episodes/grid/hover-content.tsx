@@ -1,7 +1,7 @@
 import { MediumHeader } from '@renderer/components/headers'
-import HoverCardContent from '@renderer/components/hover-card/content'
-import ScrollWrapper from '@renderer/components/scroll/scroll-wrapper'
-import EpisodeCollectionButton from '@renderer/modules/collections/episode-collection-button'
+import { HoverCardContent } from '@renderer/components/hover-card/content'
+import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
+import { EpisodeCollectionButton } from '@renderer/modules/collections/episode-collection-button'
 import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
@@ -30,7 +30,7 @@ export type HoverEpisodeDetailType = {
   setEnabledForm: (enabled: boolean) => void
 } & ModifyEpisodeCollectionOptType
 
-export default function HoverEpisodeDetail() {
+export function HoverEpisodeDetail() {
   const hoverCardContent = useAtomValue(hoverCardEpisodeContentAtom)
   if (!hoverCardContent) return null
   const { index, episodes, modifyEpisodeCollectionOpt, collectionType, setEnabledForm } =

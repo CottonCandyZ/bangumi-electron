@@ -1,13 +1,13 @@
-import Tabs from '@renderer/components/tabs'
+import { Tabs } from '@renderer/components/tabs'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectCharacters } from '@renderer/data/hooks/api/character'
 import { SubjectId } from '@renderer/data/types/bgm'
-import CharactersGrid from '@renderer/modules/subject/character/gird'
-import CharactersGridSkeleton from '@renderer/modules/subject/character/gird/skeleton'
+import { CharactersGrid } from '@renderer/modules/subject/character/gird'
+import { CharactersGridSkeleton } from '@renderer/modules/subject/character/gird/skeleton'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
 import { useAtom } from 'jotai'
 
-export default function SubjectCharacters({ subjectId }: { subjectId: SubjectId }) {
+export function SubjectCharacters({ subjectId }: { subjectId: SubjectId }) {
   const charactersQuery = useQuerySubjectCharacters({ id: subjectId, needKeepPreviousData: false })
   const id = `subject-characters-tab-${subjectId}`
   const [filterMap, setFilter] = useAtom(tabFilerAtom)

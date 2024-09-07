@@ -1,5 +1,5 @@
 import { EpisodeGridSize } from '@renderer/modules/episodes/grid/index'
-import EpisodeGridItem from '@renderer/modules/episodes/grid/item'
+import { EpisodeGridItem } from '@renderer/modules/episodes/grid/item'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'

@@ -4,7 +4,7 @@ import { cn } from '@renderer/lib/utils'
 import { rightPanelOpenAtom } from '@renderer/state/panel'
 import { useAtom } from 'jotai'
 
-export default function RightPanelButton() {
+export function RightPanelButton() {
   const [open, setOpen] = useAtom(rightPanelOpenAtom)
 
   return (

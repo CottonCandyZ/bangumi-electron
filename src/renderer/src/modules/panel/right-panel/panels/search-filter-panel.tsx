@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@renderer/components/ui/card'
 
-export default function SearchFilterPanel() {
+export function SearchFilterPanel() {
   return (
     <section className="flex flex-col p-2">
       <div>

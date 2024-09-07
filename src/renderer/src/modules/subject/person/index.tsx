@@ -1,12 +1,12 @@
-import ScrollWrapper from '@renderer/components/scroll/scroll-wrapper'
+import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useWebInfoBoxQuery } from '@renderer/data/hooks/web/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
-import PersonsTable from '@renderer/modules/subject/person/table'
+import { PersonsTable } from '@renderer/modules/subject/person/table'
 import { Fragment } from 'react/jsx-runtime'
 
-export default function SubjectPersonTable({ subjectId }: { subjectId: SubjectId }) {
+export function SubjectPersonTable({ subjectId }: { subjectId: SubjectId }) {
   const personsQuery = useWebInfoBoxQuery({ subjectId })
   const persons = personsQuery.data
   return (

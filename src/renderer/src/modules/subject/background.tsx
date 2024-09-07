@@ -10,7 +10,7 @@ const init = (top: number) => {
   return (top / scrollRange) * 100
 }
 
-export default function SubjectBackground() {
+export function SubjectBackground() {
   const scrollPosition = useAtomValue(mainPanelScrollPositionAtom)
   const isFirst = useRef(false)
   const { pathname } = useLocation()

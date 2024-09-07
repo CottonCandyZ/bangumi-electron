@@ -34,11 +34,7 @@ import { FetchError } from 'ofetch'
 
 const login_form_message = TEXT_CONFIG.login_form
 
-export default function LoginForm({
-  setOpen,
-}: {
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>
-}) {
+export function LoginForm({ setOpen }: { setOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
   const queryClient = useQueryClient()
   const formSchema = z.object({
     email: z

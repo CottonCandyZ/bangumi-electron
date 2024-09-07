@@ -11,7 +11,7 @@ const subjectTypeFilter = [
   { type: SubjectType.real, name: '三次元' },
 ]
 
-export default function SubjectTypeFilterButtons({
+export function SubjectTypeFilterButtons({
   filter,
   onFilterClick,
 }: {

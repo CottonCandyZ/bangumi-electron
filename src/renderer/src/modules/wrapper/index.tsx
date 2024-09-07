@@ -4,15 +4,15 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PropsWithChildren } from 'react'
 import { TooltipProvider } from '@renderer/components/ui/tooltip'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import SessionWrapper from '@renderer/modules/wrapper/session-wrapper'
+import { SessionWrapper } from '@renderer/modules/wrapper/session-wrapper'
 import { ClickScrollPlugin, OverlayScrollbars } from 'overlayscrollbars'
-import SheetWrapper from '@renderer/modules/sheet/wrapper'
-import HoverCard from '@renderer/modules/hover-card'
+import { SheetWrapper } from '@renderer/modules/sheet/wrapper'
+import { HoverCard } from '@renderer/modules/hover-card'
 import { persister, queryClient } from '@renderer/modules/wrapper/query'
 
 OverlayScrollbars.plugin(ClickScrollPlugin)
 
-export default function Wrapper({ children }: PropsWithChildren) {
+export function Wrapper({ children }: PropsWithChildren) {
   return (
     <PersistQueryClientProvider
       client={queryClient}

@@ -3,7 +3,7 @@ import { RatingCount } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { Bar, BarChart, LabelList, XAxis } from 'recharts'
 
-export default function ScoreChart({
+export function ScoreChart({
   ratingCount,
   total,
   className,

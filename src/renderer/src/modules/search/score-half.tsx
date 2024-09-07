@@ -1,4 +1,4 @@
-export default function ScoreStarHalf({ score }: { score: number }) {
+export function ScoreStarHalf({ score }: { score: number }) {
   const fillStar = Math.floor(score / 2)
   const halfStar = Math.round(score / 2 - fillStar)
   const emptyStar = 5 - fillStar - halfStar

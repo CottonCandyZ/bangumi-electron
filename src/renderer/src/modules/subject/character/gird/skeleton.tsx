@@ -1,6 +1,6 @@
 import { Skeleton } from '@renderer/components/ui/skeleton'
 
-export default function CharactersGridSkeleton() {
+export function CharactersGridSkeleton() {
   return (
     <div className="grid grid-cols-[repeat(auto-fill,_minmax(14rem,_1fr))] gap-3 py-2">
       {Array(8)

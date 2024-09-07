@@ -1,4 +1,4 @@
-import Wrapper from '@renderer/modules/wrapper'
+import { Wrapper } from '@renderer/modules/wrapper'
 import { Outlet } from 'react-router-dom'
 
 function App() {

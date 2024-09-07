@@ -11,7 +11,7 @@ import { cn } from '@renderer/lib/utils'
 import { getPageArrayFromTotal } from '@renderer/lib/utils/data-trans'
 import { UseQueryResult } from '@tanstack/react-query'
 
-export default function PageSelector({
+export function PageSelector({
   episodes,
   setOffSet,
   limit,

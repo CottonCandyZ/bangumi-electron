@@ -7,11 +7,7 @@ import { cn } from '@renderer/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-export default function PrivateSwitch({
-  subjectCollection,
-}: {
-  subjectCollection: CollectionData
-}) {
+export function PrivateSwitch({ subjectCollection }: { subjectCollection: CollectionData }) {
   const queryClient = useQueryClient()
   const { userInfo, accessToken } = useSession()
   const username = userInfo?.username

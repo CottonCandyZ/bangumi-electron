@@ -1,13 +1,13 @@
+import { BigPagination } from '@renderer/components/big-pagination'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySearch } from '@renderer/data/hooks/api/search'
 import { SearchParam } from '@renderer/data/types/search'
-import BigPagination from '@renderer/modules/search/big-pagination'
-import SearchItemCard from '@renderer/modules/search/item-card'
+import { SearchItemCard } from '@renderer/modules/search/item-card'
 import { updateMainScrollPositionAtom } from '@renderer/state/scroll'
 import { searchPaginationOffsetAtom } from '@renderer/state/search'
 import { useAtom, useSetAtom } from 'jotai'
 
-export default function SearchContent({ searchParam }: { searchParam: SearchParam }) {
+export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
   const [offset, setOffset] = useAtom(searchPaginationOffsetAtom)
   const updateScrollPosition = useSetAtom(updateMainScrollPositionAtom)
   const searchResultQuery = useQuerySearch({

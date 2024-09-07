@@ -1,16 +1,16 @@
 import { Card } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
 import { SubjectId } from '@renderer/data/types/bgm'
-import SubjectCharacters from '@renderer/modules/subject/character'
-import SubjectCollection from '@renderer/modules/subject/collection'
-import SubjectCoverImage from '@renderer/modules/subject/cover-image'
-import SubjectEpisodes from '@renderer/modules/subject/episode'
+import { SubjectCharacters } from '@renderer/modules/subject/character'
+import { SubjectCollection } from '@renderer/modules/subject/collection'
+import { SubjectCoverImage } from '@renderer/modules/subject/cover-image'
+import { SubjectEpisodes } from '@renderer/modules/subject/episode'
 import { SubjectHeaderInfo } from '@renderer/modules/subject/header-info'
-import RelatedSubjects from '@renderer/modules/subject/related'
-import SubjectScore from '@renderer/modules/subject/score'
-import SubjectTags from '@renderer/modules/subject/tags/indext'
+import { RelatedSubjects } from '@renderer/modules/subject/related'
+import { SubjectScore } from '@renderer/modules/subject/score'
+import { SubjectTags } from '@renderer/modules/subject/tags'
 
-const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
+export const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
   return (
     <div className="mx-auto flex max-w-[86rem] flex-col gap-10 px-10">
       <section className="flex w-full flex-row gap-8">
@@ -48,4 +48,3 @@ const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
 }
 
 SubjectContent.displayName = 'SubjectContent'
-export default SubjectContent

@@ -1,10 +1,10 @@
 import { Separator } from '@renderer/components/ui/separator'
-import SearchContent from '@renderer/modules/search/content'
-import Sort from '@renderer/modules/search/sort'
+import { SearchContent } from '@renderer/modules/search/content'
+import { Sort } from '@renderer/modules/search/sort'
 import { searchParamAtom } from '@renderer/state/search'
 import { useAtomValue } from 'jotai'
 
-export default function SearchContentWrapper() {
+export function SearchContentWrapper() {
   const searchParam = useAtomValue(searchParamAtom)
   return (
     searchParam && (

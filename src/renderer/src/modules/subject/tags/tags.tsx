@@ -3,7 +3,7 @@ import { CollectionData } from '@renderer/data/types/collection'
 import { Subject } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 
-export default function Tags({
+export function Tags({
   subjectTags,
   collectionTags,
   onTagClicked,

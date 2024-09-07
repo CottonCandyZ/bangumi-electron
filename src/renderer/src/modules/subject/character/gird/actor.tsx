@@ -1,7 +1,7 @@
 import { Actor } from '@renderer/data/types/character'
 import { Fragment } from 'react/jsx-runtime'
 
-export default function Actors({ actors }: { actors: Actor[] }) {
+export function Actors({ actors }: { actors: Actor[] }) {
   let first = true
   return (
     <div className="inline-flex flex-row flex-wrap gap-0.5">

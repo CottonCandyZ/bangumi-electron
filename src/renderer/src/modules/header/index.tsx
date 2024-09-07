@@ -1,11 +1,11 @@
 import { cn } from '@renderer/lib/utils'
-import NavButton from '@renderer/modules/header/nav-button'
-import OriginalLink from '@renderer/modules/header/o-link'
-import RightPanelButton from '@renderer/modules/header/right-panel-button'
-import HeaderTitle from '@renderer/modules/header/subject-title'
-import WindowsButton from '@renderer/modules/header/windows-button'
+import { NavButton } from '@renderer/modules/header/nav-button'
+import { OriginalLink } from '@renderer/modules/header/o-link'
+import { RightPanelButton } from '@renderer/modules/header/right-panel-button'
+import { HeaderTitle } from '@renderer/modules/header/subject-title'
+import { WindowsButton } from '@renderer/modules/header/windows-button'
 
-export default function Header() {
+export function Header() {
   return (
     <header
       className={cn(

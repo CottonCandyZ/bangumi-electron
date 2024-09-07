@@ -16,7 +16,7 @@ import { CollectionData } from '@renderer/data/types/collection'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-export default function DeleteSubjectCollectionAlert({ subjectId }: { subjectId: SubjectId }) {
+export function DeleteSubjectCollectionAlert({ subjectId }: { subjectId: SubjectId }) {
   const { userInfo, accessToken } = useSession()
   const username = userInfo?.username
   const hash = useWebDeleteCollectionHash({ subjectId }).data

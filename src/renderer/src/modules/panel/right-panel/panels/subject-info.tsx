@@ -1,7 +1,7 @@
-import SubjectPersonTable from '@renderer/modules/subject/person'
+import { SubjectPersonTable } from '@renderer/modules/subject/person'
 import { useParams } from 'react-router-dom'
 
-export default function SubjectInfoPanel() {
+export function SubjectInfoPanel() {
   const subjectId = useParams().subjectId
   if (subjectId) return <SubjectPersonTable subjectId={subjectId} />
   return null

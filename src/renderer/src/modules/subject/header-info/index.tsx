@@ -2,9 +2,9 @@ import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
-import Header from '@renderer/modules/subject/header-info/header'
-import Meta from '@renderer/modules/subject/header-info/meta'
-import Summary from '@renderer/modules/subject/header-info/summary'
+import { Header } from '@renderer/modules/subject/header-info/header'
+import { Meta } from '@renderer/modules/subject/header-info/meta'
+import { Summary } from '@renderer/modules/subject/header-info/summary'
 
 export function SubjectHeaderInfo({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
