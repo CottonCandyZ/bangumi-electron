@@ -3,7 +3,7 @@ import { parseInfoBoxFromSubjectPage, parseTopListFromHTML } from '@renderer/dat
 import { useQuery } from '@tanstack/react-query'
 import type { SectionPath } from '@renderer/data/types/web'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { useSession } from '@renderer/components/wrapper/session-wrapper'
+import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 
 // 分离 parse 和 fetch，方便缓存整个页面的内容
 

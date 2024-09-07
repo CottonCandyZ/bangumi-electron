@@ -1,9 +1,9 @@
-import { Image } from '@renderer/components/base/Image'
-import SubjectBackground from '@renderer/components/subject/background'
-import SubjectContent from '@renderer/components/subject/content'
+import { Image } from '@renderer/components/image/image'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { useResizeOb } from '@renderer/hooks/resize'
 import { isEmpty } from '@renderer/lib/utils/string'
+import SubjectBackground from '@renderer/modules/subject/background'
+import SubjectContent from '@renderer/modules/subject/content'
 import { useRef } from 'react'
 import { useParams } from 'react-router-dom'
 
