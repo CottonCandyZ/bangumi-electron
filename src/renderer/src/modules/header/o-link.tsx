@@ -18,7 +18,7 @@ export default function OriginalLink() {
             className="no-drag-region p-2 text-[1.4rem] text-muted-foreground"
           >
             <a href={href} target="_blank" rel="noreferrer">
-              <span className="i-mingcute-link-line" />
+              <span className="i-mingcute-world-2-line" />
             </a>
           </Button>
         </TooltipTrigger>
