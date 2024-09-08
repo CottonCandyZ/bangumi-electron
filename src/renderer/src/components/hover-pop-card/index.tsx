@@ -136,22 +136,19 @@ export const PopCardInnerContent: FC<
   const [popCod, setPopCod] = useState({ top: 0, left: 0 })
   const popRef = useRef<HTMLDivElement>(null)
   const timeOutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const [translate, setTranslate] = useState({ x: 0, y: 0 })
   useLayoutEffect(() => {
-    const pop = popRef.current!.getBoundingClientRect()
+    if (!popRef.current) return
+    const pop = popRef.current.getBoundingClientRect()
     const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)
     setPopCod({ top: topOffset, left: leftOffset })
     const ob = new ResizeObserver(() => {
       if (!popRef.current) return
-      const pop = popRef.current!.getBoundingClientRect()
-      const { topOffset: newTopOffset, leftOffset: newLeftOffset } = cPopSizeByC(
-        pop,
-        hoverRef.current,
-      )
-      setTranslate({ x: newLeftOffset - leftOffset, y: newTopOffset - topOffset })
+      const pop = popRef.current.getBoundingClientRect()
+      const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)
+      setPopCod({ top: topOffset, left: leftOffset })
     })
     timeOutRef.current = setTimeout(() => {
-      ob.observe(popRef.current!)
+      if (popRef.current) ob.observe(popRef.current)
     }, 500)
     return () => {
       clearTimeout(timeOutRef.current)
@@ -163,7 +160,6 @@ export const PopCardInnerContent: FC<
       layoutId={layoutId}
       ref={popRef}
       className={cn('absolute z-50', className)}
-      animate={{ x: translate.x, y: translate.y, transition: { duration: 0.2 } }}
       style={{
         top: `${popCod.top}px`,
         left: `${popCod.left}px`,

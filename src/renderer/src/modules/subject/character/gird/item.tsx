@@ -1,4 +1,3 @@
-import { CoverMotionImage } from '@renderer/components/image/cover-motion-image'
 import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/components/hover-pop-card'
 import { Badge } from '@renderer/components/ui/badge'
 import { Card, CardContent } from '@renderer/components/ui/card'
@@ -11,6 +10,7 @@ import { motion } from 'framer-motion'
 import { useLocation } from 'react-router-dom'
 import { Detail } from '@renderer/modules/subject/character/gird/detail'
 import { Actors } from '@renderer/modules/subject/character/gird/actor'
+import { Image } from '@renderer/components/image/image'
 
 const sectionId = 'Characters'
 export function Item({ character }: { character: Character }) {
@@ -28,7 +28,7 @@ export function Item({ character }: { character: Character }) {
             )}
           >
             {!isEmpty(character.images.large) && (
-              <CoverMotionImage
+              <Image
                 className="aspect-square size-14 shrink-0 overflow-hidden rounded-lg"
                 imageSrc={getCharacterAvatarURL(character.images.large)}
               />
@@ -49,7 +49,7 @@ function PopCard({ character }: { character: Character }) {
         <CardContent className="flex h-full flex-col overflow-hidden p-2">
           <motion.div className="flex h-full flex-row gap-4" layout>
             {!isEmpty(character.images.large) && (
-              <CoverMotionImage
+              <Image
                 className="h-fit basis-1/4 overflow-hidden rounded-lg"
                 imageSrc={character.images.grid}
                 loadingClassName="aspect-square"
