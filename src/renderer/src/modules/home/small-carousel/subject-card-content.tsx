@@ -1,6 +1,4 @@
 import { CoverMotionImage } from '@renderer/components/image/cover-motion-image'
-import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
-import { cHoverCardSize } from '@renderer/components/hover-pop-card/utils'
 import { MotionSkeleton } from '@renderer/components/ui/motion-skeleton'
 import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent } from '@renderer/components/ui/card'
@@ -25,6 +23,7 @@ import { MyLink } from '@renderer/components/my-link'
 import { useAtom, useSetAtom } from 'jotai'
 import { activeSectionAtom } from '@renderer/state/small-carousel'
 import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
+import { calculatePopCardPosition } from '@renderer/components/hover-pop-card/dynamic-size/utils'
 
 export interface SubjectCardProps {
   sectionPath: SectionPath
@@ -42,7 +41,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
 
   // 计算 hover card 大小
   const ref = useRef<HTMLDivElement>(null)
-  const inset = useRef({ left: 0, right: 0, top: 0, bottom: 0 })
+  const inset = useRef({ left: 0, top: 0, right: 0, bottom: 0 })
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   // 一些状态
@@ -69,12 +68,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
 
   return (
     <div className="relative">
-      <motion.div
-        layoutId={layoutId}
-        ref={ref}
-        className={cn('relative z-[1] w-full cursor-default')}
-        onMouseEnter={() => setActiveId(null)}
-      >
+      <motion.div layoutId={layoutId} ref={ref} className="relative z-[1] w-full cursor-default">
         <MyLink
           to={`/subject/${subjectId}`}
           className="cursor-default"
@@ -85,17 +79,14 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
             className="relative overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
             style={{ viewTransitionName: !activeId && isTransitioning ? `cover-image-${key}` : '' }}
             onMouseEnter={() => {
+              setActiveId(null)
               timeoutRef.current = setTimeout(() => {
                 const bounding = ref.current!.getBoundingClientRect()
-                inset.current = cHoverCardSize(bounding, {
-                  width: 0.5,
-                  height: 0.05,
-                  toViewBottom: 8,
-                  toViewTop: 8,
-                  toViewLeft: 8,
-                  toViewRight: 8,
-                  minInnerHoverHeight: 270,
-                  minInnerHoverWidth: 150,
+                inset.current = calculatePopCardPosition(bounding, {
+                  width: 2,
+                  height: 1.05,
+                  minHeight: 270,
+                  minWidth: 150,
                 })
                 setActionSection(sectionPath)
                 setActiveId(layoutId)
@@ -154,12 +145,12 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
       <AnimatePresence onExitComplete={() => setActionSection(null)}>
         {activeId === layoutId && (
           <motion.div
-            className="absolute z-10 cursor-default"
+            className="absolute z-10 cursor-default overflow-hidden"
             style={{
               left: `${inset.current.left}px`,
+              top: `${inset.current.top}px`,
               right: `${inset.current.right}px`,
               bottom: `${inset.current.bottom}px`,
-              top: `${inset.current.top}px`,
             }}
             layoutId={layoutId}
           >
@@ -236,6 +227,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
+                      layout
                     >
                       <Select>
                         <SelectTrigger className="flex-auto">
@@ -253,29 +245,24 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
                   </section>
                   {/* 标签 */}
                   {subjectInfoData ? (
-                    <ScrollWrapper
-                      className="mb-4 ml-4 mr-1 pr-3"
-                      element="div"
-                      options={{ overflow: { x: 'hidden' }, scrollbars: { autoHide: 'scroll' } }}
+                    <motion.div
+                      className="mb-4 ml-4 mr-1 flex flex-wrap gap-2 overflow-x-hidden py-2 pr-3"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      layout
                     >
-                      <motion.div
-                        className="flex flex-wrap gap-2 py-2"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                      >
-                        {subjectInfoData.tags.map((item) => (
-                          <Button
-                            key={item.name}
-                            className="h-auto flex-auto justify-center whitespace-normal px-1.5 py-1.5 text-xs"
-                            variant={'outline'}
-                            onClick={(e) => e.preventDefault()}
-                          >
-                            {item.name}
-                          </Button>
-                        ))}
-                      </motion.div>
-                    </ScrollWrapper>
+                      {subjectInfoData.tags.map((item) => (
+                        <Button
+                          key={item.name}
+                          className="h-auto flex-auto justify-center whitespace-normal px-1.5 py-1.5 text-xs"
+                          variant={'outline'}
+                          onClick={(e) => e.preventDefault()}
+                        >
+                          {item.name}
+                        </Button>
+                      ))}
+                    </motion.div>
                   ) : (
                     <Skeleton className="mb-4 ml-4 mr-4 h-full" />
                   )}

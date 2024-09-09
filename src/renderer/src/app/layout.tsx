@@ -1,5 +1,5 @@
 import { PageScrollWrapper } from '@renderer/components/scroll/page-scroll-wrapper'
-import { BackCover } from '@renderer/components/hover-pop-card/close'
+import { BackCover } from '@renderer/components/hover-pop-card/dynamic-size/close'
 import { ResizablePanel, ResizablePanelGroup } from '@renderer/components/ui/resizable'
 import { Outlet } from 'react-router-dom'
 import { Header } from '@renderer/modules/header'

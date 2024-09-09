@@ -49,7 +49,7 @@ export function HoverCardContent({
       trigger: triggerClientRect,
       content: ref.current.getBoundingClientRect(),
     })
-    if (c.height != undefined) {
+    if (c.height !== undefined) {
       setHeight(c.height)
       setIsCollision(true)
     } else {

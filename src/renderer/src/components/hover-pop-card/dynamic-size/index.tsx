@@ -1,4 +1,4 @@
-import { cPopSizeByC } from '@renderer/components/hover-pop-card/utils'
+import { calculatePopSizePosition } from '@renderer/components/hover-pop-card/dynamic-size/utils'
 import { cn } from '@renderer/lib/utils'
 import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
 import { AnimatePresence, HTMLMotionProps, motion } from 'framer-motion'
@@ -139,13 +139,13 @@ export const PopCardInnerContent: FC<
   useLayoutEffect(() => {
     if (!popRef.current) return
     const pop = popRef.current.getBoundingClientRect()
-    const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)
-    setPopCod({ top: topOffset, left: leftOffset })
+    const { top, left } = calculatePopSizePosition(pop, hoverRef.current)
+    setPopCod({ top, left })
     const ob = new ResizeObserver(() => {
       if (!popRef.current) return
       const pop = popRef.current.getBoundingClientRect()
-      const { topOffset, leftOffset } = cPopSizeByC(pop, hoverRef.current)
-      setPopCod({ top: topOffset, left: leftOffset })
+      const { top, left } = calculatePopSizePosition(pop, hoverRef.current)
+      setPopCod({ top, left })
     })
     timeOutRef.current = setTimeout(() => {
       if (popRef.current) ob.observe(popRef.current)

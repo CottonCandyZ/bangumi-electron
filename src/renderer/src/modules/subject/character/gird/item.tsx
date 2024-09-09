@@ -1,4 +1,8 @@
-import { HoverCardContent, HoverPopCard, PopCardContent } from '@renderer/components/hover-pop-card'
+import {
+  HoverCardContent,
+  HoverPopCard,
+  PopCardContent,
+} from '@renderer/components/hover-pop-card/dynamic-size'
 import { Badge } from '@renderer/components/ui/badge'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
@@ -47,7 +51,13 @@ function PopCard({ character }: { character: Character }) {
     <PopCardContent className="w-96 cursor-default">
       <Card>
         <CardContent className="flex h-full flex-col overflow-hidden p-2">
-          <motion.div className="flex h-full flex-row gap-4" layout>
+          <motion.div
+            className="flex h-full flex-row gap-4"
+            layout
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
             {!isEmpty(character.images.large) && (
               <Image
                 className="h-fit basis-1/4 overflow-hidden rounded-lg"
