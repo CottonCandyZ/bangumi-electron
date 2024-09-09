@@ -1,4 +1,4 @@
-import { calculatePopSizePosition } from '@renderer/components/hover-pop-card/dynamic-size/utils'
+import { calculatePopSizePosition } from '@renderer/components/hover-pop-card/utils'
 import { cn } from '@renderer/lib/utils'
 import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
 import { AnimatePresence, HTMLMotionProps, motion } from 'framer-motion'

@@ -23,7 +23,7 @@ import { MyLink } from '@renderer/components/my-link'
 import { useAtom, useSetAtom } from 'jotai'
 import { activeSectionAtom } from '@renderer/state/small-carousel'
 import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
-import { calculatePopCardPosition } from '@renderer/components/hover-pop-card/dynamic-size/utils'
+import { calculatePopCardPosition } from '@renderer/components/hover-pop-card/utils'
 
 export interface SubjectCardProps {
   sectionPath: SectionPath
@@ -41,7 +41,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
 
   // 计算 hover card 大小
   const ref = useRef<HTMLDivElement>(null)
-  const inset = useRef({ left: 0, top: 0, right: 0, bottom: 0 })
+  const inset = useRef({ left: 0, top: 0, height: 0, width: 0 })
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   // 一些状态
@@ -149,8 +149,8 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
             style={{
               left: `${inset.current.left}px`,
               top: `${inset.current.top}px`,
-              right: `${inset.current.right}px`,
-              bottom: `${inset.current.bottom}px`,
+              height: `${inset.current.height}px`,
+              width: `${inset.current.width}px`,
             }}
             layoutId={layoutId}
           >

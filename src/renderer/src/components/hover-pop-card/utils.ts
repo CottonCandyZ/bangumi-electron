@@ -49,10 +49,7 @@ export function calculatePopCardPosition(
     top -= hover.top
   }
 
-  const right = isFixed ? window.innerWidth - (left + popWidth) : hover.width - (left + popWidth)
-  const bottom = isFixed ? window.innerHeight - (top + popHeight) : hover.height - (top + popHeight)
-
-  return { left, top, right, bottom }
+  return { left, top, width: popWidth, height: popHeight }
 }
 
 /** 根据 pop 的大小计算 pop 的位置 */
