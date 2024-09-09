@@ -23,6 +23,7 @@
 ::-webkit-scrollbar {
   background-color: transparent;
   width: 5px;
+  height: 5px;
   z-index: 999999;
 }
 
@@ -30,8 +31,17 @@
   background-color: rgba(0, 0, 0, 0.07);
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background-color: rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+  min-width: 20px;
+}
+
+::-webkit-scrollbar-thumb:vertical {
+  min-height: 20px;
 }
 
 .dark ::-webkit-scrollbar-thumb {
