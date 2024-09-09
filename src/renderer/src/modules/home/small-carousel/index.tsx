@@ -11,7 +11,7 @@ import {
 } from '@renderer/components/ui/carousel'
 import { UI_CONFIG } from '@renderer/config'
 import { SectionPath } from '@renderer/data/types/web'
-import { useStateHook } from '@renderer/hooks/cache-state'
+import { useStateHook } from '@renderer/hooks/use-cache-state'
 import { cn } from '@renderer/lib/utils'
 import { activeSectionAtom } from '@renderer/state/small-carousel'
 import { useAtomValue } from 'jotai'

@@ -1,6 +1,6 @@
 import { Image } from '@renderer/components/image/image'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
-import { useResizeOb } from '@renderer/hooks/resize'
+import { useResizeObserver } from '@renderer/hooks/use-resize'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { SubjectBackground } from '@renderer/modules/subject/background'
 import { SubjectContent } from '@renderer/modules/subject/content'
@@ -13,11 +13,11 @@ export function Component() {
   const subjectInfo = subjectInfoQuery.data
   const backImageRef = useRef<HTMLDivElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
-  useResizeOb({
+  useResizeObserver({
     ref: containerRef,
-    callback: (entries) => {
+    callback: (entry) => {
       if (backImageRef.current) {
-        backImageRef.current.style.width = entries[0].target.getBoundingClientRect().width + 'px'
+        backImageRef.current.style.width = entry.target.getBoundingClientRect().width + 'px'
       }
     },
     deps: [backImageRef, subjectId],

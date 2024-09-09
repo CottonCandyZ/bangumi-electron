@@ -1,5 +1,5 @@
 import { ResizableHandle, ResizablePanel } from '@renderer/components/ui/resizable'
-import { useResizeOb } from '@renderer/hooks/resize'
+import { useResizeObserver } from '@renderer/hooks/use-resize'
 import { RightPanel } from '@renderer/modules/panel/right-panel/panel'
 import { panelSize } from '@renderer/state/global-var'
 import { rightPanelOpenAtom } from '@renderer/state/panel'
@@ -9,10 +9,10 @@ import { useRef } from 'react'
 export function RightResizablePanel() {
   const open = useAtomValue(rightPanelOpenAtom)
   const ref = useRef<HTMLDivElement>(null)
-  useResizeOb({
+  useResizeObserver({
     ref,
-    callback: (entries) => {
-      panelSize.right_width = entries[0].target.getBoundingClientRect().width
+    callback: (entry) => {
+      panelSize.right_width = entry.target.getBoundingClientRect().width
     },
     deps: [open],
   })

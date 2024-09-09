@@ -1,5 +1,5 @@
 import { ResizableHandle, ResizablePanel } from '@renderer/components/ui/resizable'
-import { useResizeOb } from '@renderer/hooks/resize'
+import { useResizeObserver } from '@renderer/hooks/use-resize'
 import { LeftPanel } from '@renderer/modules/panel/left-panel/panel'
 import { panelSize } from '@renderer/state/global-var'
 import { leftPanelOpenAtom, triggerLeftOpenAtomAction } from '@renderer/state/panel'
@@ -10,10 +10,10 @@ export function LeftResizablePanel() {
   const open = useAtomValue(leftPanelOpenAtom)
   const triggerOpen = useSetAtom(triggerLeftOpenAtomAction)
   const ref = useRef<HTMLDivElement>(null)
-  useResizeOb({
+  useResizeObserver({
     ref,
-    callback: (entries) => {
-      panelSize.left_width = entries[0].target.getBoundingClientRect().width
+    callback: (entry) => {
+      panelSize.left_width = entry.target.getBoundingClientRect().width
     },
     deps: [open],
   })

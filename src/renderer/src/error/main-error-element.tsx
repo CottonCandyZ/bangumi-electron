@@ -1,26 +1,25 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate, useRouteError, useLocation } from 'react-router-dom'
 import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@renderer/components/ui/card'
 import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
-import { ERROR_CONSTANTS, TIMING_CONSTANTS } from '@renderer/constants'
+import { ERROR_CONSTANTS } from '@renderer/constants'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
+import { useCopyToClipboard } from '@renderer/hooks/use-copy-to-clipboard'
 
 export default function MainErrorElement() {
   const nav = useNavigate()
   const error = useRouteError() as Error
-  const [copied, setCopied] = useState(false)
   const location = useLocation()
   const { isLogin } = useSession()
+  const { copied, copyToClipboard } = useCopyToClipboard()
 
   useEffect(() => {
     console.error('Original error:', error)
   }, [error])
 
   const copyErrorToClipboard = () => {
-    navigator.clipboard.writeText(error.stack || error.message)
-    setCopied(true)
-    setTimeout(() => setCopied(false), TIMING_CONSTANTS.COPY_FEEDBACK_DURATION)
+    copyToClipboard(error.stack || error.message)
   }
 
   const submitIssue = () => {
@@ -80,7 +79,7 @@ export default function MainErrorElement() {
                 </div>
               </div>
               <ScrollWrapper className="max-h-60">
-                <pre className="whitespace-pre-wrap break-words text-sm text-gray-700">
+                <pre className="whitespace-pre-wrap break-words font-mono text-sm text-gray-700">
                   {error.stack}
                 </pre>
               </ScrollWrapper>
