@@ -1,12 +1,18 @@
 import { Button } from '@renderer/components/ui/button'
 import { Character } from '@renderer/data/types/character'
 import { Item } from '@renderer/modules/subject/character/gird/item'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 export function CharactersGrid({ characters }: { characters: Character[] }) {
   const [fold, setFold] = useState(true)
   const slice = fold ? 8 : characters.length
   const needFold = characters.length > 8
+  const { pathname } = useLocation()
+  useEffect(() => {
+    setFold(true)
+  }, [pathname])
+
   return (
     <div className="relative flex flex-row gap-2">
       <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(15rem,_1fr))] gap-3 py-2">
