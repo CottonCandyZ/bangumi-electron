@@ -15,30 +15,40 @@ import { useLocation } from 'react-router-dom'
 import { Detail } from '@renderer/modules/subject/character/gird/detail'
 import { Actors } from '@renderer/modules/subject/character/gird/actor'
 import { Image } from '@renderer/components/image/image'
+import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
+import { useAtomValue } from 'jotai'
 
 const sectionId = 'Characters'
 export function Item({ character }: { character: Character }) {
   const { key } = useLocation()
   const id = character.id
   const layoutId = `${sectionId}-${id}-${key}`
+
+  /* eslint-disable */
+  // @ts-ignore: framer-motion needed
+  const activeId = useAtomValue(activeHoverPopCardAtom) // framer motion 需要其用于确保 re-render ?
+  /* eslint-enable */
+
   return (
     <HoverPopCard layoutId={layoutId}>
       <HoverCardContent className="h-full cursor-default">
         <Card className="h-full hover:-translate-y-0.5 hover:shadow-xl hover:duration-700">
-          <CardContent
-            className={cn(
-              'flex flex-row items-start gap-4 p-2',
-              isEmpty(character.images.large) && 'pl-4',
-            )}
-          >
-            {!isEmpty(character.images.large) && (
-              <Image
-                className="aspect-square size-14 shrink-0 overflow-hidden rounded-lg"
-                imageSrc={getCharacterAvatarURL(character.images.large)}
-              />
-            )}
-            <MetaInfo character={character} />
-          </CardContent>
+          <motion.div layout="size">
+            <CardContent
+              className={cn(
+                'flex flex-row items-start gap-4 p-2',
+                isEmpty(character.images.large) && 'pl-4',
+              )}
+            >
+              {!isEmpty(character.images.large) && (
+                <Image
+                  className="aspect-square size-14 shrink-0 overflow-hidden rounded-lg"
+                  imageSrc={getCharacterAvatarURL(character.images.large)}
+                />
+              )}
+              <MetaInfo character={character} />
+            </CardContent>
+          </motion.div>
         </Card>
       </HoverCardContent>
       <PopCard character={character} />
@@ -49,8 +59,8 @@ export function Item({ character }: { character: Character }) {
 function PopCard({ character }: { character: Character }) {
   return (
     <PopCardContent className="w-96 cursor-default">
-      <Card>
-        <CardContent className="flex h-full flex-col overflow-hidden p-2">
+      <Card className="overflow-hidden">
+        <CardContent className="flex h-full flex-col p-2">
           <motion.div
             className="flex h-full flex-row gap-4"
             layout
@@ -80,7 +90,7 @@ function PopCard({ character }: { character: Character }) {
 
 function MetaInfo({ character }: { character: Character }) {
   return (
-    <section className="flex flex-col gap-1">
+    <motion.section className="flex flex-col gap-1">
       <div className="flex flex-col gap-0.5">
         <h3 className="font-medium">{character.name}</h3>
         <h4 className="text-sm font-medium text-muted-foreground">
@@ -93,6 +103,6 @@ function MetaInfo({ character }: { character: Character }) {
           <Actors actors={character.actors} />
         </div>
       )}
-    </section>
+    </motion.section>
   )
 }

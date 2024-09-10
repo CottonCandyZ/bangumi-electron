@@ -7,10 +7,18 @@ import {
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { RelatedSubject } from '@renderer/data/types/subject'
 import { Link } from 'react-router-dom'
+import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
+import { useAtomValue } from 'jotai'
 
 const sectionId = 'RelatedSubjects'
 export function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
   const layoutId = `${sectionId}-${relatedSubject.id}`
+
+  /* eslint-disable */
+  // @ts-ignore: framer-motion needed
+  const activeId = useAtomValue(activeHoverPopCardAtom) // framer motion 需要其用于确保 re-render ?
+  /* eslint-enable */
+
   // const { key } = useLocation()
   // const isTransitioning = unstable_useViewTransitionState(`/subject/${relatedSubject.id}`)
   return (
