@@ -10,8 +10,8 @@ type ViewMargins = {
 }
 
 export type HoverCardSize = {
-  width: number
-  height: number
+  widthRatio: number
+  heightRatio: number
   maxWidth?: number
   maxHeight?: number
   minWidth?: number
@@ -25,13 +25,13 @@ export function calculatePopCardPosition(
   viewMargins: ViewMargins = { top: 8, left: 8, right: 8, bottom: 8 },
   isFixed: boolean = false,
 ) {
-  const { width, height, maxWidth, maxHeight, minWidth, minHeight } = hoverCardSize
+  const { widthRatio, heightRatio, maxWidth, maxHeight, minWidth, minHeight } = hoverCardSize
   const { top: marginTop, left: marginLeft, right: marginRight, bottom: marginBottom } = viewMargins
 
   const hoverWidth = clamp(hover.width, minWidth, maxWidth)
   const hoverHeight = clamp(hover.height, minHeight, maxHeight)
-  const popWidth = hoverWidth * width
-  const popHeight = hoverHeight * height
+  const popWidth = hoverWidth * widthRatio
+  const popHeight = hoverHeight * heightRatio
 
   let left = hover.left + (hover.width - popWidth) / 2
   let top = hover.top + (hover.height - popHeight) / 2
