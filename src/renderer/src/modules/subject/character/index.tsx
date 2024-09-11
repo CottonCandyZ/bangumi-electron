@@ -33,6 +33,7 @@ export function SubjectCharacters({ subjectId }: { subjectId: SubjectId }) {
       </div>
       {characters ? (
         <CharactersGrid
+          key={filter}
           characters={filter === '全部' ? [...characters.values()].flat() : characters.get(filter)!}
         />
       ) : (
