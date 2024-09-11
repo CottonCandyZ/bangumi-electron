@@ -6,23 +6,18 @@ export const useResizeObserver = <T extends Element>({
   deps = [],
 }: {
   ref: React.RefObject<T>
-  callback: (entry: ResizeObserverEntry) => void
+  callback: (entries: ResizeObserverEntry) => void
   deps?: React.DependencyList
 }) => {
   useEffect(() => {
-    const element = ref.current
-    if (!element) return
-
     const resizeObserver = new ResizeObserver((entries) => {
       if (entries.length > 0) {
         callback(entries[0])
       }
     })
-
-    resizeObserver.observe(element)
-
+    if (ref.current) resizeObserver.observe(ref.current)
     return () => {
-      resizeObserver.disconnect()
+      if (ref.current) resizeObserver.unobserve(ref.current)
     }
-  }, [ref, callback, ...deps])
+  }, [ref, ...deps])
 }
