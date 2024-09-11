@@ -6,20 +6,20 @@ import {
 } from '@renderer/components/hover-pop-card/dynamic-size'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { RelatedSubject } from '@renderer/data/types/subject'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
 import { useAtomValue } from 'jotai'
 
 const sectionId = 'RelatedSubjects'
 export function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
-  const layoutId = `${sectionId}-${relatedSubject.id}`
+  const { key } = useLocation()
+  const layoutId = `${sectionId}-${relatedSubject.id}-${key}`
 
   /* eslint-disable */
   // @ts-ignore: framer-motion needed
   const activeId = useAtomValue(activeHoverPopCardAtom) // framer motion 需要其用于确保 re-render ?
   /* eslint-enable */
 
-  // const { key } = useLocation()
   // const isTransitioning = unstable_useViewTransitionState(`/subject/${relatedSubject.id}`)
   return (
     <HoverPopCard layoutId={layoutId}>
@@ -36,9 +36,9 @@ export function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
               // style={{ viewTransitionName: isTransitioning ? `${key}-cover-image` : '' }}
             >
               <CardContent className="p-0">
-                {/* FIXME:需要确保 image transition 正常，或重写该组件 */}
                 {relatedSubject.images.common !== '' ? (
                   <CoverMotionImage
+                    key={`${layoutId}-image`}
                     layoutId={`${layoutId}-image`}
                     imageSrc={relatedSubject.images.common}
                     className="aspect-square"
@@ -59,6 +59,7 @@ export function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
           <CardContent className="p-2">
             <div className="flex flex-row gap-2">
               <CoverMotionImage
+                key={`${layoutId}-image`}
                 layoutId={`${layoutId}-image`}
                 imageSrc={relatedSubject.images.common}
                 className="h-fit shrink-0 basis-1/3 overflow-hidden rounded-md"

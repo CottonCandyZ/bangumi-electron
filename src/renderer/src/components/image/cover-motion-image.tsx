@@ -33,8 +33,8 @@ export const CoverMotionImage = forwardRef<
       <motion.div
         className={cn('relative z-0', (!imageSrc || !isLoad) && loadingClassName, className)}
         ref={ref}
-        {...props}
         key={imageSrc}
+        {...props}
         draggable={false}
       >
         <motion.img
