@@ -35,7 +35,6 @@ export async function isAccessTokenValid(token: Token) {
  * 登出时清除相关内容
  */
 export async function logout() {
-  window.localStorage.removeItem('isLogin')
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_sid' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_sec_id' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_cookietime' })

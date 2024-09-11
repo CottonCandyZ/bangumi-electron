@@ -12,7 +12,7 @@ export const useLogoutMutation = () => {
     mutationKey: ['session'],
     mutationFn: logout,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['accessToken'] })
+      queryClient.setQueryData(['accessToken'], null)
     },
   })
 }
