@@ -144,12 +144,12 @@ export const PopCardInnerContent: FC<
     const ob = new ResizeObserver(() => {
       if (!popRef.current) return
       const pop = popRef.current.getBoundingClientRect()
-      const { top, left } = calculatePopSizePosition(pop, hoverRef.current)
-      setPopCod({ top, left })
+      const { top: newTop, left: newLeft } = calculatePopSizePosition(pop, hoverRef.current)
+      if (top !== newTop || left !== newLeft) setPopCod({ top: newTop, left: newLeft })
     })
     timeOutRef.current = setTimeout(() => {
       if (popRef.current) ob.observe(popRef.current)
-    }, 500)
+    }, 600)
     return () => {
       clearTimeout(timeOutRef.current)
       popRef.current && ob.unobserve(popRef.current)
