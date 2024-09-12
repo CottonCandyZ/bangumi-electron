@@ -13,6 +13,8 @@ export const rightPanelOpenAtom = atom(false)
 
 export const leftPanelOpenContentAtom = atom<LeftPanelName | null>(null)
 
+export const leftPanelSizeAtom = atom(256)
+
 // export const rightPanelOpenContentAtom = atom<RightPanelName | null>(null)
 
 // left
