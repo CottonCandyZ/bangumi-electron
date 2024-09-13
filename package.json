@@ -66,6 +66,7 @@
     "react-hook-form": "^7.52.1",
     "react-resizable-panels": "^2.0.22",
     "react-router-dom": "^6.24.1",
+    "react-transition-state": "^2.1.2",
     "recharts": "2.13.0-alpha.4",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.4.0",

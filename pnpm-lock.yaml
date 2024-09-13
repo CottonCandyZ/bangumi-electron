@@ -143,6 +143,9 @@ importers:
       react-router-dom:
         specifier: ^6.24.1
         version: 6.24.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-transition-state:
+        specifier: ^2.1.2
+        version: 2.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       recharts:
         specifier: 2.13.0-alpha.4
         version: 2.13.0-alpha.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3246,6 +3249,12 @@ packages:
     peerDependencies:
       react: '>=16.6.0'
       react-dom: '>=16.6.0'
+
+  react-transition-state@2.1.2:
+    resolution: {integrity: sha512-RkDYBkj1V1ZqBA5AwQPrMt2Uagwsx6b//GVJdRDhs/t0o66w2nhQiyHyFGQEI60mgtbaIdLm8yhBRCvhA+FxEg==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   react@18.3.1:
     resolution: {integrity: sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==}
@@ -7007,6 +7016,11 @@ snapshots:
       dom-helpers: 5.2.1
       loose-envify: 1.4.0
       prop-types: 15.8.1
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+
+  react-transition-state@2.1.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+    dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
