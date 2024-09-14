@@ -1,4 +1,4 @@
-import { CollectionPanel } from '@renderer/modules/panel/left-panel/panels/collction-panel'
+import { CollectionPanel } from '@renderer/modules/panel/left-panel/panels/collection-panel'
 import { leftPanelOpenContentAtom } from '@renderer/state/panel'
 import { useAtomValue } from 'jotai'
 
