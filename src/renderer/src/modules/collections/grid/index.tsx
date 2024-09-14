@@ -7,9 +7,8 @@ import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import { gridCache } from '@renderer/state/global-var'
 import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
-import { useAtomValue, useSetAtom } from 'jotai'
+import { useSetAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
-import { leftPanelSizeAtom } from '@renderer/state/panel'
 
 export function CollectionsGrid({
   collectionType,
@@ -20,7 +19,6 @@ export function CollectionsGrid({
 }) {
   const userInfoQuery = useQueryUserInfo()
   const userInfo = userInfoQuery.data
-  const containerSize = useAtomValue(leftPanelSizeAtom)
   const collectionsQuery = useInfinityQueryCollectionsByUsername({
     username: userInfo?.username,
     collectionType: collectionType,
@@ -63,7 +61,7 @@ export function CollectionsGrid({
       </div>
     )
   return (
-    <div className="h-full overflow-hidden py-1 pr-0.5" style={{ width: `${containerSize}px` }}>
+    <div className="h-full overflow-hidden py-1 pr-0.5">
       <MasonryInfiniteGrid
         ref={igRef}
         onChangeScroll={() => {

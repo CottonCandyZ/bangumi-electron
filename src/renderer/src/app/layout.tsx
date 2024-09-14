@@ -12,25 +12,23 @@ function RootLayout() {
   return (
     <>
       <NavBar />
-      <div className="ml-16 flex">
-        <ResizablePanelGroup direction="horizontal" autoSaveId="main-panel">
-          <LeftResizablePanel />
-          <ResizablePanel order={2} id="main" className="flex h-dvh flex-col">
-            <Header />
-            <ResizablePanelGroup direction="horizontal" autoSaveId="sub-panel">
-              <ResizablePanel order={1} id="left">
-                <PageScrollWrapper className="h-full w-full overflow-hidden">
-                  <div className="h-full">
-                    <Outlet />
-                  </div>
-                </PageScrollWrapper>
-              </ResizablePanel>
-              <RightResizablePanel />
-            </ResizablePanelGroup>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-        <BackCover />
+      <div className="ml-16 flex h-dvh flex-row">
+        <LeftResizablePanel />
+        <div className="flex h-full w-full flex-col overflow-hidden">
+          <Header />
+          <ResizablePanelGroup direction="horizontal" autoSaveId="sub-panel">
+            <ResizablePanel order={1} id="left">
+              <PageScrollWrapper className="h-full w-full overflow-hidden">
+                <div className="h-full">
+                  <Outlet />
+                </div>
+              </PageScrollWrapper>
+            </ResizablePanel>
+            <RightResizablePanel />
+          </ResizablePanelGroup>
+        </div>
       </div>
+      <BackCover />
     </>
   )
 }

@@ -9,7 +9,7 @@ export function Header() {
   return (
     <header
       className={cn(
-        'drag-region relative z-10 flex h-16 shrink-0 flex-row items-center justify-between gap-10 border-b pl-2 backdrop-blur-2xl',
+        'drag-region relative z-10 flex h-16 shrink-0 flex-row items-center justify-between gap-10 border-b pl-2',
       )}
     >
       <div className="flex h-full flex-row items-center gap-3">

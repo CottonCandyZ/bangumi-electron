@@ -1,5 +1,6 @@
 import { SubjectType } from '@renderer/data/types/subject'
 import { atom } from 'jotai'
+import { atomWithStorage } from 'jotai/utils'
 
 export type LeftPanelName = 'collection'
 
@@ -13,7 +14,7 @@ export const rightPanelOpenAtom = atom(false)
 
 export const leftPanelOpenContentAtom = atom<LeftPanelName | null>(null)
 
-export const leftPanelSizeAtom = atom(256)
+export const leftPanelWidth = atomWithStorage('app-sidebar-width', 248)
 
 // export const rightPanelOpenContentAtom = atom<RightPanelName | null>(null)
 

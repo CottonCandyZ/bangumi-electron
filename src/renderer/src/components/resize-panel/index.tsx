@@ -12,7 +12,6 @@ export interface ResizeHandleProps extends React.HtmlHTMLAttributes<HTMLDivEleme
   resizeHandlePos: 'left' | 'right'
   resizeHandleOffset?: number
   resizeHandleVerticalPadding?: number
-  onOpen: (open: boolean) => void
   onResizing: (resizing: boolean) => void
   onWidthChange: (width: number) => void
 }
@@ -23,13 +22,10 @@ export interface ResizePanelProps extends React.HtmlHTMLAttributes<HTMLDivElemen
   floating?: boolean
   minWidth: number
   maxWidth: number
-  resizeHandlePos: 'left' | 'right'
-  resizeHandleOffset?: number
-  resizeHandleVerticalPadding?: number
-  enableAnimation?: boolean
   width: number
+  resizeHandlePos: 'left' | 'right'
+  enableAnimation?: boolean
   unmountOnExit?: boolean
-  onOpen: (open: boolean) => void
   onResizing: (resizing: boolean) => void
   onWidthChange: (width: number) => void
 }
@@ -54,7 +50,6 @@ const ResizeHandle = ({
   maxWidth,
   resizeHandlePos,
   open,
-  onOpen,
   onResizing,
   onWidthChange,
   ...rest
@@ -89,22 +84,27 @@ const ResizeHandle = ({
       },
       { once: true },
     )
-  }, [maxWidth, resizeHandlePos, minWidth, onWidthChange, onResizing, onOpen])
+  }, [maxWidth, resizeHandlePos, minWidth, onWidthChange, onResizing])
 
   return (
     <div
       {...rest}
       ref={ref}
       className={cn(
-        'absolute bottom-0 right-0 top-0 z-[1] flex w-4 translate-x-1/2 cursor-col-resize justify-center bg-transparent opacity-0 transition-opacity hover:opacity-100',
+        'no-drag-region absolute bottom-0 right-0 top-0 z-[1] flex w-3 translate-x-3/4 cursor-col-resize justify-center bg-transparent opacity-0 transition-opacity hover:opacity-100',
         resizing && 'opacity-100',
-        open && 'hidden',
+        !open && 'hidden',
         resizeHandlePos === 'left' && 'left-0 right-auto -translate-x-1/2',
         className,
       )}
       onMouseDown={onResizeStart}
     >
-      <div className="absolute" />
+      <div
+        className={cn(
+          'absolute h-full w-0.5 -translate-x-[2.5px] rounded-sm bg-blue-400 transition-all duration-200',
+          resizing && 'w-1',
+        )}
+      />
     </div>
   )
 }
@@ -120,12 +120,9 @@ export const ResizePanel = forwardRef<HTMLDivElement, ResizePanelProps>(function
     enableAnimation: _enableAnimation = true,
     open,
     unmountOnExit,
-    onOpen,
     onResizing,
     onWidthChange,
     resizeHandlePos,
-    resizeHandleOffset,
-    resizeHandleVerticalPadding,
     ...rest
   },
   ref,
@@ -148,21 +145,18 @@ export const ResizePanel = forwardRef<HTMLDivElement, ResizePanelProps>(function
         maxWidth: open ? '50%' : undefined,
         marginLeft: !open && resizeHandlePos === 'right' ? `${safeWidth * -1}px` : undefined,
         marginRight: !open && resizeHandlePos === 'left' ? `${safeWidth * -1}px` : undefined,
-        transition: enableAnimation
-          ? `margin-left ${animationTimeout} .05s, margin-right ${animationTimeout}ms .05s, width ${animationTimeout}ms .05s`
-          : undefined,
+        transition:
+          enableAnimation && !resizing
+            ? `margin-left ${animationTimeout} .05s, margin-right ${animationTimeout}ms .05s, width ${animationTimeout}ms .05s`
+            : undefined,
       }}
-      className={cn('relative h-full overflow-auto', status === 'exited' && 'invisible', className)}
-      data-enable-animation={enableAnimation && !resizing}
+      className={cn('relative h-full', status === 'exited' && 'invisible', className)}
     >
       {!(status === 'exited' && unmountOnExit !== false) && children}
       <ResizeHandle
         resizeHandlePos={resizeHandlePos}
-        resizeHandleOffset={resizeHandleOffset}
-        resizeHandleVerticalPadding={resizeHandleVerticalPadding}
         maxWidth={maxWidth}
         minWidth={minWidth}
-        onOpen={onOpen}
         onResizing={onResizing}
         onWidthChange={onWidthChange}
         open={open}
