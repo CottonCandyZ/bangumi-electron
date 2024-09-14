@@ -36,7 +36,7 @@ export function Login({ children }: PropsWithChildren) {
             </HoverCard>
           </DialogTitle>
         </DialogHeader>
-        <LoginForm isSuccess={setOpen} />
+        <LoginForm setOpen={setOpen} />
       </DialogContent>
     </Dialog>
   )
