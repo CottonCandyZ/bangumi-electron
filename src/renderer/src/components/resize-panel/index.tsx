@@ -150,7 +150,12 @@ export const ResizePanel = forwardRef<HTMLDivElement, ResizePanelProps>(function
             ? `margin-left ${animationTimeout} .05s, margin-right ${animationTimeout}ms .05s, width ${animationTimeout}ms .05s`
             : undefined,
       }}
-      className={cn('relative h-full', status === 'exited' && 'invisible', className)}
+      className={cn(
+        'relative h-full',
+        status === 'exited' && 'invisible',
+        resizing && 'select-none',
+        className,
+      )}
     >
       {!(status === 'exited' && unmountOnExit !== false) && children}
       <ResizeHandle
