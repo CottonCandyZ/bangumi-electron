@@ -4,6 +4,8 @@ import { useResizeObserver } from '@renderer/hooks/use-resize'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { SubjectBackground } from '@renderer/modules/subject/background'
 import { SubjectContent } from '@renderer/modules/subject/content'
+import { mainContainerWidthAtom } from '@renderer/state/width'
+import { useSetAtom } from 'jotai'
 import { useRef } from 'react'
 import { useParams } from 'react-router-dom'
 
@@ -13,9 +15,11 @@ export function Component() {
   const subjectInfo = subjectInfoQuery.data
   const backImageRef = useRef<HTMLDivElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const setMainContainerWidth = useSetAtom(mainContainerWidthAtom)
   useResizeObserver({
     ref: containerRef,
     callback: (entry) => {
+      setMainContainerWidth(entry.target.getBoundingClientRect().width)
       if (backImageRef.current) {
         backImageRef.current.style.width = entry.target.getBoundingClientRect().width + 'px'
       }

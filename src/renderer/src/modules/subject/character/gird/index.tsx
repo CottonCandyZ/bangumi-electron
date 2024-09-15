@@ -1,13 +1,17 @@
 import { Button } from '@renderer/components/ui/button'
 import { Character } from '@renderer/data/types/character'
 import { Item } from '@renderer/modules/subject/character/gird/item'
+import { mainContainerWidthAtom } from '@renderer/state/width'
+import { useAtomValue } from 'jotai'
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 export function CharactersGrid({ characters }: { characters: Character[] }) {
   const [fold, setFold] = useState(true)
-  const slice = fold ? 8 : characters.length
-  const needFold = characters.length > 8
+  const mainContainerWidth = useAtomValue(mainContainerWidthAtom)
+  const showNumber = mainContainerWidth <= 1143 ? 6 : 8
+  const slice = fold ? showNumber : characters.length
+  const needFold = characters.length > showNumber
   const { pathname } = useLocation()
   useEffect(() => {
     setFold(true)
