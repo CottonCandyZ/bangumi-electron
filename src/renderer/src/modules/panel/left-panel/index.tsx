@@ -15,7 +15,10 @@ export function LeftResizablePanel() {
   const [width, setWidth] = useAtom(leftPanelWidth)
   useEffect(() => {
     panelSize.left_width = width
-  }, [width])
+    if (!open) {
+      panelSize.left_width = 0
+    }
+  }, [width, open])
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'b' && (e.metaKey || e.ctrlKey)) {
