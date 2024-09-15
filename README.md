@@ -41,9 +41,9 @@ Framer Motion, React/TanStack Query, Jotai, shadcn/ui, tailwind
 
 ## Preview
 
-虽然截图都是 Mac 的，但是也是完美支持 Windows 的，我其实大部分时间都是在 PC 上开发的
+虽然截图都是 Mac 的，但是也是支持 Windows 的，我其实大部分时间都是在 PC 上开发的
 
-![Light](doc/screen-shot/preview-light.webp)
+![Light](doc/screen-shot/light.webp)
 ![Dark](doc/screen-shot/dark.webp)
 ![Card](doc/screen-shot/preview-card.webp)
 ![info-box](doc/screen-shot/info-box.webp)
