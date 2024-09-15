@@ -1,7 +1,9 @@
 import { useAccessTokenQuery, useRefreshTokenMutation } from '@renderer/data/hooks/session'
 import { createIDBPersister } from '@renderer/lib/persister'
 import { AuthError } from '@renderer/lib/utils/error'
+import { isRefreshingTokenAtom } from '@renderer/state/session'
 import { QueryCache, QueryClient, useQueryClient } from '@tanstack/react-query'
+import { useAtom } from 'jotai'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 
@@ -29,31 +31,36 @@ export const useIsUnauthorized = () => {
   const client = useQueryClient()
   const accessToken = useAccessTokenQuery().data
   const refreshMutation = useRefreshTokenMutation()
+  const [isRefreshing, setIsRefreshing] = useAtom(isRefreshingTokenAtom)
 
   useEffect(() => {
-    client.getQueryCache().subscribe((e) => {
+    const unsubscribe = client.getQueryCache().subscribe((e) => {
       if (
         e.type === 'updated' &&
         e.action.type === 'error' &&
         e.action.error instanceof AuthError
       ) {
         const code = e.action.error.code
-        if (code === 2 || code === 3)
-          if (accessToken) {
-            refreshMutation.mutate(accessToken.refresh_token)
-          }
+        if (code === 2 && accessToken && !isRefreshing) {
+          setIsRefreshing(true)
+          refreshMutation.mutate(accessToken.refresh_token)
+        }
       }
     })
-  }, [client, accessToken, refreshMutation])
+    return () => {
+      unsubscribe()
+    }
+  }, [client, accessToken, refreshMutation, setIsRefreshing, isRefreshing])
   useEffect(() => {
-    client.getMutationCache().subscribe((e) => {
+    const unsubscribe = client.getMutationCache().subscribe((e) => {
       if (e.mutation?.state.error instanceof AuthError) {
         const code = e.mutation.state.error.code
-        if (code === 2 || code === 3)
-          if (accessToken) {
-            refreshMutation.mutate(accessToken.refresh_token)
-          }
+        if (code === 2 && accessToken && !isRefreshing) {
+          setIsRefreshing(true)
+          refreshMutation.mutate(accessToken.refresh_token)
+        }
       }
     })
-  }, [client, accessToken, refreshMutation])
+    return () => unsubscribe()
+  }, [client, accessToken, refreshMutation, setIsRefreshing, isRefreshing])
 }

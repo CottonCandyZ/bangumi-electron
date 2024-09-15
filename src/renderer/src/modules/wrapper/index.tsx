@@ -9,25 +9,29 @@ import { ClickScrollPlugin, OverlayScrollbars } from 'overlayscrollbars'
 import { SheetWrapper } from '@renderer/modules/sheet/wrapper'
 import { HoverCard } from '@renderer/modules/hover-card'
 import { persister, queryClient } from '@renderer/modules/wrapper/query'
+import { Provider } from 'jotai'
+import { store } from '@renderer/state/utils'
 
 OverlayScrollbars.plugin(ClickScrollPlugin)
 
 export function Wrapper({ children }: PropsWithChildren) {
   return (
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={{ persister, maxAge: 60 * 1000 * 60 * 24 }}
-    >
-      <SessionWrapper>
-        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-          <TooltipProvider>
-            <SheetWrapper>{children}</SheetWrapper>
-          </TooltipProvider>
-          <HoverCard />
-          <Toaster richColors className="pointer-events-auto" />
-        </ThemeProvider>
-      </SessionWrapper>
-      <ReactQueryDevtools initialIsOpen={false} />
-    </PersistQueryClientProvider>
+    <Provider store={store}>
+      <PersistQueryClientProvider
+        client={queryClient}
+        persistOptions={{ persister, maxAge: 60 * 1000 * 60 * 24 }}
+      >
+        <SessionWrapper>
+          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+            <TooltipProvider>
+              <SheetWrapper>{children}</SheetWrapper>
+            </TooltipProvider>
+            <HoverCard />
+            <Toaster richColors className="pointer-events-auto" />
+          </ThemeProvider>
+        </SessionWrapper>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </PersistQueryClientProvider>
+    </Provider>
   )
 }

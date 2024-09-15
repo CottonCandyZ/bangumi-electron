@@ -1,5 +1,6 @@
 import { useAccessTokenQuery } from '@renderer/data/hooks/session'
 import { AuthError } from '@renderer/lib/utils/error'
+import { isRefreshingTokenAtom } from '@renderer/state/session'
 import {
   GetNextPageParamFunction,
   InfiniteData,
@@ -12,6 +13,7 @@ import {
   useMutation,
   useQuery,
 } from '@tanstack/react-query'
+import { useAtomValue } from 'jotai'
 import { FetchError } from 'ofetch'
 
 // 这里面有些类型判断还有些问题，等我精通 TS 了再回来思考吧
@@ -28,7 +30,7 @@ type OptionalProps<P> = keyof Omit<P, 'token'> extends never
  * 在验证失败时自动退出登录
  */
 export const useQueryMustAuth = <P, R>({
-  queryKey,
+  queryKey = [],
   queryFn,
   queryProps,
   enabled = true,
@@ -41,8 +43,9 @@ export const useQueryMustAuth = <P, R>({
 } & OptionalProps<P> &
   Omit<UseQueryOptions<R, Error, R, QueryKey>, 'queryFn'>) => {
   const { data: accessToken } = useAccessTokenQuery()
+  const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
   const query = useQuery({
-    queryKey: [...(queryKey || []), queryProps, accessToken?.access_token],
+    queryKey: [...queryKey, queryProps, accessToken?.access_token],
     queryFn: async () => {
       if (!accessToken?.access_token) throw AuthError.notAuth()
       let data: R | undefined
@@ -57,7 +60,7 @@ export const useQueryMustAuth = <P, R>({
       return data as R
     },
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
-    enabled: enabled && accessToken !== undefined,
+    enabled: enabled && accessToken !== undefined && !isRefreshToken,
     ...props,
   })
   return query
@@ -71,7 +74,7 @@ export const useQueryMustAuth = <P, R>({
  * 如果发现登陆过期，会重置登录状态
  */
 export const useQueryOptionalAuth = <P, R, S = R>({
-  queryKey,
+  queryKey = [],
   queryFn,
   queryProps,
   enabled = true,
@@ -85,8 +88,9 @@ export const useQueryOptionalAuth = <P, R, S = R>({
 } & OptionalProps<P> &
   Omit<UseQueryOptions<R, Error, R, QueryKey>, 'select' | 'queryFn'>) => {
   const { data: accessToken } = useAccessTokenQuery()
+  const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
   const query = useQuery({
-    queryKey: [...(queryKey || []), queryProps, accessToken?.access_token],
+    queryKey: [...queryKey, queryProps, accessToken?.access_token],
     queryFn: async () => {
       let data: R | undefined
       try {
@@ -99,7 +103,7 @@ export const useQueryOptionalAuth = <P, R, S = R>({
       }
       return data as R
     },
-    enabled: enabled && accessToken !== undefined,
+    enabled: enabled && accessToken !== undefined && !isRefreshToken,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     select,
     ...props,
@@ -112,7 +116,7 @@ type InfinityOptionalAuthProps<P> = keyof Omit<P, 'token' | 'offset' | 'limit'> 
   : { queryProps: Omit<P, 'token' | 'offset' | 'limit'> }
 
 export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
-  queryKey,
+  queryKey = [],
   queryFn,
   queryProps,
   qFLimit,
@@ -134,8 +138,9 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
     'queryFn'
   >) => {
   const { data: accessToken } = useAccessTokenQuery()
+  const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
   const query = useInfiniteQuery({
-    queryKey: [...(queryKey || []), queryProps, accessToken?.access_token],
+    queryKey: [...queryKey, queryProps, accessToken?.access_token],
     queryFn: async ({ pageParam }) => {
       let data: QR | undefined
       try {
@@ -153,7 +158,7 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
       }
       return data as QR
     },
-    enabled: enabled && accessToken !== undefined,
+    enabled: enabled && accessToken !== undefined && !isRefreshToken,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     initialPageParam,
     getNextPageParam,

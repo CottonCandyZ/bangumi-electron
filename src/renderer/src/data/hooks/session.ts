@@ -1,6 +1,8 @@
 import { logout } from '@renderer/data/fetch/session'
 import { refreshToken } from '@renderer/data/fetch/web/login'
 import { client } from '@renderer/lib/client'
+import { isRefreshingTokenAtom } from '@renderer/state/session'
+import { store } from '@renderer/state/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 /**
@@ -36,6 +38,9 @@ export const useRefreshTokenMutation = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: refreshToken,
+    onSettled() {
+      store.set(isRefreshingTokenAtom, false)
+    },
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: ['accessToken'] })
     },
