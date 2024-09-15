@@ -51,7 +51,7 @@ Framer Motion, React/TanStack Query, Jotai, shadcn/ui, tailwind
 
 ### 怎么全都是一个页面？所以说别的页面呢
 
-主页开发了一半被我搁置了，我正在准备将其改成那种 [drag and drop](https://swapy.tahazsh.com/) 的样式，所以正在制作中。至于原来的主页，是用 Pop Card + Carousel 的方案，有点类似微软商店，如果感兴趣的话，在[这里的](https://home.nanachi.moe/posts/2024-08-12-global-hover-card) 的第一个视频实际有所展现。
+主页开发了一半被我搁置了，我正在准备将其改成那种 [drag and drop](https://swapy.tahazsh.com/) 的样式，所以正在制作中。至于原来的主页，是用 Pop Card + Carousel 的方案，有点类似微软商店，如果感兴趣的话，在 [这里的](https://home.nanachi.moe/posts/2024-08-12-global-hover-card) 的第一个视频实际有所展现。
 
 搜索页正在制作中，由于 item-card 的样式还没有确定，以及 filter 摆放的位置问题，所以 ui 相对简陋，以及我还在考虑放出 Tags 的合理性，所以样式并不是确定的，但是还是可以预览一下的（最终可能不长这样）：
 
