@@ -91,7 +91,7 @@ const ResizeHandle = ({
       {...rest}
       ref={ref}
       className={cn(
-        'no-drag-region absolute bottom-0 right-0 top-0 z-[1] flex w-3 translate-x-3/4 cursor-col-resize justify-center bg-transparent opacity-0 transition-opacity hover:opacity-100',
+        'no-drag-region absolute bottom-0 right-0 top-0 z-[1] flex w-3 translate-x-3/4 cursor-col-resize select-none justify-center bg-transparent opacity-0 transition-opacity hover:opacity-100',
         resizing && 'opacity-100',
         !open && 'hidden',
         resizeHandlePos === 'left' && 'left-0 right-auto -translate-x-1/2',
@@ -150,12 +150,7 @@ export const ResizePanel = forwardRef<HTMLDivElement, ResizePanelProps>(function
             ? `margin-left ${animationTimeout} .05s, margin-right ${animationTimeout}ms .05s, width ${animationTimeout}ms .05s`
             : undefined,
       }}
-      className={cn(
-        'relative h-full',
-        status === 'exited' && 'invisible',
-        resizing && 'select-none',
-        className,
-      )}
+      className={cn('relative h-full', status === 'exited' && 'invisible', className)}
     >
       {!(status === 'exited' && unmountOnExit !== false) && children}
       <ResizeHandle
