@@ -12,7 +12,7 @@ import { SubjectTags } from '@renderer/modules/subject/tags'
 
 export const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
   return (
-    <div className="mx-auto flex max-w-[86rem] flex-col gap-10 px-10">
+    <div className="mx-auto flex max-w-[86rem] flex-col gap-10 px-10 @container">
       <section className="flex w-full flex-row gap-8">
         {/* cover */}
         <SubjectCoverImage subjectId={subjectId} />
