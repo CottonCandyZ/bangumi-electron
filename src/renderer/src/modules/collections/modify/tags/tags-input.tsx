@@ -30,7 +30,6 @@ export function TagInput({
       <input
         className="flex h-9 min-w-fit flex-1 resize-none bg-background px-3 py-2 placeholder:text-muted-foreground focus-visible:outline-none"
         onChange={(event) => {
-          console.log(event.type)
           const value = event.target.value
           if (value === ' ') {
             event.target.value = ''
