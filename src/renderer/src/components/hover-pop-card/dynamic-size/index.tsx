@@ -48,7 +48,10 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
         setFinished,
       }}
     >
-      <div key={layoutId} className={cn('relative', activeId === layoutId && 'z-30')}>
+      <div
+        key={layoutId}
+        className={cn('relative z-30', (activeId === layoutId || !finished) && 'z-40')}
+      >
         {children}
       </div>
     </HoverPopCardContext.Provider>
@@ -82,6 +85,7 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = (
         className,
       )}
       onMouseEnter={() => {
+        setActiveId(null)
         timeoutRef.current = setTimeout(() => {
           setActiveId(hoverCardContext.layoutId)
           hoverCardContext.setFinished(false)
@@ -141,7 +145,6 @@ export const PopCardInnerContent: FC<
     const pop = popRef.current.getBoundingClientRect()
     const { top, left, right, bottom } = calculatePopSizePosition(pop, hoverRef.current)
     setPopCod({ top, left, right, bottom })
-    console.log(top, left, right, bottom)
     const ob = new ResizeObserver(() => {
       if (!popRef.current) return
       const pop = popRef.current.getBoundingClientRect()
@@ -151,8 +154,11 @@ export const PopCardInnerContent: FC<
         right: newRight,
         bottom: newBottom,
       } = calculatePopSizePosition(pop, hoverRef.current)
-      if (top !== newTop || left !== newLeft || right !== newRight || bottom !== newBottom)
-        setPopCod({ top: newTop, left: newLeft, right: newRight, bottom: newBottom })
+      if (top !== newTop || left !== newLeft || right !== newRight || bottom !== newBottom) {
+        setTimeout(() => {
+          setPopCod({ top: newTop, left: newLeft, right: newRight, bottom: newBottom })
+        }, 0)
+      }
     })
     timeOutRef.current = setTimeout(() => {
       if (popRef.current) ob.observe(popRef.current)
