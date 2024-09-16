@@ -1,5 +1,5 @@
+import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
 import { Button } from '@renderer/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import { HOST } from '@renderer/data/fetch/config'
 import { useLocation } from 'react-router-dom'
 
@@ -8,10 +8,11 @@ export function OriginalLink() {
   let href = ''
   const isSubject = pathname.includes('subject')
   if (isSubject) href = `${HOST}/${pathname}`
+
   return (
     isSubject && (
-      <Tooltip>
-        <TooltipTrigger asChild>
+      <HeaderButton
+        Button={
           <Button
             asChild
             variant="ghost"
@@ -21,11 +22,9 @@ export function OriginalLink() {
               <span className="i-mingcute-world-2-line" />
             </a>
           </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>站点链接</p>
-        </TooltipContent>
-      </Tooltip>
+        }
+        Content={<p>站点链接</p>}
+      />
     )
   )
 }

@@ -1,15 +1,14 @@
+import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
 import { Button } from '@renderer/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import { cn } from '@renderer/lib/utils'
 import { rightPanelOpenAtom } from '@renderer/state/panel'
 import { useAtom } from 'jotai'
 
 export function RightPanelButton() {
   const [open, setOpen] = useAtom(rightPanelOpenAtom)
-
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
+    <HeaderButton
+      Button={
         <Button
           variant="ghost"
           className={cn(
@@ -26,10 +25,8 @@ export function RightPanelButton() {
             <span className="i-tabler-layout-sidebar-right" />
           )}
         </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>右边栏</p>
-      </TooltipContent>
-    </Tooltip>
+      }
+      Content={<p>右边栏</p>}
+    />
   )
 }

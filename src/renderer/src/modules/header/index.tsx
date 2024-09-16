@@ -16,7 +16,7 @@ export function Header() {
         <NavButton />
         <HeaderTitle />
       </div>
-      <div className="flex h-full flex-row items-center gap-2">
+      <div className="flex h-full flex-row items-center gap-0.5">
         <OriginalLink />
         <RightPanelButton />
         <WindowsButton />
