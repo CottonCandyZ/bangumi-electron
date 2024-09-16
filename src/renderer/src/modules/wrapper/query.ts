@@ -1,8 +1,10 @@
 import { useAccessTokenQuery, useRefreshTokenMutation } from '@renderer/data/hooks/session'
-import { createIDBPersister } from '@renderer/lib/persister'
+import { newIdbStorage } from '@renderer/lib/persister'
 import { AuthError } from '@renderer/lib/utils/error'
 import { isRefreshingTokenAtom } from '@renderer/state/session'
 import { QueryCache, QueryClient, useQueryClient } from '@tanstack/react-query'
+import { experimental_createPersister, PersistedQuery } from '@tanstack/react-query-persist-client'
+import { createStore } from 'idb-keyval'
 import { useAtom } from 'jotai'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
@@ -21,11 +23,15 @@ export const queryClient = new QueryClient({
       staleTime: import.meta.env.DEV ? 1000 * 60 * 60 * 5 : 20 * 1000,
       gcTime: import.meta.env.DEV ? Infinity : 60 * 1000 * 5,
       retry: 0,
+      persister: experimental_createPersister<PersistedQuery>({
+        storage: newIdbStorage(createStore('cache', 'query_persister')),
+        maxAge: 60 * 1000 * 60 * 24,
+        serialize: (persistedQuery) => persistedQuery,
+        deserialize: (cached) => cached,
+      }),
     },
   },
 })
-
-export const persister = createIDBPersister()
 
 export const useIsUnauthorized = () => {
   const client = useQueryClient()

@@ -3,24 +3,21 @@ import { ThemeProvider } from '@renderer/modules/wrapper/theme-wrapper'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PropsWithChildren } from 'react'
 import { TooltipProvider } from '@renderer/components/ui/tooltip'
-import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { SessionWrapper } from '@renderer/modules/wrapper/session-wrapper'
 import { ClickScrollPlugin, OverlayScrollbars } from 'overlayscrollbars'
 import { SheetWrapper } from '@renderer/modules/sheet/wrapper'
 import { HoverCard } from '@renderer/modules/hover-card'
-import { persister, queryClient } from '@renderer/modules/wrapper/query'
+import { queryClient } from '@renderer/modules/wrapper/query'
 import { Provider } from 'jotai'
 import { store } from '@renderer/state/utils'
+import { QueryClientProvider } from '@tanstack/react-query'
 
 OverlayScrollbars.plugin(ClickScrollPlugin)
 
 export function Wrapper({ children }: PropsWithChildren) {
   return (
     <Provider store={store}>
-      <PersistQueryClientProvider
-        client={queryClient}
-        persistOptions={{ persister, maxAge: 60 * 1000 * 60 * 24 }}
-      >
+      <QueryClientProvider client={queryClient}>
         <SessionWrapper>
           <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
             <TooltipProvider>
@@ -31,7 +28,7 @@ export function Wrapper({ children }: PropsWithChildren) {
           </ThemeProvider>
         </SessionWrapper>
         <ReactQueryDevtools initialIsOpen={false} />
-      </PersistQueryClientProvider>
+      </QueryClientProvider>
     </Provider>
   )
 }

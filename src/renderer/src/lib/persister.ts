@@ -1,20 +1,15 @@
-import { get, set, del } from 'idb-keyval'
-import { PersistedClient, Persister } from '@tanstack/react-query-persist-client'
+import { AsyncStorage, PersistedQuery } from '@tanstack/react-query-persist-client'
+import { get, set, del, type UseStore } from 'idb-keyval'
 
 /**
  * Creates an Indexed DB persister
- * @see https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
+ * @see https://github.com/TanStack/query/discussions/6213#discussioncomment-7715299
  */
-export function createIDBPersister(idbValidKey: IDBValidKey = 'reactQuery') {
+
+export function newIdbStorage(idbStore: UseStore): AsyncStorage<PersistedQuery> {
   return {
-    persistClient: async (client: PersistedClient) => {
-      await set(idbValidKey, client)
-    },
-    restoreClient: async () => {
-      return await get<PersistedClient>(idbValidKey)
-    },
-    removeClient: async () => {
-      await del(idbValidKey)
-    },
-  } as Persister
+    getItem: async (key) => await get(key, idbStore),
+    setItem: async (key, value) => await set(key, value, idbStore),
+    removeItem: async (key) => await del(key, idbStore),
+  }
 }
