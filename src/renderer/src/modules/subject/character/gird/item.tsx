@@ -58,32 +58,30 @@ export function Item({ character }: { character: Character }) {
 
 function PopCard({ character }: { character: Character }) {
   return (
-    <PopCardContent className="w-96 cursor-default">
-      <Card className="overflow-hidden">
-        <CardContent className="flex h-full flex-col p-2">
-          <motion.div
-            className="flex h-full flex-row gap-4"
-            layout
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            {!isEmpty(character.images.large) && (
-              <Image
-                className="h-fit basis-1/4 overflow-hidden rounded-lg"
-                imageSrc={character.images.grid}
-                loadingClassName="aspect-square"
-                loading="eager"
-              />
-            )}
-            <div className="flex w-full flex-col gap-2">
-              <MetaInfo character={character} />
-              <Separator />
-              <Detail characterId={character.id.toString()} />
-            </div>
-          </motion.div>
-        </CardContent>
-      </Card>
+    <PopCardContent className="w-96 cursor-default rounded-xl border bg-card text-card-foreground shadow">
+      <CardContent className="flex h-full flex-col p-2">
+        <motion.div
+          className="flex h-full flex-row gap-4"
+          layout
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          {!isEmpty(character.images.large) && (
+            <Image
+              className="h-fit basis-1/4 overflow-hidden rounded-lg"
+              imageSrc={character.images.grid}
+              loadingClassName="aspect-square"
+              loading="eager"
+            />
+          )}
+          <div className="flex w-full flex-col gap-2">
+            <MetaInfo character={character} />
+            <Separator />
+            <Detail characterId={character.id.toString()} />
+          </div>
+        </motion.div>
+      </CardContent>
     </PopCardContent>
   )
 }

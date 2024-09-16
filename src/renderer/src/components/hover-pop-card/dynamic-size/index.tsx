@@ -133,23 +133,30 @@ export const PopCardInnerContent: FC<
 > = ({ children, layoutId, className, hover, ...props }) => {
   if (!hover) throw Error('PopCardContent need to be aside HoverCardContent')
   const hoverRef = useRef(hover)
-  const [popCod, setPopCod] = useState({ top: 0, left: 0 })
+  const [popCod, setPopCod] = useState({ top: 0, left: 0, right: 0, bottom: 0 })
   const popRef = useRef<HTMLDivElement>(null)
   const timeOutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useLayoutEffect(() => {
     if (!popRef.current) return
     const pop = popRef.current.getBoundingClientRect()
-    const { top, left } = calculatePopSizePosition(pop, hoverRef.current)
-    setPopCod({ top, left })
+    const { top, left, right, bottom } = calculatePopSizePosition(pop, hoverRef.current)
+    setPopCod({ top, left, right, bottom })
+    console.log(top, left, right, bottom)
     const ob = new ResizeObserver(() => {
       if (!popRef.current) return
       const pop = popRef.current.getBoundingClientRect()
-      const { top: newTop, left: newLeft } = calculatePopSizePosition(pop, hoverRef.current)
-      if (top !== newTop || left !== newLeft) setPopCod({ top: newTop, left: newLeft })
+      const {
+        top: newTop,
+        left: newLeft,
+        right: newRight,
+        bottom: newBottom,
+      } = calculatePopSizePosition(pop, hoverRef.current)
+      if (top !== newTop || left !== newLeft || right !== newRight || bottom !== newBottom)
+        setPopCod({ top: newTop, left: newLeft, right: newRight, bottom: newBottom })
     })
     timeOutRef.current = setTimeout(() => {
       if (popRef.current) ob.observe(popRef.current)
-    }, 600)
+    }, 500)
     return () => {
       clearTimeout(timeOutRef.current)
       popRef.current && ob.unobserve(popRef.current)
@@ -158,15 +165,16 @@ export const PopCardInnerContent: FC<
   return (
     <motion.div
       layoutId={layoutId}
-      ref={popRef}
-      className={cn('absolute z-50', className)}
+      className={cn('absolute z-50 overflow-hidden', className)}
       style={{
         top: `${popCod.top}px`,
         left: `${popCod.left}px`,
+        right: `${popCod.right}px`,
+        bottom: `${popCod.bottom}px`,
       }}
       {...props}
     >
-      {children}
+      <div ref={popRef}>{children}</div>
     </motion.div>
   )
 }

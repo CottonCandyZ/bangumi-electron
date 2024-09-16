@@ -54,21 +54,19 @@ export function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
           </div>
         </div>
       </HoverCardContent>
-      <PopCardContent className="cursor-default">
-        <Card className="min-h-48 w-56">
-          <CardContent className="p-2">
-            <div className="flex flex-row gap-2">
-              <CoverMotionImage
-                key={`${layoutId}-image`}
-                layoutId={`${layoutId}-image`}
-                imageSrc={relatedSubject.images.common}
-                className="h-fit shrink-0 basis-1/3 overflow-hidden rounded-md"
-                loadingClassName="aspect-[2/3]"
-              />
-              <div className="text-xs font-bold">{relatedSubject.name}</div>
-            </div>
-          </CardContent>
-        </Card>
+      <PopCardContent className="w-fit cursor-default rounded-xl border bg-card text-card-foreground shadow">
+        <CardContent className="h-48 w-full min-w-56 p-2">
+          <div className="flex flex-row gap-2">
+            <CoverMotionImage
+              key={`${layoutId}-image`}
+              layoutId={`${layoutId}-image`}
+              imageSrc={relatedSubject.images.common}
+              className="h-fit shrink-0 basis-1/3 overflow-hidden rounded-md"
+              loadingClassName="aspect-[2/3]"
+            />
+            <div className="text-xs font-bold">{relatedSubject.name}</div>
+          </div>
+        </CardContent>
       </PopCardContent>
     </HoverPopCard>
   )

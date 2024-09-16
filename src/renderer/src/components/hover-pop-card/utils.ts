@@ -71,11 +71,15 @@ export function calculatePopSizePosition(
 
   left = clamp(left, viewportLeft, viewportRight - pop.width)
   top = clamp(top, viewportTop, viewportBottom - pop.height)
+  let right = left + pop.width
+  let bottom = top + pop.height
 
   if (!isFixed) {
     left -= hover.left
     top -= hover.top
+    right = hover.right - right
+    bottom = hover.bottom - bottom
   }
 
-  return { left, top }
+  return { left, top, right, bottom }
 }
