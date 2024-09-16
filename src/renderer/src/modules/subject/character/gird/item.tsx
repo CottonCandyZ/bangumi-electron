@@ -32,7 +32,7 @@ export function Item({ character }: { character: Character }) {
   return (
     <HoverPopCard layoutId={layoutId}>
       <HoverCardContent className="h-full cursor-default">
-        <Card className="h-full hover:-translate-y-0.5 hover:shadow-xl hover:duration-700">
+        <Card className="h-full shadow-none hover:-translate-y-0.5 hover:shadow-xl hover:duration-700">
           <motion.div layout="size">
             <CardContent
               className={cn(
@@ -58,7 +58,7 @@ export function Item({ character }: { character: Character }) {
 
 function PopCard({ character }: { character: Character }) {
   return (
-    <PopCardContent className="w-96 cursor-default rounded-xl border bg-card text-card-foreground shadow">
+    <PopCardContent className="w-96 cursor-default rounded-xl border bg-card text-card-foreground shadow-xl">
       <CardContent className="flex h-full flex-col p-2">
         <motion.div
           className="flex h-full flex-row gap-4"

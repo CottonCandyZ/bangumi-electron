@@ -19,7 +19,7 @@ export function CharactersGrid({ characters }: { characters: Character[] }) {
 
   return (
     <div className="relative flex flex-row gap-2">
-      <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(15rem,_1fr))] gap-3 py-2">
+      <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(15rem,_1fr))] gap-2 py-2">
         {characters.slice(0, slice).map((item) => (
           <Item character={item} key={item.id} />
         ))}
