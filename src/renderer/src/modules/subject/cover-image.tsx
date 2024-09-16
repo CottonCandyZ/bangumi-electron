@@ -23,7 +23,7 @@ export function SubjectCoverImage({ subjectId }: { subjectId: SubjectId }) {
   }, [isInView, subjectId])
   return (
     <Card
-      className="h-min w-48 shrink-0 overflow-hidden border-none @5xl:w-52"
+      className="h-min w-56 shrink-0 overflow-hidden border-none"
       // style={{
       //   viewTransitionName:
       //     isTransitioning && state?.viewTransitionName ? state.viewTransitionName : '',
