@@ -75,11 +75,11 @@ function EpisodeSkeleton({
   return (
     <div className="flex flex-col gap-5">
       {size === 'default' && <h2 className="text-2xl font-medium">章节</h2>}
-      <div className={cn('flex flex-row flex-wrap gap-1')}>
+      <div className={cn('flex flex-row flex-wrap gap-1.5')}>
         {Array(skeletonNumber)
           .fill(0)
           .map((_, index) => (
-            <Skeleton className={cn('size-10', size === 'small' && 'size-6')} key={index} />
+            <Skeleton className={cn('size-9', size === 'small' && 'size-6')} key={index} />
           ))}
       </div>
     </div>
