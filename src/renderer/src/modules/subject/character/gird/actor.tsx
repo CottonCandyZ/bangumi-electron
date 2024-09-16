@@ -8,17 +8,11 @@ export function Actors({ actors }: { actors: Actor[] }) {
       {actors.map((actor) => {
         if (first) {
           first = false
-          return (
-            <div className="shrink-0" key={actor.id}>
-              {actor.name}
-            </div>
-          )
+          return <span key={actor.id}>{actor.name}</span>
         }
         return (
           <Fragment key={`${actor.id}-fra`}>
-            <div className="shrink-0" key={actor.id}>
-              / {actor.name}
-            </div>
+            <span key={actor.id}>/ {actor.name}</span>
           </Fragment>
         )
       })}
