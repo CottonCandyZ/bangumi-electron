@@ -33,7 +33,7 @@ export function Item({ character }: { character: Character }) {
     <HoverPopCard layoutId={layoutId}>
       <HoverCardContent className="h-full cursor-default">
         <Card className="h-full shadow-none hover:-translate-y-0.5 hover:shadow-xl hover:duration-700">
-          <motion.div layout="size">
+          <motion.div layout layoutRoot>
             <CardContent
               className={cn(
                 'flex flex-row items-start gap-4 p-2',
@@ -63,6 +63,7 @@ function PopCard({ character }: { character: Character }) {
         <motion.div
           className="flex h-full flex-row gap-4"
           layout
+          layoutRoot
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

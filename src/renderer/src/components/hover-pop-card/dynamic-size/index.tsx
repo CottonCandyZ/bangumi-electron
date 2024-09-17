@@ -143,22 +143,11 @@ export const PopCardInnerContent: FC<
   useLayoutEffect(() => {
     if (!popRef.current) return
     const pop = popRef.current.getBoundingClientRect()
-    const { top, left, right, bottom } = calculatePopSizePosition(pop, hoverRef.current)
-    setPopCod({ top, left, right, bottom })
+    setPopCod(calculatePopSizePosition(pop, hoverRef.current))
     const ob = new ResizeObserver(() => {
       if (!popRef.current) return
       const pop = popRef.current.getBoundingClientRect()
-      const {
-        top: newTop,
-        left: newLeft,
-        right: newRight,
-        bottom: newBottom,
-      } = calculatePopSizePosition(pop, hoverRef.current)
-      if (top !== newTop || left !== newLeft || right !== newRight || bottom !== newBottom) {
-        setTimeout(() => {
-          setPopCod({ top: newTop, left: newLeft, right: newRight, bottom: newBottom })
-        }, 0)
-      }
+      setPopCod(calculatePopSizePosition(pop, hoverRef.current))
     })
     timeOutRef.current = setTimeout(() => {
       if (popRef.current) ob.observe(popRef.current)

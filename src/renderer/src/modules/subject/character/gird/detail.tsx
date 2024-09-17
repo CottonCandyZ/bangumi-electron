@@ -11,18 +11,14 @@ export function Detail({ characterId }: { characterId: CharacterId }) {
     return <Skeleton className="min-h-8" />
   }
   const renderSummery = renderBBCode(characterDetailData.summary)
-  return (
-    <div className="flex h-full min-h-0">
-      {characterDetailData.summary !== '' ? (
-        <ScrollWrapper
-          className="bbcode max-h-56 whitespace-pre-line py-0.5"
-          options={{ overflow: { x: 'hidden' } }}
-        >
-          {renderSummery}
-        </ScrollWrapper>
-      ) : (
-        <p>暂时还没有说明哦～</p>
-      )}
-    </div>
+  return characterDetailData.summary !== '' ? (
+    <ScrollWrapper
+      className="bbcode max-h-56 min-h-8 whitespace-pre-line py-0.5"
+      options={{ overflow: { x: 'hidden' } }}
+    >
+      {renderSummery}
+    </ScrollWrapper>
+  ) : (
+    <p className="min-h-8">暂时还没有说明哦～</p>
   )
 }
