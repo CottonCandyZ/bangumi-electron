@@ -28,7 +28,7 @@ export function Tags({
           type="button"
           key={item.name}
           className={cn(
-            'relative h-auto flex-auto items-baseline justify-center gap-1 overflow-hidden whitespace-normal px-1.5 py-1.5',
+            'relative h-auto flex-auto items-baseline justify-center gap-1 overflow-hidden whitespace-normal px-1.5 py-1.5 shadow-none',
 
             edit && selectedTags && selectedTags.has(item.name) && 'opacity-50',
           )}
@@ -47,7 +47,7 @@ export function Tags({
           type="button"
           key={item}
           className={cn(
-            'relative h-auto flex-auto items-baseline justify-center gap-1 overflow-hidden whitespace-normal px-1.5 py-1.5',
+            'relative h-auto flex-auto items-baseline justify-center gap-1 overflow-hidden whitespace-normal px-1.5 py-1.5 shadow-none',
             edit && selectedTags && selectedTags.has(item) && 'opacity-50',
           )}
           variant={'outline'}
