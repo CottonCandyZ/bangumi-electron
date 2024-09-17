@@ -1,12 +1,12 @@
-import { BigCarousel } from '@renderer/components/carousel/big-carousel'
+// import { BigCarousel } from '@renderer/components/carousel/big-carousel'
 import { SmallCarousel } from '@renderer/modules/home/small-carousel'
 
 export function Component() {
   return (
-    <div className="flex flex-col gap-2 pb-20 pt-10">
-      <section>
+    <div className="flex flex-col gap-2 pb-20 pt-4">
+      {/* <section>
         <BigCarousel />
-      </section>
+      </section> */}
       <section className="px-9">
         <SmallCarousel href="/anime" name="动画" sectionPath="anime" />
       </section>
