@@ -1,16 +1,16 @@
 import {
   HoverCardContent,
+  HoverCardWrapper,
   HoverPopCard,
   PopCardContent,
-} from '@renderer/components/hover-pop-card/dynamic-size'
+} from '@renderer/components/hover-pop-card/manual'
 import { Badge } from '@renderer/components/ui/badge'
-import { Card, CardContent } from '@renderer/components/ui/card'
+import { CardContent } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
 import { Character } from '@renderer/data/types/character'
 import { cn } from '@renderer/lib/utils'
 import { getCharacterAvatarURL } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
-import { motion } from 'framer-motion'
 import { useLocation } from 'react-router-dom'
 import { Detail } from '@renderer/modules/subject/character/gird/detail'
 import { Actors } from '@renderer/modules/subject/character/gird/actor'
@@ -31,9 +31,10 @@ export function Item({ character }: { character: Character }) {
 
   return (
     <HoverPopCard layoutId={layoutId}>
-      <HoverCardContent className="h-full cursor-default">
-        <Card className="h-full shadow-none hover:-translate-y-0.5 hover:shadow-xl hover:duration-700">
-          <motion.div layout layoutRoot>
+      <HoverCardWrapper
+        className="rounded-xl border bg-card text-card-foreground"
+        hoverContent={
+          <HoverCardContent className="h-full cursor-default">
             <CardContent
               className={cn(
                 'flex flex-row items-start gap-4 p-2',
@@ -48,26 +49,19 @@ export function Item({ character }: { character: Character }) {
               )}
               <MetaInfo character={character} />
             </CardContent>
-          </motion.div>
-        </Card>
-      </HoverCardContent>
-      <PopCard character={character} />
+          </HoverCardContent>
+        }
+        popContent={<PopCard character={character} />}
+      />
     </HoverPopCard>
   )
 }
 
 function PopCard({ character }: { character: Character }) {
   return (
-    <PopCardContent className="w-96 cursor-default rounded-xl border bg-card text-card-foreground shadow-xl">
-      <CardContent className="flex h-full flex-col p-2">
-        <motion.div
-          className="flex h-full flex-row gap-4"
-          layout
-          layoutRoot
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-        >
+    <PopCardContent className="w-96 cursor-default">
+      <CardContent className="flex h-full flex-col overflow-hidden p-2">
+        <div className="flex h-full flex-row gap-4">
           {!isEmpty(character.images.large) && (
             <Image
               className="h-fit basis-1/4 overflow-hidden rounded-lg"
@@ -81,7 +75,7 @@ function PopCard({ character }: { character: Character }) {
             <Separator />
             <Detail characterId={character.id.toString()} />
           </div>
-        </motion.div>
+        </div>
       </CardContent>
     </PopCardContent>
   )
@@ -89,7 +83,7 @@ function PopCard({ character }: { character: Character }) {
 
 function MetaInfo({ character }: { character: Character }) {
   return (
-    <motion.section className="flex flex-col gap-1">
+    <section className="flex flex-col gap-1">
       <div className="flex flex-col gap-0.5">
         <h3 className="font-medium">{character.name}</h3>
         <h4 className="text-sm font-medium text-muted-foreground">
@@ -102,6 +96,6 @@ function MetaInfo({ character }: { character: Character }) {
           <Actors actors={character.actors} />
         </div>
       )}
-    </motion.section>
+    </section>
   )
 }
