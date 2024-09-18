@@ -37,7 +37,7 @@ export function LeftResizablePanel() {
       resizing={resizing}
       onResizing={setResizing}
       width={width}
-      enableAnimation={false}
+      // enableAnimation={false}
       onWidthChange={setWidth}
       className="border-r"
       resizeHandlePos="right"
