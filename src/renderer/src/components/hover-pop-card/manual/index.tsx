@@ -120,24 +120,39 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
     if (!preActive.current && isActive && hoverSizeRef.current && popRef.current) {
       ob = new ResizeObserver(() => {
         if (!wrapperRef.current || !hoverSizeRef.current || !popRef.current) return
-        animate(wrapperRef.current, {
-          ...calculatePopSizePosition(popRef.current.getBoundingClientRect(), hoverSizeRef.current),
-          boxShadow:
-            'rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.1) 0px 8px 10px -6px',
-        })
+        animate(
+          wrapperRef.current,
+          {
+            ...calculatePopSizePosition(
+              popRef.current.getBoundingClientRect(),
+              hoverSizeRef.current,
+            ),
+            boxShadow:
+              'rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.1) 0px 8px 10px -6px',
+          },
+          {
+            ease: [0.165, 0.84, 0.44, 1.0],
+          },
+        )
       })
       ob.observe(popRef.current)
     }
     // 收起
     if (preActive.current && !isActive) {
       ob?.disconnect()
-      animate(wrapperRef.current, {
-        top: 0,
-        bottom: 0,
-        left: 0,
-        right: 0,
-        boxShadow: '0px 0px 0px rgba(0, 0, 0, 0)',
-      }).then(() => {
+      animate(
+        wrapperRef.current,
+        {
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          boxShadow: '0px 0px 0px rgba(0, 0, 0, 0)',
+        },
+        {
+          ease: [0.165, 0.84, 0.44, 1.0],
+        },
+      ).then(() => {
         setIsAnimate(false)
         setBox({ height: 'auto', width: 'auto' })
       })
