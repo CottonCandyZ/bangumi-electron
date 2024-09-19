@@ -11,14 +11,14 @@ registerIpcMain(router)
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    minWidth: 1100,
+    minWidth: 860,
     minHeight: 380,
-    width: 900,
+    width: 1100,
     height: 670,
     show: false,
     autoHideMenuBar: true,
     titleBarStyle: 'hidden',
-    // titleBarOverlay: {
+    // titleBarOverlay: {P
     //   color: 'rgba(0,0,0,0)',
     //   height: 64,
     // },
