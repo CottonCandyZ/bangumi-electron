@@ -15,13 +15,9 @@
 
 说实话前端学习了不足一年就准备开发这个对我来说有比较大的挑战，所以说我在不断的踩坑和摸索。但这绝对不会阻碍这个项目的开发，因为我决定一定要让大家用上它，所以我会尽最大努力去烹饪它。
 
-我在开发它的同时，虽然项目描述里用了 shadcn/ui，但是可能后续会逐渐转向高度自定义的组件，因此这部分会花费较多的精力。
+目前在用 Logseq 做本地进度管理，后续可能会开一个 Project 或者使用 Linear 来管理总体的开发进度。
 
-动画部分我仍在摸索，但尽可能的多做一些有趣的交互。
-
-我目前自己在使用 Logseq 做本地进度管理，后续可能会开一个 Project 或者使用 Linear 来管理总体的开发进度。
-
-另外，作为桌面客户端，我想要保证有以下特性：
+作为桌面客户端，我想要保证有以下特性：
 
 - 快捷键
 - 右键菜单
@@ -37,11 +33,11 @@
 
 ### 使用了哪些常见库
 
-Framer Motion, React/TanStack Query, Jotai, shadcn/ui, tailwind
+Framer Motion, React/TanStack Query, Jotai, shadcn/ui, Tailwind
 
 ## Preview
 
-虽然截图都是 Mac 的，但是也是支持 Windows 的，我其实大部分时间都是在 PC 上开发的
+虽然截图都是 Mac 的，但是也是支持 Windows 的，其实大部分时间都是在 PC 上开发的
 
 ![Light](doc/screen-shot/light.webp)
 ![Dark](doc/screen-shot/dark.webp)
