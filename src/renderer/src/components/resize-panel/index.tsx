@@ -95,7 +95,7 @@ const ResizeHandle = ({
         'no-drag-region absolute bottom-0 right-0 top-0 z-[1] flex w-3 translate-x-3/4 cursor-col-resize select-none justify-center bg-transparent opacity-0 transition-opacity hover:opacity-100',
         resizing && 'opacity-100',
         !open && 'hidden',
-        resizeHandlePos === 'left' && 'left-0 right-auto -translate-x-1/2',
+        resizeHandlePos === 'left' && 'left-0 right-auto -translate-x-3/4',
         className,
       )}
       onMouseDown={onResizeStart}
@@ -103,6 +103,7 @@ const ResizeHandle = ({
       <div
         className={cn(
           'absolute h-full w-0.5 -translate-x-[2.5px] rounded-sm bg-blue-400 transition-all duration-200',
+          resizeHandlePos === 'left' && 'translate-x-[2.5px]',
           resizing && 'w-1',
         )}
       />

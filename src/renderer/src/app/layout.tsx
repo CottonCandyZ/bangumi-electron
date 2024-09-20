@@ -1,6 +1,5 @@
 import { PageScrollWrapper } from '@renderer/components/scroll/page-scroll-wrapper'
 import { BackCover } from '@renderer/components/hover-pop-card/close'
-import { ResizablePanel, ResizablePanelGroup } from '@renderer/components/ui/resizable'
 import { Outlet } from 'react-router-dom'
 import { Header } from '@renderer/modules/header'
 import { LeftResizablePanel } from '@renderer/modules/panel/left-panel'
@@ -14,18 +13,16 @@ function RootLayout() {
       <NavBar />
       <div className="ml-16 flex h-dvh flex-row">
         <LeftResizablePanel />
-        <div className="flex h-full w-full flex-col overflow-hidden">
+        <div className="flex h-full w-full flex-col">
           <Header />
-          <ResizablePanelGroup direction="horizontal" autoSaveId="sub-panel">
-            <ResizablePanel order={1} id="left">
-              <PageScrollWrapper className="h-full w-full overflow-hidden">
-                <div className="h-full">
-                  <Outlet />
-                </div>
-              </PageScrollWrapper>
-            </ResizablePanel>
+          <div className="flex h-full w-full flex-row overflow-hidden">
+            <PageScrollWrapper className="h-full w-full">
+              <div className="h-full">
+                <Outlet />
+              </div>
+            </PageScrollWrapper>
             <RightResizablePanel />
-          </ResizablePanelGroup>
+          </div>
         </div>
       </div>
       <BackCover />

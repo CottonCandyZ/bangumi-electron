@@ -16,6 +16,8 @@ export const leftPanelOpenContentAtom = atom<LeftPanelName | null>(null)
 
 export const leftPanelWidth = atomWithStorage('app-sidebar-width', 248)
 
+export const rightPanelWidth = atomWithStorage('app-right-panel-width', 248)
+
 // export const rightPanelOpenContentAtom = atom<RightPanelName | null>(null)
 
 // left

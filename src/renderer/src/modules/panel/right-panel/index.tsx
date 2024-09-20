@@ -1,31 +1,36 @@
-import { ResizableHandle, ResizablePanel } from '@renderer/components/ui/resizable'
-import { useResizeObserver } from '@renderer/hooks/use-resize'
+import { ResizePanel } from '@renderer/components/resize-panel'
 import { RightPanel } from '@renderer/modules/panel/right-panel/panel'
 import { panelSize } from '@renderer/state/global-var'
-import { rightPanelOpenAtom } from '@renderer/state/panel'
-import { useAtomValue } from 'jotai'
-import { useRef } from 'react'
+import { rightPanelOpenAtom, rightPanelWidth } from '@renderer/state/panel'
+import { useAtom, useAtomValue } from 'jotai'
+import { useEffect, useState } from 'react'
+
+const MAX_WIDTH = 480
+const MIN_WIDTH = 248
 
 export function RightResizablePanel() {
   const open = useAtomValue(rightPanelOpenAtom)
-  const ref = useRef<HTMLDivElement>(null)
-  useResizeObserver({
-    ref,
-    callback: (entry) => {
-      panelSize.right_width = entry.target.getBoundingClientRect().width
-    },
-    deps: [open],
-  })
+  const [resizing, setResizing] = useState(false)
+  const [width, setWidth] = useAtom(rightPanelWidth)
+  useEffect(() => {
+    panelSize.left_width = width
+    if (!open) {
+      panelSize.left_width = 0
+    }
+  }, [width, open])
   return (
-    open && (
-      <>
-        <ResizableHandle className="w-0 border-r" />
-        <ResizablePanel defaultSize={25} minSize={15} maxSize={40} order={2} id="right">
-          <div ref={ref} className="h-full">
-            <RightPanel />
-          </div>
-        </ResizablePanel>
-      </>
-    )
+    <ResizePanel
+      maxWidth={MAX_WIDTH}
+      minWidth={MIN_WIDTH}
+      open={open}
+      resizing={resizing}
+      onResizing={setResizing}
+      width={width}
+      onWidthChange={setWidth}
+      className="border-l"
+      resizeHandlePos="left"
+    >
+      <RightPanel />
+    </ResizePanel>
   )
 }
