@@ -102,6 +102,10 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
   const hoverSizeRef = useRef<DOMRect | null>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const hoverRef = useRef<HTMLDivElement>(null)
+  const [hoverBox, setHoverBox] = useState<Record<'height' | 'width', string | 'auto'>>({
+    height: 'auto',
+    width: 'auto',
+  })
 
   const setActiveId = useSetAtom(activeHoverPopCardAtom)
   const preActive = useRef(isActive)
@@ -155,6 +159,7 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
       ).then(() => {
         setIsAnimate(false)
         setBox({ height: 'auto', width: 'auto' })
+        setHoverBox({ height: 'auto', width: 'auto' })
       })
     }
     preActive.current = isActive
@@ -181,6 +186,9 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
 
             // 弹起之前设定父元素的宽高
             setBox({ height: `${height}px`, width: `${width}px` })
+            const { width: hoverWidth, height: hoverHeight } =
+              wrapperRef.current.getBoundingClientRect()
+            setHoverBox({ height: `${hoverHeight}px`, width: `${hoverWidth}px` })
 
             // 开始动画
             setIsAnimate(true)
@@ -199,7 +207,9 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
           {popContent}
         </PopCardContent>
       ) : (
-        <HoverCardContent ref={hoverRef}>{hoverContent}</HoverCardContent>
+        <HoverCardContent ref={hoverRef} style={{ height: hoverBox.height, width: hoverBox.width }}>
+          {hoverContent}
+        </HoverCardContent>
       )}
     </div>
   )
