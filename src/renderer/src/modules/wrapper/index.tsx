@@ -11,24 +11,27 @@ import { queryClient } from '@renderer/modules/wrapper/query'
 import { Provider } from 'jotai'
 import { store } from '@renderer/state/utils'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { KeyboardShortcutProvider } from '@renderer/modules/wrapper/keyboard-shortcut'
 
 OverlayScrollbars.plugin(ClickScrollPlugin)
 
 export function Wrapper({ children }: PropsWithChildren) {
   return (
     <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <SessionWrapper>
-          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-            <TooltipProvider>
-              <SheetWrapper>{children}</SheetWrapper>
-            </TooltipProvider>
-            <HoverCard />
-            <Toaster richColors className="pointer-events-auto" />
-          </ThemeProvider>
-        </SessionWrapper>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
+      <KeyboardShortcutProvider>
+        <QueryClientProvider client={queryClient}>
+          <SessionWrapper>
+            <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+              <TooltipProvider>
+                <SheetWrapper>{children}</SheetWrapper>
+              </TooltipProvider>
+              <HoverCard />
+              <Toaster richColors className="pointer-events-auto" />
+            </ThemeProvider>
+          </SessionWrapper>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </KeyboardShortcutProvider>
     </Provider>
   )
 }

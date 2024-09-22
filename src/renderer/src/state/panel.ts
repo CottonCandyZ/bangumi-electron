@@ -12,7 +12,7 @@ export const leftPanelOpenAtom = atom(false)
 
 export const rightPanelOpenAtom = atom(false)
 
-export const leftPanelOpenContentAtom = atom<LeftPanelName | null>(null)
+export const leftPanelOpenContentAtom = atom<LeftPanelName>('collection')
 
 export const leftPanelWidth = atomWithStorage('app-sidebar-width', 248)
 
@@ -41,15 +41,7 @@ export const nvaCollectionButtonAtomAction = atom(
 )
 
 export const triggerLeftOpenAtomAction = atom(null, (get, set) => {
-  if (get(leftPanelOpenAtom)) set(leftPanelOpenAtom, false)
-  else {
-    if (get(leftPanelOpenContentAtom) === null) {
-      set(leftPanelOpenAtom, true)
-      set(leftPanelOpenContentAtom, 'collection')
-    } else {
-      set(leftPanelOpenAtom, true)
-    }
-  }
+  set(leftPanelOpenAtom, !get(leftPanelOpenAtom))
 })
 
 // right
