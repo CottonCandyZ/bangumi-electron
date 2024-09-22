@@ -49,6 +49,7 @@ export const useIsUnauthorized = () => {
         const code = e.action.error.code
         if (code === 2 && accessToken && !isRefreshing) {
           setIsRefreshing(true)
+          queryClient.cancelQueries()
           refreshMutation.mutate(accessToken.refresh_token)
         }
       }
@@ -63,6 +64,7 @@ export const useIsUnauthorized = () => {
         const code = e.mutation.state.error.code
         if (code === 2 && accessToken && !isRefreshing) {
           setIsRefreshing(true)
+          queryClient.cancelQueries()
           refreshMutation.mutate(accessToken.refresh_token)
         }
       }
