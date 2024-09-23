@@ -74,23 +74,22 @@ export function HoverCardContent({
     collisionPadding,
     align,
     triggerClientRect,
-    ref.current,
     setPosition,
     setTranslate,
     isBottom,
+    position,
   ])
 
   useLayoutEffect(() => {
     if (!ref.current) return
-    calc()
     const ob = new ResizeObserver(() => {
       calc()
     })
     ob.observe(ref.current)
     return () => {
-      ref.current && ob.unobserve(ref.current)
+      ob.disconnect()
     }
-  }, [triggerClientRect, ref])
+  }, [triggerClientRect, calc])
   const setOpen = useSetAtom(hoverCardOpenAtomAction)
 
   return (
