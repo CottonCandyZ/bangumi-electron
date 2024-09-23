@@ -122,7 +122,7 @@ function calcVerticalPos({
       X = clamp(
         trigger.left + (trigger.width - content.width) / 2,
         UI_CONFIG.NAV_WIDTH + paddingLeft,
-        window.innerWidth - content.width - paddingRight
+        window.innerWidth - content.width - paddingRight,
       )
   }
 
@@ -132,13 +132,11 @@ function calcVerticalPos({
   const spaceOpposite = preferBottom ? toTop : toBottom
 
   if (spacePreferred >= content.height) {
-    preferBottom
-      ? (top = trigger.bottom + margin)
-      : (bottom = window.innerHeight - trigger.top + margin)
+    if (preferBottom) top = trigger.bottom + margin
+    else bottom = window.innerHeight - trigger.top + margin
   } else if (spaceOpposite >= content.height) {
-    preferBottom
-      ? (bottom = window.innerHeight - trigger.top + margin)
-      : (top = trigger.bottom + margin)
+    if (preferBottom) bottom = window.innerHeight - trigger.top + margin
+    else top = trigger.bottom + margin
   } else {
     const usePreferred = spacePreferred > spaceOpposite
     top = usePreferred === preferBottom ? trigger.bottom + margin : undefined
@@ -211,13 +209,11 @@ function calcHorizontalPos({
   const spaceOpposite = preferRight ? toLeft : toRight
 
   if (spacePreferred >= content.width) {
-    preferRight
-      ? (left = trigger.right + margin)
-      : (right = window.innerWidth - trigger.left + margin)
+    if (preferRight) left = trigger.right + margin
+    else right = window.innerWidth - trigger.left + margin
   } else if (spaceOpposite >= content.width) {
-    preferRight
-      ? (right = window.innerWidth - trigger.left + margin)
-      : (left = trigger.right + margin)
+    if (preferRight) right = window.innerWidth - trigger.left + margin
+    else left = trigger.right + margin
   } else {
     const usePreferred = spacePreferred > spaceOpposite
     left = usePreferred === preferRight ? trigger.right + margin : undefined

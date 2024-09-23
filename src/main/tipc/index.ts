@@ -90,7 +90,8 @@ export const router = {
   toggleMaximizeCurrentWindow: t.procedure.input().action(async () => {
     const currentWindow = BrowserWindow.getFocusedWindow()
     if (currentWindow) {
-      currentWindow.isMaximized() ? currentWindow.unmaximize() : currentWindow.maximize()
+      if (currentWindow.isMaximized()) currentWindow.unmaximize()
+      else currentWindow.maximize()
     }
   }),
   platform: t.procedure.input().action(async () => {
