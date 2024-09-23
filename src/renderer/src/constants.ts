@@ -10,8 +10,8 @@ export const ERROR_CONSTANTS = {
   REFRESH_BUTTON_TEXT: '刷新页面',
   GITHUB_ISSUE_URL: 'https://github.com/CottonCandyZ/bangumi-electron/issues/new',
   ISSUE_TITLE: 'Bug Report: Rendering Error',
-};
+}
 
 export const TIMING_CONSTANTS = {
   COPY_FEEDBACK_DURATION: 2000,
-};
+}
