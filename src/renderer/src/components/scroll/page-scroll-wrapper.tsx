@@ -1,10 +1,9 @@
 import { UI_CONFIG } from '@renderer/config'
 import { scrollCache } from '@renderer/state/global-var'
-import { mainPanelScrollPositionAtom, updateMainScrollPositionAtom } from '@renderer/state/scroll'
-import { useAtomValue, useSetAtom } from 'jotai'
-import { OverlayScrollbars } from 'overlayscrollbars'
+import { mainPanelScrollPositionAtom, scrollInstanceAtom } from '@renderer/state/scroll'
+import { useAtom, useSetAtom } from 'jotai'
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react'
-import { PropsWithChildren, useEffect, useState } from 'react'
+import { PropsWithChildren, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 export function PageScrollWrapper({
@@ -16,16 +15,8 @@ export function PageScrollWrapper({
   className?: string
 }>) {
   const { pathname } = useLocation()
-  const [instance, setInstance] = useState<OverlayScrollbars | null>(null)
+  const [instance, setInstance] = useAtom(scrollInstanceAtom)
   const setScrollPosition = useSetAtom(mainPanelScrollPositionAtom)
-  const updateScrollPosition = useAtomValue(updateMainScrollPositionAtom)
-
-  useEffect(() => {
-    instance?.elements().viewport.scrollTo({
-      top: updateScrollPosition.position,
-    })
-    if (instance) scrollCache.set(pathname, instance.elements().viewport.scrollTop)
-  }, [updateScrollPosition])
 
   useEffect(() => {
     const scrollListener = () => {
@@ -43,7 +34,7 @@ export function PageScrollWrapper({
     return () => {
       instance?.off('scroll', scrollListener)
     }
-  }, [instance, pathname])
+  }, [instance, pathname, initScrollTo, setScrollPosition])
 
   return (
     <OverlayScrollbarsComponent
