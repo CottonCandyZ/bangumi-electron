@@ -5,20 +5,28 @@ import { SearchParam } from '@renderer/data/types/search'
 import { SearchItemCard } from '@renderer/modules/search/item-card'
 import { setScrollPositionAction } from '@renderer/state/scroll'
 
-import { searchPaginationOffsetAtom } from '@renderer/state/search'
+import { isSearchLoadingAtom, searchPaginationOffsetAtom } from '@renderer/state/search'
 import { useAtom, useSetAtom } from 'jotai'
+import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
   const [offset, setOffset] = useAtom(searchPaginationOffsetAtom)
   const { pathname } = useLocation()
   const updateScrollPosition = useSetAtom(setScrollPositionAction)
+  const [isLoading, setIsLoading] = useAtom(isSearchLoadingAtom)
 
   const searchResultQuery = useQuerySearch({
     searchParam,
     offset,
   })
   const searchResult = searchResultQuery.data
+  useEffect(() => {
+    if (!searchResultQuery.isRefetching) {
+      setIsLoading(false)
+    }
+  }, [searchResultQuery, setIsLoading])
+
   if (searchResult === undefined)
     return (
       <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(25rem,_1fr))] gap-4 px-10">
@@ -33,7 +41,7 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
   return (
     <div className="flex flex-col items-center justify-center gap-5">
       <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(25rem,_1fr))] gap-4 px-10">
-        {searchResultQuery.isRefetching
+        {isLoading
           ? Array(20)
               .fill(0)
               .map((_, index) => <Skeleton key={index} className="h-52 w-full" />)
@@ -45,6 +53,7 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
           value={Math.floor(offset / 20) + 1}
           onValueChanged={(value) => {
             setOffset((value - 1) * searchResult.limit)
+            setIsLoading(true)
             updateScrollPosition(125, pathname)
           }}
         />

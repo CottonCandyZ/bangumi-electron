@@ -10,6 +10,8 @@ export const searchPaginationOffsetAtom = atom(0)
 
 export const searchSortAtom = atom<SearchParam['sort']>('match')
 
+export const isSearchLoadingAtom = atom(false)
+
 export const searchKeywordActionAtom = atom(null, (get, set, keyword: string) => {
   set(searchPaginationOffsetAtom, 0)
   set(searchParamAtom, {
@@ -17,6 +19,7 @@ export const searchKeywordActionAtom = atom(null, (get, set, keyword: string) =>
     filter: { type: [...get(searchSubjectTypeFilterAtom)] },
     sort: get(searchSortAtom),
   })
+  set(isSearchLoadingAtom, true)
 })
 
 export const searchSubjectTypeFilterActionAtom = atom(null, (get, set) => {
@@ -27,6 +30,7 @@ export const searchSubjectTypeFilterActionAtom = atom(null, (get, set) => {
       filter: { type: [...get(searchSubjectTypeFilterAtom)] },
       sort: get(searchSortAtom),
     })
+    set(isSearchLoadingAtom, true)
   }
 })
 
@@ -38,5 +42,6 @@ export const searchSortActionAtom = atom(null, (get, set) => {
       filter: { ...get(searchParamAtom)?.filter },
       sort: get(searchSortAtom),
     })
+    set(isSearchLoadingAtom, true)
   }
 })
