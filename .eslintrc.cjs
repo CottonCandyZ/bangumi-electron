@@ -13,6 +13,8 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     '@typescript-eslint/explicit-function-return-type': 'off',
+    'react/prop-types': 'off',
+    '@typescript-eslint/no-require-imports': 'off',
   },
   settings: {
     react: {
