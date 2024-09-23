@@ -32,7 +32,7 @@ export type HoverEpisodeDetailType = {
 
 export function HoverEpisodeDetail() {
   const hoverCardContent = useAtomValue(hoverCardEpisodeContentAtom)
-  if (!hoverCardContent) return null
+  if (!hoverCardContent) throw 'Hover Content not set'
   const { index, episodes, modifyEpisodeCollectionOpt, collectionType, setEnabledForm } =
     hoverCardContent
   const episode = isCollectionEpisode(episodes) ? episodes[index].episode : episodes[index]
