@@ -17,7 +17,8 @@ export const useResizeObserver = <T extends Element>({
     })
     if (ref.current) resizeObserver.observe(ref.current)
     return () => {
-      if (ref.current) resizeObserver.unobserve(ref.current)
+      resizeObserver.disconnect()
     }
-  }, [ref, ...deps])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ref, callback, ...deps])
 }

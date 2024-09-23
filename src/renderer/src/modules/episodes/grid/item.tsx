@@ -55,7 +55,7 @@ export function EpisodeGridItem({
       hoverCardContent.episodes[hoverCardContent.index] !== episodes[index]
     )
       setSelfOpen(false)
-  }, [hoverCardContent])
+  }, [hoverCardContent, episodes, index])
 
   return (
     <HoverCardTrigger

@@ -32,14 +32,16 @@ export function ThemeProvider({
   useEffect(() => {
     const root = window.document.documentElement
     const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)')
-    darkModePreference.addEventListener('change', (e) => {
+    const changeTheme = (e: MediaQueryListEvent) => {
       if (theme === 'system') {
         root.classList.remove('light', 'dark')
         const systemTheme = e.matches ? 'dark' : 'light'
         root.classList.add(systemTheme)
       }
-    })
-  }, [])
+    }
+    darkModePreference.addEventListener('change', changeTheme)
+    return () => darkModePreference.removeEventListener('change', changeTheme)
+  }, [theme])
 
   useEffect(() => {
     const root = window.document.documentElement

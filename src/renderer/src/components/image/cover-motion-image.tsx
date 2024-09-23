@@ -28,7 +28,7 @@ export const CoverMotionImage = forwardRef<
     const [isLoad, setIsLoad] = useState(imageSrc ? (imageLoadCache.get(imageSrc) ?? false) : false)
     useEffect(() => {
       if (imageSrc) imageLoadCache.set(imageSrc, isLoad)
-    }, [isLoad])
+    }, [isLoad, imageSrc])
     return (
       <motion.div
         className={cn('relative z-0', (!imageSrc || !isLoad) && loadingClassName, className)}

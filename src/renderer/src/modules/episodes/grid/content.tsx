@@ -87,6 +87,7 @@ export function EpisodeGridContent({
     enabled,
     subjectCollectionQuery.fetchStatus,
     subjectInfoQuery.fetchStatus,
+    sheetAction,
   ])
 
   return (

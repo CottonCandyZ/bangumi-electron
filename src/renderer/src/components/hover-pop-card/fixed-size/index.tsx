@@ -83,7 +83,7 @@ export const HoverCardContent: FC<
       clearTimeout(timeoutRef.current)
       setActiveId(null)
     }
-  }, [])
+  }, [setActiveId])
 
   return (
     <motion.div layoutId={layoutId} ref={hoverRef} className={className} {...props}>

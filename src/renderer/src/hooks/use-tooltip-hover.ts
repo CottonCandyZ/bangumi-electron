@@ -36,20 +36,21 @@ export const useTooltipHover = <T extends HTMLElement = HTMLElement>({
       clearTimeout(timeId.current)
       setIsHover(false)
     }
+    const node = elementRef.current
 
-    if (elementRef.current) {
-      elementRef.current.addEventListener('mouseenter', handleMouseEnter)
-      elementRef.current.addEventListener('mouseleave', handleMouseLeave)
-      elementRef.current.addEventListener('mousedown', handleMouseDown)
+    if (node) {
+      node.addEventListener('mouseenter', handleMouseEnter)
+      node.addEventListener('mouseleave', handleMouseLeave)
+      node.addEventListener('mousedown', handleMouseDown)
     }
     return () => {
-      if (elementRef.current) {
-        elementRef.current.removeEventListener('mouseenter', handleMouseEnter)
-        elementRef.current.removeEventListener('mouseleave', handleMouseLeave)
-        elementRef.current.removeEventListener('mousedown', handleMouseDown)
+      if (node) {
+        node.removeEventListener('mouseenter', handleMouseEnter)
+        node.removeEventListener('mouseleave', handleMouseLeave)
+        node.removeEventListener('mousedown', handleMouseDown)
       }
     }
-  }, [elementRef])
+  }, [delay])
 
   return { isHover, elementRef }
 }

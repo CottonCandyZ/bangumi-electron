@@ -73,7 +73,7 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = (
       clearTimeout(timeoutRef.current)
       setActiveId(null)
     }
-  }, [])
+  }, [setActiveId])
 
   return (
     <motion.div
@@ -154,7 +154,7 @@ export const PopCardInnerContent: FC<
     }, 500)
     return () => {
       clearTimeout(timeOutRef.current)
-      popRef.current && ob.unobserve(popRef.current)
+      ob.disconnect()
     }
   }, [])
   return (

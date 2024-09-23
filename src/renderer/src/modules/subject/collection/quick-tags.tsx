@@ -33,7 +33,7 @@ export function QuickTags({
     if (subjectCollection) {
       setTags(new Set(subjectCollection.tags))
     }
-  }, [subjectCollection?.tags, edit])
+  }, [edit, subjectCollection])
 
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],

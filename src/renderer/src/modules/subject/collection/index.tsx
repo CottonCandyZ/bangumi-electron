@@ -36,7 +36,7 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const setIsInView = useSetAtom(collectionBoxInViewAtom)
   useEffect(() => {
     setIsInView(isInView)
-  }, [isInView])
+  }, [isInView, setIsInView])
 
   const loading =
     subjectInfo === undefined ||

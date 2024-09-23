@@ -19,7 +19,7 @@ export const Image = forwardRef<
     const [isLoad, setIsLoad] = useState(imageSrc ? (imageLoadCache.get(imageSrc) ?? false) : false)
     useEffect(() => {
       if (imageSrc && isLoad) imageLoadCache.set(imageSrc, isLoad)
-    }, [isLoad])
+    }, [isLoad, imageSrc])
     return (
       <div
         className={cn('relative z-0', (!imageSrc || !isLoad) && loadingClassName, className)}

@@ -115,7 +115,7 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
       clearTimeout(timeoutRef.current)
       setActiveId(null)
     }
-  }, [])
+  }, [setActiveId])
 
   useEffect(() => {
     if (!wrapperRef.current) return
@@ -163,7 +163,7 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
       })
     }
     preActive.current = isActive
-  }, [isActive, hoverSizeRef, popRef, wrapperRef])
+  }, [isActive, setBox, setIsAnimate])
 
   return (
     <div

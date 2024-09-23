@@ -20,7 +20,7 @@ export function SubjectCoverImage({ subjectId }: { subjectId: SubjectId }) {
   // const isTransitioning = unstable_useViewTransitionState(`/subject/${subjectId}`)
   useEffect(() => {
     setIsInView(isInView)
-  }, [isInView, subjectId])
+  }, [isInView, subjectId, setIsInView])
   return (
     <Card
       className="h-min w-48 shrink-0 overflow-hidden border-none"

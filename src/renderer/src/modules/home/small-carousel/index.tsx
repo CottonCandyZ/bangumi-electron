@@ -34,10 +34,14 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
     if (!api) {
       return
     }
-    api.on('select', () => {
+    const cacheState = () => {
       if (setIndex) setIndex?.set(`Home-Small-Carousel-${sectionPath}`, api.selectedScrollSnap())
-    })
-  }, [api])
+    }
+    api.on('select', cacheState)
+    return () => {
+      api.off('select', cacheState)
+    }
+  }, [api, setIndex, sectionPath])
 
   return (
     <Carousel
