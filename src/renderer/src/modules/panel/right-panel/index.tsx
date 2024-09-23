@@ -13,9 +13,9 @@ export function RightResizablePanel() {
   const [resizing, setResizing] = useState(false)
   const [width, setWidth] = useAtom(rightPanelWidth)
   useEffect(() => {
-    panelSize.left_width = width
+    panelSize.right_width = width
     if (!open) {
-      panelSize.left_width = 0
+      panelSize.right_width = 0
     }
   }, [width, open])
   return (
