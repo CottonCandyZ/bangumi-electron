@@ -3,6 +3,7 @@ import { UI_CONFIG } from '@renderer/config'
 import { cn } from '@renderer/lib/utils'
 import { hoverCardOpenAtomAction, triggerClientRectAtom } from '@renderer/state/hover-card'
 import { Align, Side } from '@renderer/type/ui'
+import { motion } from 'framer-motion'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { HTMLProps, PropsWithChildren, useCallback, useLayoutEffect, useRef, useState } from 'react'
 
@@ -93,12 +94,24 @@ export function HoverCardContent({
   const setOpen = useSetAtom(hoverCardOpenAtomAction)
 
   return (
-    <div
+    <motion.div
       className={cn(
-        'fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md animate-in fade-in-0',
+        'fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md',
         !isFlip && 'transition-[transform_height_width] duration-150',
         isCollision ? 'w-max overflow-x-hidden' : 'overflow-hidden',
       )}
+      transition={{
+        duration: 0.15,
+      }}
+      initial={{
+        opacity: 0,
+      }}
+      animate={{
+        opacity: 1,
+      }}
+      exit={{
+        opacity: 0,
+      }}
       style={{
         top: position.top,
         left: position.X,
@@ -113,6 +126,6 @@ export function HoverCardContent({
       <div ref={ref} className={cn('h-max w-max', className)}>
         {children}
       </div>
-    </div>
+    </motion.div>
   )
 }
