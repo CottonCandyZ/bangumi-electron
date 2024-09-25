@@ -1,5 +1,4 @@
 import { Align, Side } from '@renderer/type/ui'
-import { UI_CONFIG } from '@renderer/config'
 import { clamp } from '@renderer/lib/utils/tool'
 
 type VerticalPlacement = 'top' | 'bottom'
@@ -105,23 +104,19 @@ function calcVerticalPos({
   // Calculate X position
   switch (align) {
     case 'start':
-      X = clamp(
-        trigger.left,
-        UI_CONFIG.NAV_WIDTH + paddingLeft,
-        window.innerWidth - content.width - paddingRight,
-      )
+      X = clamp(trigger.left, paddingLeft, window.innerWidth - content.width - paddingRight)
       break
     case 'end':
       X = clamp(
         trigger.right - content.width,
-        UI_CONFIG.NAV_WIDTH + paddingLeft,
+        paddingLeft,
         window.innerWidth - content.width - paddingRight,
       )
       break
     default: // center
       X = clamp(
         trigger.left + (trigger.width - content.width) / 2,
-        UI_CONFIG.NAV_WIDTH + paddingLeft,
+        paddingLeft,
         window.innerWidth - content.width - paddingRight,
       )
   }
@@ -164,7 +159,7 @@ function calcHorizontalPos({
   paddingRight: number
   preferredPlacement: HorizontalPlacement
 }): HorizontalResult {
-  const toLeft = trigger.left - margin - paddingLeft - UI_CONFIG.NAV_WIDTH
+  const toLeft = trigger.left - margin - paddingLeft
   const toRight = window.innerWidth - trigger.right - margin - paddingRight
 
   let Y: number
@@ -175,33 +170,25 @@ function calcHorizontalPos({
   // Calculate Y position
   switch (align) {
     case 'start':
-      Y = clamp(
-        trigger.top,
-        UI_CONFIG.HEADER_HEIGHT + paddingTop,
-        window.innerHeight - content.height - paddingBottom,
-      )
+      Y = clamp(trigger.top, paddingTop, window.innerHeight - content.height - paddingBottom)
       break
     case 'end':
       Y = clamp(
         trigger.bottom - content.height,
-        UI_CONFIG.HEADER_HEIGHT + paddingTop,
+        paddingTop,
         window.innerHeight - content.height - paddingBottom,
       )
       break
     default: // center
       Y = clamp(
         trigger.top + (trigger.height - content.height) / 2,
-        UI_CONFIG.HEADER_HEIGHT + paddingTop,
+        paddingTop,
         window.innerHeight - content.height - paddingBottom,
       )
   }
 
   // Ensure Y is within bounds
-  Y = clamp(
-    Y,
-    UI_CONFIG.HEADER_HEIGHT + paddingTop,
-    window.innerHeight - content.height - paddingBottom,
-  )
+  Y = clamp(Y, paddingTop, window.innerHeight - content.height - paddingBottom)
 
   // Calculate horizontal position
   const preferRight = preferredPlacement === 'right'
