@@ -1,43 +1,27 @@
-import { Image } from '@renderer/components/image/image'
-import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { useResizeObserver } from '@renderer/hooks/use-resize'
-import { isEmpty } from '@renderer/lib/utils/string'
-import { SubjectBackground } from '@renderer/modules/subject/background'
+import { BackgroundImage } from '@renderer/modules/subject/background'
 import { SubjectContent } from '@renderer/modules/subject/content'
+import { subjectContentWidthAtom } from '@renderer/state/width'
+import { useSetAtom } from 'jotai'
 import { useRef } from 'react'
 import { useParams } from 'react-router-dom'
 
 export function Component() {
   const subjectId = useParams().subjectId
-  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
-  const subjectInfo = subjectInfoQuery.data
-  const backImageRef = useRef<HTMLDivElement | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const setWidth = useSetAtom(subjectContentWidthAtom)
   useResizeObserver({
     ref: containerRef,
     callback: (entry) => {
-      if (backImageRef.current) {
-        backImageRef.current.style.width = entry.target.getBoundingClientRect().width + 'px'
-      }
+      setWidth(entry.target.getBoundingClientRect().width)
     },
-    deps: [backImageRef, subjectId],
+    deps: [subjectId, setWidth],
   })
   if (!subjectId) throw Error('Get Params Error')
   return (
     <div ref={containerRef}>
-      {subjectInfo?.images.large && !isEmpty(subjectInfo.images.large) && (
-        <Image
-          imageSrc={subjectInfo.images.large}
-          loading="eager"
-          className="fixed -z-10 h-full overflow-hidden"
-          ref={backImageRef}
-        >
-          <SubjectBackground />
-        </Image>
-      )}
-      <div className="relative pb-10 pt-[60rem]">
-        <SubjectContent subjectId={subjectId} />
-      </div>
+      <BackgroundImage subjectId={subjectId} />
+      <SubjectContent subjectId={subjectId} className="relative pb-10 pt-[60rem]" />
     </div>
   )
 }

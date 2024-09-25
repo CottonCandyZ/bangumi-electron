@@ -1,6 +1,7 @@
 import { Card } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
 import { SubjectId } from '@renderer/data/types/bgm'
+import { cn } from '@renderer/lib/utils'
 import { SubjectCharacters } from '@renderer/modules/subject/character'
 import { SubjectCollection } from '@renderer/modules/subject/collection'
 import { SubjectCoverImage } from '@renderer/modules/subject/cover-image'
@@ -10,9 +11,15 @@ import { RelatedSubjects } from '@renderer/modules/subject/related'
 import { SubjectScore } from '@renderer/modules/subject/score'
 import { SubjectTags } from '@renderer/modules/subject/tags'
 
-export const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
+export const SubjectContent = ({
+  subjectId,
+  className,
+}: {
+  subjectId: SubjectId
+  className?: string
+}) => {
   return (
-    <div className="mx-auto flex max-w-[86rem] flex-col gap-10 px-10">
+    <div className={cn('mx-auto flex max-w-[86rem] flex-col gap-10 px-10', className)}>
       <section className="flex w-full flex-row gap-8">
         {/* cover */}
         <SubjectCoverImage subjectId={subjectId} />
@@ -20,7 +27,6 @@ export const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
         <SubjectHeaderInfo subjectId={subjectId} />
       </section>
       {/* 章节 */}
-
       <div className="flex w-full flex-col gap-10">
         <section className="flex flex-row gap-5">
           <div className="flex w-full flex-col gap-5">
@@ -39,7 +45,6 @@ export const SubjectContent = ({ subjectId }: { subjectId: SubjectId }) => {
             </section>
           </Card>
         </section>
-
         <SubjectCharacters subjectId={subjectId} />
         <RelatedSubjects subjectId={subjectId} />
       </div>
