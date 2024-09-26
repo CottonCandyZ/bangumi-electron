@@ -23,7 +23,7 @@ export function NavBar() {
       >
         <div
           className={cn(
-            'flex h-16 w-full shrink-0 items-center justify-center border-b p-2',
+            'flex h-14 w-full shrink-0 items-center justify-center border-b p-2',
             platform === 'darwin' && 'pt-6',
             open && 'justify-start pl-3',
           )}
