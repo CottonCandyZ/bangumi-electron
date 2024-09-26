@@ -4,6 +4,7 @@ import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { QuickTags } from '@renderer/modules/subject/collection/quick-tags'
+import { Fragment } from 'react/jsx-runtime'
 
 export function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
@@ -24,7 +25,13 @@ export function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
           {Array(5)
             .fill(undefined)
             .map((_, index) => (
-              <Skeleton key={index} className="h-9 w-20" />
+              <Fragment key={index}>
+                <Skeleton className="h-9 w-20" />
+                <Skeleton className="h-9 w-14" />
+                <Skeleton className="h-9 w-16" />
+                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-12" />
+              </Fragment>
             ))}
         </div>
       </section>
