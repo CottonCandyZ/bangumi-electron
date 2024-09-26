@@ -21,7 +21,6 @@ export function Score({ rating }: { rating: Rating }) {
           Rank: # <span>{rating.rank !== 0 ? rating.rank : '--'}</span>
         </div>
       </section>
-      <div></div>
       <ScoreChart
         ratingCount={rating.count}
         total={rating.total}

@@ -16,9 +16,12 @@ export function Meta({
       <section className="flex flex-row items-center gap-1.5">
         {rating.score !== 0 && (
           <>
-            <div className="flex items-center gap-0.5 text-base font-medium">
+            <div
+              className="flex items-center gap-0.5 text-base font-medium"
+              style={{ color: `hsl(var(--chart-score-${Math.floor(rating.score + 0.5) || 1}))` }}
+            >
               {rating.score == 0 ? '-.-' : rating.score.toFixed(1)}{' '}
-              <span className="i-mingcute-star-fill text-yellow-500" />
+              <span className="i-mingcute-star-fill" />
             </div>
             <Separator orientation="vertical" className="bg-primary/20" />
             <div className="flex items-center gap-0.5 text-sm font-medium">
