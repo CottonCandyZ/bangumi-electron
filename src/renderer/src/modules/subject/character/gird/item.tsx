@@ -71,7 +71,7 @@ function PopCard({ character }: { character: Character }) {
             />
           )}
           <div className="flex w-full flex-col gap-2">
-            <MetaInfo character={character} />
+            <MetaInfo character={character} showAll />
             <Separator />
             <Detail characterId={character.id.toString()} />
           </div>
@@ -81,21 +81,16 @@ function PopCard({ character }: { character: Character }) {
   )
 }
 
-function MetaInfo({ character }: { character: Character }) {
+function MetaInfo({ character, showAll = false }: { character: Character; showAll?: boolean }) {
   return (
-    <section className="flex flex-col gap-1">
+    <section className="flex flex-col gap-2">
       <div className="flex flex-col gap-0.5">
         <h3 className="font-medium">{character.name}</h3>
         <h4 className="text-sm font-medium text-muted-foreground">
           <Badge variant="outline">{character.relation}</Badge>
         </h4>
       </div>
-      {character.actors.length !== 0 && (
-        <div className="flex flex-row text-sm">
-          CV：
-          <Actors actors={character.actors} />
-        </div>
-      )}
+      {character.actors.length !== 0 && <Actors actors={character.actors} showAll={showAll} />}
     </section>
   )
 }
