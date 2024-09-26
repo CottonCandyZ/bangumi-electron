@@ -14,7 +14,7 @@ import { SubjectTags } from '@renderer/modules/subject/tags'
 export const SubjectContent = ({
   subjectId,
   className,
-  style
+  style,
 }: {
   subjectId: SubjectId
   className?: string
