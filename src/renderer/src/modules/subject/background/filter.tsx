@@ -26,7 +26,7 @@ export function SubjectBackground() {
     <div
       className="absolute inset-0"
       style={{
-        background: `linear-gradient(to top, hsl(var(--background)) ${20 + start}%, hsl(var(--background) / 0) ${40 + end}%)`,
+        background: `linear-gradient(to top, hsl(var(--background)) ${15 + start}%, hsl(var(--background) / 0) ${40 + end}%)`,
       }}
     />
   )
