@@ -15,19 +15,12 @@ import { useLocation } from 'react-router-dom'
 import { Detail } from '@renderer/modules/subject/character/gird/detail'
 import { Actors } from '@renderer/modules/subject/character/gird/actor'
 import { Image } from '@renderer/components/image/image'
-import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
-import { useAtomValue } from 'jotai'
 
 const sectionId = 'Characters'
 export function Item({ character }: { character: Character }) {
   const { key } = useLocation()
   const id = character.id
   const layoutId = `${sectionId}-${id}-${key}`
-
-  /* eslint-disable */
-  // @ts-ignore: framer-motion needed
-  const activeId = useAtomValue(activeHoverPopCardAtom) // framer motion 需要其用于确保 re-render ?
-  /* eslint-enable */
 
   return (
     <HoverPopCard layoutId={layoutId}>
@@ -83,12 +76,12 @@ function PopCard({ character }: { character: Character }) {
 
 function MetaInfo({ character, showAll = false }: { character: Character; showAll?: boolean }) {
   return (
-    <section className="flex flex-col gap-2">
-      <div className="flex flex-col gap-0.5">
-        <h3 className="font-medium">{character.name}</h3>
-        <h4 className="text-sm font-medium text-muted-foreground">
-          <Badge variant="outline">{character.relation}</Badge>
-        </h4>
+    <section className="flex w-full flex-col gap-2">
+      <div className="flex flex-row items-start justify-between gap-2">
+        <h3 className="font-medium leading-5">{character.name}</h3>
+        <Badge variant="outline" className="w-fit shrink-0 text-xs font-medium text-primary/70">
+          {character.relation}
+        </Badge>
       </div>
       {character.actors.length !== 0 && <Actors actors={character.actors} showAll={showAll} />}
     </section>
