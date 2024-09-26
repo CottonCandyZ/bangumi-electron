@@ -26,10 +26,11 @@ export const SubjectContent = ({
         {/* info */}
         <SubjectHeaderInfo subjectId={subjectId} />
       </section>
-      {/* 章节 */}
+
       <div className="flex w-full flex-col gap-10">
         <section className="flex flex-row gap-5">
           <div className="flex w-full flex-col gap-5">
+            {/* 章节 */}
             <SubjectEpisodes subjectId={subjectId} />
             <div className="flex w-full flex-row">
               <SubjectTags subjectId={subjectId} />
