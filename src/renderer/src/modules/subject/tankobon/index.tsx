@@ -38,16 +38,16 @@ function Item({ item }: { item: RelatedSubject }) {
           {!isEmpty(item.images.small) ? (
             <Image
               imageSrc={item.images.small}
-              className="size-20 overflow-hidden rounded-xl border shadow transition-all duration-150 hover:shadow-xl"
+              className="size-20 overflow-hidden rounded-xl border shadow transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xl"
             />
           ) : (
-            <div className="size-20 rounded-xl border bg-accent shadow transition-all duration-150 hover:shadow-xl" />
+            <div className="size-20 rounded-xl border bg-accent shadow transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xl" />
           )}
         </Link>
       </TooltipTrigger>
-      <TooltipContent>
+      <TooltipContent sideOffset={7}>
         <span>{item.name}</span>
-        <TooltipArrow />
+        <TooltipArrow className="fill-primary" />
       </TooltipContent>
     </Tooltip>
   )
