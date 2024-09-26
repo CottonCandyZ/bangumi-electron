@@ -21,7 +21,7 @@ function SubjectHeaderTitle({ subjectId }: { subjectId: SubjectId }) {
   const isInView = useAtomValue(subjectCoverImageInViewAtom)
   if (!subjectInfo) return null
   return (
-    <div className="flex h-full items-center overflow-hidden">
+    <div className="flex h-full select-none items-center overflow-hidden">
       <AnimatePresence key={subjectId}>
         {!isInView && (
           <motion.div
