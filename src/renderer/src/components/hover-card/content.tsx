@@ -7,17 +7,18 @@ import { motion } from 'framer-motion'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { HTMLProps, PropsWithChildren, useCallback, useLayoutEffect, useRef, useState } from 'react'
 
+const defaultCollisionPadding = {
+  right: 8,
+  left: UI_CONFIG.NAV_WIDTH + 8,
+  bottom: 8,
+  top: UI_CONFIG.HEADER_HEIGHT + 8,
+}
 export function HoverCardContent({
   children,
   className,
   margin = 5,
   align = 'start',
-  collisionPadding = {
-    right: 8,
-    left: UI_CONFIG.NAV_WIDTH + 8,
-    bottom: 8,
-    top: UI_CONFIG.HEADER_HEIGHT + 8,
-  },
+  collisionPadding = defaultCollisionPadding,
   isBottom = () => {},
 }: PropsWithChildren<
   HTMLProps<'div'> & {
@@ -41,6 +42,8 @@ export function HoverCardContent({
   const beforeBottom = useRef(true)
   const [isFlip, setIsFlip] = useState(false)
 
+  const setOpen = useSetAtom(hoverCardOpenAtomAction)
+
   const calc = useCallback(() => {
     if (!triggerClientRect || !ref.current) return
     const c = calcPos({
@@ -58,28 +61,18 @@ export function HoverCardContent({
       setIsCollision(false)
     }
     setWidth(ref.current.getBoundingClientRect().width)
-    if (position.X === undefined) setPosition({ ...c })
-    else {
-      setTranslate({ X: c.X - (position.X ?? 0) })
-      setPosition({ ...position, top: c.top, bottom: c.bottom })
-    }
+    setPosition((position) => {
+      if (position.X === undefined) {
+        return { ...c }
+      } else {
+        setTranslate({ X: c.X - position.X })
+        return { ...position, top: c.top, bottom: c.bottom }
+      }
+    })
     isBottom(c.bottom === undefined)
-    if (beforeBottom.current !== (c.bottom === undefined)) {
-      setIsFlip(true)
-    } else {
-      setIsFlip(false)
-    }
+    setIsFlip(beforeBottom.current !== (c.bottom === undefined))
     beforeBottom.current = c.bottom === undefined
-  }, [
-    margin,
-    collisionPadding,
-    align,
-    triggerClientRect,
-    setPosition,
-    setTranslate,
-    isBottom,
-    position,
-  ])
+  }, [margin, align, triggerClientRect, setPosition, setTranslate, isBottom, collisionPadding])
 
   useLayoutEffect(() => {
     if (!ref.current) return
@@ -91,7 +84,6 @@ export function HoverCardContent({
       ob.disconnect()
     }
   }, [triggerClientRect, calc])
-  const setOpen = useSetAtom(hoverCardOpenAtomAction)
 
   return (
     <motion.div
