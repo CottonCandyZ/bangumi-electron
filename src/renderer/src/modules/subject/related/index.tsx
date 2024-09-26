@@ -3,7 +3,6 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQueryRelatedSubjects } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { RelatedSubjectsContent } from '@renderer/modules/subject/related/content'
-import { RelatedGridSkeleton } from '@renderer/modules/subject/related/skelen'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
 import { useAtom } from 'jotai'
 
@@ -13,6 +12,8 @@ export function RelatedSubjects({ subjectId }: { subjectId: SubjectId }) {
     needKeepPreviousData: false,
   })
   const relatedSubjects = relatedSubjectsQuery.data
+  // 书籍处理特殊化
+  relatedSubjects?.delete('单行本')
   const id = `subject-related-tab-${subjectId}`
   const [filterMap, setFilter] = useAtom(tabFilerAtom)
   const filter = filterMap.get(id) ?? '全部'
@@ -40,5 +41,17 @@ export function RelatedSubjects({ subjectId }: { subjectId: SubjectId }) {
         <RelatedGridSkeleton />
       )}
     </section>
+  )
+}
+
+export function RelatedGridSkeleton() {
+  return (
+    <div className="grid grid-cols-[repeat(auto-fill,_minmax(8rem,_1fr))] gap-3 py-2">
+      {Array(5)
+        .fill(0)
+        .map((_, index) => (
+          <Skeleton className="aspect-square" key={index} />
+        ))}
+    </div>
   )
 }
