@@ -3,13 +3,13 @@ import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { SubjectBackground } from '@renderer/modules/subject/background/filter'
-import { subjectContentWidthAtom } from '@renderer/state/width'
+import { mainContainerWidth } from '@renderer/state/main-bounding-box'
 import { useAtomValue } from 'jotai'
 
 export function BackgroundImage({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
-  const width = useAtomValue(subjectContentWidthAtom)
+  const width = useAtomValue(mainContainerWidth)
 
   return (
     subjectInfo?.images.large &&

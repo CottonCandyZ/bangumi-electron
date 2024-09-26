@@ -14,12 +14,17 @@ import { SubjectTags } from '@renderer/modules/subject/tags'
 export const SubjectContent = ({
   subjectId,
   className,
+  style
 }: {
   subjectId: SubjectId
   className?: string
+  style?: React.CSSProperties
 }) => {
   return (
-    <div className={cn('mx-auto flex max-w-[86rem] flex-col gap-10 px-10', className)}>
+    <div
+      className={cn('mx-auto flex max-w-[86rem] flex-col gap-10 px-10', className)}
+      style={style}
+    >
       <section className="flex w-full flex-row gap-8">
         {/* cover */}
         <SubjectCoverImage subjectId={subjectId} />
