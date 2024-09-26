@@ -17,8 +17,8 @@ export function NavBar() {
     <div>
       <nav
         className={cn(
-          'fixed z-50 flex h-dvh w-16 max-w-16 flex-col border-r bg-background transition-[width]',
-          open && 'w-60 max-w-none',
+          'fixed z-10 flex h-dvh w-16 max-w-16 flex-col border-r bg-background transition-[width]',
+          open && 'z-50 w-60 max-w-none',
         )}
       >
         <div
@@ -50,7 +50,7 @@ export function NavBar() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-20 bg-black"
+            className="fixed inset-0 z-40 bg-black"
             onClick={() => setOpen(false)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.8 }}
