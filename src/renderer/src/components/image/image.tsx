@@ -1,7 +1,6 @@
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
-import { imageLoadCache } from '@renderer/state/global-var'
-import { forwardRef, useEffect, useState } from 'react'
+import { forwardRef } from 'react'
 
 export const Image = forwardRef<
   HTMLDivElement,
@@ -16,13 +15,9 @@ export const Image = forwardRef<
     { className, imageSrc, imageClassName, loadingClassName, loading = 'lazy', children, ...props },
     ref,
   ) => {
-    const [isLoad, setIsLoad] = useState(imageSrc ? (imageLoadCache.get(imageSrc) ?? false) : false)
-    useEffect(() => {
-      if (imageSrc && isLoad) imageLoadCache.set(imageSrc, isLoad)
-    }, [isLoad, imageSrc])
     return (
       <div
-        className={cn('relative z-0', (!imageSrc || !isLoad) && loadingClassName, className)}
+        className={cn('relative z-0', !imageSrc && loadingClassName, className)}
         ref={ref}
         {...props}
         key={imageSrc}
@@ -36,7 +31,6 @@ export const Image = forwardRef<
           )}
           loading={loading}
           src={imageSrc}
-          onLoad={() => setIsLoad(true)}
           draggable={false}
         />
         <Skeleton className={cn('absolute inset-0 -z-10')} />

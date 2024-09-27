@@ -11,6 +11,5 @@ export const gridCache: Map<string, ReactInfiniteGridProps['status']> = new Map<
   string,
   ReactInfiniteGridProps['status']
 >()
-export const imageLoadCache = new Map<string, boolean>()
 
 export const subjectInitScroll = { x: 0 }
