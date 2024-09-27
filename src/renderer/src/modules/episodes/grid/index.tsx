@@ -79,7 +79,7 @@ function EpisodeSkeleton({
         {Array(skeletonNumber)
           .fill(0)
           .map((_, index) => (
-            <Skeleton className={cn('size-9', size === 'small' && 'size-6')} key={index} />
+            <Skeleton className={cn('size-9', size === 'small' && 'size-5')} key={index} />
           ))}
       </div>
     </div>

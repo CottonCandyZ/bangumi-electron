@@ -75,7 +75,7 @@ export function EpisodeGridItem({
         key={episode.id}
         className={cn(
           `flex h-9 min-w-9 rounded-md px-2 py-0`,
-          size === 'small' && 'h-6 min-w-6 rounded-sm px-1 text-xs',
+          size === 'small' && 'h-5 min-w-5 rounded-sm px-1 text-xs',
         )}
         variant={selfOpen && open ? `${status}Hover` : status}
       >
