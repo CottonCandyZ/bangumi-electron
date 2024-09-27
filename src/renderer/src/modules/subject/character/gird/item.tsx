@@ -60,6 +60,7 @@ function PopCard({ character }: { character: Character }) {
               className="h-fit basis-1/4 overflow-hidden rounded-lg"
               imageSrc={character.images.grid}
               loadingClassName="aspect-square"
+              careLoading
               loading="eager"
             />
           )}
