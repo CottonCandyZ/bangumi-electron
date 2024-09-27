@@ -180,14 +180,14 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
         if (timeoutRef.current === undefined) {
           setActiveId(null)
           timeoutRef.current = setTimeout(() => {
-            if (!wrapperRef.current) return
+            if (!hoverRef.current || !wrapperRef.current) return
             const { x, y, width, height } = wrapperRef.current.getBoundingClientRect()
-            hoverSizeRef.current = new DOMRect(x, y, width, height)
 
             // 弹起之前设定父元素的宽高
             setBox({ height: `${height}px`, width: `${width}px` })
             const { width: hoverWidth, height: hoverHeight } =
-              wrapperRef.current.getBoundingClientRect()
+              hoverRef.current.getBoundingClientRect()
+            hoverSizeRef.current = new DOMRect(x, y, width, height)
             setHoverBox({ height: `${hoverHeight}px`, width: `${hoverWidth}px` })
 
             // 开始动画
