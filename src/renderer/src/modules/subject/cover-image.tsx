@@ -39,7 +39,6 @@ export function SubjectCoverImage({ subjectId }: { subjectId: SubjectId }) {
   useEffect(() => {
     setter(isWholeInView)
   }, [isWholeInView, setter])
-  console.log(state?.viewTransitionName)
   return (
     <Card
       className="h-min w-48 shrink-0 overflow-hidden border-none"
