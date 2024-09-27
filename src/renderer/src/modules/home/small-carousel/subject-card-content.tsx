@@ -52,6 +52,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
   const setActionSection = useSetAtom(activeSectionAtom) // 用来防止轮播图相互覆盖
   const id = `${sectionPath}-${index}`
   const layoutId = `${sectionId}-${id}`
+  const isActive = activeId === layoutId
 
   const isTransitioning = unstable_useViewTransitionState(`/subject/${subjectId}`) // viewTransition API
   const { key } = useLocation()
@@ -68,11 +69,14 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
     >
       <HoverCardContent
         className="relative z-[1] w-full cursor-default"
+        style={{
+          viewTransitionName: !isActive && isTransitioning ? `cover-image-${key}` : undefined,
+        }}
         CardContent={
           <MyLink
             to={`/subject/${subjectId}`}
             className="cursor-default"
-            // unstable_viewTransition
+            unstable_viewTransition
             state={{ viewTransitionName: `cover-image-${key}` }}
           >
             <CardContent className="p-0">
@@ -131,7 +135,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
         <MyLink
           to={`/subject/${subjectId}`}
           className="cursor-default"
-          // unstable_viewTransition
+          unstable_viewTransition
           state={{ viewTransitionName: `cover-image-${key}` }}
         >
           <Card className="h-full w-full overflow-hidden">
@@ -142,7 +146,9 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
                   imageSrc={subjectInfoData?.images.common}
                   className="shrink-0 basis-1/6 overflow-hidden rounded-lg shadow-lg"
                   layoutId={`${layoutId}-image`}
-                  style={{ viewTransitionName: isTransitioning ? `cover-image-${key}` : '' }}
+                  style={{
+                    viewTransitionName: isTransitioning ? `cover-image-${key}` : undefined,
+                  }}
                 />
                 {/* 标题描述 */}
                 <section className="flex w-full flex-col justify-between gap-0.5">

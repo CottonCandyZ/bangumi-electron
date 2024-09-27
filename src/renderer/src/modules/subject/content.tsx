@@ -27,7 +27,7 @@ export const SubjectContent = ({
     >
       <section className="flex w-full flex-row gap-8">
         {/* cover */}
-        <SubjectCoverImage subjectId={subjectId} />
+        <SubjectCoverImage subjectId={subjectId} key={subjectId} />
         {/* info */}
         <SubjectHeaderInfo subjectId={subjectId} />
       </section>

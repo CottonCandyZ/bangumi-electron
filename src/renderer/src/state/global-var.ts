@@ -6,7 +6,7 @@ export const panelSize = {
 }
 
 export const scrollCache = new Map<string, number>()
-export const otherCache = new Map<string, Map<string, number | string>>()
+export const otherCache = new Map<string, Map<string, number | string | boolean>>()
 export const gridCache: Map<string, ReactInfiniteGridProps['status']> = new Map<
   string,
   ReactInfiniteGridProps['status']

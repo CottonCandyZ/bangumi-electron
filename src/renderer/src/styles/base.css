@@ -1,34 +1,9 @@
-::view-transition-group(header) {
-  z-index: 1;
-}
-
-::view-transition-group(nav) {
-  z-index: 1;
-}
-
-:root {
-  view-transition-name: none;
-}
-
 :where([data-sonner-toaster]) {
   @apply !font-sans;
   & :where([data-title]) {
     @apply text-sm font-medium;
   }
 }
-::view-transition-group(pop-card) {
-  animation-duration: 0.3s;
-  animation-timing-function: ease;
-}
-::view-transition-group(pop-image) {
-  animation-duration: 0.3s;
-  animation-timing-function: ease;
-}
-::view-transition-group(pop-title) {
-  animation-duration: 0.3s;
-  animation-timing-function: ease;
-}
-
 [data-overlayscrollbars-viewport] {
   z-index: auto !important;
 }

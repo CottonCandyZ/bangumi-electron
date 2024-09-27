@@ -6,7 +6,7 @@ import {
 } from '@renderer/components/hover-pop-card/dynamic-size'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { RelatedSubject } from '@renderer/data/types/subject'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, unstable_useViewTransitionState, useLocation } from 'react-router-dom'
 import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
 import { useAtomValue } from 'jotai'
 
@@ -20,7 +20,7 @@ export function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
   const activeId = useAtomValue(activeHoverPopCardAtom) // framer motion 需要其用于确保 re-render ?
   /* eslint-enable */
 
-  // const isTransitioning = unstable_useViewTransitionState(`/subject/${relatedSubject.id}`)
+  const isTransitioning = unstable_useViewTransitionState(`/subject/${relatedSubject.id}`)
   return (
     <HoverPopCard layoutId={layoutId}>
       <HoverCardContent>
@@ -28,12 +28,12 @@ export function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
           <Link
             to={`/subject/${relatedSubject.id}`}
             className="cursor-default"
-            // state={{ viewTransitionName: `${key}-cover-image` }}
+            state={{ viewTransitionName: `cover-image-${key}` }}
             unstable_viewTransition
           >
             <Card
               className="overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
-              // style={{ viewTransitionName: isTransitioning ? `${key}-cover-image` : '' }}
+              style={{ viewTransitionName: isTransitioning ? `cover-image-${key}` : undefined }}
             >
               <CardContent className="p-0">
                 {relatedSubject.images.common !== '' ? (

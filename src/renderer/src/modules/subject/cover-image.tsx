@@ -1,34 +1,55 @@
 import { Card } from '@renderer/components/ui/card'
 import { SubjectId } from '@renderer/data/types/bgm'
-// import { unstable_useViewTransitionState, useLocation } from 'react-router-dom'
 import { Image } from '@renderer/components/image/image'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
-import { useInView } from 'framer-motion'
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useSetAtom } from 'jotai'
 import { subjectCoverImageInViewAtom } from '@renderer/state/in-view'
+import { unstable_useViewTransitionState, useLocation } from 'react-router-dom'
+import { useInView } from 'react-intersection-observer'
+import { useStateHook } from '@renderer/hooks/use-cache-state'
 
 export function SubjectCoverImage({ subjectId }: { subjectId: SubjectId }) {
-  // const { state } = useLocation()
+  const { state } = useLocation()
   const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
-  const cardRef = useRef(null)
-  const isInView = useInView(cardRef)
   const setIsInView = useSetAtom(subjectCoverImageInViewAtom)
-  // const isTransitioning = unstable_useViewTransitionState(`/subject/${subjectId}`)
+  const isTransitioning = unstable_useViewTransitionState(`/subject/${subjectId}`)
+  const { ref: partialRef, inView: isPartialInView } = useInView({
+    threshold: 0,
+    initialInView: true,
+  })
+  const { init, setter } = useStateHook({ key: 'coverImageInView' })
+  const { ref, inView: isWholeInView } = useInView({
+    threshold: 1,
+    initialInView: (init as boolean | undefined) ?? true,
+  })
+  const setRefs = useCallback(
+    (node: HTMLDivElement) => {
+      partialRef(node)
+      ref(node)
+    },
+    [ref, partialRef],
+  )
   useEffect(() => {
-    setIsInView(isInView)
-  }, [isInView, subjectId, setIsInView])
+    setIsInView(isPartialInView)
+  }, [isPartialInView, subjectId, setIsInView])
+  useEffect(() => {
+    setter(isWholeInView)
+  }, [isWholeInView, setter])
+  console.log(state?.viewTransitionName)
   return (
     <Card
       className="h-min w-48 shrink-0 overflow-hidden border-none"
-      // style={{
-      //   viewTransitionName:
-      //     isTransitioning && state?.viewTransitionName ? state.viewTransitionName : '',
-      // }}
-      ref={cardRef}
+      style={{
+        viewTransitionName:
+          isWholeInView && isTransitioning && state?.viewTransitionName
+            ? state.viewTransitionName
+            : undefined,
+      }}
+      ref={setRefs}
     >
       {subjectInfo !== undefined ? (
         !isEmpty(subjectInfo.images.common) ? (

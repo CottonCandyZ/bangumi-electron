@@ -6,7 +6,7 @@ import { useQueryRelatedSubjects } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { RelatedSubject } from '@renderer/data/types/subject'
 import { isEmpty } from '@renderer/lib/utils/string'
-import { Link } from 'react-router-dom'
+import { Link, unstable_useViewTransitionState, useLocation } from 'react-router-dom'
 
 export function Tankobon({ subjectId }: { subjectId: SubjectId }) {
   const relatedSubjectsQuery = useQueryRelatedSubjects({
@@ -31,13 +31,20 @@ export function Tankobon({ subjectId }: { subjectId: SubjectId }) {
 }
 
 function Item({ item }: { item: RelatedSubject }) {
+  const { key } = useLocation()
+  const isTransitioning = unstable_useViewTransitionState(`/subject/${item.id}`)
   return (
     <Tooltip key={item.id} delayDuration={0}>
       <TooltipTrigger>
-        <Link to={`/subject/${item.id}`}>
+        <Link
+          to={`/subject/${item.id}`}
+          state={{ viewTransitionName: `cover-image-${key}` }}
+          unstable_viewTransition
+        >
           {!isEmpty(item.images.small) ? (
             <Image
               imageSrc={item.images.small}
+              style={{ viewTransitionName: isTransitioning ? `cover-image-${key}` : undefined }}
               className="size-20 overflow-hidden rounded-xl border shadow transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xl"
             />
           ) : (

@@ -88,7 +88,7 @@ export const HoverCardContent: FC<
   return (
     <motion.div layoutId={layoutId} ref={hoverRef} className={className} {...props}>
       <Card
-        className={`relative overflow-hidden hover:-translate-x-0 hover:-translate-y-0.5 hover:shadow-xl hover:duration-700`}
+        className="relative overflow-hidden hover:-translate-x-0 hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
         onMouseEnter={() => {
           setActiveId(null)
           timeoutRef.current = setTimeout(() => {

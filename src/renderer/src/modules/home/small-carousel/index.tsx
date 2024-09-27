@@ -35,7 +35,7 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
       return
     }
     const cacheState = () => {
-      if (setIndex) setIndex?.set(`Home-Small-Carousel-${sectionPath}`, api.selectedScrollSnap())
+      setIndex(api.selectedScrollSnap())
     }
     api.on('select', cacheState)
     return () => {
