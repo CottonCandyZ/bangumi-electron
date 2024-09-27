@@ -31,7 +31,7 @@ function SubjectHeaderTitle({ subjectId }: { subjectId: SubjectId }) {
             exit={{ y: '120%', opacity: 0 }}
           >
             <Image
-              className="aspect-square w-10 shrink-0 overflow-hidden rounded-lg"
+              className="size-9 shrink-0 overflow-hidden rounded-lg"
               imageSrc={subjectInfo.images.common}
             />
             <Header {...subjectInfo} />
