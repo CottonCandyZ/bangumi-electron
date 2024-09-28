@@ -1,3 +1,5 @@
+import { easingGradient } from '@renderer/lib/utils/easing-gradient'
+import { useTheme } from '@renderer/modules/wrapper/theme-wrapper'
 import { scrollCache, subjectInitScroll } from '@renderer/state/global-var'
 import { mainContainerHeight } from '@renderer/state/main-bounding-box'
 import { mainPanelScrollPositionAtom } from '@renderer/state/scroll'
@@ -7,7 +9,7 @@ import { useLocation } from 'react-router-dom'
 
 const init = (top: number, scrollRange: number) => {
   const percent = (top / (scrollRange * 2)) * 100
-  return { start: percent * (0.033 * percent), end: percent * 3.5 }
+  return { start: percent * (0.03 * percent), end: percent * 3 }
 }
 
 export function SubjectBackground() {
@@ -21,12 +23,18 @@ export function SubjectBackground() {
   // 后面有机会还是用原生的 scroll bar 吧，可以少不少坑
   const value = isFirst ? (scrollCache.get(pathname) ?? subjectInitScroll.x) : scrollPosition
   const { start, end } = init(value, containerHeight)
-
+  const { theme } = useTheme()
+  let color: 'light' | 'dark' = 'light'
+  if (theme === 'system') {
+    color = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  } else {
+    color = theme
+  }
   return (
     <div
       className="absolute inset-0"
       style={{
-        background: `linear-gradient(to top, hsl(var(--background)) ${15 + start}%, hsl(var(--background) / 0) ${40 + end}%)`,
+        background: `${easingGradient(10 + start, 45 + end, color)}`,
       }}
     />
   )
