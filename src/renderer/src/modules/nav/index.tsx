@@ -50,7 +50,7 @@ export function NavBar() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-40 bg-black"
+            className="fixed inset-0 left-16 z-40 bg-black"
             onClick={() => setOpen(false)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.8 }}
