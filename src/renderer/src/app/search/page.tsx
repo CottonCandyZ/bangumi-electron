@@ -1,4 +1,4 @@
-import { Search } from '@renderer/modules/search'
+import { Search } from '@renderer/modules/main/search'
 
 export function Component(): JSX.Element {
   return (

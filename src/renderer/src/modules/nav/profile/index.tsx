@@ -1,4 +1,4 @@
-import { ProfileMenu } from '@renderer/modules/user/avatarMenu'
+import { ProfileMenu } from '@renderer/modules/shared/user/avatarMenu'
 import { navOpenAtom } from '@renderer/state/panel'
 import { useAtomValue } from 'jotai'
 

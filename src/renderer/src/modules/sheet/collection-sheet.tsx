@@ -1,5 +1,5 @@
 import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
-import { AddOrModifySubjectCollectionForm } from '@renderer/modules/collections/modify/form/subject-form'
+import { AddOrModifySubjectCollectionForm } from '@renderer/modules/shared/collections/modify/form/subject-form'
 import { SheetHeader, SheetTitle } from '@renderer/components/ui/sheet'
 import { openSheetAtom, subjectCollectionSheetFormPropsAtom } from '@renderer/state/sheet'
 import { useAtomValue, useSetAtom } from 'jotai'

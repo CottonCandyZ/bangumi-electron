@@ -19,6 +19,9 @@ const config = {
         sans: ['"Noto Sans SC"', '"Noto Sans JP"', '"Noto Sans"', ...defaultTheme.fontFamily.sans],
         jp: ['"Noto Sans JP"', '"Noto Sans SC"', '"Noto Sans"', ...defaultTheme.fontFamily.sans],
       },
+      maxWidth: {
+        '8xl': '86rem',
+      },
       colors: {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',

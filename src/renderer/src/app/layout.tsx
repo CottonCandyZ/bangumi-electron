@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom'
 import { Header } from '@renderer/modules/header'
 import { LeftResizablePanel } from '@renderer/modules/panel/left-panel'
 import { NavBar } from '@renderer/modules/nav'
-import { MainContainer } from '@renderer/modules/main-container'
+import { MainContainer } from '@renderer/modules/main'
 
 function RootLayout() {
   return (

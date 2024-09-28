@@ -1,4 +1,4 @@
-import { SubjectPersonTable } from '@renderer/modules/subject/person'
+import { SubjectPersonTable } from '@renderer/modules/main/subject/person'
 import { useParams } from 'react-router-dom'
 
 export function SubjectInfoPanel() {
