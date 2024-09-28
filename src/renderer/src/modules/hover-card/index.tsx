@@ -1,4 +1,4 @@
-import { HoverEpisodeDetail } from '@renderer/modules/shared/episodes/grid/hover-content'
+import { HoverEpisodeDetail } from '@renderer/modules/common/episodes/grid/hover-content'
 import { hoverCardEpisodeContentAtom, hoverCardOpenAtom } from '@renderer/state/hover-card'
 import { AnimatePresence } from 'framer-motion'
 import { useAtomValue } from 'jotai'

@@ -1,4 +1,4 @@
-import { CollectionsGrid } from '@renderer/modules/shared/collections/grid'
+import { CollectionsGrid } from '@renderer/modules/common/collections/grid'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'

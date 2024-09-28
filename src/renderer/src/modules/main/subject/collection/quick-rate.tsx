@@ -1,4 +1,4 @@
-import { RateButtons } from '@renderer/modules/shared/collections/rate'
+import { RateButtons } from '@renderer/modules/common/collections/rate'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'

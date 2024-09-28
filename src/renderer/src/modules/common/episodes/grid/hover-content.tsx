@@ -1,7 +1,7 @@
 import { MediumHeader } from '@renderer/components/headers'
 import { HoverCardContent } from '@renderer/components/hover-card/content'
 import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
-import { EpisodeCollectionButton } from '@renderer/modules/shared/collections/episode-collection-button'
+import { EpisodeCollectionButton } from '@renderer/modules/common/collections/episode-collection-button'
 import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'

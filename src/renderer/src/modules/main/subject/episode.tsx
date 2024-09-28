@@ -1,4 +1,4 @@
-import { EpisodesGrid } from '@renderer/modules/shared/episodes/grid'
+import { EpisodesGrid } from '@renderer/modules/common/episodes/grid'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { SubjectType } from '@renderer/data/types/subject'

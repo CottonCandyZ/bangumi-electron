@@ -1,4 +1,4 @@
-import { TagInput } from '@renderer/modules/shared/collections/modify/tags/tags-input'
+import { TagInput } from '@renderer/modules/common/collections/modify/tags/tags-input'
 import { Button } from '@renderer/components/ui/button'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'

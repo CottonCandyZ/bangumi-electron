@@ -1,5 +1,5 @@
 import { MasonryInfiniteGrid } from '@egjs/react-infinitegrid'
-import { CollectionItem } from '@renderer/modules/shared/collections/grid/item'
+import { CollectionItem } from '@renderer/modules/common/collections/grid/item'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useInfinityQueryCollectionsByUsername } from '@renderer/data/hooks/api/collection'
 import { useQueryUserInfo } from '@renderer/data/hooks/api/user'

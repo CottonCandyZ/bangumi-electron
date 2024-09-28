@@ -1,5 +1,5 @@
-import { EpisodeGridContent } from '@renderer/modules/shared/episodes/grid/content'
-import { PageSelector } from '@renderer/modules/shared/episodes/grid/page-selector'
+import { EpisodeGridContent } from '@renderer/modules/common/episodes/grid/content'
+import { PageSelector } from '@renderer/modules/common/episodes/grid/page-selector'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useQueryCollectionEpisodesInfoBySubjectId } from '@renderer/data/hooks/api/collection'

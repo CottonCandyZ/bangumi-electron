@@ -6,7 +6,7 @@ import {
   DialogTrigger,
 } from '@renderer/components/ui/dialog'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
-import { LoginForm } from '@renderer/modules/shared/user/login/form'
+import { LoginForm } from '@renderer/modules/common/user/login/form'
 import { CircleHelp } from 'lucide-react'
 import { PropsWithChildren, useState } from 'react'
 

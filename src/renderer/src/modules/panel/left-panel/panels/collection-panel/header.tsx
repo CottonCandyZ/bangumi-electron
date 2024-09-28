@@ -1,4 +1,4 @@
-import { SubjectCollectionSelectorContent } from '@renderer/modules/shared/collections/subject-select-content'
+import { SubjectCollectionSelectorContent } from '@renderer/modules/common/collections/subject-select-content'
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { CollectionType } from '@renderer/data/types/collection'

@@ -1,5 +1,5 @@
 import { HoverCardTrigger } from '@renderer/components/hover-card/trigger'
-import { EpisodeGridSize } from '@renderer/modules/shared/episodes/grid/index'
+import { EpisodeGridSize } from '@renderer/modules/common/episodes/grid/index'
 import { Button } from '@renderer/components/ui/button'
 import {
   CollectionEpisode,

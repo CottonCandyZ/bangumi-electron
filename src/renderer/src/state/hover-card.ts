@@ -1,4 +1,4 @@
-import { HoverEpisodeDetailType } from '@renderer/modules/shared/episodes/grid/hover-content'
+import { HoverEpisodeDetailType } from '@renderer/modules/common/episodes/grid/hover-content'
 import { atom } from 'jotai'
 
 export const hoverCardOpenAtom = atom(false)
