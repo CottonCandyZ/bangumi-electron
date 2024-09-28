@@ -9,7 +9,7 @@ import { useLocation } from 'react-router-dom'
 
 const init = (top: number, scrollRange: number) => {
   const percent = (top / (scrollRange * 2)) * 100
-  return { start: percent * (0.03 * percent), end: percent * 3 }
+  return { start: percent * (0.025 * percent), end: percent * (0.11 * percent) }
 }
 
 export function SubjectBackground() {
