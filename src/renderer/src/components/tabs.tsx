@@ -36,7 +36,6 @@ export function Tabs({
         >
           {currentSelect === item && (
             <motion.div
-              // key={`${layoutId}-${key}`}
               layoutId={layoutId}
               className="absolute inset-0 rounded-md bg-background shadow"
               style={{ originY: 'top' }}

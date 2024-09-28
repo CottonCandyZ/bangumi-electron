@@ -26,6 +26,7 @@ export function RelatedSubjects({ subjectId }: { subjectId: SubjectId }) {
         <h2 className="shrink-0 text-2xl font-medium">关联条目</h2>
         {relatedSubjects ? (
           <Tabs
+            key={id}
             currentSelect={filter}
             setCurrentSelect={setFilter}
             tabsContent={relations}
