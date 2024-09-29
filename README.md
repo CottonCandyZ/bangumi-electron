@@ -41,9 +41,13 @@ Framer Motion, React/TanStack Query, Jotai, shadcn/ui, Tailwind
 
 ![Light](doc/screen-shot/light.webp)
 ![Dark](doc/screen-shot/dark.webp)
-![Card](doc/screen-shot/preview-card.webp)
-![info-box](doc/screen-shot/info-box.webp)
-![collection](doc/screen-shot/collection-light.webp)
+![cover](doc/screen-shot/cover.webp)
+![Tags](doc/screen-shot/tags.webp)
+![info-box](doc/screen-shot/infobox.webp)
+![Book](doc/screen-shot/book.webp)
+![dark-game](doc/screen-shot/dark-game.webp)
+![Episode](doc/screen-shot/episode.webp)
+![Grid](doc/screen-shot/grid.webp)
 
 ### 怎么全都是一个页面？所以说别的页面呢
 
