@@ -56,3 +56,15 @@ Framer Motion, React/TanStack Query, Jotai, shadcn/ui, Tailwind
 搜索页正在制作中，由于 item-card 的样式还没有确定，以及 filter 摆放的位置问题，所以 ui 相对简陋，以及我还在考虑放出 Tags 的合理性，所以样式并不是确定的，但是还是可以预览一下的（最终可能不长这样）：
 
 ![Search](doc/screen-shot/search.webp)
+
+## Thanks
+
+这个项目的存在离不开下面项目的帮助！
+
+- [由 @cyz0729 开发的 Bangumi RN 客户端](https://github.com/czy0729/Bangumi)
+
+- [Bangumi 自身的开源设施](https://github.com/bangumi)
+
+- 一些组件设计和文件结构值得参考 [AFFiNE](https://github.com/toeverything/AFFiNE)
+
+- Electron 部分的文件组织 [Follow](https://github.com/RSSNext/Follow)
