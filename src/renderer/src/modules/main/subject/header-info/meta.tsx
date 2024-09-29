@@ -32,7 +32,11 @@ export function Meta({
           </>
         )}
         <div className="flex flex-row flex-wrap items-center gap-1 text-sm font-medium">
-          <MetaItem inner={date} content={dayjs(date, 'YYYY-MM-DD').format('YYYY 年 7 月')} first />
+          <MetaItem
+            inner={date}
+            content={dayjs(date, 'YYYY-MM-DD').format('YYYY 年 M 月 D 日')}
+            first
+          />
           <MetaItem inner={platform} content={platform} />
           <MetaItem inner={eps} content={`共 ${eps} 话`} />
           <MetaItem inner={week_day} content={week_day} />
