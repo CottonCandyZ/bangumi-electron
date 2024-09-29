@@ -32,6 +32,7 @@ export function NavBar() {
             variant="ghost"
             className={cn(
               'relative aspect-square h-fit w-fit p-2 text-primary/65 hover:text-primary',
+              platform === 'darwin' && 'm-1 p-1',
             )}
             onClick={() => setOpen(!open)}
           >
