@@ -30,6 +30,7 @@ export const useAccessTokenQuery = () => {
     queryFn: async () => {
       return await client.getAccessToken()
     },
+    networkMode: 'always',
   })
 }
 

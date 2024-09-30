@@ -29,6 +29,7 @@ export const queryClient = new QueryClient({
         serialize: (persistedQuery) => persistedQuery,
         deserialize: (cached) => cached,
       }),
+      networkMode: 'offlineFirst',
     },
   },
 })
