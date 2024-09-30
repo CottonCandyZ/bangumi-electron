@@ -23,18 +23,12 @@ export function SubjectBackground() {
   // 后面有机会还是用原生的 scroll bar 吧，可以少不少坑
   const value = isFirst ? (scrollCache.get(pathname) ?? subjectInitScroll.x) : scrollPosition
   const { start, end } = init(value, containerHeight)
-  const { theme } = useTheme()
-  let color: 'light' | 'dark' = 'light'
-  if (theme === 'system') {
-    color = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-  } else {
-    color = theme
-  }
+  const { currentColor } = useTheme()
   return (
     <div
       className="absolute inset-0"
       style={{
-        background: `${easingGradient(10 + start, 45 + end, color)}`,
+        background: `${easingGradient(10 + start, 45 + end, currentColor)}`,
       }}
     />
   )
