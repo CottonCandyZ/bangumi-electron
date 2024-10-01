@@ -39,15 +39,15 @@ Framer Motion, React/TanStack Query, Jotai, shadcn/ui, Tailwind
 
 虽然截图都是 Mac 的，但是也是支持 Windows 的，其实大部分时间都是在 PC 上开发的
 
-![Light](doc/screen-shot/light.webp)
-![Dark](doc/screen-shot/dark.webp)
-![cover](doc/screen-shot/cover.webp)
-![Tags](doc/screen-shot/tags.webp)
-![info-box](doc/screen-shot/infobox.webp)
-![Book](doc/screen-shot/book.webp)
-![dark-game](doc/screen-shot/dark-game.webp)
-![Episode](doc/screen-shot/episode.webp)
-![Grid](doc/screen-shot/grid.webp)
+![Light](doc/screenshot/light.webp)
+![Dark](doc/screenshot/dark.webp)
+![cover](doc/screenshot/cover.webp)
+![Tags](doc/screenshot/tags.webp)
+![info-box](doc/screenshot/infobox.webp)
+![Book](doc/screenshot/book.webp)
+![dark-game](doc/screenshot/dark-game.webp)
+![Episode](doc/screenshot/episode.webp)
+![Grid](doc/screenshot/grid.webp)
 
 ### 怎么全都是一个页面？所以说别的页面呢
 
@@ -55,7 +55,7 @@ Framer Motion, React/TanStack Query, Jotai, shadcn/ui, Tailwind
 
 搜索页正在制作中，由于 item-card 的样式还没有确定，以及 filter 摆放的位置问题，所以 ui 相对简陋，以及我还在考虑放出 Tags 的合理性，所以样式并不是确定的，但是还是可以预览一下的（最终可能不长这样）：
 
-![Search](doc/screen-shot/search.webp)
+![Search](doc/screenshot/search.webp)
 
 ## Thanks
 
