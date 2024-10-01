@@ -4,7 +4,11 @@ import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { CollectionEpisode, CollectionType } from '@renderer/data/types/collection'
+import {
+  CollectionEpisode,
+  CollectionType,
+  EpisodeCollectionType,
+} from '@renderer/data/types/collection'
 import { Episode, EpisodeType } from '@renderer/data/types/episode'
 import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
@@ -47,8 +51,13 @@ export function EpisodeGridContent({
   /** 在严格模式下会跑两次，所以让我们用 Effect 包裹它吧 */
   useEffect(() => {
     if (subjectCollection && subjectInfo && enabled) {
+      const isFinished = episodes
+        .filter(
+          (episode) => isCollectionEpisode(episode) && episode.episode.type === EpisodeType.本篇,
+        )
+        .every((episode) => episode.type === EpisodeCollectionType.watched)
       if (
-        subjectCollection.ep_status === subjectInfo.eps &&
+        isFinished &&
         subjectCollectionQuery.fetchStatus === 'idle' &&
         subjectInfoQuery.fetchStatus === 'idle'
       ) {
@@ -82,6 +91,7 @@ export function EpisodeGridContent({
       }
     }
   }, [
+    episodes,
     subjectCollection,
     subjectInfo,
     enabled,
