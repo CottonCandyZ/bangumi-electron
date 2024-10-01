@@ -79,7 +79,11 @@ export function CollectionsGrid({
         maxStretchColumnSize={384}
         gap={4}
         onRequestAppend={(e) => {
-          if (collectionsQuery.hasNextPage && !collectionsQuery.isFetchingNextPage) {
+          if (
+            !collectionsQuery.isError &&
+            collectionsQuery.hasNextPage &&
+            !collectionsQuery.isFetchingNextPage
+          ) {
             e.wait()
             e.currentTarget.appendPlaceholders(
               collections.pages[0].data.length,
