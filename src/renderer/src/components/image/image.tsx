@@ -1,6 +1,7 @@
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
-import { forwardRef, useState } from 'react'
+import { ImageLoadCache } from '@renderer/state/global-var'
+import { forwardRef, useEffect, useRef, useState } from 'react'
 
 export const Image = forwardRef<
   HTMLDivElement,
@@ -25,12 +26,34 @@ export const Image = forwardRef<
     },
     ref,
   ) => {
-    const [isLoad, setIsLoad] = useState(false)
+    const [isLoad, setIsLoad] = useState(imageSrc ? (ImageLoadCache.get(imageSrc) ?? false) : false)
+    const [isError, setIsError] = useState(false)
+    const [stateImageSrc, setStateImageSrc] = useState(imageSrc)
+    const errorTimeId = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+    useEffect(() => {
+      setStateImageSrc(imageSrc)
+    }, [imageSrc])
+
+    useEffect(() => {
+      clearTimeout(errorTimeId.current)
+      const refresh = () => {
+        setStateImageSrc(imageSrc)
+      }
+      window.removeEventListener('online', refresh)
+      if (isError) {
+        if (navigator.onLine) {
+          errorTimeId.current = setTimeout(refresh, 5000)
+        } else {
+          window.addEventListener('online', refresh)
+        }
+      }
+    }, [isError, imageSrc])
+
     return (
       <div
         className={cn(
           'relative z-0',
-          (!imageSrc || (careLoading && !isLoad)) && loadingClassName,
+          (!stateImageSrc || (careLoading && !isLoad)) && loadingClassName,
           className,
         )}
         ref={ref}
@@ -42,11 +65,19 @@ export const Image = forwardRef<
           className={cn(
             'h-full w-full max-w-none select-none object-cover',
             imageClassName,
-            !imageSrc && 'invisible',
+            (!imageSrc || isError) && 'invisible',
           )}
-          onLoad={() => setIsLoad(true)}
-          loading={loading}
-          src={imageSrc}
+          onLoad={() => {
+            setIsLoad(true)
+            setIsError(false)
+            if (imageSrc) ImageLoadCache.set(imageSrc, true)
+          }}
+          onError={() => {
+            setIsError(true)
+            setStateImageSrc(undefined)
+          }}
+          loading={isLoad ? 'eager' : loading}
+          src={stateImageSrc}
           draggable={false}
         />
         <Skeleton className="absolute inset-0 -z-10" />
