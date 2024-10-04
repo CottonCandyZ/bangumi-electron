@@ -161,6 +161,7 @@ export function EpisodeCollectionButton({
       </div>
       {episodeCollectionType !== EpisodeCollectionType.notCollected && (
         <Button
+          className="px-3 py-1"
           variant="outline"
           onClick={(e) => {
             episodeCollectionMutation.mutate({
