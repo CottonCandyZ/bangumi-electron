@@ -61,7 +61,7 @@ export function CollectionsGrid({
       </div>
     )
   return (
-    <div className="h-full overflow-hidden py-1 pr-0.5">
+    <div className="h-full overflow-hidden pr-0.5">
       <MasonryInfiniteGrid
         ref={igRef}
         onChangeScroll={() => {
@@ -70,7 +70,7 @@ export function CollectionsGrid({
         onRenderComplete={() => {
           gridCache.set(`${subjectType}-${collectionType}`, igRef.current?.getStatus())
         }}
-        className="h-full overflow-x-hidden px-1 pr-0.5"
+        className="h-full overflow-x-hidden px-1 py-1 pr-0.5"
         useResizeObserver
         container
         observeChildren
