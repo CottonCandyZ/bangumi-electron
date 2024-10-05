@@ -15,6 +15,7 @@ export function BackgroundImage({ subjectId }: { subjectId: SubjectId }) {
     subjectInfo?.images.large &&
     !isEmpty(subjectInfo.images.large) && (
       <Image
+        key={subjectInfo.images.large}
         imageSrc={subjectInfo.images.large}
         loading="eager"
         className="fixed -z-10 h-full overflow-hidden"
