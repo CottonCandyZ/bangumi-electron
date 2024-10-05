@@ -18,30 +18,33 @@ export function Tags({
   edit?: boolean
   setEdit?: (edit: boolean) => void
 }) {
+  const subjectTagsMap = new Map(subjectTags.map((item) => [item.name, item.count]))
   const subjectTagsSet = new Set(subjectTags.map((item) => item.name))
   const collectionTagsSet = new Set(collectionTags)
   const diff = collectionTagsSet.difference(subjectTagsSet)
   return (
     <div className="flex flex-row flex-wrap gap-2 after:grow-[999]">
-      {subjectTags.map((item) => (
-        <Button
-          type="button"
-          key={item.name}
-          className={cn(
-            'relative h-auto flex-auto items-baseline justify-center gap-1 overflow-hidden whitespace-normal px-1.5 py-1.5 shadow-none',
+      {[...subjectTagsMap]
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, count]) => (
+          <Button
+            type="button"
+            key={name}
+            className={cn(
+              'relative h-auto flex-auto items-baseline justify-center gap-1 overflow-hidden whitespace-normal px-1.5 py-1.5 shadow-none',
 
-            edit && selectedTags && selectedTags.has(item.name) && 'opacity-50',
-          )}
-          variant={'outline'}
-          onClick={() => onTagClicked && onTagClicked(item.name)}
-        >
-          {collectionTagsSet.has(item.name) && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-          )}
-          <span className="text-sm">{item.name}</span>
-          <span className="text-xs text-muted-foreground">{item.count}</span>
-        </Button>
-      ))}
+              edit && selectedTags && selectedTags.has(name) && 'opacity-50',
+            )}
+            variant={'outline'}
+            onClick={() => onTagClicked && onTagClicked(name)}
+          >
+            {collectionTagsSet.has(name) && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+            )}
+            <span className="text-sm">{name}</span>
+            <span className="text-xs text-muted-foreground">{count}</span>
+          </Button>
+        ))}
       {[...diff].map((item) => (
         <Button
           type="button"
