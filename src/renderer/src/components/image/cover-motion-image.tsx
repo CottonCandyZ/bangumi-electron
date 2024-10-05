@@ -11,7 +11,7 @@ export const CoverMotionImage = forwardRef<
     imageClassName?: string
     loadingClassName?: string
     loading?: 'eager' | 'lazy'
-    careLoading: boolean
+    careLoading?: boolean
     onload?: (load: boolean) => void
   }
 >(
