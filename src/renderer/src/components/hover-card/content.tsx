@@ -3,7 +3,7 @@ import { UI_CONFIG } from '@renderer/config'
 import { cn } from '@renderer/lib/utils'
 import { hoverCardOpenAtomAction, triggerClientRectAtom } from '@renderer/state/hover-card'
 import { Align, Side } from '@renderer/type/ui'
-import { motion } from 'framer-motion'
+import { animate, motion } from 'framer-motion'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { HTMLProps, PropsWithChildren, useCallback, useLayoutEffect, useRef, useState } from 'react'
 
@@ -29,19 +29,11 @@ export function HoverCardContent({
   }
 >) {
   const triggerClientRect = useAtomValue(triggerClientRectAtom)
+  const aContainerRef = useRef<HTMLDivElement>(null)
   const ref = useRef<HTMLDivElement>(null)
-  const [translate, setTranslate] = useState({ X: 0 })
-  const [position, setPosition] = useState<Record<'X' | 'top' | 'bottom', number | undefined>>({
-    X: undefined,
-    top: undefined,
-    bottom: undefined,
-  })
   const [isCollision, setIsCollision] = useState(false)
-  const [height, setHeight] = useState<number | 'auto'>('auto')
-  const [width, setWidth] = useState<number | 'auto'>('auto')
   const beforeBottom = useRef(true)
-  const [isFlip, setIsFlip] = useState(false)
-
+  const firstRender = useRef(true)
   const setOpen = useSetAtom(hoverCardOpenAtomAction)
 
   const calc = useCallback(() => {
@@ -53,26 +45,23 @@ export function HoverCardContent({
       trigger: triggerClientRect,
       content: ref.current.getBoundingClientRect(),
     })
-    if (c.height !== undefined) {
-      setHeight(c.height)
-      setIsCollision(true)
-    } else {
-      setHeight(ref.current.getBoundingClientRect().height)
-      setIsCollision(false)
-    }
-    setWidth(ref.current.getBoundingClientRect().width)
-    setPosition((position) => {
-      if (position.X === undefined) {
-        return { ...c }
-      } else {
-        setTranslate({ X: c.X - position.X })
-        return { ...position, top: c.top, bottom: c.bottom }
-      }
-    })
-    isBottom(c.bottom === undefined)
-    setIsFlip(beforeBottom.current !== (c.bottom === undefined))
-    beforeBottom.current = c.bottom === undefined
-  }, [margin, align, triggerClientRect, setPosition, setTranslate, isBottom, collisionPadding])
+    setIsCollision(c.collision)
+    const isFlip = beforeBottom.current !== c.isBottom
+    isBottom(c.isBottom)
+    beforeBottom.current = c.isBottom
+    if (!aContainerRef.current) return
+    animate(
+      aContainerRef.current,
+      {
+        left: c.left,
+        top: c.top,
+        right: c.right,
+        bottom: c.bottom,
+      },
+      { duration: isFlip || firstRender.current ? 0 : 0.15 },
+    )
+    firstRender.current = false
+  }, [margin, align, triggerClientRect, isBottom, collisionPadding, firstRender])
 
   useLayoutEffect(() => {
     if (!ref.current) return
@@ -87,9 +76,9 @@ export function HoverCardContent({
 
   return (
     <motion.div
+      ref={aContainerRef}
       className={cn(
         'fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md',
-        !isFlip && 'transition-[transform_height_width] duration-150',
         isCollision ? 'w-max overflow-x-hidden' : 'overflow-hidden',
       )}
       transition={{
@@ -103,14 +92,6 @@ export function HoverCardContent({
       }}
       exit={{
         opacity: 0,
-      }}
-      style={{
-        top: position.top,
-        left: position.X,
-        bottom: position.bottom,
-        transform: `translateX(${translate.X}px)`,
-        height,
-        width,
       }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}

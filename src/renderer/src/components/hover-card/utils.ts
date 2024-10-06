@@ -5,17 +5,21 @@ type VerticalPlacement = 'top' | 'bottom'
 type HorizontalPlacement = 'left' | 'right'
 
 type VerticalResult = {
-  X: number
-  top: number | undefined
-  bottom: number | undefined
-  height: number | undefined
+  left: number
+  top: number
+  bottom: number
+  right: number
+  collision: boolean
+  isBottom: boolean
 }
 
 type HorizontalResult = {
-  Y: number
-  left: number | undefined
-  right: number | undefined
-  width: number | undefined
+  left: number
+  top: number
+  bottom: number
+  right: number
+  collision: boolean
+  isRight: boolean
 }
 
 type CalcPosParams = {
@@ -96,50 +100,59 @@ function calcVerticalPos({
   const toTop = trigger.top - margin - paddingTop
   const toBottom = window.innerHeight - trigger.bottom - margin - paddingBottom
 
-  let X: number
-  let top: number | undefined
-  let bottom: number | undefined
-  let height: number | undefined
+  let left: number
 
-  // Calculate X position
+  // left
   switch (align) {
     case 'start':
-      X = clamp(trigger.left, paddingLeft, window.innerWidth - content.width - paddingRight)
+      left = clamp(trigger.left, paddingLeft, window.innerWidth - content.width - paddingRight)
       break
     case 'end':
-      X = clamp(
+      left = clamp(
         trigger.right - content.width,
         paddingLeft,
         window.innerWidth - content.width - paddingRight,
       )
       break
     default: // center
-      X = clamp(
+      left = clamp(
         trigger.left + (trigger.width - content.width) / 2,
         paddingLeft,
         window.innerWidth - content.width - paddingRight,
       )
   }
 
+  const right = window.innerWidth - left - content.width
+
+  let top: number
+  let bottom: number
+  let collision = false
+
   // Calculate vertical position
   const preferBottom = preferredPlacement === 'bottom'
   const spacePreferred = preferBottom ? toBottom : toTop
   const spaceOpposite = preferBottom ? toTop : toBottom
-
+  let isBottom = true
   if (spacePreferred >= content.height) {
-    if (preferBottom) top = trigger.bottom + margin
-    else bottom = window.innerHeight - trigger.top + margin
+    isBottom = preferBottom
   } else if (spaceOpposite >= content.height) {
-    if (preferBottom) bottom = window.innerHeight - trigger.top + margin
-    else top = trigger.bottom + margin
+    isBottom = !preferBottom
   } else {
+    // 折叠
     const usePreferred = spacePreferred > spaceOpposite
-    top = usePreferred === preferBottom ? trigger.bottom + margin : undefined
-    bottom = usePreferred === preferBottom ? undefined : window.innerHeight - trigger.top + margin
-    height = usePreferred ? spacePreferred : spaceOpposite
+    isBottom = usePreferred === preferBottom
+    collision = true
   }
 
-  return { X, top, bottom, height }
+  if (isBottom) {
+    top = trigger.bottom + margin
+    bottom = collision ? paddingBottom : window.innerHeight - top - content.height
+  } else {
+    bottom = window.innerHeight - trigger.top + margin
+    top = collision ? paddingTop : window.innerHeight - bottom - content.height
+  }
+
+  return { left, top, bottom, right, collision, isBottom }
 }
 
 function calcHorizontalPos({
@@ -162,51 +175,57 @@ function calcHorizontalPos({
   const toLeft = trigger.left - margin - paddingLeft
   const toRight = window.innerWidth - trigger.right - margin - paddingRight
 
-  let Y: number
-  let left: number | undefined
-  let right: number | undefined
-  let width: number | undefined
+  let top: number
 
   // Calculate Y position
   switch (align) {
     case 'start':
-      Y = clamp(trigger.top, paddingTop, window.innerHeight - content.height - paddingBottom)
+      top = clamp(trigger.top, paddingTop, window.innerHeight - content.height - paddingBottom)
       break
     case 'end':
-      Y = clamp(
+      top = clamp(
         trigger.bottom - content.height,
         paddingTop,
         window.innerHeight - content.height - paddingBottom,
       )
       break
     default: // center
-      Y = clamp(
+      top = clamp(
         trigger.top + (trigger.height - content.height) / 2,
         paddingTop,
         window.innerHeight - content.height - paddingBottom,
       )
   }
+  const bottom = window.innerHeight - top - content.height
 
-  // Ensure Y is within bounds
-  Y = clamp(Y, paddingTop, window.innerHeight - content.height - paddingBottom)
+  let left: number
+  let right: number
+  let collision = false
 
   // Calculate horizontal position
   const preferRight = preferredPlacement === 'right'
   const spacePreferred = preferRight ? toRight : toLeft
   const spaceOpposite = preferRight ? toLeft : toRight
 
+  let isRight = true
   if (spacePreferred >= content.width) {
-    if (preferRight) left = trigger.right + margin
-    else right = window.innerWidth - trigger.left + margin
+    isRight = preferRight
   } else if (spaceOpposite >= content.width) {
-    if (preferRight) right = window.innerWidth - trigger.left + margin
-    else left = trigger.right + margin
+    isRight = !preferRight
   } else {
+    // 折叠
     const usePreferred = spacePreferred > spaceOpposite
-    left = usePreferred === preferRight ? trigger.right + margin : undefined
-    right = usePreferred === preferRight ? undefined : window.innerWidth - trigger.left + margin
-    width = usePreferred ? spacePreferred : spaceOpposite
+    isRight = usePreferred === preferRight
+    collision = true
   }
 
-  return { Y, left, right, width }
+  if (isRight) {
+    left = trigger.right + margin
+    right = collision ? paddingRight : window.innerWidth - left - content.width
+  } else {
+    right = window.innerWidth - trigger.left + margin
+    left = collision ? paddingLeft : window.innerHeight - right - content.width
+  }
+
+  return { top, left, right, bottom, isRight, collision }
 }
