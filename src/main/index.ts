@@ -49,9 +49,9 @@ function boot() {
     // set notification
     electronApp.setAppUserModelId(`re.${APP_PROTOCOL}`)
 
-    mainWindow = createMainWindow()
-
     await import('./session')
+
+    mainWindow = createMainWindow()
 
     // Default open or close DevTools by F12 in development
     // and ignore CommandOrControl + R in production.
