@@ -1,11 +1,12 @@
 {
   "name": "bangumi-electron",
-  "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "An Electron application for bangumi",
   "main": "./out/main/index.js",
   "private": "true",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "CottonCandyZ",
+  "homepage": "https://github.com/CottonCandyZ/bangumi-electron",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
@@ -58,6 +59,7 @@
     "framer-motion": "^11.3.2",
     "idb-keyval": "^6.2.1",
     "jotai": "^2.9.1",
+    "lowdb": "^7.0.1",
     "lucide-react": "^0.383.0",
     "next-themes": "^0.3.0",
     "ofetch": "^1.3.4",
@@ -104,5 +106,5 @@
     "typescript": "^5.5.3",
     "vite": "^5.3.3"
   },
-  "packageManager": "pnpm@9.9.0+sha256.7a4261e50d9a44d9240baf6c9d6e10089dcf0a79d0007f2a26985a6927324177"
+  "packageManager": "pnpm@9.12.0+sha256.a61b67ff6cc97af864564f4442556c22a04f2e5a7714fbee76a1011361d9b726"
 }
