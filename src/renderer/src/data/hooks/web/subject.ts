@@ -1,5 +1,8 @@
-import { fetchSectionHome, fetchSubjectInfoById } from '@renderer/data/fetch/web/subject'
-import { parseInfoBoxFromSubjectPage, parseTopListFromHTML } from '@renderer/data/transformer/web'
+import { fetchSubjectInfoById, fetchTrends } from '@renderer/data/fetch/web/subject'
+import {
+  parseInfoBoxFromSubjectPage,
+  parseTopListFromHTML as parseTrendsFromHTML,
+} from '@renderer/data/transformer/web'
 import { useQuery } from '@tanstack/react-query'
 import type { SectionPath } from '@renderer/data/types/web'
 import { SubjectId } from '@renderer/data/types/bgm'
@@ -14,9 +17,9 @@ import { useSession } from '@renderer/modules/wrapper/session-wrapper'
  */
 export const useTopListQuery = (sectionPath: SectionPath) => {
   return useQuery({
-    queryKey: ['SectionHome', sectionPath],
-    queryFn: async () => await fetchSectionHome({ sectionPath }),
-    select: parseTopListFromHTML,
+    queryKey: ['SectionTrends', sectionPath],
+    queryFn: async () => await fetchTrends({ sectionPath }),
+    select: parseTrendsFromHTML,
   })
 }
 

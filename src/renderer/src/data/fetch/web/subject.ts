@@ -1,4 +1,4 @@
-import { HTML_SUBJECTS, webFetch } from '@renderer/data/fetch/config'
+import { HTML_SUBJECTS, SUBJECTS, webFetch } from '@renderer/data/fetch/config'
 import { SubjectId } from '@renderer/data/types/bgm'
 import type { SectionPath } from '@renderer/data/types/web'
 import { AuthError } from '@renderer/lib/utils/error'
@@ -10,6 +10,12 @@ import { AuthError } from '@renderer/lib/utils/error'
  */
 export async function fetchSectionHome({ sectionPath }: { sectionPath: SectionPath }) {
   return await webFetch<string>(`/${sectionPath}`, {
+    parseResponse: (text) => text,
+  })
+}
+
+export async function fetchTrends({ sectionPath }: { sectionPath: SectionPath }) {
+  return await webFetch<string>(SUBJECTS.TRENDS(sectionPath), {
     parseResponse: (text) => text,
   })
 }

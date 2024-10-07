@@ -10,20 +10,11 @@ import { domParser } from '@renderer/lib/utils/parser'
 export const parseTopListFromHTML = (HTML: string) => {
   const dom = domParser.parseFromString(HTML, 'text/html')
   const result: TopList[] = []
-  const top = dom.querySelectorAll('.imageCell')
+  const top = dom.querySelectorAll('.subjectCover.cover.ll')
   for (const item of Array.from(top)) {
-    const a = item.firstElementChild as HTMLAnchorElement | null
+    const a = item as HTMLAnchorElement | null
     const SubjectId = a?.href.split('/').at(-1)
-    const follow =
-      item.nextElementSibling?.lastElementChild?.firstElementChild?.textContent ?? undefined
-    result.push({ SubjectId, follow })
-  }
-  const sub = dom.querySelector('#chl_subitem > ul') as HTMLUListElement
-  for (const item of Array.from(sub.children)) {
-    const a = item.firstElementChild as HTMLAnchorElement
-    const SubjectId = a.href.split('/').at(-1)
-    const follow = item.querySelector('.feed')?.textContent ?? undefined
-    result.push({ SubjectId, follow })
+    result.push({ SubjectId })
   }
   return result
 }

@@ -2,6 +2,7 @@
 
 import { CharacterId, PersonId, SubjectId } from '@renderer/data/types/bgm'
 import { UserInfo } from '@renderer/data/types/user'
+import { SectionPath } from '@renderer/data/types/web'
 import { getTimestamp } from '@renderer/lib/utils/date'
 import { ofetch } from 'ofetch'
 
@@ -54,6 +55,7 @@ export const SUBJECTS = {
   CHARACTERS_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/characters`,
   PERSONS_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/persons`,
   RELATED_SUBJECT_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/subjects`,
+  TRENDS: (sectionPath: SectionPath) => `/${sectionPath}/browser/?sort=trends`,
 }
 
 export const HTML_SUBJECTS = {
