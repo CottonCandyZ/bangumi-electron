@@ -78,20 +78,24 @@ export function HoverCardContent({
     <motion.div
       ref={aContainerRef}
       className={cn(
-        'fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-md',
+        'fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-xl',
         isCollision ? 'w-max overflow-x-hidden' : 'overflow-hidden',
       )}
       transition={{
         duration: 0.15,
+        ease: 'easeInOut',
       }}
       initial={{
         opacity: 0,
+        y: -10,
       }}
       animate={{
         opacity: 1,
+        y: 0,
       }}
       exit={{
-        opacity: 0,
+        opacity: 0.1,
+        y: -10,
       }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
