@@ -1,9 +1,9 @@
 import { app, BrowserWindow } from 'electron'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
-import { initialize } from '@main/init'
+import { initialize } from '../main/init'
 import { APP_PROTOCOL } from '../shared/constants'
-import { createMainWindow } from '@main/window'
-import { appPath, isMacOS } from '@main/env'
+import { createMainWindow } from '../main/window'
+import { appPath, isMacOS } from '../main/env'
 
 function boot() {
   // dev 和 prod 的位置

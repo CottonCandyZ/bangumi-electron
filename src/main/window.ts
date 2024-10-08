@@ -1,11 +1,11 @@
-import { JSONStore } from '@main/lib/store'
+import { JSONStore } from '../main/lib/store'
 import { BrowserWindow, type BrowserWindowConstructorOptions, screen, shell } from 'electron'
 import path, { join } from 'node:path'
-import { getIconPath } from '@main/helper'
+import { getIconPath } from '../main/helper'
 import { is } from '@electron-toolkit/utils'
 import { getRendererHandlers } from '@egoist/tipc/main'
-import { RendererHandlers } from '@main/tipc/renderer-handlers'
-import { isMacOS, isWindows11 } from '@main/env'
+import { RendererHandlers } from '../main/tipc/renderer-handlers'
+import { isMacOS, isWindows11 } from '../main/env'
 
 const DEFAULT_WINDOW_SIZE = {
   width: 1100,

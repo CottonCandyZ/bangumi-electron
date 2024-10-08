@@ -1,4 +1,4 @@
-import { appFolder } from '@main/constants'
+import { appFolder } from '../main/constants'
 import { app } from 'electron'
 import os from 'node:os'
 import path from 'node:path'
