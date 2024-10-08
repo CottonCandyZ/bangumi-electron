@@ -5,20 +5,21 @@
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.tsx",
     "src/preload/*.d.ts",
-    "src/main/*.ts",
-    "src/main/tipc/*.ts",
-    "src/shared/**/*",
-    "src/main/lib/*.ts"
+    "src/main/**/*",
+    "src/shared/**/*"
   ],
   "compilerOptions": {
     "composite": true,
+    "moduleResolution": "Bundler",
     "esModuleInterop": true,
     "jsx": "react-jsx",
+    "target": "ES2022",
     "baseUrl": ".",
     "paths": {
       "@renderer/*": [
         "src/renderer/src/*"
-      ]
+      ],
+      "@main/*": ["src/main/*"],
     }
   }
 }

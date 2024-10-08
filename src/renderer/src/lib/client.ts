@@ -1,6 +1,6 @@
 import { createClient, createEventHandlers } from '@egoist/tipc/renderer'
-import { Router } from 'src/main/tipc'
-import { RendererHandlers } from 'src/main/tipc/renderer-handlers'
+import { Router } from '@main/tipc'
+import { RendererHandlers } from '@main/tipc/renderer-handlers'
 
 /**
  * tIPC 的 Client

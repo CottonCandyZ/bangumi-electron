@@ -1,7 +1,7 @@
 import { registerIpcMain } from '@egoist/tipc/main'
-import { router } from './tipc'
+import { router } from '@main/tipc'
 import { app } from 'electron'
-import { getIconPath } from '../main/helper'
+import { getIconPath } from '@main/helper'
 export function initialize() {
   // URI scheme
   // if (process.defaultApp) {

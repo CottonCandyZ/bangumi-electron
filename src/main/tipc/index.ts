@@ -1,6 +1,6 @@
 import { tipc } from '@egoist/tipc/main'
 import { BrowserWindow, safeStorage, session } from 'electron'
-import { store } from '../lib/store'
+import { store } from '@main/lib/store'
 
 const t = tipc.create()
 

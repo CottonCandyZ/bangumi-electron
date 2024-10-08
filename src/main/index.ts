@@ -1,10 +1,10 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'node:path'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
-import { initialize } from '../main/init'
+import { initialize } from '@main/init'
 import { APP_PROTOCOL } from '../shared/constants'
-import { createMainWindow } from '../main/window'
-import { isMacOS } from '../main/env'
+import { createMainWindow } from '@main/window'
+import { isMacOS } from '@main/env'
 
 const appFolder = {
   prod: 'bangumi-electron',
