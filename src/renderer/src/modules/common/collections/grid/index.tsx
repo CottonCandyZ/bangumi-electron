@@ -55,7 +55,7 @@ export function CollectionsGrid({
           {Array(20)
             .fill(undefined)
             .map((_, index) => (
-              <Skeleton key={index} className="h-20 w-full" />
+              <CollectionSkeleton key={index} />
             ))}
         </div>
       </div>
@@ -74,7 +74,7 @@ export function CollectionsGrid({
         useResizeObserver
         container
         observeChildren
-        placeholder={<Skeleton className="h-20 w-full max-w-96" />}
+        placeholder={<CollectionSkeleton />}
         align="stretch"
         maxStretchColumnSize={384}
         gap={4}
@@ -101,6 +101,18 @@ export function CollectionsGrid({
           )
         })}
       </MasonryInfiniteGrid>
+    </div>
+  )
+}
+
+function CollectionSkeleton() {
+  return (
+    <div className="flex h-20 w-full flex-row gap-2 p-2">
+      <Skeleton className="size-12 shrink-0" />
+      <div className="flex w-full flex-col gap-2">
+        <Skeleton className="h-5 w-full" />
+        <Skeleton className="h-3 w-full" />
+      </div>
     </div>
   )
 }
