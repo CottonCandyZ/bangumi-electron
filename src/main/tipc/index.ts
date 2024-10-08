@@ -1,6 +1,7 @@
 import { tipc } from '@egoist/tipc/main'
 import { BrowserWindow, safeStorage, session } from 'electron'
-import Store from 'electron-store'
+import { store } from '../lib/store'
+
 const t = tipc.create()
 
 export interface Token {
@@ -14,7 +15,6 @@ export interface loginInfo {
   password: string
 }
 
-const store = new Store()
 export const router = {
   setAccessToken: t.procedure.input<Token>().action(async ({ input }) => {
     const encrypted_access_token = safeStorage.encryptString(input.access_token).toString('base64')
@@ -28,7 +28,7 @@ export const router = {
     })
   }),
   getAccessToken: t.procedure.action(async () => {
-    const encrypted_token = store.get('token', undefined) as {
+    const encrypted_token = store.get('token') as {
       encrypted_access_token: string
       encrypted_refresh_token: string
       expires_in: number
@@ -45,7 +45,7 @@ export const router = {
     }
   }),
   isStoreAccessToken: t.procedure.action(async () => {
-    return store.has('token')
+    return store.get('token')
   }),
   deleteAccessToken: t.procedure.action(async () => {
     store.delete('token')

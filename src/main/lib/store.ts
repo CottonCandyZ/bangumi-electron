@@ -15,4 +15,8 @@ export const store = {
     db.data[key] = value
     db.write()
   },
+  delete: (key: string) => {
+    delete db.data[key]
+    db.write()
+  },
 }
