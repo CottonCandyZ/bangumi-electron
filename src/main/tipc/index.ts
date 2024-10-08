@@ -1,6 +1,6 @@
 import { tipc } from '@egoist/tipc/main'
 import { BrowserWindow, safeStorage, session } from 'electron'
-import { store } from '@main/lib/store'
+import { JSONStore } from '@main/lib/store'
 
 const t = tipc.create()
 
@@ -21,14 +21,14 @@ export const router = {
     const encrypted_refresh_token = safeStorage
       .encryptString(input.refresh_token)
       .toString('base64')
-    store.set('token', {
+    JSONStore.set('token', {
       encrypted_access_token,
       encrypted_refresh_token,
       expires_in: input.expires_in,
     })
   }),
   getAccessToken: t.procedure.action(async () => {
-    const encrypted_token = store.get('token') as {
+    const encrypted_token = JSONStore.get('token') as {
       encrypted_access_token: string
       encrypted_refresh_token: string
       expires_in: number
@@ -45,21 +45,21 @@ export const router = {
     }
   }),
   isStoreAccessToken: t.procedure.action(async () => {
-    return store.get('token')
+    return JSONStore.has('token')
   }),
   deleteAccessToken: t.procedure.action(async () => {
-    store.delete('token')
+    JSONStore.delete('token')
   }),
   setLoginInfo: t.procedure.input<loginInfo>().action(async ({ input }) => {
     const encrypted_email = safeStorage.encryptString(input.email).toString('base64')
     const encrypted_password = safeStorage.encryptString(input.password).toString('base64')
-    store.set('loginInfo', {
+    JSONStore.set('loginInfo', {
       encrypted_email,
       encrypted_password,
     })
   }),
   getLoginInfo: t.procedure.action(async () => {
-    const encrypted_token = store.get('token') as {
+    const encrypted_token = JSONStore.get('token') as {
       encrypted_email: string
       encrypted_password: string
     }

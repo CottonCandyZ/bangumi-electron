@@ -1,4 +1,4 @@
-import { store } from '@main/lib/store'
+import { JSONStore } from '@main/lib/store'
 import { BrowserWindow, type BrowserWindowConstructorOptions, screen, shell } from 'electron'
 import path, { join } from 'node:path'
 import { getIconPath } from '@main/helper'
@@ -102,7 +102,7 @@ export function createWindow(
 }
 
 export function createMainWindow() {
-  const windowState = store.get(WINDOW_STORE_KEY) as {
+  const windowState = JSONStore.get(WINDOW_STORE_KEY) as {
     height: number
     width: number
     x: number
@@ -134,7 +134,7 @@ export function createMainWindow() {
       const windowStoreKey = Symbol.for('maximized')
       if (window[windowStoreKey]) {
         const stored = window[windowStoreKey]
-        store.set(WINDOW_STORE_KEY, {
+        JSONStore.set(WINDOW_STORE_KEY, {
           width: stored.size[0],
           height: stored.size[1],
           x: stored.position[0],
@@ -146,7 +146,7 @@ export function createMainWindow() {
     }
 
     const bounds = window.getBounds()
-    store.set(WINDOW_STORE_KEY, {
+    JSONStore.set(WINDOW_STORE_KEY, {
       width: bounds.width,
       height: bounds.height,
       x: bounds.x,

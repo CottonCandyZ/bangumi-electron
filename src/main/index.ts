@@ -1,21 +1,13 @@
 import { app, BrowserWindow } from 'electron'
-import path from 'node:path'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { initialize } from '@main/init'
 import { APP_PROTOCOL } from '../shared/constants'
 import { createMainWindow } from '@main/window'
-import { isMacOS } from '@main/env'
-
-const appFolder = {
-  prod: 'bangumi-electron',
-  dev: 'bangumi-electron (dev)',
-}
-
-const isDev = process.env.NODE_ENV === 'development'
+import { appPath, isMacOS } from '@main/env'
 
 function boot() {
   // dev 和 prod 的位置
-  app.setPath('appData', path.join(app.getPath('appData'), isDev ? appFolder.dev : appFolder.prod))
+  appPath()
 
   // 确保只有一个实例
   const getTheLock = app.requestSingleInstanceLock()
