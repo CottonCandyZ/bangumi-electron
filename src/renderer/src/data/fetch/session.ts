@@ -1,6 +1,6 @@
 import { LOGIN, webFetch } from '@renderer/data/fetch/config'
 import { client } from '@renderer/lib/client'
-import { Token } from 'src/main/tipc'
+import { Token } from '@shared/types/login'
 
 // 这里是用来验证相关 session 的地方，如果可能也会刷新 Session
 

@@ -1,7 +1,7 @@
 /**
  * v0/me
  */
-export interface UserInfo {
+export type UserInfo = {
   avatar: {
     large: string
     medium: string
@@ -12,6 +12,8 @@ export interface UserInfo {
   nickname: string
   id: number
   user_group: number
+  url: string
+  time_offset: number
 }
 
 export enum UerGroup {

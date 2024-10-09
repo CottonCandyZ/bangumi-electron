@@ -1,7 +1,12 @@
 import { registerIpcMain } from '@egoist/tipc/main'
 import { router } from './tipc'
 import { app } from 'electron'
-import { getIconPath } from '../main/helper'
+import { getIconPath } from '@main/helper'
+
+/**
+ * - init tipc
+ * - set docker icon
+ */
 export function initialize() {
   // URI scheme
   // if (process.defaultApp) {

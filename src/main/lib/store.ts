@@ -1,6 +1,6 @@
 import { resolve } from 'node:path'
 import { JSONFileSyncPreset } from 'lowdb/node'
-import { appPath } from '../env'
+import { appPath } from '@main/env'
 
 const db = JSONFileSyncPreset(resolve(appPath()('userData'), 'db.json'), {}) as {
   data: Record<string, unknown>
