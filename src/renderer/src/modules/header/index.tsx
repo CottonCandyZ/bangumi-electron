@@ -1,3 +1,4 @@
+import { UI_CONFIG } from '@renderer/config'
 import { cn } from '@renderer/lib/utils'
 import { NavButton } from '@renderer/modules/header/nav-button'
 import { OriginalLink } from '@renderer/modules/header/o-link'
@@ -9,8 +10,11 @@ export function Header() {
   return (
     <header
       className={cn(
-        'drag-region relative z-10 flex h-14 shrink-0 flex-row items-center justify-between gap-10 border-b pl-2',
+        'drag-region relative z-10 flex shrink-0 flex-row items-center justify-between gap-10 border-b pl-2',
       )}
+      style={{
+        height: UI_CONFIG.HEADER_HEIGHT,
+      }}
     >
       <div className="flex h-full flex-row items-center gap-3">
         <NavButton />

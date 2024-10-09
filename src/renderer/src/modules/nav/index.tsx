@@ -8,6 +8,7 @@ import { cn } from '@renderer/lib/utils'
 import { navOpenAtom } from '@renderer/state/panel'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAtom } from 'jotai'
+import { UI_CONFIG } from '@renderer/config'
 
 const platform = await client.platform({})
 
@@ -17,9 +18,13 @@ export function NavBar() {
     <div>
       <nav
         className={cn(
-          'fixed z-10 flex h-dvh w-16 max-w-16 flex-col border-r bg-background transition-[width]',
-          open && 'z-50 w-60 max-w-none',
+          'fixed z-10 flex h-dvh flex-col border-r bg-background transition-[width]',
+          open && 'z-50',
         )}
+        style={{
+          width: open ? '15rem' : UI_CONFIG.NAV_WIDTH,
+          maxWidth: open ? undefined : '4rem',
+        }}
       >
         <div
           className={cn(
