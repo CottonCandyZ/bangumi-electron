@@ -9,7 +9,7 @@ import { client } from '@renderer/lib/client'
 import { getTimestamp } from '@renderer/lib/utils/date'
 import { LoginError } from '@renderer/lib/utils/error'
 import { domParser } from '@renderer/lib/utils/parser'
-import { Token } from 'src/main/tipc'
+import { Token } from '@main/tipc'
 
 // 所以这里就是用 web 登录网页啦，非常感谢下面链接里前人的工作给与的参考！
 

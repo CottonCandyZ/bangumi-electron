@@ -1,7 +1,7 @@
 // 存储有关 api 的 CONFIG
 
 import { CharacterId, PersonId, SubjectId } from '@renderer/data/types/bgm'
-import { UserInfo } from '@renderer/data/types/user'
+import { APIUserInfo } from '@shared/types/user'
 import { SectionPath } from '@renderer/data/types/web'
 import { getTimestamp } from '@renderer/lib/utils/date'
 import { ofetch } from 'ofetch'
@@ -79,8 +79,8 @@ export const PERSONS = {
 
 /** 收藏 */
 export const COLLECTIONS = {
-  BY_USERNAME: (username: UserInfo['username']) => `/v0/users/${username}/collections`,
-  BY_USERNAME_AND_SUBJECT_ID: (username: UserInfo['username'], subjectId: SubjectId) =>
+  BY_USERNAME: (username: APIUserInfo['username']) => `/v0/users/${username}/collections`,
+  BY_USERNAME_AND_SUBJECT_ID: (username: APIUserInfo['username'], subjectId: SubjectId) =>
     `/v0/users/${username}/collections/${subjectId}`,
   EPISODES_BY_SUBJECT_ID: (subjectId: SubjectId) => `/v0/users/-/collections/${subjectId}/episodes`,
   ADD_OR_MODIFY_SUBJECT_BY_ID: (subjectId: SubjectId) => `/v0/users/-/collections/${subjectId}`,

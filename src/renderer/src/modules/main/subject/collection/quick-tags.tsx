@@ -3,7 +3,7 @@ import { Button } from '@renderer/components/ui/button'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'
 import { Subject } from '@renderer/data/types/subject'
-import { UserInfo } from '@renderer/data/types/user'
+import { APIUserInfo } from '@shared/types/user'
 import { cn } from '@renderer/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
@@ -18,7 +18,7 @@ export function QuickTags({
 }: {
   subjectTags: Subject['tags']
   subjectCollection: CollectionData | undefined | null
-  userInfo: UserInfo | undefined
+  userInfo: APIUserInfo | undefined
   accessToken: string | undefined
 }) {
   const [tags, setTags] = useState(new Set<string>())

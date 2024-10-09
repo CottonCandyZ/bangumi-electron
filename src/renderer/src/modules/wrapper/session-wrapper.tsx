@@ -1,12 +1,12 @@
 import { useIsUnauthorized } from '@renderer/modules/wrapper/query'
 import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
 import { useAccessTokenQuery } from '@renderer/data/hooks/session'
-import { UserInfo } from '@renderer/data/types/user'
+import { APIUserInfo } from '@shared/types/user'
 import { createContext, PropsWithChildren, useContext } from 'react'
 
 export const SessionContext = createContext<{
   isLogin: undefined | boolean
-  userInfo: undefined | UserInfo
+  userInfo: undefined | APIUserInfo
   accessToken: string | undefined
 }>({
   isLogin: undefined,

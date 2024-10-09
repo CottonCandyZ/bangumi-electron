@@ -1,6 +1,6 @@
 import { apiFetch, COLLECTIONS } from '@renderer/data/fetch/config'
 import { getAuthHeader } from '@renderer/data/fetch/utils'
-import { UserInfo } from '@renderer/data/types/user'
+import { APIUserInfo } from '@shared/types/user'
 import { FetchParamError } from '@renderer/lib/utils/error'
 import {
   CollectionData,
@@ -23,7 +23,7 @@ export async function getSubjectCollectionsByUsername({
   limit,
   offset,
 }: {
-  username: UserInfo['username'] | undefined
+  username: APIUserInfo['username'] | undefined
   subjectType?: SubjectType
   collectionType?: CollectionType
   token?: string
@@ -80,7 +80,7 @@ export async function getSubjectCollectionBySubjectIdAndUsername({
   subjectId,
   token,
 }: {
-  username: UserInfo['username'] | undefined
+  username: APIUserInfo['username'] | undefined
   subjectId: SubjectId | undefined
   token?: string
 }) {

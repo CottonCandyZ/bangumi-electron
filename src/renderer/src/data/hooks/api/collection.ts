@@ -13,7 +13,7 @@ import {
 } from '@renderer/data/hooks/factory'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { EpisodeType } from '@renderer/data/types/episode'
-import { UserInfo } from '@renderer/data/types/user'
+import { APIUserInfo } from '@shared/types/user'
 import { MutationKey } from '@tanstack/react-query'
 
 type OmitInfinityQFP<P> = Omit<P, 'token' | 'offset'>
@@ -27,7 +27,7 @@ export const useInfinityQueryCollectionsByUsername = ({
   enabled,
   needKeepPreviousData,
 }: OmitInfinityQFP<Parameters<typeof getSubjectCollectionsByUsername>[0]> & {
-  username: UserInfo['username'] | undefined
+  username: APIUserInfo['username'] | undefined
   initialPageParam?: number
   enabled?: boolean
   needKeepPreviousData?: boolean
@@ -75,7 +75,7 @@ export const useQuerySubjectCollection = ({
   needKeepPreviousData,
 }: {
   subjectId: SubjectId | undefined
-  username: UserInfo['username'] | undefined
+  username: APIUserInfo['username'] | undefined
   enabled?: boolean
   needKeepPreviousData?: boolean
 }) =>
