@@ -1,4 +1,3 @@
-import { BackCover } from '@renderer/components/hover-pop-card/close'
 import { Outlet } from 'react-router-dom'
 import { Header } from '@renderer/modules/header'
 import { LeftResizablePanel } from '@renderer/modules/panel/left-panel'
@@ -18,7 +17,6 @@ function RootLayout() {
           </MainContainer>
         </div>
       </div>
-      <BackCover />
     </>
   )
 }

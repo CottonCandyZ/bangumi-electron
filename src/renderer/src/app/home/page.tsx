@@ -1,4 +1,5 @@
 // import { BigCarousel } from '@renderer/components/carousel/big-carousel'
+import { BackCover } from '@renderer/components/hover-pop-card/close'
 import { SmallCarousel } from '@renderer/modules/main/home/small-carousel'
 
 export function Component() {
@@ -22,6 +23,7 @@ export function Component() {
       <section className="px-9">
         <SmallCarousel href="/real" name="三次元" sectionPath="real" />
       </section>
+      <BackCover />
 
       {/*  时间线 */}
     </div>

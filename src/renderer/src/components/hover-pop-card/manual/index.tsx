@@ -1,3 +1,4 @@
+import { BackCover } from '@renderer/components/hover-pop-card/close'
 import { calculatePopSizePosition } from '@renderer/components/hover-pop-card/utils'
 import { cn } from '@renderer/lib/utils'
 import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
@@ -52,8 +53,9 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
         setBox,
       }}
     >
-      <div className={cn('relative z-30', (isActive || isAnimate) && 'z-40')} style={{ ...box }}>
+      <div className={cn('relative', (isActive || isAnimate) && 'z-40')} style={{ ...box }}>
         {children}
+        <BackCover />
       </div>
     </HoverPopCardContext.Provider>
   )
@@ -173,29 +175,9 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
           ? 'absolute'
           : 'h-full hover:-translate-y-0.5 hover:!shadow-xl hover:duration-700',
         'inset-0 overflow-hidden',
+        isActive && 'z-10',
         className,
       )}
-      onMouseEnter={() => {
-        // 这个会被执行两次，所以、
-        if (timeoutRef.current === undefined) {
-          setActiveId(null)
-          timeoutRef.current = setTimeout(() => {
-            if (!hoverRef.current || !wrapperRef.current) return
-            const { x, y, width, height } = wrapperRef.current.getBoundingClientRect()
-
-            // 弹起之前设定父元素的宽高
-            setBox({ height: `${height}px`, width: `${width}px` })
-            const { width: hoverWidth, height: hoverHeight } =
-              hoverRef.current.getBoundingClientRect()
-            hoverSizeRef.current = new DOMRect(x, y, width, height)
-            setHoverBox({ height: `${hoverHeight}px`, width: `${hoverWidth}px` })
-
-            // 开始动画
-            setIsAnimate(true)
-            setActiveId(layoutId)
-          }, delay)
-        }
-      }}
       onMouseLeave={() => {
         clearTimeout(timeoutRef.current)
         timeoutRef.current = undefined
@@ -207,7 +189,28 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
           {popContent}
         </PopCardContent>
       ) : (
-        <HoverCardContent ref={hoverRef} style={{ height: hoverBox.height, width: hoverBox.width }}>
+        <HoverCardContent
+          ref={hoverRef}
+          style={{ height: hoverBox.height, width: hoverBox.width }}
+          onMouseEnter={() => {
+            setActiveId(null)
+            timeoutRef.current = setTimeout(() => {
+              if (!hoverRef.current || !wrapperRef.current) return
+              const { x, y, width, height } = wrapperRef.current.getBoundingClientRect()
+
+              // 弹起之前设定父元素的宽高
+              setBox({ height: `${height}px`, width: `${width}px` })
+              const { width: hoverWidth, height: hoverHeight } =
+                hoverRef.current.getBoundingClientRect()
+              hoverSizeRef.current = new DOMRect(x, y, width, height)
+              setHoverBox({ height: `${hoverHeight}px`, width: `${hoverWidth}px` })
+
+              // 开始动画
+              setIsAnimate(true)
+              setActiveId(layoutId)
+            }, delay)
+          }}
+        >
           {hoverContent}
         </HoverCardContent>
       )}
