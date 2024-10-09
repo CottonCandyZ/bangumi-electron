@@ -41,7 +41,7 @@ export function SubjectCoverImage({ subjectId }: { subjectId: SubjectId }) {
   }, [isWholeInView, setter])
   return (
     <Card
-      className="h-min w-48 shrink-0 overflow-hidden border-none"
+      className="h-min w-40 shrink-0 overflow-hidden border-none @3xl:w-48"
       style={{
         viewTransitionName:
           isWholeInView && isTransitioning && state?.viewTransitionName

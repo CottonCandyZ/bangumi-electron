@@ -21,12 +21,14 @@ export const SubjectContent = ({
   style?: React.CSSProperties
 }) => {
   return (
-    <div className={cn('max-w-8xl mx-auto flex flex-col gap-10 px-10', className)} style={style}>
-      <section className="flex w-full flex-row gap-8">
-        {/* cover */}
-        <SubjectCoverImage subjectId={subjectId} key={subjectId} />
-        {/* info */}
-        <SubjectHeaderInfo subjectId={subjectId} />
+    <div className={cn('mx-auto flex max-w-8xl flex-col gap-10 px-10', className)} style={style}>
+      <section className="@container">
+        <div className="flex w-full flex-col items-center gap-8 @3xl:flex-row @3xl:items-start">
+          {/* cover */}
+          <SubjectCoverImage subjectId={subjectId} key={subjectId} />
+          {/* info */}
+          <SubjectHeaderInfo subjectId={subjectId} />
+        </div>
       </section>
 
       <div className="flex w-full flex-col gap-10">

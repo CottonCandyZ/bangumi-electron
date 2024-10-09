@@ -19,6 +19,10 @@ const config = {
         sans: ['"Noto Sans SC"', '"Noto Sans JP"', '"Noto Sans"', ...defaultTheme.fontFamily.sans],
         jp: ['"Noto Sans JP"', '"Noto Sans SC"', '"Noto Sans"', ...defaultTheme.fontFamily.sans],
       },
+      containers: {
+        '8xl': '86rem',
+        '9xl': '90rem',
+      },
       maxWidth: {
         '8xl': '86rem',
       },

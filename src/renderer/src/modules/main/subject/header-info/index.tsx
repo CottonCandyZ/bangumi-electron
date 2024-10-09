@@ -11,10 +11,10 @@ export function SubjectHeaderInfo({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfo = subjectInfoQuery.data
   if (!subjectInfo)
     return (
-      <div className="flex flex-1 flex-col gap-5">
-        <section className="flex flex-col gap-2">
-          <Skeleton className="h-10" />
-          <Skeleton className="h-5" />
+      <div className="flex flex-1 flex-col gap-3">
+        <section className="flex flex-col items-center gap-2 @3xl:items-start">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-5 w-full" />
         </section>
         <section>
           <Skeleton className="h-36" />
@@ -23,7 +23,7 @@ export function SubjectHeaderInfo({ subjectId }: { subjectId: SubjectId }) {
     )
   return (
     <div className="flex flex-1 flex-col gap-3">
-      <section className="flex flex-col gap-2">
+      <section className="flex flex-col items-center gap-2 @3xl:items-start">
         {/* 标题 */}
         <Header {...subjectInfo} />
         {/* 一些 meta 数据 */}
