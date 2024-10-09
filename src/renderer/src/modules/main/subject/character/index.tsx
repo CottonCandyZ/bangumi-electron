@@ -22,7 +22,6 @@ export function SubjectCharacters({ subjectId }: { subjectId: SubjectId }) {
         <h2 className="text-2xl font-medium">角色</h2>
         {characters ? (
           <Tabs
-            key={id}
             tabsContent={relations}
             layoutId={id}
             currentSelect={filter}

@@ -22,6 +22,7 @@ export function Tabs({
         'inline-flex min-h-9 flex-wrap items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground',
         className,
       )}
+      key={layoutId}
       layout
       layoutRoot
     >
