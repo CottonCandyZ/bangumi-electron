@@ -22,7 +22,7 @@ export const useInfinityQueryCollectionsByUsername = ({
   username,
   subjectType,
   collectionType,
-  limit = 5,
+  limit = 10,
   initialPageParam = 0,
   enabled,
   needKeepPreviousData,
@@ -65,7 +65,7 @@ export const useQueryCollectionEpisodesInfoBySubjectId = ({
     queryKey: ['collection-episodes'],
     queryProps: { subjectId, limit, offset, episodeType },
     enabled,
-    staleTime: 1000 * 60 * 10,
+    staleTime: 0,
   })
 
 export const useQuerySubjectCollection = ({

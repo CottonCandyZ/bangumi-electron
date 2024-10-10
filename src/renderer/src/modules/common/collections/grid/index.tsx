@@ -8,7 +8,7 @@ import { SubjectType } from '@renderer/data/types/subject'
 import { gridCache } from '@renderer/state/global-var'
 import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
 import { useSetAtom } from 'jotai'
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 export function CollectionsGrid({
   collectionType,
@@ -37,14 +37,22 @@ export function CollectionsGrid({
     }
   }, [subjectType, collectionType, igRef])
   const collections = collectionsQuery.data
-  const items = collections
-    ? collections.pages.flatMap((page, index) =>
-        page.data.map((item) => ({
-          data: item,
-          index,
-        })),
-      )
-    : []
+  const items = useMemo(
+    () =>
+      collections
+        ? collections.pages.flatMap((page, index) =>
+            page.data.map((item) => ({
+              data: item,
+              index,
+            })),
+          )
+        : [],
+    [collections],
+  )
+  useEffect(() => {
+    if (new Set(items.map((item) => item.data.subject_id)).size !== items.length)
+      collectionsQuery.refetch()
+  }, [items, collectionsQuery])
   useEffect(() => {
     setIsRefetching(collectionsQuery.isRefetching)
   }, [collectionsQuery.isRefetching, setIsRefetching])
