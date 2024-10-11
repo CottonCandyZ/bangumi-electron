@@ -1,13 +1,15 @@
 import { registerIpcMain } from '@egoist/tipc/main'
-import { router } from './tipc'
+import { router } from '@main/tipc'
 import { app } from 'electron'
 import { getIconPath } from '@main/helper'
+import { initDB } from '@main/lib/db'
 
 /**
+ * - create DB
  * - init tipc
  * - set docker icon
  */
-export function initialize() {
+export async function initialize() {
   // URI scheme
   // if (process.defaultApp) {
   //   if (process.argv.length >= 2) {
@@ -18,6 +20,8 @@ export function initialize() {
   // } else {
   //   app.setAsDefaultProtocolClient(APP_PROTOCOL)
   // }
+
+  await initDB()
 
   registerIpcMain(router)
 

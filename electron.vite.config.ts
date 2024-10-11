@@ -9,6 +9,7 @@ export default defineConfig({
       alias: {
         '@shared': resolve('src/shared'),
         '@main': resolve('src/main'),
+        '@db': resolve('src/db'),
       },
     },
   },
@@ -21,6 +22,7 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src'),
         '@main': resolve('src/main'),
         '@shared': resolve('src/shared'),
+        '@db': resolve('src/db'),
       },
     },
     plugins: [react()],

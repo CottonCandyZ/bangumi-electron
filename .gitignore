@@ -1,7 +1,21 @@
+# node
 node_modules
+
+# out
 dist
 out
+
+# mac
 .DS_Store
+
+# log
 *.log*
+
+# config
 .env
+
+# IDE
 .idea
+
+# db
+drizzle

@@ -5,7 +5,7 @@ import { APP_PROTOCOL } from '@shared/constants'
 import { createMainWindow } from '@main/window'
 import { appPath, isMacOS } from '@main/env'
 
-function boot() {
+async function boot() {
   // dev 和 prod 的位置
   appPath()
 
@@ -18,7 +18,7 @@ function boot() {
 
   let mainWindow: BrowserWindow
 
-  initialize()
+  await initialize()
 
   // 再次点击图标打开相同的实例
   app.on('second-instance', () => {
@@ -78,4 +78,4 @@ function boot() {
   })
 }
 
-boot()
+await boot()
