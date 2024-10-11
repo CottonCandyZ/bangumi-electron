@@ -7,7 +7,7 @@ export function OriginalLink() {
   const { pathname } = useLocation()
   let href = ''
   const isSubject = pathname.includes('subject')
-  if (isSubject) href = `${HOST}/${pathname}`
+  if (isSubject) href = `${HOST}${pathname}`
 
   return (
     isSubject && (
