@@ -11,7 +11,7 @@ export function SubjectCollectionContent() {
   return (
     <>
       <SheetHeader className="pl-6">
-        <SheetTitle>添加收藏</SheetTitle>
+        <SheetTitle>{formProps.sheetTitle}</SheetTitle>
       </SheetHeader>
       <ScrollWrapper className="pl-6 pr-4 pt-2" options={{ scrollbars: { autoHide: 'leave' } }}>
         <AddOrModifySubjectCollectionForm {...formProps} setOpen={setOpen} />
