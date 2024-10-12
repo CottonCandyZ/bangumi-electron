@@ -11,13 +11,20 @@ export function SubjectHeaderInfo({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfo = subjectInfoQuery.data
   if (!subjectInfo)
     return (
-      <div className="flex flex-1 flex-col gap-3">
+      <div className="flex w-full flex-1 flex-col gap-3">
         <section className="flex flex-col items-center gap-2 @3xl:items-start">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-10 w-96" />
+          <Skeleton className="h-6 w-72" />
+          <Skeleton className="h-5 w-2/3" />
         </section>
-        <section>
-          <Skeleton className="h-36" />
+        <Separator className="bg-primary/10" />
+        <section className="flex flex-col gap-1.5">
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-1/2" />
+          <Skeleton className="h-5 w-56" />
+          <Skeleton className="h-5 w-72" />
+          <Skeleton className="h-5 w-56" />
+          <Skeleton className="h-5 w-80" />
         </section>
       </div>
     )
