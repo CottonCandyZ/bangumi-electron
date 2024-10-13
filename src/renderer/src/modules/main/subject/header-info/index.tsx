@@ -29,7 +29,7 @@ export function SubjectHeaderInfo({ subjectId }: { subjectId: SubjectId }) {
       </div>
     )
   return (
-    <div className="flex flex-1 flex-col gap-3">
+    <div className="flex w-full flex-1 flex-col gap-3">
       <section className="flex flex-col items-center gap-2 @3xl:items-start">
         {/* 标题 */}
         <Header {...subjectInfo} />
