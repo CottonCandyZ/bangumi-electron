@@ -31,6 +31,7 @@ import { AlertCircle, CircleHelp } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@renderer/components/ui/alert'
 import { LoginError } from '@renderer/lib/utils/error'
 import { FetchError } from 'ofetch'
+import { useRef } from 'react'
 
 const login_form_message = TEXT_CONFIG.login_form
 
@@ -54,17 +55,18 @@ export function LoginForm({ setOpen }: { setOpen: React.Dispatch<React.SetStateA
       savePassword: false,
     },
   })
+  const toastId = useRef<string | number>()
   // 登录流程
   const login = async (props: webLoginProps) => {
-    toast.info('开始登录啦！')
+    toastId.current = toast.loading('正在登录', { duration: Infinity })
     await webLogin({ ...props })
-    toast.info('网页验证成功 (1/5)')
+    toast.loading('网页验证成功 (1/5)', { id: toastId.current })
     await getOAuthFormHash()
-    toast.info('获取授权表单成功 (2/5)')
+    toast.loading('获取授权表单成功 (2/5)', { id: toastId.current })
     await getOAuthCode()
-    toast.info('获得授权 Code 成功 (3/5)')
+    toast.loading('获得授权 Code 成功 (3/5)', { id: toastId.current })
     await getOAuthAccessToken()
-    toast.info('获得授权 secret 成功 (4/5)')
+    toast.loading('获得授权 secret 成功 (4/5)', { id: toastId.current })
     await save()
   }
 
@@ -82,17 +84,17 @@ export function LoginForm({ setOpen }: { setOpen: React.Dispatch<React.SetStateA
     mutationKey: ['session'],
     mutationFn: login,
     onSuccess() {
-      toast.success('登陆成功 (5/5)')
+      toast.success('登陆成功 (5/5)', { id: toastId.current, duration: 3000 })
       queryClient.invalidateQueries({ queryKey: ['accessToken'] })
       setOpen(false)
     },
     onError(error) {
       if (error instanceof LoginError) {
-        toast.error(error.message)
+        toast.error(error.message, { id: toastId.current, duration: 3000 })
       } else if (error instanceof FetchError) {
-        toast.error('网络错误')
+        toast.error('网络错误', { id: toastId.current, duration: 3000 })
       } else {
-        toast.error('未知错误')
+        toast.error('未知错误', { id: toastId.current, duration: 3000 })
       }
       captcha.refetch()
     },
