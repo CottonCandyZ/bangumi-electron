@@ -65,9 +65,10 @@ export function LoginForm({ setOpen }: { setOpen: React.Dispatch<React.SetStateA
     toast.loading('获取授权表单成功 (2/5)', { id: toastId.current })
     await getOAuthCode()
     toast.loading('获得授权 Code 成功 (3/5)', { id: toastId.current })
-    await getOAuthAccessToken()
+    await getOAuthAccessToken({ ...props })
     toast.loading('获得授权 secret 成功 (4/5)', { id: toastId.current })
-    await save()
+    const user_id = await save({ ...props })
+    localStorage.setItem('current_user_id', user_id.toString())
   }
 
   const captcha = useQuery({

@@ -1,12 +1,12 @@
 import { dbIPC } from '@main/tipc/db'
 import { env } from '@main/tipc/env'
-import { modifySession } from '@main/tipc/session'
+import { utils } from '@main/tipc/utils'
 import { window } from '@main/tipc/window'
 
 export const router = {
   ...window,
   ...env,
-  ...modifySession,
+  ...utils,
   ...dbIPC,
 }
 

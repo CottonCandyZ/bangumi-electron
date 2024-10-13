@@ -11,12 +11,12 @@ export type UserInfo = {
   username: string
   nickname: string
   id: number
-  user_group: number
+  user_group: UserGroup
   url: string
   time_offset: number
 }
 
-export enum UerGroup {
+export enum UserGroup {
   '管理员' = 1,
   'Bangumi 管理猿',
   '天窗管理员',

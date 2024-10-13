@@ -5,11 +5,12 @@ import {
   URL_OAUTH_REDIRECT,
   webFetch,
 } from '@renderer/data/fetch/config'
-import { client } from '@renderer/lib/client'
+import { insertAccessToken, insertLoginInfo } from '@renderer/data/fetch/db/user'
 import { getTimestamp } from '@renderer/lib/utils/date'
 import { LoginError } from '@renderer/lib/utils/error'
 import { domParser } from '@renderer/lib/utils/parser'
-import { LoginInfo, Token } from '@shared/types/login'
+import { LoginInfo, Token } from '@renderer/data/types/login'
+import { MakeOptional } from '@shared/utils/type'
 
 // 所以这里就是用 web 登录网页啦，非常感谢下面链接里前人的工作给与的参考！
 
@@ -26,7 +27,7 @@ import { LoginInfo, Token } from '@shared/types/login'
 const store: {
   formHash?: string | null
   code?: string | null
-  loginInfo?: LoginInfo
+  loginInfo?: MakeOptional<LoginInfo, 'id'>
   accessToken?: Token
 } = {}
 
@@ -77,13 +78,14 @@ export async function getCaptcha() {
  * Web 登录函数，直接往登录地址 POST 相关信息
  */
 export async function webLogin({ email, password, captcha, savePassword }: webLoginProps) {
+  if (!store.formHash) throw new LoginError('未获得 formHash')
   const { _data: data, redirected } = await webFetch.raw(LOGIN.POST_URL, {
     method: 'post',
     headers: {
       'Content-Type': LOGIN.POST_CONTENT_TYPE,
     },
     body: new URLSearchParams({
-      formhash: store.formHash!,
+      formhash: store.formHash,
       referer: '',
       dreferer: '',
       email,
@@ -137,6 +139,7 @@ export async function getOAuthFormHash() {
  * 所以在 main 里将 Referer 修改成了 https://bgm.tv/oauth/authorize
  */
 export async function getOAuthCode() {
+  if (!store.formHash) throw new LoginError('未获得 formHash')
   const { url } = await webFetch.raw(LOGIN.OAUTH_FORM_ULR, {
     method: 'post',
     credentials: 'include',
@@ -144,7 +147,7 @@ export async function getOAuthCode() {
       'Content-Type': LOGIN.POST_CONTENT_TYPE,
     },
     body: new URLSearchParams({
-      formhash: store.formHash!,
+      formhash: store.formHash,
       redirect_uri: '',
       client_id: APP_ID,
       submit: '授权',
@@ -159,7 +162,7 @@ export async function getOAuthCode() {
  *
  * 使用 code 获得 Bearer (Access token)
  */
-export async function getOAuthAccessToken() {
+export async function getOAuthAccessToken({ savePassword }: { savePassword: boolean }) {
   if (!store.code) throw new LoginError('获取授权 code 失败')
   const token = await webFetch<Token>(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
     method: 'post',
@@ -177,6 +180,7 @@ export async function getOAuthAccessToken() {
   })
   if (!token.access_token) throw new LoginError('获取 Bearer 失败')
   store.accessToken = token
+  if (savePassword && store.loginInfo) store.loginInfo.id = token.user_id
   return token
 }
 
@@ -185,19 +189,29 @@ export async function getOAuthAccessToken() {
  *
  * 保存登录信息
  */
-export async function save() {
-  await client.setAccessToken(store.accessToken!)
-  if (store.loginInfo) {
-    await client.setLoginInfo(store.loginInfo)
+export async function save({ savePassword }: { savePassword: boolean }) {
+  if (!store.accessToken) throw new LoginError('尚未获得 accessToken')
+  await insertAccessToken(store.accessToken)
+  if (savePassword) {
+    if (!store.loginInfo || !store.loginInfo.id) throw new LoginError('尚未获得账户密码')
+    const info = store.loginInfo as LoginInfo
+    await insertLoginInfo(info)
   }
+  return store.accessToken.user_id
 }
 
 /**
  * 刷新 token
  * @param refreshToken refresh token
  */
-export async function refreshToken(refreshToken: string) {
-  const token = await webFetch<Token>(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
+export async function refreshToken({
+  refresh_token,
+  user_id,
+}: {
+  refresh_token: string
+  user_id: number
+}) {
+  const token = await webFetch<Omit<Token, 'user_id'>>(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
     method: 'post',
     headers: {
       'Content-Type': LOGIN.POST_CONTENT_TYPE,
@@ -206,10 +220,10 @@ export async function refreshToken(refreshToken: string) {
       grant_type: 'refresh_token',
       client_id: APP_ID,
       client_secret: APP_SECRET,
-      refresh_token: refreshToken,
+      refresh_token,
       redirect_uri: URL_OAUTH_REDIRECT,
     }),
   })
   if (!token) throw new LoginError('刷新 Token 失败')
-  await client.setAccessToken(token)
+  await insertAccessToken({ ...token, user_id })
 }

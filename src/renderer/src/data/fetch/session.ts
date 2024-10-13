@@ -1,6 +1,6 @@
 import { LOGIN, webFetch } from '@renderer/data/fetch/config'
+import { Token } from '@renderer/data/types/login'
 import { client } from '@renderer/lib/client'
-import { Token } from '@shared/types/login'
 
 // 这里是用来验证相关 session 的地方，如果可能也会刷新 Session
 
@@ -39,5 +39,5 @@ export async function logout() {
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_sec_id' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_cookietime' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_auth' })
-  await client.deleteAccessToken()
+  localStorage.removeItem('current_user_id')
 }

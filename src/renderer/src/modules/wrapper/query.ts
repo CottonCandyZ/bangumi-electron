@@ -51,7 +51,7 @@ export const useIsUnauthorized = () => {
         if (code === 2 && accessToken && !isRefreshing) {
           setIsRefreshing(true)
           queryClient.cancelQueries()
-          refreshMutation.mutate(accessToken.refresh_token)
+          refreshMutation.mutate({ ...accessToken })
         }
       }
     })
@@ -66,7 +66,7 @@ export const useIsUnauthorized = () => {
         if (code === 2 && accessToken && !isRefreshing) {
           setIsRefreshing(true)
           queryClient.cancelQueries()
-          refreshMutation.mutate(accessToken.refresh_token)
+          refreshMutation.mutate({ ...accessToken })
         }
       }
     })

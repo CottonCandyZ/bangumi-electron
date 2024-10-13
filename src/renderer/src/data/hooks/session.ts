@@ -1,6 +1,6 @@
+import { getAccessToken } from '@renderer/data/fetch/db/user'
 import { logout } from '@renderer/data/fetch/session'
 import { refreshToken } from '@renderer/data/fetch/web/login'
-import { client } from '@renderer/lib/client'
 import { isRefreshingTokenAtom } from '@renderer/state/session'
 import { store } from '@renderer/state/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -15,6 +15,7 @@ export const useLogoutMutation = () => {
     mutationFn: logout,
     onSuccess: () => {
       queryClient.setQueryData(['accessToken'], null)
+      queryClient.invalidateQueries({ queryKey: ['accessToken'] })
     },
   })
 }
@@ -28,7 +29,9 @@ export const useAccessTokenQuery = () => {
   return useQuery({
     queryKey: ['accessToken'],
     queryFn: async () => {
-      return await client.getAccessToken()
+      const user_id = localStorage.getItem('current_user_id')
+      if (!user_id) return null
+      return await getAccessToken({ user_id: Number(user_id) })
     },
     networkMode: 'always',
   })
