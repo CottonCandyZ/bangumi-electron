@@ -12,11 +12,11 @@ import {
 import { Episode, EpisodeType } from '@renderer/data/types/episode'
 import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
-import { subjectCollectionSheetFormActionAtom } from '@renderer/state/sheet'
 import { useSetAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 import { toast } from 'sonner'
+import { subjectCollectionSheetFormActionAtom } from '@renderer/state/dialog/sheet'
 
 function isCollectionEpisode(episode: Episode | CollectionEpisode): episode is CollectionEpisode {
   return (episode as CollectionEpisode).episode !== undefined

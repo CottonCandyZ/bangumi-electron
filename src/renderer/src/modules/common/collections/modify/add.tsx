@@ -11,8 +11,8 @@ import { CollectionType } from '@renderer/data/types/collection'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
-import { subjectCollectionSheetFormActionAtom } from '@renderer/state/sheet'
 import { useSetAtom } from 'jotai'
+import { subjectCollectionSheetFormActionAtom } from '@renderer/state/dialog/sheet'
 
 export function AddSubjectCollection({
   subjectId,

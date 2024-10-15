@@ -40,7 +40,7 @@ export function AddOrModifySubjectCollectionForm({
   isPrivate = false,
   tags = [],
   modify = false,
-  setOpen,
+  success = () => {},
 }: {
   subjectId: SubjectId
   subjectType: SubjectType
@@ -51,7 +51,7 @@ export function AddOrModifySubjectCollectionForm({
   isPrivate?: boolean
   tags?: CollectionData['tags']
   modify?: boolean
-  setOpen: (open: boolean) => void
+  success?: () => void
 }) {
   const queryClient = useQueryClient()
   const { userInfo, accessToken } = useSession()
@@ -81,7 +81,7 @@ export function AddOrModifySubjectCollectionForm({
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
     onSuccess() {
-      setOpen(false)
+      success()
       toast.success(modify ? '修改成功！' : '添加成功！')
     },
     onError(_error, _variable, context) {

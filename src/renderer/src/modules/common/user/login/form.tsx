@@ -35,7 +35,7 @@ import { useRef } from 'react'
 
 const login_form_message = TEXT_CONFIG.login_form
 
-export function LoginForm({ setOpen }: { setOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
+export function LoginForm({ success = () => {} }: { success?: () => void }) {
   const queryClient = useQueryClient()
   const formSchema = z.object({
     email: z
@@ -65,9 +65,9 @@ export function LoginForm({ setOpen }: { setOpen: React.Dispatch<React.SetStateA
     toast.loading('获取授权表单成功 (2/5)', { id: toastId.current })
     await getOAuthCode()
     toast.loading('获得授权 Code 成功 (3/5)', { id: toastId.current })
-    await getOAuthAccessToken({ ...props })
+    await getOAuthAccessToken()
     toast.loading('获得授权 secret 成功 (4/5)', { id: toastId.current })
-    const user_id = await save({ ...props })
+    const user_id = await save()
     localStorage.setItem('current_user_id', user_id.toString())
   }
 
@@ -87,7 +87,7 @@ export function LoginForm({ setOpen }: { setOpen: React.Dispatch<React.SetStateA
     onSuccess() {
       toast.success('登陆成功 (5/5)', { id: toastId.current, duration: 3000 })
       queryClient.invalidateQueries({ queryKey: ['accessToken'] })
-      setOpen(false)
+      success()
     },
     onError(error) {
       if (error instanceof LoginError) {
@@ -105,6 +105,7 @@ export function LoginForm({ setOpen }: { setOpen: React.Dispatch<React.SetStateA
   async function onSubmit(values: z.infer<typeof formSchema>) {
     mutation.mutate({ ...values })
   }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

@@ -12,12 +12,12 @@ import { collectionBoxInViewAtom } from '@renderer/state/in-view'
 import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { Button } from '@renderer/components/ui/button'
-import { Login } from '@renderer/modules/common/user/login'
 import { PrivateSwitch } from '@renderer/modules/main/subject/collection/private-switch'
 import { SubjectCollectionSelector } from '@renderer/modules/main/subject/collection/select'
 import { ModifySubjectCollection } from '@renderer/modules/main/subject/collection/modify-action'
 import { MoreActionDropDown } from '@renderer/modules/main/subject/collection/more-action-drop-down'
 import { QuickRate } from '@renderer/modules/main/subject/collection/quick-rate'
+import { openDialogAction } from '@renderer/state/dialog/normal'
 
 export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const { isLogin, userInfo, accessToken } = useSession()
@@ -30,6 +30,7 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const subjectCollection = subjectCollectionQuery.data
   const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
+  const openDialog = useSetAtom(openDialogAction)
 
   const ref = useRef<null | HTMLDivElement>(null)
   const isInView = useInView(ref)
@@ -44,11 +45,7 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
     userInfo === undefined ||
     isLogin === undefined
   if (!isLogin || !accessToken)
-    return (
-      <Login>
-        <Button className="">登录</Button>
-      </Login>
-    )
+    return <Button onClick={() => openDialog('login-form')}>登录</Button>
   return (
     <div className="flex flex-col gap-2" ref={ref}>
       <div className="flex flex-row items-center justify-between">

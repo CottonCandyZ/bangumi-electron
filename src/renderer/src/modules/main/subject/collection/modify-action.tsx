@@ -1,7 +1,7 @@
 import { Button } from '@renderer/components/ui/button'
 import { CollectionData } from '@renderer/data/types/collection'
 import { Subject } from '@renderer/data/types/subject'
-import { subjectCollectionSheetFormActionAtom } from '@renderer/state/sheet'
+import { subjectCollectionSheetFormActionAtom } from '@renderer/state/dialog/sheet'
 import { useSetAtom } from 'jotai'
 
 export function ModifySubjectCollection({
