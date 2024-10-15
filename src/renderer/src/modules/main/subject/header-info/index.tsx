@@ -14,8 +14,16 @@ export function SubjectHeaderInfo({ subjectId }: { subjectId: SubjectId }) {
       <div className="flex w-full flex-1 flex-col gap-3">
         <section className="flex flex-col items-center gap-2 @3xl:items-start">
           <Skeleton className="h-10 w-96" />
-          <Skeleton className="h-6 w-72" />
-          <Skeleton className="h-5 w-2/3" />
+          <Skeleton className="h-4 w-72" />
+          <div className="flex flex-row items-center gap-1.5 text-muted-foreground">
+            <Skeleton className="h-5 w-10" />
+            <span>·</span>
+            <Skeleton className="h-5 w-7" />
+            <span>·</span>
+            <Skeleton className="h-5 w-12" />
+            <span>·</span>
+            <Skeleton className="h-5 w-14" />
+          </div>
         </section>
         <Separator className="bg-primary/10" />
         <section className="flex flex-col gap-1.5">
