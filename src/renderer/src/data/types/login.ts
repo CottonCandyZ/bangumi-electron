@@ -1,7 +1,7 @@
 /** 登录信息 */
 export type LoginInfo = {
   email: string
-  password: string
+  password: string | null
   id: number
 }
 

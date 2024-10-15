@@ -129,7 +129,7 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
             <FormItem>
               <FormLabel>密码</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <Input type="password" {...field} className="font-mono" />
               </FormControl>
               <FormMessage />
             </FormItem>

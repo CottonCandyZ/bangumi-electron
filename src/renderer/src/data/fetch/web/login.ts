@@ -110,7 +110,7 @@ export async function webLogin({ email, password, captcha, savePassword }: webLo
   if (savePassword) {
     store.loginInfo = { email, password }
   } else {
-    store.loginInfo = undefined
+    store.loginInfo = { email, password: null }
   }
 }
 
@@ -162,7 +162,7 @@ export async function getOAuthCode() {
  *
  * 使用 code 获得 Bearer (Access token)
  */
-export async function getOAuthAccessToken({ savePassword }: { savePassword: boolean }) {
+export async function getOAuthAccessToken() {
   if (!store.code) throw new LoginError('获取授权 code 失败')
   const token = await webFetch<Token>(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
     method: 'post',
@@ -180,7 +180,7 @@ export async function getOAuthAccessToken({ savePassword }: { savePassword: bool
   })
   if (!token.access_token) throw new LoginError('获取 Bearer 失败')
   store.accessToken = token
-  if (savePassword && store.loginInfo) store.loginInfo.id = token.user_id
+  if (store.loginInfo) store.loginInfo.id = token.user_id
   return token
 }
 
@@ -189,14 +189,12 @@ export async function getOAuthAccessToken({ savePassword }: { savePassword: bool
  *
  * 保存登录信息
  */
-export async function save({ savePassword }: { savePassword: boolean }) {
+export async function save() {
   if (!store.accessToken) throw new LoginError('尚未获得 accessToken')
   await insertAccessToken(store.accessToken)
-  if (savePassword) {
-    if (!store.loginInfo || !store.loginInfo.id) throw new LoginError('尚未获得账户密码')
-    const info = store.loginInfo as LoginInfo
-    await insertLoginInfo(info)
-  }
+  if (!store.loginInfo || !store.loginInfo.id) throw new LoginError('尚未获得账户密码')
+  const info = store.loginInfo as LoginInfo
+  await insertLoginInfo(info)
   return store.accessToken.user_id
 }
 

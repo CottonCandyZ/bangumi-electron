@@ -7,12 +7,20 @@ import { LoginInfo, Token } from '@renderer/data/types/login'
 
 // login info
 export async function insertLoginInfo(loginInfo: LoginInfo) {
-  const [encryptedEmail, encryptedPassword] = await client.getSafeStorageEncrypted({
-    origin: [loginInfo.email, loginInfo.password],
-  })
-  await db
-    .insert(userLoginInfo)
-    .values({ ...loginInfo, email: encryptedEmail, password: encryptedPassword })
+  if (loginInfo.password !== null) {
+    const [encryptedPassword] = await client.getSafeStorageEncrypted({
+      origin: [loginInfo.password],
+    })
+    await db
+      .insert(userLoginInfo)
+      .values({ id: loginInfo.id, email: loginInfo.email, password: encryptedPassword })
+      .onConflictDoUpdate({ target: userLoginInfo.email, set: { password: encryptedPassword } })
+  } else {
+    await db
+      .insert(userLoginInfo)
+      .values({ id: loginInfo.id, email: loginInfo.email, password: null })
+      .onConflictDoNothing()
+  }
 }
 
 // accessToken

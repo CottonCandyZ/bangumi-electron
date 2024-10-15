@@ -5,7 +5,7 @@ import { UserGroup } from '@renderer/data/types/user'
 
 export const userLoginInfo = sqliteTable('UserLoginInfo', {
   email: t.text().primaryKey().notNull(),
-  password: t.text().notNull(),
+  password: t.text(),
   id: t.integer().notNull(),
 })
 
