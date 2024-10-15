@@ -11,7 +11,6 @@ export function BackgroundImage({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfo = subjectInfoQuery.data
   const left = useAtomValue(mainContainerLeft)
   const right = useAtomValue(mainContainerRight)
-  console.log(right)
 
   return (
     subjectInfo?.images.large &&
