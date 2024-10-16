@@ -11,12 +11,17 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { deleteSubjectCollectionById } from '@renderer/data/fetch/web/collection'
 import { useWebDeleteCollectionHash } from '@renderer/data/hooks/web/collection'
-import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionData } from '@renderer/data/types/collection'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { useAtomValue } from 'jotai'
+import { deleteCollectionPropsAtom } from '@renderer/state/dialog/alert'
 
-export function DeleteSubjectCollectionAlert({ subjectId }: { subjectId: SubjectId }) {
+export function DeleteSubjectCollectionAlert() {
+  const props = useAtomValue(deleteCollectionPropsAtom)
+  if (!props) throw Error('Props 传丢了')
+  const { subjectId } = props
+
   const { userInfo, accessToken } = useSession()
   const username = userInfo?.username
   const hash = useWebDeleteCollectionHash({ subjectId }).data

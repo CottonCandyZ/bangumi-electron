@@ -1,27 +1,26 @@
-import { AlertDialogTrigger } from '@radix-ui/react-alert-dialog'
-import { AlertDialog } from '@renderer/components/ui/alert-dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@renderer/components/ui/dropdown-menu'
-import { DeleteSubjectCollectionAlert } from '@renderer/modules/main/subject/collection/delete-action'
+import { openDeleteCollectionAction } from '@renderer/state/dialog/alert'
+import { useSetAtom } from 'jotai'
 
 export function MoreActionDropDown({ subjectId }: { subjectId: string }) {
+  const deleteSubjectCollection = useSetAtom(openDeleteCollectionAction)
   return (
-    <AlertDialog>
+    <>
       <DropdownMenu>
         <DropdownMenuTrigger>
           <span className="i-mingcute-more-2-fill text-base" />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="min-w-fit" align="start">
-          <AlertDialogTrigger>
-            <DropdownMenuItem>删除收藏</DropdownMenuItem>
-          </AlertDialogTrigger>
+          <DropdownMenuItem onClick={() => deleteSubjectCollection({ subjectId })}>
+            删除收藏
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <DeleteSubjectCollectionAlert subjectId={subjectId} />
-    </AlertDialog>
+    </>
   )
 }
