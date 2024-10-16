@@ -1,13 +1,14 @@
-import { DialogHeader, DialogTitle } from '@renderer/components/ui/dialog'
+import { DialogContent, DialogHeader, DialogTitle } from '@renderer/components/ui/dialog'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import { LoginForm } from '@renderer/modules/common/user/login/form'
-import { openDialogAtom } from '@renderer/state/dialog/index'
+import { openDialogAtom } from '@renderer/state/dialog/normal'
 import { useSetAtom } from 'jotai'
 import { CircleHelp } from 'lucide-react'
+
 export function LoginDialog() {
   const setOpen = useSetAtom(openDialogAtom)
   return (
-    <>
+    <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
       <DialogHeader>
         <DialogTitle>
           登录{' '}
@@ -29,6 +30,6 @@ export function LoginDialog() {
         </DialogTitle>
       </DialogHeader>
       <LoginForm success={() => setOpen(false)} />
-    </>
+    </DialogContent>
   )
 }

@@ -4,7 +4,7 @@ import { PropsWithChildren } from 'react'
 import { SessionWrapper } from '@renderer/modules/wrapper/session-wrapper'
 import { ClickScrollPlugin, OverlayScrollbars } from 'overlayscrollbars'
 import { queryClient } from '@renderer/modules/wrapper/query'
-import { Provider } from 'jotai'
+import { Provider as JotaiProvider } from 'jotai'
 import { store } from '@renderer/state/utils'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { KeyboardShortcutProvider } from '@renderer/modules/wrapper/keyboard-shortcut'
@@ -14,7 +14,7 @@ OverlayScrollbars.plugin(ClickScrollPlugin)
 
 export function Wrapper({ children }: PropsWithChildren) {
   return (
-    <Provider store={store}>
+    <JotaiProvider store={store}>
       <KeyboardShortcutProvider>
         <QueryClientProvider client={queryClient}>
           <SessionWrapper>
@@ -25,6 +25,6 @@ export function Wrapper({ children }: PropsWithChildren) {
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </KeyboardShortcutProvider>
-    </Provider>
+    </JotaiProvider>
   )
 }

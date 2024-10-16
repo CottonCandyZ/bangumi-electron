@@ -31,12 +31,23 @@ import { AlertCircle, CircleHelp } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@renderer/components/ui/alert'
 import { LoginError } from '@renderer/lib/utils/error'
 import { FetchError } from 'ofetch'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
+import { InputSelector } from '@renderer/components/input-selector'
+import { useLoginInfoQuery } from '@renderer/data/hooks/db/user'
+import { useSetAtom } from 'jotai'
+import { openLoginDeleteAccountAction } from '@renderer/state/dialog/alert'
+import { client } from '@renderer/lib/client'
+import { deleteLoginInfo } from '@renderer/data/fetch/db/user'
 
 const login_form_message = TEXT_CONFIG.login_form
 
 export function LoginForm({ success = () => {} }: { success?: () => void }) {
   const queryClient = useQueryClient()
+  // init data
+  const loginInfo = useLoginInfoQuery().data
+  const deleteAlertDialog = useSetAtom(openLoginDeleteAccountAction)
+  const firstTime = useRef(true)
+
   const formSchema = z.object({
     email: z
       .string()
@@ -52,9 +63,22 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
       email: '',
       password: '',
       captcha: '',
-      savePassword: false,
+      savePassword: true,
     },
   })
+  useEffect(() => {
+    if (!firstTime.current || !loginInfo) return
+    firstTime.current = false
+    if (loginInfo.length === 0) return
+    const { email, password: enPassword } = loginInfo[0]
+    form.setValue('email', email)
+    if (enPassword) {
+      client.getSafeStorageDecrypted({ encrypted: [enPassword] }).then(([password]) => {
+        form.setValue('password', password)
+        form.setValue('savePassword', true)
+      })
+    }
+  }, [loginInfo, form])
   const toastId = useRef<string | number>()
   // 登录流程
   const login = async (props: webLoginProps) => {
@@ -101,9 +125,39 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
     },
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: deleteLoginInfo,
+    onSuccess: (_, { email }) => {
+      queryClient.invalidateQueries({ queryKey: ['login-info-list'] })
+      if (form.getValues('email') === email) {
+        form.setValue('email', '')
+        form.setValue('password', '')
+        form.setValue('savePassword', true)
+      }
+    },
+  })
+
   // 提交函数
   async function onSubmit(values: z.infer<typeof formSchema>) {
     mutation.mutate({ ...values })
+  }
+
+  const deleteSaveAccount = (email: string) => {
+    deleteAlertDialog({
+      email,
+      onDeleted: () => {
+        deleteMutation.mutate({ email })
+      },
+    })
+  }
+
+  const onSelectAccount = (email: string) => {
+    const res = loginInfo?.find((item) => item.email === email)
+    if (!res?.password) return
+    client.getSafeStorageDecrypted({ encrypted: [res.password] }).then(([password]) => {
+      form.setValue('password', password)
+      form.setValue('savePassword', true)
+    })
   }
 
   return (
@@ -116,7 +170,14 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
             <FormItem>
               <FormLabel>邮箱</FormLabel>
               <FormControl>
-                <Input placeholder="xxx@gmail.com" {...field} />
+                <InputSelector
+                  placeholder="xxx@gmail.com"
+                  selectList={loginInfo ? loginInfo?.map((item) => item.email) : []}
+                  inputValue={field.value}
+                  setValue={field.onChange}
+                  onDelete={deleteSaveAccount}
+                  onSelectAction={onSelectAccount}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

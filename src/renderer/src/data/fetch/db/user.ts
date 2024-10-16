@@ -2,6 +2,7 @@ import { userLoginInfo, userSession } from '@db/index'
 import { client } from '@renderer/lib/client'
 import { db } from '@renderer/lib/db/bridge'
 import { LoginInfo, Token } from '@renderer/data/types/login'
+import { eq } from 'drizzle-orm'
 
 // save
 
@@ -29,9 +30,21 @@ export async function insertAccessToken(sessionInfo: Token) {
 }
 
 // get
-export async function getAccessToken({ user_id }: { user_id: number }) {
+
+// login info
+export async function readLoginInfo() {
+  return await db.query.userLoginInfo.findMany()
+}
+
+// accessToken
+export async function readAccessToken({ user_id }: { user_id: number }) {
   return await db.query.userSession.findFirst({
     where: (userSession, { eq }) => eq(userSession.user_id, user_id),
     orderBy: (userSession, { desc }) => [desc(userSession.create_time)],
   })
+}
+
+// delete
+export async function deleteLoginInfo({ email }: { email: string }) {
+  return await db.delete(userLoginInfo).where(eq(userLoginInfo.email, email))
 }

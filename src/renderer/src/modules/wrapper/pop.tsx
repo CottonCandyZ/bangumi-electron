@@ -1,5 +1,6 @@
-import { Dialog } from '@renderer/components/dialog'
-
+import { AlertDialog } from '@renderer/components/dialog/alert'
+import { NormalDialog } from '@renderer/components/dialog/normal'
+import { SheetDialog } from '@renderer/components/dialog/sheet'
 import { Toaster } from '@renderer/components/ui/sonner'
 import { TooltipProvider } from '@renderer/components/ui/tooltip'
 import { HoverCard } from '@renderer/modules/hover-card'
@@ -11,7 +12,9 @@ export function Pop({ children }: PropsWithChildren) {
       <TooltipProvider>
         {children}
         <HoverCard />
-        <Dialog />
+        <NormalDialog />
+        <SheetDialog />
+        <AlertDialog />
         <Toaster richColors className="pointer-events-auto" />
       </TooltipProvider>
     </>

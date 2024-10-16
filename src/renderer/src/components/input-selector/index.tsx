@@ -11,13 +11,22 @@ import {
 } from 'react'
 
 type InputSelectorProps = {
+  inputValue: string
   selectList: string[]
   setValue: (value: string) => void
   onDelete: (value: string) => void
+  onSelectAction?: (value: string) => void
 } & HTMLProps<HTMLInputElement>
 
 export function InputSelector(props: InputSelectorProps) {
-  const { value: inputValue, onDelete, setValue, selectList, ...resProps } = props
+  const {
+    inputValue,
+    onDelete,
+    setValue,
+    onSelectAction = () => {},
+    selectList,
+    ...resProps
+  } = props
   const [isOpen, setIsOpen] = useState(false)
   const [filtered, setFiltered] = useState<string[]>(selectList)
   const [selectedIndex, setSelectedIndex] = useState(-1)
@@ -56,6 +65,7 @@ export function InputSelector(props: InputSelectorProps) {
 
   const handleSelect = (select: string) => {
     setValue(select)
+    onSelectAction(select)
     setIsOpen(false)
   }
 
@@ -83,6 +93,7 @@ export function InputSelector(props: InputSelectorProps) {
       setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev))
       setIsOpen(true)
     } else if (e.key === 'Enter' && selectedIndex >= 0) {
+      e.preventDefault()
       handleSelect(filtered[selectedIndex])
     } else if (e.key === 'Escape') {
       setIsOpen(false)
@@ -104,7 +115,7 @@ export function InputSelector(props: InputSelectorProps) {
     onDelete(value)
   }
   return (
-    <div className="relative w-full max-w-sm" ref={containerRef}>
+    <div className="relative w-full" ref={containerRef}>
       <div>
         <Input
           ref={inputRef}
@@ -117,6 +128,7 @@ export function InputSelector(props: InputSelectorProps) {
           {...resProps}
         />
         <button
+          type="button"
           onClick={handleClear}
           data-input-empty={inputValue === ''}
           className="absolute right-8 top-1/2 -translate-y-1/2 text-muted-foreground opacity-100 transition-[opacity_color] duration-300 hover:text-primary data-[input-empty=true]:opacity-0"
@@ -124,6 +136,7 @@ export function InputSelector(props: InputSelectorProps) {
           <X size={15} />
         </button>
         <button
+          type="button"
           data-open={isOpen && filtered.length !== 0}
           disabled={filtered.length === 0}
           onClick={handleToggleDropdown}
@@ -147,6 +160,7 @@ export function InputSelector(props: InputSelectorProps) {
             >
               <span>{highlightMatch(item, inputValue?.toString())}</span>
               <button
+                type="button"
                 onClick={(e) => deleteItem(item, e)}
                 className="absolute right-4 top-1/2 flex shrink-0 -translate-y-1/2 text-muted-foreground hover:text-destructive"
               >
