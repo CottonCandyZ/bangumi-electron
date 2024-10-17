@@ -16,7 +16,6 @@ import {
 } from '@renderer/components/ui/dropdown-menu'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useLogoutMutation } from '@renderer/data/hooks/session'
-import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
 import { toast } from 'sonner'
 import { useTheme } from '@renderer/modules/wrapper/theme-wrapper'
 import { useState } from 'react'
@@ -27,7 +26,7 @@ import { openDialogAction } from '@renderer/state/dialog/normal'
 
 export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   const logoutMutation = useLogoutMutation()
-  const userInfo = useQueryUserInfo()
+  const { userInfo } = useSession()
   const { theme, setTheme } = useTheme()
   const { isLogin } = useSession()
   const [dropdownOpen, setDropDownOpen] = useState(false)
@@ -45,13 +44,13 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
         {isLogin ? (
           <Image
             className="aspect-square w-8 shrink-0 overflow-hidden rounded-full"
-            imageSrc={userInfo.data?.avatar.small}
+            imageSrc={userInfo?.avatar.small}
           />
         ) : (
           <div className="aspect-square w-8 overflow-hidden rounded-full bg-accent"></div>
         )}
         {type === 'expend' && (
-          <span className="shrink-0 font-semibold">{isLogin && userInfo.data?.nickname}</span>
+          <span className="shrink-0 font-semibold">{isLogin && userInfo?.nickname}</span>
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent
@@ -66,8 +65,8 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
       >
         {isLogin && (
           <DropdownMenuLabel>
-            {userInfo.data?.nickname ? (
-              <span>Hi! {userInfo.data?.nickname}</span>
+            {userInfo?.nickname ? (
+              <span>Hi! {userInfo?.nickname}</span>
             ) : (
               <Skeleton className="h-5" />
             )}

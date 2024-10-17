@@ -2,13 +2,13 @@ import { MasonryInfiniteGrid } from '@egjs/react-infinitegrid'
 import { CollectionItem } from '@renderer/modules/common/collections/grid/item'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useInfinityQueryCollectionsByUsername } from '@renderer/data/hooks/api/collection'
-import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
 import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import { gridCache } from '@renderer/state/global-var'
 import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
 import { useSetAtom } from 'jotai'
 import { useEffect, useMemo, useRef } from 'react'
+import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 
 export function CollectionsGrid({
   collectionType,
@@ -17,8 +17,7 @@ export function CollectionsGrid({
   collectionType: CollectionType
   subjectType: SubjectType
 }) {
-  const userInfoQuery = useQueryUserInfo()
-  const userInfo = userInfoQuery.data
+  const { userInfo } = useSession()
   const collectionsQuery = useInfinityQueryCollectionsByUsername({
     username: userInfo?.username,
     collectionType: collectionType,
