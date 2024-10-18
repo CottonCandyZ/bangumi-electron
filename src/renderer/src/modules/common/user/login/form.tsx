@@ -121,6 +121,12 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
       } else {
         toast.error('未知错误', { id: toastId.current, duration: 3000 })
       }
+      form.reset({
+        email: form.getValues('email'),
+        password: form.getValues('password'),
+        savePassword: form.getValues('savePassword'),
+        captcha: undefined,
+      })
       captcha.refetch()
     },
   })
