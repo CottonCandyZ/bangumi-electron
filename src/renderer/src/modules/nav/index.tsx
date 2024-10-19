@@ -18,19 +18,17 @@ export function NavBar() {
     <div>
       <nav
         className={cn(
-          'fixed z-10 flex h-dvh flex-col border-r bg-background transition-[width]',
+          'fixed z-50 flex h-dvh flex-col border-r bg-background transition-[width]',
           open && 'z-50',
         )}
         style={{
           width: open ? '15rem' : UI_CONFIG.NAV_WIDTH,
-          maxWidth: open ? undefined : '4rem',
         }}
       >
         <div
           className={cn(
-            'flex h-14 w-full shrink-0 items-center justify-center border-b p-2',
+            'flex h-14 w-full shrink-0 items-center border-b p-3',
             platform === 'darwin' && 'pt-6',
-            open && 'justify-start pl-3',
           )}
         >
           <Button
@@ -44,7 +42,7 @@ export function NavBar() {
             <span className="i-mingcute-menu-line flex text-[1.4rem]" />
           </Button>
         </div>
-        <div className="flex h-full w-full flex-col justify-between overflow-x-hidden px-2.5 pb-2 pt-2">
+        <div className="flex h-full w-full flex-col justify-between overflow-x-hidden p-3">
           <div className="flex w-full flex-col gap-2">
             <LinkNav />
             <Separator />

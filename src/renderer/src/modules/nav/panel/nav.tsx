@@ -35,9 +35,9 @@ export const route = [
 
 export function PanelNav() {
   return (
-    <ul className="flex w-full flex-col items-center gap-1">
+    <ul className="flex w-full flex-col gap-1">
       {route.map((item) => (
-        <li key={item.name} className="flex w-full justify-center">
+        <li key={item.name}>
           <PanelButton {...item} />
         </li>
       ))}
