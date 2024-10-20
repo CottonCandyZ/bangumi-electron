@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@renderer/components/ui/button'
-import { TEXT_CONFIG } from '@renderer/config'
+import { TEXT_CONFIG } from '@renderer/config/text'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   getCaptcha,
@@ -39,7 +39,15 @@ import { openLoginDeleteAccountAction } from '@renderer/state/dialog/alert'
 import { client } from '@renderer/lib/client'
 import { deleteLoginInfo } from '@renderer/data/fetch/db/user'
 
-const login_form_message = TEXT_CONFIG.login_form
+const {
+  FORM: LOGIN_FORM_MESSAGE,
+  LOGIN_STEP: STEP_MESSAGE,
+  LOGIN_ERROR,
+  LOGIN_FORM_TITLE,
+  FORM_ERROR,
+  REMEMBER_PASSWORD_HINT,
+  BUTTON_LOGIN,
+} = TEXT_CONFIG
 
 export function LoginForm({ success = () => {} }: { success?: () => void }) {
   const queryClient = useQueryClient()
@@ -51,10 +59,10 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
   const formSchema = z.object({
     email: z
       .string()
-      .min(1, { message: login_form_message.required })
-      .email(login_form_message.mail_format_error),
-    password: z.string().min(1, { message: login_form_message.required }),
-    captcha: z.string().length(5, { message: login_form_message.captcha_length_error }),
+      .min(1, { message: LOGIN_FORM_MESSAGE.REQUIRED })
+      .email(LOGIN_FORM_MESSAGE.MAIL_FORMAT_ERROR),
+    password: z.string().min(1, { message: LOGIN_FORM_MESSAGE.REQUIRED }),
+    captcha: z.string().length(5, { message: LOGIN_FORM_MESSAGE.CAPTCHA_LENGTH_ERROR }),
     savePassword: z.boolean(),
   })
   const form = useForm<z.infer<typeof formSchema>>({
@@ -82,15 +90,17 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
   const toastId = useRef<string | number>()
   // 登录流程
   const login = async (props: webLoginProps) => {
-    toastId.current = toast.loading('正在登录', { duration: Infinity })
+    toastId.current = toast.loading(STEP_MESSAGE.START_LOGIN, {
+      duration: Infinity,
+    })
     await webLogin({ ...props })
-    toast.loading('网页验证成功 (1/5)', { id: toastId.current })
+    toast.loading(STEP_MESSAGE.WEB_VERIFY_SUCCESS, { id: toastId.current })
     await getOAuthFormHash()
-    toast.loading('获取授权表单成功 (2/5)', { id: toastId.current })
+    toast.loading(STEP_MESSAGE.GET_AUTH_FORM_SUCCESS, { id: toastId.current })
     await getOAuthCode()
-    toast.loading('获得授权 Code 成功 (3/5)', { id: toastId.current })
+    toast.loading(STEP_MESSAGE.GET_AUTH_CODE_SUCCESS, { id: toastId.current })
     await getOAuthAccessToken()
-    toast.loading('获得授权 secret 成功 (4/5)', { id: toastId.current })
+    toast.loading(STEP_MESSAGE.GET_AUTH_SECRET_SUCCESS, { id: toastId.current })
     const user_id = await save()
     localStorage.setItem('current_user_id', user_id.toString())
   }
@@ -109,7 +119,10 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
     mutationKey: ['session'],
     mutationFn: login,
     onSuccess() {
-      toast.success('登陆成功 (5/5)', { id: toastId.current, duration: 3000 })
+      toast.success(STEP_MESSAGE.LOGIN_SUCCESS, {
+        id: toastId.current,
+        duration: 3000,
+      })
       queryClient.invalidateQueries({ queryKey: ['accessToken'] })
       success()
     },
@@ -117,9 +130,16 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
       if (error instanceof LoginError) {
         toast.error(error.message, { id: toastId.current, duration: 3000 })
       } else if (error instanceof FetchError) {
-        toast.error('网络错误', { id: toastId.current, duration: 3000 })
+        console.error(error.message)
+        toast.error(LOGIN_ERROR.NETWORK_ERROR, {
+          id: toastId.current,
+          duration: 3000,
+        })
       } else {
-        toast.error('未知错误', { id: toastId.current, duration: 3000 })
+        toast.error(LOGIN_ERROR.UNKNOWN_ERROR, {
+          id: toastId.current,
+          duration: 3000,
+        })
       }
       form.reset({
         email: form.getValues('email'),
@@ -174,7 +194,7 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>邮箱</FormLabel>
+              <FormLabel>{LOGIN_FORM_TITLE.EMAIL}</FormLabel>
               <FormControl>
                 <InputSelector
                   placeholder="xxx@gmail.com"
@@ -194,7 +214,7 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>密码</FormLabel>
+              <FormLabel>{LOGIN_FORM_TITLE.PASSWORD}</FormLabel>
               <FormControl>
                 <Input type="password" {...field} className="font-mono" />
               </FormControl>
@@ -208,7 +228,7 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
             name="captcha"
             render={({ field }) => (
               <FormItem className="shrink-0 grow basis-48">
-                <FormLabel>验证码</FormLabel>
+                <FormLabel>{LOGIN_FORM_TITLE.CAPTCHA}</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -225,8 +245,8 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
               onClick={() => captcha.refetch()}
             >
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Ooops 出错啦</AlertTitle>
-              <AlertDescription>验证码获取失败，点击重试</AlertDescription>
+              <AlertTitle>{FORM_ERROR.COMMON_TITLE}</AlertTitle>
+              <AlertDescription>{FORM_ERROR.CAPTCHA_LOAD_RETRY_ERROR}</AlertDescription>
             </Alert>
           ) : (
             <img
@@ -245,13 +265,13 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
                 <Checkbox checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
               <FormLabel>
-                记住密码{' '}
+                {LOGIN_FORM_TITLE.REMEMBER_PASSWORD}{' '}
                 <HoverCard>
                   <HoverCardTrigger asChild>
                     <CircleHelp className="-mt-1 inline size-3" />
                   </HoverCardTrigger>
                   <HoverCardContent className="text-sm font-normal">
-                    <p>会使用 electron safeStore 来保存，除了你，没有人可以得到它！</p>
+                    <p>{REMEMBER_PASSWORD_HINT}</p>
                   </HoverCardContent>
                 </HoverCard>
               </FormLabel>
@@ -259,7 +279,7 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
           )}
         />
         <Button type="submit" className="w-full" disabled={mutation.isPending}>
-          登录
+          {BUTTON_LOGIN}
         </Button>
       </form>
     </Form>

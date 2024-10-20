@@ -1,15 +1,3 @@
-export const TEXT_CONFIG = {
-  login_form: {
-    required: '不能为空噢',
-    mail_format_error: '邮箱格式不对的说',
-    captcha_length_error: '验证码需要五位',
-  },
-  add_subject_collection: {
-    comment_exceed_max_length: '不可以超过 380 个字哦',
-    tags_exceed_max_length: '标签不可以超过 10 个',
-  },
-} as const
-
 export const UI_CONFIG = {
   HOME_SECTION_CAROUSEL_NUMBER: 24,
   HEADER_HEIGHT: 56,

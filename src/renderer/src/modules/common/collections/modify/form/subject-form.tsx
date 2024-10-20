@@ -16,7 +16,7 @@ import { Separator } from '@renderer/components/ui/separator'
 import { Switch } from '@renderer/components/ui/switch'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
-import { INPUT_LIMIT_CONFIG, TEXT_CONFIG } from '@renderer/config'
+import { INPUT_LIMIT_CONFIG } from '@renderer/config'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
@@ -27,8 +27,9 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { FormTags } from '@renderer/modules/common/collections/modify/tags/tags-form'
+import { TEXT_CONFIG } from '@renderer/config/text'
 
-const add_subject_collection_message = TEXT_CONFIG.add_subject_collection
+const { ADD_SUBJECT_COLLECTION } = TEXT_CONFIG
 
 export function AddOrModifySubjectCollectionForm({
   subjectId,
@@ -60,10 +61,10 @@ export function AddOrModifySubjectCollectionForm({
     collectionType: z.number(),
     rate: z.custom<CollectionData['rate']>(),
     comment: z.string().max(INPUT_LIMIT_CONFIG.short_comment_length_limit, {
-      message: add_subject_collection_message.comment_exceed_max_length,
+      message: ADD_SUBJECT_COLLECTION.COMMENT_EXCEED_MAX_LENGTH,
     }),
     tags: z.set(z.string()).max(INPUT_LIMIT_CONFIG.tags_max_length_limit, {
-      message: add_subject_collection_message.tags_exceed_max_length,
+      message: ADD_SUBJECT_COLLECTION.TAGS_EXCEED_MAX_LENGTH,
     }),
     isPrivate: z.boolean(),
   })
