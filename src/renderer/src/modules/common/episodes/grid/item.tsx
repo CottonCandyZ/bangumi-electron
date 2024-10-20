@@ -1,6 +1,5 @@
 import { HoverCardTrigger } from '@renderer/components/hover-card/trigger'
 import { EpisodeGridSize } from '@renderer/modules/common/episodes/grid/index'
-import { Button } from '@renderer/components/ui/button'
 import {
   CollectionEpisode,
   CollectionType,
@@ -13,6 +12,7 @@ import { getOnAirStatus } from '@renderer/lib/utils/date'
 import { hoverCardEpisodeContentAtom, hoverCardOpenAtom } from '@renderer/state/hover-card'
 import { useAtom, useAtomValue } from 'jotai'
 import { useEffect, useState } from 'react'
+import { EpisodeButton } from '@renderer/components/button/episode'
 
 function isCollectionEpisode(
   episodes: Episode[] | CollectionEpisode[],
@@ -71,7 +71,7 @@ export function EpisodeGridItem({
         setSelfOpen(true)
       }}
     >
-      <Button
+      <EpisodeButton
         key={episode.id}
         className={cn(
           `flex h-9 min-w-9 rounded-md px-2 py-0`,
@@ -80,7 +80,7 @@ export function EpisodeGridItem({
         variant={selfOpen && open ? `${status}Hover` : status}
       >
         {episode.sort}
-      </Button>
+      </EpisodeButton>
     </HoverCardTrigger>
   )
 }
