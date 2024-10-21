@@ -17,7 +17,7 @@ export function NavButton() {
     <div className="flex items-center justify-center gap-0.5">
       <Button
         variant="ghost"
-        className="no-drag-region aspect-square p-0.5 shadow-none"
+        className="no-drag-region aspect-square p-0.5 shadow-none [&_svg]:size-6"
         onClick={() => navigate(-1)}
         disabled={backDisable}
       >
@@ -25,7 +25,7 @@ export function NavButton() {
       </Button>
       <Button
         variant="ghost"
-        className="no-drag-region aspect-square p-0.5 shadow-none"
+        className="no-drag-region aspect-square p-0.5 shadow-none [&_svg]:size-6"
         onClick={() => navigate(1)}
         disabled={forwardDisable}
       >
