@@ -37,9 +37,10 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   return (
     <DropdownMenu onOpenChange={(open) => setDropDownOpen(open)}>
       <DropdownMenuTrigger
+        data-expend={type}
         className={cn(
-          'flex w-full flex-row items-center gap-3 rounded-full text-muted-foreground shadow-sm hover:text-primary',
-          type === 'expend' && 'group border p-2 shadow-none hover:bg-accent',
+          'flex w-fit flex-row items-center gap-3 rounded-full text-muted-foreground shadow-sm hover:text-primary',
+          type === 'expend' && 'group w-full border p-2 shadow-none',
           dropdownOpen && 'bg-accent text-primary',
         )}
       >
@@ -49,7 +50,10 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
             imageSrc={getUserAvatar(userInfo.avatar).small}
           />
         ) : (
-          <div className="aspect-square w-8 overflow-hidden rounded-full bg-accent"></div>
+          <div
+            data-expend={type}
+            className="aspect-square w-8 shrink-0 overflow-hidden rounded-full bg-accent"
+          ></div>
         )}
         {type === 'expend' && (
           <span className="shrink-0 font-semibold">{isLogin && userInfo.nickname}</span>
