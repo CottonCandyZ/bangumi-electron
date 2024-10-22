@@ -1,3 +1,4 @@
+import { ASSERT_HOST } from '@renderer/data/fetch/config'
 import { InfoBox, InfoKey } from '@renderer/data/types/subject'
 import { RATING_MAP } from '@renderer/lib/utils/map'
 
@@ -33,4 +34,12 @@ export function getCharacterAvatarURL(largeUrl: string) {
   // lain.bgm.tv/pic/crt/l/8f/16/150623_crt_Yuczy.jpg?r=1705076939
   // lain.bgm.tv/pic/crt/g/8f/16/150623_crt_Yuczy.jpg?r=1705076939
   return largeUrl.replace('/l/', '/g/')
+}
+
+export function getUserAvatar(avatar: string) {
+  return {
+    large: `${ASSERT_HOST}/${avatar}`,
+    medium: `${ASSERT_HOST}/r/200/${avatar}`,
+    small: `${ASSERT_HOST}/r/100/${avatar}`,
+  }
 }

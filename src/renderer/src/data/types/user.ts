@@ -1,12 +1,10 @@
+import { ModifyField } from '@shared/utils/type'
+
 /**
  * v0/me
  */
 export type UserInfo = {
-  avatar: {
-    large: string
-    medium: string
-    small: string
-  }
+  avatar: string
   sign: string
   username: string
   nickname: string
@@ -15,6 +13,12 @@ export type UserInfo = {
   url: string
   time_offset: number
 }
+
+export type UserInfoAPI = ModifyField<
+  UserInfo,
+  'avatar',
+  { large: string; medium: string; small: string }
+>
 
 export enum UserGroup {
   '管理员' = 1,

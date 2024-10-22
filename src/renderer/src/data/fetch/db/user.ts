@@ -1,12 +1,12 @@
-import { userLoginInfo, userSession } from '@db/index'
+import { userLoginInfo, userSession, userInfo as userInfoDatabase } from '@db/index'
 import { client } from '@renderer/lib/client'
 import { db } from '@renderer/lib/db/bridge'
 import { LoginInfo, Token } from '@renderer/data/types/login'
 import { eq } from 'drizzle-orm'
+import { UserInfo } from '@renderer/data/types/user'
 
-// save
+// Login Info
 
-// login info
 export async function insertLoginInfo(loginInfo: LoginInfo) {
   if (loginInfo.password !== null) {
     const [encryptedPassword] = await client.getSafeStorageEncrypted({
@@ -24,19 +24,20 @@ export async function insertLoginInfo(loginInfo: LoginInfo) {
   }
 }
 
-// accessToken
-export async function insertAccessToken(sessionInfo: Token) {
-  await db.insert(userSession).values(sessionInfo)
-}
-
-// get
-
-// login info
 export async function readLoginInfo() {
   return await db.query.userLoginInfo.findMany()
 }
 
+export async function deleteLoginInfo({ email }: { email: string }) {
+  return await db.delete(userLoginInfo).where(eq(userLoginInfo.email, email))
+}
+
 // accessToken
+
+export async function insertAccessToken(sessionInfo: Token) {
+  await db.insert(userSession).values(sessionInfo)
+}
+
 export async function readAccessToken({ user_id }: { user_id: number }) {
   return await db.query.userSession.findFirst({
     where: (userSession, { eq }) => eq(userSession.user_id, user_id),
@@ -44,7 +45,21 @@ export async function readAccessToken({ user_id }: { user_id: number }) {
   })
 }
 
-// delete
-export async function deleteLoginInfo({ email }: { email: string }) {
-  return await db.delete(userLoginInfo).where(eq(userLoginInfo.email, email))
+// userInfo
+export async function insertUserInfo(userInfo: UserInfo) {
+  await db
+    .insert(userInfoDatabase)
+    .values(userInfo)
+    .onConflictDoUpdate({
+      target: userInfoDatabase.id,
+      set: {
+        ...userInfo,
+      },
+    })
+}
+
+export async function readUserInfo({ user_id }: { user_id: number }) {
+  return await db.query.userInfo.findFirst({
+    where: (userInfo, { eq }) => eq(userInfo.id, user_id),
+  })
 }

@@ -1,10 +1,16 @@
+export enum LoginErrorCode {
+  'CAPTCHA_ERROR',
+}
+
 /**
  * 一些有关登陆的错误提示
  */
 export class LoginError extends Error {
-  constructor(message: string) {
+  code: number
+  constructor(message: string, code = 0) {
     super(message)
     this.name = 'LoginError'
+    this.code = code
   }
 }
 

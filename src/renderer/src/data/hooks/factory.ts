@@ -12,6 +12,7 @@ import {
   useInfiniteQuery,
   useMutation,
   useQuery,
+  useQueryClient,
 } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai'
 import { FetchError } from 'ofetch'
@@ -23,6 +24,12 @@ type Fn<P, R> = (P: P) => Promise<R>
 type OptionalProps<P> = keyof Omit<P, 'token'> extends never
   ? { queryProps?: Omit<P, 'token'> }
   : { queryProps: Omit<P, 'token'> }
+type OptionalAPIQueryProps<P> = keyof Omit<P, 'token'> extends never
+  ? { apiParams?: Omit<P, 'token'> }
+  : { apiParams: Omit<P, 'token'> }
+type OptionalDBQueryProps<P> = keyof Omit<P, 'user_id'> extends never
+  ? { dbParams?: Omit<P, 'user_id'> }
+  : { dbParams: Omit<P, 'user_id'> }
 
 /**
  * 为必须验证的 QueryHook 工厂
@@ -61,6 +68,65 @@ export const useQueryMustAuth = <P, R>({
     },
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     enabled: enabled && accessToken !== undefined && !isRefreshToken,
+    ...props,
+  })
+  return query
+}
+
+export const useDBQueryMustAuth = <TApiParams, TDbParams, TQueryFnReturn>({
+  queryKey = [],
+  apiQueryFn,
+  dbQueryFn,
+  updateDB,
+  apiParams,
+  dbParams,
+  enabled = true,
+  needKeepPreviousData = true,
+  ...props
+}: {
+  apiQueryFn: TApiParams extends { token: string } ? Fn<TApiParams, TQueryFnReturn> : never
+  dbQueryFn: TDbParams extends { user_id: number }
+    ? Fn<TDbParams, TQueryFnReturn | undefined>
+    : never
+  updateDB: Fn<TQueryFnReturn, void>
+  enabled?: boolean
+  needKeepPreviousData?: boolean
+} & OptionalAPIQueryProps<TApiParams> &
+  OptionalDBQueryProps<TDbParams> &
+  Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
+  const { data: token } = useAccessTokenQuery()
+  const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
+  const queryKeyWithToken = [...queryKey, apiParams, token?.access_token]
+  const queryClient = useQueryClient()
+
+  const unifiedQueryFn = async () => {
+    if (!token?.access_token) throw AuthError.notAuth()
+
+    const dbData = await dbQueryFn({ user_id: token.user_id, ...dbParams } as TDbParams)
+    if (dbData) {
+      setTimeout(async () => {
+        const apiData = await apiQueryFn({
+          token: token.access_token,
+          ...apiParams,
+        } as TApiParams)
+        await updateDB(apiData)
+        queryClient.setQueryData(queryKeyWithToken, apiData)
+      }, 0)
+      return dbData
+    }
+    const apiData = await apiQueryFn({
+      token: token.access_token,
+      ...apiParams,
+    } as TApiParams)
+    await updateDB(apiData)
+    return apiData
+  }
+
+  const query = useQuery({
+    queryKey: queryKeyWithToken,
+    queryFn: unifiedQueryFn,
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
+    enabled: enabled && token !== undefined && !isRefreshToken,
     ...props,
   })
   return query

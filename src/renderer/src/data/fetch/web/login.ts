@@ -7,7 +7,7 @@ import {
 } from '@renderer/data/fetch/config'
 import { insertAccessToken, insertLoginInfo } from '@renderer/data/fetch/db/user'
 import { getTimestamp } from '@renderer/lib/utils/date'
-import { LoginError } from '@renderer/lib/utils/error'
+import { LoginError, LoginErrorCode } from '@renderer/lib/utils/error'
 import { domParser } from '@renderer/lib/utils/parser'
 import { LoginInfo, Token } from '@renderer/data/types/login'
 import { MakeOptional } from '@shared/utils/type'
@@ -101,7 +101,7 @@ export async function webLogin({ email, password, captcha, savePassword }: webLo
     throw new LoginError('尝试超过 5 次了的说，请 15 分钟后再试')
   }
   if (data.includes('验证码错误，请返回重试')) {
-    throw new LoginError('验证码错误')
+    throw new LoginError('验证码错误', LoginErrorCode.CAPTCHA_ERROR)
   }
   if (data.includes('用户名无效，密码错误')) {
     throw new LoginError('用户名或密码错误')

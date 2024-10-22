@@ -1,8 +1,8 @@
 import { useIsUnauthorized } from '@renderer/modules/wrapper/query'
-import { useQueryUserInfo } from '@renderer/data/hooks/api/user'
 import { useAccessTokenQuery } from '@renderer/data/hooks/session'
 import { UserInfo } from '@renderer/data/types/user'
 import { createContext, PropsWithChildren, useContext } from 'react'
+import { useUserInfoQuery } from '@renderer/data/hooks/db/user'
 
 export const SessionContext = createContext<{
   isLogin: undefined | boolean
@@ -21,7 +21,7 @@ export const useSession = () => {
 export function SessionWrapper({ children }: PropsWithChildren) {
   const token = useAccessTokenQuery().data
   const isLogin = token === undefined ? undefined : !!token
-  const userInfo = useQueryUserInfo({ enabled: !!isLogin }).data
+  const userInfo = useUserInfoQuery({ enabled: !!isLogin }).data
   useIsUnauthorized()
   return (
     <SessionContext.Provider value={{ isLogin, userInfo, accessToken: token?.access_token }}>
