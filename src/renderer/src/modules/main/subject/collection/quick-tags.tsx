@@ -18,7 +18,7 @@ export function QuickTags({
 }: {
   subjectTags: Subject['tags']
   subjectCollection: CollectionData | undefined | null
-  userInfo: UserInfo | undefined
+  userInfo: UserInfo | undefined | null
   accessToken: string | undefined
 }) {
   const [tags, setTags] = useState(new Set<string>())
