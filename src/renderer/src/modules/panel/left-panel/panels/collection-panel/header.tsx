@@ -11,12 +11,12 @@ import { useAtom, useAtomValue } from 'jotai'
 export function SubjectCollectionPanelHeader() {
   const subjectType = SubjectType[useAtomValue(collectionPanelSubjectTypeAtom)]
   const [filterMap, setCurrentTypeFilter] = useAtom(sidePanelCollectionTypeFilterAtom)
-  const { isLogin } = useSession()
+  const { userInfo } = useSession()
   const currentSelect = filterMap.get(subjectType.toString()) ?? CollectionType['watching']
   const isRefetching = useAtomValue(collectionPanelIsRefetchingAtom)
   return (
     <div className="drag-region flex h-14 shrink-0 flex-row items-center justify-end gap-5 border-b px-2">
-      {isLogin && (
+      {!!userInfo && (
         <>
           {isRefetching && <span className="i-mingcute-loading-line animate-spin text-2xl" />}
           <Select

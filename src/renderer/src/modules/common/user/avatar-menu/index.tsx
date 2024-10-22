@@ -28,8 +28,9 @@ import { getUserAvatar } from '@renderer/lib/utils/data-trans'
 export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   const logoutMutation = useLogoutMutation()
   const { userInfo } = useSession()
+  const isLogin = !!userInfo
   const { theme, setTheme } = useTheme()
-  const { isLogin } = useSession()
+
   const [dropdownOpen, setDropDownOpen] = useState(false)
   const openDialog = useSetAtom(openDialogAction)
 
@@ -45,13 +46,13 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
         {isLogin ? (
           <Image
             className="aspect-square w-8 shrink-0 overflow-hidden rounded-full"
-            imageSrc={userInfo ? getUserAvatar(userInfo.avatar).small : ''}
+            imageSrc={getUserAvatar(userInfo.avatar).small}
           />
         ) : (
           <div className="aspect-square w-8 overflow-hidden rounded-full bg-accent"></div>
         )}
         {type === 'expend' && (
-          <span className="shrink-0 font-semibold">{isLogin && userInfo?.nickname}</span>
+          <span className="shrink-0 font-semibold">{isLogin && userInfo.nickname}</span>
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent

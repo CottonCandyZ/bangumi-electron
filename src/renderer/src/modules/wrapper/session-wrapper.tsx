@@ -5,11 +5,9 @@ import { createContext, PropsWithChildren, useContext } from 'react'
 import { useUserInfoQuery } from '@renderer/data/hooks/db/user'
 
 export const SessionContext = createContext<{
-  isLogin: undefined | boolean
-  userInfo: undefined | UserInfo
+  userInfo: undefined | UserInfo | null
   accessToken: string | undefined
 }>({
-  isLogin: undefined,
   userInfo: undefined,
   accessToken: undefined,
 })
@@ -19,12 +17,13 @@ export const useSession = () => {
 }
 
 export function SessionWrapper({ children }: PropsWithChildren) {
+  // token 是暂时提供的的，预计后续将会去除，只提供 userInfo
+  // 现在 token 仅仅用来拼接 queryKey
   const token = useAccessTokenQuery().data
-  const isLogin = token === undefined ? undefined : !!token
-  const userInfo = useUserInfoQuery({ enabled: !!isLogin }).data
+  const userInfo = useUserInfoQuery().data
   useIsUnauthorized()
   return (
-    <SessionContext.Provider value={{ isLogin, userInfo, accessToken: token?.access_token }}>
+    <SessionContext.Provider value={{ userInfo, accessToken: token?.access_token }}>
       {children}
     </SessionContext.Provider>
   )

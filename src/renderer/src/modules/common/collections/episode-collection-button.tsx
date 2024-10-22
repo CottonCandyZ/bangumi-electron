@@ -32,12 +32,12 @@ export function EpisodeCollectionButton({
   subjectId: SubjectId
   setEnabledForm: (enabled: boolean) => void
 } & ModifyEpisodeCollectionOptType) {
-  const { isLogin, userInfo, accessToken } = useSession()
+  const { userInfo, accessToken } = useSession()
   const username = userInfo?.username
   const collectionEpisodesQuery = useQueryCollectionEpisodesInfoBySubjectId({
     ...modifyEpisodeCollectionOpt,
     subjectId,
-    enabled: isLogin !== undefined && isLogin,
+    enabled: !!userInfo,
   })
   const collectionEpisodes = collectionEpisodesQuery.data
   const episodes = collectionEpisodes?.data

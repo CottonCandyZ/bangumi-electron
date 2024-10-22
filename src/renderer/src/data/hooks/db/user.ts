@@ -7,12 +7,11 @@ export function useLoginInfoQuery() {
   return useQuery({ queryKey: ['login-info-list'], queryFn: readLoginInfo, staleTime: 0 })
 }
 
-export function useUserInfoQuery({ enabled }: { enabled?: boolean }) {
+export function useUserInfoQuery() {
   return useDBQueryMustAuth({
     queryKey: ['userInfo'],
     apiQueryFn: getUserInfo,
     dbQueryFn: readUserInfo,
     updateDB: insertUserInfo,
-    enabled: enabled,
   })
 }

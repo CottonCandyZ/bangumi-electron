@@ -93,14 +93,17 @@ export const useDBQueryMustAuth = <TApiParams, TDbParams, TQueryFnReturn>({
   needKeepPreviousData?: boolean
 } & OptionalAPIQueryProps<TApiParams> &
   OptionalDBQueryProps<TDbParams> &
-  Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
+  Omit<
+    UseQueryOptions<TQueryFnReturn | null, Error, TQueryFnReturn | null, QueryKey>,
+    'queryFn'
+  >) => {
   const { data: token } = useAccessTokenQuery()
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
   const queryKeyWithToken = [...queryKey, apiParams, token?.access_token]
   const queryClient = useQueryClient()
 
   const unifiedQueryFn = async () => {
-    if (!token?.access_token) throw AuthError.notAuth()
+    if (!token) return null
 
     const dbData = await dbQueryFn({ user_id: token.user_id, ...dbParams } as TDbParams)
     if (dbData) {

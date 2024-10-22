@@ -11,7 +11,7 @@ export default function MainErrorElement() {
   const nav = useNavigate()
   const error = useRouteError() as Error
   const location = useLocation()
-  const { isLogin } = useSession()
+  const { userInfo } = useSession()
   const { copied, copyToClipboard } = useCopyToClipboard()
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function MainErrorElement() {
   const submitIssue = () => {
     const issueTitle = encodeURIComponent(ERROR_CONSTANTS.ISSUE_TITLE)
     const issueBody = encodeURIComponent(
-      `Error Stack:\n\`\`\`\n${error.stack || error.message}\n\`\`\`\n\nCurrent Page Path: ${location.pathname}\n\nLogin Status: ${isLogin ? 'Logged In' : 'Not Logged In'}`,
+      `Error Stack:\n\`\`\`\n${error.stack || error.message}\n\`\`\`\n\nCurrent Page Path: ${location.pathname}\n\nLogin Status: ${userInfo ? 'Logged In' : 'Not Logged In'}`,
     )
     const issueUrl = `${ERROR_CONSTANTS.GITHUB_ISSUE_URL}?title=${issueTitle}&body=${issueBody}`
     window.open(issueUrl, '_blank')

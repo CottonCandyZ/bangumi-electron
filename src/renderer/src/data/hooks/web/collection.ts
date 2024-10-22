@@ -11,9 +11,9 @@ export const useWebDeleteCollectionHash = ({
   subjectId: SubjectId
   enabled?: boolean
 }) => {
-  const { isLogin } = useSession()
+  const { userInfo } = useSession()
   return useQuery({
-    queryKey: ['SubjectHomePage', isLogin, subjectId],
+    queryKey: ['SubjectHomePage', !!userInfo, subjectId],
     queryFn: async () => await fetchSubjectInfoById({ subjectId }),
     select: parseDeleteCollectionHash,
     enabled: enabled,

@@ -24,7 +24,7 @@ export function EpisodesGrid({
   selector?: boolean
   collectionType?: CollectionType
 } & EpisodeGridSize) {
-  const { isLogin } = useSession()
+  const { userInfo } = useSession()
   const [offset, setOffSet] = useState(0)
   const limit = 100
   let skeletonNumber = eps ?? 12
@@ -33,19 +33,19 @@ export function EpisodesGrid({
     subjectId,
     offset,
     limit,
-    enabled: isLogin !== undefined && !isLogin,
+    enabled: !userInfo,
   })
 
   const collectionEpisodesQuery = useQueryCollectionEpisodesInfoBySubjectId({
     subjectId,
     offset,
     limit,
-    enabled: isLogin !== undefined && isLogin,
+    enabled: !!userInfo,
   })
 
-  if (isLogin === undefined) return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
+  if (userInfo === undefined) return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
 
-  const episode = isLogin ? collectionEpisodesQuery : episodesQuery
+  const episode = userInfo ? collectionEpisodesQuery : episodesQuery
   if (episode.data === undefined) {
     return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
   }

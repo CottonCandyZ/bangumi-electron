@@ -9,7 +9,7 @@ import { useAtomValue } from 'jotai'
 export function SubjectCollectionPanelContent() {
   const subjectType = SubjectType[useAtomValue(collectionPanelSubjectTypeAtom)]
   const filterMap = useAtomValue(sidePanelCollectionTypeFilterAtom)
-  const { isLogin } = useSession()
+  const { userInfo } = useSession()
   const currentSelect = filterMap.get(subjectType.toString()) ?? CollectionType['watching']
-  return isLogin && <CollectionsGrid subjectType={subjectType} collectionType={currentSelect} />
+  return !!userInfo && <CollectionsGrid subjectType={subjectType} collectionType={currentSelect} />
 }

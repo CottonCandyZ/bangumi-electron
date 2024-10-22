@@ -20,7 +20,7 @@ import { QuickRate } from '@renderer/modules/main/subject/collection/quick-rate'
 import { openDialogAction } from '@renderer/state/dialog/normal'
 
 export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
-  const { isLogin, userInfo, accessToken } = useSession()
+  const { userInfo, accessToken } = useSession()
   const subjectCollectionQuery = useQuerySubjectCollection({
     subjectId,
     username: userInfo?.username,
@@ -39,13 +39,8 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
     setIsInView(isInView)
   }, [isInView, setIsInView])
 
-  const loading =
-    subjectInfo === undefined ||
-    subjectCollection === undefined ||
-    userInfo === undefined ||
-    isLogin === undefined
-  if (!isLogin || !accessToken)
-    return <Button onClick={() => openDialog('login-form')}>登录</Button>
+  const loading = subjectInfo === undefined || subjectCollection === undefined || !userInfo
+  if (!accessToken) return <Button onClick={() => openDialog('login-form')}>登录</Button>
   return (
     <div className="flex flex-col gap-2" ref={ref}>
       <div className="flex flex-row items-center justify-between">
