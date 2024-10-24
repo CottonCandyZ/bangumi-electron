@@ -13,6 +13,7 @@ asarUnpack:
   - resources/**
 win:
   executableName: Bangumi
+  icon: build/icon-windows.png
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
