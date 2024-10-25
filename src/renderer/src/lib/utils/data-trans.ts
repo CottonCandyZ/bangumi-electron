@@ -36,10 +36,39 @@ export function getCharacterAvatarURL(largeUrl: string) {
   return largeUrl.replace('/l/', '/g/')
 }
 
+export function returnFirstOrNull<T>(res: T[]) {
+  return res.length === 0 ? null : res[0]
+}
+
+// 可能暂时不准备使用，不如直接存 json
 export function getUserAvatar(avatar: string) {
+  if (avatar.trim().length === 0)
+    return {
+      large: '',
+      medium: '',
+      small: '',
+    }
   return {
     large: `${ASSERT_HOST}/${avatar}`,
     medium: `${ASSERT_HOST}/r/200/${avatar}`,
     small: `${ASSERT_HOST}/r/100/${avatar}`,
+  }
+}
+
+export function getCoverImage(src: string) {
+  if (src.trim().length === 0)
+    return {
+      large: '',
+      medium: '',
+      small: '',
+      common: '',
+      grid: '',
+    }
+  return {
+    large: `${ASSERT_HOST}/${src}`,
+    small: `${ASSERT_HOST}/r/200/${src}`,
+    grid: `${ASSERT_HOST}/r/100/${src}`,
+    medium: `${ASSERT_HOST}/r/800/${src}`,
+    common: `${ASSERT_HOST}/r/400/${src}`,
   }
 }

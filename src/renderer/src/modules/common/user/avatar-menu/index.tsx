@@ -23,7 +23,6 @@ import { cn } from '@renderer/lib/utils'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useSetAtom } from 'jotai'
 import { openDialogAction } from '@renderer/state/dialog/normal'
-import { getUserAvatar } from '@renderer/lib/utils/data-trans'
 
 export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   const logoutMutation = useLogoutMutation()
@@ -47,7 +46,7 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
         {isLogin ? (
           <Image
             className="aspect-square w-8 shrink-0 overflow-hidden rounded-full"
-            imageSrc={getUserAvatar(userInfo.avatar).small}
+            imageSrc={userInfo.avatar.small}
           />
         ) : (
           <div

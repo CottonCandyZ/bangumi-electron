@@ -4,6 +4,7 @@ import { db } from '@renderer/lib/db/bridge'
 import { LoginInfo, Token } from '@renderer/data/types/login'
 import { eq } from 'drizzle-orm'
 import { UserInfo } from '@renderer/data/types/user'
+import { returnFirstOrNull } from '@renderer/lib/utils/data-trans'
 
 // Login Info
 
@@ -39,10 +40,13 @@ export async function insertAccessToken(sessionInfo: Token) {
 }
 
 export async function readAccessToken({ user_id }: { user_id: number }) {
-  return await db.query.userSession.findFirst({
-    where: (userSession, { eq }) => eq(userSession.user_id, user_id),
-    orderBy: (userSession, { desc }) => [desc(userSession.create_time)],
-  })
+  return returnFirstOrNull(
+    await db.query.userSession.findMany({
+      where: (userSession, { eq }) => eq(userSession.user_id, user_id),
+      orderBy: (userSession, { desc }) => [desc(userSession.create_time)],
+      limit: 1,
+    }),
+  )
 }
 
 // userInfo
@@ -59,7 +63,10 @@ export async function insertUserInfo(userInfo: UserInfo) {
 }
 
 export async function readUserInfo({ user_id }: { user_id: number }) {
-  return await db.query.userInfo.findFirst({
-    where: (userInfo, { eq }) => eq(userInfo.id, user_id),
-  })
+  return returnFirstOrNull(
+    await db.query.userInfo.findMany({
+      where: (userInfo, { eq }) => eq(userInfo.id, user_id),
+      limit: 1,
+    }),
+  )
 }
