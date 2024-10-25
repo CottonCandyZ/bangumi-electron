@@ -5,7 +5,6 @@ import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionType } from '@renderer/data/types/collection'
 import { useInView } from 'framer-motion'
 import { useEffect, useRef } from 'react'
-import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useSetAtom } from 'jotai'
 import { collectionBoxInViewAtom } from '@renderer/state/in-view'
@@ -18,6 +17,7 @@ import { ModifySubjectCollection } from '@renderer/modules/main/subject/collecti
 import { MoreActionDropDown } from '@renderer/modules/main/subject/collection/more-action-drop-down'
 import { QuickRate } from '@renderer/modules/main/subject/collection/quick-rate'
 import { openDialogAction } from '@renderer/state/dialog/normal'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 
 export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const { userInfo, accessToken } = useSession()
@@ -28,7 +28,7 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
     needKeepPreviousData: false,
   })
   const subjectCollection = subjectCollectionQuery.data
-  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
+  const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const openDialog = useSetAtom(openDialogAction)
 

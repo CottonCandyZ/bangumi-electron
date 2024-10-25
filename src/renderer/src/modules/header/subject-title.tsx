@@ -1,5 +1,5 @@
 import { Image } from '@renderer/components/image/image'
-import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { Subject } from '@renderer/data/types/subject'
 import { isEmpty } from '@renderer/lib/utils/string'
@@ -16,7 +16,7 @@ export function HeaderTitle() {
 }
 
 function SubjectHeaderTitle({ subjectId }: { subjectId: SubjectId }) {
-  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
+  const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const isInView = useAtomValue(subjectCoverImageInViewAtom)
   if (!subjectInfo) return null

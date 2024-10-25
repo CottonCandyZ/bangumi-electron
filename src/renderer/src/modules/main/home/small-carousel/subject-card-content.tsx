@@ -11,7 +11,6 @@ import {
 } from '@renderer/components/ui/select'
 import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { useTopListQuery } from '@renderer/data/hooks/web/subject'
 import { SectionPath } from '@renderer/data/types/web'
 import { cn } from '@renderer/lib/utils'
@@ -28,6 +27,7 @@ import {
   HoverPopCard,
   PopCardContent,
 } from '@renderer/components/hover-pop-card/fixed-size'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 
 export interface SubjectCardProps {
   sectionPath: SectionPath
@@ -40,7 +40,7 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
   const topList = useTopListQuery(sectionPath)
   const subjectId = topList?.data?.[index].SubjectId
   // const follow = topList?.data?.[index].follow?.replace(/[^0-9]/g, '')
-  const subjectInfo = useQuerySubjectInfo({ subjectId, enabled: !!subjectId })
+  const subjectInfo = useSubjectInfoQuery({ subjectId, enabled: !!subjectId })
   const subjectInfoData = subjectInfo.data
 
   /* eslint-disable */

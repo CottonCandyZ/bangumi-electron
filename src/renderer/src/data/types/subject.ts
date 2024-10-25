@@ -1,19 +1,21 @@
 import { InfoBoxValueList } from '@renderer/data/types/bgm'
+import { ModifyField } from '@shared/utils/type'
 
 /** 条目 */
 export type Subject = {
-  date: string
+  id: number
+  date: Date | null
   platform: string
   images: CoverImages
   summary: string
   name: string
   name_cn: string
-  tags: Tag[]
   infobox: InfoBox[]
+  ratingCount: RatingCount
+  tags: Tag[]
   rating: Rating
   total_episodes: number
   collection: SubjectCollection
-  id: number
   /** eps 不可信 */
   eps: number
   volumes: number
@@ -22,6 +24,17 @@ export type Subject = {
   nsfw: boolean
   type: SubjectType
 }
+
+export type SubjectAPI = ModifyField<
+  Subject,
+  'date' | 'ratingCount' | 'rating',
+  {
+    date: string
+    rating: Rating & {
+      count: RatingCount
+    }
+  }
+>
 
 export type RelatedSubject = {
   images: CoverImages
@@ -93,22 +106,10 @@ export type InfoKey =
 export type Rating = {
   rank: number
   total: number
-  count: RatingCount
   score: number
 }
 
-export type RatingCount = {
-  '1': number
-  '2': number
-  '3': number
-  '4': number
-  '5': number
-  '6': number
-  '7': number
-  '8': number
-  '9': number
-  '10': number
-}
+export type RatingCount = Record<'1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10', number>
 
 export type SubjectCollection = {
   on_hold: number

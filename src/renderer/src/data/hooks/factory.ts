@@ -1,6 +1,7 @@
 import { useAccessTokenQuery } from '@renderer/data/hooks/session'
 import { AuthError } from '@renderer/lib/utils/error'
 import { isRefreshingTokenAtom } from '@renderer/state/session'
+
 import {
   GetNextPageParamFunction,
   InfiniteData,
@@ -88,9 +89,7 @@ export const useDBQueryMustAuth = <TApiParams, TDbParams, TQueryFnReturn>({
   ...props
 }: {
   apiQueryFn: TApiParams extends { token: string } ? Fn<TApiParams, TQueryFnReturn> : never
-  dbQueryFn: TDbParams extends { user_id: number }
-    ? Fn<TDbParams, TQueryFnReturn | undefined>
-    : never
+  dbQueryFn: TDbParams extends { user_id: number } ? Fn<TDbParams, TQueryFnReturn | null> : never
   updateDB: Fn<TQueryFnReturn, void>
   enabled?: boolean
   needKeepPreviousData?: boolean
@@ -202,16 +201,13 @@ export const useDBQueryOptionalAuth = <TApiParams, TDbParams, TQueryFnReturn>({
   ...props
 }: {
   apiQueryFn: TApiParams extends { token?: string } ? Fn<TApiParams, TQueryFnReturn> : never
-  dbQueryFn: Fn<TDbParams, TQueryFnReturn | undefined>
+  dbQueryFn: Fn<TDbParams, TQueryFnReturn | null>
   dbParams: TDbParams
   updateDB: Fn<TQueryFnReturn, void>
   enabled?: boolean
   needKeepPreviousData?: boolean
 } & OptionalAPIQueryProps<TApiParams> &
-  Omit<
-    UseQueryOptions<TQueryFnReturn | null, Error, TQueryFnReturn | null, QueryKey>,
-    'queryFn'
-  >) => {
+  Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
   const { data: token } = useAccessTokenQuery()
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
   const queryKeyWithToken = [...queryKey, apiParams, token?.access_token]

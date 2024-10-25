@@ -1,14 +1,18 @@
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { Score } from '@renderer/modules/main/subject/score/score'
 
 export function SubjectScore({ subjectId }: { subjectId: SubjectId }) {
-  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
+  const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   return (
     <section className="flex min-w-56 flex-col gap-2">
-      {subjectInfo ? <Score rating={subjectInfo.rating} /> : <Skeleton className="h-60" />}
+      {subjectInfo ? (
+        <Score rating={subjectInfo.rating} ratingCount={subjectInfo.ratingCount} />
+      ) : (
+        <Skeleton className="h-60" />
+      )}
     </section>
   )
 }

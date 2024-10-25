@@ -1,5 +1,5 @@
 import { Image } from '@renderer/components/image/image'
-import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { SubjectBackground } from '@renderer/modules/main/subject/background/filter'
@@ -7,7 +7,7 @@ import { mainContainerLeft, mainContainerRight } from '@renderer/state/main-boun
 import { useAtomValue } from 'jotai'
 
 export function BackgroundImage({ subjectId }: { subjectId: SubjectId }) {
-  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
+  const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const left = useAtomValue(mainContainerLeft)
   const right = useAtomValue(mainContainerRight)

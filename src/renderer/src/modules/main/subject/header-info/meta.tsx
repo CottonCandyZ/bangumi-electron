@@ -52,12 +52,12 @@ function MetaItem({
   first = false,
 }: {
   content: string | number | undefined
-  inner: string | undefined | number
+  inner: string | undefined | number | null | Date
   first?: boolean
 }) {
   return (
-    inner != 0 &&
     inner &&
+    inner != 0 &&
     inner !== '' && (
       <>
         {!first && <span>·</span>}

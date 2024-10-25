@@ -5,7 +5,6 @@ import {
   DropdownMenuTrigger,
 } from '@renderer/components/ui/dropdown-menu'
 import { Button } from '@renderer/components/ui/button'
-import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionType } from '@renderer/data/types/collection'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
@@ -13,6 +12,7 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
 import { useSetAtom } from 'jotai'
 import { subjectCollectionSheetFormActionAtom } from '@renderer/state/dialog/sheet'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 
 export function AddSubjectCollection({
   subjectId,
@@ -21,7 +21,7 @@ export function AddSubjectCollection({
   subjectId: SubjectId
   dropdown?: boolean
 }) {
-  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
+  const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const sheetAction = useSetAtom(subjectCollectionSheetFormActionAtom)
   if (subjectInfo === undefined) return <Skeleton className="h-10 w-full" />

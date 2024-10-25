@@ -80,7 +80,7 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
           {Array.from({ length: UI_CONFIG.HOME_SECTION_CAROUSEL_NUMBER }).map((_, index) => (
             <CarouselItem
               key={index}
-              className="@8xl:basis-[11.111111%] @9xl:basis-[10%] basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%]"
+              className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @8xl:basis-[11.111111%] @9xl:basis-[10%]"
             >
               <div className="p-0.5">
                 <SubjectCard index={index} sectionPath={sectionPath} />

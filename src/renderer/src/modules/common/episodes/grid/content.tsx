@@ -2,7 +2,6 @@ import { EpisodeGridSize } from '@renderer/modules/common/episodes/grid/index'
 import { EpisodeGridItem } from '@renderer/modules/common/episodes/grid/item'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
-import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import {
   CollectionEpisode,
@@ -17,6 +16,7 @@ import { useEffect, useState } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 import { toast } from 'sonner'
 import { subjectCollectionSheetFormActionAtom } from '@renderer/state/dialog/sheet'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 
 function isCollectionEpisode(episode: Episode | CollectionEpisode): episode is CollectionEpisode {
   return (episode as CollectionEpisode).episode !== undefined
@@ -45,7 +45,7 @@ export function EpisodeGridContent({
     needKeepPreviousData: false,
   })
   const subjectCollection = subjectCollectionQuery.data
-  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false, enabled })
+  const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false, enabled })
   const subjectInfo = subjectInfoQuery.data
   const sheetAction = useSetAtom(subjectCollectionSheetFormActionAtom)
   /** 在严格模式下会跑两次，所以让我们用 Effect 包裹它吧 */

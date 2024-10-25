@@ -3,17 +3,17 @@ import { SubjectId } from '@renderer/data/types/bgm'
 import { Image } from '@renderer/components/image/image'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { useCallback, useEffect } from 'react'
 import { useSetAtom } from 'jotai'
 import { subjectCoverImageInViewAtom } from '@renderer/state/in-view'
 import { unstable_useViewTransitionState, useLocation } from 'react-router-dom'
 import { useInView } from 'react-intersection-observer'
 import { useStateHook } from '@renderer/hooks/use-cache-state'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 
 export function SubjectCoverImage({ subjectId }: { subjectId: SubjectId }) {
   const { state } = useLocation()
-  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
+  const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const setIsInView = useSetAtom(subjectCoverImageInViewAtom)
   const isTransitioning = unstable_useViewTransitionState(`/subject/${subjectId}`)

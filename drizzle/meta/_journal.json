@@ -15,6 +15,20 @@
       "when": 1728997253087,
       "tag": "0001_round_magik",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1729836464167,
+      "tag": "0002_heavy_professor_monster",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1729860880518,
+      "tag": "0003_milky_ravenous",
+      "breakpoints": true
     }
   ]
 }

@@ -31,12 +31,13 @@ export const execute = async ({ sql, params, method }: ExecuteType) => {
 
 /** only for insert & delete, no query return here */
 export const executeBatch = async ({ queries }: ExecuteBatchType) => {
+  console.log(queries)
   const pres = Array(queries.length)
   queries.forEach((item, index) => {
     pres[index] = sqlite.prepare(item.sql)
   })
-  const batch = sqlite.transaction((parm: unknown[]) => {
-    pres.forEach((item, index) => item[queries[index].method](...parm))
+  const batch = sqlite.transaction((params: unknown[]) => {
+    params.forEach((param, index) => pres[index].run(param))
   })
   // FIXME: NO TEST HERE, USE WITH CAUTION
   batch(queries.map((item) => item.params))

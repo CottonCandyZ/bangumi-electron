@@ -1,13 +1,13 @@
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
-import { useQuerySubjectInfo } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { QuickTags } from '@renderer/modules/main/subject/collection/quick-tags'
 import { Fragment } from 'react/jsx-runtime'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 
 export function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
-  const subjectInfoQuery = useQuerySubjectInfo({ subjectId, needKeepPreviousData: false })
+  const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const { userInfo, accessToken } = useSession()
   const subjectCollection = useQuerySubjectCollection({
