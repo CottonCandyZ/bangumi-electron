@@ -13,7 +13,7 @@ export function BackgroundImage({ subjectId }: { subjectId: SubjectId }) {
   const right = useAtomValue(mainContainerRight)
 
   return (
-    subjectInfo?.images.large &&
+    subjectInfo &&
     !isEmpty(subjectInfo.images.large) && (
       <Image
         key={subjectInfo.images.large}

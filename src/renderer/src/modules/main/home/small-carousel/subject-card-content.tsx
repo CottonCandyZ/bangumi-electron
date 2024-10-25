@@ -80,14 +80,18 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
             state={{ viewTransitionName: `cover-image-${key}` }}
           >
             <CardContent className="p-0">
-              <CoverMotionImage
-                className={cn(
-                  'aspect-[2/3] overflow-hidden rounded-xl',
-                  sectionPath === 'music' && 'aspect-square',
-                )}
-                imageSrc={subjectInfoData?.images.common}
-                layoutId={`${layoutId}-image`}
-              />
+              {subjectInfoData ? (
+                <CoverMotionImage
+                  className={cn(
+                    'aspect-[2/3] overflow-hidden rounded-xl',
+                    sectionPath === 'music' && 'aspect-square',
+                  )}
+                  imageSrc={subjectInfoData.images.common}
+                  layoutId={`${layoutId}-image`}
+                />
+              ) : (
+                <Skeleton className="aspect-[2/3] rounded-xl" />
+              )}
               <div
                 className={`absolute bottom-0 left-0 right-0 z-20 flex h-12 items-end justify-between bg-gradient-to-t from-black/50 px-2 py-1`}
               >
@@ -142,14 +146,18 @@ export const SubjectCard = memo(({ sectionPath, index }: SubjectCardProps) => {
             <CardContent className="flex h-full flex-col gap-1 p-0">
               {/* Cover */}
               <section className="flex w-full flex-row items-start gap-2 p-4">
-                <CoverMotionImage
-                  imageSrc={subjectInfoData?.images.common}
-                  className="shrink-0 basis-1/6 overflow-hidden rounded-lg shadow-lg"
-                  layoutId={`${layoutId}-image`}
-                  style={{
-                    viewTransitionName: isTransitioning ? `cover-image-${key}` : undefined,
-                  }}
-                />
+                {subjectInfoData ? (
+                  <CoverMotionImage
+                    imageSrc={subjectInfoData.images.common}
+                    className="shrink-0 basis-1/6 overflow-hidden rounded-lg shadow-lg"
+                    layoutId={`${layoutId}-image`}
+                    style={{
+                      viewTransitionName: isTransitioning ? `cover-image-${key}` : undefined,
+                    }}
+                  />
+                ) : (
+                  <Skeleton className="aspect-square shrink-0 basis-1/6" />
+                )}
                 {/* 标题描述 */}
                 <section className="flex w-full flex-col justify-between gap-0.5">
                   <div className="flex w-full flex-col">
