@@ -26,11 +26,12 @@ export async function insertSubjectInfo(subjectInfo: Subject) {
   const batch: [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] = [
     db
       .insert(subject)
-      .values(subjectInfo)
+      .values({ ...subjectInfo, last_update_at: new Date() })
       .onConflictDoUpdate({
         target: subject.id,
         set: {
           ...subjectInfo,
+          last_update_at: new Date(),
         },
       }),
 

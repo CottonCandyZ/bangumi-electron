@@ -19,6 +19,7 @@ export const subject = sqliteTable('Subject', {
   locked: t.integer({ mode: 'boolean' }).notNull(),
   nsfw: t.integer({ mode: 'boolean' }).notNull(),
   type: t.integer().notNull(),
+  last_update_at: t.integer({ mode: 'timestamp_ms' }).notNull(),
 })
 
 export const subjectRelation = relations(subject, ({ one, many }) => ({
