@@ -4,7 +4,12 @@ import { useDBQueryMustAuth } from '@renderer/data/hooks/factory'
 import { useQuery } from '@tanstack/react-query'
 
 export function useLoginInfoQuery() {
-  return useQuery({ queryKey: ['login-info-list'], queryFn: readLoginInfo, staleTime: 0 })
+  return useQuery({
+    queryKey: ['login-info-list'],
+    queryFn: readLoginInfo,
+    staleTime: 0,
+    persister: undefined,
+  })
 }
 
 export function useUserInfoQuery() {

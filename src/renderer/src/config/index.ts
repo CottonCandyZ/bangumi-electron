@@ -10,3 +10,7 @@ export const INPUT_LIMIT_CONFIG = {
   short_comment_length_limit: 380,
   tags_max_length_limit: 10,
 }
+
+export const DB_CONFIG = {
+  DEFAULT_STALE_TIME: 1000 * 60 * 5,
+}

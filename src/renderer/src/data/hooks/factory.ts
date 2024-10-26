@@ -1,3 +1,4 @@
+import { DB_CONFIG } from '@renderer/config'
 import { useAccessTokenQuery } from '@renderer/data/hooks/session'
 import { AuthError } from '@renderer/lib/utils/error'
 import { isRefreshingTokenAtom } from '@renderer/state/session'
@@ -77,20 +78,28 @@ export const useQueryMustAuth = <P, R>({
 /**
  * 同前必须验证 配合 db 会先读取后写入，写入后会 update 状态
  */
-export const useDBQueryMustAuth = <TApiParams, TDbParams, TQueryFnReturn>({
+export const useDBQueryMustAuth = <
+  TApiParams,
+  TDbParams,
+  TQueryFnReturn extends { last_update_at: Date },
+>({
   queryKey = [],
   apiQueryFn,
   dbQueryFn,
   updateDB,
   apiParams,
   dbParams,
+  dbStaleTime = DB_CONFIG.DEFAULT_STALE_TIME,
   enabled = true,
   needKeepPreviousData = true,
   ...props
 }: {
   apiQueryFn: TApiParams extends { token: string } ? Fn<TApiParams, TQueryFnReturn> : never
-  dbQueryFn: TDbParams extends { user_id: number } ? Fn<TDbParams, TQueryFnReturn | null> : never
+  dbQueryFn: TDbParams extends { user_id: number }
+    ? Fn<TDbParams, TQueryFnReturn | undefined>
+    : never
   updateDB: Fn<TQueryFnReturn, void>
+  dbStaleTime?: number
   enabled?: boolean
   needKeepPreviousData?: boolean
 } & OptionalAPIQueryProps<TApiParams> &
@@ -101,47 +110,68 @@ export const useDBQueryMustAuth = <TApiParams, TDbParams, TQueryFnReturn>({
   >) => {
   const { data: token } = useAccessTokenQuery()
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
-  const queryKeyWithToken = [...queryKey, apiParams, token?.access_token]
+  const apiQueryKey = [...queryKey, apiParams, token?.access_token, 'api']
+  const dbQueryKey = [...queryKey, dbParams, token?.access_token, 'db']
   const queryClient = useQueryClient()
 
-  const unifiedQueryFn = async () => {
+  const update = async () => {
     if (!token) return null
-
-    const dbData = await dbQueryFn({ user_id: token.user_id, ...dbParams } as TDbParams)
-
-    const updateData = async () => {
-      let apiData: TQueryFnReturn | undefined
-      try {
-        apiData = await apiQueryFn({ token: token.access_token, ...apiParams } as TApiParams)
-      } catch (error) {
-        if (error instanceof FetchError && error.statusCode === 401) {
-          throw AuthError.expire()
-        }
-        throw error
+    let apiData: TQueryFnReturn | undefined
+    try {
+      apiData = await apiQueryFn({ token: token?.access_token, ...apiParams } as TApiParams)
+    } catch (error) {
+      if (error instanceof FetchError && error.statusCode === 401) {
+        throw AuthError.expire()
       }
+      throw error
+    }
+    setTimeout(async () => {
       await updateDB(apiData)
-      return apiData
-    }
-
-    if (dbData) {
-      setTimeout(async () => {
-        const apiData = await updateData()
-        queryClient.setQueryData(queryKeyWithToken, apiData)
-      }, 0)
-      return dbData
-    }
-    const apiData = await updateData()
+    }, 0)
     return apiData
   }
 
-  const query = useQuery({
-    queryKey: queryKeyWithToken,
-    queryFn: unifiedQueryFn,
-    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
+  const tempDBQueryFn = async () => {
+    if (!token) return null
+    const data = await dbQueryFn({ user_id: token.user_id, ...dbParams } as TDbParams)
+    if (data === undefined) {
+      return await update()
+    }
+    return data
+  }
+
+  const dbQuery = useQuery({
+    queryKey: dbQueryKey,
+    queryFn: tempDBQueryFn,
     enabled: enabled && token !== undefined && !isRefreshToken,
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
+    persister: undefined,
     ...props,
   })
-  return query
+
+  const tempQueryFn = async () => {
+    const apiData = await update()
+    queryClient.setQueryData(dbQueryKey, apiData)
+    return null
+  }
+
+  useQuery({
+    queryKey: apiQueryKey,
+    queryFn: tempQueryFn,
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
+    enabled:
+      enabled &&
+      !!token &&
+      !isRefreshToken &&
+      !dbQuery.isFetching &&
+      !!dbQuery.data &&
+      new Date().getTime() - dbQuery.data.last_update_at.getTime() > dbStaleTime,
+    staleTime: 0,
+    gcTime: 0,
+    persister: undefined,
+  })
+
+  return dbQuery
 }
 
 /**
@@ -189,66 +219,90 @@ export const useQueryOptionalAuth = <P, R, S = R>({
   return query
 }
 
-export const useDBQueryOptionalAuth = <TApiParams, TDbParams, TQueryFnReturn>({
+export const useDBQueryOptionalAuth = <
+  TApiParams,
+  TDbParams,
+  TQueryFnReturn extends { last_update_at: Date },
+>({
   queryKey = [],
   apiQueryFn,
   dbQueryFn,
   updateDB,
   apiParams,
   dbParams,
+  dbStaleTime = DB_CONFIG.DEFAULT_STALE_TIME,
   enabled = true,
   needKeepPreviousData = true,
   ...props
 }: {
   apiQueryFn: TApiParams extends { token?: string } ? Fn<TApiParams, TQueryFnReturn> : never
-  dbQueryFn: Fn<TDbParams, TQueryFnReturn | null>
+  dbQueryFn: Fn<TDbParams, TQueryFnReturn | undefined>
   dbParams: TDbParams
   updateDB: Fn<TQueryFnReturn, void>
+  dbStaleTime?: number
   enabled?: boolean
   needKeepPreviousData?: boolean
 } & OptionalAPIQueryProps<TApiParams> &
   Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
   const { data: token } = useAccessTokenQuery()
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
-  const queryKeyWithToken = [...queryKey, apiParams, token?.access_token]
+  const apiQueryKey = [...queryKey, apiParams, token?.access_token, 'api']
+  const dbQueryKey = [...queryKey, dbParams, token?.access_token, 'db']
   const queryClient = useQueryClient()
 
-  const unifiedQueryFn = async () => {
-    const dbData = await dbQueryFn({ ...dbParams } as TDbParams)
-
-    const updateData = async () => {
-      let apiData: TQueryFnReturn | undefined
-      try {
-        apiData = await apiQueryFn({ token: token?.access_token, ...apiParams } as TApiParams)
-      } catch (error) {
-        if (error instanceof FetchError && error.statusCode === 401) {
-          throw AuthError.expire()
-        }
-        throw error
+  const update = async () => {
+    let apiData: TQueryFnReturn | undefined
+    try {
+      apiData = await apiQueryFn({ token: token?.access_token, ...apiParams } as TApiParams)
+    } catch (error) {
+      if (error instanceof FetchError && error.statusCode === 401) {
+        throw AuthError.expire()
       }
+      throw error
+    }
+    setTimeout(async () => {
       await updateDB(apiData)
-      return apiData
-    }
-
-    if (dbData) {
-      setTimeout(async () => {
-        const apiData = await updateData()
-        queryClient.setQueryData(queryKeyWithToken, apiData)
-      }, 0)
-      return dbData
-    }
-    const apiData = await updateData()
+    }, 0)
     return apiData
   }
 
-  const query = useQuery({
-    queryKey: queryKeyWithToken,
-    queryFn: unifiedQueryFn,
+  const dbQuery = useQuery({
+    queryKey: dbQueryKey,
+    queryFn: async () => {
+      const data = await dbQueryFn({ ...dbParams } as TDbParams)
+      if (data === undefined) {
+        return await update()
+      }
+      return data
+    },
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     enabled: enabled && token !== undefined && !isRefreshToken,
+    persister: undefined,
     ...props,
   })
-  return query
+
+  const tempQueryFn = async () => {
+    const apiData = await update()
+    queryClient.setQueryData(dbQueryKey, apiData)
+    return null
+  }
+
+  useQuery({
+    queryKey: apiQueryKey,
+    queryFn: tempQueryFn,
+    enabled:
+      enabled &&
+      token !== undefined &&
+      !isRefreshToken &&
+      !dbQuery.isFetching &&
+      dbQuery.data !== undefined &&
+      new Date().getTime() - dbQuery.data.last_update_at.getTime() > dbStaleTime,
+    staleTime: 0,
+    gcTime: 0,
+    persister: undefined,
+  })
+
+  return dbQuery
 }
 
 type InfinityOptionalAuthProps<P> = keyof Omit<P, 'token' | 'offset' | 'limit'> extends never

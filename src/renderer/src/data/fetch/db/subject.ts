@@ -2,24 +2,40 @@ import { subject, subjectCollection, subjectRate, subjectRatingCount, subjectTag
 import { SubjectId } from '@renderer/data/types/bgm'
 import { Subject } from '@renderer/data/types/subject'
 import { db } from '@renderer/lib/db/bridge'
-import { returnFirstOrNull } from '@renderer/lib/utils/data-trans'
+import { returnFirstOrUndefined } from '@renderer/lib/utils/data-trans'
 import { FetchParamError } from '@renderer/lib/utils/error'
 import { eq } from 'drizzle-orm'
 import { BatchItem } from 'drizzle-orm/batch'
 
 export async function readSubjectInfoById({ id }: { id?: SubjectId }) {
   if (!id) throw new FetchParamError('未获得 id')
-  return returnFirstOrNull(
+  return returnFirstOrUndefined(
     await db.query.subject.findMany({
       where: (subject, { eq }) => eq(subject.id, Number(id)),
       with: {
-        collection: true,
-        rating: true,
-        tags: true,
-        ratingCount: true,
+        collection: {
+          columns: {
+            subject_id: false,
+          },
+        },
+        rating: {
+          columns: {
+            subject_id: false,
+          },
+        },
+        tags: {
+          columns: {
+            subject_id: false,
+          },
+        },
+        ratingCount: {
+          columns: {
+            subject_id: false,
+          },
+        },
       },
     }),
-  ) as Subject
+  ) as Subject | undefined
 }
 
 export async function insertSubjectInfo(subjectInfo: Subject) {

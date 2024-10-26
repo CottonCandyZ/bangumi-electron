@@ -36,8 +36,8 @@ export function getCharacterAvatarURL(largeUrl: string) {
   return largeUrl.replace('/l/', '/g/')
 }
 
-export function returnFirstOrNull<T>(res: T[]) {
-  return res.length === 0 ? null : res[0]
+export function returnFirstOrUndefined<T>(res: T[]) {
+  return res.length === 0 ? undefined : res[0]
 }
 
 // 可能暂时不准备使用，不如直接存 json

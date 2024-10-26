@@ -31,7 +31,7 @@ export const useAccessTokenQuery = () => {
     queryFn: async () => {
       const user_id = localStorage.getItem('current_user_id')
       if (!user_id) return null
-      return await readAccessToken({ user_id: Number(user_id) })
+      return (await readAccessToken({ user_id: Number(user_id) })) ?? null
     },
     networkMode: 'always',
   })
