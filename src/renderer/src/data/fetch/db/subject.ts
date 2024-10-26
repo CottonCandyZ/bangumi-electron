@@ -26,12 +26,11 @@ export async function insertSubjectInfo(subjectInfo: Subject) {
   const batch: [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] = [
     db
       .insert(subject)
-      .values({ ...subjectInfo, last_update_at: new Date() })
+      .values(subjectInfo)
       .onConflictDoUpdate({
         target: subject.id,
         set: {
           ...subjectInfo,
-          last_update_at: new Date(),
         },
       }),
 
@@ -50,7 +49,10 @@ export async function insertSubjectInfo(subjectInfo: Subject) {
 
     db
       .insert(subjectCollection)
-      .values(subjectInfo.collection)
+      .values({
+        subject_id: subjectInfo.id,
+        ...subjectInfo.collection,
+      })
       .onConflictDoUpdate({
         target: subjectCollection.subject_id,
         set: {
@@ -60,7 +62,10 @@ export async function insertSubjectInfo(subjectInfo: Subject) {
 
     db
       .insert(subjectRatingCount)
-      .values(subjectInfo.ratingCount)
+      .values({
+        subject_id: subjectInfo.id,
+        ...subjectInfo.ratingCount,
+      })
       .onConflictDoUpdate({
         target: subjectRatingCount.subject_id,
         set: {

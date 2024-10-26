@@ -23,11 +23,12 @@ export type Subject = {
   locked: boolean
   nsfw: boolean
   type: SubjectType
+  last_update_at: Date
 }
 
 export type SubjectAPI = ModifyField<
   Subject,
-  'date' | 'ratingCount' | 'rating',
+  'date' | 'ratingCount' | 'rating' | 'last_update_at',
   {
     date: string
     rating: Rating & {

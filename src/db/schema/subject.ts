@@ -44,7 +44,7 @@ export const subjectRateRelation = relations(subjectRate, ({ one }) => ({
 }))
 
 export const subjectRatingCount = sqliteTable('SubjectRatingCount', {
-  subject_id: t.integer().primaryKey(),
+  subject_id: t.integer().primaryKey().notNull(),
   '1': t.integer().notNull(),
   '2': t.integer().notNull(),
   '3': t.integer().notNull(),
@@ -78,7 +78,7 @@ export const subjectTagsRelation = relations(subjectTags, ({ one }) => ({
 }))
 
 export const subjectCollection = sqliteTable('SubjectCollection', {
-  subject_id: t.integer().primaryKey(),
+  subject_id: t.integer().primaryKey().notNull(),
   on_hold: t.integer().notNull(),
   dropped: t.integer().notNull(),
   wish: t.integer().notNull(),

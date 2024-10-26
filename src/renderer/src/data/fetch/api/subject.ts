@@ -26,6 +26,7 @@ export async function getSubjectById({ id, token }: { id?: SubjectId; token?: st
     ...info,
     date: info.date ? dayjs.tz(info.date, 'Asia/Shanghai').toDate() : null,
     ratingCount: info.rating.count,
+    last_update_at: new Date(),
   } satisfies Subject as Subject
 }
 

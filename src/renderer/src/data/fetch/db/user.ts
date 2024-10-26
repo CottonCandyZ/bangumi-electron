@@ -53,12 +53,11 @@ export async function readAccessToken({ user_id }: { user_id: number }) {
 export async function insertUserInfo(userInfo: UserInfo) {
   await db
     .insert(userInfoDatabase)
-    .values({ ...userInfo, last_update_at: new Date() })
+    .values(userInfo)
     .onConflictDoUpdate({
       target: userInfoDatabase.id,
       set: {
         ...userInfo,
-        last_update_at: new Date(),
       },
     })
 }
