@@ -34,11 +34,41 @@ export async function readSubjectInfoById({ id }: { id?: SubjectId }) {
           },
         },
       },
+      limit: 1,
     }),
   ) as Subject | undefined
 }
 
-export async function insertSubjectInfo(subjectInfo: Subject) {
+export async function readSubjectsInfoByIds({ ids }: { ids?: number[] }) {
+  if (!ids) throw new FetchParamError('未获得 id')
+  return (await db.query.subject.findMany({
+    where: (subject, { inArray }) => inArray(subject.id, ids),
+    with: {
+      collection: {
+        columns: {
+          subject_id: false,
+        },
+      },
+      rating: {
+        columns: {
+          subject_id: false,
+        },
+      },
+      tags: {
+        columns: {
+          subject_id: false,
+        },
+      },
+      ratingCount: {
+        columns: {
+          subject_id: false,
+        },
+      },
+    },
+  })) as Subject[]
+}
+
+function createSubjectBatchInsert(subjectInfo: Subject) {
   const batch: [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] = [
     db
       .insert(subject)
@@ -99,5 +129,18 @@ export async function insertSubjectInfo(subjectInfo: Subject) {
       }),
     )
   }
+  return batch
+}
+
+export async function insertSubjectsInfo(subjectsInfo: Subject[]) {
+  const batch = subjectsInfo.map((subject) => createSubjectBatchInsert(subject)).flat(1) as [
+    BatchItem<'sqlite'>,
+    ...BatchItem<'sqlite'>[],
+  ]
+  db.batch(batch)
+}
+
+export async function insertSubjectInfo(subjectInfo: Subject) {
+  const batch = createSubjectBatchInsert(subjectInfo)
   db.batch(batch)
 }

@@ -9,7 +9,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@renderer/components/ui/carousel'
-import { UI_CONFIG } from '@renderer/config'
 import { SectionPath } from '@renderer/data/types/web'
 import { useStateHook } from '@renderer/hooks/use-cache-state'
 import { cn } from '@renderer/lib/utils'
@@ -17,6 +16,9 @@ import { activeSectionAtom } from '@renderer/state/small-carousel'
 import { useAtomValue } from 'jotai'
 import { ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useTopListQuery } from '@renderer/data/hooks/web/subject'
+import { useSubjectsInfoQuery } from '@renderer/data/hooks/db/subject'
+import { Skeleton } from '@renderer/components/ui/skeleton'
 
 interface SmallCarouselProps {
   href: string
@@ -25,6 +27,12 @@ interface SmallCarouselProps {
 }
 
 export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
+  const topList = useTopListQuery(sectionPath)
+  const subjectIds = topList.data
+    ?.map((item) => item.SubjectId)
+    .filter((item) => item !== undefined)
+  const subjectsInfo = useSubjectsInfoQuery({ subjectIds: subjectIds, enabled: !!subjectIds }).data
+
   const currentSectionPath = useAtomValue(activeSectionAtom)
   const [api, setApi] = useState<CarouselApi>()
   const { init: initIndex, setter: setIndex } = useStateHook({
@@ -77,16 +85,31 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
       </div>
       <div className={cn('relative @container', currentSectionPath === sectionPath ? 'z-30' : '')}>
         <CarouselContentNoFlow className="-ml-3">
-          {Array.from({ length: UI_CONFIG.HOME_SECTION_CAROUSEL_NUMBER }).map((_, index) => (
-            <CarouselItem
-              key={index}
-              className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @8xl:basis-[11.111111%] @9xl:basis-[10%]"
-            >
-              <div className="p-0.5">
-                <SubjectCard index={index} sectionPath={sectionPath} />
-              </div>
-            </CarouselItem>
-          ))}
+          {subjectsInfo
+            ? subjectsInfo.map((subject, index) => (
+                <CarouselItem
+                  key={index}
+                  className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @8xl:basis-[11.111111%] @9xl:basis-[10%]"
+                >
+                  <div className="p-0.5">
+                    {subject ? (
+                      <SubjectCard subjectInfo={subject} sectionPath={sectionPath} />
+                    ) : (
+                      <Skeleton className="aspect-[2/3] w-full" />
+                    )}
+                  </div>
+                </CarouselItem>
+              ))
+            : Array.from({ length: 10 }).map((_, index) => (
+                <CarouselItem
+                  key={index}
+                  className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @8xl:basis-[11.111111%] @9xl:basis-[10%]"
+                >
+                  <div className="p-0.5">
+                    <Skeleton className="aspect-[2/3] w-full" />
+                  </div>
+                </CarouselItem>
+              ))}
         </CarouselContentNoFlow>
       </div>
     </Carousel>

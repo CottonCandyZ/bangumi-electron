@@ -29,6 +29,9 @@ type OptionalProps<P> = keyof Omit<P, 'token'> extends never
 type OptionalAPIQueryProps<P> = keyof Omit<P, 'token'> extends never
   ? { apiParams?: Omit<P, 'token'> }
   : { apiParams: Omit<P, 'token'> }
+type OptionalAPIQueriesProps<P> = keyof Omit<P, 'token' | 'id'> extends never
+  ? { apiParams?: Omit<P, 'token' | 'id'> }
+  : { apiParams: Omit<P, 'token' | 'id'> }
 type OptionalDBQueryProps<P> = keyof Omit<P, 'user_id'> extends never
   ? { dbParams?: Omit<P, 'user_id'> }
   : { dbParams: Omit<P, 'user_id'> }
@@ -297,6 +300,113 @@ export const useDBQueryOptionalAuth = <
       !dbQuery.isFetching &&
       dbQuery.data !== undefined &&
       new Date().getTime() - dbQuery.data.last_update_at.getTime() > dbStaleTime,
+    staleTime: 0,
+    gcTime: 0,
+    persister: undefined,
+  })
+
+  return dbQuery
+}
+
+export const useDBQueriesOptionalAuth = <
+  TApiParams,
+  TDbParams extends { ids?: number[] },
+  TQueryFnReturn extends { last_update_at: Date; id: number },
+>({
+  queryKey = [],
+  apiQueryFn,
+  dbQueryFn,
+  updateDB,
+  apiParams,
+  dbParams,
+  dbStaleTime = DB_CONFIG.DEFAULT_STALE_TIME,
+  enabled = true,
+  needKeepPreviousData = true,
+  ...props
+}: {
+  apiQueryFn: TApiParams extends { token?: string } ? Fn<TApiParams, TQueryFnReturn> : never
+  dbQueryFn: Fn<TDbParams, TQueryFnReturn[]>
+  dbParams: TDbParams
+  updateDB: Fn<TQueryFnReturn[], void>
+  dbStaleTime?: number
+  enabled?: boolean
+  needKeepPreviousData?: boolean
+} & OptionalAPIQueriesProps<TApiParams> &
+  Omit<
+    UseQueryOptions<(TQueryFnReturn | null)[], Error, (TQueryFnReturn | null)[], QueryKey>,
+    'queryFn'
+  >) => {
+  const { data: token } = useAccessTokenQuery()
+  const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
+  const dbQueryKey = [...queryKey, dbParams, token?.access_token, 'db']
+  const queryClient = useQueryClient()
+
+  const update = async (dbData: (TQueryFnReturn | null)[]) => {
+    if (dbParams.ids === undefined) throw new FetchError('[Params error]: no ids')
+    const data_map = new Map(dbData.filter((item) => item !== null).map((item) => [item.id, item]))
+    const currentTime = new Date().getTime()
+    const fetchArray = dbParams.ids.filter((id) => {
+      const data = data_map.get(id)
+      if (data === undefined) return true
+      else if (currentTime - data.last_update_at.getTime() > dbStaleTime) return true
+      else return false
+    })
+    if (fetchArray.length === 0) return dbParams.ids.map((id) => data_map.get(id) ?? null)
+
+    const res = await Promise.allSettled(
+      fetchArray.map((id) =>
+        apiQueryFn({ token: token?.access_token, id, ...apiParams } as TApiParams),
+      ),
+    )
+    const errors = res.filter((v) => v.status === 'rejected').map((v) => v.reason)
+    for (const e of errors) {
+      if (e instanceof FetchError && e.statusCode === 401) {
+        throw AuthError.expire()
+      }
+    }
+    const apiData = res.filter((v) => v.status === 'fulfilled').map((v) => v.value)
+    setTimeout(async () => {
+      await updateDB(apiData)
+    }, 0)
+    for (const data of apiData) {
+      data_map.set(data.id, data)
+    }
+    //FIXME: NSFW 条目没有特殊处理，只是返回 null
+    return dbParams.ids.map((id) => data_map.get(id) ?? null)
+  }
+
+  const dbQuery = useQuery({
+    queryKey: dbQueryKey,
+    queryFn: async () => {
+      const data = await dbQueryFn({ ...dbParams } as TDbParams)
+      return await update(data)
+    },
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
+    enabled: enabled && token !== undefined && !isRefreshToken,
+    persister: undefined,
+    ...props,
+  })
+
+  const tempQueryFn = async () => {
+    if (!dbQuery.data) return null
+    const apiData = await update(dbQuery.data)
+    queryClient.setQueryData(dbQueryKey, apiData)
+    return null
+  }
+
+  useQuery({
+    queryKey: [...queryKey, apiParams, dbQuery.data?.map((item) => item?.id), token?.access_token],
+    queryFn: tempQueryFn,
+    enabled:
+      enabled &&
+      token !== undefined &&
+      !isRefreshToken &&
+      !dbQuery.isFetching &&
+      dbQuery.data !== undefined &&
+      dbQuery.data.some(
+        (item) =>
+          item !== null && new Date().getTime() - item.last_update_at.getTime() > dbStaleTime,
+      ),
     staleTime: 0,
     gcTime: 0,
     persister: undefined,

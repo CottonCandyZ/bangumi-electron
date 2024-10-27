@@ -1,6 +1,11 @@
 import { getSubjectById } from '@renderer/data/fetch/api/subject'
-import { insertSubjectInfo, readSubjectInfoById } from '@renderer/data/fetch/db/subject'
-import { useDBQueryOptionalAuth } from '@renderer/data/hooks/factory'
+import {
+  insertSubjectInfo,
+  insertSubjectsInfo,
+  readSubjectInfoById,
+  readSubjectsInfoByIds,
+} from '@renderer/data/fetch/db/subject'
+import { useDBQueriesOptionalAuth, useDBQueryOptionalAuth } from '@renderer/data/hooks/factory'
 import { SubjectId } from '@renderer/data/types/bgm'
 
 /**
@@ -22,6 +27,25 @@ export const useSubjectInfoQuery = ({
     dbParams: { id },
     queryKey: ['subject-info'],
     updateDB: insertSubjectInfo,
+    enabled,
+    needKeepPreviousData,
+  })
+
+export const useSubjectsInfoQuery = ({
+  subjectIds: ids,
+  enabled,
+  needKeepPreviousData,
+}: {
+  subjectIds: SubjectId[] | undefined
+  enabled?: boolean
+  needKeepPreviousData?: boolean
+}) =>
+  useDBQueriesOptionalAuth({
+    apiQueryFn: getSubjectById,
+    dbQueryFn: readSubjectsInfoByIds,
+    dbParams: { ids: ids?.map((id) => Number(id)) },
+    queryKey: ['subject-info'],
+    updateDB: insertSubjectsInfo,
     enabled,
     needKeepPreviousData,
   })
