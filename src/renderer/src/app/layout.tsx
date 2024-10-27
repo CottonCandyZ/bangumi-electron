@@ -3,6 +3,7 @@ import { Header } from '@renderer/modules/header'
 import { LeftResizablePanel } from '@renderer/modules/panel/left-panel'
 import { NavBar } from '@renderer/modules/nav'
 import { MainContainer } from '@renderer/modules/main'
+import { BackCover } from '@renderer/components/hover-pop-card/close'
 
 function RootLayout() {
   return (
@@ -17,6 +18,7 @@ function RootLayout() {
           </MainContainer>
         </div>
       </div>
+      <BackCover />
     </>
   )
 }

@@ -1,4 +1,3 @@
-import { BackCover } from '@renderer/components/hover-pop-card/close'
 import { calculatePopSizePosition } from '@renderer/components/hover-pop-card/utils'
 import { cn } from '@renderer/lib/utils'
 import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
@@ -53,9 +52,8 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
         setBox,
       }}
     >
-      <div className={cn('relative', (isActive || isAnimate) && 'z-40')} style={{ ...box }}>
+      <div className={cn('relative z-30', (isActive || isAnimate) && 'z-40')} style={{ ...box }}>
         {children}
-        <BackCover />
       </div>
     </HoverPopCardContext.Provider>
   )

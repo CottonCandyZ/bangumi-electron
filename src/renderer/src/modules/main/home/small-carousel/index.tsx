@@ -83,7 +83,7 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
           <CarouselNext className="relative right-0 top-0 translate-y-0" />
         </div>
       </div>
-      <div className={cn('relative @container', currentSectionPath === sectionPath ? 'z-30' : '')}>
+      <div className={cn('relative @container', currentSectionPath === sectionPath && 'z-40')}>
         <CarouselContentNoFlow className="-ml-3">
           {subjectsInfo
             ? subjectsInfo.map((subject, index) => (

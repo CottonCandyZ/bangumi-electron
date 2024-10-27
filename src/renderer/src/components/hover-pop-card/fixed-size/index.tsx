@@ -1,4 +1,3 @@
-import { BackCover } from '@renderer/components/hover-pop-card/close'
 import { calculatePopCardPosition } from '@renderer/components/hover-pop-card/utils'
 import { Card } from '@renderer/components/ui/card'
 import { cn } from '@renderer/lib/utils'
@@ -63,10 +62,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverPopCardProps>> = ({
         isActive,
       }}
     >
-      <div className="relative">
-        {children}
-        <BackCover />
-      </div>
+      <div className="relative">{children}</div>
     </HoverPopCardContext.Provider>
   )
 }
@@ -76,8 +72,17 @@ export const HoverCardContent: FC<
 > = ({ CardContent, Description = null, className, ...props }) => {
   const hoverCardContext = useContext(HoverPopCardContext)
   if (!hoverCardContext) throw Error('HoverCardContent need to be wrapped in HoverPopCard')
-  const { layoutId, delay, widthRatio, heightRatio, minHeight, minWidth, hoverInset, isActive } =
-    hoverCardContext
+  const {
+    layoutId,
+    delay,
+    widthRatio,
+    heightRatio,
+    minHeight,
+    minWidth,
+    hoverInset,
+    isActive,
+    activeId,
+  } = hoverCardContext
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const setActiveId = useSetAtom(activeHoverPopCardAtom)
   const hoverRef = useRef<HTMLDivElement>(null)
@@ -92,8 +97,9 @@ export const HoverCardContent: FC<
   return (
     <motion.div key={layoutId} layoutId={layoutId} ref={hoverRef} className={className} {...props}>
       <Card
-        className="relative overflow-hidden hover:-translate-x-0 hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
-        onMouseEnter={() => {
+        className="relative overflow-hidden border-none hover:-translate-x-0 hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
+        onMouseOver={() => {
+          if (activeId === layoutId) return
           setActiveId(null)
           timeoutRef.current = setTimeout(() => {
             if (!hoverRef.current) return
@@ -108,7 +114,7 @@ export const HoverCardContent: FC<
             setActiveId(layoutId)
           }, delay)
         }}
-        onMouseLeave={() => clearTimeout(timeoutRef.current)}
+        onMouseOut={() => clearTimeout(timeoutRef.current)}
       >
         {CardContent}
       </Card>
