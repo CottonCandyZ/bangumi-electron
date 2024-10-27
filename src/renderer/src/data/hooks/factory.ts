@@ -341,7 +341,7 @@ export const useDBQueriesOptionalAuth = <
   const dbQueryKey = [...queryKey, dbParams, token?.access_token, 'db']
   const queryClient = useQueryClient()
 
-  const update = async (dbData: (TQueryFnReturn | null)[]) => {
+  const update = async (dbData: (TQueryFnReturn | null)[], returnFirst = true) => {
     if (dbParams.ids === undefined) throw new FetchError('[Params error]: no ids')
     const data_map = new Map(dbData.filter((item) => item !== null).map((item) => [item.id, item]))
     const currentTime = new Date().getTime()
@@ -353,26 +353,39 @@ export const useDBQueriesOptionalAuth = <
     })
     if (fetchArray.length === 0) return dbParams.ids.map((id) => data_map.get(id) ?? null)
 
-    const res = await Promise.allSettled(
-      fetchArray.map((id) =>
-        apiQueryFn({ token: token?.access_token, id, ...apiParams } as TApiParams),
-      ),
-    )
-    const errors = res.filter((v) => v.status === 'rejected').map((v) => v.reason)
-    for (const e of errors) {
-      if (e instanceof FetchError && e.statusCode === 401) {
-        throw AuthError.expire()
+    const update = async () => {
+      if (dbParams.ids === undefined) throw new FetchError('[Params error]: no ids')
+      const res = await Promise.allSettled(
+        fetchArray.map((id) =>
+          apiQueryFn({ token: token?.access_token, id, ...apiParams } as TApiParams),
+        ),
+      )
+      const errors = res.filter((v) => v.status === 'rejected').map((v) => v.reason)
+      for (const e of errors) {
+        if (e instanceof FetchError && e.statusCode === 401) {
+          throw AuthError.expire()
+        }
       }
+      const apiData = res.filter((v) => v.status === 'fulfilled').map((v) => v.value)
+      setTimeout(async () => {
+        await updateDB(apiData)
+      }, 0)
+      for (const data of apiData) {
+        data_map.set(data.id, data)
+      }
+      //FIXME: NSFW 条目没有特殊处理，只是返回 null
+      return dbParams.ids.map((id) => data_map.get(id) ?? null)
     }
-    const apiData = res.filter((v) => v.status === 'fulfilled').map((v) => v.value)
-    setTimeout(async () => {
-      await updateDB(apiData)
-    }, 0)
-    for (const data of apiData) {
-      data_map.set(data.id, data)
+
+    if (returnFirst) {
+      setTimeout(async () => {
+        const data = await update()
+        queryClient.setQueryData(dbQueryKey, data)
+      }, 0)
+      return dbParams.ids.map((id) => data_map.get(id) ?? null)
+    } else {
+      return await update()
     }
-    //FIXME: NSFW 条目没有特殊处理，只是返回 null
-    return dbParams.ids.map((id) => data_map.get(id) ?? null)
   }
 
   const dbQuery = useQuery({
@@ -389,13 +402,19 @@ export const useDBQueriesOptionalAuth = <
 
   const tempQueryFn = async () => {
     if (!dbQuery.data) return null
-    const apiData = await update(dbQuery.data)
+    const apiData = await update(dbQuery.data, false)
     queryClient.setQueryData(dbQueryKey, apiData)
     return null
   }
 
   useQuery({
-    queryKey: [...queryKey, apiParams, dbQuery.data?.map((item) => item?.id), token?.access_token],
+    queryKey: [
+      ...queryKey,
+      apiParams,
+      dbQuery.data?.map((item) => item?.id),
+      token?.access_token,
+      'api',
+    ],
     queryFn: tempQueryFn,
     enabled:
       enabled &&
