@@ -2,6 +2,7 @@ import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
+import { Collections } from '@renderer/modules/main/subject/header-info/collections'
 import { Header } from '@renderer/modules/main/subject/header-info/header'
 import { Meta } from '@renderer/modules/main/subject/header-info/meta'
 import { Summary } from '@renderer/modules/main/subject/header-info/summary'
@@ -43,6 +44,8 @@ export function SubjectHeaderInfo({ subjectId }: { subjectId: SubjectId }) {
         <Header {...subjectInfo} />
         {/* 一些 meta 数据 */}
         <Meta {...subjectInfo} />
+        {/* collections */}
+        <Collections {...subjectInfo} />
       </section>
       <Separator className="bg-primary/10" />
       <section>

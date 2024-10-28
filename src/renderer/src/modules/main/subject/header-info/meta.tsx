@@ -9,29 +9,29 @@ export function Meta({
   platform,
   infobox,
   rating,
-}: Pick<Subject, 'date' | 'eps' | 'platform' | 'infobox' | 'rating' | 'collection'>) {
+}: Pick<Subject, 'date' | 'eps' | 'platform' | 'infobox' | 'rating'>) {
   const week_day = extractInfoBox(infobox, '放送星期')?.value as string | undefined
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex select-none flex-col gap-1.5">
       <section className="flex flex-row items-center gap-1.5">
         {rating.score !== 0 && (
           <>
             <div
-              className="flex items-center gap-0.5 text-base font-medium"
+              className="flex items-center gap-0.5 text-lg font-medium"
               style={{ color: `hsl(var(--chart-score-${Math.floor(rating.score + 0.5) || 1}))` }}
             >
               {rating.score == 0 ? '-.-' : rating.score.toFixed(1)}{' '}
               <span className="i-mingcute-star-fill" />
             </div>
             <Separator orientation="vertical" className="h-5 bg-primary/20" />
-            <div className="flex items-center gap-0.5 text-sm font-medium">
+            <div className="flex items-center gap-0.5 text-base font-medium">
               <span className="i-mingcute-hashtag-line mt-0.5" />{' '}
               {rating.rank === 0 ? '--' : rating.rank}
             </div>
             <Separator orientation="vertical" className="h-5 bg-primary/20" />
           </>
         )}
-        <div className="flex flex-row flex-wrap items-center gap-1 text-sm font-medium">
+        <div className="flex flex-row flex-wrap items-center gap-1 text-base font-medium">
           <MetaItem
             inner={date}
             content={dayjs(date, 'YYYY-MM-DD').format('YYYY 年 M 月 D 日')}
@@ -55,14 +55,11 @@ function MetaItem({
   inner: string | undefined | number | null | Date
   first?: boolean
 }) {
+  if (!inner || inner === 0 || inner == '') return null
   return (
-    inner &&
-    inner != 0 &&
-    inner !== '' && (
-      <>
-        {!first && <span>·</span>}
-        <span className="shrink-0">{content}</span>
-      </>
-    )
+    <>
+      {!first && <span>·</span>}
+      <span className="shrink-0">{content}</span>
+    </>
   )
 }
