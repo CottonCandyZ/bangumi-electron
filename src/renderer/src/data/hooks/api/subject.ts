@@ -18,7 +18,7 @@ export const useQuerySubjectInfo = ({
   useQueryOptionalAuth({
     queryFn: getSubjectById,
     queryKey: ['subject-info'],
-    queryProps: { id },
+    queryProps: { id: Number(id) },
     enabled: enabled,
     needKeepPreviousData,
   })

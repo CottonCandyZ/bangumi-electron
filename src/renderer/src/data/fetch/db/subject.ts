@@ -1,5 +1,4 @@
 import { subject, subjectCollection, subjectRate, subjectRatingCount, subjectTags } from '@db/index'
-import { SubjectId } from '@renderer/data/types/bgm'
 import { Subject } from '@renderer/data/types/subject'
 import { db } from '@renderer/lib/db/bridge'
 import { returnFirstOrUndefined } from '@renderer/lib/utils/data-trans'
@@ -7,7 +6,7 @@ import { FetchParamError } from '@renderer/lib/utils/error'
 import { eq } from 'drizzle-orm'
 import { BatchItem } from 'drizzle-orm/batch'
 
-export async function readSubjectInfoById({ id }: { id?: SubjectId }) {
+export async function readSubjectInfoById({ id }: { id?: number }) {
   if (!id) throw new FetchParamError('未获得 id')
   return returnFirstOrUndefined(
     await db.query.subject.findMany({

@@ -22,9 +22,9 @@ export const useSubjectInfoQuery = ({
 }) =>
   useDBQueryOptionalAuth({
     apiQueryFn: getSubjectById,
-    apiParams: { id },
+    apiParams: { id: Number(id) },
     dbQueryFn: readSubjectInfoById,
-    dbParams: { id },
+    dbParams: { id: Number(id) },
     queryKey: ['subject-info'],
     updateDB: insertSubjectInfo,
     enabled,
