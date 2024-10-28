@@ -352,15 +352,13 @@ export const useDBQueriesOptionalAuth = <
       else if (currentTime - data.last_update_at.getTime() > dbStaleTime) return true
       else return false
     })
-    if (fetchArray.length === 0)
-      return dbParams.ids.map((id) => {
-        const data = data_map.get(id) ?? null
-        queryClient.setQueryData<TQueryFnReturn | null>(
-          [...queryKey, { id }, token?.access_token, 'db'],
-          data,
-        )
-        return data
-      })
+    const dbOrderedData = dbParams.ids.map((id) => {
+      const data = data_map.get(id) ?? null
+      if (data)
+        queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, token?.access_token], data)
+      return data
+    })
+    if (fetchArray.length === 0) return dbOrderedData
 
     const update = async () => {
       if (dbParams.ids === undefined) throw new FetchError('[Params error]: no ids')
@@ -383,31 +381,20 @@ export const useDBQueriesOptionalAuth = <
         data_map.set(data.id, data)
       }
       //FIXME: NSFW 条目没有特殊处理，只是返回 null
-      return dbParams.ids.map((id) => data_map.get(id) ?? null)
+      return dbParams.ids.map((id) => {
+        const data = data_map.get(id) ?? null
+        if (data)
+          queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, token?.access_token], data)
+        return data
+      })
     }
 
     if (returnFirst) {
       setTimeout(async () => {
         const data = await update()
-        data.forEach((data) => {
-          if (data) {
-            queryClient.setQueryData<TQueryFnReturn | null>(
-              [...queryKey, { id: data.id }, token?.access_token, 'db'],
-              data,
-            )
-          }
-        })
-
         queryClient.setQueryData(dbQueryKey, data)
       }, 0)
-      return dbParams.ids.map((id) => {
-        const data = data_map.get(id) ?? null
-        queryClient.setQueryData<TQueryFnReturn | null>(
-          [...queryKey, { id }, token?.access_token, 'db'],
-          data,
-        )
-        return data
-      })
+      return dbOrderedData
     } else {
       return await update()
     }
