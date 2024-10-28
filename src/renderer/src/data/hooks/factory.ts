@@ -281,6 +281,7 @@ export const useDBQueryOptionalAuth = <
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     enabled: enabled && token !== undefined && !isRefreshToken,
     persister: undefined,
+    staleTime: dbStaleTime,
     ...props,
   })
 
@@ -397,6 +398,7 @@ export const useDBQueriesOptionalAuth = <
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     enabled: enabled && token !== undefined && !isRefreshToken,
     persister: undefined,
+    staleTime: dbStaleTime,
     ...props,
   })
 
