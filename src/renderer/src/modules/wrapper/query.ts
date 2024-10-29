@@ -20,7 +20,7 @@ export const queryClient = new QueryClient({
   }),
   defaultOptions: {
     queries: {
-      staleTime: import.meta.env.DEV ? 1000 * 60 * 60 * 5 : 20 * 1000,
+      staleTime: import.meta.env.DEV ? 1000 * 60 * 60 * 5 : 1000 * 60 * 5,
       gcTime: import.meta.env.DEV ? Infinity : 60 * 1000 * 5,
       retry: 0,
       persister: experimental_createPersister<PersistedQuery>({
