@@ -355,7 +355,10 @@ export const useDBQueriesOptionalAuth = <
     const dbOrderedData = dbParams.ids.map((id) => {
       const data = data_map.get(id) ?? null
       if (data)
-        queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, token?.access_token], data)
+        queryClient.setQueryData<TQueryFnReturn>(
+          [...queryKey, { id }, token?.access_token, 'db'],
+          data,
+        )
       return data
     })
     if (fetchArray.length === 0) return dbOrderedData
@@ -384,7 +387,10 @@ export const useDBQueriesOptionalAuth = <
       return dbParams.ids.map((id) => {
         const data = data_map.get(id) ?? null
         if (data)
-          queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, token?.access_token], data)
+          queryClient.setQueryData<TQueryFnReturn>(
+            [...queryKey, { id }, token?.access_token, 'db'],
+            data,
+          )
         return data
       })
     }
