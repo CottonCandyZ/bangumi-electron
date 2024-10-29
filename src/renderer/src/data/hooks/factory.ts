@@ -222,6 +222,51 @@ export const useQueryOptionalAuth = <P, R, S = R>({
   return query
 }
 
+export const useQueriesOptionalAuth = <P, R extends { id: number }>({
+  queryKey = [],
+  queryFn,
+  queryIds,
+  apiParams,
+  enabled = true,
+  needKeepPreviousData = true,
+  ...props
+}: {
+  queryFn: P extends { token?: string } ? Fn<P, R> : never
+  queryIds: number[]
+  needKeepPreviousData?: boolean
+} & OptionalAPIQueriesProps<P> &
+  Omit<UseQueryOptions<(R | null)[], Error, (R | null)[], QueryKey>, 'select' | 'queryFn'>) => {
+  const { data: token } = useAccessTokenQuery()
+  const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
+  const queryClient = useQueryClient()
+
+  const query = useQuery({
+    queryKey: [...queryKey, queryIds, apiParams, token?.access_token],
+    queryFn: async () => {
+      const res = await Promise.allSettled(
+        queryIds.map((id) => queryFn({ token: token?.access_token, id, ...apiParams } as P)),
+      )
+
+      return res.map((item) => {
+        if (item.status === 'rejected') {
+          const e = item.reason
+          if (e instanceof FetchError && e.statusCode === 401) throw AuthError.expire()
+          return null
+        }
+        queryClient.setQueryData<R>(
+          [...queryKey, { id: item.value.id }, token?.access_token],
+          item.value,
+        )
+        return item.value
+      })
+    },
+    enabled: enabled && token !== undefined && !isRefreshToken,
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
+    ...props,
+  })
+  return query
+}
+
 export const useDBQueryOptionalAuth = <
   TApiParams,
   TDbParams,
