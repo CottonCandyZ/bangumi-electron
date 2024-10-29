@@ -17,7 +17,7 @@ const buttonVariants = cva(
           'border border-primary-foreground line-through shadow-inner hover:bg-accent hover:text-accent-foreground text-muted-foreground',
         noAired: 'hover:bg-accent hover:text-accent-foreground text-muted-foreground hover:shadow',
         onAir:
-          'border border-input bg-background text-muted-foreground shadow-sm hover:bg-accent hover:text-accent-foreground',
+          'border border-input bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground',
         aired:
           'border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:shadow-inner',
         wantToWatchHover:
@@ -27,8 +27,7 @@ const buttonVariants = cva(
         abandonedHover:
           'border border-primary-foreground line-through shadow-inner bg-accent text-accent-foreground text-muted-foreground',
         noAiredHover: 'bg-accent text-accent-foreground shadow',
-        onAirHover:
-          'border border-input text-muted-foreground shadow-sm bg-accent text-accent-foreground',
+        onAirHover: 'border border-input text-muted-foreground bg-accent text-accent-foreground',
         airedHover: 'border border-input bg-accent text-accent-foreground shadow-inner',
       },
       size: {
