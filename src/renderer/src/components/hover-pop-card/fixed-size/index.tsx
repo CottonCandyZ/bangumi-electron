@@ -90,7 +90,7 @@ export const HoverCardContent: FC<
   }, [setActiveId])
 
   return (
-    <motion.div layoutId={layoutId} ref={hoverRef} className={className} {...props}>
+    <motion.div key={layoutId} layoutId={layoutId} ref={hoverRef} className={className} {...props}>
       <Card
         className="relative overflow-hidden hover:-translate-x-0 hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
         onMouseEnter={() => {
@@ -129,6 +129,7 @@ export const PopCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = ({
     <AnimatePresence onExitComplete={() => isActive(false)}>
       {activeId === layoutId && (
         <motion.div
+          key={layoutId}
           layoutId={layoutId}
           className={cn('absolute z-10 cursor-default', className)}
           style={{
