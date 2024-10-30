@@ -1,7 +1,7 @@
 import { sqliteTable } from 'drizzle-orm/sqlite-core'
 import * as t from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
-import { CoverImages, InfoBox } from '@renderer/data/types/subject'
+import { CoverImages, InfoBox, SubjectType } from '@renderer/data/types/subject'
 
 export const subject = sqliteTable('Subject', {
   id: t.integer().primaryKey(),
@@ -18,7 +18,7 @@ export const subject = sqliteTable('Subject', {
   series: t.integer({ mode: 'boolean' }).notNull(),
   locked: t.integer({ mode: 'boolean' }).notNull(),
   nsfw: t.integer({ mode: 'boolean' }).notNull(),
-  type: t.integer().notNull(),
+  type: t.integer().$type<SubjectType>().notNull(),
   last_update_at: t.integer({ mode: 'timestamp_ms' }).notNull(),
 })
 
@@ -63,7 +63,6 @@ export const subjectRatingCountRelation = relations(subjectRatingCount, ({ one }
     references: [subject.id],
   }),
 }))
-
 export const subjectTags = sqliteTable('SubjectTags', {
   subject_id: t.integer().notNull(),
   name: t.text().notNull(),
