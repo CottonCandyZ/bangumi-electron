@@ -113,8 +113,7 @@ export const useDBQueryMustAuth = <
   >) => {
   const { data: token } = useAccessTokenQuery()
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
-  const apiQueryKey = [...queryKey, apiParams, token?.access_token, 'api']
-  const dbQueryKey = [...queryKey, dbParams, token?.access_token, 'db']
+  const dbQueryKey = [...queryKey, dbParams, token?.access_token]
   const queryClient = useQueryClient()
 
   const update = async () => {
@@ -130,7 +129,7 @@ export const useDBQueryMustAuth = <
     }
     setTimeout(async () => {
       await updateDB(apiData)
-    }, 0)
+    }, 10)
     return apiData
   }
 
@@ -140,6 +139,17 @@ export const useDBQueryMustAuth = <
     if (data === undefined) {
       return await update()
     }
+    setTimeout(async () => {
+      const last_update_at = data.last_update_at.getTime()
+      if (new Date().getTime() - last_update_at > dbStaleTime) {
+        const data = await update()
+        queryClient.setQueryData<TQueryFnReturn | null>(dbQueryKey, data)
+      } else {
+        queryClient.setQueryData<TQueryFnReturn>(dbQueryKey, (oldData) => oldData, {
+          updatedAt: last_update_at,
+        })
+      }
+    }, 10)
     return data
   }
 
@@ -148,30 +158,9 @@ export const useDBQueryMustAuth = <
     queryFn: tempDBQueryFn,
     enabled: enabled && token !== undefined && !isRefreshToken,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
+    staleTime: dbStaleTime,
     persister: undefined,
     ...props,
-  })
-
-  const tempQueryFn = async () => {
-    const apiData = await update()
-    queryClient.setQueryData(dbQueryKey, apiData)
-    return null
-  }
-
-  useQuery({
-    queryKey: apiQueryKey,
-    queryFn: tempQueryFn,
-    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
-    enabled:
-      enabled &&
-      !!token &&
-      !isRefreshToken &&
-      !dbQuery.isFetching &&
-      !!dbQuery.data &&
-      new Date().getTime() - dbQuery.data.last_update_at.getTime() > dbStaleTime,
-    staleTime: 0,
-    gcTime: 0,
-    persister: undefined,
   })
 
   return dbQuery
@@ -294,8 +283,7 @@ export const useDBQueryOptionalAuth = <
   Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
   const { data: token } = useAccessTokenQuery()
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
-  const apiQueryKey = [...queryKey, apiParams, token?.access_token, 'api']
-  const dbQueryKey = [...queryKey, dbParams, token?.access_token, 'db']
+  const dbQueryKey = [...queryKey, dbParams, token?.access_token]
   const queryClient = useQueryClient()
 
   const update = async () => {
@@ -310,17 +298,28 @@ export const useDBQueryOptionalAuth = <
     }
     setTimeout(async () => {
       await updateDB(apiData)
-    }, 0)
+    }, 10)
     return apiData
   }
 
-  const dbQuery = useQuery({
+  return useQuery({
     queryKey: dbQueryKey,
     queryFn: async () => {
       const data = await dbQueryFn({ ...dbParams } as TDbParams)
       if (data === undefined) {
         return await update()
       }
+      setTimeout(async () => {
+        const last_update_at = data.last_update_at.getTime()
+        if (new Date().getTime() - last_update_at > dbStaleTime) {
+          const data = await update()
+          queryClient.setQueryData<TQueryFnReturn>(dbQueryKey, data)
+        } else {
+          queryClient.setQueryData<TQueryFnReturn>(dbQueryKey, (oldData) => oldData, {
+            updatedAt: last_update_at,
+          })
+        }
+      }, 0)
       return data
     },
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
@@ -329,29 +328,6 @@ export const useDBQueryOptionalAuth = <
     staleTime: dbStaleTime,
     ...props,
   })
-
-  const tempQueryFn = async () => {
-    const apiData = await update()
-    queryClient.setQueryData(dbQueryKey, apiData)
-    return null
-  }
-
-  useQuery({
-    queryKey: apiQueryKey,
-    queryFn: tempQueryFn,
-    enabled:
-      enabled &&
-      token !== undefined &&
-      !isRefreshToken &&
-      !dbQuery.isFetching &&
-      dbQuery.data !== undefined &&
-      new Date().getTime() - dbQuery.data.last_update_at.getTime() > dbStaleTime,
-    staleTime: 0,
-    gcTime: 0,
-    persister: undefined,
-  })
-
-  return dbQuery
 }
 
 export const useDBQueriesOptionalAuth = <
@@ -383,37 +359,46 @@ export const useDBQueriesOptionalAuth = <
     'queryFn'
   >) => {
   const { data: token } = useAccessTokenQuery()
+  const accessToken = token?.access_token
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
-  const dbQueryKey = [...queryKey, dbParams, token?.access_token, 'db']
+  const dbQueryKey = [...queryKey, dbParams, accessToken]
   const queryClient = useQueryClient()
 
-  const update = async (dbData: (TQueryFnReturn | null)[], returnFirst = true) => {
+  const getData = async (dbData: TQueryFnReturn[]) => {
     if (dbParams.ids === undefined) throw new FetchError('[Params error]: no ids')
-    const data_map = new Map(dbData.filter((item) => item !== null).map((item) => [item.id, item]))
+    const data_map = new Map(dbData.map((item) => [item.id, item]))
     const currentTime = new Date().getTime()
+    let minimalTimestamp = currentTime
     const fetchArray = dbParams.ids.filter((id) => {
       const data = data_map.get(id)
       if (data === undefined) return true
       else if (currentTime - data.last_update_at.getTime() > dbStaleTime) return true
-      else return false
+      else {
+        minimalTimestamp = Math.min(data.last_update_at.getTime(), minimalTimestamp)
+        return false
+      }
     })
     const dbOrderedData = dbParams.ids.map((id) => {
       const data = data_map.get(id) ?? null
       if (data)
-        queryClient.setQueryData<TQueryFnReturn>(
-          [...queryKey, { id }, token?.access_token, 'db'],
-          data,
-        )
+        queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, accessToken], data, {
+          updatedAt: data.last_update_at.getTime(),
+        })
       return data
     })
-    if (fetchArray.length === 0) return dbOrderedData
+    if (fetchArray.length === 0) {
+      setTimeout(() => {
+        queryClient.setQueryData<(TQueryFnReturn | null)[]>(dbQueryKey, (oldData) => oldData, {
+          updatedAt: minimalTimestamp,
+        })
+      }, 10)
+      return dbOrderedData
+    }
 
     const update = async () => {
       if (dbParams.ids === undefined) throw new FetchError('[Params error]: no ids')
       const res = await Promise.allSettled(
-        fetchArray.map((id) =>
-          apiQueryFn({ token: token?.access_token, id, ...apiParams } as TApiParams),
-        ),
+        fetchArray.map((id) => apiQueryFn({ token: accessToken, id, ...apiParams } as TApiParams)),
       )
       const errors = res.filter((v) => v.status === 'rejected').map((v) => v.reason)
       for (const e of errors) {
@@ -432,67 +417,33 @@ export const useDBQueriesOptionalAuth = <
       return dbParams.ids.map((id) => {
         const data = data_map.get(id) ?? null
         if (data)
-          queryClient.setQueryData<TQueryFnReturn>(
-            [...queryKey, { id }, token?.access_token, 'db'],
-            data,
-          )
+          queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, accessToken], data, {
+            updatedAt: data.last_update_at.getTime(),
+          })
         return data
       })
     }
 
-    if (returnFirst) {
-      setTimeout(async () => {
-        const data = await update()
-        queryClient.setQueryData(dbQueryKey, data)
-      }, 0)
-      return dbOrderedData
-    } else {
-      return await update()
-    }
+    setTimeout(async () => {
+      const data = await update()
+      queryClient.setQueryData<(TQueryFnReturn | null)[]>(dbQueryKey, data, {
+        updatedAt: minimalTimestamp,
+      })
+    }, 10)
+    return dbOrderedData
   }
 
   const dbQuery = useQuery({
     queryKey: dbQueryKey,
     queryFn: async () => {
       const data = await dbQueryFn({ ...dbParams } as TDbParams)
-      return await update(data)
+      return await getData(data)
     },
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     enabled: enabled && token !== undefined && !isRefreshToken,
     persister: undefined,
     staleTime: dbStaleTime,
     ...props,
-  })
-
-  const tempQueryFn = async () => {
-    if (!dbQuery.data) return null
-    const apiData = await update(dbQuery.data, false)
-    queryClient.setQueryData(dbQueryKey, apiData)
-    return null
-  }
-
-  useQuery({
-    queryKey: [
-      ...queryKey,
-      apiParams,
-      dbQuery.data?.map((item) => item?.id),
-      token?.access_token,
-      'api',
-    ],
-    queryFn: tempQueryFn,
-    enabled:
-      enabled &&
-      token !== undefined &&
-      !isRefreshToken &&
-      !dbQuery.isFetching &&
-      dbQuery.data !== undefined &&
-      dbQuery.data.some(
-        (item) =>
-          item !== null && new Date().getTime() - item.last_update_at.getTime() > dbStaleTime,
-      ),
-    staleTime: 0,
-    gcTime: 0,
-    persister: undefined,
   })
 
   return dbQuery
