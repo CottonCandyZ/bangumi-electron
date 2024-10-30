@@ -319,7 +319,7 @@ export const useDBQueryOptionalAuth = <
             updatedAt: last_update_at,
           })
         }
-      }, 0)
+      }, 10)
       return data
     },
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
