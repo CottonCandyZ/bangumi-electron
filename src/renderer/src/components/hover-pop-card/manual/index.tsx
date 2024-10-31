@@ -135,7 +135,8 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
               'rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 20px 25px -5px, rgba(0, 0, 0, 0.1) 0px 8px 10px -6px',
           },
           {
-            ease: [0.165, 0.84, 0.44, 1.0],
+            ease: [0.25, 1, 0.5, 1],
+            duration: 0.4,
           },
         )
       })
@@ -154,7 +155,8 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
           boxShadow: '0px 0px 0px rgba(0, 0, 0, 0)',
         },
         {
-          ease: [0.165, 0.84, 0.44, 1.0],
+          ease: [0.25, 1, 0.5, 1],
+          duration: 0.4,
         },
       ).then(() => {
         setIsAnimate(false)
