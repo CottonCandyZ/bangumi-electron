@@ -32,12 +32,13 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
   )
-  const currentColor =
+  const [currentColor, setCurrentColor] = useState<Color>(
     theme === 'system'
       ? window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light'
-      : theme
+      : theme,
+  )
   useEffect(() => {
     const root = window.document.documentElement
     const darkModePreference = window.matchMedia('(prefers-color-scheme: dark)')
@@ -45,6 +46,7 @@ export function ThemeProvider({
       if (theme === 'system') {
         root.classList.remove('light', 'dark')
         const systemTheme = e.matches ? 'dark' : 'light'
+        setCurrentColor(systemTheme)
         root.classList.add(systemTheme)
       }
     }
@@ -61,9 +63,12 @@ export function ThemeProvider({
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light'
+      setCurrentColor(systemTheme)
       root.classList.add(systemTheme)
       return
     }
+
+    setCurrentColor(theme)
 
     root.classList.add(theme)
   }, [theme])
