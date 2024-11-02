@@ -77,6 +77,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
                   'aspect-[2/3] overflow-hidden rounded-xl',
                   sectionPath === 'music' && 'aspect-square',
                 )}
+                loading="eager"
                 imageSrc={subjectInfo.images.common}
                 layoutId={`${layoutId}-image`}
               />
