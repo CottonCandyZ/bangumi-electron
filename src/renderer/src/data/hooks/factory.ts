@@ -127,35 +127,39 @@ export const useDBQueryMustAuth = <
       }
       throw error
     }
-    setTimeout(async () => {
-      await updateDB(apiData)
-    }, 10)
+    await updateDB(apiData)
     return apiData
   }
 
-  const tempDBQueryFn = async () => {
+  const mutate = useMutation({
+    mutationFn: update,
+    onSuccess: (data) => {
+      queryClient.setQueryData(queryKey, data)
+    },
+  })
+
+  const fetchFromDB = async () => {
     if (!token) return null
     const data = await dbQueryFn({ user_id: token.user_id, ...dbParams } as TDbParams)
     if (data === undefined) {
-      return await update()
+      return await mutate.mutateAsync()
     }
-    setTimeout(async () => {
-      const last_update_at = data.last_update_at.getTime()
-      if (new Date().getTime() - last_update_at > dbStaleTime) {
-        const data = await update()
-        queryClient.setQueryData<TQueryFnReturn | null>(dbQueryKey, data)
-      } else {
+    const last_update_at = data.last_update_at.getTime()
+    if (new Date().getTime() - last_update_at > dbStaleTime) {
+      mutate.mutate()
+    } else {
+      setTimeout(() => {
         queryClient.setQueryData<TQueryFnReturn>(dbQueryKey, (oldData) => oldData, {
           updatedAt: last_update_at,
         })
-      }
-    }, 10)
+      }, 10)
+    }
     return data
   }
 
   const dbQuery = useQuery({
     queryKey: dbQueryKey,
-    queryFn: tempDBQueryFn,
+    queryFn: fetchFromDB,
     enabled: enabled && token !== undefined && !isRefreshToken,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     staleTime: dbStaleTime,
