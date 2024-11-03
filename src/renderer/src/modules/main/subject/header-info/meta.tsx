@@ -1,7 +1,9 @@
 import { Separator } from '@renderer/components/ui/separator'
 import { Subject } from '@renderer/data/types/subject'
 import { extractInfoBox } from '@renderer/lib/utils/data-trans'
+import { isEmpty } from '@renderer/lib/utils/string'
 import dayjs from 'dayjs'
+import { Fragment } from 'react/jsx-runtime'
 
 export function Meta({
   date,
@@ -32,34 +34,27 @@ export function Meta({
           </>
         )}
         <div className="flex flex-row flex-wrap items-center gap-1 text-base font-medium">
-          <MetaItem
-            inner={date}
-            content={dayjs(date, 'YYYY-MM-DD').format('YYYY 年 M 月 D 日')}
-            first
+          <MetaItemList
+            listItem={[
+              date ? dayjs(date, 'YYYY-MM-DD').format('YYYY 年 M 月 D 日') : null,
+              platform,
+              eps !== 0 ? `共 ${eps} 话` : null,
+              week_day ? week_day : null,
+            ]}
           />
-          <MetaItem inner={platform} content={platform} />
-          <MetaItem inner={eps} content={`共 ${eps} 话`} />
-          <MetaItem inner={week_day} content={week_day} />
         </div>
       </section>
     </div>
   )
 }
 
-function MetaItem({
-  inner,
-  content,
-  first = false,
-}: {
-  content: string | number | undefined
-  inner: string | undefined | number | null | Date
-  first?: boolean
-}) {
-  if (!inner || inner === 0 || inner == '') return null
-  return (
-    <>
-      {!first && <span>·</span>}
-      <span className="shrink-0">{content}</span>
-    </>
-  )
+function MetaItemList({ listItem }: { listItem: (string | null)[] }) {
+  return listItem
+    .filter((item) => item !== null && !isEmpty(item))
+    .map((item, index) => (
+      <Fragment key={item}>
+        {index !== 0 && <span>·</span>}
+        <span>{item}</span>
+      </Fragment>
+    ))
 }
