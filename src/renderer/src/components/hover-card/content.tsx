@@ -19,7 +19,7 @@ export function HoverCardContent({
   margin = 5,
   align = 'start',
   collisionPadding = defaultCollisionPadding,
-  isBottom = () => {},
+  isBottom,
 }: PropsWithChildren<
   HTMLProps<'div'> & {
     margin?: number
@@ -47,7 +47,7 @@ export function HoverCardContent({
     })
     setIsCollision(c.collision)
     const isFlip = beforeBottom.current !== c.isBottom
-    isBottom(c.isBottom)
+    isBottom?.(c.isBottom)
     beforeBottom.current = c.isBottom
     if (!aContainerRef.current) return
     animate(
