@@ -116,6 +116,10 @@ export const useDBQueryMustAuth = <
   const dbQueryKey = [...queryKey, dbParams, token?.access_token]
   const queryClient = useQueryClient()
 
+  const updateDBMutate = useMutation({
+    mutationFn: updateDB,
+  })
+
   const update = async () => {
     if (!token) return null
     let apiData: TQueryFnReturn | undefined
@@ -127,11 +131,11 @@ export const useDBQueryMustAuth = <
       }
       throw error
     }
-    await updateDB(apiData)
+    updateDBMutate.mutate(apiData)
     return apiData
   }
 
-  const mutate = useMutation({
+  const fetchMutate = useMutation({
     mutationFn: update,
     onSuccess: (data) => {
       queryClient.setQueryData(queryKey, data)
@@ -142,11 +146,11 @@ export const useDBQueryMustAuth = <
     if (!token) return null
     const data = await dbQueryFn({ user_id: token.user_id, ...dbParams } as TDbParams)
     if (data === undefined) {
-      return await mutate.mutateAsync()
+      return await fetchMutate.mutateAsync()
     }
     const last_update_at = data.last_update_at.getTime()
     if (new Date().getTime() - last_update_at > dbStaleTime) {
-      mutate.mutate()
+      fetchMutate.mutate()
     } else {
       setTimeout(() => {
         queryClient.setQueryData<TQueryFnReturn>(dbQueryKey, (oldData) => oldData, {
@@ -290,6 +294,10 @@ export const useDBQueryOptionalAuth = <
   const dbQueryKey = [...queryKey, dbParams, token?.access_token]
   const queryClient = useQueryClient()
 
+  const updateDBMutate = useMutation({
+    mutationFn: updateDB,
+  })
+
   const update = async () => {
     let apiData: TQueryFnReturn | undefined
     try {
@@ -300,7 +308,7 @@ export const useDBQueryOptionalAuth = <
       }
       throw error
     }
-    await updateDB(apiData)
+    updateDBMutate.mutate(apiData)
     return apiData
   }
 
@@ -374,13 +382,70 @@ export const useDBQueriesOptionalAuth = <
   const dbQueryKey = [...queryKey, dbParams, accessToken]
   const queryClient = useQueryClient()
 
-  const getData = async (dbData: TQueryFnReturn[]) => {
-    if (dbParams.ids === undefined) throw new FetchError('[Params error]: no ids')
-    const data_map = new Map(dbData.map((item) => [item.id, item]))
+  const updateDBMutate = useMutation({
+    mutationFn: updateDB,
+  })
+
+  const fetchData = async ({
+    allIds,
+    fetchArray,
+    dataMap,
+  }: {
+    allIds: number[]
+    fetchArray: number[]
+    dataMap: Map<number, TQueryFnReturn>
+  }) => {
+    const res = await Promise.allSettled(
+      fetchArray.map((id) => apiQueryFn({ token: accessToken, id, ...apiParams } as TApiParams)),
+    )
+    const errors = res.filter((v) => v.status === 'rejected').map((v) => v.reason)
+    for (const e of errors) {
+      if (e instanceof FetchError && e.statusCode === 401) {
+        throw AuthError.expire()
+      }
+    }
+    const apiData = res.filter((v) => v.status === 'fulfilled').map((v) => v.value)
+
+    updateDBMutate.mutate(apiData)
+
+    for (const data of apiData) {
+      dataMap.set(data.id, data)
+    }
+
+    //FIXME: NSFW 条目没有特殊处理，只是返回 null
     const currentTime = new Date().getTime()
     let minimalTimestamp = currentTime
-    const fetchArray = dbParams.ids.filter((id) => {
-      const data = data_map.get(id)
+    const data = allIds.map((id) => {
+      const data = dataMap.get(id) ?? null
+      if (data) {
+        queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, accessToken], data, {
+          updatedAt: data.last_update_at.getTime(),
+        })
+        minimalTimestamp = Math.min(minimalTimestamp, data.last_update_at.getTime())
+      }
+      return data
+    })
+
+    return { data, minimalTimestamp }
+  }
+
+  const fetchDataMutation = useMutation({
+    mutationFn: fetchData,
+    onSuccess: ({ data, minimalTimestamp }) => {
+      queryClient.setQueryData<(TQueryFnReturn | null)[]>(dbQueryKey, data, {
+        updatedAt: minimalTimestamp,
+      })
+    },
+  })
+
+  const getData = async (dbData: TQueryFnReturn[]) => {
+    if (dbParams.ids === undefined) throw new FetchError('[Params error]: no ids')
+    const allIds = dbParams.ids
+    const dataMap = new Map(dbData.map((item) => [item.id, item]))
+    const currentTime = new Date().getTime()
+    let minimalTimestamp = currentTime
+    const fetchArray = allIds.filter((id) => {
+      const data = dataMap.get(id)
       if (data === undefined) return true
       else if (currentTime - data.last_update_at.getTime() > dbStaleTime) return true
       else {
@@ -388,8 +453,8 @@ export const useDBQueriesOptionalAuth = <
         return false
       }
     })
-    const dbOrderedData = dbParams.ids.map((id) => {
-      const data = data_map.get(id) ?? null
+    const dbOrderedData = allIds.map((id) => {
+      const data = dataMap.get(id) ?? null
       if (data)
         queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, accessToken], data, {
           updatedAt: data.last_update_at.getTime(),
@@ -405,41 +470,8 @@ export const useDBQueriesOptionalAuth = <
       return dbOrderedData
     }
 
-    const update = async () => {
-      if (dbParams.ids === undefined) throw new FetchError('[Params error]: no ids')
-      const res = await Promise.allSettled(
-        fetchArray.map((id) => apiQueryFn({ token: accessToken, id, ...apiParams } as TApiParams)),
-      )
-      const errors = res.filter((v) => v.status === 'rejected').map((v) => v.reason)
-      for (const e of errors) {
-        if (e instanceof FetchError && e.statusCode === 401) {
-          throw AuthError.expire()
-        }
-      }
-      const apiData = res.filter((v) => v.status === 'fulfilled').map((v) => v.value)
-      setTimeout(async () => {
-        await updateDB(apiData)
-      }, 0)
-      for (const data of apiData) {
-        data_map.set(data.id, data)
-      }
-      //FIXME: NSFW 条目没有特殊处理，只是返回 null
-      return dbParams.ids.map((id) => {
-        const data = data_map.get(id) ?? null
-        if (data)
-          queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, accessToken], data, {
-            updatedAt: data.last_update_at.getTime(),
-          })
-        return data
-      })
-    }
+    fetchDataMutation.mutate({ allIds, dataMap, fetchArray })
 
-    setTimeout(async () => {
-      const data = await update()
-      queryClient.setQueryData<(TQueryFnReturn | null)[]>(dbQueryKey, data, {
-        updatedAt: minimalTimestamp,
-      })
-    }, 10)
     return dbOrderedData
   }
 
