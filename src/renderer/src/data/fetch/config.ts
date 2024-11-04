@@ -102,4 +102,4 @@ export const SEARCH = {
 export const webFetch = ofetch.create({ baseURL: HOST })
 
 /** ofetch api config  */
-export const apiFetch = ofetch.create({ baseURL: API_HOST })
+export const apiFetch = ofetch.create({ baseURL: API_HOST, credentials: 'omit' })
