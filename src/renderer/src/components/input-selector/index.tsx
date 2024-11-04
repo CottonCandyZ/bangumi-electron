@@ -154,8 +154,8 @@ export function InputSelector(props: InputSelectorProps) {
             <li
               key={index}
               data-selected={index === selectedIndex}
-              data-isLatest={index === filtered.length - 1}
-              className="relative cursor-pointer px-4 py-2 data-[isLatest=false]:border-b data-[selected=true]:bg-muted data-[selected=false]:hover:bg-muted"
+              data-is-latest={index === filtered.length - 1}
+              className="relative cursor-pointer px-4 py-2 data-[is-latest=false]:border-b data-[selected=true]:bg-muted data-[selected=false]:hover:bg-muted"
               onClick={() => handleSelect(item)}
             >
               <span>{highlightMatch(item, inputValue?.toString())}</span>
