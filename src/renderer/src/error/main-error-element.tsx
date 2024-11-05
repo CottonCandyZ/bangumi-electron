@@ -32,18 +32,18 @@ export default function MainErrorElement() {
   }
 
   return (
-    <div className="flex h-full items-center justify-center bg-gradient-to-br from-red-50 to-orange-50">
+    <div className="flex h-full items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 dark:from-secondary dark:to-background">
       <Card className="max-w-3xl overflow-hidden shadow-lg">
-        <CardHeader className="bg-red-100/50 py-6">
-          <CardTitle className="text-center text-3xl font-bold text-red-600">
+        <CardHeader className="bg-red-100/50 py-6 dark:bg-white/20">
+          <CardTitle className="text-center text-3xl font-bold text-red-600 dark:text-red-50">
             {ERROR_CONSTANTS.CARD_TITLE}
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-6 p-6">
           {error.stack && (
-            <div className="w-full rounded-lg border border-red-200 p-4 shadow-sm">
+            <div className="w-full rounded-lg border border-red-200 p-4 shadow-sm dark:border-border">
               <div className="mb-4 flex items-center justify-between">
-                <p className="text-xl font-medium text-red-600">
+                <p className="text-xl font-medium text-red-600 dark:text-red-50">
                   {ERROR_CONSTANTS.ERROR_MESSAGE_LABEL}
                 </p>
                 <div className="flex gap-2">
@@ -51,7 +51,7 @@ export default function MainErrorElement() {
                     variant="outline"
                     size="sm"
                     onClick={copyErrorToClipboard}
-                    className="transition-all duration-200 ease-in-out hover:bg-red-50/50"
+                    className="transition-all duration-200 ease-in-out hover:bg-red-50/50 dark:hover:bg-accent dark:hover:text-accent-foreground"
                   >
                     {copied ? (
                       <span className="flex items-center">
@@ -79,7 +79,7 @@ export default function MainErrorElement() {
                 </div>
               </div>
               <ScrollWrapper className="max-h-60">
-                <pre className="whitespace-pre-wrap break-words font-mono text-sm text-gray-700">
+                <pre className="whitespace-pre-wrap break-words font-mono text-sm text-gray-700 dark:text-primary">
                   {error.stack}
                 </pre>
               </ScrollWrapper>
@@ -87,24 +87,32 @@ export default function MainErrorElement() {
           )}
 
           <div className="mt-6 flex flex-col items-center gap-4">
-            <span className="text-xl font-semibold text-red-600">
+            <span className="text-xl font-semibold text-red-600 dark:text-red-50">
               {ERROR_CONSTANTS.TRY_FOLLOWING_TEXT}
             </span>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-center gap-4 bg-red-50/50 p-6">
-          <Button variant="outline" onClick={() => nav(-1)} className="hover:bg-red-100/50">
+        <CardFooter className="flex justify-center gap-4 bg-red-50/50 p-6 dark:bg-white/20">
+          <Button
+            variant="outline"
+            onClick={() => nav(-1)}
+            className="hover:bg-red-100/50 dark:hover:bg-accent dark:hover:text-accent-foreground"
+          >
             <span className="i-mingcute-arrow-left-line mr-2 mt-0.5" />
             {ERROR_CONSTANTS.BACK_BUTTON_TEXT}
           </Button>
-          <Button variant="outline" onClick={() => nav('/')} className="hover:bg-red-100/50">
+          <Button
+            variant="outline"
+            onClick={() => nav('/')}
+            className="hover:bg-red-100/50 dark:hover:bg-accent dark:hover:text-accent-foreground"
+          >
             <span className="i-mingcute-home-5-line mr-2 mt-0.5" />
             {ERROR_CONSTANTS.HOME_BUTTON_TEXT}
           </Button>
           <Button
             variant="outline"
             onClick={() => window.location.reload()}
-            className="hover:bg-red-100/50"
+            className="hover:bg-red-100/50 dark:hover:bg-accent dark:hover:text-accent-foreground"
           >
             <span className="i-mingcute-refresh-1-line mr-2 mt-0.5" />
             {ERROR_CONSTANTS.REFRESH_BUTTON_TEXT}
