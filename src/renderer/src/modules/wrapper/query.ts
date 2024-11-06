@@ -13,7 +13,7 @@ export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
       // 已经获得了数据，但是在更新时出错
-      if (query.state.data === null) {
+      if (query.state.data !== undefined) {
         toast.error(error.message)
       }
     },
