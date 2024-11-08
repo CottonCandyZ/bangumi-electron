@@ -20,7 +20,7 @@ import { useTopListQuery } from '@renderer/data/hooks/web/subject'
 import { useSubjectsInfoQuery } from '@renderer/data/hooks/db/subject'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 
-interface SmallCarouselProps {
+export type SmallCarouselProps = {
   href: string
   name: string
   sectionPath: SectionPath

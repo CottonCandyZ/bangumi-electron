@@ -403,6 +403,10 @@ export const useDBQueriesOptionalAuth = <
       if (e instanceof FetchError && e.statusCode === 401) {
         throw AuthError.expire()
       }
+      if (e instanceof FetchError && e.status === 404) {
+        continue
+      }
+      throw e
     }
     const apiData = res.filter((v) => v.status === 'fulfilled').map((v) => v.value)
 
@@ -436,9 +440,10 @@ export const useDBQueriesOptionalAuth = <
         updatedAt: minimalTimestamp,
       })
     },
+    throwOnError: (e) => !(e instanceof FetchError && e.statusCode === 401),
   })
 
-  const getData = async (dbData: TQueryFnReturn[]) => {
+  const getData = (dbData: TQueryFnReturn[]) => {
     if (dbParams.ids === undefined) throw new FetchError('[Params error]: no ids')
     const allIds = dbParams.ids
     const dataMap = new Map(dbData.map((item) => [item.id, item]))
@@ -479,12 +484,16 @@ export const useDBQueriesOptionalAuth = <
     queryKey: dbQueryKey,
     queryFn: async () => {
       const data = await dbQueryFn({ ...dbParams } as TDbParams)
-      return await getData(data)
+      // throw Error('1')
+      return getData(data)
     },
+    networkMode: 'offlineFirst',
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     enabled: enabled && token !== undefined && !isRefreshToken,
     persister: undefined,
     staleTime: dbStaleTime,
+    throwOnError: (e, query) =>
+      query.state.data === undefined && !(e instanceof FetchError && e.statusCode === 401),
     ...props,
   })
 
