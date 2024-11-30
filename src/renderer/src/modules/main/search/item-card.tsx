@@ -48,7 +48,7 @@ export function SearchItemCard({ searchItem }: { searchItem: SearchData }) {
                 <div className="text-base text-muted-foreground">{ICON_MAP[searchItem.type]}</div>
                 <Separator orientation="vertical" className="h-4" />
                 <section className="flex flex-row items-center gap-1">
-                  {searchItem.score !== 0 ? (
+                  {searchItem.score && searchItem.score !== 0 ? (
                     <>
                       <div className="mt-[1px]">
                         <ScoreStarHalf score={searchItem.score} />
@@ -65,7 +65,7 @@ export function SearchItemCard({ searchItem }: { searchItem: SearchData }) {
                   )}
                 </section>
                 <Separator orientation="vertical" className="h-4" />
-                {!isEmpty(searchItem.date) ? (
+                {searchItem.date && !isEmpty(searchItem.date) ? (
                   <span className="text-xs font-medium text-muted-foreground">
                     {searchItem.date}
                   </span>
