@@ -15,7 +15,7 @@
 
 ### 2025
 
-- [ ] \[2025.02] 还是觉得放在 Notion 上会比较好管理一些，所以说新的 Project Manage 会[出现在这里](https://cottoncandyz.notion.site/BE-Project-17e4e3d00a8a801880e6e53fa6396b95)，等到正式发布时会同步为 Change Log。
+- [ ] \[2025.02] 还是觉得放在 Notion 上会比较好管理一些，所以说新的 Project Manage 会[出现在这里](https://cottoncandyz.notion.site/BE-Project-1914e3d00a8a8003a336f81f18b48f48?pvs=4)，等到正式发布时会同步为 Change Log。
 - [ ] \[2024.12\] & \[2025.01\] 还在忙别的事中...预计过年会有一点时间稍微理一下代办和项目结构，重新建一个 Linear 的 Project，理一下优先级。预计还是会优先实现搜索 → 收藏优化 → 评论，有空了会给 changeLog 和更新最优先的事项。（希望二月能推进一些！！
 
 ### 2024
