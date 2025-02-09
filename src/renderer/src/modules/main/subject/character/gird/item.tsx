@@ -9,7 +9,6 @@ import { CardContent } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
 import { Character } from '@renderer/data/types/character'
 import { cn } from '@renderer/lib/utils'
-import { getCharacterAvatarURL } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { useLocation } from 'react-router-dom'
 import { Detail } from '@renderer/modules/main/subject/character/gird/detail'
@@ -37,7 +36,7 @@ export function Item({ character }: { character: Character }) {
               {!isEmpty(character.images.large) && (
                 <Image
                   className="aspect-square size-14 shrink-0 overflow-hidden rounded-lg"
-                  imageSrc={getCharacterAvatarURL(character.images.large)}
+                  imageSrc={character.images.grid}
                 />
               )}
               <MetaInfo character={character} />
@@ -58,7 +57,7 @@ function PopCard({ character }: { character: Character }) {
           {!isEmpty(character.images.large) && (
             <Image
               className="h-fit basis-1/4 overflow-hidden rounded-lg"
-              imageSrc={character.images.grid}
+              imageSrc={character.images.medium}
               loadingClassName="aspect-square"
               careLoading
               loading="eager"
