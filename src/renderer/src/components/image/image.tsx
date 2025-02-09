@@ -65,7 +65,7 @@ export const Image = forwardRef<
           className={cn(
             'h-full w-full max-w-none select-none object-cover',
             imageClassName,
-            (!imageSrc || isError) && 'invisible',
+            (!imageSrc || isError || (careLoading && !isLoad)) && 'invisible',
           )}
           onLoad={() => {
             setIsLoad(true)
