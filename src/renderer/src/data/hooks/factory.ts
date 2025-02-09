@@ -440,7 +440,7 @@ export const useDBQueriesOptionalAuth = <
         updatedAt: minimalTimestamp,
       })
     },
-    throwOnError: (e) => !(e instanceof FetchError && e.statusCode === 401),
+    throwOnError: (e) => !(e instanceof AuthError),
   })
 
   const getData = (dbData: TQueryFnReturn[]) => {
@@ -492,8 +492,7 @@ export const useDBQueriesOptionalAuth = <
     enabled: enabled && token !== undefined && !isRefreshToken,
     persister: undefined,
     staleTime: dbStaleTime,
-    throwOnError: (e, query) =>
-      query.state.data === undefined && !(e instanceof FetchError && e.statusCode === 401),
+    throwOnError: (e, query) => query.state.data === undefined && !(e instanceof AuthError),
     ...props,
   })
 
