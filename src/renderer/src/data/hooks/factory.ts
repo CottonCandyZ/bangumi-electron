@@ -484,7 +484,6 @@ export const useDBQueriesOptionalAuth = <
     queryKey: dbQueryKey,
     queryFn: async () => {
       const data = await dbQueryFn({ ...dbParams } as TDbParams)
-      // throw Error('1')
       return getData(data)
     },
     networkMode: 'offlineFirst',
