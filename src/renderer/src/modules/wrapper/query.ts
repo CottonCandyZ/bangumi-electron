@@ -40,6 +40,7 @@ export const useIsUnauthorized = () => {
 
   const refresh = useCallback(
     async (code: AuthCode) => {
+      if (code !== AuthCode.EXPIRE) return
       if (store.get(isRefreshingTokenAtom)) return
       store.set(isRefreshingTokenAtom, true)
       const accessToken = await queryClient.ensureQueryData<
