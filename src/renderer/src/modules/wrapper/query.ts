@@ -42,9 +42,9 @@ export const useIsUnauthorized = () => {
     async (code: AuthCode) => {
       if (store.get(isRefreshingTokenAtom)) return
       store.set(isRefreshingTokenAtom, true)
-      const accessToken = (await queryClient.ensureQueryData({
-        queryKey: ['accessToken'],
-      })) as ReturnType<typeof useAccessTokenQuery>['data']
+      const accessToken = await queryClient.ensureQueryData<
+        ReturnType<typeof useAccessTokenQuery>['data']
+      >({ queryKey: ['accessToken'] })
       if (code === AuthCode.EXPIRE && accessToken) {
         queryClient.cancelQueries({ queryKey: [accessToken] })
         refreshMutation.mutate({ ...accessToken })

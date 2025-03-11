@@ -41,7 +41,7 @@ type OptionalDBQueryProps<P> = keyof Omit<P, 'user_id'> extends never
  *
  * 在验证失败时自动退出登录
  */
-export const useQueryMustAuth = <P, R>({
+export const useQueryMustAuth = <TApiParams, TQueryFnReturn>({
   queryKey = [],
   queryFn,
   queryProps,
@@ -49,30 +49,34 @@ export const useQueryMustAuth = <P, R>({
   needKeepPreviousData = true,
   ...props
 }: {
-  queryFn: P extends { token: string } ? Fn<P, R> : never
+  queryFn: TApiParams extends { token: string } ? Fn<TApiParams, TQueryFnReturn> : never
   enabled?: boolean
   needKeepPreviousData?: boolean
-} & OptionalProps<P> &
-  Omit<UseQueryOptions<R, Error, R, QueryKey>, 'queryFn'>) => {
-  const { data: accessToken } = useAccessTokenQuery()
-  const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
+} & OptionalProps<TApiParams> &
+  Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
+  const { data: token } = useAccessTokenQuery()
+  const isRefreshingToken = useAtomValue(isRefreshingTokenAtom)
+  const accessToken = token?.access_token
   const query = useQuery({
-    queryKey: [...queryKey, queryProps, accessToken?.access_token],
+    queryKey: [...queryKey, queryProps, accessToken],
     queryFn: async () => {
-      if (!accessToken?.access_token) throw AuthError.notAuth()
-      let data: R | undefined
+      // 没有 token，说明没有登录
+      // 然而实际上 token 未空时，不会进到这里，只有在 revalidate 的时候才会来到这...
+      if (!accessToken) throw AuthError.notAuth()
+      let data: TQueryFnReturn
       try {
-        data = await queryFn({ token: accessToken.access_token, ...queryProps } as P)
+        data = await queryFn({ token: accessToken, ...queryProps } as TApiParams)
       } catch (error) {
+        // token 过期
         if (error instanceof FetchError && error.statusCode === 401) {
           throw AuthError.expire()
         }
         throw error
       }
-      return data as R
+      return data
     },
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
-    enabled: enabled && accessToken !== undefined && !isRefreshToken,
+    enabled: enabled && token !== undefined && !isRefreshingToken,
     ...props,
   })
   return query
@@ -111,9 +115,9 @@ export const useDBQueryMustAuth = <
     UseQueryOptions<TQueryFnReturn | null, Error, TQueryFnReturn | null, QueryKey>,
     'queryFn'
   >) => {
-  const { data: token } = useAccessTokenQuery()
-  const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
-  const dbQueryKey = [...queryKey, dbParams, token?.access_token]
+  const { data: userInfo } = useAccessTokenQuery()
+  const isRefreshingToken = useAtomValue(isRefreshingTokenAtom)
+  const dbQueryKey = [...queryKey, dbParams, userInfo?.access_token]
   const queryClient = useQueryClient()
 
   const updateDBMutate = useMutation({
@@ -121,16 +125,17 @@ export const useDBQueryMustAuth = <
   })
 
   const update = async () => {
-    if (!token) return null
-    let apiData: TQueryFnReturn | undefined
+    if (!userInfo) throw AuthError.notAuth()
+    let apiData: TQueryFnReturn
     try {
-      apiData = await apiQueryFn({ token: token?.access_token, ...apiParams } as TApiParams)
+      apiData = await apiQueryFn({ token: userInfo.access_token, ...apiParams } as TApiParams)
     } catch (error) {
       if (error instanceof FetchError && error.statusCode === 401) {
         throw AuthError.expire()
       }
       throw error
     }
+    // 更新数据库
     updateDBMutate.mutate(apiData)
     return apiData
   }
@@ -143,20 +148,14 @@ export const useDBQueryMustAuth = <
   })
 
   const fetchFromDB = async () => {
-    if (!token) return null
-    const data = await dbQueryFn({ user_id: token.user_id, ...dbParams } as TDbParams)
+    if (!userInfo) throw AuthError.notAuth()
+    const data = await dbQueryFn({ user_id: userInfo.user_id, ...dbParams } as TDbParams)
     if (data === undefined) {
       return await fetchMutate.mutateAsync()
     }
     const last_update_at = data.last_update_at.getTime()
     if (new Date().getTime() - last_update_at > dbStaleTime) {
       fetchMutate.mutate()
-    } else {
-      setTimeout(() => {
-        queryClient.setQueryData<TQueryFnReturn>(dbQueryKey, (oldData) => oldData, {
-          updatedAt: last_update_at,
-        })
-      }, 10)
     }
     return data
   }
@@ -164,8 +163,15 @@ export const useDBQueryMustAuth = <
   const dbQuery = useQuery({
     queryKey: dbQueryKey,
     queryFn: fetchFromDB,
-    enabled: enabled && token !== undefined && !isRefreshToken,
+    enabled: enabled && userInfo !== undefined && !isRefreshingToken,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
+    // staleTime: async (q) => {
+    //   const data = await q.promise
+    //   if (!data) return dbStaleTime
+    //   const last_update_at = data.last_update_at.getTime()
+    //   const pastTime = new Date().getTime() - last_update_at
+    //   return pastTime > dbStaleTime ? 0 : dbStaleTime - pastTime
+    // },
     staleTime: dbStaleTime,
     persister: undefined,
     ...props,
@@ -181,7 +187,7 @@ export const useDBQueryMustAuth = <
  *
  * 如果发现登陆过期，会重置登录状态
  */
-export const useQueryOptionalAuth = <P, R, S = R>({
+export const useQueryOptionalAuth = <TApiParams, TQueryFnReturn, TData = TQueryFnReturn>({
   queryKey = [],
   queryFn,
   queryProps,
@@ -190,28 +196,29 @@ export const useQueryOptionalAuth = <P, R, S = R>({
   needKeepPreviousData = true,
   ...props
 }: {
-  queryFn: P extends { token?: string } ? Fn<P, R> : never
-  select?: (data: R) => S
+  queryFn: TApiParams extends { token?: string } ? Fn<TApiParams, TQueryFnReturn> : never
+  select?: (data: TQueryFnReturn) => TData
   needKeepPreviousData?: boolean
-} & OptionalProps<P> &
-  Omit<UseQueryOptions<R, Error, R, QueryKey>, 'select' | 'queryFn'>) => {
-  const { data: accessToken } = useAccessTokenQuery()
+} & OptionalProps<TApiParams> &
+  Omit<UseQueryOptions<TQueryFnReturn, Error, TData, QueryKey>, 'select' | 'queryFn'>) => {
+  const { data: userInfo } = useAccessTokenQuery()
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
+  const accessToken = userInfo?.access_token
   const query = useQuery({
-    queryKey: [...queryKey, queryProps, accessToken?.access_token],
+    queryKey: [...queryKey, queryProps, accessToken],
     queryFn: async () => {
-      let data: R | undefined
+      let data: TQueryFnReturn
       try {
-        data = await queryFn({ token: accessToken?.access_token, ...queryProps } as P)
+        data = await queryFn({ token: accessToken, ...queryProps } as TApiParams)
       } catch (error) {
         if (error instanceof FetchError && error.statusCode === 401) {
           throw AuthError.expire()
         }
         throw error
       }
-      return data as R
+      return data
     },
-    enabled: enabled && accessToken !== undefined && !isRefreshToken,
+    enabled: enabled && userInfo !== undefined && !isRefreshToken,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     select,
     ...props,
@@ -219,7 +226,7 @@ export const useQueryOptionalAuth = <P, R, S = R>({
   return query
 }
 
-export const useQueriesOptionalAuth = <P, R extends { id: number }>({
+export const useQueriesOptionalAuth = <TApiParams, TQueryFnReturn extends { id: number }>({
   queryKey = [],
   queryFn,
   queryIds,
@@ -228,20 +235,24 @@ export const useQueriesOptionalAuth = <P, R extends { id: number }>({
   needKeepPreviousData = true,
   ...props
 }: {
-  queryFn: P extends { token?: string } ? Fn<P, R> : never
+  queryFn: TApiParams extends { token?: string } ? Fn<TApiParams, TQueryFnReturn> : never
   queryIds: number[]
   needKeepPreviousData?: boolean
-} & OptionalAPIQueriesProps<P> &
-  Omit<UseQueryOptions<(R | null)[], Error, (R | null)[], QueryKey>, 'select' | 'queryFn'>) => {
-  const { data: token } = useAccessTokenQuery()
+} & OptionalAPIQueriesProps<TApiParams> &
+  Omit<
+    UseQueryOptions<(TQueryFnReturn | null)[], Error, (TQueryFnReturn | null)[], QueryKey>,
+    'select' | 'queryFn'
+  >) => {
+  const { data: userInfo } = useAccessTokenQuery()
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
+  const accessToken = userInfo?.access_token
   const queryClient = useQueryClient()
 
   const query = useQuery({
-    queryKey: [...queryKey, queryIds, apiParams, token?.access_token],
+    queryKey: [...queryKey, queryIds, apiParams, accessToken],
     queryFn: async () => {
       const res = await Promise.allSettled(
-        queryIds.map((id) => queryFn({ token: token?.access_token, id, ...apiParams } as P)),
+        queryIds.map((id) => queryFn({ token: accessToken, id, ...apiParams } as TApiParams)),
       )
 
       return res.map((item) => {
@@ -250,14 +261,11 @@ export const useQueriesOptionalAuth = <P, R extends { id: number }>({
           if (e instanceof FetchError && e.statusCode === 401) throw AuthError.expire()
           return null
         }
-        queryClient.setQueryData<R>(
-          [...queryKey, { id: item.value.id }, token?.access_token],
-          item.value,
-        )
+        queryClient.setQueryData([...queryKey, { id: item.value.id }, accessToken], item.value)
         return item.value
       })
     },
-    enabled: enabled && token !== undefined && !isRefreshToken,
+    enabled: enabled && userInfo !== undefined && !isRefreshToken,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     ...props,
   })
@@ -289,9 +297,10 @@ export const useDBQueryOptionalAuth = <
   needKeepPreviousData?: boolean
 } & OptionalAPIQueryProps<TApiParams> &
   Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
-  const { data: token } = useAccessTokenQuery()
+  const { data: userInfo } = useAccessTokenQuery()
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
-  const dbQueryKey = [...queryKey, dbParams, token?.access_token]
+  const accessToken = userInfo?.access_token
+  const dbQueryKey = [...queryKey, dbParams, accessToken]
   const queryClient = useQueryClient()
 
   const updateDBMutate = useMutation({
@@ -301,7 +310,7 @@ export const useDBQueryOptionalAuth = <
   const update = async () => {
     let apiData: TQueryFnReturn | undefined
     try {
-      apiData = await apiQueryFn({ token: token?.access_token, ...apiParams } as TApiParams)
+      apiData = await apiQueryFn({ token: accessToken, ...apiParams } as TApiParams)
     } catch (error) {
       if (error instanceof FetchError && error.statusCode === 401) {
         throw AuthError.expire()
@@ -327,12 +336,6 @@ export const useDBQueryOptionalAuth = <
     const last_update_at = data.last_update_at.getTime()
     if (new Date().getTime() - last_update_at > dbStaleTime) {
       mutate.mutate()
-    } else {
-      setTimeout(() => {
-        queryClient.setQueryData<TQueryFnReturn>(dbQueryKey, (oldData) => oldData, {
-          updatedAt: last_update_at,
-        })
-      }, 10)
     }
     return data
   }
@@ -341,8 +344,15 @@ export const useDBQueryOptionalAuth = <
     queryKey: dbQueryKey,
     queryFn: fetchFromDB,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
-    enabled: enabled && token !== undefined && !isRefreshToken,
+    enabled: enabled && userInfo !== undefined && !isRefreshToken,
     persister: undefined,
+    // staleTime: async (q) => {
+    //   const data = await q.promise
+    //   if (!data) return dbStaleTime
+    //   const last_update_at = data.last_update_at.getTime()
+    //   const pastTime = new Date().getTime() - last_update_at
+    //   return pastTime > dbStaleTime ? 0 : dbStaleTime - pastTime
+    // },
     staleTime: dbStaleTime,
     ...props,
   })
@@ -422,6 +432,7 @@ export const useDBQueriesOptionalAuth = <
     const data = allIds.map((id) => {
       const data = dataMap.get(id) ?? null
       if (data) {
+        // 提前设置部分 fetch 的 data
         queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, accessToken], data, {
           updatedAt: data.last_update_at.getTime(),
         })
@@ -466,17 +477,16 @@ export const useDBQueriesOptionalAuth = <
         })
       return data
     })
+
     if (fetchArray.length === 0) {
-      setTimeout(() => {
-        queryClient.setQueryData<(TQueryFnReturn | null)[]>(dbQueryKey, (oldData) => oldData, {
-          updatedAt: minimalTimestamp,
-        })
-      }, 10)
+      // 无需更新
       return dbOrderedData
     }
 
     fetchDataMutation.mutate({ allIds, dataMap, fetchArray })
 
+    // 先返回过期的数据
+    // 这里没有对全部都为 null 的情况做处理...
     return dbOrderedData
   }
 
@@ -490,6 +500,23 @@ export const useDBQueriesOptionalAuth = <
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     enabled: enabled && token !== undefined && !isRefreshToken,
     persister: undefined,
+    // staleTime: async (q) => {
+    //   const data = await q.promise
+    //   if (!data) return dbStaleTime
+    //   const now = new Date().getTime()
+    //   let minStaleTime = dbStaleTime
+    //   for (const item of data) {
+    //     if (item) {
+    //       const last_update_at = item.last_update_at.getTime()
+    //       const pastTime = now - last_update_at
+    //       if (pastTime > dbStaleTime) return 0
+    //       const staleTime = dbStaleTime - pastTime
+    //       minStaleTime = Math.min(staleTime, minStaleTime)
+    //     }
+    //   }
+    //   return minStaleTime
+    // },
+    // 暂时为了减少 bug，选择更加舒适的方案
     staleTime: dbStaleTime,
     throwOnError: (e, query) => query.state.data === undefined && !(e instanceof AuthError),
     ...props,
