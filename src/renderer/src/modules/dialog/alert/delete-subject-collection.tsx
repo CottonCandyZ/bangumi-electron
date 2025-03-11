@@ -1,4 +1,5 @@
 import {
+  AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
@@ -14,14 +15,21 @@ import { useWebDeleteCollectionHash } from '@renderer/data/hooks/web/collection'
 import { CollectionData } from '@renderer/data/types/collection'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { useAtomValue } from 'jotai'
-import { deleteCollectionPropsAtom } from '@renderer/state/dialog/alert'
+import { useAtom } from 'jotai'
+import { deleteCollectionDialogAtom, DeleteCollectionProps } from '@renderer/state/dialog/alert'
 
 export function DeleteSubjectCollectionAlert() {
-  const props = useAtomValue(deleteCollectionPropsAtom)
-  if (!props) throw Error('Props 传丢了')
-  const { subjectId } = props
+  const [dialogOpen, setDialogOpen] = useAtom(deleteCollectionDialogAtom)
 
+  return (
+    <AlertDialog open={dialogOpen.open} onOpenChange={(open) => setDialogOpen({ open })}>
+      {dialogOpen.content && <Content {...dialogOpen.content} />}
+    </AlertDialog>
+  )
+}
+
+const Content = (props: DeleteCollectionProps) => {
+  const { subjectId } = props
   const { userInfo, accessToken } = useSession()
   const username = userInfo?.username
   const hash = useWebDeleteCollectionHash({ subjectId }).data
@@ -73,7 +81,10 @@ export function DeleteSubjectCollectionAlert() {
         {hash ? (
           <AlertDialogAction
             variant={'destructive'}
-            onClick={() => subjectCollectionMutation.mutate({ subjectId, hash })}
+            onClick={() => {
+              if (subjectId === null) return
+              subjectCollectionMutation.mutate({ subjectId, hash })
+            }}
           >
             删除
           </AlertDialogAction>

@@ -22,7 +22,7 @@ import { useState } from 'react'
 import { cn } from '@renderer/lib/utils'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useSetAtom } from 'jotai'
-import { openDialogAction } from '@renderer/state/dialog/normal'
+import { loginDialogAtom } from '@renderer/state/dialog/normal'
 
 export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   const logoutMutation = useLogoutMutation()
@@ -31,7 +31,7 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   const { theme, setTheme } = useTheme()
 
   const [dropdownOpen, setDropDownOpen] = useState(false)
-  const openDialog = useSetAtom(openDialogAction)
+  const openDialog = useSetAtom(loginDialogAtom)
 
   return (
     <DropdownMenu onOpenChange={(open) => setDropDownOpen(open)}>
@@ -52,7 +52,7 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
           <div
             data-expend={type}
             className="aspect-square w-8 shrink-0 overflow-hidden rounded-full bg-accent"
-          ></div>
+          />
         )}
         {type === 'expend' && (
           <span className="shrink-0 font-semibold">{isLogin && userInfo.nickname}</span>
@@ -78,7 +78,7 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
           </DropdownMenuLabel>
         )}
         {!isLogin && (
-          <DropdownMenuItem onClick={() => openDialog('login-form')}>登录</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openDialog({ open: true })}>登录</DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuGroup>

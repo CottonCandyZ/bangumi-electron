@@ -16,7 +16,7 @@ import { SubjectCollectionSelector } from '@renderer/modules/main/subject/collec
 import { ModifySubjectCollection } from '@renderer/modules/main/subject/collection/modify-action'
 import { MoreActionDropDown } from '@renderer/modules/main/subject/collection/more-action-drop-down'
 import { QuickRate } from '@renderer/modules/main/subject/collection/quick-rate'
-import { openDialogAction } from '@renderer/state/dialog/normal'
+import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 
 export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
@@ -30,7 +30,7 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const subjectCollection = subjectCollectionQuery.data
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
-  const openDialog = useSetAtom(openDialogAction)
+  const openLoginDialog = useSetAtom(loginDialogAtom)
 
   const ref = useRef<null | HTMLDivElement>(null)
   const isInView = useInView(ref)
@@ -40,7 +40,7 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   }, [isInView, setIsInView])
 
   const loading = subjectInfo === undefined || subjectCollection === undefined || !userInfo
-  if (!accessToken) return <Button onClick={() => openDialog('login-form')}>登录</Button>
+  if (!accessToken) return <Button onClick={() => openLoginDialog({ open: true })}>登录</Button>
   return (
     <div className="flex flex-col gap-2" ref={ref}>
       <div className="flex flex-row items-center justify-between">

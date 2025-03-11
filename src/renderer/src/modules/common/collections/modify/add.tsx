@@ -11,7 +11,7 @@ import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
 import { useSetAtom } from 'jotai'
-import { subjectCollectionSheetFormActionAtom } from '@renderer/state/dialog/sheet'
+import { subjectCollectionSheetFormAtom } from '@renderer/state/dialog/sheet'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 
 export function AddSubjectCollection({
@@ -23,7 +23,7 @@ export function AddSubjectCollection({
 }) {
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
-  const sheetAction = useSetAtom(subjectCollectionSheetFormActionAtom)
+  const sheetAction = useSetAtom(subjectCollectionSheetFormAtom)
   if (subjectInfo === undefined) return <Skeleton className="h-10 w-full" />
   if (dropdown) {
     return (
@@ -39,11 +39,14 @@ export function AddSubjectCollection({
                 key={item}
                 onClick={() => {
                   sheetAction({
-                    sheetTitle: '添加收藏',
-                    collectionType: Number(item) as CollectionType,
-                    subjectId: subjectInfo.id.toString(),
-                    subjectTags: subjectInfo.tags,
-                    subjectType: subjectInfo.type,
+                    open: true,
+                    content: {
+                      sheetTitle: '添加收藏',
+                      collectionType: Number(item) as CollectionType,
+                      subjectId: subjectInfo.id.toString(),
+                      subjectTags: subjectInfo.tags,
+                      subjectType: subjectInfo.type,
+                    },
                   })
                 }}
               >
@@ -69,11 +72,14 @@ export function AddSubjectCollection({
             )}
             onClick={() => {
               sheetAction({
-                sheetTitle: '添加收藏',
-                collectionType: Number(item) as CollectionType,
-                subjectId: subjectInfo.id.toString(),
-                subjectTags: subjectInfo.tags,
-                subjectType: subjectInfo.type,
+                open: true,
+                content: {
+                  sheetTitle: '添加收藏',
+                  collectionType: Number(item) as CollectionType,
+                  subjectId: subjectInfo.id.toString(),
+                  subjectTags: subjectInfo.tags,
+                  subjectType: subjectInfo.type,
+                },
               })
             }}
           >

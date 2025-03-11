@@ -14,7 +14,7 @@ import {
 import { SubjectId } from '@renderer/data/types/bgm'
 import { EpisodeType } from '@renderer/data/types/episode'
 import { UserInfo } from '@renderer/data/types/user'
-import { MutationKey } from '@tanstack/react-query'
+import { MutationKey, UseMutationOptions } from '@tanstack/react-query'
 
 type OmitInfinityQFP<P> = Omit<P, 'token' | 'offset'>
 
@@ -95,20 +95,11 @@ export const useMutationSubjectCollection = ({
   onError,
 }: {
   mutationKey?: MutationKey
-  onSuccess?: (
-    data: Awaited<ReturnType<typeof AddOrModifySubjectCollectionById>>,
-    variable: Omit<Parameters<typeof AddOrModifySubjectCollectionById>[0], 'token'>,
-  ) => void
-  onMutate?: (
-    variable: Omit<Parameters<typeof AddOrModifySubjectCollectionById>[0], 'token'>,
-  ) => void
-  onSettled?: () => void
-  onError?: (
-    err: Error,
-    variable: Omit<Parameters<typeof AddOrModifySubjectCollectionById>[0], 'token'>,
-    context: unknown,
-  ) => void
-} = {}) =>
+} & UseMutationOptions<
+  Awaited<ReturnType<typeof AddOrModifySubjectCollectionById>>,
+  Error,
+  Omit<Parameters<typeof AddOrModifySubjectCollectionById>[0], 'token'>
+>) =>
   useMutationMustAuth({
     mutationKey,
     mutationFn: AddOrModifySubjectCollectionById,
@@ -126,20 +117,11 @@ export const useMutationEpisodesCollectionBySubjectId = ({
   onError,
 }: {
   mutationKey?: MutationKey
-  onSuccess?: (
-    data: Awaited<ReturnType<typeof ModifyEpisodeCollectionBySubjectId>>,
-    variable: Omit<Parameters<typeof ModifyEpisodeCollectionBySubjectId>[0], 'token'>,
-  ) => void
-  onMutate?: (
-    variable: Omit<Parameters<typeof ModifyEpisodeCollectionBySubjectId>[0], 'token'>,
-  ) => void
-  onSettled?: () => void
-  onError?: (
-    err: Error,
-    variable: Omit<Parameters<typeof ModifyEpisodeCollectionBySubjectId>[0], 'token'>,
-    context: unknown,
-  ) => void
-} = {}) =>
+} & UseMutationOptions<
+  Awaited<ReturnType<typeof ModifyEpisodeCollectionBySubjectId>>,
+  Error,
+  Omit<Parameters<typeof ModifyEpisodeCollectionBySubjectId>[0], 'token'>
+>) =>
   useMutationMustAuth({
     mutationKey,
     mutationFn: ModifyEpisodeCollectionBySubjectId,

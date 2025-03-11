@@ -21,17 +21,17 @@ export function QuickRate({ subjectCollection }: { subjectCollection: Collection
     },
     onError(_error, _variable, context) {
       toast.error('呀，出了点错误...')
-      queryClient.setQueryData(queryKey, (context as { pre: CollectionData }).pre)
+      queryClient.setQueryData<CollectionData>(queryKey, (context as { pre: CollectionData }).pre)
     },
     onMutate(variable) {
       queryClient.cancelQueries({
         queryKey,
       })
-      const pre = queryClient.getQueryData(queryKey)
-      queryClient.setQueryData(queryKey, {
+      const pre = queryClient.getQueryData<CollectionData>(queryKey)
+      queryClient.setQueryData<CollectionData>(queryKey, {
         ...subjectCollection,
         rate: variable.rate!,
-      } satisfies CollectionData)
+      })
       return { pre }
     },
     onSettled() {

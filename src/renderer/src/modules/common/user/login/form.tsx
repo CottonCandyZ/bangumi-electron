@@ -35,7 +35,7 @@ import { useEffect, useRef } from 'react'
 import { InputSelector } from '@renderer/components/input-selector'
 import { useLoginInfoQuery } from '@renderer/data/hooks/db/user'
 import { useSetAtom } from 'jotai'
-import { openLoginDeleteAccountAction } from '@renderer/state/dialog/alert'
+import { deleteLoginAccountDialogAtom } from '@renderer/state/dialog/alert'
 import { client } from '@renderer/lib/client'
 import { deleteLoginInfo } from '@renderer/data/fetch/db/user'
 
@@ -53,7 +53,7 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
   const queryClient = useQueryClient()
   // init data
   const loginInfo = useLoginInfoQuery().data
-  const deleteAlertDialog = useSetAtom(openLoginDeleteAccountAction)
+  const deleteAlertDialog = useSetAtom(deleteLoginAccountDialogAtom)
   const firstTime = useRef(true)
 
   const formSchema = z.object({
@@ -170,9 +170,12 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
 
   const deleteSaveAccount = (email: string) => {
     deleteAlertDialog({
-      email,
-      onDeleted: () => {
-        deleteMutation.mutate({ email })
+      open: true,
+      content: {
+        email,
+        onDeleted: () => {
+          deleteMutation.mutate({ email })
+        },
       },
     })
   }

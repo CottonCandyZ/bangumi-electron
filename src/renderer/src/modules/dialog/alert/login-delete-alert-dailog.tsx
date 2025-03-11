@@ -1,4 +1,5 @@
 import {
+  AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
@@ -7,12 +8,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@renderer/components/ui/alert-dialog'
-import { loginDeleteAccountPropsAtom } from '@renderer/state/dialog/alert'
-import { useAtomValue } from 'jotai'
+import { deleteLoginAccountDialogAtom, DeleteLoginAccountProps } from '@renderer/state/dialog/alert'
+import { useAtom } from 'jotai'
 
 export function LoginInfoDeleteDialogAlertContent() {
-  const props = useAtomValue(loginDeleteAccountPropsAtom)
-  if (!props) throw Error('Props 传丢了')
+  const [openDialog, setDialogOpen] = useAtom(deleteLoginAccountDialogAtom)
+  return (
+    <AlertDialog open={openDialog.open} onOpenChange={(open) => setDialogOpen({ open })}>
+      {openDialog.content && <Content {...openDialog.content} />}
+    </AlertDialog>
+  )
+}
+
+const Content = (props: DeleteLoginAccountProps) => {
   const { email, onDeleted } = props
   return (
     <AlertDialogContent>

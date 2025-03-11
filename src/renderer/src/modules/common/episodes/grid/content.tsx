@@ -15,7 +15,7 @@ import { useSetAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 import { toast } from 'sonner'
-import { subjectCollectionSheetFormActionAtom } from '@renderer/state/dialog/sheet'
+import { subjectCollectionSheetFormAtom } from '@renderer/state/dialog/sheet'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 
 function isCollectionEpisode(episode: Episode | CollectionEpisode): episode is CollectionEpisode {
@@ -47,7 +47,7 @@ export function EpisodeGridContent({
   const subjectCollection = subjectCollectionQuery.data
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false, enabled })
   const subjectInfo = subjectInfoQuery.data
-  const sheetAction = useSetAtom(subjectCollectionSheetFormActionAtom)
+  const sheetAction = useSetAtom(subjectCollectionSheetFormAtom)
   /** 在严格模式下会跑两次，所以让我们用 Effect 包裹它吧 */
   useEffect(() => {
     if (subjectCollection && subjectInfo && enabled) {
@@ -66,16 +66,19 @@ export function EpisodeGridContent({
             label: '标记',
             onClick: () => {
               sheetAction({
-                sheetTitle: '修改收藏',
-                collectionType: CollectionType.watched,
-                subjectId: subjectCollection.subject_id.toString(),
-                subjectTags: subjectInfo.tags,
-                subjectType: subjectCollection.subject_type,
-                comment: subjectCollection.comment ?? '',
-                isPrivate: subjectCollection.private,
-                rate: subjectCollection.rate,
-                tags: subjectCollection.tags,
-                modify: true,
+                open: true,
+                content: {
+                  sheetTitle: '修改收藏',
+                  collectionType: CollectionType.watched,
+                  subjectId: subjectCollection.subject_id.toString(),
+                  subjectTags: subjectInfo.tags,
+                  subjectType: subjectCollection.subject_type,
+                  comment: subjectCollection.comment ?? '',
+                  isPrivate: subjectCollection.private,
+                  rate: subjectCollection.rate,
+                  tags: subjectCollection.tags,
+                  modify: true,
+                },
               })
             },
           },
