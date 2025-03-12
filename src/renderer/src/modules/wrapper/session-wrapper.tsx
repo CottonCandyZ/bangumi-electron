@@ -20,10 +20,15 @@ export function SessionWrapper({ children }: PropsWithChildren) {
   // token 是暂时提供的的，预计后续将会去除，只提供 userInfo
   // 现在 token 仅仅用来拼接 queryKey
   const token = useAccessTokenQuery().data
-  const userInfo = useUserInfoQuery().data
+  const userInfo = useUserInfoQuery()
   useIsUnauthorized()
   return (
-    <SessionContext.Provider value={{ userInfo, accessToken: token?.access_token }}>
+    <SessionContext.Provider
+      value={{
+        userInfo: userInfo.isError ? null : userInfo.data,
+        accessToken: token?.access_token,
+      }}
+    >
       {children}
     </SessionContext.Provider>
   )
