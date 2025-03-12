@@ -224,4 +224,5 @@ export async function refreshToken({
   })
   if (!token) throw new LoginError('刷新 Token 失败')
   await insertAccessToken({ ...token, user_id })
+  return { ...token, user_id }
 }

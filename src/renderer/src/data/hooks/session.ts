@@ -4,6 +4,7 @@ import { refreshToken } from '@renderer/data/fetch/web/login'
 import { isRefreshingTokenAtom } from '@renderer/state/session'
 import { store } from '@renderer/state/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useCallback } from 'react'
 
 /**
  * Logout 的 Mutate
@@ -26,12 +27,18 @@ export const useLogoutMutation = () => {
  * @returns 不存在时返回 Null，而非抛出异常
  */
 export const useAccessTokenQuery = () => {
+  const refreshToken = useRefreshTokenMutation()
   return useQuery({
     queryKey: ['accessToken'],
     queryFn: async () => {
       const user_id = localStorage.getItem('current_user_id')
       if (!user_id) return null
-      return (await readAccessToken({ user_id: Number(user_id) })) ?? null
+      const data = await readAccessToken({ user_id: Number(user_id) })
+      if (!data) return null
+      if (data.expires_in + data.create_time.getTime() < new Date().getTime()) {
+        return await refreshToken.mutateAsync({ ...data })
+      }
+      return data
     },
     networkMode: 'always',
   })
@@ -39,17 +46,28 @@ export const useAccessTokenQuery = () => {
 
 export const useRefreshTokenMutation = () => {
   const logoutMutation = useLogoutMutation()
-  const queryClient = useQueryClient()
   return useMutation({
     mutationFn: refreshToken,
-    onSettled() {
-      store.set(isRefreshingTokenAtom, false)
-    },
-    onSuccess() {
-      queryClient.invalidateQueries({ queryKey: ['accessToken'] })
-    },
     onError() {
       logoutMutation.mutate()
     },
   })
+}
+
+export const useRefreshToken = () => {
+  const client = useQueryClient()
+  const refreshMutation = useRefreshTokenMutation()
+  return useCallback(async () => {
+    if (store.get(isRefreshingTokenAtom)) return
+    store.set(isRefreshingTokenAtom, true)
+    const accessToken = await client.ensureQueryData<
+      ReturnType<typeof useAccessTokenQuery>['data']
+    >({ queryKey: ['accessToken'] })
+    if (accessToken) {
+      client.cancelQueries({ queryKey: [accessToken] })
+      await refreshMutation.mutateAsync({ ...accessToken })
+      client.invalidateQueries({ queryKey: ['accessToken'] })
+      store.set(isRefreshingTokenAtom, false)
+    }
+  }, [refreshMutation, client])
 }

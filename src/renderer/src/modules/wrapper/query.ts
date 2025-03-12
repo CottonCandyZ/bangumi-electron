@@ -1,13 +1,11 @@
-import { useAccessTokenQuery, useRefreshTokenMutation } from '@renderer/data/hooks/session'
+import { useRefreshToken } from '@renderer/data/hooks/session'
 import { newIdbStorage } from '@renderer/lib/persister'
 import { AuthCode, AuthError } from '@renderer/lib/utils/error'
-import { isRefreshingTokenAtom } from '@renderer/state/session'
 import { QueryCache, QueryClient, useQueryClient } from '@tanstack/react-query'
 import { experimental_createPersister, PersistedQuery } from '@tanstack/react-query-persist-client'
 import { createStore } from 'idb-keyval'
-import { useCallback, useEffect } from 'react'
+import { useEffect } from 'react'
 import { toast } from 'sonner'
-import { store } from '../../state/utils'
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -36,40 +34,27 @@ export const queryClient = new QueryClient({
 
 export const useIsUnauthorized = () => {
   const client = useQueryClient()
-  const refreshMutation = useRefreshTokenMutation()
-
-  const refresh = useCallback(
-    async (code: AuthCode) => {
-      if (code !== AuthCode.EXPIRE) return
-      if (store.get(isRefreshingTokenAtom)) return
-      store.set(isRefreshingTokenAtom, true)
-      const accessToken = await queryClient.ensureQueryData<
-        ReturnType<typeof useAccessTokenQuery>['data']
-      >({ queryKey: ['accessToken'] })
-      if (code === AuthCode.EXPIRE && accessToken) {
-        queryClient.cancelQueries({ queryKey: [accessToken] })
-        refreshMutation.mutate({ ...accessToken })
-      }
-    },
-    [refreshMutation],
-  )
-
+  const refresh = useRefreshToken()
   useEffect(() => {
     const unsubscribe = client.getQueryCache().subscribe(async (e) => {
       if (
         e.type === 'updated' &&
         e.action.type === 'error' &&
-        e.action.error instanceof AuthError
+        e.action.error instanceof AuthError &&
+        e.action.error.code === AuthCode.EXPIRE
       ) {
-        refresh(e.action.error.code)
+        refresh()
       }
     })
     return () => unsubscribe()
   }, [client, refresh])
   useEffect(() => {
     const unsubscribe = client.getMutationCache().subscribe(async (e) => {
-      if (e.mutation?.state.error instanceof AuthError) {
-        refresh(e.mutation.state.error.code)
+      if (
+        e.mutation?.state.error instanceof AuthError &&
+        e.mutation.state.error.code === AuthCode.EXPIRE
+      ) {
+        refresh()
       }
     })
     return () => unsubscribe()
