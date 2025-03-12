@@ -1,5 +1,5 @@
 import { readAccessToken } from '@renderer/data/fetch/db/user'
-import { logout } from '@renderer/data/fetch/session'
+import { isAccessTokenValid, isWebLogin, logout } from '@renderer/data/fetch/session'
 import { refreshToken } from '@renderer/data/fetch/web/login'
 import { isRefreshingTokenAtom } from '@renderer/state/session'
 import { store } from '@renderer/state/utils'
@@ -28,6 +28,7 @@ export const useLogoutMutation = () => {
  */
 export const useAccessTokenQuery = () => {
   const refreshToken = useRefreshTokenMutation()
+  const logout = useLogoutMutation()
   return useQuery({
     queryKey: ['accessToken'],
     queryFn: async () => {
@@ -35,7 +36,14 @@ export const useAccessTokenQuery = () => {
       if (!user_id) return null
       const data = await readAccessToken({ user_id: Number(user_id) })
       if (!data) return null
-      if (data.expires_in + data.create_time.getTime() < new Date().getTime()) {
+      if (!(await isWebLogin())) {
+        logout.mutate()
+        return null
+      }
+      if (
+        data.expires_in + data.create_time.getTime() < new Date().getTime() ||
+        !(await isAccessTokenValid(data))
+      ) {
         return await refreshToken.mutateAsync({ ...data })
       }
       return data
