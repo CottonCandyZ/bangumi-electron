@@ -28,6 +28,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { FormTags } from '@renderer/modules/common/collections/modify/tags/tags-form'
 import { TEXT_CONFIG } from '@renderer/config/text'
+import { useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
 
 const { ADD_SUBJECT_COLLECTION } = TEXT_CONFIG
 
@@ -55,7 +56,7 @@ export function AddOrModifySubjectCollectionForm({
   success?: () => void
 }) {
   const queryClient = useQueryClient()
-  const { userInfo, accessToken } = useSession()
+  const { userInfo } = useSession()
   const username = userInfo?.username
   const formSchema = z.object({
     collectionType: z.number(),
@@ -79,6 +80,8 @@ export function AddOrModifySubjectCollectionForm({
     },
   })
 
+  const queryKey = useQueryKeyWithAccessToken(['collection-subject', { subjectId, username }])
+
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
     onSuccess() {
@@ -88,35 +91,28 @@ export function AddOrModifySubjectCollectionForm({
     onError(_error, _variable, context) {
       toast.error('呀，出了点错误...')
       if (!modify) return
-      queryClient.setQueryData(
-        ['collection-subject', { subjectId, username }, accessToken],
-        (context as { pre: CollectionData }).pre,
-      )
+      queryClient.setQueryData(queryKey, (context as { pre: CollectionData }).pre)
     },
     onMutate(variable) {
       queryClient.cancelQueries({
-        queryKey: ['collection-subject', { subjectId, username }, accessToken],
+        queryKey,
       })
       if (!modify) return
-      const pre = queryClient.getQueryData([
-        'collection-subject',
-        { subjectId, username },
-        accessToken,
-      ]) as CollectionData | null | undefined
+      const pre = queryClient.getQueryData<CollectionData>(queryKey)
       if (!pre) return { pre }
-      queryClient.setQueryData(['collection-subject', { subjectId, username }, accessToken], {
+      queryClient.setQueryData<CollectionData>(queryKey, {
         ...pre,
         type: variable.collectionType!,
         rate: variable.rate!,
         private: variable.isPrivate!,
         tags: variable.tags!,
         comment: variable.comment!,
-      } satisfies CollectionData)
+      })
       return { pre }
     },
     onSettled() {
       queryClient.invalidateQueries({
-        queryKey: ['collection-subject', { subjectId, username }],
+        queryKey,
       })
       queryClient.invalidateQueries({
         queryKey: ['collection-subjects'],

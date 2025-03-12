@@ -14,9 +14,13 @@ import {
 import { SubjectId } from '@renderer/data/types/bgm'
 import { EpisodeType } from '@renderer/data/types/episode'
 import { UserInfo } from '@renderer/data/types/user'
-import { MutationKey, UseMutationOptions } from '@tanstack/react-query'
+import { UseMutationOptions } from '@tanstack/react-query'
 
 type OmitInfinityQFP<P> = Omit<P, 'token' | 'offset'>
+
+type ApiMutationOptionsWithoutToken<TFunction> = TFunction extends (arg: infer P) => infer R
+  ? Omit<UseMutationOptions<Awaited<R>, Error, Omit<P, 'token'>>, 'mutationFn'>
+  : never
 
 export const useInfinityQueryCollectionsByUsername = ({
   username,
@@ -93,13 +97,7 @@ export const useMutationSubjectCollection = ({
   onMutate,
   onSettled,
   onError,
-}: {
-  mutationKey?: MutationKey
-} & UseMutationOptions<
-  Awaited<ReturnType<typeof AddOrModifySubjectCollectionById>>,
-  Error,
-  Omit<Parameters<typeof AddOrModifySubjectCollectionById>[0], 'token'>
->) =>
+}: ApiMutationOptionsWithoutToken<typeof AddOrModifySubjectCollectionById>) =>
   useMutationMustAuth({
     mutationKey,
     mutationFn: AddOrModifySubjectCollectionById,
@@ -115,13 +113,7 @@ export const useMutationEpisodesCollectionBySubjectId = ({
   onMutate,
   onSettled,
   onError,
-}: {
-  mutationKey?: MutationKey
-} & UseMutationOptions<
-  Awaited<ReturnType<typeof ModifyEpisodeCollectionBySubjectId>>,
-  Error,
-  Omit<Parameters<typeof ModifyEpisodeCollectionBySubjectId>[0], 'token'>
->) =>
+}: ApiMutationOptionsWithoutToken<typeof ModifyEpisodeCollectionBySubjectId>) =>
   useMutationMustAuth({
     mutationKey,
     mutationFn: ModifyEpisodeCollectionBySubjectId,

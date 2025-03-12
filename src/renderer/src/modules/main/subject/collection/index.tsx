@@ -20,7 +20,7 @@ import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 
 export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
-  const { userInfo, accessToken } = useSession()
+  const { userInfo } = useSession()
   const subjectCollectionQuery = useQuerySubjectCollection({
     subjectId,
     username: userInfo?.username,
@@ -40,7 +40,8 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   }, [isInView, setIsInView])
 
   const loading = subjectInfo === undefined || subjectCollection === undefined || !userInfo
-  if (!accessToken) return <Button onClick={() => openLoginDialog({ open: true })}>登录</Button>
+  if (userInfo === null)
+    return <Button onClick={() => openLoginDialog({ open: true })}>登录</Button>
   return (
     <div className="flex flex-col gap-2" ref={ref}>
       <div className="flex flex-row items-center justify-between">

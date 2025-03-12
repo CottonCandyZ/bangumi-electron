@@ -608,3 +608,8 @@ export const useMutationMustAuth = <P, R>({
   })
   return mutate
 }
+
+export const useQueryKeyWithAccessToken = (queryKey: QueryKey) => {
+  const { data: accessToken } = useAccessTokenQuery()
+  return [...queryKey, accessToken?.access_token]
+}

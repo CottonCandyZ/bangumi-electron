@@ -3,27 +3,30 @@ import { Button } from '@renderer/components/ui/button'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'
 import { Subject } from '@renderer/data/types/subject'
-import { UserInfo } from '@renderer/data/types/user'
 import { cn } from '@renderer/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Tags } from '@renderer/modules/main/subject/tags/tags'
+import { useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
+import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 
 export function QuickTags({
   subjectTags,
   subjectCollection,
-  userInfo,
-  accessToken,
 }: {
   subjectTags: Subject['tags']
   subjectCollection: CollectionData | undefined | null
-  userInfo: UserInfo | undefined | null
-  accessToken: string | undefined
 }) {
   const [tags, setTags] = useState(new Set<string>())
   const queryClient = useQueryClient()
   const [edit, setEdit] = useState(false)
+  const { userInfo } = useSession()
+
+  const queryKey = useQueryKeyWithAccessToken([
+    'collection-subject',
+    { subjectId: subjectCollection?.subject_id.toString(), username: userInfo?.username },
+  ])
 
   useEffect(() => {
     setEdit(false)
@@ -36,7 +39,7 @@ export function QuickTags({
   }, [edit, subjectCollection])
 
   const subjectCollectionMutation = useMutationSubjectCollection({
-    mutationKey: ['subject-collection'],
+    mutationKey: ['collection-subject'],
     onSuccess() {
       toast.success(subjectCollection && '修改成功')
       setEdit(false)
@@ -44,54 +47,23 @@ export function QuickTags({
     onError(_error, _variable, context) {
       toast.error('呀，出了点错误...')
       if (subjectCollection && userInfo) {
-        queryClient.setQueryData(
-          [
-            'collection-subject',
-            { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
-            accessToken,
-          ],
-          (context as { pre: CollectionData }).pre,
-        )
+        queryClient.setQueryData(queryKey, (context as { pre: CollectionData }).pre)
       }
     },
     onMutate(variable) {
       if (subjectCollection && userInfo) {
-        queryClient.cancelQueries({
-          queryKey: [
-            'collection-subject',
-            { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
-            accessToken,
-          ],
+        queryClient.cancelQueries({ queryKey })
+        const pre = queryClient.getQueryData<CollectionData>(queryKey)
+        queryClient.setQueryData<CollectionData>(queryKey, {
+          ...subjectCollection,
+          tags: variable.tags!,
         })
-        const pre = queryClient.getQueryData([
-          'collection-subject',
-          { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
-          accessToken,
-        ])
-        queryClient.setQueryData(
-          [
-            'collection-subject',
-            { subjectId: subjectCollection.subject_id.toString(), username: userInfo.username },
-            accessToken,
-          ],
-          { ...subjectCollection, tags: variable.tags! } satisfies CollectionData,
-        )
         return { pre }
       }
       return { pre: null }
     },
     onSettled() {
-      if (subjectCollection && userInfo)
-        queryClient.invalidateQueries({
-          queryKey: [
-            'collection-subject',
-            {
-              subjectId: subjectCollection.subject_id.toString(),
-              username: userInfo.username,
-              accessToken,
-            },
-          ],
-        })
+      if (subjectCollection && userInfo) queryClient.invalidateQueries({ queryKey })
       queryClient.invalidateQueries({
         queryKey: ['collection-subjects'],
       })

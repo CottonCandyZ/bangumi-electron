@@ -6,16 +6,16 @@ import { CollectionData } from '@renderer/data/types/collection'
 import { cn } from '@renderer/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
 
 export function PrivateSwitch({ subjectCollection }: { subjectCollection: CollectionData }) {
   const queryClient = useQueryClient()
-  const { userInfo, accessToken } = useSession()
+  const { userInfo } = useSession()
   const username = userInfo?.username
-  const queryKey = [
+  const queryKey = useQueryKeyWithAccessToken([
     'collection-subject',
     { subjectId: subjectCollection.subject_id.toString(), username },
-    accessToken,
-  ]
+  ])
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
     onSuccess() {
@@ -29,11 +29,11 @@ export function PrivateSwitch({ subjectCollection }: { subjectCollection: Collec
       queryClient.cancelQueries({
         queryKey,
       })
-      const pre = queryClient.getQueryData(queryKey)
-      queryClient.setQueryData(queryKey, {
+      const pre = queryClient.getQueryData<CollectionData>(queryKey)
+      queryClient.setQueryData<CollectionData>(queryKey, {
         ...subjectCollection,
         private: variable.isPrivate!,
-      } satisfies CollectionData)
+      })
       return { pre }
     },
     onSettled() {

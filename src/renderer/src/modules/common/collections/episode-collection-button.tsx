@@ -19,6 +19,7 @@ import { EPISODE_COLLECTION_ACTION_MAP, EPISODE_COLLECTION_TYPE_MAP } from '@ren
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
 
 export function EpisodeCollectionButton({
   index,
@@ -32,7 +33,7 @@ export function EpisodeCollectionButton({
   subjectId: SubjectId
   setEnabledForm: (enabled: boolean) => void
 } & ModifyEpisodeCollectionOptType) {
-  const { userInfo, accessToken } = useSession()
+  const { userInfo } = useSession()
   const username = userInfo?.username
   const collectionEpisodesQuery = useQueryCollectionEpisodesInfoBySubjectId({
     ...modifyEpisodeCollectionOpt,
@@ -51,7 +52,7 @@ export function EpisodeCollectionButton({
       episodeCollectionType ? (EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null) : null,
     )
   }, [episodeCollectionType])
-  const queryKey = [
+  const queryKey = useQueryKeyWithAccessToken([
     'collection-episodes',
     {
       subjectId,
@@ -59,8 +60,11 @@ export function EpisodeCollectionButton({
       offset: modifyEpisodeCollectionOpt.offset,
       episodeType: undefined,
     },
-    accessToken,
-  ]
+  ])
+  const invalidateQueryKey = useQueryKeyWithAccessToken([
+    'collection-subject',
+    { subjectId, username },
+  ])
 
   const episodeCollectionMutation = useMutationEpisodesCollectionBySubjectId({
     mutationKey: ['subject-collection'],
@@ -71,7 +75,7 @@ export function EpisodeCollectionButton({
     onError(_error, _variable, context) {
       toast.error('呀，出了点错误...')
       const pre = (context as { pre: CollectionEpisodes }).pre
-      queryClient.setQueryData(queryKey, pre)
+      queryClient.setQueryData<CollectionEpisodes>(queryKey, pre)
     },
     onMutate(variable) {
       setEnabledForm(false)
@@ -79,9 +83,10 @@ export function EpisodeCollectionButton({
         queryKey,
       })
       const { episodesId, episodeCollectionType } = variable
-      const pre = queryClient.getQueryData(queryKey) as CollectionEpisodes
+      const pre = queryClient.getQueryData<CollectionEpisodes>(queryKey)
       if (episodes)
-        queryClient.setQueryData(queryKey, (pre: CollectionEpisodes) => {
+        queryClient.setQueryData<CollectionEpisodes>(queryKey, (pre) => {
+          if (!pre) return
           return {
             ...pre,
             data: episodes.map((item) => {
@@ -105,7 +110,7 @@ export function EpisodeCollectionButton({
           ],
         })
       queryClient.invalidateQueries({
-        queryKey: ['collection-subject', { subjectId, username }, accessToken],
+        queryKey: invalidateQueryKey,
       })
     },
   })

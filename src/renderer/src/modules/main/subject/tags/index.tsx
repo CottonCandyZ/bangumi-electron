@@ -9,7 +9,7 @@ import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 export function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
-  const { userInfo, accessToken } = useSession()
+  const { userInfo } = useSession()
   const subjectCollection = useQuerySubjectCollection({
     subjectId,
     username: userInfo?.username,
@@ -47,12 +47,7 @@ export function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
   return (
     <section className="flex flex-col gap-5">
       <h2 className="text-2xl font-medium">标签</h2>
-      <QuickTags
-        subjectTags={subjectInfo.tags}
-        accessToken={accessToken}
-        subjectCollection={subjectCollection}
-        userInfo={userInfo}
-      />
+      <QuickTags subjectTags={subjectInfo.tags} subjectCollection={subjectCollection} />
     </section>
   )
 }

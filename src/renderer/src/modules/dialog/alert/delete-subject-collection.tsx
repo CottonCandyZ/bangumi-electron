@@ -17,6 +17,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useAtom } from 'jotai'
 import { deleteCollectionDialogAtom, DeleteCollectionProps } from '@renderer/state/dialog/alert'
+import { useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
 
 export function DeleteSubjectCollectionAlert() {
   const [dialogOpen, setDialogOpen] = useAtom(deleteCollectionDialogAtom)
@@ -30,10 +31,11 @@ export function DeleteSubjectCollectionAlert() {
 
 const Content = (props: DeleteCollectionProps) => {
   const { subjectId } = props
-  const { userInfo, accessToken } = useSession()
+  const { userInfo } = useSession()
   const username = userInfo?.username
   const hash = useWebDeleteCollectionHash({ subjectId }).data
   const queryClient = useQueryClient()
+  const queryKey = useQueryKeyWithAccessToken(['collection-subject', { subjectId, username }])
   const subjectCollectionMutation = useMutation({
     mutationFn: deleteSubjectCollectionById,
     onSuccess() {
@@ -41,26 +43,19 @@ const Content = (props: DeleteCollectionProps) => {
     },
     onError(_error, _variable, context) {
       toast.error('呀，出了点错误...')
-      queryClient.setQueryData(
-        ['collection-subject', { subjectId, username }, accessToken],
-        (context as { pre: CollectionData }).pre,
-      )
+      queryClient.setQueryData(queryKey, (context as { pre: CollectionData }).pre)
     },
     onMutate() {
       queryClient.cancelQueries({
-        queryKey: ['collection-subject', { subjectId, username }, accessToken],
+        queryKey,
       })
-      const pre = queryClient.getQueryData([
-        'collection-subject',
-        { subjectId, username },
-        accessToken,
-      ])
-      queryClient.setQueryData(['collection-subject', { subjectId, username }, accessToken], null)
+      const pre = queryClient.getQueryData<CollectionData>(queryKey)
+      queryClient.setQueryData<CollectionData | null>(queryKey, null)
       return { pre }
     },
     onSettled() {
       queryClient.invalidateQueries({
-        queryKey: ['collection-subject', { subjectId, username }, accessToken],
+        queryKey,
       })
       queryClient.invalidateQueries({
         queryKey: ['collection-subjects'],
