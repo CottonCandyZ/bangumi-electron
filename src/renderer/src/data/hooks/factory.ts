@@ -2,14 +2,15 @@ import { DB_CONFIG } from '@renderer/config'
 import { useAccessTokenQuery } from '@renderer/data/hooks/session'
 import { AuthError } from '@renderer/lib/utils/error'
 import { isRefreshingTokenAtom } from '@renderer/state/session'
-
-import {
+import type {
   GetNextPageParamFunction,
   InfiniteData,
   QueryKey,
   UseInfiniteQueryOptions,
   UseMutationOptions,
   UseQueryOptions,
+} from '@tanstack/react-query'
+import {
   keepPreviousData,
   useInfiniteQuery,
   useMutation,
@@ -410,11 +411,9 @@ export const useDBQueriesOptionalAuth = <
     )
     const errors = res.filter((v) => v.status === 'rejected').map((v) => v.reason)
     for (const e of errors) {
-      if (e instanceof FetchError && e.statusCode === 401) {
-        throw AuthError.expire()
-      }
-      if (e instanceof FetchError && e.status === 404) {
-        continue
+      if (e instanceof FetchError) {
+        if (e.statusCode === 401) throw AuthError.expire()
+        if (e.statusCode === 404) continue
       }
       throw e
     }
@@ -463,11 +462,9 @@ export const useDBQueriesOptionalAuth = <
     const fetchArray = allIds.filter((id) => {
       const data = dataMap.get(id)
       if (data === undefined) return true
-      else if (currentTime - data.last_update_at.getTime() > dbStaleTime) return true
-      else {
-        minimalTimestamp = Math.min(data.last_update_at.getTime(), minimalTimestamp)
-        return false
-      }
+      if (currentTime - data.last_update_at.getTime() > dbStaleTime) return true
+      minimalTimestamp = Math.min(data.last_update_at.getTime(), minimalTimestamp)
+      return false
     })
     const dbOrderedData = allIds.map((id) => {
       const data = dataMap.get(id) ?? null

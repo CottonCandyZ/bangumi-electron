@@ -2,7 +2,10 @@ import { useRefreshToken } from '@renderer/data/hooks/session'
 import { newIdbStorage } from '@renderer/lib/persister'
 import { AuthCode, AuthError } from '@renderer/lib/utils/error'
 import { QueryCache, QueryClient, useQueryClient } from '@tanstack/react-query'
-import { experimental_createPersister, PersistedQuery } from '@tanstack/react-query-persist-client'
+import {
+  experimental_createPersister,
+  type PersistedQuery,
+} from '@tanstack/react-query-persist-client'
 import { createStore } from 'idb-keyval'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
@@ -19,7 +22,7 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: import.meta.env.DEV ? 1000 * 60 * 60 * 5 : 1000 * 60 * 5,
-      gcTime: import.meta.env.DEV ? Infinity : 60 * 1000 * 5,
+      gcTime: import.meta.env.DEV ? Number.MAX_VALUE : 60 * 1000 * 5,
       retry: 0,
       persister: experimental_createPersister<PersistedQuery>({
         storage: newIdbStorage(createStore('cache', 'query_persister')),
