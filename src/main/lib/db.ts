@@ -31,7 +31,6 @@ export const execute = async ({ sql, params, method }: ExecuteType) => {
 
 /** only for insert & delete, no query return here */
 export const executeBatch = async ({ queries }: ExecuteBatchType) => {
-  console.log(queries)
   const pres = Array(queries.length)
   queries.forEach((item, index) => {
     pres[index] = sqlite.prepare(item.sql)
@@ -57,7 +56,6 @@ function toDrizzleResult(rows: Record<string, unknown> | Array<Record<string, un
   }
 }
 
-// FIXME: RUN ONLY WHEN START?
 export async function initDB() {
   migrate(db, {
     migrationsFolder: path.join(__dirname, '../../drizzle'),

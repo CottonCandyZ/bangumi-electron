@@ -55,11 +55,11 @@ export const useQueryMustAuth = <TApiParams, TQueryFnReturn>({
   needKeepPreviousData?: boolean
 } & OptionalProps<TApiParams> &
   Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
-  const { data: token } = useAccessTokenQuery()
+  const { data: token, isFetching } = useAccessTokenQuery()
   const isRefreshingToken = useAtomValue(isRefreshingTokenAtom)
   const accessToken = token?.access_token
   const query = useQuery({
-    queryKey: [...queryKey, queryProps, accessToken],
+    queryKey: ['authFetch', ...queryKey, queryProps, accessToken],
     queryFn: async () => {
       // 没有 token，说明没有登录
       // 然而实际上 token 未空时，不会进到这里，只有在 revalidate 的时候才会来到这...
@@ -77,7 +77,7 @@ export const useQueryMustAuth = <TApiParams, TQueryFnReturn>({
       return data
     },
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
-    enabled: enabled && token !== undefined && !isRefreshingToken,
+    enabled: enabled && !isRefreshingToken && !isFetching,
     ...props,
   })
   return query
@@ -116,9 +116,9 @@ export const useDBQueryMustAuth = <
     UseQueryOptions<TQueryFnReturn | null, Error, TQueryFnReturn | null, QueryKey>,
     'queryFn'
   >) => {
-  const { data: userInfo } = useAccessTokenQuery()
+  const { data: userInfo, isFetching } = useAccessTokenQuery()
   const isRefreshingToken = useAtomValue(isRefreshingTokenAtom)
-  const dbQueryKey = [...queryKey, dbParams, userInfo?.access_token]
+  const dbQueryKey = ['authFetch', ...queryKey, dbParams, userInfo?.access_token]
   const queryClient = useQueryClient()
 
   const updateDBMutate = useMutation({
@@ -164,7 +164,7 @@ export const useDBQueryMustAuth = <
   const dbQuery = useQuery({
     queryKey: dbQueryKey,
     queryFn: fetchFromDB,
-    enabled: enabled && userInfo !== undefined && !isRefreshingToken,
+    enabled: enabled && !isRefreshingToken && !isFetching,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     // staleTime: async (q) => {
     //   const data = await q.promise
@@ -202,11 +202,11 @@ export const useQueryOptionalAuth = <TApiParams, TQueryFnReturn, TData = TQueryF
   needKeepPreviousData?: boolean
 } & OptionalProps<TApiParams> &
   Omit<UseQueryOptions<TQueryFnReturn, Error, TData, QueryKey>, 'select' | 'queryFn'>) => {
-  const { data: userInfo } = useAccessTokenQuery()
+  const { data: userInfo, isFetching } = useAccessTokenQuery()
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
   const accessToken = userInfo?.access_token
   const query = useQuery({
-    queryKey: [...queryKey, queryProps, accessToken],
+    queryKey: ['authFetch', ...queryKey, queryProps, accessToken],
     queryFn: async () => {
       let data: TQueryFnReturn
       try {
@@ -219,7 +219,7 @@ export const useQueryOptionalAuth = <TApiParams, TQueryFnReturn, TData = TQueryF
       }
       return data
     },
-    enabled: enabled && userInfo !== undefined && !isRefreshToken,
+    enabled: enabled && !isRefreshToken && !isFetching,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     select,
     ...props,
@@ -244,13 +244,13 @@ export const useQueriesOptionalAuth = <TApiParams, TQueryFnReturn extends { id: 
     UseQueryOptions<(TQueryFnReturn | null)[], Error, (TQueryFnReturn | null)[], QueryKey>,
     'select' | 'queryFn'
   >) => {
-  const { data: userInfo } = useAccessTokenQuery()
+  const { data: userInfo, isFetching } = useAccessTokenQuery()
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
   const accessToken = userInfo?.access_token
   const queryClient = useQueryClient()
 
   const query = useQuery({
-    queryKey: [...queryKey, queryIds, apiParams, accessToken],
+    queryKey: ['authFetch', ...queryKey, queryIds, apiParams, accessToken],
     queryFn: async () => {
       const res = await Promise.allSettled(
         queryIds.map((id) => queryFn({ token: accessToken, id, ...apiParams } as TApiParams)),
@@ -266,7 +266,7 @@ export const useQueriesOptionalAuth = <TApiParams, TQueryFnReturn extends { id: 
         return item.value
       })
     },
-    enabled: enabled && userInfo !== undefined && !isRefreshToken,
+    enabled: enabled && !isRefreshToken && !isFetching,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     ...props,
   })
@@ -298,10 +298,10 @@ export const useDBQueryOptionalAuth = <
   needKeepPreviousData?: boolean
 } & OptionalAPIQueryProps<TApiParams> &
   Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
-  const { data: userInfo } = useAccessTokenQuery()
+  const { data: userInfo, isFetching } = useAccessTokenQuery()
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
   const accessToken = userInfo?.access_token
-  const dbQueryKey = [...queryKey, dbParams, accessToken]
+  const dbQueryKey = ['authFetch', ...queryKey, dbParams, accessToken]
   const queryClient = useQueryClient()
 
   const updateDBMutate = useMutation({
@@ -345,7 +345,7 @@ export const useDBQueryOptionalAuth = <
     queryKey: dbQueryKey,
     queryFn: fetchFromDB,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
-    enabled: enabled && userInfo !== undefined && !isRefreshToken,
+    enabled: enabled && !isRefreshToken && !isFetching,
     persister: undefined,
     // staleTime: async (q) => {
     //   const data = await q.promise
@@ -387,10 +387,10 @@ export const useDBQueriesOptionalAuth = <
     UseQueryOptions<(TQueryFnReturn | null)[], Error, (TQueryFnReturn | null)[], QueryKey>,
     'queryFn'
   >) => {
-  const { data: token } = useAccessTokenQuery()
+  const { data: token, isFetching } = useAccessTokenQuery()
   const accessToken = token?.access_token
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
-  const dbQueryKey = [...queryKey, dbParams, accessToken]
+  const dbQueryKey = ['authFetch', ...queryKey, dbParams, accessToken]
   const queryClient = useQueryClient()
 
   const updateDBMutate = useMutation({
@@ -446,9 +446,13 @@ export const useDBQueriesOptionalAuth = <
   const fetchDataMutation = useMutation({
     mutationFn: fetchData,
     onSuccess: ({ data, minimalTimestamp }) => {
-      queryClient.setQueryData<(TQueryFnReturn | null)[]>(dbQueryKey, data, {
-        updatedAt: minimalTimestamp,
-      })
+      queryClient.setQueryData<(TQueryFnReturn | null)[]>(
+        ['authFetch', ...queryKey, dbParams, accessToken],
+        data,
+        {
+          updatedAt: minimalTimestamp,
+        },
+      )
     },
     throwOnError: (e) => !(e instanceof AuthError),
   })
@@ -470,7 +474,8 @@ export const useDBQueriesOptionalAuth = <
       const data = dataMap.get(id) ?? null
       if (data)
         queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, accessToken], data, {
-          updatedAt: data.last_update_at.getTime(),
+          //TODO: comment for debug
+          // updatedAt: data.last_update_at.getTime(),
         })
       return data
     })
@@ -495,7 +500,7 @@ export const useDBQueriesOptionalAuth = <
     },
     networkMode: 'offlineFirst',
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
-    enabled: enabled && token !== undefined && !isRefreshToken,
+    enabled: enabled && !isRefreshToken && !isFetching,
     persister: undefined,
     // staleTime: async (q) => {
     //   const data = await q.promise
@@ -548,15 +553,16 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
     UseInfiniteQueryOptions<QR, Error, InfiniteData<QR, TPageParam>, QR, QueryKey, TPageParam>,
     'queryFn'
   >) => {
-  const { data: accessToken } = useAccessTokenQuery()
+  const { data: token, isFetching } = useAccessTokenQuery()
+  const accessToken = token?.access_token
   const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
   const query = useInfiniteQuery({
-    queryKey: [...queryKey, queryProps, accessToken?.access_token],
+    queryKey: ['authFetch', ...queryKey, queryProps, accessToken],
     queryFn: async ({ pageParam }) => {
       let data: QR | undefined
       try {
         data = await queryFn({
-          token: accessToken?.access_token,
+          token: accessToken,
           limit: qFLimit,
           offset: pageParam as TPageParam,
           ...queryProps,
@@ -569,7 +575,7 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
       }
       return data as QR
     },
-    enabled: enabled && accessToken !== undefined && !isRefreshToken,
+    enabled: enabled && !isRefreshToken && !isFetching,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     initialPageParam,
     getNextPageParam,
@@ -608,5 +614,5 @@ export const useMutationMustAuth = <P, R>({
 
 export const useQueryKeyWithAccessToken = (queryKey: QueryKey) => {
   const { data: accessToken } = useAccessTokenQuery()
-  return [...queryKey, accessToken?.access_token]
+  return ['authFetch', ...queryKey, accessToken?.access_token]
 }
