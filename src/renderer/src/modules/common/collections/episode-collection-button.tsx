@@ -105,6 +105,7 @@ export function EpisodeCollectionButton({
       if (episodes)
         queryClient.invalidateQueries({
           queryKey: [
+            'authFetch',
             'collection-subjects',
             { username, collectionType: CollectionType.watching, subjectType },
           ],

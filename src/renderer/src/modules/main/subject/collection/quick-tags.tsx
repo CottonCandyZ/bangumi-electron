@@ -65,7 +65,7 @@ export function QuickTags({
     onSettled() {
       if (subjectCollection && userInfo) queryClient.invalidateQueries({ queryKey })
       queryClient.invalidateQueries({
-        queryKey: ['collection-subjects'],
+        queryKey: ['authFetch', 'collection-subjects'],
       })
     },
   })

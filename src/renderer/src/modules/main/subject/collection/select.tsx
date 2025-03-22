@@ -41,7 +41,7 @@ export function SubjectCollectionSelector({
         queryKey,
       })
       queryClient.invalidateQueries({
-        queryKey: ['collection-subjects'],
+        queryKey: ['authFetch', 'collection-subjects'],
       })
     },
     onError(_error, _variable, context) {

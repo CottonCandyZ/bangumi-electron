@@ -58,7 +58,7 @@ const Content = (props: DeleteCollectionProps) => {
         queryKey,
       })
       queryClient.invalidateQueries({
-        queryKey: ['collection-subjects'],
+        queryKey: ['authFetch', 'collection-subjects'],
       })
     },
   })

@@ -41,7 +41,7 @@ export function PrivateSwitch({ subjectCollection }: { subjectCollection: Collec
         queryKey,
       })
       queryClient.invalidateQueries({
-        queryKey: ['collection-subjects'],
+        queryKey: ['authFetch', 'collection-subjects'],
       })
     },
   })
