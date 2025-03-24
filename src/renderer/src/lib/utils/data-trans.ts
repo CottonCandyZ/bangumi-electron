@@ -1,4 +1,4 @@
-import { ASSERT_HOST } from '@renderer/data/fetch/config'
+import { ASSERT_HOST } from '@renderer/data/fetch/config/'
 import { InfoBox, InfoKey } from '@renderer/data/types/subject'
 import { RATING_MAP } from '@renderer/lib/utils/map'
 

@@ -1,4 +1,4 @@
-import { HTML_COLLECTION, webFetch } from '@renderer/data/fetch/config'
+import { COLLECTIONS, webFetch } from '@renderer/data/fetch/config'
 import { SubjectId } from '@renderer/data/types/bgm'
 
 export async function deleteSubjectCollectionById({
@@ -8,7 +8,7 @@ export async function deleteSubjectCollectionById({
   subjectId: SubjectId
   hash: string
 }) {
-  const text = await webFetch<string>(HTML_COLLECTION.DELETE_SUBJECT_BY_ID(subjectId), {
+  const text = await webFetch<string>(COLLECTIONS.DELETE_SUBJECT_BY_ID(subjectId), {
     parseResponse: (text) => text,
     credentials: 'include',
     query: {

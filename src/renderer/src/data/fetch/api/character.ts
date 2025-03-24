@@ -1,4 +1,4 @@
-import { CHARACTERS, SUBJECTS, apiFetch } from '@renderer/data/fetch/config'
+import { CHARACTERS, SUBJECTS, apiFetch } from '@renderer/data/fetch/config/'
 import { getAuthHeader } from '@renderer/data/fetch/utils'
 import { CharacterId, SubjectId } from '@renderer/data/types/bgm'
 import { Character, CharacterDetail } from '@renderer/data/types/character'

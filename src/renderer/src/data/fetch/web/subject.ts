@@ -1,4 +1,4 @@
-import { HTML_SUBJECTS, SUBJECTS, webFetch } from '@renderer/data/fetch/config'
+import { HTML_SUBJECTS, SUBJECTS, webFetch } from '@renderer/data/fetch/config/'
 import { SubjectId } from '@renderer/data/types/bgm'
 import type { SectionPath } from '@renderer/data/types/web'
 import { AuthError } from '@renderer/lib/utils/error'

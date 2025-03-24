@@ -1,34 +1,9 @@
 // 存储有关 api 的 CONFIG
-
+import { APP_ID, URL_OAUTH_REDIRECT } from './base'
 import { CharacterId, PersonId, SubjectId } from '@renderer/data/types/bgm'
 import { UserInfo } from '@renderer/data/types/user'
 import { SectionPath } from '@renderer/data/types/web'
 import { getTimestamp } from '@renderer/lib/utils/date'
-import { ofetch } from 'ofetch'
-
-/** 主站域名 */
-export const HOST_NAME = 'bgm.tv'
-
-/** API 域名 */
-export const API_NAME = 'api.bgm.tv'
-
-/** 主站 URL */
-export const HOST = `https://${HOST_NAME}`
-
-/** API URL */
-export const API_HOST = `https://${API_NAME}`
-
-/** 一些静态资源，现在主要是图片 */
-export const ASSERT_HOST = `https://lain.bgm.tv`
-
-/** 从 env 读 APP ID */
-export const APP_ID = import.meta.env.VITE_APP_ID
-
-/** 从 env 读 APP_SECRET */
-export const APP_SECRET = import.meta.env.VITE_APP_SECRET
-
-/** OAuth 的 Redirect 地址 */
-export const URL_OAUTH_REDIRECT = `${HOST}/dev/app`
 
 /** 构建 Author 头 */
 export const AuthorizationHeader = (token: string) => `Bearer ${token}`
@@ -55,6 +30,7 @@ export const SUBJECTS = {
   CHARACTERS_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/characters`,
   PERSONS_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/persons`,
   RELATED_SUBJECT_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/subjects`,
+  /** web 排行榜  exp https://bgm.tv/anime/browser/?sort=trends */
   TRENDS: (sectionPath: SectionPath) => `/${sectionPath}/browser/?sort=trends`,
 }
 
@@ -86,20 +62,18 @@ export const COLLECTIONS = {
   ADD_OR_MODIFY_SUBJECT_BY_ID: (subjectId: SubjectId) => `/v0/users/-/collections/${subjectId}`,
   MODIFY_EPISODE_BY_SUBJECT_ID: (subjectId: SubjectId) =>
     `/v0/users/-/collections/${subjectId}/episodes`,
-}
 
-export const HTML_COLLECTION = {
+  /** web 删除收藏 */
   DELETE_SUBJECT_BY_ID: (subjectId: SubjectId) => `/subject/${subjectId}/remove`,
 }
 
-/** 搜索 */
+/** Private API 测试 */
+export const NEXT_COLLECTIONS = {
+  LIST: (limit: number, offset: number) =>
+    `/p1/collections/subjects?limit=${limit}&offset=${offset}`,
+}
 
+/** 搜索 */
 export const SEARCH = {
   V0: '/v0/search/subjects',
 }
-
-/** ofetch web config */
-export const webFetch = ofetch.create({ baseURL: HOST })
-
-/** ofetch api config  */
-export const apiFetch = ofetch.create({ baseURL: API_HOST, credentials: 'omit' })

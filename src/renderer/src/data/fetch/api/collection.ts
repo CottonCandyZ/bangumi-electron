@@ -1,4 +1,4 @@
-import { apiFetch, COLLECTIONS } from '@renderer/data/fetch/config'
+import { apiFetch, COLLECTIONS } from '@renderer/data/fetch/config/'
 import { getAuthHeader } from '@renderer/data/fetch/utils'
 import { UserInfo } from '@renderer/data/types/user'
 import { FetchParamError } from '@renderer/lib/utils/error'

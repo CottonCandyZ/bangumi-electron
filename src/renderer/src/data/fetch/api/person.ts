@@ -1,4 +1,4 @@
-import { apiFetch, PERSONS, SUBJECTS } from '@renderer/data/fetch/config'
+import { apiFetch, PERSONS, SUBJECTS } from '@renderer/data/fetch/config/'
 import { getAuthHeader } from '@renderer/data/fetch/utils'
 import { PersonId, SubjectId } from '@renderer/data/types/bgm'
 import { Person, PersonGrid } from '@renderer/data/types/person'

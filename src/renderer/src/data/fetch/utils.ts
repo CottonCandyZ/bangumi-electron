@@ -1,4 +1,4 @@
-import { AuthorizationHeader } from '@renderer/data/fetch/config'
+import { AuthorizationHeader } from '@renderer/data/fetch/config/'
 
 /**
  * 获得 AuthHeader 的工具类

@@ -1,4 +1,4 @@
-import { USER, apiFetch } from '@renderer/data/fetch/config'
+import { USER, apiFetch } from '@renderer/data/fetch/config/'
 import { getAuthHeader } from '@renderer/data/fetch/utils'
 import { UerInfoAPI, UserInfo } from '@renderer/data/types/user'
 

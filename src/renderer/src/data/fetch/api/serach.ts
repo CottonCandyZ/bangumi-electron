@@ -1,4 +1,4 @@
-import { apiFetch, SEARCH } from '@renderer/data/fetch/config'
+import { apiFetch, SEARCH } from '@renderer/data/fetch/config/'
 import { getAuthHeader } from '@renderer/data/fetch/utils'
 import { SearchDataPage, SearchParam } from '@renderer/data/types/search'
 

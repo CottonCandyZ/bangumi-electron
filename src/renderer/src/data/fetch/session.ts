@@ -1,4 +1,4 @@
-import { LOGIN, webFetch } from '@renderer/data/fetch/config'
+import { LOGIN, webFetch } from '@renderer/data/fetch/config/'
 import { Token } from '@renderer/data/types/login'
 import { client } from '@renderer/lib/client'
 

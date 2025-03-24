@@ -1,4 +1,4 @@
-import { SUBJECTS, apiFetch } from '@renderer/data/fetch/config'
+import { SUBJECTS, apiFetch } from '@renderer/data/fetch/config/'
 import { getAuthHeader } from '@renderer/data/fetch/utils'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { RelatedSubject, Subject, SubjectAPI } from '@renderer/data/types/subject'

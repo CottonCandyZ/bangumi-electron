@@ -1,6 +1,6 @@
 import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
 import { Button } from '@renderer/components/ui/button'
-import { HOST } from '@renderer/data/fetch/config'
+import { HOST } from '@renderer/data/fetch/config/'
 import { useLocation } from 'react-router-dom'
 
 export function OriginalLink() {
