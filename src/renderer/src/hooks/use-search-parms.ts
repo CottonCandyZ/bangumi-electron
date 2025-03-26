@@ -3,7 +3,7 @@ import { SubjectType } from '@renderer/data/types/subject'
 import { useCallback } from 'react'
 import { useSearchParams as useRouterSearchParams } from 'react-router-dom'
 
-export function useSearchParams() {
+export function useSearchParams(onChange?: () => void) {
   const [searchParams, setSearchParams] = useRouterSearchParams()
 
   const keyword = searchParams.get('keyword') || ''
@@ -13,6 +13,7 @@ export function useSearchParams() {
 
   const setKeyword = useCallback(
     (newKeyword: string) => {
+      onChange?.()
       setSearchParams((prev) => {
         const newParams = new URLSearchParams(prev)
         if (newKeyword) {
@@ -25,11 +26,12 @@ export function useSearchParams() {
         return newParams
       })
     },
-    [setSearchParams],
+    [setSearchParams, onChange],
   )
 
   const setSort = useCallback(
     (newSort: SearchParam['sort']) => {
+      onChange?.()
       setSearchParams((prev) => {
         const newParams = new URLSearchParams(prev)
         if (newSort !== undefined) {
@@ -42,11 +44,12 @@ export function useSearchParams() {
         return newParams
       })
     },
-    [setSearchParams],
+    [setSearchParams, onChange],
   )
 
   const setTypeFilters = useCallback(
     (types: SubjectType[]) => {
+      onChange?.()
       setSearchParams((prev) => {
         const newParams = new URLSearchParams(prev)
         newParams.delete('type')
@@ -58,7 +61,7 @@ export function useSearchParams() {
         return newParams
       })
     },
-    [setSearchParams],
+    [setSearchParams, onChange],
   )
 
   const setOffset = useCallback(

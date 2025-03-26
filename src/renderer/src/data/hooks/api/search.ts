@@ -28,13 +28,16 @@ export const useQuerySearch = ({
   searchParam,
   limit = 20,
   offset = 0,
+  keepPreviousData = false,
 }: {
   limit?: number
   offset?: number
   searchParam: SearchParam
+  keepPreviousData?: boolean
 }) =>
   useQueryOptionalAuth({
     queryKey: ['search'],
     queryFn: searchV0,
     queryProps: { offset, limit, searchParam },
+    needKeepPreviousData: keepPreviousData,
   })
