@@ -1,5 +1,5 @@
 import { SubjectTypeFilterButtons } from '@renderer/modules/main/search/type-filter/filter-subject-type-buttons'
-import { useSearchParams } from '@renderer/hooks/use-search-parms'
+import { useSearchParams } from '@renderer/hooks/use-search-params'
 
 export function SubjectTypeFilter() {
   const { setTypeFilters, typeFilters } = useSearchParams()

@@ -1,5 +1,5 @@
 import { Separator } from '@renderer/components/ui/separator'
-import { useSearchParams } from '@renderer/hooks/use-search-parms'
+import { useSearchParams } from '@renderer/hooks/use-search-params'
 import { SearchContent } from '@renderer/modules/main/search/content'
 import { Sort } from '@renderer/modules/main/search/sort'
 

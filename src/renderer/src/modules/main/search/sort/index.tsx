@@ -1,4 +1,4 @@
-import { useSearchParams } from '@renderer/hooks/use-search-parms'
+import { useSearchParams } from '@renderer/hooks/use-search-params'
 import { SortButton } from '@renderer/modules/main/search/sort/sort-buttons'
 
 export function Sort() {

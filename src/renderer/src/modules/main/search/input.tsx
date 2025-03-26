@@ -1,5 +1,5 @@
 import { Button } from '@renderer/components/ui/button'
-import { useSearchParams } from '@renderer/hooks/use-search-parms'
+import { useSearchParams } from '@renderer/hooks/use-search-params'
 import { cn } from '@renderer/lib/utils'
 import { useEffect, useRef, useState } from 'react'
 
