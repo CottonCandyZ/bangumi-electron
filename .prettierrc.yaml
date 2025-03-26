@@ -2,4 +2,4 @@ singleQuote: true
 semi: false
 printWidth: 100
 plugins:
- - "prettier-plugin-tailwindcss"
+  - 'prettier-plugin-tailwindcss'

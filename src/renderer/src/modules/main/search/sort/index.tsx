@@ -1,17 +1,14 @@
+import { useSearchParams } from '@renderer/hooks/use-search-parms'
 import { SortButton } from '@renderer/modules/main/search/sort/sort-buttons'
-import { searchSortActionAtom, searchSortAtom } from '@renderer/state/search'
-import { useAtom, useSetAtom } from 'jotai'
 
 export function Sort() {
-  const [sort, setSort] = useAtom(searchSortAtom)
-  const searchAction = useSetAtom(searchSortActionAtom)
+  const { sort, setSort } = useSearchParams()
 
   return (
     <SortButton
       value={sort}
       onValueChanged={(value) => {
         setSort(value)
-        searchAction()
       }}
     />
   )

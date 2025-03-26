@@ -1,11 +1,12 @@
 import { Separator } from '@renderer/components/ui/separator'
+import { useSearchParams } from '@renderer/hooks/use-search-parms'
 import { SearchContent } from '@renderer/modules/main/search/content'
 import { Sort } from '@renderer/modules/main/search/sort'
-import { searchParamAtom } from '@renderer/state/search'
-import { useAtomValue } from 'jotai'
 
 export function SearchContentWrapper() {
-  const searchParam = useAtomValue(searchParamAtom)
+  const { getSearchParam } = useSearchParams()
+  const searchParam = getSearchParam()
+
   return (
     searchParam && (
       <div className="flex flex-col gap-5">

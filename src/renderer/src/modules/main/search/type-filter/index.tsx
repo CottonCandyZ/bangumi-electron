@@ -1,28 +1,20 @@
 import { SubjectTypeFilterButtons } from '@renderer/modules/main/search/type-filter/filter-subject-type-buttons'
-import {
-  searchSubjectTypeFilterActionAtom,
-  searchSubjectTypeFilterAtom,
-} from '@renderer/state/search'
-import { useAtom, useSetAtom } from 'jotai'
+import { useSearchParams } from '@renderer/hooks/use-search-parms'
 
 export function SubjectTypeFilter() {
-  const [typeFilter, setTypeFilter] = useAtom(searchSubjectTypeFilterAtom)
-  const searchSubjectTypeFilterAction = useSetAtom(searchSubjectTypeFilterActionAtom)
+  const { setTypeFilters, typeFilters } = useSearchParams()
   return (
     <SubjectTypeFilterButtons
-      filter={typeFilter}
+      filter={new Set([...typeFilters].map(Number))}
       onFilterClick={(value) => {
-        if (value === null) setTypeFilter(new Set())
-        else {
-          if (!typeFilter.has(value)) setTypeFilter((filter) => new Set(filter).add(value))
-          else
-            setTypeFilter((filter) => {
-              const newSet = new Set(filter)
-              newSet.delete(value)
-              return newSet
-            })
+        // if value in types, remove it, else add it
+        if (value === null) {
+          setTypeFilters([])
+        } else if (typeFilters.includes(value)) {
+          setTypeFilters(typeFilters.filter((type) => type !== value))
+        } else {
+          setTypeFilters([...typeFilters, value])
         }
-        searchSubjectTypeFilterAction()
       }}
     />
   )

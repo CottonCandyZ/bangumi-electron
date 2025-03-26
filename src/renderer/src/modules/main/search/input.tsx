@@ -1,34 +1,34 @@
 import { Button } from '@renderer/components/ui/button'
+import { useSearchParams } from '@renderer/hooks/use-search-parms'
 import { cn } from '@renderer/lib/utils'
-import { searchKeywordActionAtom, searchParamAtom } from '@renderer/state/search'
-import { useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useRef, useState } from 'react'
 
 export function SearchInput() {
-  const [keyword, setKeyword] = useState('')
+  const [keyword, setKeywordState] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
-  const searchParam = useAtomValue(searchParamAtom)
-  const searchAction = useSetAtom(searchKeywordActionAtom)
+  const { keyword: searchKeyword, setKeyword } = useSearchParams()
 
   useEffect(() => {
-    setKeyword(searchParam?.keyword ?? '')
-  }, [searchParam])
+    setKeywordState(searchKeyword ?? '')
+  }, [searchKeyword])
 
   return (
     <search className="group flex h-12 w-full items-center gap-2 border-b bg-accent/50 px-2 pl-4 transition-colors focus-within:bg-background hover:bg-background">
+      {/* search Icon */}
       <span className="i-mingcute-search-2-line text-4xl" />
       <input
         value={keyword}
         ref={inputRef}
         className="h-full w-full bg-transparent focus-visible:outline-none"
-        onChange={(e) => setKeyword(e.target.value)}
+        onChange={(e) => setKeywordState(e.target.value)}
         onKeyDownCapture={(e) => {
           if (keyword !== '' && e.code === 'Enter') {
-            searchAction(keyword)
+            setKeyword(keyword)
             inputRef.current?.blur()
           }
         }}
       />
+      {/* clear Button */}
       <button
         className={cn(
           'i-mingcute-close-circle-fill flex shrink-0 items-center justify-center text-xl text-transparent transition-all duration-300 group-focus-within:text-primary/30 group-hover:text-primary/30 group-hover:hover:text-primary/80',
@@ -36,15 +36,16 @@ export function SearchInput() {
             'cursor-default group-focus-within:text-transparent group-hover:text-transparent group-hover:hover:text-transparent',
         )}
         onClick={() => {
-          setKeyword('')
+          setKeywordState('')
           inputRef.current?.focus()
         }}
       />
+      {/* search Button */}
       <Button
         className="rounded-lg"
         onClick={(e) => {
           if (keyword !== '') {
-            searchAction(keyword)
+            setKeyword(keyword)
             inputRef.current?.blur()
             e.currentTarget.blur()
           }

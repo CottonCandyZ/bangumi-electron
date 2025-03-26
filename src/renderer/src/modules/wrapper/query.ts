@@ -22,7 +22,7 @@ export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: import.meta.env.DEV ? 1000 * 60 * 60 * 5 : 1000 * 60 * 5,
-      gcTime: import.meta.env.DEV ? Number.MAX_VALUE : 60 * 1000 * 60 * 24,
+      gcTime: import.meta.env.DEV ? Number.POSITIVE_INFINITY : 60 * 1000 * 60 * 24,
       retry: 0,
       persister: experimental_createPersister<PersistedQuery>({
         storage: newIdbStorage(createStore('cache', 'query_persister')),
