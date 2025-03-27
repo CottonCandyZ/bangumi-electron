@@ -40,6 +40,7 @@ export const useAccessTokenQuery = () => {
       // 没有 token，说明没有登录
       if (!data) return null
       // 没有 Web 登录，说明没有登录
+      // TODO: 判断联网情况
       if (!(await isWebLogin())) {
         logout.mutate()
         return null
@@ -49,7 +50,7 @@ export const useAccessTokenQuery = () => {
         data.expires_in + data.create_time.getTime() < new Date().getTime() ||
         !(await isAccessTokenValid(data))
       ) {
-        return await refreshToken.mutateAsync({ ...data })
+        return { ...(await refreshToken.mutateAsync({ ...data })), create_time: new Date() }
       }
       return data
     },
@@ -70,11 +71,18 @@ export const useRefreshTokenMutation = () => {
 export const useRefreshToken = () => {
   const client = useQueryClient()
   const refreshMutation = useRefreshTokenMutation()
-  const finish = useCallback(() => {
-    client.invalidateQueries({ queryKey: ['authFetch'] })
-    client.invalidateQueries({ queryKey: ['accessToken'] })
-    store.set(isRefreshingTokenAtom, false)
-  }, [client])
+  const finish = useCallback(
+    (data?: ReturnType<typeof useAccessTokenQuery>['data']) => {
+      if (data) {
+        client.setQueryData<ReturnType<typeof useAccessTokenQuery>['data']>(['accessToken'], data)
+      } else {
+        client.invalidateQueries({ queryKey: ['accessToken'] })
+      }
+      client.invalidateQueries({ queryKey: ['authFetch'] })
+      store.set(isRefreshingTokenAtom, false)
+    },
+    [client],
+  )
   return useCallback(async () => {
     if (store.get(isRefreshingTokenAtom)) return
     toast.info('正在刷新 Token...')
@@ -83,19 +91,19 @@ export const useRefreshToken = () => {
     const accessToken = await client.ensureQueryData<
       ReturnType<typeof useAccessTokenQuery>['data']
     >({ queryKey: ['accessToken'] })
-    if (accessToken) {
-      refreshMutation.mutate(
-        { ...accessToken },
-        {
-          onSuccess: () => {
-            finish()
-            toast.success('Token 刷新成功')
-          },
-          onError: () => {
-            toast.error('Token 刷新失败（可能是已过期）')
-          },
-        },
-      )
+    if (
+      accessToken &&
+      (accessToken.expires_in + accessToken.create_time.getTime() < new Date().getTime() ||
+        !(await isAccessTokenValid(accessToken)))
+    ) {
+      try {
+        const newAccessToken = await refreshMutation.mutateAsync({ ...accessToken })
+        finish({ ...newAccessToken, create_time: new Date() })
+        toast.success('Token 刷新成功')
+      } catch (e) {
+        console.error(e)
+        toast.error('Token 刷新失败（可能是已过期）')
+      }
     } else {
       finish()
       toast.error('Token 已过期')
