@@ -28,7 +28,7 @@ export const useLogoutMutation = () => {
  * @returns 不存在时返回 Null，而非抛出异常
  */
 export const useAccessTokenQuery = () => {
-  const refreshToken = useRefreshTokenMutation()
+  // const refreshToken = useRefreshTokenMutation()
   // const logout = useLogoutMutation()
   return useQuery({
     queryKey: ['accessToken'],
@@ -46,12 +46,12 @@ export const useAccessTokenQuery = () => {
       //   return null
       // }
       // token 过期
-      if (
-        data.expires_in + data.create_time.getTime() < new Date().getTime() ||
-        !(await isAccessTokenValid(data))
-      ) {
-        return { ...(await refreshToken.mutateAsync({ ...data })), create_time: new Date() }
-      }
+      // if (
+      //   data.expires_in + data.create_time.getTime() < new Date().getTime() ||
+      //   !(await isAccessTokenValid(data))
+      // ) {
+      //   return { ...(await refreshToken.mutateAsync({ ...data })), create_time: new Date() }
+      // }
       return data
     },
     networkMode: 'always',
@@ -102,11 +102,12 @@ export const useRefreshToken = () => {
         toast.success('Token 刷新成功')
       } catch (e) {
         console.error(e)
+        finish()
         toast.error('Token 刷新失败（可能是已过期）')
       }
     } else {
       finish()
-      toast.error('Token 已过期')
+      toast.error('无法刷新 Token：登录信息丢失')
     }
   }, [refreshMutation, client, finish])
 }
