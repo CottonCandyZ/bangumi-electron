@@ -1,5 +1,5 @@
 import { readAccessToken } from '@renderer/data/fetch/db/user'
-import { isAccessTokenValid, isWebLogin, logout } from '@renderer/data/fetch/session'
+import { isAccessTokenValid, logout } from '@renderer/data/fetch/session'
 import { refreshToken } from '@renderer/data/fetch/web/login'
 import { isRefreshingTokenAtom } from '@renderer/state/session'
 import { store } from '@renderer/state/utils'
@@ -29,7 +29,7 @@ export const useLogoutMutation = () => {
  */
 export const useAccessTokenQuery = () => {
   const refreshToken = useRefreshTokenMutation()
-  const logout = useLogoutMutation()
+  // const logout = useLogoutMutation()
   return useQuery({
     queryKey: ['accessToken'],
     queryFn: async () => {
@@ -41,10 +41,10 @@ export const useAccessTokenQuery = () => {
       if (!data) return null
       // 没有 Web 登录，说明没有登录
       // TODO: 判断联网情况
-      if (!(await isWebLogin())) {
-        logout.mutate()
-        return null
-      }
+      // if (!(await isWebLogin())) {
+      //   logout.mutate()
+      //   return null
+      // }
       // token 过期
       if (
         data.expires_in + data.create_time.getTime() < new Date().getTime() ||
