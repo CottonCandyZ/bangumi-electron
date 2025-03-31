@@ -1,20 +1,10 @@
-import { triggerLeftOpenAtomAction } from '@renderer/state/panel'
 import { useSetAtom } from 'jotai'
-import { PropsWithChildren, useEffect } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
+import { triggerLeftOpenAtomAction } from '@renderer/state/panel'
 
-export const KeyboardShortcutProvider = ({ children }: PropsWithChildren) => {
-  const triggerLeftPanelOpen = useSetAtom(triggerLeftOpenAtomAction)
-
-  useEffect(() => {
-    const down = (e: KeyboardEvent) => {
-      // leftPanel
-      if (e.key === 'b' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        triggerLeftPanelOpen()
-      }
-    }
-    document.addEventListener('keydown', down)
-    return () => document.removeEventListener('keydown', down)
-  }, [triggerLeftPanelOpen])
-  return children
+export const useGlobalKeyboard = () => {
+  const toggleLeftSidePanel = useSetAtom(triggerLeftOpenAtomAction)
+  useHotkeys('mod+b', () => {
+    toggleLeftSidePanel()
+  })
 }
