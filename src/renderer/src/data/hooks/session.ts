@@ -91,10 +91,14 @@ export const useRefreshToken = () => {
     const accessToken = await client.ensureQueryData<
       ReturnType<typeof useAccessTokenQuery>['data']
     >({ queryKey: ['accessToken'] })
+    if (!accessToken) {
+      toast.error('无法刷新 Token：登录信息丢失')
+      finish()
+      return
+    }
     if (
-      accessToken &&
-      (accessToken.expires_in + accessToken.create_time.getTime() < new Date().getTime() ||
-        !(await isAccessTokenValid(accessToken)))
+      accessToken.expires_in + accessToken.create_time.getTime() < new Date().getTime() ||
+      !(await isAccessTokenValid(accessToken))
     ) {
       try {
         const newAccessToken = await refreshMutation.mutateAsync({ ...accessToken })
@@ -102,12 +106,11 @@ export const useRefreshToken = () => {
         toast.success('Token 刷新成功')
       } catch (e) {
         console.error(e)
-        finish()
         toast.error('Token 刷新失败（可能是已过期）')
+        finish()
       }
     } else {
-      finish()
-      toast.error('无法刷新 Token：登录信息丢失')
+      toast.error('已经刷新过了！')
     }
   }, [refreshMutation, client, finish])
 }

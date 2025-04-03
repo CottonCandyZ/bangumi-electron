@@ -19,15 +19,21 @@ export async function isWebLogin() {
  * 验证 AccessToken 有效性
  */
 export async function isAccessTokenValid(token: Token) {
-  const json = (await webFetch(LOGIN.OAUTH_ACCESS_TOKEN_STATUS, {
-    method: 'post',
-    headers: {
-      'Content-Type': LOGIN.POST_CONTENT_TYPE,
-    },
-    body: new URLSearchParams({
-      access_token: token.access_token,
-    }),
-  })) as Token & { user_id: string }
+  let json: Token & { user_id: string }
+  try {
+    json = (await webFetch(LOGIN.OAUTH_ACCESS_TOKEN_STATUS, {
+      method: 'post',
+      headers: {
+        'Content-Type': LOGIN.POST_CONTENT_TYPE,
+      },
+      body: new URLSearchParams({
+        access_token: token.access_token,
+      }),
+    })) as Token & { user_id: string }
+  } catch (e) {
+    console.error(e)
+    return false
+  }
   return !!json.user_id
 }
 
