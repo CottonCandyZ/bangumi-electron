@@ -55,8 +55,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.11",
-    "drizzle-kit": "^0.25.0",
-    "drizzle-orm": "^0.34.1",
+    "drizzle-orm": "^0.41.0",
     "electron-updater": "^6.2.1",
     "embla-carousel-react": "^8.3.0",
     "framer-motion": "^11.3.2",
@@ -95,6 +94,7 @@
     "@typescript-eslint/parser": "^8.6.0",
     "@vitejs/plugin-react": "^4.3.1",
     "ajv": "^8.17.1",
+    "drizzle-kit": "^0.30.6",
     "electron": "^35.1.2",
     "electron-builder": "26.0.12",
     "electron-vite": "^2.3.0",
@@ -121,5 +121,5 @@
       "prettier --write"
     ]
   },
-  "packageManager": "pnpm@10.4.1+sha512.c753b6c3ad7afa13af388fa6d808035a008e30ea9993f58c6663e2bc5ff21679aa834db094987129aa4d488b86df57f7b634981b2f827cdcacc698cc0cfb88af"
+  "packageManager": "pnpm@10.8.0+sha512.0e82714d1b5b43c74610193cb20734897c1d00de89d0e18420aebc5977fa13d780a9cb05734624e81ebd81cc876cd464794850641c48b9544326b5622ca29971"
 }
