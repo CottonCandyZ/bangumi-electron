@@ -136,10 +136,12 @@ export async function insertSubjectsInfo(subjectsInfo: Subject[]) {
     BatchItem<'sqlite'>,
     ...BatchItem<'sqlite'>[],
   ]
+  if (batch.length === 0) return
   db.batch(batch)
 }
 
 export async function insertSubjectInfo(subjectInfo: Subject) {
   const batch = createSubjectBatchInsert(subjectInfo)
+  if (batch.length === 0) return
   db.batch(batch)
 }
