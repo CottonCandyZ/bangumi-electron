@@ -46,6 +46,8 @@ export const useIsUnauthorized = () => {
         e.action.error instanceof AuthError &&
         e.action.error.code === AuthCode.EXPIRE
       ) {
+        //FIXME: need to remove
+        console.error(e.action.error)
         refresh()
       }
     })

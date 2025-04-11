@@ -71,15 +71,13 @@ export const useRefreshTokenMutation = () => {
 export const useRefreshToken = () => {
   const client = useQueryClient()
   const refreshMutation = useRefreshTokenMutation()
-  const finish = useCallback(
+  const resetAccessToken = useCallback(
     (data?: ReturnType<typeof useAccessTokenQuery>['data']) => {
       if (data) {
         client.setQueryData<ReturnType<typeof useAccessTokenQuery>['data']>(['accessToken'], data)
       } else {
         client.invalidateQueries({ queryKey: ['accessToken'] })
       }
-      client.invalidateQueries({ queryKey: ['authFetch'] })
-      store.set(isRefreshingTokenAtom, false)
     },
     [client],
   )
@@ -93,7 +91,7 @@ export const useRefreshToken = () => {
     >({ queryKey: ['accessToken'] })
     if (!accessToken) {
       toast.error('无法刷新 Token：登录信息丢失')
-      finish()
+      resetAccessToken()
       return
     }
     if (
@@ -102,15 +100,15 @@ export const useRefreshToken = () => {
     ) {
       try {
         const newAccessToken = await refreshMutation.mutateAsync({ ...accessToken })
-        finish({ ...newAccessToken, create_time: new Date() })
+        resetAccessToken({ ...newAccessToken, create_time: new Date() })
         toast.success('Token 刷新成功')
       } catch (e) {
         console.error(e)
         toast.error('Token 刷新失败（可能是已过期）')
-        finish()
+        resetAccessToken()
       }
-    } else {
-      toast.error('已经刷新过了！')
     }
-  }, [refreshMutation, client, finish])
+    store.set(isRefreshingTokenAtom, false)
+    client.invalidateQueries({ queryKey: ['authFetch'] })
+  }, [refreshMutation, client, resetAccessToken])
 }
