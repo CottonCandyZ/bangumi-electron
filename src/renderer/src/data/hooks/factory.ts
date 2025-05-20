@@ -359,6 +359,86 @@ export const useDBQueryOptionalAuth = <
   })
 }
 
+export const useDBQuery = <TApiParams, TDbParams, TQueryFnReturn extends { last_update_at: Date }>({
+  queryKey = [],
+  apiQueryFn,
+  apiParams,
+  dbQueryFn,
+  updateDB,
+  dbParams,
+  dbStaleTime = DB_CONFIG.DEFAULT_STALE_TIME,
+  enabled = true,
+  needKeepPreviousData = true,
+  ...props
+}: {
+  apiQueryFn: Fn<TApiParams, TQueryFnReturn>
+  dbQueryFn: Fn<TDbParams, TQueryFnReturn | undefined>
+  apiParams: TApiParams
+  dbParams: TDbParams
+  updateDB: Fn<TQueryFnReturn, void>
+  dbStaleTime?: number
+  enabled?: boolean
+  needKeepPreviousData?: boolean
+} & Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
+  const dbQueryKey = ['authFetch', ...queryKey, dbParams, localStorage.getItem('current_user_id')]
+  const queryClient = useQueryClient()
+
+  const updateDBMutate = useMutation({
+    mutationFn: updateDB,
+  })
+
+  const update = async () => {
+    let apiData: TQueryFnReturn | undefined
+    try {
+      console.log(apiParams)
+      apiData = await apiQueryFn(apiParams)
+    } catch (error) {
+      if (error instanceof FetchError && error.statusCode === 401) {
+        throw AuthError.expire()
+      }
+      throw error
+    }
+    updateDBMutate.mutate(apiData)
+    return apiData
+  }
+
+  const mutate = useMutation({
+    mutationFn: update,
+    onSuccess: (data) => {
+      queryClient.setQueryData(queryKey, data)
+    },
+  })
+
+  const fetchFromDB = async () => {
+    const data = await dbQueryFn({ ...dbParams } as TDbParams)
+    if (data === undefined) {
+      return await mutate.mutateAsync()
+    }
+    const last_update_at = data.last_update_at.getTime()
+    if (new Date().getTime() - last_update_at > dbStaleTime) {
+      mutate.mutate()
+    }
+    return data
+  }
+
+  return useQuery({
+    queryKey: dbQueryKey,
+    queryFn: fetchFromDB,
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
+    enabled: enabled,
+    persister: undefined,
+    // staleTime: async (q) => {
+    //   const data = await q.promise
+    //   if (!data) return dbStaleTime
+    //   const last_update_at = data.last_update_at.getTime()
+    //   const pastTime = new Date().getTime() - last_update_at
+    //   return pastTime > dbStaleTime ? 0 : dbStaleTime - pastTime
+    // },
+    staleTime: dbStaleTime,
+    ...props,
+  })
+}
+
 export const useDBQueriesOptionalAuth = <
   TApiParams,
   TDbParams extends { ids?: number[] },
@@ -501,6 +581,173 @@ export const useDBQueriesOptionalAuth = <
     networkMode: 'offlineFirst',
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     enabled: enabled && !isRefreshToken && !isFetching,
+    persister: undefined,
+    // staleTime: async (q) => {
+    //   const data = await q.promise
+    //   if (!data) return dbStaleTime
+    //   const now = new Date().getTime()
+    //   let minStaleTime = dbStaleTime
+    //   for (const item of data) {
+    //     if (item) {
+    //       const last_update_at = item.last_update_at.getTime()
+    //       const pastTime = now - last_update_at
+    //       if (pastTime > dbStaleTime) return 0
+    //       const staleTime = dbStaleTime - pastTime
+    //       minStaleTime = Math.min(staleTime, minStaleTime)
+    //     }
+    //   }
+    //   return minStaleTime
+    // },
+    // 暂时为了减少 bug，选择更加舒适的方案
+    staleTime: dbStaleTime,
+    throwOnError: (e, query) => query.state.data === undefined && !(e instanceof AuthError),
+    ...props,
+  })
+
+  return dbQuery
+}
+
+export const useDBQueries = <
+  TApiParams,
+  TDbParams extends { ids?: number[] },
+  TQueryFnReturn extends { last_update_at: Date; id: number },
+>({
+  queryKey = [],
+  apiQueryFn,
+  apiParams,
+  dbQueryFn,
+  updateDB,
+  dbParams,
+  dbStaleTime = DB_CONFIG.DEFAULT_STALE_TIME,
+  enabled = true,
+  needKeepPreviousData = true,
+  ...props
+}: {
+  apiQueryFn: Fn<TApiParams, TQueryFnReturn>
+  apiParams: TApiParams
+  dbQueryFn: Fn<TDbParams, TQueryFnReturn[]>
+  dbParams: TDbParams
+  updateDB: Fn<TQueryFnReturn[], void>
+  dbStaleTime?: number
+  enabled?: boolean
+  needKeepPreviousData?: boolean
+} & Omit<
+  UseQueryOptions<(TQueryFnReturn | null)[], Error, (TQueryFnReturn | null)[], QueryKey>,
+  'queryFn'
+>) => {
+  const dbQueryKey = ['authFetch', ...queryKey, dbParams, localStorage.getItem('current_user_id')]
+  const queryClient = useQueryClient()
+
+  const updateDBMutate = useMutation({
+    mutationFn: updateDB,
+  })
+
+  const fetchData = async ({
+    allIds,
+    fetchArray,
+    dataMap,
+  }: {
+    allIds: number[]
+    fetchArray: number[]
+    dataMap: Map<number, TQueryFnReturn>
+  }) => {
+    const res = await Promise.allSettled(fetchArray.map((id) => apiQueryFn({ id, ...apiParams })))
+    const errors = res.filter((v) => v.status === 'rejected').map((v) => v.reason)
+    for (const e of errors) {
+      if (e instanceof FetchError) {
+        if (e.statusCode === 401) throw AuthError.expire()
+        if (e.statusCode === 404) continue
+      }
+      throw e
+    }
+    const apiData = res.filter((v) => v.status === 'fulfilled').map((v) => v.value)
+
+    updateDBMutate.mutate(apiData)
+
+    for (const data of apiData) {
+      dataMap.set(data.id, data)
+    }
+
+    //FIXME: NSFW 条目没有特殊处理，只是返回 null
+    const currentTime = new Date().getTime()
+    let minimalTimestamp = currentTime
+    const data = allIds.map((id) => {
+      const data = dataMap.get(id) ?? null
+      if (data) {
+        // 提前设置部分 fetch 的 data
+        queryClient.setQueryData<TQueryFnReturn>(
+          [...queryKey, { id }, localStorage.getItem('current_user_id')],
+          data,
+          {
+            updatedAt: data.last_update_at.getTime(),
+          },
+        )
+        minimalTimestamp = Math.min(minimalTimestamp, data.last_update_at.getTime())
+      }
+      return data
+    })
+
+    return { data, minimalTimestamp }
+  }
+
+  const fetchDataMutation = useMutation({
+    mutationFn: fetchData,
+    onSuccess: ({ data, minimalTimestamp }) => {
+      queryClient.setQueryData<(TQueryFnReturn | null)[]>(dbQueryKey, data, {
+        updatedAt: minimalTimestamp,
+      })
+    },
+    throwOnError: (e) => !(e instanceof AuthError),
+  })
+
+  const getData = (dbData: TQueryFnReturn[]) => {
+    if (dbParams.ids === undefined) throw new FetchError('[Params error]: no ids')
+    const allIds = dbParams.ids
+    const dataMap = new Map(dbData.map((item) => [item.id, item]))
+    const currentTime = new Date().getTime()
+    let minimalTimestamp = currentTime
+    const fetchArray = allIds.filter((id) => {
+      const data = dataMap.get(id)
+      if (data === undefined) return true
+      if (currentTime - data.last_update_at.getTime() > dbStaleTime) return true
+      minimalTimestamp = Math.min(data.last_update_at.getTime(), minimalTimestamp)
+      return false
+    })
+    const dbOrderedData = allIds.map((id) => {
+      const data = dataMap.get(id) ?? null
+      if (data)
+        queryClient.setQueryData<TQueryFnReturn>(
+          [...queryKey, { id }, localStorage.getItem('current_user_id')],
+          data,
+          {
+            //TODO: comment for debug
+            // updatedAt: data.last_update_at.getTime(),
+          },
+        )
+      return data
+    })
+
+    if (fetchArray.length === 0) {
+      // 无需更新
+      return dbOrderedData
+    }
+
+    fetchDataMutation.mutate({ allIds, dataMap, fetchArray })
+
+    // 先返回过期的数据
+    // 这里没有对全部都为 null 的情况做处理...
+    return dbOrderedData
+  }
+
+  const dbQuery = useQuery({
+    queryKey: dbQueryKey,
+    queryFn: async () => {
+      const data = await dbQueryFn({ ...dbParams } as TDbParams)
+      return getData(data)
+    },
+    networkMode: 'offlineFirst',
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
+    enabled: enabled,
     persister: undefined,
     // staleTime: async (q) => {
     //   const data = await q.promise

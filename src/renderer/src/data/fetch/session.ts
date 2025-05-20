@@ -1,6 +1,7 @@
 import { LOGIN, webFetch } from '@renderer/data/fetch/config/'
 import { Token } from '@renderer/data/types/login'
 import { client } from '@renderer/lib/client'
+import { readAccessToken } from './db/user'
 
 // 这里是用来验证相关 session 的地方，如果可能也会刷新 Session
 
@@ -46,4 +47,24 @@ export async function logout() {
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_cookietime' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_auth' })
   localStorage.removeItem('current_user_id')
+}
+
+// token cache
+let accessTokenCache: Token | null = null
+
+/** 获得当前的 AccessToken，没登录时返回 null */
+export async function getAccessToken() {
+  const user_id = localStorage.getItem('current_user_id')
+  if (!user_id) return null
+  if (accessTokenCache?.user_id === Number(user_id)) {
+    return accessTokenCache
+  }
+  const token = await readAccessToken({ user_id: Number(user_id) })
+  accessTokenCache = token ?? null
+  return accessTokenCache
+}
+
+/** 清除 AccessToken 缓存 */
+export function cleanAccessTokenCache() {
+  accessTokenCache = null
 }

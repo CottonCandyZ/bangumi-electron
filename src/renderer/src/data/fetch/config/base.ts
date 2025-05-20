@@ -1,3 +1,5 @@
+import { AuthorizationHeader } from '@renderer/data/fetch/config/path'
+import { getAccessToken } from '@renderer/data/fetch/session'
 import { ofetch } from 'ofetch'
 
 /** 主站域名 */
@@ -34,6 +36,19 @@ export const webFetch = ofetch.create({ baseURL: HOST })
 
 /** ofetch api config  */
 export const apiFetch = ofetch.create({ baseURL: API_HOST, credentials: 'omit' })
+
+/** ofetch api withAuth */
+export const apiFetchWithAuth = ofetch.create({
+  baseURL: API_HOST,
+  credentials: 'omit',
+  async onRequest({ options }) {
+    const token = await getAccessToken()
+    console.log(token)
+    if (!token) return
+    options.headers = new Headers(options.headers)
+    options.headers.append('Authorization', AuthorizationHeader(token.access_token))
+  },
+})
 
 /** ofetch next config */
 export const nextFetch = ofetch.create({ baseURL: NEXT_API_HOST, credentials: 'include' })

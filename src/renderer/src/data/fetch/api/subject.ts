@@ -1,4 +1,4 @@
-import { SUBJECTS, apiFetch } from '@renderer/data/fetch/config/'
+import { SUBJECTS, apiFetch, apiFetchWithAuth } from '@renderer/data/fetch/config/'
 import { getAuthHeader } from '@renderer/data/fetch/utils'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { RelatedSubject, Subject, SubjectAPI } from '@renderer/data/types/subject'
@@ -22,6 +22,16 @@ export async function getSubjectById({ id, token }: { id?: number; token?: strin
     },
   })
 
+  return {
+    ...info,
+    date: info.date ? dayjs.tz(info.date, 'Asia/Shanghai').toDate() : null,
+    ratingCount: info.rating.count,
+    last_update_at: new Date(),
+  } satisfies Subject as Subject
+}
+
+export async function getSubjectByIdWithToken({ id }: { id: number }) {
+  const info = await apiFetchWithAuth<SubjectAPI>(SUBJECTS.BY_ID(id.toString()))
   return {
     ...info,
     date: info.date ? dayjs.tz(info.date, 'Asia/Shanghai').toDate() : null,
