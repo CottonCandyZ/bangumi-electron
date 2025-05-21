@@ -343,15 +343,7 @@ export const useDBQuery = <TApiParams, TDbParams, TQueryFnReturn extends { last_
   })
 
   const update = async () => {
-    let apiData: TQueryFnReturn | undefined
-    try {
-      apiData = await apiQueryFn(apiParams)
-    } catch (error) {
-      if (error instanceof FetchError && error.statusCode === 401) {
-        throw AuthError.expire()
-      }
-      throw error
-    }
+    const apiData = await apiQueryFn(apiParams)
     updateDBMutate.mutate(apiData)
     return apiData
   }
@@ -470,15 +462,7 @@ export const useDBSuspenseQuery = <
   })
 
   const update = async () => {
-    let apiData: TQueryFnReturn | undefined
-    try {
-      apiData = await apiQueryFn(apiParams)
-    } catch (error) {
-      if (error instanceof FetchError && error.statusCode === 401) {
-        throw AuthError.expire()
-      }
-      throw error
-    }
+    const apiData = await apiQueryFn(apiParams)
     updateDBMutate.mutate(apiData)
     return apiData
   }
@@ -737,7 +721,6 @@ export const useDBQueries = <
     const errors = res.filter((v) => v.status === 'rejected').map((v) => v.reason)
     for (const e of errors) {
       if (e instanceof FetchError) {
-        if (e.statusCode === 401) throw AuthError.expire()
         if (e.statusCode === 404) continue
       }
       throw e

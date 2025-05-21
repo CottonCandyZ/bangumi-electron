@@ -1,7 +1,7 @@
 import { AuthorizationHeader } from '@renderer/data/fetch/config/path'
 import { getAccessToken } from '@renderer/data/fetch/session'
-import { logout } from '@renderer/data/hooks/session'
-import { FetchError, ofetch } from 'ofetch'
+import { safeLogout } from '@renderer/data/hooks/session'
+import { ofetch } from 'ofetch'
 
 /** 主站域名 */
 export const HOST_NAME = 'bgm.tv'
@@ -48,13 +48,14 @@ export const apiFetchWithAuth = ofetch.create({
     options.headers = new Headers(options.headers)
     options.headers.append('Authorization', AuthorizationHeader(token.access_token))
   },
-  async onRequestError({ error }) {
-    // TODO: 测试这里的 Error 发生后会不会被抛出
-    if (error instanceof FetchError) {
-      if (error.statusCode === 401) {
-        await logout()
-      }
+  async onResponseError({ response }) {
+    // Handle 401 Unauthorized errors by logging out the user
+    if (response.status === 401) {
+      // Use the safeLogout function to handle the logout process
+      // This ensures only one logout happens at a time and shows a toast notification
+      await safeLogout({ showToast: true })
     }
+    // The error will still be thrown to the caller after this hook
   },
 })
 

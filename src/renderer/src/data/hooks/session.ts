@@ -1,6 +1,6 @@
 import { getUserInfoWithAuth } from '@renderer/data/fetch/api/user'
 import { readAccessToken } from '@renderer/data/fetch/db/user'
-import { isAccessTokenValid, logout as _logout, getAccessToken } from '@renderer/data/fetch/session'
+import { isAccessTokenValid, logout, getAccessToken } from '@renderer/data/fetch/session'
 import { refreshToken } from '@renderer/data/fetch/web/login'
 import { queryClient } from '@renderer/modules/wrapper/query'
 import { isRefreshingTokenAtom } from '@renderer/state/session'
@@ -8,26 +8,63 @@ import { store } from '@renderer/state/utils'
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
+import { createSingletonPromise } from '@renderer/lib/utils/promise'
+
+function logoutResetQuery() {
+  queryClient.cancelQueries({ queryKey: ['authFetch'] })
+  queryClient.setQueryData(['accessToken'], null)
+  queryClient.invalidateQueries({ queryKey: ['accessToken'] })
+  queryClient.invalidateQueries({ queryKey: ['authFetch'] })
+}
 
 /**
  * Logout 的 Mutate
  */
 export const useLogoutMutation = () => {
-  const queryClient = useQueryClient()
   return useMutation({
     mutationKey: ['session'],
-    mutationFn: _logout,
+    mutationFn: logout,
     onSuccess: () => {
-      queryClient.setQueryData(['accessToken'], null)
-      queryClient.invalidateQueries({ queryKey: ['accessToken'] })
+      logoutResetQuery()
     },
   })
 }
 
-export async function logout() {
-  await _logout()
-  queryClient.setQueryData(['accessToken'], null)
-  queryClient.invalidateQueries({ queryKey: ['accessToken'] })
+// Create a singleton promise for logout operations
+const logoutSingleton = createSingletonPromise<void>()
+
+/**
+ * Regular logout function - performs the actual logout operations
+ */
+export async function logoutAndRefresh() {
+  await logout()
+  logoutResetQuery()
+}
+
+/**
+ * Safe logout function that ensures only one logout operation happens at a time
+ * Shows a toast notification for auth expiration if showToast is true
+ */
+export async function safeLogout(options?: { showToast?: boolean }) {
+  // Get current user ID to check if we're already logged in
+  const currentUserId = localStorage.getItem('current_user_id')
+
+  // Only proceed with logout if user is currently logged in
+  if (!currentUserId) return
+
+  console.error('Authentication error, logging out user')
+
+  // Show a toast notification only if logout is not already in progress and showToast is true
+  if (options?.showToast && !logoutSingleton.isRunning()) {
+    toast.error('登录已过期，请重新登录', {
+      id: 'auth-expired',
+      duration: 3000,
+    })
+  }
+
+  // Use the singleton promise to ensure only one logout happens
+  // All concurrent callers will await the same promise
+  return logoutSingleton.runOrAwait(() => logoutAndRefresh())
 }
 
 /**
@@ -123,7 +160,7 @@ export const useRefreshToken = () => {
 
 export function useSessionQuery() {
   return useSuspenseQuery({
-    queryKey: ['userSession'],
+    queryKey: ['authFetch', 'userSession'],
     queryFn: async () => {
       const accessToken = await getAccessToken()
       if (!accessToken) return null
