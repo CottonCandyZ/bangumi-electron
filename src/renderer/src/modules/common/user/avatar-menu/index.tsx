@@ -18,15 +18,15 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useLogoutMutation } from '@renderer/data/hooks/session'
 import { toast } from 'sonner'
 import { useTheme } from '@renderer/modules/wrapper/theme-wrapper'
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { cn } from '@renderer/lib/utils'
-import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { useSetAtom } from 'jotai'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
+import { useSession } from '@renderer/data/hooks/session'
 
-export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
+function ProfileMenuContent({ type }: { type: 'expend' | 'small' }) {
   const logoutMutation = useLogoutMutation()
-  const { userInfo } = useSession()
+  const userInfo = useSession()
   const isLogin = !!userInfo
   const { theme, setTheme } = useTheme()
 
@@ -49,10 +49,7 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
             imageSrc={userInfo.avatar.small}
           />
         ) : (
-          <div
-            data-expend={type}
-            className="aspect-square w-8 shrink-0 overflow-hidden rounded-full bg-accent"
-          />
+          <div className="aspect-square w-8 shrink-0 overflow-hidden rounded-full bg-accent" />
         )}
         {type === 'expend' && (
           <span className="shrink-0 font-semibold">{isLogin && userInfo.nickname}</span>
@@ -115,5 +112,27 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
         )}
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+function ProfileMenuSkeleton({ type }: { type: 'expend' | 'small' }) {
+  return (
+    <div
+      data-expend={type}
+      className={cn(
+        'flex w-fit flex-row items-center gap-3 overflow-hidden rounded-full text-muted-foreground shadow-sm hover:text-primary',
+        type === 'expend' && 'group w-full border p-2 shadow-none',
+      )}
+    >
+      <Skeleton className="aspect-square w-8 shrink-0 overflow-hidden rounded-full bg-accent" />
+    </div>
+  )
+}
+
+export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
+  return (
+    <Suspense fallback={<ProfileMenuSkeleton type={type} />}>
+      <ProfileMenuContent type={type} />
+    </Suspense>
   )
 }

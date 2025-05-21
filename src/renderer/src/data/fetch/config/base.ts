@@ -1,6 +1,7 @@
 import { AuthorizationHeader } from '@renderer/data/fetch/config/path'
 import { getAccessToken } from '@renderer/data/fetch/session'
-import { ofetch } from 'ofetch'
+import { logout } from '@renderer/data/hooks/session'
+import { FetchError, ofetch } from 'ofetch'
 
 /** 主站域名 */
 export const HOST_NAME = 'bgm.tv'
@@ -43,10 +44,17 @@ export const apiFetchWithAuth = ofetch.create({
   credentials: 'omit',
   async onRequest({ options }) {
     const token = await getAccessToken()
-    console.log(token)
     if (!token) return
     options.headers = new Headers(options.headers)
     options.headers.append('Authorization', AuthorizationHeader(token.access_token))
+  },
+  async onRequestError({ error }) {
+    // TODO: 测试这里的 Error 发生后会不会被抛出
+    if (error instanceof FetchError) {
+      if (error.statusCode === 401) {
+        await logout()
+      }
+    }
   },
 })
 

@@ -1,10 +1,5 @@
 // import { BigCarousel } from '@renderer/components/carousel/big-carousel'
-import {
-  SmallCarousel,
-  SmallCarouselFallback,
-  SmallCarouselProps,
-} from '@renderer/modules/main/home/small-carousel'
-import { Suspense } from 'react'
+import { SmallCarousel, SmallCarouselProps } from '@renderer/modules/main/home/small-carousel'
 
 const config = [
   { href: '/anime', name: '动画', sectionPath: 'anime' },
@@ -23,9 +18,7 @@ export function Component() {
 
       {config.map((item) => (
         <section className="px-9" key={item.sectionPath}>
-          <Suspense fallback={<SmallCarouselFallback {...item} />}>
-            <SmallCarousel {...item} />
-          </Suspense>
+          <SmallCarousel {...item} />
         </section>
       ))}
 

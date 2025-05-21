@@ -33,7 +33,7 @@ import { LoginError } from '@renderer/lib/utils/error'
 import { FetchError } from 'ofetch'
 import { useEffect, useRef } from 'react'
 import { InputSelector } from '@renderer/components/input-selector'
-import { useLoginInfoQuery } from '@renderer/data/hooks/db/user'
+import { useLocalLoginInfoQuery } from '@renderer/data/hooks/db/user'
 import { useSetAtom } from 'jotai'
 import { deleteLoginAccountDialogAtom } from '@renderer/state/dialog/alert'
 import { client } from '@renderer/lib/client'
@@ -52,7 +52,7 @@ const {
 export function LoginForm({ success = () => {} }: { success?: () => void }) {
   const queryClient = useQueryClient()
   // init data
-  const loginInfo = useLoginInfoQuery().data
+  const loginInfo = useLocalLoginInfoQuery().data
   const deleteAlertDialog = useSetAtom(deleteLoginAccountDialogAtom)
   const firstTime = useRef(true)
 

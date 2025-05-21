@@ -228,52 +228,6 @@ export const useQueryOptionalAuth = <TApiParams, TQueryFnReturn, TData = TQueryF
   return query
 }
 
-export const useQueriesOptionalAuth = <TApiParams, TQueryFnReturn extends { id: number }>({
-  queryKey = [],
-  queryFn,
-  queryIds,
-  apiParams,
-  enabled = true,
-  needKeepPreviousData = true,
-  ...props
-}: {
-  queryFn: TApiParams extends { token?: string } ? Fn<TApiParams, TQueryFnReturn> : never
-  queryIds: number[]
-  needKeepPreviousData?: boolean
-} & OptionalAPIQueriesProps<TApiParams> &
-  Omit<
-    UseQueryOptions<(TQueryFnReturn | null)[], Error, (TQueryFnReturn | null)[], QueryKey>,
-    'select' | 'queryFn'
-  >) => {
-  const { data: userInfo, isFetching } = useAccessTokenQuery()
-  const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
-  const accessToken = userInfo?.access_token
-  const queryClient = useQueryClient()
-
-  const query = useQuery({
-    queryKey: ['authFetch', ...queryKey, queryIds, apiParams, accessToken],
-    queryFn: async () => {
-      const res = await Promise.allSettled(
-        queryIds.map((id) => queryFn({ token: accessToken, id, ...apiParams } as TApiParams)),
-      )
-
-      return res.map((item) => {
-        if (item.status === 'rejected') {
-          const e = item.reason
-          if (e instanceof FetchError && e.statusCode === 401) throw AuthError.expire()
-          return null
-        }
-        queryClient.setQueryData([...queryKey, { id: item.value.id }, accessToken], item.value)
-        return item.value
-      })
-    },
-    enabled: enabled && !isRefreshToken && !isFetching,
-    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
-    ...props,
-  })
-  return query
-}
-
 export const useDBQueryOptionalAuth = <
   TApiParams,
   TDbParams,
@@ -391,7 +345,6 @@ export const useDBQuery = <TApiParams, TDbParams, TQueryFnReturn extends { last_
   const update = async () => {
     let apiData: TQueryFnReturn | undefined
     try {
-      console.log(apiParams)
       apiData = await apiQueryFn(apiParams)
     } catch (error) {
       if (error instanceof FetchError && error.statusCode === 401) {
@@ -427,6 +380,132 @@ export const useDBQuery = <TApiParams, TDbParams, TQueryFnReturn extends { last_
     queryFn: fetchFromDB,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     enabled: enabled,
+    persister: undefined,
+    // staleTime: async (q) => {
+    //   const data = await q.promise
+    //   if (!data) return dbStaleTime
+    //   const last_update_at = data.last_update_at.getTime()
+    //   const pastTime = new Date().getTime() - last_update_at
+    //   return pastTime > dbStaleTime ? 0 : dbStaleTime - pastTime
+    // },
+    staleTime: dbStaleTime,
+    ...props,
+  })
+}
+
+export const useQueriesOptionalAuth = <TApiParams, TQueryFnReturn extends { id: number }>({
+  queryKey = [],
+  queryFn,
+  queryIds,
+  apiParams,
+  enabled = true,
+  needKeepPreviousData = true,
+  ...props
+}: {
+  queryFn: TApiParams extends { token?: string } ? Fn<TApiParams, TQueryFnReturn> : never
+  queryIds: number[]
+  needKeepPreviousData?: boolean
+} & OptionalAPIQueriesProps<TApiParams> &
+  Omit<
+    UseQueryOptions<(TQueryFnReturn | null)[], Error, (TQueryFnReturn | null)[], QueryKey>,
+    'select' | 'queryFn'
+  >) => {
+  const { data: userInfo, isFetching } = useAccessTokenQuery()
+  const isRefreshToken = useAtomValue(isRefreshingTokenAtom)
+  const accessToken = userInfo?.access_token
+  const queryClient = useQueryClient()
+
+  const query = useQuery({
+    queryKey: ['authFetch', ...queryKey, queryIds, apiParams, accessToken],
+    queryFn: async () => {
+      const res = await Promise.allSettled(
+        queryIds.map((id) => queryFn({ token: accessToken, id, ...apiParams } as TApiParams)),
+      )
+
+      return res.map((item) => {
+        if (item.status === 'rejected') {
+          const e = item.reason
+          if (e instanceof FetchError && e.statusCode === 401) throw AuthError.expire()
+          return null
+        }
+        queryClient.setQueryData([...queryKey, { id: item.value.id }, accessToken], item.value)
+        return item.value
+      })
+    },
+    enabled: enabled && !isRefreshToken && !isFetching,
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
+    ...props,
+  })
+  return query
+}
+
+export const useDBSuspenseQuery = <
+  TApiParams,
+  TDbParams,
+  TQueryFnReturn extends { last_update_at: Date },
+>({
+  queryKey = [],
+  apiQueryFn,
+  apiParams,
+  dbQueryFn,
+  updateDB,
+  dbParams,
+  dbStaleTime = DB_CONFIG.DEFAULT_STALE_TIME,
+  needKeepPreviousData = true,
+  ...props
+}: {
+  apiQueryFn: Fn<TApiParams, TQueryFnReturn>
+  dbQueryFn: Fn<TDbParams, TQueryFnReturn | undefined>
+  apiParams: TApiParams
+  dbParams: TDbParams
+  updateDB: Fn<TQueryFnReturn, void>
+  dbStaleTime?: number
+  needKeepPreviousData?: boolean
+} & Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
+  const dbQueryKey = ['authFetch', ...queryKey, dbParams, localStorage.getItem('current_user_id')]
+  const queryClient = useQueryClient()
+
+  const updateDBMutate = useMutation({
+    mutationFn: updateDB,
+  })
+
+  const update = async () => {
+    let apiData: TQueryFnReturn | undefined
+    try {
+      apiData = await apiQueryFn(apiParams)
+    } catch (error) {
+      if (error instanceof FetchError && error.statusCode === 401) {
+        throw AuthError.expire()
+      }
+      throw error
+    }
+    updateDBMutate.mutate(apiData)
+    return apiData
+  }
+
+  const mutate = useMutation({
+    mutationFn: update,
+    onSuccess: (data) => {
+      queryClient.setQueryData(queryKey, data)
+    },
+  })
+
+  const fetchFromDB = async () => {
+    const data = await dbQueryFn({ ...dbParams } as TDbParams)
+    if (data === undefined) {
+      return await mutate.mutateAsync()
+    }
+    const last_update_at = data.last_update_at.getTime()
+    if (new Date().getTime() - last_update_at > dbStaleTime) {
+      mutate.mutate()
+    }
+    return data
+  }
+
+  return useSuspenseQuery({
+    queryKey: dbQueryKey,
+    queryFn: fetchFromDB,
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     persister: undefined,
     // staleTime: async (q) => {
     //   const data = await q.promise

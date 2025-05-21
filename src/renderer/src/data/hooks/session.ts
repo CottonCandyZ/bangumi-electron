@@ -1,9 +1,11 @@
+import { getUserInfoWithAuth } from '@renderer/data/fetch/api/user'
 import { readAccessToken } from '@renderer/data/fetch/db/user'
-import { isAccessTokenValid, logout } from '@renderer/data/fetch/session'
+import { isAccessTokenValid, logout as _logout, getAccessToken } from '@renderer/data/fetch/session'
 import { refreshToken } from '@renderer/data/fetch/web/login'
+import { queryClient } from '@renderer/modules/wrapper/query'
 import { isRefreshingTokenAtom } from '@renderer/state/session'
 import { store } from '@renderer/state/utils'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 
@@ -14,12 +16,18 @@ export const useLogoutMutation = () => {
   const queryClient = useQueryClient()
   return useMutation({
     mutationKey: ['session'],
-    mutationFn: logout,
+    mutationFn: _logout,
     onSuccess: () => {
       queryClient.setQueryData(['accessToken'], null)
       queryClient.invalidateQueries({ queryKey: ['accessToken'] })
     },
   })
+}
+
+export async function logout() {
+  await _logout()
+  queryClient.setQueryData(['accessToken'], null)
+  queryClient.invalidateQueries({ queryKey: ['accessToken'] })
 }
 
 /**
@@ -111,4 +119,19 @@ export const useRefreshToken = () => {
     store.set(isRefreshingTokenAtom, false)
     client.invalidateQueries({ queryKey: ['authFetch'] })
   }, [refreshMutation, client, resetAccessToken])
+}
+
+export function useSessionQuery() {
+  return useSuspenseQuery({
+    queryKey: ['userSession'],
+    queryFn: async () => {
+      const accessToken = await getAccessToken()
+      if (!accessToken) return null
+      return await getUserInfoWithAuth()
+    },
+  })
+}
+
+export function useSession() {
+  return useSessionQuery().data
 }

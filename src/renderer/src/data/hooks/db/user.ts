@@ -3,7 +3,7 @@ import { insertUserInfo, readLoginInfo, readUserInfo } from '@renderer/data/fetc
 import { useDBQueryMustAuth } from '@renderer/data/hooks/factory'
 import { useQuery } from '@tanstack/react-query'
 
-export function useLoginInfoQuery() {
+export function useLocalLoginInfoQuery() {
   return useQuery({
     queryKey: ['login-info-list'],
     queryFn: readLoginInfo,

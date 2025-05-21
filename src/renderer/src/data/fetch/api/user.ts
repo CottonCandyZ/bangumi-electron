@@ -1,4 +1,4 @@
-import { USER, apiFetch } from '@renderer/data/fetch/config/'
+import { USER, apiFetch, apiFetchWithAuth } from '@renderer/data/fetch/config/'
 import { getAuthHeader } from '@renderer/data/fetch/utils'
 import { UerInfoAPI, UserInfo } from '@renderer/data/types/user'
 
@@ -12,4 +12,8 @@ export async function getUserInfo({ token }: { token: string }) {
     },
   })
   return { ...data, last_update_at: new Date() } satisfies UserInfo
+}
+
+export async function getUserInfoWithAuth() {
+  return await apiFetchWithAuth<UerInfoAPI>(USER.ME)
 }

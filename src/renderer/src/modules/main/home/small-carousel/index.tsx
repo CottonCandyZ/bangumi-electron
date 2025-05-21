@@ -15,7 +15,7 @@ import { cn } from '@renderer/lib/utils'
 import { activeSectionAtom } from '@renderer/state/small-carousel'
 import { useAtomValue } from 'jotai'
 import { ChevronRight } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useTopListQuery } from '@renderer/data/hooks/web/subject'
 import { useSubjectsInfoQuery } from '@renderer/data/hooks/db/subject'
 import { Skeleton } from '@renderer/components/ui/skeleton'
@@ -26,7 +26,7 @@ export type SmallCarouselProps = {
   sectionPath: SectionPath
 }
 
-function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
+function SmallCarouselContent({ href, name, sectionPath }: SmallCarouselProps) {
   const topList = useTopListQuery(sectionPath)
   const subjectIds = topList.data
     ?.map((item) => item.SubjectId)
@@ -106,7 +106,7 @@ function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
 }
 
 /** just copy */
-function SmallCarouselFallback({ href, name }: SmallCarouselProps) {
+function SmallCarouselSkeleton({ href, name }: SmallCarouselProps) {
   return (
     <Carousel
       opts={{
@@ -156,4 +156,10 @@ function SmallCarouselFallback({ href, name }: SmallCarouselProps) {
   )
 }
 
-export { SmallCarousel, SmallCarouselFallback }
+export function SmallCarousel(props: SmallCarouselProps) {
+  return (
+    <Suspense fallback={<SmallCarouselSkeleton {...props} />}>
+      <SmallCarouselContent {...props} />
+    </Suspense>
+  )
+}
