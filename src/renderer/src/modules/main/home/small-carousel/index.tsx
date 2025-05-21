@@ -26,12 +26,12 @@ export type SmallCarouselProps = {
   sectionPath: SectionPath
 }
 
-export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
+function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
   const topList = useTopListQuery(sectionPath)
   const subjectIds = topList.data
     ?.map((item) => item.SubjectId)
     .filter((item) => item !== undefined)
-  const subjectsInfo = useSubjectsInfoQuery({ subjectIds: subjectIds, enabled: !!subjectIds }).data
+  const subjectsInfo = useSubjectsInfoQuery({ subjectIds: subjectIds }).data
 
   const currentSectionPath = useAtomValue(activeSectionAtom)
   const [api, setApi] = useState<CarouselApi>()
@@ -85,33 +85,75 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
       </div>
       <div className={cn('relative @container', currentSectionPath === sectionPath && 'z-40')}>
         <CarouselContentNoFlow className="-ml-3">
-          {subjectsInfo
-            ? subjectsInfo.map((subject, index) => (
-                <CarouselItem
-                  key={index}
-                  className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @8xl:basis-[11.111111%] @9xl:basis-[10%]"
-                >
-                  <div className="p-0.5">
-                    {subject ? (
-                      <SubjectCard subjectInfo={subject} sectionPath={sectionPath} />
-                    ) : (
-                      <Skeleton className="aspect-[2/3] w-full" />
-                    )}
-                  </div>
-                </CarouselItem>
-              ))
-            : Array.from({ length: 10 }).map((_, index) => (
-                <CarouselItem
-                  key={index}
-                  className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @8xl:basis-[11.111111%] @9xl:basis-[10%]"
-                >
-                  <div className="p-0.5">
-                    <Skeleton className="aspect-[2/3] w-full" />
-                  </div>
-                </CarouselItem>
-              ))}
+          {subjectsInfo.map((subject, index) => (
+            <CarouselItem
+              key={index}
+              className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @8xl:basis-[11.111111%] @9xl:basis-[10%]"
+            >
+              <div className="p-0.5">
+                {subject ? (
+                  <SubjectCard subjectInfo={subject} sectionPath={sectionPath} />
+                ) : (
+                  <Skeleton className="aspect-[2/3] w-full" />
+                )}
+              </div>
+            </CarouselItem>
+          ))}
         </CarouselContentNoFlow>
       </div>
     </Carousel>
   )
 }
+
+/** just copy */
+function SmallCarouselFallback({ href, name }: SmallCarouselProps) {
+  return (
+    <Carousel
+      opts={{
+        align: 'start',
+        slidesToScroll: 'auto',
+        startIndex: 0,
+      }}
+    >
+      <div className="flex justify-between">
+        <Button
+          asChild
+          variant="ghost"
+          className="group ml-1 h-min px-2 py-1 text-xl font-medium duration-100"
+        >
+          <MyLink to={href}>
+            <div
+              className={`flex -translate-x-2 items-center justify-center gap-1 transition-all duration-100 group-hover:translate-x-0 group-hover:text-red-600/70 dark:group-hover:text-red-400`}
+            >
+              <span>{name}</span>
+              <ChevronRight
+                className="mt-[1px] h-4 w-4 text-red-600/50 group-hover:text-red-600/70 dark:text-red-600/80 dark:group-hover:text-red-400"
+                strokeWidth={4}
+              />
+            </div>
+          </MyLink>
+        </Button>
+        <div className="mb-2 ml-auto flex w-min gap-2">
+          <CarouselPrevious className="relative left-0 top-0 translate-y-0" disabled />
+          <CarouselNext className="relative right-0 top-0 translate-y-0" disabled />
+        </div>
+      </div>
+      <div className="relative @container">
+        <CarouselContentNoFlow className="-ml-3">
+          {Array.from({ length: 10 }).map((_, index) => (
+            <CarouselItem
+              key={index}
+              className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @8xl:basis-[11.111111%] @9xl:basis-[10%]"
+            >
+              <div className="p-0.5">
+                <Skeleton className="aspect-[2/3] w-full" />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContentNoFlow>
+      </div>
+    </Carousel>
+  )
+}
+
+export { SmallCarousel, SmallCarouselFallback }

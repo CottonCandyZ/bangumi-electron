@@ -1,8 +1,10 @@
 // import { BigCarousel } from '@renderer/components/carousel/big-carousel'
-import { Button } from '@renderer/components/ui/button'
-import { SmallCarousel, SmallCarouselProps } from '@renderer/modules/main/home/small-carousel'
-import { QueryErrorResetBoundary } from '@tanstack/react-query'
-import { ErrorBoundary } from 'react-error-boundary'
+import {
+  SmallCarousel,
+  SmallCarouselFallback,
+  SmallCarouselProps,
+} from '@renderer/modules/main/home/small-carousel'
+import { Suspense } from 'react'
 
 const config = [
   { href: '/anime', name: '动画', sectionPath: 'anime' },
@@ -21,26 +23,9 @@ export function Component() {
 
       {config.map((item) => (
         <section className="px-9" key={item.sectionPath}>
-          <QueryErrorResetBoundary>
-            {({ reset }) => (
-              <ErrorBoundary
-                onReset={reset}
-                onError={(error) => {
-                  console.error(error.message)
-                }}
-                fallbackRender={({ resetErrorBoundary }) => (
-                  <div className="flex h-52 w-full flex-col items-center justify-center gap-5 rounded-xl border-[1px] border-destructive">
-                    <div className="text-2xl">Ooops 出错了</div>
-                    <Button variant={'destructive'} onClick={() => resetErrorBoundary()}>
-                      再试一次
-                    </Button>
-                  </div>
-                )}
-              >
-                <SmallCarousel {...item} />
-              </ErrorBoundary>
-            )}
-          </QueryErrorResetBoundary>
+          <Suspense fallback={<SmallCarouselFallback {...item} />}>
+            <SmallCarousel {...item} />
+          </Suspense>
         </section>
       ))}
 

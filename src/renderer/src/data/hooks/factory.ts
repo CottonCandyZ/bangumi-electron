@@ -16,6 +16,7 @@ import {
   useMutation,
   useQuery,
   useQueryClient,
+  useSuspenseQuery,
 } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai'
 import { FetchError } from 'ofetch'
@@ -608,7 +609,7 @@ export const useDBQueriesOptionalAuth = <
 }
 
 export const useDBQueries = <
-  TApiParams,
+  TApiParams extends { id: number },
   TDbParams extends { ids?: number[] },
   TQueryFnReturn extends { last_update_at: Date; id: number },
 >({
@@ -619,17 +620,17 @@ export const useDBQueries = <
   updateDB,
   dbParams,
   dbStaleTime = DB_CONFIG.DEFAULT_STALE_TIME,
-  enabled = true,
+  // enabled = true,
   needKeepPreviousData = true,
   ...props
 }: {
   apiQueryFn: Fn<TApiParams, TQueryFnReturn>
-  apiParams: TApiParams
+  apiParams?: Omit<TApiParams, 'id'>
   dbQueryFn: Fn<TDbParams, TQueryFnReturn[]>
   dbParams: TDbParams
   updateDB: Fn<TQueryFnReturn[], void>
   dbStaleTime?: number
-  enabled?: boolean
+  // enabled?: boolean
   needKeepPreviousData?: boolean
 } & Omit<
   UseQueryOptions<(TQueryFnReturn | null)[], Error, (TQueryFnReturn | null)[], QueryKey>,
@@ -651,7 +652,9 @@ export const useDBQueries = <
     fetchArray: number[]
     dataMap: Map<number, TQueryFnReturn>
   }) => {
-    const res = await Promise.allSettled(fetchArray.map((id) => apiQueryFn({ id, ...apiParams })))
+    const res = await Promise.allSettled(
+      fetchArray.map((id) => apiQueryFn({ id, ...(apiParams || {}) } as TApiParams)),
+    )
     const errors = res.filter((v) => v.status === 'rejected').map((v) => v.reason)
     for (const e of errors) {
       if (e instanceof FetchError) {
@@ -739,7 +742,7 @@ export const useDBQueries = <
     return dbOrderedData
   }
 
-  const dbQuery = useQuery({
+  const dbQuery = useSuspenseQuery({
     queryKey: dbQueryKey,
     queryFn: async () => {
       const data = await dbQueryFn({ ...dbParams } as TDbParams)
@@ -747,7 +750,6 @@ export const useDBQueries = <
     },
     networkMode: 'offlineFirst',
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
-    enabled: enabled,
     persister: undefined,
     // staleTime: async (q) => {
     //   const data = await q.promise
@@ -767,7 +769,7 @@ export const useDBQueries = <
     // },
     // 暂时为了减少 bug，选择更加舒适的方案
     staleTime: dbStaleTime,
-    throwOnError: (e, query) => query.state.data === undefined && !(e instanceof AuthError),
+    // throwOnError: (e, query) => query.state.data === undefined && !(e instanceof AuthError),
     ...props,
   })
 

@@ -3,7 +3,7 @@ import {
   parseInfoBoxFromSubjectPage,
   parseTopListFromHTML as parseTrendsFromHTML,
 } from '@renderer/data/transformer/web'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import type { SectionPath } from '@renderer/data/types/web'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { useSession } from '@renderer/modules/wrapper/session-wrapper'
@@ -16,7 +16,7 @@ import { useSession } from '@renderer/modules/wrapper/session-wrapper'
  * @returns 关注的 SubjectId 和 关注人数 数组
  */
 export const useTopListQuery = (sectionPath: SectionPath) => {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: ['SectionTrends', sectionPath],
     queryFn: async () => await fetchTrends({ sectionPath }),
     select: parseTrendsFromHTML,
