@@ -5,10 +5,11 @@ import { refreshToken } from '@renderer/data/fetch/web/login'
 import { queryClient } from '@renderer/modules/wrapper/query'
 import { isRefreshingTokenAtom } from '@renderer/state/session'
 import { store } from '@renderer/state/utils'
-import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
 import { createSingletonPromise } from '@renderer/lib/utils/promise'
+import { useAuthSuspenseQuery } from '@renderer/data/hooks/factory'
 
 function logoutResetQuery() {
   queryClient.cancelQueries({ queryKey: ['authFetch'] })
@@ -159,8 +160,8 @@ export const useRefreshToken = () => {
 }
 
 export function useSessionQuery() {
-  return useSuspenseQuery({
-    queryKey: ['authFetch', 'userSession'],
+  return useAuthSuspenseQuery({
+    queryKey: ['userSession'],
     queryFn: async () => {
       const accessToken = await getAccessToken()
       if (!accessToken) return null
@@ -171,4 +172,8 @@ export function useSessionQuery() {
 
 export function useSession() {
   return useSessionQuery().data
+}
+
+export function getCurrentUserId() {
+  return localStorage.getItem('current_user_id')
 }

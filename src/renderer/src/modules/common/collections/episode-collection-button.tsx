@@ -1,10 +1,9 @@
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { useSession } from '@renderer/modules/wrapper/session-wrapper'
 import { EPISODE_COLLECTION_ACTION } from '@renderer/constant/collection'
 import {
   useMutationEpisodesCollectionBySubjectId,
-  useQueryCollectionEpisodesInfoBySubjectId,
+  useCollectionEpisodesInfoBySubjectIdQuery,
 } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
 import {
@@ -17,31 +16,32 @@ import { SubjectType } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { EPISODE_COLLECTION_ACTION_MAP, EPISODE_COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
+import { useSession } from '@renderer/data/hooks/session'
 
-export function EpisodeCollectionButton({
+type Props = {
+  index: number
+  subjectId: SubjectId
+  subjectType: SubjectType
+  setEnabledForm: (enabled: boolean) => void
+} & ModifyEpisodeCollectionOptType
+
+function EpisodeCollectionButtonContent({
   index,
   subjectId,
   subjectType,
   modifyEpisodeCollectionOpt,
   setEnabledForm,
-}: {
-  index: number
-  subjectType: SubjectType
-  subjectId: SubjectId
-  setEnabledForm: (enabled: boolean) => void
-} & ModifyEpisodeCollectionOptType) {
-  const { userInfo } = useSession()
-  const username = userInfo?.username
-  const collectionEpisodesQuery = useQueryCollectionEpisodesInfoBySubjectId({
+}: Props) {
+  const userInfo = useSession()
+  const collectionEpisodes = useCollectionEpisodesInfoBySubjectIdQuery({
     ...modifyEpisodeCollectionOpt,
     subjectId,
-    enabled: !!userInfo,
-  })
-  const collectionEpisodes = collectionEpisodesQuery.data
-  const episodes = collectionEpisodes?.data
+  }).data
+  const username = userInfo?.username
+  const episodes = collectionEpisodes.data
   const queryClient = useQueryClient()
   const episodeCollectionType = episodes?.[index].type
   const [hover, setHover] = useState<(typeof EPISODE_COLLECTION_ACTION)[number] | null>(
@@ -115,8 +115,8 @@ export function EpisodeCollectionButton({
       })
     },
   })
-  if (episodes === undefined || episodeCollectionType == undefined)
-    return <Skeleton className="h-9 w-52" />
+
+  if (!episodes || episodeCollectionType === undefined) return null
 
   return (
     <div className="flex h-9 flex-row gap-1">
@@ -182,5 +182,13 @@ export function EpisodeCollectionButton({
         </Button>
       )}
     </div>
+  )
+}
+
+export function EpisodeCollectionButton(props: Props) {
+  return (
+    <Suspense fallback={<Skeleton className="h-9 w-52" />}>
+      <EpisodeCollectionButtonContent {...props} />
+    </Suspense>
   )
 }

@@ -9,25 +9,25 @@ import { CollectionEpisodes } from '@renderer/data/types/collection'
 import { Episodes } from '@renderer/data/types/episode'
 import { cn } from '@renderer/lib/utils'
 import { getPageArrayFromTotal } from '@renderer/lib/utils/data-trans'
-import { UseQueryResult } from '@tanstack/react-query'
 
 export function PageSelector({
   episodes,
   setOffSet,
+  isPending,
   limit,
 }: {
-  episodes: UseQueryResult<Episodes | CollectionEpisodes, Error>
+  episodes: Episodes | CollectionEpisodes
   setOffSet: React.Dispatch<React.SetStateAction<number>>
+  isPending: boolean
   limit: number
 }) {
-  if (!episodes.data) return null
-  const selectArray = getPageArrayFromTotal(episodes.data.total)
+  const selectArray = getPageArrayFromTotal(episodes.total)
   return (
     selectArray.length !== 1 && (
       <Select onValueChange={(value) => setOffSet(Number(value))} defaultValue="0">
-        <SelectTrigger className={cn('w-min', episodes.isFetching && 'text-muted-foreground')}>
+        <SelectTrigger className={cn('w-min', isPending && 'text-muted-foreground')}>
           <div className="flex items-center gap-2">
-            {episodes.isFetching && <span className="i-mingcute-loading-line animate-spin" />}
+            {isPending && <span className="i-mingcute-loading-line animate-spin" />}
             <SelectValue />
           </div>
         </SelectTrigger>

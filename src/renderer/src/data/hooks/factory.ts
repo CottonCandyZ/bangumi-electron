@@ -1,5 +1,5 @@
 import { DB_CONFIG } from '@renderer/config'
-import { useAccessTokenQuery } from '@renderer/data/hooks/session'
+import { getCurrentUserId, useAccessTokenQuery } from '@renderer/data/hooks/session'
 import { AuthError } from '@renderer/lib/utils/error'
 import { isRefreshingTokenAtom } from '@renderer/state/session'
 import type {
@@ -9,6 +9,7 @@ import type {
   UseInfiniteQueryOptions,
   UseMutationOptions,
   UseQueryOptions,
+  UseSuspenseQueryOptions,
 } from '@tanstack/react-query'
 import {
   keepPreviousData,
@@ -37,6 +38,8 @@ type OptionalAPIQueriesProps<P> = keyof Omit<P, 'token' | 'id'> extends never
 type OptionalDBQueryProps<P> = keyof Omit<P, 'user_id'> extends never
   ? { dbParams?: Omit<P, 'user_id'> }
   : { dbParams: Omit<P, 'user_id'> }
+
+type SuspenseOptionalProps<P> = keyof P extends never ? { queryProps?: P } : { queryProps: P }
 
 /**
  * 为必须验证的 QueryHook 工厂
@@ -335,7 +338,7 @@ export const useDBQuery = <TApiParams, TDbParams, TQueryFnReturn extends { last_
   enabled?: boolean
   needKeepPreviousData?: boolean
 } & Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
-  const dbQueryKey = ['authFetch', ...queryKey, dbParams, localStorage.getItem('current_user_id')]
+  const dbQueryKey = ['authFetch', ...queryKey, dbParams, getCurrentUserId()]
   const queryClient = useQueryClient()
 
   const updateDBMutate = useMutation({
@@ -431,7 +434,7 @@ export const useQueriesOptionalAuth = <TApiParams, TQueryFnReturn extends { id: 
   return query
 }
 
-export const useDBSuspenseQuery = <
+export const useDBAuthSuspenseQuery = <
   TApiParams,
   TDbParams,
   TQueryFnReturn extends { last_update_at: Date },
@@ -443,7 +446,6 @@ export const useDBSuspenseQuery = <
   updateDB,
   dbParams,
   dbStaleTime = DB_CONFIG.DEFAULT_STALE_TIME,
-  needKeepPreviousData = true,
   ...props
 }: {
   apiQueryFn: Fn<TApiParams, TQueryFnReturn>
@@ -452,23 +454,16 @@ export const useDBSuspenseQuery = <
   dbParams: TDbParams
   updateDB: Fn<TQueryFnReturn, void>
   dbStaleTime?: number
-  needKeepPreviousData?: boolean
-} & Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
-  const dbQueryKey = ['authFetch', ...queryKey, dbParams, localStorage.getItem('current_user_id')]
+} & Omit<UseSuspenseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
+  const dbQueryKey = ['authFetch', ...queryKey, dbParams, getCurrentUserId()]
   const queryClient = useQueryClient()
 
-  const updateDBMutate = useMutation({
-    mutationFn: updateDB,
-  })
-
-  const update = async () => {
-    const apiData = await apiQueryFn(apiParams)
-    updateDBMutate.mutate(apiData)
-    return apiData
-  }
-
   const mutate = useMutation({
-    mutationFn: update,
+    mutationFn: async () => {
+      const apiData = await apiQueryFn(apiParams)
+      updateDB(apiData)
+      return apiData
+    },
     onSuccess: (data) => {
       queryClient.setQueryData(queryKey, data)
     },
@@ -489,7 +484,6 @@ export const useDBSuspenseQuery = <
   return useSuspenseQuery({
     queryKey: dbQueryKey,
     queryFn: fetchFromDB,
-    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     persister: undefined,
     // staleTime: async (q) => {
     //   const data = await q.promise
@@ -501,6 +495,23 @@ export const useDBSuspenseQuery = <
     staleTime: dbStaleTime,
     ...props,
   })
+}
+
+export const useAuthSuspenseQuery = <TApiParams, TQueryFnReturn, TData = TQueryFnReturn>({
+  queryKey = [],
+  queryFn,
+  queryProps,
+  ...props
+}: {
+  queryFn: Fn<TApiParams, TQueryFnReturn>
+} & SuspenseOptionalProps<TApiParams> &
+  Omit<UseSuspenseQueryOptions<TQueryFnReturn, Error, TData, QueryKey>, 'queryFn'>) => {
+  const query = useSuspenseQuery({
+    queryKey: ['authFetch', ...queryKey, queryProps, getCurrentUserId()],
+    queryFn: async () => await queryFn(queryProps as TApiParams),
+    ...props,
+  })
+  return query
 }
 
 export const useDBQueriesOptionalAuth = <
@@ -671,6 +682,7 @@ export const useDBQueriesOptionalAuth = <
   return dbQuery
 }
 
+// suspense
 export const useDBQueries = <
   TApiParams extends { id: number },
   TDbParams extends { ids?: number[] },
@@ -683,8 +695,6 @@ export const useDBQueries = <
   updateDB,
   dbParams,
   dbStaleTime = DB_CONFIG.DEFAULT_STALE_TIME,
-  // enabled = true,
-  needKeepPreviousData = true,
   ...props
 }: {
   apiQueryFn: Fn<TApiParams, TQueryFnReturn>
@@ -693,13 +703,11 @@ export const useDBQueries = <
   dbParams: TDbParams
   updateDB: Fn<TQueryFnReturn[], void>
   dbStaleTime?: number
-  // enabled?: boolean
-  needKeepPreviousData?: boolean
 } & Omit<
-  UseQueryOptions<(TQueryFnReturn | null)[], Error, (TQueryFnReturn | null)[], QueryKey>,
+  UseSuspenseQueryOptions<(TQueryFnReturn | null)[], Error, (TQueryFnReturn | null)[], QueryKey>,
   'queryFn'
 >) => {
-  const dbQueryKey = ['authFetch', ...queryKey, dbParams, localStorage.getItem('current_user_id')]
+  const dbQueryKey = ['authFetch', ...queryKey, dbParams, getCurrentUserId()]
   const queryClient = useQueryClient()
 
   const updateDBMutate = useMutation({
@@ -740,13 +748,9 @@ export const useDBQueries = <
       const data = dataMap.get(id) ?? null
       if (data) {
         // 提前设置部分 fetch 的 data
-        queryClient.setQueryData<TQueryFnReturn>(
-          [...queryKey, { id }, localStorage.getItem('current_user_id')],
-          data,
-          {
-            updatedAt: data.last_update_at.getTime(),
-          },
-        )
+        queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, getCurrentUserId()], data, {
+          updatedAt: data.last_update_at.getTime(),
+        })
         minimalTimestamp = Math.min(minimalTimestamp, data.last_update_at.getTime())
       }
       return data
@@ -781,14 +785,10 @@ export const useDBQueries = <
     const dbOrderedData = allIds.map((id) => {
       const data = dataMap.get(id) ?? null
       if (data)
-        queryClient.setQueryData<TQueryFnReturn>(
-          [...queryKey, { id }, localStorage.getItem('current_user_id')],
-          data,
-          {
-            //TODO: comment for debug
-            // updatedAt: data.last_update_at.getTime(),
-          },
-        )
+        queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, getCurrentUserId()], data, {
+          //TODO: comment for debug
+          // updatedAt: data.last_update_at.getTime(),
+        })
       return data
     })
 
@@ -811,7 +811,6 @@ export const useDBQueries = <
       return getData(data)
     },
     networkMode: 'offlineFirst',
-    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     persister: undefined,
     // staleTime: async (q) => {
     //   const data = await q.promise

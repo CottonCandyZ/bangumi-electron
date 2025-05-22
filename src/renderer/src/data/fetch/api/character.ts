@@ -1,26 +1,18 @@
-import { CHARACTERS, SUBJECTS, apiFetch } from '@renderer/data/fetch/config/'
-import { getAuthHeader } from '@renderer/data/fetch/utils'
+import { CHARACTERS, SUBJECTS, apiFetchWithAuth, apiFetch } from '@renderer/data/fetch/config/'
 import { CharacterId, SubjectId } from '@renderer/data/types/bgm'
 import { Character, CharacterDetail } from '@renderer/data/types/character'
-import { FetchParamError } from '@renderer/lib/utils/error'
 
 /**
  * 从 v0 获得 subject 相关的角色信息
  */
-export async function getSubjectCharactersById({ id, token }: { id?: SubjectId; token?: string }) {
-  if (!id) throw new FetchParamError('未获得 id')
-  const info = await apiFetch<Character[]>(SUBJECTS.CHARACTERS_BY_ID(id.toString()), {
-    headers: {
-      ...getAuthHeader(token),
-    },
-  })
-  return info
+export function getSubjectCharactersById({ id }: { id: SubjectId }) {
+  return apiFetchWithAuth<Character[]>(SUBJECTS.CHARACTERS_BY_ID(id.toString()))
 }
 
 /**
  * 从 v0 获得 Character 的详细信息
+ * 这个接口无需鉴权
  */
-export async function getCharacterDetailById({ id }: { id: CharacterId }) {
-  const info = await apiFetch<CharacterDetail>(CHARACTERS.BY_ID(id.toString()))
-  return info
+export function getCharacterDetailById({ id }: { id: CharacterId }) {
+  return apiFetch<CharacterDetail>(CHARACTERS.BY_ID(id.toString()))
 }

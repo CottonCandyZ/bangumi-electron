@@ -123,6 +123,7 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
         id: toastId.current,
         duration: 3000,
       })
+      queryClient.invalidateQueries({ queryKey: ['authFetch'] })
       queryClient.invalidateQueries({ queryKey: ['accessToken'] })
       success()
     },

@@ -43,13 +43,6 @@ export async function getSubjectByIdWithToken({ id }: { id: number }) {
 /**
  * 从 v0 获得 subject 相关的 subjects
  */
-export async function getRelatedSubjects({ id, token }: { id?: SubjectId; token?: string }) {
-  if (!id) throw new FetchParamError('未获得 id')
-
-  const info = await apiFetch<RelatedSubject[]>(SUBJECTS.RELATED_SUBJECT_BY_ID(id.toString()), {
-    headers: {
-      ...getAuthHeader(token),
-    },
-  })
-  return info
+export async function getRelatedSubjects({ id }: { id: SubjectId }) {
+  return await apiFetchWithAuth<RelatedSubject[]>(SUBJECTS.RELATED_SUBJECT_BY_ID(id.toString()))
 }

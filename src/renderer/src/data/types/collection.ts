@@ -21,7 +21,7 @@ export type CollectionData = {
 }
 
 export type CollectionEpisodes = {
-  data: CollectionEpisode[]
+  data: CollectionEpisode[] | null
 } & Pagination
 
 export type CollectionEpisode = {

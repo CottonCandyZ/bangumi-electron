@@ -27,7 +27,7 @@ export const userSession = sqliteTable('UserSession', {
   refresh_token: t.text().notNull(),
   expires_in: t.integer().notNull(),
   create_time: t
-    .integer({ mode: 'timestamp' })
+    .integer({ mode: 'timestamp_ms' })
     .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
 })

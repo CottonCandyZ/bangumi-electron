@@ -1,7 +1,7 @@
 import { Pagination } from '@renderer/data/types/bgm'
 
 export type Episodes = {
-  data: Episode[]
+  data: Episode[] | null
 } & Pagination
 
 export type Episode = {

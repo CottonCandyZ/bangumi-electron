@@ -6,9 +6,9 @@ import {
   ModifyEpisodeCollectionBySubjectId,
 } from '@renderer/data/fetch/api/collection'
 import {
+  useAuthSuspenseQuery,
   useInfinityQueryOptionalAuth,
   useMutationMustAuth,
-  useQueryMustAuth,
   useQueryOptionalAuth,
 } from '@renderer/data/hooks/factory'
 import { SubjectId } from '@renderer/data/types/bgm'
@@ -51,24 +51,22 @@ export const useInfinityQueryCollectionsByUsername = ({
     needKeepPreviousData,
   })
 
-export const useQueryCollectionEpisodesInfoBySubjectId = ({
+/** 用条目 ID 获得 章节收藏, must auth */
+export const useCollectionEpisodesInfoBySubjectIdQuery = ({
   subjectId,
   limit = 100,
   offset = 0,
   episodeType,
-  enabled,
 }: {
-  subjectId: SubjectId | undefined
+  subjectId: SubjectId
   limit?: number
   offset?: number
   episodeType?: EpisodeType
-  enabled?: boolean
 }) =>
-  useQueryMustAuth({
+  useAuthSuspenseQuery({
     queryFn: getEpisodesCollectionBySubjectId,
     queryKey: ['collection-episodes'],
     queryProps: { subjectId, limit, offset, episodeType },
-    enabled,
     staleTime: 0,
   })
 

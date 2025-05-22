@@ -5,7 +5,7 @@ import { CoverImages, InfoBox, SubjectType } from '@renderer/data/types/subject'
 
 export const subject = sqliteTable('Subject', {
   id: t.integer().primaryKey(),
-  date: t.integer({ mode: 'timestamp' }),
+  date: t.integer({ mode: 'timestamp_ms' }),
   platform: t.text().notNull(),
   name: t.text().notNull(),
   name_cn: t.text().notNull(),

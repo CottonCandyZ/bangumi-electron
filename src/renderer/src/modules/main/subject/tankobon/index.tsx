@@ -2,20 +2,24 @@ import { TooltipArrow } from '@radix-ui/react-tooltip'
 import { Image } from '@renderer/components/image/image'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
-import { useQueryRelatedSubjects } from '@renderer/data/hooks/api/subject'
+import { useRelatedSubjectsQuery } from '@renderer/data/hooks/api/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { RelatedSubject } from '@renderer/data/types/subject'
 import { isEmpty } from '@renderer/lib/utils/string'
+import { Suspense } from 'react'
 import { Link, unstable_useViewTransitionState, useLocation } from 'react-router-dom'
 
-export function Tankobon({ subjectId }: { subjectId: SubjectId }) {
-  const relatedSubjectsQuery = useQueryRelatedSubjects({
+interface Props {
+  subjectId: SubjectId
+}
+
+function TankobonContent({ subjectId }: Props) {
+  /** 由于 API 给单行版的列表现在是在关联条目里面，所以 */
+  const relatedSubjects = useRelatedSubjectsQuery({
     id: subjectId,
     needKeepPreviousData: false,
-  })
-  const relatedSubjects = relatedSubjectsQuery.data
+  }).data
   const tankobon = relatedSubjects?.get('单行本')
-  if (!relatedSubjects) return <TankobonSkeleton num={5} />
   if (tankobon === undefined) return null
 
   return (
@@ -72,5 +76,14 @@ function TankobonSkeleton({ num }: { num: number }) {
           ))}
       </div>
     </div>
+  )
+}
+
+/** 单行本列表 */
+export function Tankobon(props: Props) {
+  return (
+    <Suspense fallback={<TankobonSkeleton num={5} />}>
+      <TankobonContent {...props} />
+    </Suspense>
   )
 }

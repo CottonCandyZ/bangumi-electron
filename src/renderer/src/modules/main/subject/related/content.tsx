@@ -5,7 +5,7 @@ import { Item } from '@renderer/modules/main/subject/related/item'
 import { useState } from 'react'
 import { Fragment } from 'react/jsx-runtime'
 
-export function RelatedSubjectsContent({
+export function RelatedSubjectsGrid({
   relatedSubjects,
   filter,
 }: {

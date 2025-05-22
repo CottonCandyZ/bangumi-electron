@@ -1,4 +1,4 @@
-import { apiFetch, COLLECTIONS } from '@renderer/data/fetch/config/'
+import { apiFetch, apiFetchWithAuth, COLLECTIONS } from '@renderer/data/fetch/config/'
 import { getAuthHeader } from '@renderer/data/fetch/utils'
 import { UserInfo } from '@renderer/data/types/user'
 import { FetchParamError } from '@renderer/lib/utils/error'
@@ -46,32 +46,24 @@ export async function getSubjectCollectionsByUsername({
 }
 
 /** 用条目 ID 和 token 获得 章节收藏 */
-export async function getEpisodesCollectionBySubjectId({
+export function getEpisodesCollectionBySubjectId({
   subjectId,
   limit,
   offset,
   episodeType,
-  token,
 }: {
-  subjectId: SubjectId | undefined
+  subjectId: SubjectId
   limit?: number
   offset?: number
   episodeType?: EpisodeType
-  token: string
 }) {
-  if (!subjectId) throw new FetchParamError('未获得 id')
-
-  const info = await apiFetch<CollectionEpisodes>(COLLECTIONS.EPISODES_BY_SUBJECT_ID(subjectId), {
+  return apiFetchWithAuth<CollectionEpisodes>(COLLECTIONS.EPISODES_BY_SUBJECT_ID(subjectId), {
     query: {
       limit,
       offset,
       episode_type: episodeType,
     },
-    headers: {
-      ...getAuthHeader(token),
-    },
   })
-  return info
 }
 
 /** 用条目 ID 和 用户名获得 条目收藏 */
