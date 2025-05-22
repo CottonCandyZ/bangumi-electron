@@ -58,7 +58,7 @@ export function SubjectCharactersSkeleton() {
 
 export function SubjectCharacters(props: Props) {
   return (
-    <Suspense fallback={<SubjectCharactersSkeleton />}>
+    <Suspense fallback={<SubjectCharactersSkeleton />} key={props.subjectId}>
       <SubjectCharactersContent {...props} />
     </Suspense>
   )

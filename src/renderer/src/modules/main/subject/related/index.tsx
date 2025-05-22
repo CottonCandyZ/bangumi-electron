@@ -14,7 +14,6 @@ interface Props {
 export function RelatedSubjectsContent({ subjectId }: Props) {
   const relatedSubjects = useRelatedSubjectsQuery({
     id: subjectId,
-    needKeepPreviousData: false,
   }).data
   // 书籍处理特殊化
   relatedSubjects.delete('单行本')
@@ -60,8 +59,8 @@ export function RelatedGridSkeleton() {
 
 export function RelatedSubjects(props: Props) {
   return (
-    <Suspense fallback={<RelatedGridSkeleton />}>
-      <RelatedSubjectsContent {...props} />
+    <Suspense key={props.subjectId} fallback={<RelatedGridSkeleton />}>
+      <RelatedSubjectsContent subjectId={props.subjectId} />
     </Suspense>
   )
 }

@@ -46,17 +46,10 @@ export const useSubjectsInfoAPIQuery = ({
     needKeepPreviousData,
   })
 
-export const useRelatedSubjectsQuery = ({
-  id,
-  needKeepPreviousData,
-}: {
-  id: SubjectId
-  needKeepPreviousData?: boolean
-}) =>
+export const useRelatedSubjectsQuery = ({ id }: { id: SubjectId }) =>
   useAuthSuspenseQuery({
     queryFn: getRelatedSubjects,
     queryKey: ['subject-related'],
     queryProps: { id },
     select: sortCharacterByRelation(),
-    needKeepPreviousData,
   })

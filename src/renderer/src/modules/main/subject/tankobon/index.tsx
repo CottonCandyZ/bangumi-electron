@@ -17,7 +17,6 @@ function TankobonContent({ subjectId }: Props) {
   /** 由于 API 给单行版的列表现在是在关联条目里面，所以 */
   const relatedSubjects = useRelatedSubjectsQuery({
     id: subjectId,
-    needKeepPreviousData: false,
   }).data
   const tankobon = relatedSubjects?.get('单行本')
   if (tankobon === undefined) return null
@@ -82,7 +81,7 @@ function TankobonSkeleton({ num }: { num: number }) {
 /** 单行本列表 */
 export function Tankobon(props: Props) {
   return (
-    <Suspense fallback={<TankobonSkeleton num={5} />}>
+    <Suspense fallback={<TankobonSkeleton num={5} />} key={props.subjectId}>
       <TankobonContent {...props} />
     </Suspense>
   )

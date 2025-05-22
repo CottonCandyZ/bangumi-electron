@@ -239,7 +239,10 @@ function EpisodesSkeleton({
 
 export function EpisodesGrid(props: EpisodesGridProps) {
   return (
-    <Suspense fallback={<EpisodesSkeleton skeletonNumber={props.eps || 12} size={props.size} />}>
+    <Suspense
+      fallback={<EpisodesSkeleton skeletonNumber={props.eps || 12} size={props.size} />}
+      key={props.subjectId}
+    >
       <EpisodesGridContent {...props} />
     </Suspense>
   )

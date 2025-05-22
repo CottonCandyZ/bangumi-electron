@@ -39,7 +39,7 @@ type OptionalDBQueryProps<P> = keyof Omit<P, 'user_id'> extends never
   ? { dbParams?: Omit<P, 'user_id'> }
   : { dbParams: Omit<P, 'user_id'> }
 
-type SuspenseOptionalProps<P> = keyof P extends never ? { queryProps?: P } : { queryProps: P }
+type NoTokenOptionalProps<P> = keyof P extends never ? { queryProps?: P } : { queryProps: P }
 
 /**
  * 为必须验证的 QueryHook 工厂
@@ -504,11 +504,37 @@ export const useAuthSuspenseQuery = <TApiParams, TQueryFnReturn, TData = TQueryF
   ...props
 }: {
   queryFn: Fn<TApiParams, TQueryFnReturn>
-} & SuspenseOptionalProps<TApiParams> &
+} & NoTokenOptionalProps<TApiParams> &
   Omit<UseSuspenseQueryOptions<TQueryFnReturn, Error, TData, QueryKey>, 'queryFn'>) => {
   const query = useSuspenseQuery({
     queryKey: ['authFetch', ...queryKey, queryProps],
     queryFn: async () => await queryFn(queryProps as TApiParams),
+    ...props,
+  })
+  return query
+}
+
+export const useAuthQuery = <TApiParams, TQueryFnReturn, TData = TQueryFnReturn>({
+  queryKey = [],
+  queryFn,
+  queryProps,
+  enabled = true,
+  needKeepPreviousData = true,
+  ...props
+}: {
+  queryFn: Fn<TApiParams, TQueryFnReturn>
+  enabled?: boolean
+  needKeepPreviousData?: boolean
+} & NoTokenOptionalProps<TApiParams> &
+  Omit<
+    UseQueryOptions<TQueryFnReturn, Error, TData, QueryKey>,
+    'queryFn' | 'enabled' | 'placeholderData'
+  >) => {
+  const query = useQuery({
+    queryKey: ['authFetch', ...queryKey, queryProps],
+    queryFn: async () => await queryFn(queryProps as TApiParams),
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
+    enabled,
     ...props,
   })
   return query
