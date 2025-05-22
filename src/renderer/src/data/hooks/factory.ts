@@ -926,3 +926,6 @@ export const useQueryKeyWithAccessToken = (queryKey: QueryKey) => {
   const { data: accessToken } = useAccessTokenQuery()
   return ['authFetch', ...queryKey, accessToken?.access_token]
 }
+export const createQueryKeyWithUserId = (queryKey: QueryKey) => {
+  return ['authFetch', ...queryKey, getCurrentUserId()]
+}
