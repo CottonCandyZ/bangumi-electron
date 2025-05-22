@@ -18,7 +18,7 @@ import { EPISODE_COLLECTION_ACTION_MAP, EPISODE_COLLECTION_TYPE_MAP } from '@ren
 import { useQueryClient } from '@tanstack/react-query'
 import { Suspense, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { createQueryKeyWithUserId, useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
+import { useQueryKeyWithUserId, useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
 import { useSession } from '@renderer/data/hooks/session'
 
 type Props = {
@@ -52,7 +52,7 @@ function EpisodeCollectionButtonContent({
       episodeCollectionType ? (EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null) : null,
     )
   }, [episodeCollectionType])
-  const queryKey = createQueryKeyWithUserId([
+  const queryKey = useQueryKeyWithUserId([
     'collection-episodes',
     {
       subjectId,

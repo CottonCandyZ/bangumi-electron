@@ -3,7 +3,7 @@ import { readAccessToken } from '@renderer/data/fetch/db/user'
 import { isAccessTokenValid, logout, getAccessToken } from '@renderer/data/fetch/session'
 import { refreshToken } from '@renderer/data/fetch/web/login'
 import { queryClient } from '@renderer/modules/wrapper/query'
-import { isRefreshingTokenAtom } from '@renderer/state/session'
+import { isRefreshingTokenAtom, userIdAtom } from '@renderer/state/session'
 import { store } from '@renderer/state/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
@@ -12,10 +12,9 @@ import { createSingletonPromise } from '@renderer/lib/utils/promise'
 import { useAuthSuspenseQuery } from '@renderer/data/hooks/factory'
 
 function logoutResetQuery() {
-  queryClient.cancelQueries({ queryKey: ['authFetch'] })
+  // queryClient.cancelQueries({ queryKey: ['authFetch'] })
   queryClient.setQueryData(['accessToken'], null)
   queryClient.invalidateQueries({ queryKey: ['accessToken'] })
-  queryClient.invalidateQueries({ queryKey: ['authFetch'] })
 }
 
 /**
@@ -48,7 +47,7 @@ export async function logoutAndRefresh() {
  */
 export async function safeLogout(options?: { showToast?: boolean }) {
   // Get current user ID to check if we're already logged in
-  const currentUserId = localStorage.getItem('current_user_id')
+  const currentUserId = store.get(userIdAtom)
 
   // Only proceed with logout if user is currently logged in
   if (!currentUserId) return
@@ -79,7 +78,7 @@ export const useAccessTokenQuery = () => {
   return useQuery({
     queryKey: ['accessToken'],
     queryFn: async () => {
-      const user_id = localStorage.getItem('current_user_id')
+      const user_id = store.get(userIdAtom)
       // 没有 user_id，说明没有登录
       if (!user_id) return null
       const data = await readAccessToken({ user_id: Number(user_id) })
@@ -172,8 +171,4 @@ export function useSessionQuery() {
 
 export function useSession() {
   return useSessionQuery().data
-}
-
-export function getCurrentUserId() {
-  return localStorage.getItem('current_user_id')
 }

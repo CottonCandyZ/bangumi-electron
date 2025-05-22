@@ -4,7 +4,9 @@ import { client } from '@renderer/lib/client'
 import { readAccessToken } from './db/user'
 import { refreshToken } from '@renderer/data/fetch/web/login'
 import { createPromiseCache } from '@renderer/lib/utils/promise'
-import { getCurrentUserId, safeLogout } from '@renderer/data/hooks/session'
+import { safeLogout } from '@renderer/data/hooks/session'
+import { store } from '@renderer/state/utils'
+import { userIdAtom } from '@renderer/state/session'
 
 // 这里是用来验证相关 session 的地方，如果可能也会刷新 Session
 
@@ -49,7 +51,7 @@ export async function logout() {
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_sec_id' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_cookietime' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_auth' })
-  localStorage.removeItem('current_user_id')
+  store.set(userIdAtom, null)
 }
 
 // token cache
@@ -77,7 +79,7 @@ export async function safeRefreshToken(token: Token): Promise<Token & { create_t
 
 /** 获得当前的 AccessToken，没登录时返回 null */
 export async function getAccessToken() {
-  const user_id = getCurrentUserId()
+  const user_id = store.get(userIdAtom)
   if (!user_id) return null
   // 从缓存中读取，如果未过期，直接返回
   if (
