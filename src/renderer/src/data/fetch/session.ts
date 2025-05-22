@@ -4,7 +4,7 @@ import { client } from '@renderer/lib/client'
 import { readAccessToken } from './db/user'
 import { refreshToken } from '@renderer/data/fetch/web/login'
 import { createPromiseCache } from '@renderer/lib/utils/promise'
-import { safeLogout } from '@renderer/data/hooks/session'
+import { getCurrentUserId, safeLogout } from '@renderer/data/hooks/session'
 
 // 这里是用来验证相关 session 的地方，如果可能也会刷新 Session
 
@@ -77,7 +77,7 @@ export async function safeRefreshToken(token: Token): Promise<Token & { create_t
 
 /** 获得当前的 AccessToken，没登录时返回 null */
 export async function getAccessToken() {
-  const user_id = localStorage.getItem('current_user_id')
+  const user_id = getCurrentUserId()
   if (!user_id) return null
   // 从缓存中读取，如果未过期，直接返回
   if (

@@ -1,5 +1,5 @@
 import { DB_CONFIG } from '@renderer/config'
-import { getCurrentUserId, useAccessTokenQuery } from '@renderer/data/hooks/session'
+import { useAccessTokenQuery } from '@renderer/data/hooks/session'
 import { AuthError } from '@renderer/lib/utils/error'
 import { isRefreshingTokenAtom } from '@renderer/state/session'
 import type {
@@ -338,7 +338,7 @@ export const useDBQuery = <TApiParams, TDbParams, TQueryFnReturn extends { last_
   enabled?: boolean
   needKeepPreviousData?: boolean
 } & Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
-  const dbQueryKey = ['authFetch', ...queryKey, dbParams, getCurrentUserId()]
+  const dbQueryKey = ['authFetch', ...queryKey, dbParams]
   const queryClient = useQueryClient()
 
   const updateDBMutate = useMutation({
@@ -455,7 +455,7 @@ export const useDBAuthSuspenseQuery = <
   updateDB: Fn<TQueryFnReturn, void>
   dbStaleTime?: number
 } & Omit<UseSuspenseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
-  const dbQueryKey = ['authFetch', ...queryKey, dbParams, getCurrentUserId()]
+  const dbQueryKey = ['authFetch', ...queryKey, dbParams]
   const queryClient = useQueryClient()
 
   const mutate = useMutation({
@@ -507,7 +507,7 @@ export const useAuthSuspenseQuery = <TApiParams, TQueryFnReturn, TData = TQueryF
 } & SuspenseOptionalProps<TApiParams> &
   Omit<UseSuspenseQueryOptions<TQueryFnReturn, Error, TData, QueryKey>, 'queryFn'>) => {
   const query = useSuspenseQuery({
-    queryKey: ['authFetch', ...queryKey, queryProps, getCurrentUserId()],
+    queryKey: ['authFetch', ...queryKey, queryProps],
     queryFn: async () => await queryFn(queryProps as TApiParams),
     ...props,
   })
@@ -707,7 +707,7 @@ export const useDBQueries = <
   UseSuspenseQueryOptions<(TQueryFnReturn | null)[], Error, (TQueryFnReturn | null)[], QueryKey>,
   'queryFn'
 >) => {
-  const dbQueryKey = ['authFetch', ...queryKey, dbParams, getCurrentUserId()]
+  const dbQueryKey = ['authFetch', ...queryKey, dbParams]
   const queryClient = useQueryClient()
 
   const updateDBMutate = useMutation({
@@ -748,7 +748,7 @@ export const useDBQueries = <
       const data = dataMap.get(id) ?? null
       if (data) {
         // 提前设置部分 fetch 的 data
-        queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, getCurrentUserId()], data, {
+        queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }], data, {
           updatedAt: data.last_update_at.getTime(),
         })
         minimalTimestamp = Math.min(minimalTimestamp, data.last_update_at.getTime())
@@ -785,7 +785,7 @@ export const useDBQueries = <
     const dbOrderedData = allIds.map((id) => {
       const data = dataMap.get(id) ?? null
       if (data)
-        queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, getCurrentUserId()], data, {
+        queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }], data, {
           //TODO: comment for debug
           // updatedAt: data.last_update_at.getTime(),
         })
@@ -927,5 +927,5 @@ export const useQueryKeyWithAccessToken = (queryKey: QueryKey) => {
   return ['authFetch', ...queryKey, accessToken?.access_token]
 }
 export const createQueryKeyWithUserId = (queryKey: QueryKey) => {
-  return ['authFetch', ...queryKey, getCurrentUserId()]
+  return ['authFetch', ...queryKey]
 }

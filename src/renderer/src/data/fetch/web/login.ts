@@ -191,7 +191,10 @@ export async function getOAuthAccessToken() {
  */
 export async function save() {
   if (!store.accessToken) throw new LoginError('尚未获得 accessToken')
-  await insertAccessToken(store.accessToken)
+  await insertAccessToken({
+    ...store.accessToken,
+    expires_in: store.accessToken.expires_in * 1000,
+  })
   if (!store.loginInfo || !store.loginInfo.id) throw new LoginError('尚未获得账户密码')
   const info = store.loginInfo as LoginInfo
   await insertLoginInfo(info)
