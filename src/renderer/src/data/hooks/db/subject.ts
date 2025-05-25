@@ -33,10 +33,8 @@ export const useSubjectInfoQuery = ({
 
 export const useSubjectsInfoQuery = ({
   subjectIds: ids,
-  needKeepPreviousData,
 }: {
   subjectIds: SubjectId[] | undefined
-  needKeepPreviousData?: boolean
 }) =>
   useDBQueries({
     apiQueryFn: getSubjectByIdWithToken,
@@ -44,5 +42,4 @@ export const useSubjectsInfoQuery = ({
     dbParams: { ids: ids?.map((id) => Number(id)) },
     queryKey: ['subject-info'],
     updateDB: insertSubjectsInfo,
-    needKeepPreviousData,
   })

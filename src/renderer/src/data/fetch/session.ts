@@ -84,18 +84,20 @@ export async function getAccessToken() {
   // 从缓存中读取，如果未过期，直接返回
   if (
     accessTokenCache?.user_id === Number(user_id) &&
-    accessTokenCache.expires_in + accessTokenCache.create_time.getTime() > new Date().getTime()
+    accessTokenCache.expires_in * 1000 + accessTokenCache.create_time.getTime() >
+      new Date().getTime()
   ) {
     return accessTokenCache
   }
   const token = await readAccessToken({ user_id: Number(user_id) })
   // 判断过期
-  if (token && token.expires_in + token.create_time.getTime() < new Date().getTime()) {
+  if (token && token.expires_in * 1000 + token.create_time.getTime() < new Date().getTime()) {
     // refresh token using the safe refresh function
     try {
       accessTokenCache = await safeRefreshToken(token)
-    } catch {
-      await safeLogout()
+    } catch (e) {
+      console.error('刷新 Token 失败，自动登出', e)
+      await safeLogout({ showToast: true })
       return null
     }
     return accessTokenCache
