@@ -86,8 +86,8 @@ export async function webLogin({ email, password, captcha, savePassword }: webLo
     },
     body: new URLSearchParams({
       formhash: store.formHash,
-      referer: '',
-      dreferer: '',
+      referer: 'https://bgm.tv/',
+      dreferer: 'https://bgm.tv/',
       email,
       password,
       captcha_challenge_field: captcha,
