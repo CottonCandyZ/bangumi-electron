@@ -17,7 +17,7 @@ import { useAtomValue } from 'jotai'
 import { ChevronRight } from 'lucide-react'
 import { Suspense, useEffect, useState } from 'react'
 import { useTopListQuery } from '@renderer/data/hooks/web/subject'
-import { useSubjectsInfoQuery } from '@renderer/data/hooks/db/subject'
+import { useSuspenseSubjectsInfoQuery } from '@renderer/data/hooks/db/subject'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 
 export type SmallCarouselProps = {
@@ -31,7 +31,7 @@ function SmallCarouselContent({ href, name, sectionPath }: SmallCarouselProps) {
   const subjectIds = topList.data
     ?.map((item) => item.SubjectId)
     .filter((item) => item !== undefined)
-  const subjectsInfo = useSubjectsInfoQuery({ subjectIds: subjectIds }).data
+  const subjectsInfo = useSuspenseSubjectsInfoQuery({ subjectIds: subjectIds }).data
 
   const currentSectionPath = useAtomValue(activeSectionAtom)
   const [api, setApi] = useState<CarouselApi>()

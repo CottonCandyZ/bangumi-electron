@@ -5,7 +5,7 @@ import {
   readSubjectInfoById,
   readSubjectsInfoByIds,
 } from '@renderer/data/fetch/db/subject'
-import { useDBQueries, useDBQuery } from '@renderer/data/hooks/factory'
+import { useSuspenseDBQueries, useDBQuery } from '@renderer/data/hooks/factory'
 import { SubjectId } from '@renderer/data/types/bgm'
 
 /**
@@ -31,12 +31,12 @@ export const useSubjectInfoQuery = ({
     needKeepPreviousData,
   })
 
-export const useSubjectsInfoQuery = ({
+export const useSuspenseSubjectsInfoQuery = ({
   subjectIds: ids,
 }: {
   subjectIds: SubjectId[] | undefined
 }) =>
-  useDBQueries({
+  useSuspenseDBQueries({
     apiQueryFn: getSubjectByIdWithToken,
     dbQueryFn: readSubjectsInfoByIds,
     dbParams: { ids: ids?.map((id) => Number(id)) },

@@ -687,7 +687,7 @@ export const useDBQueriesOptionalAuth = <
 }
 
 // suspense
-export const useDBQueries = <
+export const useSuspenseDBQueries = <
   TApiParams extends { id: number },
   TDbParams extends { ids?: number[] },
   TQueryFnReturn extends { last_update_at: Date; id: number },
