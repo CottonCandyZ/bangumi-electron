@@ -17,8 +17,8 @@ session.defaultSession.webRequest.onHeadersReceived(
   (details, callback) => {
     details.responseHeaders!['Access-Control-Allow-Origin'] = ['http://localhost:5173']
     details.responseHeaders!['Access-Control-Allow-Credentials'] = ['true']
-    if (details.responseHeaders!['set-cookie']) {
-      details.responseHeaders!['set-cookie'] = details.responseHeaders!['set-cookie'].map(
+    if (details.responseHeaders!['set-cookie'] || details.responseHeaders!['Set-Cookie']) {
+      details.responseHeaders!['Set-Cookie'] = details.responseHeaders!['Set-Cookie'].map(
         (item) => {
           if (item.includes('chii_auth')) item += '; Max-Age=7776000'
           return (item += '; SameSite=None; Secure')
