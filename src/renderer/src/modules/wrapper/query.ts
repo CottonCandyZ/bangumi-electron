@@ -1,13 +1,10 @@
-import { useRefreshToken } from '@renderer/data/hooks/session'
 import { newIdbStorage } from '@renderer/lib/persister'
-import { AuthCode, AuthError } from '@renderer/lib/utils/error'
-import { QueryCache, QueryClient, useQueryClient } from '@tanstack/react-query'
+import { QueryCache, QueryClient } from '@tanstack/react-query'
 import {
   experimental_createPersister,
   type PersistedQuery,
 } from '@tanstack/react-query-persist-client'
 import { createStore } from 'idb-keyval'
-import { useEffect } from 'react'
 import { toast } from 'sonner'
 
 export const queryClient = new QueryClient({
@@ -54,34 +51,3 @@ export const queryClient = new QueryClient({
     },
   },
 })
-
-export const useIsUnauthorized = () => {
-  const client = useQueryClient()
-  const refresh = useRefreshToken()
-  useEffect(() => {
-    const unsubscribe = client.getQueryCache().subscribe(async (e) => {
-      if (
-        e.type === 'updated' &&
-        e.action.type === 'error' &&
-        e.action.error instanceof AuthError &&
-        e.action.error.code === AuthCode.EXPIRE
-      ) {
-        //FIXME: need to remove
-        console.error(e.action.error)
-        refresh()
-      }
-    })
-    return () => unsubscribe()
-  }, [client, refresh])
-  useEffect(() => {
-    const unsubscribe = client.getMutationCache().subscribe(async (e) => {
-      if (
-        e.mutation?.state.error instanceof AuthError &&
-        e.mutation.state.error.code === AuthCode.EXPIRE
-      ) {
-        refresh()
-      }
-    })
-    return () => unsubscribe()
-  }, [client, refresh])
-}

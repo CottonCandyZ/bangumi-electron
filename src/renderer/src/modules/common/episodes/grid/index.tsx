@@ -7,7 +7,7 @@ import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionType } from '@renderer/data/types/collection'
 import { cn } from '@renderer/lib/utils'
 import { PropsWithChildren, Suspense, useDeferredValue, useState, useTransition } from 'react'
-import { useSession } from '@renderer/data/hooks/session'
+import { useSessionSuspense } from '@renderer/data/hooks/session'
 
 export type EpisodeGridSize = {
   size?: 'small' | 'default'
@@ -27,7 +27,7 @@ function EpisodesGridContent({
   selector = true,
   collectionType,
 }: EpisodesGridProps) {
-  const userInfo = useSession()
+  const userInfo = useSessionSuspense()
   const [offset, setOffSet] = useState(0)
   const deferredOffset = useDeferredValue(offset)
   const [isPending, startTransition] = useTransition()

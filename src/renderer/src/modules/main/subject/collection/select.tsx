@@ -1,6 +1,6 @@
 import { SubjectCollectionSelectorContent } from '@renderer/modules/common/collections/subject-select-content'
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
-import { useSession } from '@renderer/modules/wrapper/session-wrapper'
+import { useSession } from '@renderer/data/hooks/session'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
@@ -14,7 +14,7 @@ export function SubjectCollectionSelector({
   subjectCollection: CollectionData
 }) {
   const queryClient = useQueryClient()
-  const { userInfo } = useSession()
+  const userInfo = useSession()
   const username = userInfo?.username
   const queryKey = useQueryKeyWithAccessToken([
     'collection-subject',

@@ -1,6 +1,4 @@
-import { getUserInfo } from '@renderer/data/fetch/api/user'
-import { insertUserInfo, readLoginInfo, readUserInfo } from '@renderer/data/fetch/db/user'
-import { useDBQueryMustAuth } from '@renderer/data/hooks/factory'
+import { readLoginInfo } from '@renderer/data/fetch/db/user'
 import { useQuery } from '@tanstack/react-query'
 
 export function useLocalLoginInfoQuery() {
@@ -9,14 +7,5 @@ export function useLocalLoginInfoQuery() {
     queryFn: readLoginInfo,
     staleTime: 0,
     persister: undefined,
-  })
-}
-
-export function useUserInfoQuery() {
-  return useDBQueryMustAuth({
-    queryKey: ['userInfo'],
-    apiQueryFn: getUserInfo,
-    dbQueryFn: readUserInfo,
-    updateDB: insertUserInfo,
   })
 }

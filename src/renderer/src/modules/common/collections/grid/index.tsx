@@ -8,7 +8,7 @@ import { gridCache } from '@renderer/state/global-var'
 import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
 import { useSetAtom } from 'jotai'
 import { useEffect, useMemo, useRef } from 'react'
-import { useSession } from '@renderer/modules/wrapper/session-wrapper'
+import { useSession } from '@renderer/data/hooks/session'
 
 export function CollectionsGrid({
   collectionType,
@@ -17,7 +17,7 @@ export function CollectionsGrid({
   collectionType: CollectionType
   subjectType: SubjectType
 }) {
-  const { userInfo } = useSession()
+  const userInfo = useSession()
   const collectionsQuery = useInfinityQueryCollectionsByUsername({
     username: userInfo?.username,
     collectionType: collectionType,

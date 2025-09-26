@@ -1,5 +1,5 @@
 import { RateButtons } from '@renderer/modules/common/collections/rate'
-import { useSession } from '@renderer/modules/wrapper/session-wrapper'
+import { useSession } from '@renderer/data/hooks/session'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'
 import { useQueryClient } from '@tanstack/react-query'
@@ -8,7 +8,7 @@ import { useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
 
 export function QuickRate({ subjectCollection }: { subjectCollection: CollectionData }) {
   const queryClient = useQueryClient()
-  const { userInfo } = useSession()
+  const userInfo = useSession()
   const username = userInfo?.username
   const queryKey = useQueryKeyWithAccessToken([
     'collection-subject',

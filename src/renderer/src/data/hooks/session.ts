@@ -1,21 +1,13 @@
 import { getUserInfoWithAuth } from '@renderer/data/fetch/api/user'
 import { readAccessToken } from '@renderer/data/fetch/db/user'
-import { isAccessTokenValid, logout, getAccessToken } from '@renderer/data/fetch/session'
-import { refreshToken } from '@renderer/data/fetch/web/login'
-import { queryClient } from '@renderer/modules/wrapper/query'
-import { isRefreshingTokenAtom, userIdAtom } from '@renderer/state/session'
+import { logout, getAccessToken } from '@renderer/data/fetch/session'
+import { userIdAtom } from '@renderer/state/session'
 import { store } from '@renderer/state/utils'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCallback } from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { useAtomValue } from 'jotai'
 import { toast } from 'sonner'
 import { createSingletonPromise } from '@renderer/lib/utils/promise'
 import { useAuthSuspenseQuery } from '@renderer/data/hooks/factory'
-
-function logoutResetQuery() {
-  // queryClient.cancelQueries({ queryKey: ['authFetch'] })
-  queryClient.setQueryData(['accessToken'], null)
-  queryClient.invalidateQueries({ queryKey: ['accessToken'] })
-}
 
 /**
  * Logout 的 Mutate
@@ -24,22 +16,11 @@ export const useLogoutMutation = () => {
   return useMutation({
     mutationKey: ['session'],
     mutationFn: logout,
-    onSuccess: () => {
-      logoutResetQuery()
-    },
   })
 }
 
 // Create a singleton promise for logout operations
 const logoutSingleton = createSingletonPromise<void>()
-
-/**
- * Regular logout function - performs the actual logout operations
- */
-export async function logoutAndRefresh() {
-  await logout()
-  logoutResetQuery()
-}
 
 /**
  * Safe logout function that ensures only one logout operation happens at a time
@@ -64,7 +45,7 @@ export async function safeLogout(options?: { showToast?: boolean }) {
 
   // Use the singleton promise to ensure only one logout happens
   // All concurrent callers will await the same promise
-  return logoutSingleton.runOrAwait(() => logoutAndRefresh())
+  return logoutSingleton.runOrAwait(() => logout())
 }
 
 /**
@@ -75,13 +56,13 @@ export async function safeLogout(options?: { showToast?: boolean }) {
 export const useAccessTokenQuery = () => {
   // const refreshToken = useRefreshTokenMutation()
   // const logout = useLogoutMutation()
+  const userId = useAtomValue(userIdAtom)
   return useQuery({
-    queryKey: ['accessToken'],
+    queryKey: ['accessToken', userId],
     queryFn: async () => {
-      const user_id = store.get(userIdAtom)
       // 没有 user_id，说明没有登录
-      if (!user_id) return null
-      const data = await readAccessToken({ user_id: Number(user_id) })
+      if (!userId) return null
+      const data = await readAccessToken({ user_id: Number(userId) })
       // 没有 token，说明没有登录
       if (!data) return null
       // 没有 Web 登录，说明没有登录
@@ -103,70 +84,32 @@ export const useAccessTokenQuery = () => {
   })
 }
 
-export const useRefreshTokenMutation = () => {
-  const logoutMutation = useLogoutMutation()
-  return useMutation({
-    mutationFn: refreshToken,
-    onError() {
-      logoutMutation.mutate()
-    },
-  })
-}
-
-export const useRefreshToken = () => {
-  const client = useQueryClient()
-  const refreshMutation = useRefreshTokenMutation()
-  const resetAccessToken = useCallback(
-    (data?: ReturnType<typeof useAccessTokenQuery>['data']) => {
-      if (data) {
-        client.setQueryData<ReturnType<typeof useAccessTokenQuery>['data']>(['accessToken'], data)
-      } else {
-        client.invalidateQueries({ queryKey: ['accessToken'] })
-      }
-    },
-    [client],
-  )
-  return useCallback(async () => {
-    if (store.get(isRefreshingTokenAtom)) return
-    toast.info('正在刷新 Token...')
-    store.set(isRefreshingTokenAtom, true)
-    client.cancelQueries({ queryKey: ['authFetch'] })
-    const accessToken = await client.ensureQueryData<
-      ReturnType<typeof useAccessTokenQuery>['data']
-    >({ queryKey: ['accessToken'] })
-    if (!accessToken) {
-      toast.error('无法刷新 Token：登录信息丢失')
-      resetAccessToken()
-      return
-    }
-    if (
-      accessToken.expires_in + accessToken.create_time.getTime() < new Date().getTime() ||
-      !(await isAccessTokenValid(accessToken))
-    ) {
-      try {
-        const newAccessToken = await refreshMutation.mutateAsync({ ...accessToken })
-        resetAccessToken({ ...newAccessToken, create_time: new Date() })
-        toast.success('Token 刷新成功')
-      } catch (e) {
-        console.error(e)
-        toast.error('Token 刷新失败（可能是已过期）')
-        resetAccessToken()
-      }
-    }
-    store.set(isRefreshingTokenAtom, false)
-    client.invalidateQueries({ queryKey: ['authFetch'] })
-  }, [refreshMutation, client, resetAccessToken])
-}
-
-export function useSessionQuery() {
+function useSessionSuspenseQuery() {
+  const userId = useAtomValue(userIdAtom)
   return useAuthSuspenseQuery({
-    queryKey: ['userSession'],
+    queryKey: ['userSession', userId],
     queryFn: async () => {
-      const accessToken = await getAccessToken()
+      const accessToken = await getAccessToken(userId)
       if (!accessToken) return null
       return await getUserInfoWithAuth()
     },
   })
+}
+
+function useSessionQuery() {
+  const userId = useAtomValue(userIdAtom)
+  return useQuery({
+    queryKey: ['userSession', userId],
+    queryFn: async () => {
+      const accessToken = await getAccessToken(userId)
+      if (!accessToken) return null
+      return await getUserInfoWithAuth()
+    },
+  })
+}
+
+export function useSessionSuspense() {
+  return useSessionSuspenseQuery().data
 }
 
 export function useSession() {

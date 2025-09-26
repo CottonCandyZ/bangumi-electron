@@ -5,7 +5,7 @@ import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionType } from '@renderer/data/types/collection'
 import { useInView } from 'framer-motion'
 import { useEffect, useRef } from 'react'
-import { useSession } from '@renderer/modules/wrapper/session-wrapper'
+import { useSession } from '@renderer/data/hooks/session'
 import { useSetAtom } from 'jotai'
 import { collectionBoxInViewAtom } from '@renderer/state/in-view'
 import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
@@ -20,7 +20,7 @@ import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 
 export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
-  const { userInfo } = useSession()
+  const userInfo = useSession()
   const subjectCollectionQuery = useQuerySubjectCollection({
     subjectId,
     username: userInfo?.username,

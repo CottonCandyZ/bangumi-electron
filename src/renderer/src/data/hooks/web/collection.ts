@@ -2,7 +2,7 @@ import { fetchSubjectInfoById } from '@renderer/data/fetch/web/subject'
 import { parseDeleteCollectionHash } from '@renderer/data/transformer/web'
 import { useQuery } from '@tanstack/react-query'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { useSession } from '@renderer/modules/wrapper/session-wrapper'
+import { useSession } from '@renderer/data/hooks/session'
 
 export const useWebDeleteCollectionHash = ({
   subjectId,
@@ -11,7 +11,7 @@ export const useWebDeleteCollectionHash = ({
   subjectId: SubjectId
   enabled?: boolean
 }) => {
-  const { userInfo } = useSession()
+  const userInfo = useSession()
   return useQuery({
     queryKey: ['SubjectHomePage', !!userInfo, subjectId],
     queryFn: async () => await fetchSubjectInfoById({ subjectId }),

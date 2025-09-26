@@ -22,11 +22,11 @@ import { Suspense, useState } from 'react'
 import { cn } from '@renderer/lib/utils'
 import { useSetAtom } from 'jotai'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
-import { useSession } from '@renderer/data/hooks/session'
+import { useSessionSuspense } from '@renderer/data/hooks/session'
 
 function ProfileMenuContent({ type }: { type: 'expend' | 'small' }) {
   const logoutMutation = useLogoutMutation()
-  const userInfo = useSession()
+  const userInfo = useSessionSuspense()
   const isLogin = !!userInfo
   const { theme, setTheme } = useTheme()
 

@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Tags } from '@renderer/modules/main/subject/tags/tags'
 import { useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
-import { useSession } from '@renderer/modules/wrapper/session-wrapper'
+import { useSession } from '@renderer/data/hooks/session'
 
 export function QuickTags({
   subjectTags,
@@ -21,7 +21,7 @@ export function QuickTags({
   const [tags, setTags] = useState(new Set<string>())
   const queryClient = useQueryClient()
   const [edit, setEdit] = useState(false)
-  const { userInfo } = useSession()
+  const userInfo = useSession()
 
   const queryKey = useQueryKeyWithAccessToken([
     'collection-subject',

@@ -1,7 +1,6 @@
 import { ThemeProvider } from '@renderer/modules/wrapper/theme-wrapper'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PropsWithChildren } from 'react'
-import { SessionWrapper } from '@renderer/modules/wrapper/session-wrapper'
 import { ClickScrollPlugin, OverlayScrollbars } from 'overlayscrollbars'
 import { queryClient } from '@renderer/modules/wrapper/query'
 import { Provider as JotaiProvider } from 'jotai'
@@ -17,11 +16,9 @@ export function Wrapper({ children }: PropsWithChildren) {
     <JotaiProvider store={store}>
       <QueryClientProvider client={queryClient}>
         <KeyboardShortcutWrapper>
-          <SessionWrapper>
-            <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-              <Pop>{children}</Pop>
-            </ThemeProvider>
-          </SessionWrapper>
+          <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+            <Pop>{children}</Pop>
+          </ThemeProvider>
         </KeyboardShortcutWrapper>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>

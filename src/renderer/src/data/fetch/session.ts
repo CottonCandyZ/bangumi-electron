@@ -78,18 +78,17 @@ export async function safeRefreshToken(token: Token): Promise<Token & { create_t
 }
 
 /** 获得当前的 AccessToken，没登录时返回 null */
-export async function getAccessToken() {
-  const user_id = store.get(userIdAtom)
-  if (!user_id) return null
+export async function getAccessToken(userId: string | null = store.get(userIdAtom) ?? null) {
+  if (!userId) return null
   // 从缓存中读取，如果未过期，直接返回
   if (
-    accessTokenCache?.user_id === Number(user_id) &&
+    accessTokenCache?.user_id === Number(userId) &&
     accessTokenCache.expires_in * 1000 + accessTokenCache.create_time.getTime() >
       new Date().getTime()
   ) {
     return accessTokenCache
   }
-  const token = await readAccessToken({ user_id: Number(user_id) })
+  const token = await readAccessToken({ user_id: Number(userId) })
   // 判断过期
   if (token && token.expires_in * 1000 + token.create_time.getTime() < new Date().getTime()) {
     // refresh token using the safe refresh function

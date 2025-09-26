@@ -15,7 +15,7 @@ import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/sele
 import { Separator } from '@renderer/components/ui/separator'
 import { Switch } from '@renderer/components/ui/switch'
 import { Textarea } from '@renderer/components/ui/textarea'
-import { useSession } from '@renderer/modules/wrapper/session-wrapper'
+import { useSession } from '@renderer/data/hooks/session'
 import { INPUT_LIMIT_CONFIG } from '@renderer/config'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
@@ -56,7 +56,7 @@ export function AddOrModifySubjectCollectionForm({
   success?: () => void
 }) {
   const queryClient = useQueryClient()
-  const { userInfo } = useSession()
+  const userInfo = useSession()
   const username = userInfo?.username
   const formSchema = z.object({
     collectionType: z.number(),

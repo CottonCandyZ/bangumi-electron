@@ -4,14 +4,14 @@ import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@renderer/components/ui/card'
 import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { ERROR_CONSTANTS } from '@renderer/constants'
-import { useSession } from '@renderer/modules/wrapper/session-wrapper'
+import { useSession } from '@renderer/data/hooks/session'
 import { useCopyToClipboard } from '@renderer/hooks/use-copy-to-clipboard'
 
 export default function MainErrorElement() {
   const nav = useNavigate()
   const error = useRouteError() as Error
   const location = useLocation()
-  const { userInfo } = useSession()
+  const userInfo = useSession()
   const { copied, copyToClipboard } = useCopyToClipboard()
 
   useEffect(() => {

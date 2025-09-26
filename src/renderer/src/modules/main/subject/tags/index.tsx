@@ -1,5 +1,5 @@
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { useSession } from '@renderer/modules/wrapper/session-wrapper'
+import { useSession } from '@renderer/data/hooks/session'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { QuickTags } from '@renderer/modules/main/subject/collection/quick-tags'
@@ -9,7 +9,7 @@ import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 export function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
-  const { userInfo } = useSession()
+  const userInfo = useSession()
   const subjectCollection = useQuerySubjectCollection({
     subjectId,
     username: userInfo?.username,

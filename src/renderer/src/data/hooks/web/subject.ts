@@ -6,7 +6,7 @@ import {
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import type { SectionPath } from '@renderer/data/types/web'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { useSession } from '@renderer/modules/wrapper/session-wrapper'
+import { useSession } from '@renderer/data/hooks/session'
 
 // 分离 parse 和 fetch，方便缓存整个页面的内容
 
@@ -30,7 +30,7 @@ export const useWebInfoBoxQuery = ({
   subjectId: SubjectId
   enabled?: boolean
 }) => {
-  const { userInfo } = useSession()
+  const userInfo = useSession()
   return useQuery({
     queryKey: ['SubjectHomePage', !!userInfo, subjectId],
     queryFn: async () => await fetchSubjectInfoById({ subjectId }),

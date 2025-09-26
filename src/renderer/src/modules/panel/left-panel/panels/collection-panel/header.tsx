@@ -1,6 +1,6 @@
 import { SubjectCollectionSelectorContent } from '@renderer/modules/common/collections/subject-select-content'
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
-import { useSession } from '@renderer/modules/wrapper/session-wrapper'
+import { useSession } from '@renderer/data/hooks/session'
 import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import { sidePanelCollectionTypeFilterAtom } from '@renderer/state/collection'
@@ -11,7 +11,7 @@ import { useAtom, useAtomValue } from 'jotai'
 export function SubjectCollectionPanelHeader() {
   const subjectType = SubjectType[useAtomValue(collectionPanelSubjectTypeAtom)]
   const [filterMap, setCurrentTypeFilter] = useAtom(sidePanelCollectionTypeFilterAtom)
-  const { userInfo } = useSession()
+  const userInfo = useSession()
   const currentSelect = filterMap.get(subjectType.toString()) ?? CollectionType['watching']
   const isRefetching = useAtomValue(collectionPanelIsRefetchingAtom)
   return (
