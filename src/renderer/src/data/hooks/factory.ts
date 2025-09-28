@@ -922,7 +922,7 @@ export const useMutationMustAuth = <P, R>({
 
 export const useQueryKeyWithAccessToken = (queryKey: QueryKey) => {
   const { data: accessToken } = useAccessTokenQuery()
-  return ['authFetch', ...queryKey, accessToken?.access_token]
+  return [...queryKey, accessToken?.access_token]
 }
 export const useQueryKeyWithUserId = (queryKey: QueryKey) => {
   const userId = useDeferredValue(useAtomValue(userIdAtom))
