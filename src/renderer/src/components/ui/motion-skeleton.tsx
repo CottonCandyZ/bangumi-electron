@@ -1,5 +1,5 @@
 import { cn } from '@renderer/lib/utils'
-import { HTMLMotionProps, motion } from 'framer-motion'
+import { HTMLMotionProps, motion } from 'motion/react'
 
 function MotionSkeleton({ className, ...props }: HTMLMotionProps<'div'>) {
   return (

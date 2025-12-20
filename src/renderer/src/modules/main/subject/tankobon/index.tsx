@@ -7,7 +7,7 @@ import { SubjectId } from '@renderer/data/types/bgm'
 import { RelatedSubject } from '@renderer/data/types/subject'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { Suspense } from 'react'
-import { Link, unstable_useViewTransitionState, useLocation } from 'react-router-dom'
+import { Link, useViewTransitionState, useLocation } from 'react-router-dom'
 
 interface Props {
   subjectId: SubjectId
@@ -35,23 +35,23 @@ function TankobonContent({ subjectId }: Props) {
 
 function Item({ item }: { item: RelatedSubject }) {
   const { key } = useLocation()
-  const isTransitioning = unstable_useViewTransitionState(`/subject/${item.id}`)
+  const isTransitioning = useViewTransitionState(`/subject/${item.id}`)
   return (
     <Tooltip key={item.id} delayDuration={0}>
       <TooltipTrigger>
         <Link
           to={`/subject/${item.id}`}
           state={{ viewTransitionName: `cover-image-${key}` }}
-          unstable_viewTransition
+          viewTransition
         >
           {!isEmpty(item.images.small) ? (
             <Image
               imageSrc={item.images.small}
               style={{ viewTransitionName: isTransitioning ? `cover-image-${key}` : undefined }}
-              className="size-20 overflow-hidden rounded-xl border shadow transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xl"
+              className="size-20 overflow-hidden rounded-xl border shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xl"
             />
           ) : (
-            <div className="size-20 rounded-xl border bg-accent shadow transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xl" />
+            <div className="bg-accent size-20 rounded-xl border shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xl" />
           )}
         </Link>
       </TooltipTrigger>

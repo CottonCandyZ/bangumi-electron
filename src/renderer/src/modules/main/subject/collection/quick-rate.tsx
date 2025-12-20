@@ -39,7 +39,7 @@ export function QuickRate({ subjectCollection }: { subjectCollection: Collection
         queryKey,
       })
       queryClient.invalidateQueries({
-        queryKey: ['authFetch', 'collection-subjects'],
+        queryKey: ['collection-subjects'],
       })
     },
   })

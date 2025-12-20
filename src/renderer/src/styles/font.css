@@ -1,25 +1,23 @@
-@layer base {
-  @font-face {
-    font-family: 'Noto Sans SC';
-    src: url('./fonts/NotoSansSC-VariableFont_wght.ttf') format('truetype');
-    font-weight: 100 900;
-  }
-  @font-face {
-    font-family: 'Noto Sans JP';
-    src: url('fonts/NotoSansJP-VariableFont_wght.ttf') format('truetype');
-    font-weight: 100 900;
-  }
+@font-face {
+  font-family: 'Noto Sans SC';
+  src: url('./fonts/NotoSansSC-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+}
+@font-face {
+  font-family: 'Noto Sans JP';
+  src: url('fonts/NotoSansJP-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+}
 
-  @font-face {
-    font-family: 'Noto Sans';
-    src: url('fonts/NotoSansJP-VariableFont_wght.ttf') format('truetype');
-    font-weight: 100 900;
-  }
+@font-face {
+  font-family: 'Noto Sans';
+  src: url('fonts/NotoSansJP-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+}
 
-  @font-face {
-    font-family: 'Noto Sans';
-    src: url('fonts/NotoSansJP-VariableFont_wght.ttf') format('truetype');
-    font-weight: 100 900;
-    font-style: italic;
-  }
+@font-face {
+  font-family: 'Noto Sans';
+  src: url('fonts/NotoSansJP-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
 }

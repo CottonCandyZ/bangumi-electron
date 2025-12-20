@@ -17,18 +17,18 @@ export function TagInput({
       {tags.map((value) => (
         <span
           key={value}
-          className="inline-flex h-9 cursor-default items-center rounded-sm border border-solid bg-secondary pl-2 text-sm font-medium text-secondary-foreground transition-all hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-secondary text-secondary-foreground hover:bg-secondary/80 inline-flex h-9 cursor-default items-center rounded-sm border border-solid pl-2 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50"
         >
           {value}
           <button
             type="button"
             onClick={() => remove(value)}
-            className="i-mingcute-close-line inline-flex h-full items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+            className="i-mingcute-close-line focus-visible:ring-ring inline-flex h-full items-center justify-center rounded-md px-3 py-1 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-1 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
           />
         </span>
       ))}
       <input
-        className="flex h-9 min-w-fit flex-1 resize-none bg-background px-3 py-2 placeholder:text-muted-foreground focus-visible:outline-none"
+        className="bg-background placeholder:text-muted-foreground flex h-9 min-w-fit flex-1 resize-none px-3 py-2 focus-visible:outline-hidden"
         onChange={(event) => {
           const value = event.target.value
           if (value === ' ') {

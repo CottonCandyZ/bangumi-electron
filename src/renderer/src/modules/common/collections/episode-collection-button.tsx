@@ -105,7 +105,6 @@ function EpisodeCollectionButtonContent({
       if (episodes)
         queryClient.invalidateQueries({
           queryKey: [
-            'authFetch',
             'collection-subjects',
             { username, collectionType: CollectionType.watching, subjectType },
           ],
@@ -122,7 +121,7 @@ function EpisodeCollectionButtonContent({
     <div className="flex h-9 flex-row gap-1">
       <div
         className={cn(
-          'inline-flex h-9 w-fit flex-wrap items-center justify-center rounded-md bg-muted text-muted-foreground',
+          'bg-muted text-muted-foreground inline-flex h-9 w-fit flex-wrap items-center justify-center rounded-md',
         )}
         onMouseLeave={() => setHover(EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null)}
       >
@@ -132,7 +131,7 @@ function EpisodeCollectionButtonContent({
           return (
             <button
               className={cn(
-                `relative inline-flex h-full cursor-pointer items-center justify-center whitespace-nowrap rounded-md border border-transparent px-3 py-1 text-sm font-medium ring-offset-background hover:border-border hover:bg-background hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50`,
+                `ring-offset-background hover:border-border hover:bg-background hover:text-foreground focus-visible:ring-ring relative inline-flex h-full cursor-pointer items-center justify-center rounded-md border border-transparent px-3 py-1 text-sm font-medium whitespace-nowrap focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50`,
                 hover === item && 'border-border bg-background text-foreground',
                 EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] == item && 'cursor-default',
               )}

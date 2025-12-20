@@ -10,7 +10,7 @@ export const useTooltipHover = <T extends HTMLElement = HTMLElement>({
 } = {}) => {
   const [isHover, setIsHover] = useState(false)
   const elementRef = useRef<T>(null)
-  const timeId = useRef<ReturnType<typeof setTimeout> | undefined>()
+  const timeId = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => {
     const handleMouseEnter = () => {
       clearTimeout(globalHoverTimeId)

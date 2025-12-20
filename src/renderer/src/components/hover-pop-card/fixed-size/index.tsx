@@ -2,7 +2,7 @@ import { calculatePopCardPosition } from '@renderer/components/hover-pop-card/ut
 import { Card } from '@renderer/components/ui/card'
 import { cn } from '@renderer/lib/utils'
 import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
-import { AnimatePresence, HTMLMotionProps, motion } from 'framer-motion'
+import { AnimatePresence, HTMLMotionProps, motion } from 'motion/react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { createContext, MutableRefObject, ReactNode, useContext, useEffect, useRef } from 'react'
 

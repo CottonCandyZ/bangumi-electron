@@ -27,7 +27,7 @@ export function CollectionItem({ collectionItemInfo }: { collectionItemInfo: Col
     >
       <Card
         className={cn(
-          'h-full rounded border-none shadow-none group-hover:bg-accent group-hover:duration-500',
+          'group-hover:bg-accent h-full rounded border-none shadow-none group-hover:duration-500',
           mainSubjectId === collectionItemInfo.subject_id.toString() && 'bg-accent',
         )}
       >
@@ -35,7 +35,7 @@ export function CollectionItem({ collectionItemInfo }: { collectionItemInfo: Col
           <div className="flex flex-row gap-2">
             <Image
               imageSrc={collectionItemInfo.subject.images.grid}
-              className="size-12 shrink-0 overflow-hidden rounded-md border shadow-sm"
+              className="size-12 shrink-0 overflow-hidden rounded-md border shadow-xs"
             />
             <div className="flex flex-col gap-2">
               <CollectionHeader {...collectionItemInfo.subject} />

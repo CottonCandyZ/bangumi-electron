@@ -2,7 +2,7 @@
 
 import { cn } from '@renderer/lib/utils'
 import { clamp } from '@renderer/lib/utils/tool'
-import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useTransition } from 'react-transition-state'
 
 export interface ResizeHandleProps extends React.HtmlHTMLAttributes<HTMLDivElement> {
@@ -92,10 +92,10 @@ const ResizeHandle = ({
       {...rest}
       ref={ref}
       className={cn(
-        'no-drag-region absolute bottom-0 right-0 top-0 z-[1] flex w-3 translate-x-3/4 cursor-col-resize select-none justify-center bg-transparent opacity-0 transition-opacity hover:opacity-100',
+        'no-drag-region absolute top-0 right-0 bottom-0 z-1 flex w-3 translate-x-3/4 cursor-col-resize justify-center bg-transparent opacity-0 transition-opacity select-none hover:opacity-100',
         resizing && 'opacity-100',
         !open && 'hidden',
-        resizeHandlePos === 'left' && 'left-0 right-auto -translate-x-3/4',
+        resizeHandlePos === 'left' && 'right-auto left-0 -translate-x-3/4',
         className,
       )}
       onMouseDown={onResizeStart}
@@ -111,24 +111,21 @@ const ResizeHandle = ({
   )
 }
 
-export const ResizePanel = forwardRef<HTMLDivElement, ResizePanelProps>(function ResizePanel(
-  {
-    children,
-    className,
-    resizing,
-    minWidth,
-    maxWidth,
-    width,
-    enableAnimation: _enableAnimation = true,
-    open,
-    unmountOnExit,
-    onResizing,
-    onWidthChange,
-    resizeHandlePos,
-    ...rest
-  },
-  ref,
-) {
+export const ResizePanel = ({
+  children,
+  className,
+  resizing,
+  minWidth,
+  maxWidth,
+  width,
+  enableAnimation: _enableAnimation = true,
+  open,
+  unmountOnExit,
+  onResizing,
+  onWidthChange,
+  resizeHandlePos,
+  ...rest
+}: ResizePanelProps) => {
   const enableAnimation = useEnableAnimation() && _enableAnimation
   const safeWidth = clamp(width, minWidth, maxWidth)
   const [{ status }, toggle] = useTransition({
@@ -140,7 +137,6 @@ export const ResizePanel = forwardRef<HTMLDivElement, ResizePanelProps>(function
   return (
     <div
       {...rest}
-      ref={ref}
       style={{
         width: `${safeWidth}px`,
         minWidth: `${safeWidth}px`,
@@ -166,4 +162,4 @@ export const ResizePanel = forwardRef<HTMLDivElement, ResizePanelProps>(function
       />
     </div>
   )
-})
+}

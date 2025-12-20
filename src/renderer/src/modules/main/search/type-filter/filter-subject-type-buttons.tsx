@@ -28,7 +28,7 @@ export function SubjectTypeFilterButtons({
             'cursor-default rounded-2xl shadow-none transition-all duration-500',
             ((item.type === null && filter.size === 0) ||
               (item.type !== null && filter.has(item.type))) &&
-              'gap-2 bg-accent',
+              'bg-accent gap-2',
           )}
           onClick={() => {
             onFilterClick(item.type)
@@ -36,10 +36,10 @@ export function SubjectTypeFilterButtons({
         >
           <span
             className={cn(
-              'i-mingcute-check-line !w-0 transition-[width]',
+              'i-mingcute-check-line w-0! transition-[width]',
               ((item.type === null && filter.size === 0) ||
                 (item.type !== null && filter.has(item.type))) &&
-                '!w-4',
+                'w-4!',
             )}
           />
           {item.name}

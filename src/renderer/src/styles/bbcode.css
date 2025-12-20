@@ -1,9 +1,7 @@
-@layer utilities {
-  .bbcode {
-    .mask {
-      text-shadow: #555 0 0 20px;
-      border-radius: 2px;
-      @apply bg-[#555] text-[#555] hover:text-white transition-all ease-linear duration-500 border border-[#555];
-    }
+@utility bbcode {
+  .mask {
+    text-shadow: #555 0 0 20px;
+    border-radius: 2px;
+    @apply border border-[#555] bg-[#555] text-[#555] transition-all duration-500 ease-linear hover:text-white;
   }
 }

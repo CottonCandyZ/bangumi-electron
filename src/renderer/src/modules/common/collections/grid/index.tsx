@@ -58,7 +58,7 @@ export function CollectionsGrid({
   if (!collections)
     return (
       <div className="relative flex flex-col items-center justify-start gap-5 overflow-hidden p-1">
-        <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(15rem,_1fr))] gap-1">
+        <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-1">
           {Array(20)
             .fill(undefined)
             .map((_, index) => (

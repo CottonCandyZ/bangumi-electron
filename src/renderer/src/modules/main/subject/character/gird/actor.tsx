@@ -15,10 +15,10 @@ export function Actors({ actors, showAll = false }: { actors: Actor[]; showAll?:
                   className="size-9 overflow-hidden rounded-md"
                 />
               )}
-              <span className="line-clamp-1 font-jp">{actor.name}</span>
+              <span className="font-jp line-clamp-1">{actor.name}</span>
               {!showAll && actors.length > 1 && (
                 <div className="-mb-[3px] flex size-6 items-center justify-center rounded-full border pb-0.5">
-                  <div className="text-[0.7rem] text-accent-foreground">+{actors.length - 1}</div>
+                  <div className="text-accent-foreground text-[0.7rem]">+{actors.length - 1}</div>
                 </div>
               )}
             </div>

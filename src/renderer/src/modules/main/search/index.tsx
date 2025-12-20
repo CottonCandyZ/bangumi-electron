@@ -9,7 +9,7 @@ export function Search() {
       <div>
         <SearchInput />
       </div>
-      <div className="grid grid-cols-[minmax(auto,_max-content)_min-content] gap-2 px-3">
+      <div className="grid grid-cols-[minmax(auto,max-content)_min-content] gap-2 px-3">
         <SubjectTypeFilter />
         <FilterButton />
       </div>

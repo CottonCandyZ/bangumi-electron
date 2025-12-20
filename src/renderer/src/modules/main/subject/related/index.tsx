@@ -46,7 +46,7 @@ export function RelatedGridSkeleton() {
         <h2 className="shrink-0 text-2xl font-medium">关联条目</h2>
         <Skeleton className="h-9 w-40" />
       </div>
-      <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(8rem,_1fr))] gap-x-2 gap-y-5 py-2">
+      <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-x-2 gap-y-5 py-2">
         {Array(5)
           .fill(0)
           .map((_, index) => (

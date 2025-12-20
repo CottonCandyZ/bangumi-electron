@@ -6,7 +6,7 @@ import { Separator } from '@renderer/components/ui/separator'
 import { client } from '@renderer/lib/client'
 import { cn } from '@renderer/lib/utils'
 import { navOpenAtom } from '@renderer/state/panel'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { useAtom } from 'jotai'
 import { UI_CONFIG } from '@renderer/config'
 
@@ -18,7 +18,7 @@ export function NavBar() {
     <div>
       <nav
         className={cn(
-          'fixed z-50 flex h-dvh flex-col border-r bg-background transition-[width]',
+          'bg-background fixed z-50 flex h-dvh flex-col border-r transition-[width]',
           open && 'z-50',
         )}
         style={{
@@ -34,7 +34,7 @@ export function NavBar() {
           <Button
             variant="ghost"
             className={cn(
-              'relative aspect-square h-fit w-fit p-2 text-primary/65 hover:text-primary',
+              'text-primary/65 hover:text-primary relative aspect-square h-fit w-fit p-2',
               platform === 'darwin' && 'm-1 p-1',
             )}
             onClick={() => setOpen(!open)}

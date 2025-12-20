@@ -1,6 +1,6 @@
 import { HoverEpisodeDetail } from '@renderer/modules/common/episodes/grid/hover-content'
 import { hoverCardEpisodeContentAtom, hoverCardOpenAtom } from '@renderer/state/hover-card'
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'motion/react'
 import { useAtomValue } from 'jotai'
 
 export function HoverCard() {

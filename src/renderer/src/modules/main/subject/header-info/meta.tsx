@@ -14,7 +14,7 @@ export function Meta({
 }: Pick<Subject, 'date' | 'eps' | 'platform' | 'infobox' | 'rating'>) {
   const week_day = extractInfoBox(infobox, '放送星期')?.value as string | undefined
   return (
-    <div className="flex select-none flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5 select-none">
       <section className="flex flex-row items-center gap-1.5">
         {rating.score !== 0 && (
           <>
@@ -25,12 +25,12 @@ export function Meta({
               {rating.score == 0 ? '-.-' : rating.score.toFixed(1)}{' '}
               <span className="i-mingcute-star-fill" />
             </div>
-            <Separator orientation="vertical" className="h-5 bg-primary/20" />
+            <Separator orientation="vertical" className="bg-primary/20 h-5" />
             <div className="flex items-center gap-0.5 text-base font-medium">
               <span className="i-mingcute-hashtag-line mt-0.5" />{' '}
               {rating.rank === 0 ? '--' : rating.rank}
             </div>
-            <Separator orientation="vertical" className="h-5 bg-primary/20" />
+            <Separator orientation="vertical" className="bg-primary/20 h-5" />
           </>
         )}
         <div className="flex flex-row flex-wrap items-center gap-1 text-base font-medium">

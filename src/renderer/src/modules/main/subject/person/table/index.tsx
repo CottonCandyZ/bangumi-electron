@@ -29,10 +29,10 @@ export function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
 
                 return (
                   <HoverCard key={index} openDelay={300} closeDelay={200}>
-                    <HoverCardTrigger className="inline-block cursor-pointer underline decoration-primary/40 underline-offset-2 hover:decoration-primary">
+                    <HoverCardTrigger className="decoration-primary/40 hover:decoration-primary inline-block cursor-pointer underline underline-offset-2">
                       {item.name}
                     </HoverCardTrigger>
-                    <HoverCardContent side="top" className="w-full min-w-64 max-w-72">
+                    <HoverCardContent side="top" className="w-full max-w-72 min-w-64">
                       <Detail personId={item.id} />
                     </HoverCardContent>
                   </HoverCard>

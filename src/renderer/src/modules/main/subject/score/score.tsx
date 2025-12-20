@@ -17,12 +17,12 @@ export function Score({ rating, ratingCount }: { rating: Rating; ratingCount: Ra
             <span>--</span>
           )}
         </div>
-        <div className="text-sm font-medium text-muted-foreground">
+        <div className="text-muted-foreground text-sm font-medium">
           Rank: # <span>{rating.rank !== 0 ? rating.rank : '--'}</span>
         </div>
       </section>
       <ScoreChart ratingCount={ratingCount} total={rating.total} className="min-h-32 md:min-h-40" />
-      <div className="pr-2 text-right text-sm text-muted-foreground">
+      <div className="text-muted-foreground pr-2 text-right text-sm">
         {rating.total > 10 ? rating.total : '--'} 人参与
       </div>
     </div>

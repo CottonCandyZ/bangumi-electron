@@ -1,21 +1,21 @@
 import { Image } from '@renderer/components/image/image'
 import { Card } from '@renderer/components/ui/card'
 import { RelatedSubject } from '@renderer/data/types/subject'
-import { Link, unstable_useViewTransitionState, useLocation } from 'react-router-dom'
+import { Link, useViewTransitionState, useLocation } from 'react-router-dom'
 
 const sectionId = 'RelatedSubjects'
 export function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
   const { key } = useLocation()
   const layoutId = `${sectionId}-${relatedSubject.id}-${key}`
 
-  const isTransitioning = unstable_useViewTransitionState(`/subject/${relatedSubject.id}`)
+  const isTransitioning = useViewTransitionState(`/subject/${relatedSubject.id}`)
   return (
     <div className="flex flex-col gap-2">
       <Link
         to={`/subject/${relatedSubject.id}`}
         className="cursor-default"
         state={{ viewTransitionName: `cover-image-${key}` }}
-        unstable_viewTransition
+        viewTransition
       >
         <Card
           className="overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
@@ -28,7 +28,7 @@ export function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
               className="aspect-square"
             />
           ) : (
-            <div className="aspect-square bg-muted" />
+            <div className="bg-muted aspect-square" />
           )}
         </Card>
       </Link>

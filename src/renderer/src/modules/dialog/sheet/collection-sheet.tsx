@@ -23,11 +23,11 @@ function Content(props: {
 }) {
   const { sheetTitle, ...formProps } = props.content
   return (
-    <SheetContent className="flex w-1/3 flex-col pl-0 pr-2 sm:max-w-none">
+    <SheetContent className="flex w-1/3 flex-col pr-2 pl-0 sm:max-w-none">
       <SheetHeader className="pl-6">
         <SheetTitle>{sheetTitle}</SheetTitle>
       </SheetHeader>
-      <ScrollWrapper className="pl-6 pr-4 pt-2" options={{ scrollbars: { autoHide: 'leave' } }}>
+      <ScrollWrapper className="pt-2 pr-4 pl-6" options={{ scrollbars: { autoHide: 'leave' } }}>
         <AddOrModifySubjectCollectionForm {...formProps} success={() => props.setOpen(false)} />
       </ScrollWrapper>
     </SheetContent>

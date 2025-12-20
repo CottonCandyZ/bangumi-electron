@@ -1,11 +1,18 @@
 import { newIdbStorage } from '@renderer/lib/persister'
 import { QueryCache, QueryClient } from '@tanstack/react-query'
 import {
-  experimental_createPersister,
+  experimental_createQueryPersister,
   type PersistedQuery,
 } from '@tanstack/react-query-persist-client'
 import { createStore } from 'idb-keyval'
 import { toast } from 'sonner'
+
+const persister = experimental_createQueryPersister<PersistedQuery>({
+  storage: newIdbStorage(createStore('cache', 'query_persister')),
+  maxAge: 60 * 1000 * 60 * 24, // 1 day
+  serialize: (persistedQuery) => persistedQuery,
+  deserialize: (cached) => cached,
+})
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -41,12 +48,7 @@ export const queryClient = new QueryClient({
       staleTime: import.meta.env.DEV ? 1000 * 60 * 60 * 5 : 1000 * 60 * 5,
       gcTime: import.meta.env.DEV ? Number.POSITIVE_INFINITY : 60 * 1000 * 60 * 24,
       retry: 0,
-      persister: experimental_createPersister<PersistedQuery>({
-        storage: newIdbStorage(createStore('cache', 'query_persister')),
-        maxAge: 60 * 1000 * 60 * 24,
-        serialize: (persistedQuery) => persistedQuery,
-        deserialize: (cached) => cached,
-      }),
+      persister: persister.persisterFn,
       networkMode: 'online',
     },
   },

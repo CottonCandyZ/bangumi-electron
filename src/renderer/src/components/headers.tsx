@@ -5,7 +5,7 @@ export function MediumHeader({ name, name_cn }: { name: string; name_cn: string 
   return (
     <header>
       <h3 className="font-semibold">{name_cn}</h3>
-      <h4 className="font font-jp text-sm font-semibold text-muted-foreground">{name}</h4>
+      <h4 className="font font-jp text-muted-foreground text-sm font-semibold">{name}</h4>
     </header>
   )
 }
@@ -15,7 +15,7 @@ export function CollectionHeader({ name, name_cn }: { name: string; name_cn: str
   return (
     <header>
       <h3 className="text-sm font-medium">{name_cn}</h3>
-      <h4 className="font font-jp text-xs text-muted-foreground">{name}</h4>
+      <h4 className="font font-jp text-muted-foreground text-xs">{name}</h4>
     </header>
   )
 }

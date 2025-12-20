@@ -6,7 +6,7 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useCallback, useEffect } from 'react'
 import { useSetAtom } from 'jotai'
 import { subjectCoverImageInViewAtom } from '@renderer/state/in-view'
-import { unstable_useViewTransitionState, useLocation } from 'react-router-dom'
+import { useViewTransitionState, useLocation } from 'react-router-dom'
 import { useInView } from 'react-intersection-observer'
 import { useStateHook } from '@renderer/hooks/use-cache-state'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
@@ -16,7 +16,7 @@ export function SubjectCoverImage({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const setIsInView = useSetAtom(subjectCoverImageInViewAtom)
-  const isTransitioning = unstable_useViewTransitionState(`/subject/${subjectId}`)
+  const isTransitioning = useViewTransitionState(`/subject/${subjectId}`)
   const { ref: partialRef, inView: isPartialInView } = useInView({
     threshold: 0,
     initialInView: true,
@@ -52,12 +52,12 @@ export function SubjectCoverImage({ subjectId }: { subjectId: SubjectId }) {
     >
       {subjectInfo !== undefined ? (
         !isEmpty(subjectInfo.images.common) ? (
-          <Image imageSrc={subjectInfo.images.common} loadingClassName="aspect-[22/31]" />
+          <Image imageSrc={subjectInfo.images.common} loadingClassName="aspect-22/31" />
         ) : (
-          <div className="flex aspect-[2/3] items-center justify-center">还没有图片哦</div>
+          <div className="flex aspect-2/3 items-center justify-center">还没有图片哦</div>
         )
       ) : (
-        <Skeleton className="aspect-[2/3]" />
+        <Skeleton className="aspect-2/3" />
       )}
     </Card>
   )

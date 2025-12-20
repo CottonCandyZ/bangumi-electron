@@ -1,98 +1,160 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
+@plugin '@egoist/tailwindcss-icons';
 
-    --want-to-watch: #ffb4c3;
-    --want-to-watch-foreground: #fff;
-    --want-to-watch-accent: #ffdfea;
-    --want-to-watch-accent-foreground: #903446;
-    --watched: #52c2fe;
-    --watched-foreground: #fff;
-    --watched-accent: #f1fbff;
-    --watched-accent-foreground: #3b86ae;
+@custom-variant dark (&:is(.dark *));
 
-    --chart-score-10: 346.29, 54.97%, 62.55%;
-    --chart-score-9: 357.69, 58.43%, 65.1%;
-    --chart-score-8: 9.47, 61.96%, 63.92%;
-    --chart-score-7: 19.18, 62.24%, 61.57%;
-    --chart-score-6: 28.8, 59.81%, 59.02%;
-    --chart-score-5: 37.69, 54.75%, 56.67%;
-    --chart-score-4: 48.55, 47.41%, 54.51%;
-    --chart-score-3: 63.16, 40.43%, 53.92%;
-    --chart-score-2: 80.43, 44.34%, 58.43%;
-    --chart-score-1: 101.59, 47.83%, 63.92%;
-  }
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-score-1);
+  --color-chart-2: var(--chart-score-2);
+  --color-chart-3: var(--chart-score-3);
+  --color-chart-4: var(--chart-score-4);
+  --color-chart-5: var(--chart-score-5);
+  --color-chart-6: var(--chart-score-6);
+  --color-chart-7: var(--chart-score-7);
+  --color-chart-8: var(--chart-score-8);
+  --color-chart-9: var(--chart-score-9);
+  --color-chart-10: var(--chart-score-10);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 90);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --radius: 0.5rem;
+  --want-to-watch: #ffb4c3;
+  --want-to-watch-foreground: #fff;
+  --want-to-watch-accent: #ffdfea;
+  --want-to-watch-accent-foreground: #903446;
+  --watched: #52c2fe;
+  --watched-foreground: #fff;
+  --watched-accent: #f1fbff;
+  --watched-accent-foreground: #3b86ae;
+  --chart-score-10: 346.29, 54.97%, 62.55%;
+  --chart-score-9: 357.69, 58.43%, 65.1%;
+  --chart-score-8: 9.47, 61.96%, 63.92%;
+  --chart-score-7: 19.18, 62.24%, 61.57%;
+  --chart-score-6: 28.8, 59.81%, 59.02%;
+  --chart-score-5: 37.69, 54.75%, 56.67%;
+  --chart-score-4: 48.55, 47.41%, 54.51%;
+  --chart-score-3: 63.16, 40.43%, 53.92%;
+  --chart-score-2: 80.43, 44.34%, 58.43%;
+  --chart-score-1: 101.59, 47.83%, 63.92%;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
 
-    --want-to-watch: #cfa4ad;
-    --want-to-watch-foreground: #fff;
-    --want-to-watch-accent: #cdb7be;
-    --watched: #78abc7;
-    --watched-foreground: #fff;
-    --watched-accent: #afc7cd;
-    --watched-accent-foreground: #295e7b;
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 90);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.556 0 0);
 
-    --chart-score-10: 331.83, 80.39%, 60%;
-    --chart-score-9: 345.1, 77.66%, 61.37%;
-    --chart-score-8: 358.73, 74.74%, 62.75%;
-    --chart-score-7: 11.82, 71.74%, 63.92%;
-    --chart-score-6: 25.37, 69.49%, 65.29%;
-    --chart-score-5: 38.76, 66.08%, 66.47%;
-    --chart-score-4: 51.92, 63.41%, 67.84%;
-    --chart-score-3: 65.05, 60.51%, 69.22%;
-    --chart-score-2: 78.62, 58.39%, 70.78%;
-    --chart-score-1: 91.9, 55.24%, 71.96%;
-  }
+  --want-to-watch: #cfa4ad;
+  --want-to-watch-foreground: #fff;
+  --want-to-watch-accent: #cdb7be;
+  --watched: #78abc7;
+  --watched-foreground: #fff;
+  --watched-accent: #afc7cd;
+  --watched-accent-foreground: #295e7b;
+  --chart-score-10: 331.83, 80.39%, 60%;
+  --chart-score-9: 345.1, 77.66%, 61.37%;
+  --chart-score-8: 358.73, 74.74%, 62.75%;
+  --chart-score-7: 11.82, 71.74%, 63.92%;
+  --chart-score-6: 25.37, 69.49%, 65.29%;
+  --chart-score-5: 38.76, 66.08%, 66.47%;
+  --chart-score-4: 51.92, 63.41%, 67.84%;
+  --chart-score-3: 65.05, 60.51%, 69.22%;
+  --chart-score-2: 78.62, 58.39%, 70.78%;
+  --chart-score-1: 91.9, 55.24%, 71.96%;
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@theme {
+  --font-sans: 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans', sans-serif;
+  --font-jp: 'Noto Sans JP', 'Noto Sans SC', 'Noto Sans', sans-serif;
 }

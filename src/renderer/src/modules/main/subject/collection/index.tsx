@@ -3,7 +3,7 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionType } from '@renderer/data/types/collection'
-import { useInView } from 'framer-motion'
+import { useInView } from 'motion/react'
 import { useEffect, useRef } from 'react'
 import { useSession } from '@renderer/data/hooks/session'
 import { useSetAtom } from 'jotai'
@@ -69,7 +69,7 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
             <QuickRate subjectCollection={subjectCollection} />
           )}
           {subjectCollection.comment && !isEmpty(subjectCollection.comment) && (
-            <ScrollWrapper className="max-h-40 max-w-56 rounded-md border border-border p-2 text-sm">
+            <ScrollWrapper className="border-border max-h-40 max-w-56 rounded-md border p-2 text-sm">
               <p className="">{subjectCollection.comment}</p>
             </ScrollWrapper>
           )}

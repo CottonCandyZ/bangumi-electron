@@ -13,9 +13,9 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { SectionPath } from '@renderer/data/types/web'
 import { cn } from '@renderer/lib/utils'
 import dayjs from 'dayjs'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { memo } from 'react'
-import { unstable_useViewTransitionState, useLocation } from 'react-router-dom'
+import { useViewTransitionState, useLocation } from 'react-router-dom'
 import { MyLink } from '@renderer/components/my-link'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { activeSectionAtom } from '@renderer/state/small-carousel'
@@ -41,7 +41,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
   // const subjectInfo = useSubjectInfoQuery({ subjectId, enabled: !!subjectId })
 
   /* eslint-disable */
-  // @ts-ignore: framer-motion needed
+  // @ts-ignore: motion needed
   const activeId = useAtomValue(activeHoverPopCardAtom) // framer motion 需要其用于确保 re-render ?
   /* eslint-enable */
 
@@ -51,7 +51,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
   const layoutId = `${sectionId}-${id}`
   const isActive = activeId === layoutId
 
-  const isTransitioning = unstable_useViewTransitionState(`/subject/${subjectId}`) // viewTransition API
+  const isTransitioning = useViewTransitionState(`/subject/${subjectId}`) // viewTransition API
   const { key } = useLocation()
 
   return (
@@ -60,7 +60,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
       isActive={(isActive) => (isActive ? setActionSection(sectionPath) : setActionSection(null))}
     >
       <HoverCardContent
-        className="relative z-[1] w-full cursor-default"
+        className="relative z-1 w-full cursor-default"
         style={{
           viewTransitionName: !isActive && isTransitioning ? `cover-image-${key}` : undefined,
         }}
@@ -68,13 +68,13 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
           <MyLink
             to={`/subject/${subjectId}`}
             className="cursor-default"
-            unstable_viewTransition
+            viewTransition
             state={{ viewTransitionName: `cover-image-${key}` }}
           >
             <CardContent className="p-0">
               <CoverMotionImage
                 className={cn(
-                  'aspect-[2/3] overflow-hidden rounded-xl',
+                  'aspect-2/3 overflow-hidden rounded-xl',
                   sectionPath === 'music' && 'aspect-square',
                 )}
                 loading="eager"
@@ -83,7 +83,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
               />
 
               <div
-                className={`absolute bottom-0 left-0 right-0 z-20 flex h-12 items-end justify-between bg-gradient-to-t from-black/50 px-2 py-1`}
+                className={`absolute right-0 bottom-0 left-0 z-20 flex h-12 items-end justify-between bg-linear-to-t from-black/50 px-2 py-1`}
               >
                 <motion.div
                   className="flex items-center justify-center gap-1 font-bold text-white"
@@ -98,7 +98,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
         }
         Description={
           <div className="mt-2 w-full p-0.5">
-            <motion.h1 className="h-6 truncate font-jp font-medium" layoutId={`${layoutId}-header`}>
+            <motion.h1 className="font-jp h-6 truncate font-medium" layoutId={`${layoutId}-header`}>
               {subjectInfo.name}
             </motion.h1>
             <motion.h2 className="mt-1 h-4 truncate text-xs">{subjectInfo.name_cn}</motion.h2>
@@ -109,7 +109,6 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
         <MyLink
           to={`/subject/${subjectId}`}
           className="cursor-default"
-          unstable_viewTransition
           state={{ viewTransitionName: `cover-image-${key}` }}
         >
           <Card className="h-full w-full overflow-hidden">
@@ -185,7 +184,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
               </section>
               {/* 标签 */}
               <motion.div
-                className="mb-4 ml-4 mr-1 flex flex-wrap gap-2 overflow-x-hidden py-2 pr-3"
+                className="mr-1 mb-4 ml-4 flex flex-wrap gap-2 overflow-x-hidden py-2 pr-3"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -194,8 +193,8 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
                 {subjectInfo.tags.map((item) => (
                   <Button
                     key={item.name}
-                    className="h-auto flex-auto justify-center whitespace-normal px-1.5 py-1.5 text-xs"
-                    variant={'outline'}
+                    className="h-auto flex-auto justify-center px-1.5 py-1.5 text-xs whitespace-normal"
+                    variant="outline"
                     onClick={(e) => e.preventDefault()}
                   >
                     {item.name}

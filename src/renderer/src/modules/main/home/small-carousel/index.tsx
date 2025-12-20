@@ -72,29 +72,29 @@ function SmallCarouselContent({ href, name, sectionPath }: SmallCarouselProps) {
             >
               <span>{name}</span>
               <ChevronRight
-                className="mt-[1px] h-4 w-4 text-red-600/50 group-hover:text-red-600/70 dark:text-red-600/80 dark:group-hover:text-red-400"
+                className="mt-px h-4 w-4 text-red-600/50 group-hover:text-red-600/70 dark:text-red-600/80 dark:group-hover:text-red-400"
                 strokeWidth={4}
               />
             </div>
           </MyLink>
         </Button>
         <div className="mb-2 ml-auto flex w-min gap-2">
-          <CarouselPrevious className="relative left-0 top-0 translate-y-0" />
-          <CarouselNext className="relative right-0 top-0 translate-y-0" />
+          <CarouselPrevious className="relative top-0 left-0 translate-y-0" />
+          <CarouselNext className="relative top-0 right-0 translate-y-0" />
         </div>
       </div>
-      <div className={cn('relative @container', currentSectionPath === sectionPath && 'z-40')}>
+      <div className={cn('@container relative', currentSectionPath === sectionPath && 'z-40')}>
         <CarouselContentNoFlow className="-ml-3">
           {subjectsInfo.map((subject, index) => (
             <CarouselItem
               key={index}
-              className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @8xl:basis-[11.111111%] @9xl:basis-[10%]"
+              className="@8xl:basis-[11.111111%] @9xl:basis-[10%] basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%]"
             >
               <div className="p-0.5">
                 {subject ? (
                   <SubjectCard subjectInfo={subject} sectionPath={sectionPath} />
                 ) : (
-                  <Skeleton className="aspect-[2/3] w-full" />
+                  <Skeleton className="aspect-2/3 w-full" />
                 )}
               </div>
             </CarouselItem>
@@ -127,26 +127,26 @@ function SmallCarouselSkeleton({ href, name }: SmallCarouselProps) {
             >
               <span>{name}</span>
               <ChevronRight
-                className="mt-[1px] h-4 w-4 text-red-600/50 group-hover:text-red-600/70 dark:text-red-600/80 dark:group-hover:text-red-400"
+                className="mt-px h-4 w-4 text-red-600/50 group-hover:text-red-600/70 dark:text-red-600/80 dark:group-hover:text-red-400"
                 strokeWidth={4}
               />
             </div>
           </MyLink>
         </Button>
         <div className="mb-2 ml-auto flex w-min gap-2">
-          <CarouselPrevious className="relative left-0 top-0 translate-y-0" disabled />
-          <CarouselNext className="relative right-0 top-0 translate-y-0" disabled />
+          <CarouselPrevious className="relative top-0 left-0 translate-y-0" disabled />
+          <CarouselNext className="relative top-0 right-0 translate-y-0" disabled />
         </div>
       </div>
-      <div className="relative @container">
+      <div className="@container relative">
         <CarouselContentNoFlow className="-ml-3">
           {Array.from({ length: 10 }).map((_, index) => (
             <CarouselItem
               key={index}
-              className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @8xl:basis-[11.111111%] @9xl:basis-[10%]"
+              className="@8xl:basis-[11.111111%] @9xl:basis-[10%] basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%]"
             >
               <div className="p-0.5">
-                <Skeleton className="aspect-[2/3] w-full" />
+                <Skeleton className="aspect-2/3 w-full" />
               </div>
             </CarouselItem>
           ))}

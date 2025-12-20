@@ -74,7 +74,7 @@ export function InputSelector(props: InputSelectorProps) {
     const parts = text.split(new RegExp(`(${query})`, 'gi'))
     return parts.map((part, index) =>
       part.toLowerCase() === query.toLowerCase() ? (
-        <span key={index} className="rounded-sm bg-accent">
+        <span key={index} className="bg-accent rounded-sm">
           {part}
         </span>
       ) : (
@@ -131,7 +131,7 @@ export function InputSelector(props: InputSelectorProps) {
           type="button"
           onClick={handleClear}
           data-input-empty={inputValue === ''}
-          className="absolute right-8 top-1/2 -translate-y-1/2 text-muted-foreground opacity-100 transition-[opacity_color] duration-300 hover:text-primary data-[input-empty=true]:opacity-0"
+          className="text-muted-foreground hover:text-primary absolute top-1/2 right-8 -translate-y-1/2 opacity-100 transition-[opacity_color] duration-300 data-[input-empty=true]:opacity-0"
         >
           <X size={15} />
         </button>
@@ -140,7 +140,7 @@ export function InputSelector(props: InputSelectorProps) {
           data-open={isOpen && filtered.length !== 0}
           disabled={filtered.length === 0}
           onClick={handleToggleDropdown}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground transition-[transform_colors] hover:text-primary disabled:opacity-50 data-[open=true]:rotate-180"
+          className="text-muted-foreground hover:text-primary absolute top-1/2 right-2 -translate-y-1/2 transition-[transform_colors] disabled:opacity-50 data-[open=true]:rotate-180"
         >
           <ChevronDown size={18} />
         </button>
@@ -148,21 +148,21 @@ export function InputSelector(props: InputSelectorProps) {
       {isOpen && filtered.length !== 0 && (
         <ul
           ref={dropdownRef}
-          className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover shadow-lg"
+          className="bg-popover absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border shadow-lg"
         >
           {filtered.map((item, index) => (
             <li
               key={index}
               data-selected={index === selectedIndex}
               data-is-latest={index === filtered.length - 1}
-              className="relative cursor-pointer px-4 py-2 data-[is-latest=false]:border-b data-[selected=true]:bg-muted data-[selected=false]:hover:bg-muted"
+              className="data-[selected=true]:bg-muted data-[selected=false]:hover:bg-muted relative cursor-pointer px-4 py-2 data-[is-latest=false]:border-b"
               onClick={() => handleSelect(item)}
             >
               <span>{highlightMatch(item, inputValue?.toString())}</span>
               <button
                 type="button"
                 onClick={(e) => deleteItem(item, e)}
-                className="absolute right-4 top-1/2 flex shrink-0 -translate-y-1/2 text-muted-foreground hover:text-destructive"
+                className="text-muted-foreground hover:text-destructive absolute top-1/2 right-4 flex shrink-0 -translate-y-1/2"
               >
                 <X size={14} />
               </button>

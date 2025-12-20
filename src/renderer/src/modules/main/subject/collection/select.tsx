@@ -41,7 +41,7 @@ export function SubjectCollectionSelector({
         queryKey,
       })
       queryClient.invalidateQueries({
-        queryKey: ['authFetch', 'collection-subjects'],
+        queryKey: ['collection-subjects'],
       })
     },
     onError(_error, _variable, context) {
@@ -60,7 +60,7 @@ export function SubjectCollectionSelector({
         })
       }}
     >
-      <SelectTrigger className="w-fit bg-background font-medium">
+      <SelectTrigger className="bg-background w-fit font-medium">
         <SelectValue />
       </SelectTrigger>
       <SubjectCollectionSelectorContent subjectType={subjectCollection.subject_type} />

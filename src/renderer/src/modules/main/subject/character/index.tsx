@@ -45,7 +45,7 @@ export function SubjectCharactersSkeleton() {
         <h2 className="text-2xl font-medium">角色</h2>
         <Skeleton className="h-9 w-40" />
       </div>
-      <div className="grid grid-cols-[repeat(auto-fill,_minmax(14rem,_1fr))] gap-3 py-2">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3 py-2">
         {Array(8)
           .fill(0)
           .map((_, index) => (

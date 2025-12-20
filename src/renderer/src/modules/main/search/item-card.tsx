@@ -26,11 +26,11 @@ export function SearchItemCard({ searchItem }: { searchItem: SearchData }) {
           {!isEmpty(searchItem.image) ? (
             <Image
               imageSrc={searchItem.image}
-              className="h-fit w-24 shrink-0 overflow-hidden rounded-lg shadow"
-              loadingClassName="aspect-[2/3]"
+              className="h-fit w-24 shrink-0 overflow-hidden rounded-lg shadow-sm"
+              loadingClassName="aspect-2/3"
             />
           ) : (
-            <div className="flex size-24 shrink-0 items-center justify-center rounded-lg border text-xs shadow">
+            <div className="flex size-24 shrink-0 items-center justify-center rounded-lg border text-xs shadow-sm">
               还没有图片哦
             </div>
           )}
@@ -45,12 +45,12 @@ export function SearchItemCard({ searchItem }: { searchItem: SearchData }) {
                 )}
               </section>
               <div className="flex flex-row items-center gap-1">
-                <div className="text-base text-muted-foreground">{ICON_MAP[searchItem.type]}</div>
+                <div className="text-muted-foreground text-base">{ICON_MAP[searchItem.type]}</div>
                 <Separator orientation="vertical" className="h-4" />
                 <section className="flex flex-row items-center gap-1">
                   {searchItem.score && searchItem.score !== 0 ? (
                     <>
-                      <div className="mt-[1px]">
+                      <div className="mt-px">
                         <ScoreStarHalf score={searchItem.score} />
                       </div>
                       <span
@@ -66,7 +66,7 @@ export function SearchItemCard({ searchItem }: { searchItem: SearchData }) {
                 </section>
                 <Separator orientation="vertical" className="h-4" />
                 {searchItem.date && !isEmpty(searchItem.date) ? (
-                  <span className="text-xs font-medium text-muted-foreground">
+                  <span className="text-muted-foreground text-xs font-medium">
                     {searchItem.date}
                   </span>
                 ) : (
@@ -75,14 +75,14 @@ export function SearchItemCard({ searchItem }: { searchItem: SearchData }) {
               </div>
             </div>
             <div className="h-full overflow-hidden">
-              <ScrollWrapper className="h-full pb-2 pr-1">
-                <div className="mt-1 flex flex-row flex-wrap gap-1.5 after:grow-[999]">
+              <ScrollWrapper className="h-full pr-1 pb-2">
+                <div className="mt-1 flex flex-row flex-wrap gap-1.5 after:grow-999">
                   {searchItem.tags.map((item) => (
                     <Button
                       variant="outline"
                       size="sm"
                       key={item.name}
-                      className="h-auto flex-auto whitespace-normal px-1 py-1 shadow-none"
+                      className="h-auto flex-auto px-1 py-1 whitespace-normal shadow-none"
                     >
                       {item.name}
                     </Button>
@@ -110,7 +110,7 @@ function Header({ name, name_cn, id }: { name: string; name_cn: string; id: numb
         <MyLink to={`/subject/${id}`} className="flex flex-row gap-2">
           <h2 className="line-clamp-2 font-medium text-sky-600">{name_cn}</h2>
         </MyLink>
-        <h3 className="line-clamp-2 text-xs font-medium text-muted-foreground">{name}</h3>
+        <h3 className="text-muted-foreground line-clamp-2 text-xs font-medium">{name}</h3>
       </div>
     )
 }

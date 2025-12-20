@@ -31,7 +31,7 @@ export function FormTags({
         selectedTags={tags}
         edit
       />
-      <div className="flex w-full flex-col items-start gap-2 rounded-md border border-input bg-transparent p-2 text-sm shadow-sm transition-colors">
+      <div className="border-input flex w-full flex-col items-start gap-2 rounded-md border bg-transparent p-2 text-sm shadow-xs transition-colors">
         <TagInput
           tags={[...tags]}
           add={(value) => onTagsChanges(tags.add(value.trim()))}
