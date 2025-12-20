@@ -31,10 +31,7 @@ export function CharactersGrid({ characters }: { characters: Character[] }) {
 
   return (
     <div className="relative flex flex-row gap-2">
-      <div
-        className="grid w-full grid-cols-[repeat(auto-fill,_minmax(15rem,_1fr))] gap-2"
-        ref={ref}
-      >
+      <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-2" ref={ref}>
         {characters.slice(0, slice).map((item) => (
           <Item character={item} key={item.id} />
         ))}
@@ -43,7 +40,7 @@ export function CharactersGrid({ characters }: { characters: Character[] }) {
         <div>
           <Button
             variant="outline"
-            className="h-full whitespace-normal rounded-xl"
+            className="h-full rounded-xl whitespace-normal"
             onClick={() => setFold((fold) => !fold)}
           >
             {fold ? '展开' : '收起'}

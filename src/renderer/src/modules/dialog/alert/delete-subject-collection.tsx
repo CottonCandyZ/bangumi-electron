@@ -58,7 +58,7 @@ const Content = (props: DeleteCollectionProps) => {
         queryKey,
       })
       queryClient.invalidateQueries({
-        queryKey: ['authFetch', 'collection-subjects'],
+        queryKey: ['collection-subjects'],
       })
     },
   })
@@ -75,7 +75,7 @@ const Content = (props: DeleteCollectionProps) => {
 
         {hash ? (
           <AlertDialogAction
-            variant={'destructive'}
+            variant="destructive"
             onClick={() => {
               if (subjectId === null) return
               subjectCollectionMutation.mutate({ subjectId, hash })
@@ -87,7 +87,7 @@ const Content = (props: DeleteCollectionProps) => {
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <AlertDialogAction
-                variant={'destructive'}
+                variant="destructive"
                 className="cursor-not-allowed opacity-50"
                 onClick={(e) => {
                   e.preventDefault()

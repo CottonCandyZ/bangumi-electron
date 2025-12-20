@@ -859,7 +859,7 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
   getNextPageParam: GetNextPageParamFunction<TPageParam, QR>
 } & InfinityOptionalAuthProps<QP> &
   Omit<
-    UseInfiniteQueryOptions<QR, Error, InfiniteData<QR, TPageParam>, QR, QueryKey, TPageParam>,
+    UseInfiniteQueryOptions<QR, Error, InfiniteData<QR, TPageParam>, QueryKey, TPageParam>,
     'queryFn'
   >) => {
   const { data: token, isFetching } = useAccessTokenQuery()

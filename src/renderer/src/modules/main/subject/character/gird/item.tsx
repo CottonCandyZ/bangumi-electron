@@ -24,7 +24,7 @@ export function Item({ character }: { character: Character }) {
   return (
     <HoverPopCard layoutId={layoutId}>
       <HoverCardWrapper
-        className="rounded-xl border bg-card text-card-foreground"
+        className="bg-card text-card-foreground rounded-xl border"
         hoverContent={
           <HoverCardContent className="h-full cursor-default">
             <CardContent
@@ -78,8 +78,8 @@ function MetaInfo({ character, showAll = false }: { character: Character; showAl
   return (
     <section className="flex w-full flex-col gap-2">
       <div className="flex flex-row items-start justify-between gap-2">
-        <h3 className="font-medium leading-5">{character.name}</h3>
-        <Badge variant="outline" className="w-fit shrink-0 text-xs font-medium text-primary/70">
+        <h3 className="leading-5 font-medium">{character.name}</h3>
+        <Badge variant="outline" className="text-primary/70 w-fit shrink-0 text-xs font-medium">
           {character.relation}
         </Badge>
       </div>

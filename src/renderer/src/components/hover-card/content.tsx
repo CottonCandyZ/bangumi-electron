@@ -3,7 +3,8 @@ import { UI_CONFIG } from '@renderer/config'
 import { cn } from '@renderer/lib/utils'
 import { hoverCardOpenAtomAction, triggerClientRectAtom } from '@renderer/state/hover-card'
 import { Align, Side } from '@renderer/type/ui'
-import { animate, motion } from 'framer-motion'
+import { animate } from 'motion'
+import { motion } from 'motion/react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { HTMLProps, PropsWithChildren, useCallback, useLayoutEffect, useRef, useState } from 'react'
 
@@ -60,8 +61,11 @@ export function HoverCardContent({
       },
       { duration: isFlip || firstRender.current ? 0 : 0.15 },
     )
-    firstRender.current = false
-  }, [margin, align, triggerClientRect, isBottom, collisionPadding, firstRender])
+    // 首次的可能 resizeOb 会有抖动，本来加了个 tailing false 的 throttle 给 calc，不太合理，直接加个首次的时延这个可以解决
+    setTimeout(() => {
+      firstRender.current = false
+    }, 100)
+  }, [margin, align, triggerClientRect, isBottom, collisionPadding])
 
   useLayoutEffect(() => {
     if (!ref.current) return
@@ -78,7 +82,7 @@ export function HoverCardContent({
     <motion.div
       ref={aContainerRef}
       className={cn(
-        'fixed z-50 rounded-md border bg-popover text-popover-foreground shadow-xl',
+        'bg-popover text-popover-foreground fixed z-50 rounded-md border shadow-xl',
         isCollision ? 'w-max overflow-x-hidden' : 'overflow-hidden',
       )}
       transition={{

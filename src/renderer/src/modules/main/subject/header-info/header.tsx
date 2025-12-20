@@ -9,7 +9,7 @@ export function Header({ name, name_cn }: Pick<Subject, 'name' | 'name_cn'>) {
       ) : (
         <>
           <h1 className="text-3xl font-medium">{name_cn}</h1>
-          <h2 className="text-center font-jp text-muted-foreground @3xl:text-start">{name}</h2>
+          <h2 className="font-jp text-muted-foreground text-center @3xl:text-start">{name}</h2>
         </>
       )}
     </header>

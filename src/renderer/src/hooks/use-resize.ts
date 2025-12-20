@@ -5,7 +5,7 @@ export const useResizeObserver = <T extends Element>({
   callback,
   deps = [],
 }: {
-  ref: React.RefObject<T>
+  ref: React.RefObject<T | null>
   callback: (entry: ResizeObserverEntry) => void
   deps?: React.DependencyList
 }) => {

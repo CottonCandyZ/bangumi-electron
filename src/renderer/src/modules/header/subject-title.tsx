@@ -4,7 +4,7 @@ import { SubjectId } from '@renderer/data/types/bgm'
 import { Subject } from '@renderer/data/types/subject'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { subjectCoverImageInViewAtom } from '@renderer/state/in-view'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'motion/react'
 import { useAtomValue } from 'jotai'
 import { useLocation } from 'react-router-dom'
 
@@ -21,7 +21,7 @@ function SubjectHeaderTitle({ subjectId }: { subjectId: SubjectId }) {
   const isInView = useAtomValue(subjectCoverImageInViewAtom)
   if (!subjectInfo) return null
   return (
-    <div className="flex h-full select-none items-center overflow-hidden">
+    <div className="flex h-full items-center overflow-hidden select-none">
       <AnimatePresence key={subjectId}>
         {!isInView && (
           <motion.div
@@ -50,7 +50,7 @@ function Header({ name, name_cn }: Pick<Subject, 'name' | 'name_cn'>) {
       ) : (
         <>
           <h1 className="line-clamp-1 font-medium">{name_cn}</h1>
-          <h2 className="line-clamp-1 font-jp text-xs text-muted-foreground">{name}</h2>
+          <h2 className="font-jp text-muted-foreground line-clamp-1 text-xs">{name}</h2>
         </>
       )}
     </header>

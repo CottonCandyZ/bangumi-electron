@@ -27,7 +27,7 @@ export function RightResizablePanel() {
       onResizing={setResizing}
       width={width}
       onWidthChange={setWidth}
-      className="border-l bg-background"
+      className="bg-background border-l"
       resizeHandlePos="left"
     >
       <RightPanel />

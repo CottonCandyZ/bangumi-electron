@@ -89,7 +89,7 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
       })
     }
   }, [loginInfo, form])
-  const toastId = useRef<string | number>()
+  const toastId = useRef<string | number | undefined>(undefined)
   // 登录流程
   const login = async (props: webLoginProps) => {
     toastId.current = toast.loading(STEP_MESSAGE.START_LOGIN, {
@@ -125,7 +125,6 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
         id: toastId.current,
         duration: 3000,
       })
-      // queryClient.invalidateQueries({ queryKey: ['authFetch'] })
       queryClient.invalidateQueries({ queryKey: ['accessToken'] })
       success()
     },
@@ -266,7 +265,7 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
           control={form.control}
           name="savePassword"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md">
+            <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md">
               <FormControl>
                 <Checkbox checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>

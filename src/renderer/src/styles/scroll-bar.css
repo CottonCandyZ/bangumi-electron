@@ -11,14 +11,12 @@
     --os-handle-interactive-area-offset: 4px;
     --os-handle-border-radius: 10px;
   }
-
 }
 .dark .os-theme-custom {
   --os-handle-bg: rgba(255, 255, 255, 0.2);
   --os-handle-bg-hover: rgba(255, 255, 255, 0.55);
   --os-handle-bg-active: rgba(255, 255, 255, 0.66);
 }
-
 
 ::-webkit-scrollbar {
   background-color: transparent;

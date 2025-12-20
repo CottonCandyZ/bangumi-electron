@@ -5,28 +5,28 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@renderer/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center select-none whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center select-none whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
   {
     variants: {
       variant: {
         wantToWatch:
-          'bg-[var(--want-to-watch-accent)] text-[var(--want-to-watch-accent-foreground)] shadow-inner hover:bg-[var(--want-to-watch)] hover:text-[var(--want-to-watch-foreground)]',
+          'bg-(--want-to-watch-accent) text-(--want-to-watch-accent-foreground) shadow-inner hover:bg-(--want-to-watch) hover:text-(--want-to-watch-foreground)',
         watched:
-          'border border-input bg-[var(--watched-accent)] text-[var(--watched-accent-foreground)] shadow-inner hover:shadow-none hover:bg-[var(--watched)] hover:text-[var(--watched-foreground)]',
+          'border border-input bg-(--watched-accent) text-(--watched-accent-foreground) shadow-inner hover:shadow-none hover:bg-(--watched) hover:text-(--watched-foreground)',
         abandoned:
           'border border-primary-foreground line-through shadow-inner hover:bg-accent hover:text-accent-foreground text-muted-foreground',
-        noAired: 'hover:bg-accent hover:text-accent-foreground text-muted-foreground hover:shadow',
+        noAired:
+          'hover:bg-accent hover:text-accent-foreground text-muted-foreground hover:shadow-sm',
         onAir:
           'border border-input bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground',
         aired:
           'border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:shadow-inner',
-        wantToWatchHover:
-          'shadow-inner bg-[var(--want-to-watch)] text-[var(--want-to-watch-foreground)]',
+        wantToWatchHover: 'shadow-inner bg-(--want-to-watch) text-(--want-to-watch-foreground)',
         watchedHover:
-          'border border-input shadow-inner hover:shadow-none bg-[var(--watched)] text-[var(--watched-foreground)]',
+          'border border-input shadow-inner hover:shadow-none bg-(--watched) text-(--watched-foreground)',
         abandonedHover:
           'border border-primary-foreground line-through shadow-inner bg-accent text-accent-foreground text-muted-foreground',
-        noAiredHover: 'bg-accent text-accent-foreground shadow',
+        noAiredHover: 'bg-accent text-accent-foreground shadow-sm',
         onAirHover: 'border border-input text-muted-foreground bg-accent text-accent-foreground',
         airedHover: 'border border-input bg-accent text-accent-foreground shadow-inner',
       },
@@ -44,20 +44,24 @@ const buttonVariants = cva(
   },
 )
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+function EpisodeButton({
+  className,
+  variant,
+  size,
+  asChild = false,
+  ...props
+}: React.ComponentProps<'button'> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean
+  }) {
+  const Comp = asChild ? Slot : 'button'
+  return (
+    <Comp
+      data-slot="button"
+      className={cn(buttonVariants({ variant, size, className }))}
+      {...props}
+    />
+  )
 }
-
-const EpisodeButton = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : 'button'
-    return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
-    )
-  },
-)
-EpisodeButton.displayName = 'EpisodeButton'
 
 export { EpisodeButton, buttonVariants }

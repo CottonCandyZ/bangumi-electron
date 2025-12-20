@@ -53,7 +53,7 @@ export function HoverEpisodeDetail() {
     <HoverCardContent align="start" isBottom={(value) => setBottom(value)}>
       <div
         className={cn(
-          'flex min-w-64 max-w-96 flex-col gap-2 px-4',
+          'flex max-w-96 min-w-64 flex-col gap-2 px-4',
           isCollectionEpisode(episodes) &&
             (subjectCollection === undefined || subjectCollectionType === CollectionType.watching)
             ? bottom
@@ -65,13 +65,13 @@ export function HoverEpisodeDetail() {
         {bottom &&
           isCollectionEpisode(episodes) &&
           (subjectCollection === undefined ? (
-            <div className="sticky top-0 bg-background pb-2 pt-4">
+            <div className="bg-background sticky top-0 pt-4 pb-2">
               <Skeleton className="h-9 w-52" />
             </div>
           ) : (
             subjectCollection !== null &&
             subjectCollectionType === CollectionType.watching && (
-              <div className="sticky top-0 bg-background pb-2 pt-4">
+              <div className="bg-background sticky top-0 pt-4 pb-2">
                 <EpisodeCollectionButton
                   subjectType={subjectCollection.subject_type}
                   subjectId={episode.subject_id.toString()}
@@ -107,13 +107,13 @@ export function HoverEpisodeDetail() {
         {!bottom &&
           isCollectionEpisode(episodes) &&
           (subjectCollection === undefined ? (
-            <div className="sticky bottom-0 z-0 bg-background pb-4 pt-2">
+            <div className="bg-background sticky bottom-0 z-0 pt-2 pb-4">
               <Skeleton className="h-9 w-52" />
             </div>
           ) : (
             subjectCollection !== null &&
             subjectCollectionType === CollectionType.watching && (
-              <div className="sticky bottom-0 z-0 bg-background pb-4 pt-2">
+              <div className="bg-background sticky bottom-0 z-0 pt-2 pb-4">
                 <EpisodeCollectionButton
                   subjectType={subjectCollection.subject_type}
                   subjectId={episode.subject_id.toString()}

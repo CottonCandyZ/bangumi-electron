@@ -13,13 +13,13 @@ export function SearchInput() {
   }, [searchKeyword])
 
   return (
-    <search className="group flex h-12 w-full items-center gap-2 border-b bg-accent/50 px-2 pl-4 transition-colors focus-within:bg-background hover:bg-background">
+    <search className="group bg-accent/50 focus-within:bg-background hover:bg-background flex h-12 w-full items-center gap-2 border-b px-2 pl-4 transition-colors">
       {/* search Icon */}
       <span className="i-mingcute-search-2-line text-4xl" />
       <input
         value={keyword}
         ref={inputRef}
-        className="h-full w-full bg-transparent focus-visible:outline-none"
+        className="h-full w-full bg-transparent focus-visible:outline-hidden"
         onChange={(e) => setKeywordState(e.target.value)}
         onKeyDownCapture={(e) => {
           if (keyword !== '' && e.code === 'Enter') {
@@ -31,9 +31,9 @@ export function SearchInput() {
       {/* clear Button */}
       <button
         className={cn(
-          'i-mingcute-close-circle-fill flex shrink-0 items-center justify-center text-xl text-transparent transition-all duration-300 group-focus-within:text-primary/30 group-hover:text-primary/30 group-hover:hover:text-primary/80',
+          'i-mingcute-close-circle-fill group-focus-within:text-primary/30 group-hover:text-primary/30 hover:group-hover:text-primary/80 flex shrink-0 items-center justify-center text-xl text-transparent transition-all duration-300',
           keyword === '' &&
-            'cursor-default group-focus-within:text-transparent group-hover:text-transparent group-hover:hover:text-transparent',
+            'cursor-default group-focus-within:text-transparent group-hover:text-transparent hover:group-hover:text-transparent',
         )}
         onClick={() => {
           setKeywordState('')

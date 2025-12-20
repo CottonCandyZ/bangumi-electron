@@ -1,7 +1,7 @@
 import { calculatePopSizePosition } from '@renderer/components/hover-pop-card/utils'
 import { cn } from '@renderer/lib/utils'
 import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
-import { AnimatePresence, HTMLMotionProps, motion } from 'framer-motion'
+import { AnimatePresence, HTMLMotionProps, motion } from 'motion/react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import {
   createContext,
@@ -15,7 +15,7 @@ import {
 } from 'react'
 
 const HoverPopCardContext = createContext<{
-  hoverRef: React.RefObject<HTMLDivElement> | null
+  hoverRef: React.RefObject<HTMLDivElement | null>
   layoutId: string
   activeId: string | null
   finished: boolean
@@ -33,7 +33,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
   layoutId,
   delay = 700,
 }) => {
-  const hoverRef = useRef<HTMLDivElement>(null)
+  const hoverRef = useRef<HTMLDivElement | null>(null)
   const activeId = useAtomValue(activeHoverPopCardAtom)
   const [finished, setFinished] = useState(true)
 

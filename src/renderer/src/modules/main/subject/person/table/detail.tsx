@@ -43,7 +43,7 @@ export function Detail({ personId }: { personId: PersonId }) {
         )}
         <section className="flex flex-col">
           <h3 className="text-base font-medium">{personDetail.name}</h3>
-          {cn_name && <h4 className="font-medium text-muted-foreground">{cn_name}</h4>}
+          {cn_name && <h4 className="text-muted-foreground font-medium">{cn_name}</h4>}
         </section>
       </div>
       <section>

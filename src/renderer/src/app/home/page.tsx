@@ -11,7 +11,7 @@ const config = [
 
 export function Component() {
   return (
-    <div className="flex flex-col gap-2 pb-20 pt-4">
+    <div className="flex flex-col gap-2 pt-4 pb-20">
       {/* <section>
         <BigCarousel />
       </section> */}

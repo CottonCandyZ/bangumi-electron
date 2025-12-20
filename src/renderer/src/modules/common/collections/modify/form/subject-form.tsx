@@ -115,7 +115,7 @@ export function AddOrModifySubjectCollectionForm({
         queryKey,
       })
       queryClient.invalidateQueries({
-        queryKey: ['authFetch', 'collection-subjects'],
+        queryKey: ['collection-subjects'],
       })
     },
   })

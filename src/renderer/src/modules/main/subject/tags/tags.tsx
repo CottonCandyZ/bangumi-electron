@@ -23,7 +23,7 @@ export function Tags({
   const collectionTagsSet = new Set(collectionTags)
   const diff = collectionTagsSet.difference(subjectTagsSet)
   return (
-    <div className="flex flex-row flex-wrap gap-2 after:grow-[999]">
+    <div className="flex flex-row flex-wrap gap-2 after:grow-999">
       {[...subjectTagsMap]
         .sort((a, b) => b[1] - a[1])
         .map(([name, count]) => (
@@ -31,18 +31,18 @@ export function Tags({
             type="button"
             key={name}
             className={cn(
-              'relative h-auto flex-auto items-baseline justify-center gap-1 overflow-hidden whitespace-normal px-1.5 py-1.5 shadow-none',
+              'relative h-auto flex-auto items-baseline justify-center gap-1 overflow-hidden px-1.5 py-1.5 whitespace-normal shadow-none',
 
               edit && selectedTags && selectedTags.has(name) && 'opacity-50',
             )}
-            variant={'outline'}
+            variant="outline"
             onClick={() => onTagClicked && onTagClicked(name)}
           >
             {collectionTagsSet.has(name) && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              <div className="bg-primary absolute right-0 bottom-0 left-0 h-0.5" />
             )}
             <span className="text-sm">{name}</span>
-            <span className="text-xs text-muted-foreground">{count}</span>
+            <span className="text-muted-foreground text-xs">{count}</span>
           </Button>
         ))}
       {[...diff].map((item) => (
@@ -50,13 +50,13 @@ export function Tags({
           type="button"
           key={item}
           className={cn(
-            'relative h-auto flex-auto items-baseline justify-center gap-1 overflow-hidden whitespace-normal px-1.5 py-1.5 shadow-none',
+            'relative h-auto flex-auto items-baseline justify-center gap-1 overflow-hidden px-1.5 py-1.5 whitespace-normal shadow-none',
             edit && selectedTags && selectedTags.has(item) && 'opacity-50',
           )}
-          variant={'outline'}
+          variant="outline"
           onClick={() => onTagClicked && onTagClicked(item)}
         >
-          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+          <div className="bg-primary absolute right-0 bottom-0 left-0 h-0.5" />
           <span className="text-sm">{item}</span>
         </Button>
       ))}
@@ -64,7 +64,7 @@ export function Tags({
         <Button
           type="button"
           className="h-auto flex-auto gap-1 py-1.5 text-sm"
-          variant={'outline'}
+          variant="outline"
           onClick={() => setEdit(true)}
         >
           + 添加标签

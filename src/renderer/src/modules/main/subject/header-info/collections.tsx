@@ -8,7 +8,7 @@ export function Collections({ collection, type }: Pick<Subject, 'collection' | '
   const { currentColor } = useTheme()
   const colorValue = currentColor === 'light' ? '60, 60, 60' : '255, 255, 255'
   return (
-    <div className="flex w-fit select-none flex-row items-center gap-3 text-sm font-medium">
+    <div className="flex w-fit flex-row items-center gap-3 text-sm font-medium select-none">
       <span
         style={{
           borderColor: `rgba(${colorValue}, ${total_collection !== 0 ? collection.wish / total_collection : 0})`,

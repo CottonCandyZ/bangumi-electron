@@ -1,7 +1,7 @@
 import { calculatePopSizePosition } from '@renderer/components/hover-pop-card/utils'
 import { cn } from '@renderer/lib/utils'
 import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
-import { animate } from 'framer-motion'
+import { animate } from 'motion/react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import {
   createContext,
@@ -59,29 +59,13 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
   )
 }
 
-import React, { forwardRef } from 'react'
+export const HoverCardContent = ({ children, ...props }: HTMLProps<HTMLDivElement>) => {
+  return <div {...props}>{children}</div>
+}
 
-export const HoverCardContent = forwardRef<HTMLDivElement, HTMLProps<HTMLDivElement>>(
-  ({ children, ...props }, ref) => {
-    return (
-      <div ref={ref} {...props}>
-        {children}
-      </div>
-    )
-  },
-)
-HoverCardContent.displayName = 'HoverCardContent'
-
-export const PopCardContent = forwardRef<HTMLDivElement, HTMLProps<HTMLDivElement>>(
-  ({ children, ...props }, ref) => {
-    return (
-      <div ref={ref} {...props}>
-        {children}
-      </div>
-    )
-  },
-)
-PopCardContent.displayName = 'PopCardContent'
+export const PopCardContent = ({ children, ...props }: HTMLProps<HTMLDivElement>) => {
+  return <div {...props}>{children}</div>
+}
 
 type HoverCardWrapperProps = HTMLProps<HTMLDivElement> & {
   hoverContent: React.ReactNode
@@ -173,7 +157,7 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
       className={cn(
         isAnimate
           ? 'absolute'
-          : 'h-full hover:-translate-y-0.5 hover:!shadow-xl hover:duration-700',
+          : 'h-full hover:-translate-y-0.5 hover:shadow-xl! hover:duration-700',
         'inset-0 overflow-hidden',
         isActive && 'z-10',
         className,

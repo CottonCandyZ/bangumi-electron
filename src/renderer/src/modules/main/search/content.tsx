@@ -34,21 +34,21 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
 
   // if (searchResult === undefined)
   //   return (
-  //     <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(25rem,_1fr))] gap-4 px-10">
+  //     <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(25rem,1fr))] gap-4 px-10">
   //       <SkeletonList />
   //     </div>
   //   )
 
   return (
     <div className="flex flex-col items-center justify-center gap-5">
-      <div className="grid w-full grid-cols-[repeat(auto-fill,_minmax(25rem,_1fr))] gap-4 px-10">
+      <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(25rem,1fr))] gap-4 px-10">
         {searchResultQuery.isLoading ? (
           <SkeletonList />
         ) : (
           searchResult?.data.map((item) => <SearchItemCard searchItem={item} key={item.id} />)
         )}
       </div>
-      <div className="sticky bottom-0 w-full border-t bg-background py-3">
+      <div className="bg-background sticky bottom-0 w-full border-t py-3">
         {total > 0 && (
           <BigPagination
             total={Math.ceil(total / limit)}

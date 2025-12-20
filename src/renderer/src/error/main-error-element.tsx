@@ -32,7 +32,7 @@ export default function MainErrorElement() {
   }
 
   return (
-    <div className="flex h-full items-center justify-center bg-gradient-to-br from-red-50 to-orange-50 dark:from-secondary dark:to-background">
+    <div className="dark:from-secondary dark:to-background flex h-full items-center justify-center bg-linear-to-br from-red-50 to-orange-50">
       <Card className="max-w-3xl overflow-hidden shadow-lg">
         <CardHeader className="bg-red-100/50 py-6 dark:bg-white/20">
           <CardTitle className="text-center text-3xl font-bold text-red-600 dark:text-red-50">
@@ -41,7 +41,7 @@ export default function MainErrorElement() {
         </CardHeader>
         <CardContent className="flex flex-col gap-6 p-6">
           {error.stack && (
-            <div className="w-full rounded-lg border border-red-200 p-4 shadow-sm dark:border-border">
+            <div className="dark:border-border w-full rounded-lg border border-red-200 p-4 shadow-xs">
               <div className="mb-4 flex items-center justify-between">
                 <p className="text-xl font-medium text-red-600 dark:text-red-50">
                   {ERROR_CONSTANTS.ERROR_MESSAGE_LABEL}
@@ -51,16 +51,16 @@ export default function MainErrorElement() {
                     variant="outline"
                     size="sm"
                     onClick={copyErrorToClipboard}
-                    className="transition-all duration-200 ease-in-out hover:bg-red-50/50 dark:hover:bg-accent dark:hover:text-accent-foreground"
+                    className="dark:hover:bg-accent dark:hover:text-accent-foreground transition-all duration-200 ease-in-out hover:bg-red-50/50"
                   >
                     {copied ? (
                       <span className="flex items-center">
-                        <span className="i-mingcute-check-fill mr-1 mt-0.5 text-green-500" />
+                        <span className="i-mingcute-check-fill mt-0.5 mr-1 text-green-500" />
                         {ERROR_CONSTANTS.COPIED_TEXT}
                       </span>
                     ) : (
                       <span className="flex items-center">
-                        <span className="i-mingcute-copy-2-line mr-1 mt-0.5" />
+                        <span className="i-mingcute-copy-2-line mt-0.5 mr-1" />
                         {ERROR_CONSTANTS.COPY_BUTTON_TEXT}
                       </span>
                     )}
@@ -72,14 +72,14 @@ export default function MainErrorElement() {
                     className="transition-all duration-200 ease-in-out hover:bg-red-50/50"
                   >
                     <span className="flex items-center">
-                      <span className="i-mingcute-github-line mr-1 mt-0.5" />
+                      <span className="i-mingcute-github-line mt-0.5 mr-1" />
                       {ERROR_CONSTANTS.SUBMIT_ISSUE_TEXT}
                     </span>
                   </Button>
                 </div>
               </div>
               <ScrollWrapper className="max-h-60">
-                <pre className="whitespace-pre-wrap break-words font-mono text-sm text-gray-700 dark:text-primary">
+                <pre className="dark:text-primary font-mono text-sm break-words whitespace-pre-wrap text-gray-700">
                   {error.stack}
                 </pre>
               </ScrollWrapper>
@@ -96,25 +96,25 @@ export default function MainErrorElement() {
           <Button
             variant="outline"
             onClick={() => nav(-1)}
-            className="hover:bg-red-100/50 dark:hover:bg-accent dark:hover:text-accent-foreground"
+            className="dark:hover:bg-accent dark:hover:text-accent-foreground hover:bg-red-100/50"
           >
-            <span className="i-mingcute-arrow-left-line mr-2 mt-0.5" />
+            <span className="i-mingcute-arrow-left-line mt-0.5 mr-2" />
             {ERROR_CONSTANTS.BACK_BUTTON_TEXT}
           </Button>
           <Button
             variant="outline"
             onClick={() => nav('/')}
-            className="hover:bg-red-100/50 dark:hover:bg-accent dark:hover:text-accent-foreground"
+            className="dark:hover:bg-accent dark:hover:text-accent-foreground hover:bg-red-100/50"
           >
-            <span className="i-mingcute-home-5-line mr-2 mt-0.5" />
+            <span className="i-mingcute-home-5-line mt-0.5 mr-2" />
             {ERROR_CONSTANTS.HOME_BUTTON_TEXT}
           </Button>
           <Button
             variant="outline"
             onClick={() => window.location.reload()}
-            className="hover:bg-red-100/50 dark:hover:bg-accent dark:hover:text-accent-foreground"
+            className="dark:hover:bg-accent dark:hover:text-accent-foreground hover:bg-red-100/50"
           >
-            <span className="i-mingcute-refresh-1-line mr-2 mt-0.5" />
+            <span className="i-mingcute-refresh-1-line mt-0.5 mr-2" />
             {ERROR_CONSTANTS.REFRESH_BUTTON_TEXT}
           </Button>
         </CardFooter>

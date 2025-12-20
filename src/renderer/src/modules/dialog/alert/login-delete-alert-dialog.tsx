@@ -30,7 +30,7 @@ const Content = (props: DeleteLoginAccountProps) => {
       </AlertDialogHeader>
       <AlertDialogFooter>
         <AlertDialogCancel>取消</AlertDialogCancel>
-        <AlertDialogAction variant={'destructive'} onClick={onDeleted}>
+        <AlertDialogAction variant="destructive" onClick={onDeleted}>
           确定
         </AlertDialogAction>
       </AlertDialogFooter>

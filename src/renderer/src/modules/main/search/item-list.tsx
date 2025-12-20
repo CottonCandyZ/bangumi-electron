@@ -23,7 +23,7 @@ export function SearchItemList({ searchItem }: { searchItem: SearchData }) {
           <Image
             imageSrc={searchItem.image}
             className="h-fit w-full"
-            loadingClassName="aspect-[2/3]"
+            loadingClassName="aspect-2/3"
           />
         </Card>
       </MyLink>
@@ -31,7 +31,7 @@ export function SearchItemList({ searchItem }: { searchItem: SearchData }) {
         <div className="flex flex-row justify-between">
           {/* 标题 */}
           <section className="flex flex-row items-center gap-1">
-            <div className="mt-[3px] text-base text-muted-foreground">
+            <div className="text-muted-foreground mt-[3px] text-base">
               {ICON_MAP[searchItem.type]}
             </div>
             <Header {...searchItem} />
@@ -42,7 +42,7 @@ export function SearchItemList({ searchItem }: { searchItem: SearchData }) {
         <span>{searchItem.date}</span>
         {/* 评分 */}
         <section className="flex flex-row items-center gap-1">
-          <div className="mt-[1px]">
+          <div className="mt-px">
             <ScoreStarHalf score={searchItem.score} />
           </div>
           <span
@@ -52,7 +52,7 @@ export function SearchItemList({ searchItem }: { searchItem: SearchData }) {
             {searchItem.score}
           </span>
         </section>
-        <div className="mt-1 flex flex-row flex-wrap gap-1.5 after:grow-[999]">
+        <div className="mt-1 flex flex-row flex-wrap gap-1.5 after:grow-999">
           {searchItem.tags.map((item) => (
             <Button
               variant="outline"
@@ -83,7 +83,7 @@ function Header({ name, name_cn, id }: { name: string; name_cn: string; id: numb
         <MyLink to={`/subject/${id}`}>
           <h2 className="font-medium text-sky-600 hover:text-sky-900">{name_cn}</h2>
         </MyLink>
-        <h3 className="text-sm font-medium text-muted-foreground">{name}</h3>
+        <h3 className="text-muted-foreground text-sm font-medium">{name}</h3>
       </div>
     )
 }

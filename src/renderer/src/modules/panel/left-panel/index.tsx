@@ -27,7 +27,7 @@ export function LeftResizablePanel() {
       onResizing={setResizing}
       width={width}
       onWidthChange={setWidth}
-      className="border-r bg-background"
+      className="bg-background border-r"
       resizeHandlePos="right"
     >
       <LeftPanel />

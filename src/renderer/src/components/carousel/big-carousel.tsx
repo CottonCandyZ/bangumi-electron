@@ -17,7 +17,7 @@ const animateConfig: KeyframeAnimationOptions = {
   easing: 'ease',
 }
 
-export function BigCarousel(): JSX.Element {
+export function BigCarousel() {
   // index
   const [currentIndex, setCurrentIndex] = useState(items)
   const flexBox = useRef<HTMLDivElement>(null)
@@ -87,7 +87,7 @@ export function BigCarousel(): JSX.Element {
         onClick={() => {
           fromTo(currentIndex, currentIndex - 1)
         }}
-        className="absolute left-2 top-1/2 z-10 h-8 w-8 -translate-y-1/2 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+        className="absolute top-1/2 left-2 z-10 h-8 w-8 -translate-y-1/2 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
       >
         <ArrowLeft className="h-4 w-4" />
       </Button>
@@ -97,7 +97,7 @@ export function BigCarousel(): JSX.Element {
         onClick={() => {
           fromTo(currentIndex, currentIndex + 1)
         }}
-        className="absolute right-2 top-1/2 z-10 h-8 w-8 -translate-y-1/2 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+        className="absolute top-1/2 right-2 z-10 h-8 w-8 -translate-y-1/2 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
       >
         <ArrowRight className="h-4 w-4" />
       </Button>

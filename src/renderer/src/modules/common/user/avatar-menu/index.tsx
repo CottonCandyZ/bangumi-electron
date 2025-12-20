@@ -38,7 +38,7 @@ function ProfileMenuContent({ type }: { type: 'expend' | 'small' }) {
       <DropdownMenuTrigger
         data-expend={type}
         className={cn(
-          'flex w-fit flex-row items-center gap-3 rounded-full text-muted-foreground shadow-sm hover:text-primary',
+          'text-muted-foreground hover:text-primary flex w-fit flex-row items-center gap-3 rounded-full shadow-xs',
           type === 'expend' && 'group w-full border p-2 shadow-none',
           dropdownOpen && 'bg-accent text-primary',
         )}
@@ -49,7 +49,7 @@ function ProfileMenuContent({ type }: { type: 'expend' | 'small' }) {
             imageSrc={userInfo.avatar.small}
           />
         ) : (
-          <div className="aspect-square w-8 shrink-0 overflow-hidden rounded-full bg-accent" />
+          <div className="bg-accent aspect-square w-8 shrink-0 overflow-hidden rounded-full" />
         )}
         {type === 'expend' && (
           <span className="shrink-0 font-semibold">{isLogin && userInfo.nickname}</span>
@@ -120,11 +120,11 @@ function ProfileMenuSkeleton({ type }: { type: 'expend' | 'small' }) {
     <div
       data-expend={type}
       className={cn(
-        'flex w-fit flex-row items-center gap-3 overflow-hidden rounded-full text-muted-foreground shadow-sm hover:text-primary',
+        'text-muted-foreground hover:text-primary flex w-fit flex-row items-center gap-3 overflow-hidden rounded-full shadow-xs',
         type === 'expend' && 'group w-full border p-2 shadow-none',
       )}
     >
-      <Skeleton className="aspect-square w-8 shrink-0 overflow-hidden rounded-full bg-accent" />
+      <Skeleton className="bg-accent aspect-square w-8 shrink-0 overflow-hidden rounded-full" />
     </div>
   )
 }
