@@ -7,7 +7,6 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai'
 import { toast } from 'sonner'
 import { createSingletonPromise } from '@renderer/lib/utils/promise'
-import { useAuthSuspenseQuery } from '@renderer/data/hooks/factory'
 
 /**
  * Logout 的 Mutate
@@ -84,18 +83,6 @@ export const useAccessTokenQuery = () => {
   })
 }
 
-function useSessionSuspenseQuery() {
-  const userId = useAtomValue(userIdAtom)
-  return useAuthSuspenseQuery({
-    queryKey: ['userSession', userId],
-    queryFn: async () => {
-      const accessToken = await getAccessToken(userId)
-      if (!accessToken) return null
-      return await getUserInfoWithAuth()
-    },
-  })
-}
-
 function useSessionQuery() {
   const userId = useAtomValue(userIdAtom)
   return useQuery({
@@ -106,10 +93,6 @@ function useSessionQuery() {
       return await getUserInfoWithAuth()
     },
   })
-}
-
-export function useSessionSuspense() {
-  return useSessionSuspenseQuery().data
 }
 
 export function useSession() {

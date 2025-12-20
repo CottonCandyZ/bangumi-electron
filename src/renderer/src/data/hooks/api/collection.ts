@@ -6,7 +6,7 @@ import {
   ModifyEpisodeCollectionBySubjectId,
 } from '@renderer/data/fetch/api/collection'
 import {
-  useAuthSuspenseQuery,
+  useAuthQuery,
   useInfinityQueryOptionalAuth,
   useMutationMustAuth,
   useQueryOptionalAuth,
@@ -57,17 +57,20 @@ export const useCollectionEpisodesInfoBySubjectIdQuery = ({
   limit = 100,
   offset = 0,
   episodeType,
+  enabled,
 }: {
   subjectId: SubjectId
   limit?: number
   offset?: number
   episodeType?: EpisodeType
+  enabled?: boolean
 }) =>
-  useAuthSuspenseQuery({
+  useAuthQuery({
     queryFn: getEpisodesCollectionBySubjectId,
     queryKey: ['collection-episodes'],
     queryProps: { subjectId, limit, offset, episodeType },
     staleTime: 0,
+    enabled,
   })
 
 export const useQuerySubjectCollection = ({

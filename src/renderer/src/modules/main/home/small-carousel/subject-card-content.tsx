@@ -109,6 +109,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
         <MyLink
           to={`/subject/${subjectId}`}
           className="cursor-default"
+          viewTransition
           state={{ viewTransitionName: `cover-image-${key}` }}
         >
           <Card className="h-full w-full overflow-hidden">

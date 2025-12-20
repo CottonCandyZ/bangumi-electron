@@ -1,5 +1,5 @@
 import { getEpisodesBySubjectId } from '@renderer/data/fetch/api/episodes'
-import { useAuthSuspenseQuery } from '@renderer/data/hooks/factory'
+import { useAuthQuery } from '@renderer/data/hooks/factory'
 import { SubjectId } from '@renderer/data/types/bgm'
 
 /**
@@ -11,14 +11,17 @@ export const useEpisodesInfoBySubjectIdQuery = ({
   limit = 100,
   offset = 0,
   type,
+  enabled,
 }: {
   subjectId: SubjectId
   limit?: number
   offset?: number
   type?: number
+  enabled?: boolean
 }) =>
-  useAuthSuspenseQuery({
+  useAuthQuery({
     queryFn: getEpisodesBySubjectId,
     queryKey: ['episodes-info'],
     queryProps: { subjectId, limit, offset, type },
+    enabled,
   })

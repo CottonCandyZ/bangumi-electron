@@ -15,18 +15,17 @@ import {
   DropdownMenuRadioItem,
 } from '@renderer/components/ui/dropdown-menu'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { useLogoutMutation } from '@renderer/data/hooks/session'
+import { useLogoutMutation, useSession } from '@renderer/data/hooks/session'
 import { toast } from 'sonner'
 import { useTheme } from '@renderer/modules/wrapper/theme-wrapper'
-import { Suspense, useState } from 'react'
+import { useState } from 'react'
 import { cn } from '@renderer/lib/utils'
 import { useSetAtom } from 'jotai'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
-import { useSessionSuspense } from '@renderer/data/hooks/session'
 
-function ProfileMenuContent({ type }: { type: 'expend' | 'small' }) {
+export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   const logoutMutation = useLogoutMutation()
-  const userInfo = useSessionSuspense()
+  const userInfo = useSession()
   const isLogin = !!userInfo
   const { theme, setTheme } = useTheme()
 
@@ -112,27 +111,5 @@ function ProfileMenuContent({ type }: { type: 'expend' | 'small' }) {
         )}
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-}
-
-function ProfileMenuSkeleton({ type }: { type: 'expend' | 'small' }) {
-  return (
-    <div
-      data-expend={type}
-      className={cn(
-        'text-muted-foreground hover:text-primary flex w-fit flex-row items-center gap-3 overflow-hidden rounded-full shadow-xs',
-        type === 'expend' && 'group w-full border p-2 shadow-none',
-      )}
-    >
-      <Skeleton className="bg-accent aspect-square w-8 shrink-0 overflow-hidden rounded-full" />
-    </div>
-  )
-}
-
-export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
-  return (
-    <Suspense fallback={<ProfileMenuSkeleton type={type} />}>
-      <ProfileMenuContent type={type} />
-    </Suspense>
   )
 }

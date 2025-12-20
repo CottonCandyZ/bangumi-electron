@@ -1,6 +1,6 @@
 import { getRelatedSubjects, getSubjectById } from '@renderer/data/fetch/api/subject'
 import {
-  useAuthSuspenseQuery,
+  useAuthQuery,
   useQueriesOptionalAuth,
   useQueryOptionalAuth,
 } from '@renderer/data/hooks/factory'
@@ -46,10 +46,17 @@ export const useSubjectsInfoAPIQuery = ({
     needKeepPreviousData,
   })
 
-export const useRelatedSubjectsQuery = ({ id }: { id: SubjectId }) =>
-  useAuthSuspenseQuery({
+export const useRelatedSubjectsQuery = ({
+  id,
+  needKeepPreviousData,
+}: {
+  id: SubjectId
+  needKeepPreviousData?: boolean
+}) =>
+  useAuthQuery({
     queryFn: getRelatedSubjects,
     queryKey: ['subject-related'],
     queryProps: { id },
     select: sortCharacterByRelation(),
+    needKeepPreviousData,
   })

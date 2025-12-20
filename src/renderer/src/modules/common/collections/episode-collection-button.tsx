@@ -16,10 +16,10 @@ import { SubjectType } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { EPISODE_COLLECTION_ACTION_MAP, EPISODE_COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { useQueryClient } from '@tanstack/react-query'
-import { Suspense, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useQueryKeyWithUserId, useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
-import { useSessionSuspense } from '@renderer/data/hooks/session'
+import { useSession } from '@renderer/data/hooks/session'
 
 type Props = {
   index: number
@@ -28,20 +28,22 @@ type Props = {
   setEnabledForm: (enabled: boolean) => void
 } & ModifyEpisodeCollectionOptType
 
-function EpisodeCollectionButtonContent({
+export function EpisodeCollectionButton({
   index,
   subjectId,
   subjectType,
   modifyEpisodeCollectionOpt,
   setEnabledForm,
 }: Props) {
-  const userInfo = useSessionSuspense()
-  const collectionEpisodes = useCollectionEpisodesInfoBySubjectIdQuery({
+  const userInfo = useSession()
+  const collectionEpisodesQuery = useCollectionEpisodesInfoBySubjectIdQuery({
     ...modifyEpisodeCollectionOpt,
     subjectId,
-  }).data
+    enabled: !!userInfo,
+  })
+  const collectionEpisodes = collectionEpisodesQuery.data
+  const episodes = collectionEpisodes?.data
   const username = userInfo?.username
-  const episodes = collectionEpisodes.data
   const queryClient = useQueryClient()
   const episodeCollectionType = episodes?.[index].type
   const [hover, setHover] = useState<(typeof EPISODE_COLLECTION_ACTION)[number] | null>(
@@ -115,7 +117,9 @@ function EpisodeCollectionButtonContent({
     },
   })
 
-  if (!episodes || episodeCollectionType === undefined) return null
+  if (episodes === undefined || episodeCollectionType == undefined)
+    return <Skeleton className="h-9 w-52" />
+  if (!episodes) return null
 
   return (
     <div className="flex h-9 flex-row gap-1">
@@ -181,13 +185,5 @@ function EpisodeCollectionButtonContent({
         </Button>
       )}
     </div>
-  )
-}
-
-export function EpisodeCollectionButton(props: Props) {
-  return (
-    <Suspense fallback={<Skeleton className="h-9 w-52" />}>
-      <EpisodeCollectionButtonContent {...props} />
-    </Suspense>
   )
 }

@@ -495,19 +495,22 @@ export const useDBAuthSuspenseQuery = <
   })
 }
 
-export const useAuthSuspenseQuery = <TApiParams, TQueryFnReturn, TData = TQueryFnReturn>({
+export const useAuthQuery = <TApiParams, TQueryFnReturn, TData = TQueryFnReturn>({
   queryKey = [],
   queryFn,
   queryProps,
+  needKeepPreviousData,
   ...props
 }: {
+  needKeepPreviousData?: boolean
   queryFn: Fn<TApiParams, TQueryFnReturn>
 } & NoTokenOptionalProps<TApiParams> &
-  Omit<UseSuspenseQueryOptions<TQueryFnReturn, Error, TData, QueryKey>, 'queryFn'>) => {
-  const userId = useDeferredValue(useAtomValue(userIdAtom))
-  const query = useSuspenseQuery({
+  Omit<UseQueryOptions<TQueryFnReturn, Error, TData, QueryKey>, 'queryFn'>) => {
+  const userId = useAtomValue(userIdAtom)
+  const query = useQuery({
     queryKey: [...queryKey, queryProps, userId],
     queryFn: async () => await queryFn(queryProps as TApiParams),
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     ...props,
   })
   return query
@@ -680,8 +683,7 @@ export const useDBQueriesOptionalAuth = <
   return dbQuery
 }
 
-// suspense
-export const useSuspenseDBQueries = <
+export const useDBQueries = <
   TApiParams extends { id: number },
   TDbParams extends { ids?: number[] },
   TQueryFnReturn extends { last_update_at: Date; id: number },
@@ -693,6 +695,7 @@ export const useSuspenseDBQueries = <
   updateDB,
   dbParams,
   dbStaleTime = DB_CONFIG.DEFAULT_STALE_TIME,
+  needKeepPreviousData = true,
   ...props
 }: {
   apiQueryFn: Fn<TApiParams, TQueryFnReturn>
@@ -701,11 +704,13 @@ export const useSuspenseDBQueries = <
   dbParams: TDbParams
   updateDB: Fn<TQueryFnReturn[], void>
   dbStaleTime?: number
+  needKeepPreviousData?: boolean
 } & Omit<
-  UseSuspenseQueryOptions<(TQueryFnReturn | null)[], Error, (TQueryFnReturn | null)[], QueryKey>,
+  UseQueryOptions<(TQueryFnReturn | null)[], Error, (TQueryFnReturn | null)[], QueryKey>,
   'queryFn'
 >) => {
-  const userId = useDeferredValue(useAtomValue(userIdAtom))
+  // const userId = useDeferredValue(useAtomValue(userIdAtom))
+  const userId = useAtomValue(userIdAtom)
   const dbQueryKey = [...queryKey, dbParams, userId]
   const queryClient = useQueryClient()
 
@@ -803,7 +808,7 @@ export const useSuspenseDBQueries = <
     return dbOrderedData
   }
 
-  const dbQuery = useSuspenseQuery({
+  const dbQuery = useQuery({
     queryKey: dbQueryKey,
     queryFn: async () => {
       const data = await dbQueryFn({ ...dbParams } as TDbParams)
@@ -828,6 +833,7 @@ export const useSuspenseDBQueries = <
     //   return minStaleTime
     // },
     // 暂时为了减少 bug，选择更加舒适的方案
+    placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     staleTime: dbStaleTime,
     // throwOnError: (e, query) => query.state.data === undefined && !(e instanceof AuthError),
     ...props,

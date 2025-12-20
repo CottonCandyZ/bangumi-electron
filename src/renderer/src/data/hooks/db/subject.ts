@@ -5,7 +5,7 @@ import {
   readSubjectInfoById,
   readSubjectsInfoByIds,
 } from '@renderer/data/fetch/db/subject'
-import { useSuspenseDBQueries, useDBQuery } from '@renderer/data/hooks/factory'
+import { useDBQueries, useDBQuery } from '@renderer/data/hooks/factory'
 import { SubjectId } from '@renderer/data/types/bgm'
 
 /**
@@ -31,15 +31,37 @@ export const useSubjectInfoQuery = ({
     needKeepPreviousData,
   })
 
-export const useSuspenseSubjectsInfoQuery = ({
+// export const useSuspenseSubjectsInfoQuery = ({
+//   subjectIds: ids,
+// }: {
+//   subjectIds: SubjectId[] | undefined
+// }) =>
+//   useDBQueries({
+//     apiQueryFn: getSubjectByIdWithToken,
+//     dbQueryFn: readSubjectsInfoByIds,
+//     dbParams: { ids: ids?.map((id) => Number(id)) },
+//     queryKey: ['subject-info'],
+//     updateDB: insertSubjectsInfo,
+//   })
+
+/**
+ * 批量拿 subject info
+ */
+export const useSubjectsInfoQuery = ({
   subjectIds: ids,
+  enabled,
+  needKeepPreviousData,
 }: {
   subjectIds: SubjectId[] | undefined
+  enabled?: boolean
+  needKeepPreviousData?: boolean
 }) =>
-  useSuspenseDBQueries({
+  useDBQueries({
     apiQueryFn: getSubjectByIdWithToken,
     dbQueryFn: readSubjectsInfoByIds,
     dbParams: { ids: ids?.map((id) => Number(id)) },
     queryKey: ['subject-info'],
     updateDB: insertSubjectsInfo,
+    enabled,
+    needKeepPreviousData,
   })
