@@ -31,7 +31,7 @@ export function PageSelector({
             <SelectValue />
           </div>
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent align="start">
           {selectArray.map((item) => (
             <SelectItem value={item.toString()} key={item}>
               {item + 1} - {item + limit}

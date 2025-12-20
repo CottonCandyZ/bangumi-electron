@@ -223,7 +223,7 @@ export function AddOrModifySubjectCollectionForm({
         />
         <Button
           type="submit"
-          className="sticky bottom-0 w-full"
+          className="sticky bottom-2 w-full"
           disabled={subjectCollectionMutation.isPending}
         >
           {modify ? '修改' : '添加'}

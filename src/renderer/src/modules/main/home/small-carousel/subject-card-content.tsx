@@ -172,7 +172,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
                     <SelectTrigger className="flex-auto">
                       <SelectValue placeholder="标记为" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent align="start">
                       <SelectItem value="想看">想看</SelectItem>
                       <SelectItem value="看过">看过</SelectItem>
                       <SelectItem value="在看">在看</SelectItem>

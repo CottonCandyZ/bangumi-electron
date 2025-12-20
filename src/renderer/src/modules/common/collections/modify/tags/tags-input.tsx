@@ -17,14 +17,16 @@ export function TagInput({
       {tags.map((value) => (
         <span
           key={value}
-          className="bg-secondary text-secondary-foreground hover:bg-secondary/80 inline-flex h-9 cursor-default items-center rounded-sm border border-solid pl-2 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-secondary text-secondary-foreground hover:bg-secondary/80 inline-flex h-9 cursor-default items-center gap-0.5 rounded-sm border border-solid pl-1.5 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50"
         >
           {value}
           <button
             type="button"
             onClick={() => remove(value)}
-            className="i-mingcute-close-line focus-visible:ring-ring inline-flex h-full items-center justify-center rounded-md px-3 py-1 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-1 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
-          />
+            className="focus-visible:ring-ring inline-flex h-full items-center justify-center rounded-md px-1.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-1 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+          >
+            <span className="i-mingcute-close-line" />
+          </button>
         </span>
       ))}
       <input

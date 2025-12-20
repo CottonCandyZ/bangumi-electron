@@ -5,7 +5,7 @@ import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 
 export function SubjectCollectionSelectorContent({ subjectType }: { subjectType: SubjectType }) {
   return (
-    <SelectContent>
+    <SelectContent align="start">
       {Object.keys(CollectionType)
         .slice(0, Object.keys(CollectionType).length / 2)
         .map((item) => (
