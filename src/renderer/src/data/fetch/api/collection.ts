@@ -15,11 +15,10 @@ import { EpisodeType } from '@renderer/data/types/episode'
 import { FetchError } from 'ofetch'
 
 /** 用用户名获得条目收藏 */
-export async function getSubjectCollectionsByUsername({
+export async function getSubjectCollectionsByUsernameMustAuth({
   username,
   subjectType,
   collectionType,
-  token,
   limit,
   offset,
 }: {
@@ -31,15 +30,12 @@ export async function getSubjectCollectionsByUsername({
   offset: number
 }) {
   if (!username) throw new FetchParamError('未获得 username')
-  const info = await apiFetch<Collections>(COLLECTIONS.BY_USERNAME(username), {
+  const info = await apiFetchWithAuth<Collections>(COLLECTIONS.BY_USERNAME(username), {
     query: {
       subject_type: subjectType,
       type: collectionType,
       limit,
       offset,
-    },
-    headers: {
-      ...getAuthHeader(token),
     },
   })
   return info
@@ -70,23 +66,16 @@ export function getEpisodesCollectionBySubjectId({
 export async function getSubjectCollectionBySubjectIdAndUsername({
   username,
   subjectId,
-  token,
 }: {
   username: UserInfo['username'] | undefined
   subjectId: SubjectId | undefined
-  token?: string
 }) {
   if (!subjectId) throw new FetchParamError('未获得条目 id')
   if (!username) throw new FetchParamError('未获得用户名')
   let info: null | CollectionData
   try {
-    info = await apiFetch<CollectionData>(
+    info = await apiFetchWithAuth<CollectionData>(
       COLLECTIONS.BY_USERNAME_AND_SUBJECT_ID(username, subjectId),
-      {
-        headers: {
-          ...getAuthHeader(token),
-        },
-      },
     )
   } catch (e) {
     if (e instanceof FetchError && e.statusCode === 404) {

@@ -857,7 +857,7 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
   getNextPageParam,
   ...props
 }: {
-  queryFn: QP extends { token?: string; offset: TPageParam; limit?: number } ? Fn<QP, QR> : never
+  queryFn: QP extends { offset: TPageParam; limit?: number } ? Fn<QP, QR> : never
   enabled?: boolean
   qFLimit?: number
   needKeepPreviousData?: boolean
@@ -868,15 +868,13 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
     UseInfiniteQueryOptions<QR, Error, InfiniteData<QR, TPageParam>, QueryKey, TPageParam>,
     'queryFn'
   >) => {
-  const { data: token, isFetching } = useAccessTokenQuery()
-  const accessToken = token?.access_token
+  const userId = useAtomValue(userIdAtom)
   const query = useInfiniteQuery({
-    queryKey: [...queryKey, queryProps, accessToken],
+    queryKey: [...queryKey, queryProps, userId],
     queryFn: async ({ pageParam }) => {
       let data: QR | undefined
       try {
         data = await queryFn({
-          token: accessToken,
           limit: qFLimit,
           offset: pageParam as TPageParam,
           ...queryProps,
@@ -889,7 +887,7 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
       }
       return data as QR
     },
-    enabled: enabled && !isFetching,
+    enabled: enabled,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     initialPageParam,
     getNextPageParam,

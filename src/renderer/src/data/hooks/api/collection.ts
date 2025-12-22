@@ -2,14 +2,13 @@ import {
   AddOrModifySubjectCollectionById,
   getEpisodesCollectionBySubjectId,
   getSubjectCollectionBySubjectIdAndUsername,
-  getSubjectCollectionsByUsername,
+  getSubjectCollectionsByUsernameMustAuth,
   ModifyEpisodeCollectionBySubjectId,
 } from '@renderer/data/fetch/api/collection'
 import {
   useAuthQuery,
   useInfinityQueryOptionalAuth,
   useMutationMustAuth,
-  useQueryOptionalAuth,
 } from '@renderer/data/hooks/factory'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { EpisodeType } from '@renderer/data/types/episode'
@@ -30,14 +29,14 @@ export const useInfinityQueryCollectionsByUsername = ({
   initialPageParam = 0,
   enabled,
   needKeepPreviousData,
-}: OmitInfinityQFP<Parameters<typeof getSubjectCollectionsByUsername>[0]> & {
+}: OmitInfinityQFP<Parameters<typeof getSubjectCollectionsByUsernameMustAuth>[0]> & {
   username: UserInfo['username'] | undefined
   initialPageParam?: number
   enabled?: boolean
   needKeepPreviousData?: boolean
 }) =>
   useInfinityQueryOptionalAuth({
-    queryFn: getSubjectCollectionsByUsername,
+    queryFn: getSubjectCollectionsByUsernameMustAuth,
     queryKey: ['collection-subjects'],
     queryProps: { username, collectionType, subjectType },
     qFLimit: limit,
@@ -84,7 +83,7 @@ export const useQuerySubjectCollection = ({
   enabled?: boolean
   needKeepPreviousData?: boolean
 }) =>
-  useQueryOptionalAuth({
+  useAuthQuery({
     queryFn: getSubjectCollectionBySubjectIdAndUsername,
     queryKey: ['collection-subject'],
     queryProps: { subjectId, username },
