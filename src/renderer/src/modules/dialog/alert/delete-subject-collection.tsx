@@ -17,7 +17,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useAtom } from 'jotai'
 import { deleteCollectionDialogAtom, DeleteCollectionProps } from '@renderer/state/dialog/alert'
-import { useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
 
 export function DeleteSubjectCollectionAlert() {
   const [dialogOpen, setDialogOpen] = useAtom(deleteCollectionDialogAtom)
@@ -35,7 +34,7 @@ const Content = (props: DeleteCollectionProps) => {
   const username = userInfo?.username
   const hash = useWebDeleteCollectionHash({ subjectId }).data
   const queryClient = useQueryClient()
-  const queryKey = useQueryKeyWithAccessToken(['collection-subject', { subjectId, username }])
+  const queryKey = ['collection-subject', { subjectId, username }]
   const subjectCollectionMutation = useMutation({
     mutationFn: deleteSubjectCollectionById,
     onSuccess() {
@@ -88,7 +87,7 @@ const Content = (props: DeleteCollectionProps) => {
             <TooltipTrigger asChild>
               <AlertDialogAction
                 variant="destructive"
-                className="cursor-not-allowed opacity-50"
+                className="text-destructive-foreground cursor-not-allowed opacity-50"
                 onClick={(e) => {
                   e.preventDefault()
                 }}

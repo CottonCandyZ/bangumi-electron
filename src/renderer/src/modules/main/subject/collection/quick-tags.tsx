@@ -8,7 +8,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Tags } from '@renderer/modules/main/subject/tags/tags'
-import { useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
 import { useSession } from '@renderer/data/hooks/session'
 
 export function QuickTags({
@@ -23,10 +22,10 @@ export function QuickTags({
   const [edit, setEdit] = useState(false)
   const userInfo = useSession()
 
-  const queryKey = useQueryKeyWithAccessToken([
+  const queryKey = [
     'collection-subject',
     { subjectId: subjectCollection?.subject_id.toString(), username: userInfo?.username },
-  ])
+  ]
 
   useEffect(() => {
     setEdit(false)

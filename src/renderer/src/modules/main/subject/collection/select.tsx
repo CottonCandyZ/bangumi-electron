@@ -6,7 +6,6 @@ import { CollectionData, CollectionType } from '@renderer/data/types/collection'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
 
 export function SubjectCollectionSelector({
   subjectCollection,
@@ -16,10 +15,10 @@ export function SubjectCollectionSelector({
   const queryClient = useQueryClient()
   const userInfo = useSession()
   const username = userInfo?.username
-  const queryKey = useQueryKeyWithAccessToken([
+  const queryKey = [
     'collection-subject',
     { subjectId: subjectCollection.subject_id.toString(), username },
-  ])
+  ]
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
     onSuccess(_, variable) {

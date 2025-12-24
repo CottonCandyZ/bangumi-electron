@@ -28,7 +28,6 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { FormTags } from '@renderer/modules/common/collections/modify/tags/tags-form'
 import { TEXT_CONFIG } from '@renderer/config/text'
-import { useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
 
 const { ADD_SUBJECT_COLLECTION } = TEXT_CONFIG
 
@@ -80,7 +79,7 @@ export function AddOrModifySubjectCollectionForm({
     },
   })
 
-  const queryKey = useQueryKeyWithAccessToken(['collection-subject', { subjectId, username }])
+  const queryKey = ['collection-subject', { subjectId, username }]
 
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],

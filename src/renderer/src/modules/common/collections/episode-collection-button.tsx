@@ -18,7 +18,7 @@ import { EPISODE_COLLECTION_ACTION_MAP, EPISODE_COLLECTION_TYPE_MAP } from '@ren
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { useQueryKeyWithUserId, useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
+import { useQueryKeyWithUserId } from '@renderer/data/hooks/factory'
 import { useSession } from '@renderer/data/hooks/session'
 
 type Props = {
@@ -63,10 +63,7 @@ export function EpisodeCollectionButton({
       episodeType: undefined,
     },
   ])
-  const invalidateQueryKey = useQueryKeyWithAccessToken([
-    'collection-subject',
-    { subjectId, username },
-  ])
+  const invalidateQueryKey = ['collection-subject', { subjectId, username }]
 
   const episodeCollectionMutation = useMutationEpisodesCollectionBySubjectId({
     mutationKey: ['subject-collection'],

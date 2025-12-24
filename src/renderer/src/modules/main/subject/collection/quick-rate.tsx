@@ -4,16 +4,15 @@ import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collectio
 import { CollectionData } from '@renderer/data/types/collection'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { useQueryKeyWithAccessToken } from '@renderer/data/hooks/factory'
 
 export function QuickRate({ subjectCollection }: { subjectCollection: CollectionData }) {
   const queryClient = useQueryClient()
   const userInfo = useSession()
   const username = userInfo?.username
-  const queryKey = useQueryKeyWithAccessToken([
+  const queryKey = [
     'collection-subject',
     { subjectId: subjectCollection.subject_id.toString(), username },
-  ])
+  ]
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
     onSuccess() {
