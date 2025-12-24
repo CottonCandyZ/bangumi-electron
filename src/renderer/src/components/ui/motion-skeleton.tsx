@@ -3,7 +3,7 @@ import { HTMLMotionProps, motion } from 'motion/react'
 
 function MotionSkeleton({ className, ...props }: HTMLMotionProps<'div'>) {
   return (
-    <motion.div className={cn('animate-pulse rounded-md bg-primary/10', className)} {...props} />
+    <motion.div className={cn('bg-primary/10 animate-pulse rounded-md', className)} {...props} />
   )
 }
 
