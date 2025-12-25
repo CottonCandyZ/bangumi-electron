@@ -25,7 +25,7 @@ export function SubjectTypeFilterButtons({
           key={item.name}
           variant="outline"
           className={cn(
-            'cursor-default rounded-2xl shadow-none transition-all duration-500',
+            'cursor-default gap-0 rounded-2xl shadow-none transition-all duration-300',
             ((item.type === null && filter.size === 0) ||
               (item.type !== null && filter.has(item.type))) &&
               'bg-accent gap-2',
