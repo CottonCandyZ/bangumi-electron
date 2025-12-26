@@ -17,6 +17,11 @@ export function FormTags({
   onTagsChanges: (value: Set<string>) => void
 }) {
   const tags = selectedTags
+  const updateTags = (updater: (next: Set<string>) => void) => {
+    const next = new Set(tags)
+    updater(next)
+    onTagsChanges(next)
+  }
   const exceed = tags.size > 10
   return (
     <div className="flex flex-col gap-2">
@@ -24,9 +29,10 @@ export function FormTags({
         subjectTags={subjectTags}
         collectionTags={collectionTags}
         onTagClicked={(value) => {
-          if (tags.has(value)) tags.delete(value)
-          else tags.add(value)
-          onTagsChanges(tags)
+          updateTags((next) => {
+            if (next.has(value)) next.delete(value)
+            else next.add(value)
+          })
         }}
         selectedTags={tags}
         edit
@@ -34,10 +40,14 @@ export function FormTags({
       <div className="border-input flex w-full flex-col items-start gap-2 rounded-md border bg-transparent p-2 text-sm shadow-xs transition-colors">
         <TagInput
           tags={[...tags]}
-          add={(value) => onTagsChanges(tags.add(value.trim()))}
+          add={(value) =>
+            updateTags((next) => {
+              const trimmed = value.trim()
+              if (trimmed) next.add(trimmed)
+            })
+          }
           remove={(value) => {
-            tags.delete(value)
-            onTagsChanges(tags)
+            updateTags((next) => next.delete(value))
           }}
         />
         <div className="flex flex-row items-center gap-2">
