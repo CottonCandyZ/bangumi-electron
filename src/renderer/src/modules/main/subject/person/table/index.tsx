@@ -12,7 +12,7 @@ export function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
         {Array.from(persons).map(([key, value]) => (
           <TableRow key={key}>
             <TableCell className="min-w-20 text-center font-medium">{key.slice(0, -2)}</TableCell>
-            <TableCell className="break-all">
+            <TableCell className="break-all whitespace-pre-wrap">
               {value.map((item, index) => {
                 if (typeof item === 'string') {
                   if (UI_CONFIG.INFO_BOX_INLINE_BLOCK.includes(key.slice(0, -2)))
