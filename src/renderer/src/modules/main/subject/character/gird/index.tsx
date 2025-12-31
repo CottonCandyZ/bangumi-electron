@@ -9,7 +9,7 @@ export function CharactersGrid({ characters }: { characters: Character[] }) {
   const [fold, setFold] = useState(true)
   const [showNumber, setShowNumber] = useState(8)
   const slice = fold ? showNumber : characters.length
-  const needFold = characters.length > showNumber
+  const canFold = characters.length > showNumber
   const { pathname } = useLocation()
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -18,26 +18,26 @@ export function CharactersGrid({ characters }: { characters: Character[] }) {
   useResizeObserver({
     ref,
     callback: (e) => {
-      if (
-        e.target.getBoundingClientRect().width >= 240 * 3 + 8 * 2 &&
-        e.target.getBoundingClientRect().width <= 240 * 4 + 8 * 3
-      ) {
-        setShowNumber(9)
-      } else {
-        setShowNumber(8)
-      }
+      const target = e.target as HTMLElement
+      const template = getComputedStyle(target).gridTemplateColumns
+      const columns = Math.max(1, template.split(' ').filter(Boolean).length)
+      const nextShowNumber = columns * 2
+      setShowNumber((prev) => (prev === nextShowNumber ? prev : nextShowNumber))
     },
   })
 
   return (
     <div className="relative flex flex-row gap-2">
-      <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-2" ref={ref}>
+      <div
+        className="grid min-w-0 flex-1 grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-2"
+        ref={ref}
+      >
         {characters.slice(0, slice).map((item) => (
           <Item character={item} key={item.id} />
         ))}
       </div>
-      {needFold && (
-        <div>
+      {canFold && (
+        <div className="shrink-0">
           <Button
             variant="outline"
             className="h-full rounded-xl whitespace-normal"
