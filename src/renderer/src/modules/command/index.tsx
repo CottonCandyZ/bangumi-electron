@@ -147,7 +147,7 @@ export function CommandPanel() {
   }, [open, trimmedQuery, searching, subjectResults, fallbackValue])
 
   const placeholder = useMemo(() => {
-    if (mode === 'subject-search') return '搜索条目（优先中文名）...'
+    if (mode === 'subject-search') return '搜索条目...'
     return '输入以搜索条目或命令...'
   }, [mode])
 
@@ -161,9 +161,17 @@ export function CommandPanel() {
         value: selectedValue,
         onValueChange: setSelectedValue,
         onKeyDownCapture: onCommandKeyDownCapture,
+        shouldFilter: mode !== 'subject-search',
       }}
     >
-      <CommandInput placeholder={placeholder} autoFocus value={query} onValueChange={setQuery} />
+      <CommandInput
+        placeholder={placeholder}
+        autoFocus
+        value={query}
+        onValueChange={setQuery}
+        onCompositionUpdate={(e) => setQuery(e.currentTarget.value)}
+        onCompositionEnd={(e) => setQuery(e.currentTarget.value)}
+      />
       <CommandList className="h-[min(60vh,420px)] max-h-none">
         {mode === 'palette' && trimmedQuery === '' && (
           <>
