@@ -8,6 +8,7 @@ import {
   CommandShortcut,
 } from '@renderer/components/ui/command'
 import { searchSubjectsInDb, SubjectSearchItem } from '@renderer/data/fetch/db/subject'
+import { client, handlers } from '@renderer/lib/client'
 import { SUBJECT_TYPE_MAP } from '@renderer/lib/utils/map'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
@@ -38,6 +39,8 @@ export function CommandPanel() {
 
   const trimmedQuery = query.trim()
   const fallbackValue = useMemo(() => `search-page:${trimmedQuery}`, [trimmedQuery])
+  const isCommandOverlayWindow =
+    typeof window !== 'undefined' && window.location.hash.startsWith('#/command')
 
   const onCommandKeyDownCapture = useCallback((e: React.KeyboardEvent) => {
     if (
@@ -50,6 +53,33 @@ export function CommandPanel() {
     ) {
       userHasNavigatedRef.current = true
     }
+  }, [])
+
+  const openMainAndNavigate = useCallback(
+    async (path: string) => {
+      if (isCommandOverlayWindow) {
+        setOpen(false)
+        await client.openMainWindowAndNavigate({ path })
+        await client.hideCommandWindow({})
+      } else {
+        setOpen(false)
+        navigate(path)
+      }
+    },
+    [isCommandOverlayWindow, navigate],
+  )
+
+  useEffect(() => {
+    // Triggered by main process (e.g. global shortcut).
+    const unlisten = handlers.openCommandPanel.listen((payload) => {
+      const nextMode: PanelMode = payload?.mode === 'subject-search' ? 'subject-search' : 'palette'
+      setMode(nextMode)
+      setQuery('')
+      setSelectedValue(nextMode === 'subject-search' ? 'go-search-page' : 'go-home')
+      userHasNavigatedRef.current = false
+      setOpen(true)
+    })
+    return unlisten
   }, [])
 
   useHotkeys(
@@ -154,9 +184,16 @@ export function CommandPanel() {
   return (
     <CommandDialog
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen)
+        if (!nextOpen && isCommandOverlayWindow) {
+          client.hideCommandWindow({})
+        }
+      }}
       title="Command Panel"
       description="Search and navigate quickly"
+      hideOverlay={isCommandOverlayWindow}
+      disableAnimation={isCommandOverlayWindow}
       commandProps={{
         value: selectedValue,
         onValueChange: setSelectedValue,
@@ -179,8 +216,7 @@ export function CommandPanel() {
               <CommandItem
                 value="go-home"
                 onSelect={() => {
-                  setOpen(false)
-                  navigate('/')
+                  openMainAndNavigate('/')
                 }}
               >
                 <span className="i-mingcute-home-2-line" />
@@ -189,8 +225,7 @@ export function CommandPanel() {
               <CommandItem
                 value="go-search"
                 onSelect={() => {
-                  setOpen(false)
-                  navigate('/search')
+                  openMainAndNavigate('/search')
                 }}
               >
                 <span className="i-mingcute-search-line" />
@@ -199,8 +234,7 @@ export function CommandPanel() {
               <CommandItem
                 value="go-talk"
                 onSelect={() => {
-                  setOpen(false)
-                  navigate('/talk')
+                  openMainAndNavigate('/talk')
                 }}
               >
                 <span className="i-mingcute-chat-3-line" />
@@ -212,8 +246,7 @@ export function CommandPanel() {
               <CommandItem
                 value="go-anime"
                 onSelect={() => {
-                  setOpen(false)
-                  navigate('/anime')
+                  openMainAndNavigate('/anime')
                 }}
               >
                 <span className="i-mingcute-tv-2-line" />
@@ -222,8 +255,7 @@ export function CommandPanel() {
               <CommandItem
                 value="go-game"
                 onSelect={() => {
-                  setOpen(false)
-                  navigate('/game')
+                  openMainAndNavigate('/game')
                 }}
               >
                 <span className="i-mingcute-game-1-line" />
@@ -232,8 +264,7 @@ export function CommandPanel() {
               <CommandItem
                 value="go-book"
                 onSelect={() => {
-                  setOpen(false)
-                  navigate('/book')
+                  openMainAndNavigate('/book')
                 }}
               >
                 <span className="i-mingcute-book-6-line" />
@@ -242,8 +273,7 @@ export function CommandPanel() {
               <CommandItem
                 value="go-music"
                 onSelect={() => {
-                  setOpen(false)
-                  navigate('/music')
+                  openMainAndNavigate('/music')
                 }}
               >
                 <span className="i-mingcute-music-3-line" />
@@ -252,8 +282,7 @@ export function CommandPanel() {
               <CommandItem
                 value="go-real"
                 onSelect={() => {
-                  setOpen(false)
-                  navigate('/real')
+                  openMainAndNavigate('/real')
                 }}
               >
                 <span className="i-mingcute-tv-1-line" />
@@ -295,8 +324,7 @@ export function CommandPanel() {
             <CommandItem
               value="go-search-page"
               onSelect={() => {
-                setOpen(false)
-                navigate('/search')
+                openMainAndNavigate('/search')
               }}
             >
               <span className="i-mingcute-search-line" />
@@ -329,8 +357,7 @@ export function CommandPanel() {
                     value={getSubjectItemValue(subject)}
                     keywords={[String(subject.id), subject.name_cn, subject.name].filter(Boolean)}
                     onSelect={() => {
-                      setOpen(false)
-                      navigate(`/subject/${subject.id}`)
+                      openMainAndNavigate(`/subject/${subject.id}`)
                     }}
                   >
                     <span className="text-muted-foreground flex items-center text-base">
@@ -354,8 +381,7 @@ export function CommandPanel() {
                 value={`search-page:${trimmedQuery}`}
                 keywords={[trimmedQuery]}
                 onSelect={() => {
-                  setOpen(false)
-                  navigate(`/search?keyword=${encodeURIComponent(trimmedQuery)}`)
+                  openMainAndNavigate(`/search?keyword=${encodeURIComponent(trimmedQuery)}`)
                 }}
               >
                 <span className="i-mingcute-search-line" />

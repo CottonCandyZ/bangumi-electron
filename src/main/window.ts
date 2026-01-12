@@ -5,7 +5,8 @@ import { getIconPath } from '@main/helper'
 import { is } from '@electron-toolkit/utils'
 import { getRendererHandlers } from '@egoist/tipc/main'
 import { RendererHandlers } from '@main/tipc/renderer-handlers'
-import { isMacOS, isWindows11 } from '@main/env'
+import { isMacOS, isWindows, isWindows11 } from '@main/env'
+import { isAppQuitting } from '@main/app-flags'
 
 const DEFAULT_WINDOW_SIZE = {
   width: 1100,
@@ -130,6 +131,7 @@ export function createMainWindow() {
   })
 
   window.on('close', (event) => {
+    let storedWindowState = false
     if (isWindows11) {
       const windowStoreKey = Symbol.for('maximized')
       if (window[windowStoreKey]) {
@@ -140,20 +142,24 @@ export function createMainWindow() {
           x: stored.position[0],
           y: stored.position[1],
         })
-
-        return
+        storedWindowState = true
       }
     }
 
-    const bounds = window.getBounds()
-    JSONStore.set(WINDOW_STORE_KEY, {
-      width: bounds.width,
-      height: bounds.height,
-      x: bounds.x,
-      y: bounds.y,
-    })
+    if (!storedWindowState) {
+      const bounds = window.getBounds()
+      JSONStore.set(WINDOW_STORE_KEY, {
+        width: bounds.width,
+        height: bounds.height,
+        x: bounds.x,
+        y: bounds.y,
+      })
+    }
 
-    if (isMacOS) {
+    // TODO: move to settings: "close to tray/background" behavior
+    // NOTE: macOS 点击关闭按钮默认仅隐藏窗口（不退出），因此全局快捷键/托盘入口都很重要。
+    const shouldHideToBackground = (isMacOS || isWindows) && !isAppQuitting()
+    if (shouldHideToBackground) {
       event.preventDefault()
       if (window.isFullScreen()) {
         window.once('leave-full-screen', () => {
