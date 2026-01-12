@@ -4,6 +4,11 @@ import { initialize } from '@main/init'
 import { APP_PROTOCOL } from '@shared/constants'
 import { createMainWindow } from '@main/window'
 import { appPath, isMacOS } from '@main/env'
+import { setupTray } from '@main/tray'
+import { setAppQuitting } from '@main/app-flags'
+import { registerGlobalShortcuts } from '@main/shortcuts'
+import { toggleCommandWindow } from '@main/command-window'
+import { setMainWindowGetter } from '@main/app-context'
 
 async function boot() {
   // dev 和 prod 的位置
@@ -20,12 +25,19 @@ async function boot() {
 
   await initialize()
 
+  const getOrCreateMainWindow = () => {
+    if (mainWindow && !mainWindow.isDestroyed()) return mainWindow
+    mainWindow = createMainWindow()
+    return mainWindow
+  }
+  setMainWindowGetter(getOrCreateMainWindow)
+
   // 再次点击图标打开相同的实例
   app.on('second-instance', () => {
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) mainWindow.restore()
-      mainWindow.focus()
-    }
+    const window = getOrCreateMainWindow()
+    if (window.isMinimized()) window.restore()
+    window.show()
+    window.focus()
 
     // URI scheme
     // const url = commandLine.pop()
@@ -43,7 +55,9 @@ async function boot() {
 
     await import('./session')
 
-    mainWindow = createMainWindow()
+    mainWindow = getOrCreateMainWindow()
+    setupTray(getOrCreateMainWindow)
+    registerGlobalShortcuts(() => toggleCommandWindow({ mode: 'palette' }))
 
     // Default open or close DevTools by F12 in development
     // and ignore CommandOrControl + R in production.
@@ -55,11 +69,8 @@ async function boot() {
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (BrowserWindow.getAllWindows().length === 0) {
-        mainWindow = createMainWindow()
-      }
-
-      if (mainWindow) mainWindow.show()
+      if (BrowserWindow.getAllWindows().length === 0) mainWindow = getOrCreateMainWindow()
+      getOrCreateMainWindow().show()
     })
 
     // Quit when all windows are closed, except on  macOS. There, it's common
@@ -72,6 +83,7 @@ async function boot() {
     })
 
     app.on('before-quit', () => {
+      setAppQuitting(true)
       const windows = BrowserWindow.getAllWindows()
       windows.forEach((window) => window.destroy())
     })
