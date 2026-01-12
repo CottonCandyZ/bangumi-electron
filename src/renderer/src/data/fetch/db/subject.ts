@@ -3,7 +3,7 @@ import { Subject } from '@renderer/data/types/subject'
 import { db } from '@renderer/lib/db/bridge'
 import { returnFirstOrUndefined } from '@renderer/lib/utils/data-trans'
 import { FetchParamError } from '@renderer/lib/utils/error'
-import { eq } from 'drizzle-orm'
+import { and, desc, eq, like, or } from 'drizzle-orm'
 import { BatchItem } from 'drizzle-orm/batch'
 
 export async function readSubjectInfoById({ id }: { id?: number }) {
@@ -144,4 +144,51 @@ export async function insertSubjectInfo(subjectInfo: Subject) {
   const batch = createSubjectBatchInsert(subjectInfo)
   if (batch.length === 0) return
   db.batch(batch)
+}
+
+export type SubjectSearchItem = Pick<Subject, 'id' | 'name' | 'name_cn' | 'type'>
+
+export async function searchSubjectsInDb({
+  keyword,
+  limit = 20,
+}: {
+  keyword: string
+  limit?: number
+}): Promise<SubjectSearchItem[]> {
+  const trimmedKeyword = keyword.trim()
+  if (!trimmedKeyword) return []
+
+  const tokens = trimmedKeyword.split(/\s+/).filter(Boolean)
+  const tokenConditions = tokens.map((token) =>
+    or(like(subject.name_cn, `%${token}%`), like(subject.name, `%${token}%`)),
+  )
+
+  const keywordCondition =
+    tokenConditions.length === 0
+      ? undefined
+      : tokenConditions.length === 1
+        ? tokenConditions[0]
+        : and(...tokenConditions)
+
+  const idCondition = /^\d+$/.test(trimmedKeyword)
+    ? eq(subject.id, Number(trimmedKeyword))
+    : undefined
+  const whereCondition =
+    idCondition && keywordCondition
+      ? or(idCondition, keywordCondition)
+      : (idCondition ?? keywordCondition)
+
+  if (!whereCondition) return []
+
+  return await db
+    .select({
+      id: subject.id,
+      name: subject.name,
+      name_cn: subject.name_cn,
+      type: subject.type,
+    })
+    .from(subject)
+    .where(whereCondition)
+    .orderBy(desc(subject.last_update_at))
+    .limit(limit)
 }
