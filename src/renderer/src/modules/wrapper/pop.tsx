@@ -3,6 +3,7 @@ import { NormalDialog } from '@renderer/components/dialog/normal'
 import { SheetDialog } from '@renderer/components/dialog/sheet'
 import { Toaster } from '@renderer/components/ui/sonner'
 import { TooltipProvider } from '@renderer/components/ui/tooltip'
+import { CommandPanel } from '@renderer/modules/command'
 import { HoverCard } from '@renderer/modules/hover-card'
 import { PropsWithChildren } from 'react'
 
@@ -12,6 +13,7 @@ export function Pop({ children }: PropsWithChildren) {
       <TooltipProvider>
         {children}
         <HoverCard />
+        <CommandPanel />
         <NormalDialog />
         <SheetDialog />
         <AlertDialog />
