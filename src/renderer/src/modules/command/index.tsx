@@ -106,7 +106,7 @@ export function CommandPanel() {
       description="Search and navigate quickly"
     >
       <CommandInput placeholder={placeholder} autoFocus value={query} onValueChange={setQuery} />
-      <CommandList>
+      <CommandList className="h-[min(60vh,420px)] max-h-none">
         {mode === 'palette' && trimmedQuery === '' && (
           <>
             <CommandGroup heading="导航">
