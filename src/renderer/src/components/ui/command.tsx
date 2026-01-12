@@ -34,6 +34,8 @@ function CommandDialog({
   className,
   showCloseButton = true,
   commandProps,
+  hideOverlay = false,
+  disableAnimation = false,
   ...props
 }: React.ComponentProps<typeof Dialog> & {
   title?: string
@@ -41,6 +43,8 @@ function CommandDialog({
   className?: string
   showCloseButton?: boolean
   commandProps?: React.ComponentProps<typeof CommandPrimitive>
+  hideOverlay?: boolean
+  disableAnimation?: boolean
 }) {
   const { className: commandClassName, ...restCommandProps } = commandProps ?? {}
   return (
@@ -52,6 +56,8 @@ function CommandDialog({
       <DialogContent
         className={cn("overflow-hidden p-0", className)}
         showCloseButton={showCloseButton}
+        hideOverlay={hideOverlay}
+        disableAnimation={disableAnimation}
       >
         <Command
           {...restCommandProps}
