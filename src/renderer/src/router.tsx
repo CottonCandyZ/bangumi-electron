@@ -29,6 +29,10 @@ export const router: ReturnType<typeof createHashRouter> = createHashRouter(
       element: <App />,
       children: [
         {
+          path: 'command',
+          lazy: () => import('@renderer/routes/command-overlay'),
+        },
+        {
           path: '',
           lazy: () => import('@renderer/app/layout'),
           children: pageRoutes,
