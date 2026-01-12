@@ -9,18 +9,21 @@ import {
 } from '@renderer/components/ui/command'
 import { searchSubjectsInDb, SubjectSearchItem } from '@renderer/data/fetch/db/subject'
 import { SUBJECT_TYPE_MAP } from '@renderer/lib/utils/map'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useNavigate } from 'react-router-dom'
 
 type PanelMode = 'palette' | 'subject-search'
 
+const getSubjectItemValue = (subject: SubjectSearchItem) =>
+  `${subject.id} ${subject.name_cn} ${subject.name}`
+
 const TYPE_ICON_MAP: Record<SubjectSearchItem['type'], React.ReactNode> = {
-  1: <span className="i-mingcute-book-2-fill" />,
-  2: <span className="i-mingcute-tv-2-fill" />,
-  3: <span className="i-mingcute-music-2-fill" />,
-  4: <span className="i-mingcute-game-2-fill" />,
-  6: <span className="i-mingcute-tv-1-fill" />,
+  1: <span className="i-mingcute-book-2-line" />,
+  2: <span className="i-mingcute-tv-2-line" />,
+  3: <span className="i-mingcute-music-2-line" />,
+  4: <span className="i-mingcute-game-2-line" />,
+  6: <span className="i-mingcute-tv-1-line" />,
 }
 
 export function CommandPanel() {
@@ -30,8 +33,24 @@ export function CommandPanel() {
   const [query, setQuery] = useState('')
   const [searching, setSearching] = useState(false)
   const [subjectResults, setSubjectResults] = useState<SubjectSearchItem[]>([])
+  const [selectedValue, setSelectedValue] = useState('go-home')
+  const userHasNavigatedRef = useRef(false)
 
   const trimmedQuery = query.trim()
+  const fallbackValue = useMemo(() => `search-page:${trimmedQuery}`, [trimmedQuery])
+
+  const onCommandKeyDownCapture = useCallback((e: React.KeyboardEvent) => {
+    if (
+      e.key === 'ArrowDown' ||
+      e.key === 'ArrowUp' ||
+      e.key === 'PageDown' ||
+      e.key === 'PageUp' ||
+      e.key === 'Home' ||
+      e.key === 'End'
+    ) {
+      userHasNavigatedRef.current = true
+    }
+  }, [])
 
   useHotkeys(
     'mod+p',
@@ -39,6 +58,8 @@ export function CommandPanel() {
       e.preventDefault()
       setQuery('')
       setMode('palette')
+      setSelectedValue('go-home')
+      userHasNavigatedRef.current = false
       setOpen((wasOpen) => {
         if (wasOpen && mode === 'palette') return false
         return true
@@ -54,6 +75,8 @@ export function CommandPanel() {
       e.preventDefault()
       setQuery('')
       setMode('subject-search')
+      setSelectedValue('go-search-page')
+      userHasNavigatedRef.current = false
       setOpen((wasOpen) => {
         if (wasOpen && mode === 'subject-search') return false
         return true
@@ -73,6 +96,7 @@ export function CommandPanel() {
 
     let cancelled = false
     setSearching(true)
+    setSubjectResults([])
 
     const timer = window.setTimeout(async () => {
       try {
@@ -91,12 +115,41 @@ export function CommandPanel() {
     }
   }, [open, trimmedQuery])
 
+  useEffect(() => {
+    if (!open) return
+    userHasNavigatedRef.current = false
+
+    if (trimmedQuery === '') {
+      if (mode === 'palette') setSelectedValue('go-home')
+      if (mode === 'subject-search') setSelectedValue('go-search-page')
+      return
+    }
+
+    setSelectedValue(fallbackValue)
+  }, [open, mode, trimmedQuery, fallbackValue])
+
+  useEffect(() => {
+    if (!open) return
+    if (userHasNavigatedRef.current) return
+    if (trimmedQuery === '') return
+
+    if (searching) {
+      setSelectedValue(fallbackValue)
+      return
+    }
+
+    if (subjectResults.length > 0) {
+      setSelectedValue(getSubjectItemValue(subjectResults[0]))
+      return
+    }
+
+    setSelectedValue(fallbackValue)
+  }, [open, trimmedQuery, searching, subjectResults, fallbackValue])
+
   const placeholder = useMemo(() => {
     if (mode === 'subject-search') return '搜索条目（优先中文名）...'
     return '输入以搜索条目或命令...'
   }, [mode])
-
-  const showSubjectSearchFallback = trimmedQuery !== '' && !searching && subjectResults.length === 0
 
   return (
     <CommandDialog
@@ -104,6 +157,11 @@ export function CommandPanel() {
       onOpenChange={setOpen}
       title="Command Panel"
       description="Search and navigate quickly"
+      commandProps={{
+        value: selectedValue,
+        onValueChange: setSelectedValue,
+        onKeyDownCapture: onCommandKeyDownCapture,
+      }}
     >
       <CommandInput placeholder={placeholder} autoFocus value={query} onValueChange={setQuery} />
       <CommandList className="h-[min(60vh,420px)] max-h-none">
@@ -117,7 +175,7 @@ export function CommandPanel() {
                   navigate('/')
                 }}
               >
-                <span className="i-mingcute-home-2-fill" />
+                <span className="i-mingcute-home-2-line" />
                 主页
               </CommandItem>
               <CommandItem
@@ -127,7 +185,7 @@ export function CommandPanel() {
                   navigate('/search')
                 }}
               >
-                <span className="i-mingcute-search-fill" />
+                <span className="i-mingcute-search-line" />
                 搜索
               </CommandItem>
               <CommandItem
@@ -137,7 +195,7 @@ export function CommandPanel() {
                   navigate('/talk')
                 }}
               >
-                <span className="i-mingcute-chat-3-fill" />
+                <span className="i-mingcute-chat-3-line" />
                 讨论
               </CommandItem>
             </CommandGroup>
@@ -150,7 +208,7 @@ export function CommandPanel() {
                   navigate('/anime')
                 }}
               >
-                <span className="i-mingcute-tv-2-fill" />
+                <span className="i-mingcute-tv-2-line" />
                 动画
               </CommandItem>
               <CommandItem
@@ -160,7 +218,7 @@ export function CommandPanel() {
                   navigate('/game')
                 }}
               >
-                <span className="i-mingcute-game-1-fill" />
+                <span className="i-mingcute-game-1-line" />
                 游戏
               </CommandItem>
               <CommandItem
@@ -170,7 +228,7 @@ export function CommandPanel() {
                   navigate('/book')
                 }}
               >
-                <span className="i-mingcute-book-6-fill" />
+                <span className="i-mingcute-book-6-line" />
                 书籍
               </CommandItem>
               <CommandItem
@@ -180,7 +238,7 @@ export function CommandPanel() {
                   navigate('/music')
                 }}
               >
-                <span className="i-mingcute-music-3-fill" />
+                <span className="i-mingcute-music-3-line" />
                 音乐
               </CommandItem>
               <CommandItem
@@ -190,7 +248,7 @@ export function CommandPanel() {
                   navigate('/real')
                 }}
               >
-                <span className="i-mingcute-tv-1-fill" />
+                <span className="i-mingcute-tv-1-line" />
                 三次元
               </CommandItem>
             </CommandGroup>
@@ -233,40 +291,57 @@ export function CommandPanel() {
                 navigate('/search')
               }}
             >
-              <span className="i-mingcute-search-fill" />
+              <span className="i-mingcute-search-line" />
               打开搜索页
             </CommandItem>
           </CommandGroup>
         )}
 
         {trimmedQuery !== '' && (
-          <CommandGroup heading="条目">
-            {subjectResults.map((subject) => {
-              const title = subject.name_cn || subject.name
-              const subtitle =
-                subject.name_cn && subject.name ? subject.name : SUBJECT_TYPE_MAP[subject.type]
-              return (
-                <CommandItem
-                  key={subject.id}
-                  value={`${subject.id} ${subject.name_cn} ${subject.name}`}
-                  keywords={[String(subject.id), subject.name_cn, subject.name].filter(Boolean)}
-                  onSelect={() => {
-                    setOpen(false)
-                    navigate(`/subject/${subject.id}`)
-                  }}
-                >
-                  <span className="text-muted-foreground flex items-center text-base">
-                    {TYPE_ICON_MAP[subject.type]}
-                  </span>
-                  <span className="flex flex-col gap-0.5">
-                    <span className="leading-tight">{title}</span>
-                    <span className="text-muted-foreground text-xs leading-tight">{subtitle}</span>
-                  </span>
+          <>
+            <CommandGroup heading="条目">
+              {searching && (
+                <CommandItem value="subject-searching" disabled>
+                  正在搜索本地条目...
                 </CommandItem>
-              )
-            })}
+              )}
+              {!searching && subjectResults.length === 0 && (
+                <CommandItem value="subject-no-results" disabled>
+                  本地未找到匹配条目
+                </CommandItem>
+              )}
 
-            {showSubjectSearchFallback && (
+              {subjectResults.map((subject) => {
+                const title = subject.name_cn || subject.name
+                const subtitle =
+                  subject.name_cn && subject.name ? subject.name : SUBJECT_TYPE_MAP[subject.type]
+                return (
+                  <CommandItem
+                    key={subject.id}
+                    value={getSubjectItemValue(subject)}
+                    keywords={[String(subject.id), subject.name_cn, subject.name].filter(Boolean)}
+                    onSelect={() => {
+                      setOpen(false)
+                      navigate(`/subject/${subject.id}`)
+                    }}
+                  >
+                    <span className="text-muted-foreground flex items-center text-base">
+                      {TYPE_ICON_MAP[subject.type]}
+                    </span>
+                    <span className="flex flex-col gap-0.5">
+                      <span className="leading-tight">{title}</span>
+                      <span className="text-muted-foreground text-xs leading-tight">
+                        {subtitle}
+                      </span>
+                    </span>
+                  </CommandItem>
+                )
+              })}
+            </CommandGroup>
+
+            <CommandSeparator />
+
+            <CommandGroup heading="更多">
               <CommandItem
                 value={`search-page:${trimmedQuery}`}
                 keywords={[trimmedQuery]}
@@ -278,8 +353,8 @@ export function CommandPanel() {
                 <span className="i-mingcute-search-line" />
                 在搜索页中查找 “{trimmedQuery}”<CommandShortcut>Enter</CommandShortcut>
               </CommandItem>
-            )}
-          </CommandGroup>
+            </CommandGroup>
+          </>
         )}
       </CommandList>
     </CommandDialog>
