@@ -5,6 +5,50 @@ import { returnFirstOrUndefined } from '@renderer/lib/utils/data-trans'
 import { FetchParamError } from '@renderer/lib/utils/error'
 import { and, desc, eq, like, or } from 'drizzle-orm'
 import { BatchItem } from 'drizzle-orm/batch'
+import pinyin from 'pinyin'
+
+function buildNameCnPinyin(nameCn: string | null | undefined): string | null {
+  const trimmed = nameCn?.trim()
+  if (!trimmed) return null
+
+  const toString = (arr: string[][]) =>
+    arr
+      .map((item) => item[0])
+      .filter(Boolean)
+      .map((s) => s.toLowerCase())
+
+  const toNormalizedIndex = (words: string[], syllableInitials?: string) => {
+    const spaced = words.join(' ')
+    const compact = words.join('')
+    const wordInitials = words.map((w) => w[0] ?? '').join('')
+
+    const merged = [spaced, compact, wordInitials, syllableInitials].filter(Boolean).join(' ')
+    const normalized = merged
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+
+    return normalized || null
+  }
+
+  try {
+    const words = toString(pinyin(trimmed, { style: 'normal', segment: true, group: true }))
+    const syllables = toString(pinyin(trimmed, { style: 'normal', segment: true }))
+    const syllableInitials = syllables.map((w) => w[0] ?? '').join('')
+    const indexed = toNormalizedIndex(words, syllableInitials)
+    if (indexed) return indexed
+  } catch {
+    // Ignore and fallback below.
+  }
+
+  try {
+    const words = toString(pinyin(trimmed, { style: 'normal' }))
+    const syllableInitials = words.map((w) => w[0] ?? '').join('')
+    return toNormalizedIndex(words, syllableInitials)
+  } catch {
+    return null
+  }
+}
 
 export async function readSubjectInfoById({ id }: { id?: number }) {
   if (!id) throw new FetchParamError('未获得 id')
@@ -68,14 +112,18 @@ export async function readSubjectsInfoByIds({ ids }: { ids?: number[] }) {
 }
 
 function createSubjectBatchInsert(subjectInfo: Subject) {
+  const subjectWithPinyin = {
+    ...subjectInfo,
+    name_cn_pinyin: buildNameCnPinyin(subjectInfo.name_cn),
+  }
   const batch: [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] = [
     db
       .insert(subject)
-      .values(subjectInfo)
+      .values(subjectWithPinyin)
       .onConflictDoUpdate({
         target: subject.id,
         set: {
-          ...subjectInfo,
+          ...subjectWithPinyin,
         },
       }),
 
@@ -159,9 +207,12 @@ export async function searchSubjectsInDb({
   if (!trimmedKeyword) return []
 
   const tokens = trimmedKeyword.split(/\s+/).filter(Boolean)
-  const tokenConditions = tokens.map((token) =>
-    or(like(subject.name_cn, `%${token}%`), like(subject.name, `%${token}%`)),
-  )
+  const tokenConditions = tokens.map((token) => {
+    const pinyinNeedle = token.toLowerCase().replace(/[^a-z0-9]/g, '')
+    const conditions = [like(subject.name_cn, `%${token}%`), like(subject.name, `%${token}%`)]
+    if (pinyinNeedle) conditions.push(like(subject.name_cn_pinyin, `%${pinyinNeedle}%`))
+    return or(...(conditions as [ReturnType<typeof like>, ...ReturnType<typeof like>[]]))
+  })
 
   const keywordCondition =
     tokenConditions.length === 0

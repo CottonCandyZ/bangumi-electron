@@ -1,7 +1,7 @@
 import { sqliteTable } from 'drizzle-orm/sqlite-core'
 import * as t from 'drizzle-orm/sqlite-core'
 import { relations } from 'drizzle-orm'
-import { CoverImages, InfoBox, SubjectType } from '@renderer/data/types/subject'
+import type { CoverImages, InfoBox, SubjectType } from '@renderer/data/types/subject'
 
 export const subject = sqliteTable('Subject', {
   id: t.integer().primaryKey(),
@@ -9,6 +9,8 @@ export const subject = sqliteTable('Subject', {
   platform: t.text().notNull(),
   name: t.text().notNull(),
   name_cn: t.text().notNull(),
+  /** Pinyin for `name_cn`, used for search (no tone marks). */
+  name_cn_pinyin: t.text(),
   summary: t.text().notNull(),
   images: t.text({ mode: 'json' }).$type<CoverImages>().notNull(),
   total_episodes: t.integer().notNull(),
