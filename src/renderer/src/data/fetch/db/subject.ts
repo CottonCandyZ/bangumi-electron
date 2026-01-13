@@ -194,7 +194,9 @@ export async function insertSubjectInfo(subjectInfo: Subject) {
   db.batch(batch)
 }
 
-export type SubjectSearchItem = Pick<Subject, 'id' | 'name' | 'name_cn' | 'type'>
+export type SubjectSearchItem = Pick<Subject, 'id' | 'name' | 'name_cn' | 'type'> & {
+  name_cn_pinyin: string | null
+}
 
 export async function searchSubjectsInDb({
   keyword,
@@ -236,6 +238,7 @@ export async function searchSubjectsInDb({
       id: subject.id,
       name: subject.name,
       name_cn: subject.name_cn,
+      name_cn_pinyin: subject.name_cn_pinyin,
       type: subject.type,
     })
     .from(subject)
