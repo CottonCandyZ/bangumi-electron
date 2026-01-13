@@ -42,6 +42,8 @@ export function CommandPanel() {
   const isCommandOverlayWindow =
     typeof window !== 'undefined' && window.location.hash.startsWith('#/command')
 
+  const normalizeSearchText = useCallback((text: string) => text.trim().toLowerCase(), [])
+
   const onCommandKeyDownCapture = useCallback((e: React.KeyboardEvent) => {
     if (
       e.key === 'ArrowDown' ||
@@ -68,6 +70,123 @@ export function CommandPanel() {
     },
     [isCommandOverlayWindow, navigate],
   )
+
+  const paletteCommands = useMemo(() => {
+    const items = [
+      {
+        value: 'go-home',
+        keywords: ['主页', 'home', 'index'],
+        icon: <span className="i-mingcute-home-2-line" />,
+        label: '主页',
+        onSelect: () => openMainAndNavigate('/'),
+      },
+      {
+        value: 'go-search',
+        keywords: ['搜索', 'search', 'find'],
+        icon: <span className="i-mingcute-search-line" />,
+        label: '搜索',
+        onSelect: () => openMainAndNavigate('/search'),
+      },
+      {
+        value: 'go-talk',
+        keywords: ['讨论', 'talk', 'chat'],
+        icon: <span className="i-mingcute-chat-3-line" />,
+        label: '讨论',
+        onSelect: () => openMainAndNavigate('/talk'),
+      },
+      {
+        value: 'go-anime',
+        keywords: ['动画', 'anime'],
+        icon: <span className="i-mingcute-tv-2-line" />,
+        label: '动画',
+        onSelect: () => openMainAndNavigate('/anime'),
+      },
+      {
+        value: 'go-game',
+        keywords: ['游戏', 'game'],
+        icon: <span className="i-mingcute-game-1-line" />,
+        label: '游戏',
+        onSelect: () => openMainAndNavigate('/game'),
+      },
+      {
+        value: 'go-book',
+        keywords: ['书籍', '图书', 'book'],
+        icon: <span className="i-mingcute-book-6-line" />,
+        label: '书籍',
+        onSelect: () => openMainAndNavigate('/book'),
+      },
+      {
+        value: 'go-music',
+        keywords: ['音乐', 'music'],
+        icon: <span className="i-mingcute-music-3-line" />,
+        label: '音乐',
+        onSelect: () => openMainAndNavigate('/music'),
+      },
+      {
+        value: 'go-real',
+        keywords: ['三次元', '现实', 'real'],
+        icon: <span className="i-mingcute-tv-1-line" />,
+        label: '三次元',
+        onSelect: () => openMainAndNavigate('/real'),
+      },
+      {
+        value: 'open-command-panel',
+        keywords: ['command', 'palette', '命令', '面板', '快捷键'],
+        label: '打开 Command Panel',
+        shortcut: '⌘/Ctrl P',
+        onSelect: () => {
+          setMode('palette')
+          setQuery('')
+        },
+      },
+      {
+        value: 'open-subject-search',
+        keywords: ['搜索条目', '条目', 'subject', '本地'],
+        label: '搜索条目',
+        shortcut: '⌘/Ctrl K',
+        onSelect: () => {
+          setMode('subject-search')
+          setQuery('')
+        },
+      },
+    ]
+
+    return items
+  }, [openMainAndNavigate])
+
+  const matchedPaletteCommandValue = useMemo(() => {
+    if (mode !== 'palette') return null
+    const normalizedQuery = normalizeSearchText(trimmedQuery)
+    if (!normalizedQuery) return null
+    if (normalizedQuery.length < 2 && !/[\u4e00-\u9fff]/.test(normalizedQuery)) return null
+
+    let bestMatch: { value: string; score: number } | null = null
+
+    for (const command of paletteCommands) {
+      const candidates = [command.label, ...command.keywords]
+        .filter(Boolean)
+        .map((candidate) => normalizeSearchText(String(candidate)))
+
+      for (const candidate of candidates) {
+        const score =
+          candidate === normalizedQuery
+            ? 0
+            : candidate.startsWith(normalizedQuery)
+              ? 1
+              : candidate.includes(normalizedQuery)
+                ? 2
+                : null
+        if (score === null) continue
+
+        if (!bestMatch || score < bestMatch.score) {
+          bestMatch = { value: command.value, score }
+          if (score === 0) return bestMatch.value
+        }
+      }
+    }
+
+    return bestMatch?.value ?? null
+  }, [mode, paletteCommands, normalizeSearchText, trimmedQuery])
 
   useEffect(() => {
     // Triggered by main process (e.g. global shortcut).
@@ -155,13 +274,23 @@ export function CommandPanel() {
       return
     }
 
+    if (mode === 'palette' && matchedPaletteCommandValue) {
+      setSelectedValue(matchedPaletteCommandValue)
+      return
+    }
+
     setSelectedValue(fallbackValue)
-  }, [open, mode, trimmedQuery, fallbackValue])
+  }, [open, mode, trimmedQuery, matchedPaletteCommandValue, fallbackValue])
 
   useEffect(() => {
     if (!open) return
     if (userHasNavigatedRef.current) return
     if (trimmedQuery === '') return
+
+    if (mode === 'palette' && matchedPaletteCommandValue) {
+      setSelectedValue(matchedPaletteCommandValue)
+      return
+    }
 
     if (searching) {
       setSelectedValue(fallbackValue)
@@ -174,7 +303,15 @@ export function CommandPanel() {
     }
 
     setSelectedValue(fallbackValue)
-  }, [open, trimmedQuery, searching, subjectResults, fallbackValue])
+  }, [
+    open,
+    mode,
+    trimmedQuery,
+    searching,
+    matchedPaletteCommandValue,
+    subjectResults,
+    fallbackValue,
+  ])
 
   const placeholder = useMemo(() => {
     if (mode === 'subject-search') return '搜索条目...'
@@ -213,106 +350,64 @@ export function CommandPanel() {
         {mode === 'palette' && trimmedQuery === '' && (
           <>
             <CommandGroup heading="导航">
-              <CommandItem
-                value="go-home"
-                onSelect={() => {
-                  openMainAndNavigate('/')
-                }}
-              >
-                <span className="i-mingcute-home-2-line" />
-                主页
-              </CommandItem>
-              <CommandItem
-                value="go-search"
-                onSelect={() => {
-                  openMainAndNavigate('/search')
-                }}
-              >
-                <span className="i-mingcute-search-line" />
-                搜索
-              </CommandItem>
-              <CommandItem
-                value="go-talk"
-                onSelect={() => {
-                  openMainAndNavigate('/talk')
-                }}
-              >
-                <span className="i-mingcute-chat-3-line" />
-                讨论
-              </CommandItem>
+              {paletteCommands.slice(0, 3).map((command) => (
+                <CommandItem
+                  key={command.value}
+                  value={command.value}
+                  keywords={command.keywords}
+                  onSelect={command.onSelect}
+                >
+                  {command.icon}
+                  {command.label}
+                </CommandItem>
+              ))}
             </CommandGroup>
             <CommandSeparator />
             <CommandGroup heading="分区">
-              <CommandItem
-                value="go-anime"
-                onSelect={() => {
-                  openMainAndNavigate('/anime')
-                }}
-              >
-                <span className="i-mingcute-tv-2-line" />
-                动画
-              </CommandItem>
-              <CommandItem
-                value="go-game"
-                onSelect={() => {
-                  openMainAndNavigate('/game')
-                }}
-              >
-                <span className="i-mingcute-game-1-line" />
-                游戏
-              </CommandItem>
-              <CommandItem
-                value="go-book"
-                onSelect={() => {
-                  openMainAndNavigate('/book')
-                }}
-              >
-                <span className="i-mingcute-book-6-line" />
-                书籍
-              </CommandItem>
-              <CommandItem
-                value="go-music"
-                onSelect={() => {
-                  openMainAndNavigate('/music')
-                }}
-              >
-                <span className="i-mingcute-music-3-line" />
-                音乐
-              </CommandItem>
-              <CommandItem
-                value="go-real"
-                onSelect={() => {
-                  openMainAndNavigate('/real')
-                }}
-              >
-                <span className="i-mingcute-tv-1-line" />
-                三次元
-              </CommandItem>
+              {paletteCommands.slice(3, 8).map((command) => (
+                <CommandItem
+                  key={command.value}
+                  value={command.value}
+                  keywords={command.keywords}
+                  onSelect={command.onSelect}
+                >
+                  {command.icon}
+                  {command.label}
+                </CommandItem>
+              ))}
             </CommandGroup>
             <CommandSeparator />
             <CommandGroup heading="快捷键">
-              <CommandItem
-                value="open-command-panel"
-                onSelect={() => {
-                  setMode('palette')
-                  setQuery('')
-                }}
-              >
-                打开 Command Panel
-                <CommandShortcut>⌘/Ctrl P</CommandShortcut>
-              </CommandItem>
-              <CommandItem
-                value="open-subject-search"
-                onSelect={() => {
-                  setMode('subject-search')
-                  setQuery('')
-                }}
-              >
-                搜索条目
-                <CommandShortcut>⌘/Ctrl K</CommandShortcut>
-              </CommandItem>
+              {paletteCommands.slice(8).map((command) => (
+                <CommandItem
+                  key={command.value}
+                  value={command.value}
+                  keywords={command.keywords}
+                  onSelect={command.onSelect}
+                >
+                  {command.label}
+                  {command.shortcut ? <CommandShortcut>{command.shortcut}</CommandShortcut> : null}
+                </CommandItem>
+              ))}
             </CommandGroup>
           </>
+        )}
+
+        {mode === 'palette' && trimmedQuery !== '' && (
+          <CommandGroup heading="命令">
+            {paletteCommands.map((command) => (
+              <CommandItem
+                key={command.value}
+                value={command.value}
+                keywords={command.keywords}
+                onSelect={command.onSelect}
+              >
+                {command.icon}
+                {command.label}
+                {command.shortcut ? <CommandShortcut>{command.shortcut}</CommandShortcut> : null}
+              </CommandItem>
+            ))}
+          </CommandGroup>
         )}
 
         {mode === 'subject-search' && trimmedQuery === '' && (
@@ -355,7 +450,15 @@ export function CommandPanel() {
                   <CommandItem
                     key={subject.id}
                     value={getSubjectItemValue(subject)}
-                    keywords={[String(subject.id), subject.name_cn, subject.name].filter(Boolean)}
+                    keywords={[
+                      String(subject.id),
+                      subject.name_cn,
+                      subject.name,
+                      subject.name_cn_pinyin,
+                    ].filter(
+                      (keyword): keyword is string =>
+                        typeof keyword === 'string' && keyword.length > 0,
+                    )}
                     onSelect={() => {
                       openMainAndNavigate(`/subject/${subject.id}`)
                     }}
