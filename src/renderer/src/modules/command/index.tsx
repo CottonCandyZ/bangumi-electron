@@ -129,16 +129,16 @@ export function CommandPanel() {
         label: '三次元',
         onSelect: () => openMainAndNavigate('/real'),
       },
-      {
-        value: 'open-command-panel',
-        keywords: ['command', 'palette', '命令', '面板', '快捷键'],
-        label: '打开 Command Panel',
-        shortcut: '⌘/Ctrl P',
-        onSelect: () => {
-          setMode('palette')
-          setQuery('')
-        },
-      },
+      // {
+      //   value: 'open-command-panel',
+      //   keywords: ['command', 'palette', '命令', '面板', '快捷键'],
+      //   label: '打开 Command Panel',
+      //   shortcut: '⌘/Ctrl P',
+      //   onSelect: () => {
+      //     setMode('palette')
+      //     setQuery('')
+      //   },
+      // },
       {
         value: 'open-subject-search',
         keywords: ['搜索条目', '条目', 'subject', '本地'],
