@@ -12,6 +12,7 @@ let pendingOpen: { mode?: 'palette' | 'subject-search' } | null = null
 let pendingShow = false
 let commandWindowPresented = false
 let commandWindowShownOnce = false
+let primingHideTimer: ReturnType<typeof setTimeout> | null = null
 
 function loadCommandWindowContents(window: BrowserWindow) {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -46,11 +47,17 @@ function setPresented(window: BrowserWindow, presented: boolean) {
   if (presented) {
     window.setIgnoreMouseEvents(false)
     window.setFocusable(true)
+    if (!window.isVisible()) {
+      // Keep the first on-screen frame invisible to avoid flashes.
+      window.setOpacity(0)
+      window.showInactive()
+    }
     window.setOpacity(1)
   } else {
     window.setOpacity(0)
     window.setIgnoreMouseEvents(true, { forward: true })
     window.setFocusable(false)
+    window.hide()
   }
 }
 
@@ -83,6 +90,11 @@ export function getOrCreateCommandWindow() {
       sandbox: false,
     },
   })
+
+  if (process.platform === 'darwin') {
+    // Avoid a persistent "empty" transparent window showing up in Mission Control.
+    window.setHiddenInMissionControl(true)
+  }
 
   window.on('close', (event) => {
     if (!isAppQuitting()) {
@@ -117,7 +129,15 @@ export function getOrCreateCommandWindow() {
 function ensureShownOnce(window: BrowserWindow) {
   if (commandWindowShownOnce) return
   commandWindowShownOnce = true
+  window.setOpacity(0)
   window.showInactive()
+  if (primingHideTimer) clearTimeout(primingHideTimer)
+  primingHideTimer = setTimeout(() => {
+    primingHideTimer = null
+    if (window.isDestroyed()) return
+    if (commandWindowPresented) return
+    window.hide()
+  }, 0)
 }
 
 function flushPendingOpen() {
@@ -134,14 +154,14 @@ function flushPendingOpen() {
 export function markCommandOverlayReady() {
   commandOverlayReady = true
   const window = commandWindow
-  if (window && !window.isDestroyed()) ensureShownOnce(window)
-
   if (pendingShow) {
     pendingShow = false
     if (window && !window.isDestroyed()) {
       setPresented(window, true)
       window.focus()
     }
+  } else if (window && !window.isDestroyed()) {
+    ensureShownOnce(window)
   }
   flushPendingOpen()
 }
@@ -152,7 +172,6 @@ export function showCommandWindow(payload?: { mode?: 'palette' | 'subject-search
 
   pendingOpen = payload ?? { mode: 'palette' }
   if (commandOverlayReady) {
-    ensureShownOnce(window)
     setPresented(window, true)
     window.focus()
     flushPendingOpen()
