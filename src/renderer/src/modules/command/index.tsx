@@ -13,6 +13,7 @@ import { SUBJECT_TYPE_MAP } from '@renderer/lib/utils/map'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useNavigate } from 'react-router-dom'
+import { COMMAND_WINDOW_LIST_HEIGHT_RATIO, COMMAND_WINDOW_LIST_MAX_HEIGHT } from '@shared/constants'
 
 type PanelMode = 'palette' | 'subject-search'
 
@@ -41,6 +42,15 @@ export function CommandPanel() {
   const fallbackValue = useMemo(() => `search-page:${trimmedQuery}`, [trimmedQuery])
   const isCommandOverlayWindow =
     typeof window !== 'undefined' && window.location.hash.startsWith('#/command')
+  const overlayListHeight = useMemo(() => {
+    if (!isCommandOverlayWindow || typeof window === 'undefined') return null
+    const availableHeight = window.screen?.availHeight ?? window.innerHeight
+    const height = Math.min(
+      Math.round(availableHeight * COMMAND_WINDOW_LIST_HEIGHT_RATIO),
+      COMMAND_WINDOW_LIST_MAX_HEIGHT,
+    )
+    return `${height}px`
+  }, [isCommandOverlayWindow])
 
   const normalizeSearchText = useCallback((text: string) => text.trim().toLowerCase(), [])
 
@@ -346,7 +356,10 @@ export function CommandPanel() {
         onCompositionUpdate={(e) => setQuery(e.currentTarget.value)}
         onCompositionEnd={(e) => setQuery(e.currentTarget.value)}
       />
-      <CommandList className="h-[min(60vh,420px)] max-h-none">
+      <CommandList
+        className={isCommandOverlayWindow ? 'max-h-none' : 'h-[min(60vh,420px)] max-h-none'}
+        style={overlayListHeight ? { height: overlayListHeight } : undefined}
+      >
         {mode === 'palette' && trimmedQuery === '' && (
           <>
             <CommandGroup heading="导航">
