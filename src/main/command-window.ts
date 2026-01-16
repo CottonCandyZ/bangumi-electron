@@ -5,6 +5,14 @@ import { getIconPath } from '@main/helper'
 import { getRendererHandlers } from '@egoist/tipc/main'
 import type { RendererHandlers } from '@main/tipc/renderer-handlers'
 import { isAppQuitting } from '@main/app-flags'
+import {
+  COMMAND_WINDOW_INPUT_HEIGHT,
+  COMMAND_WINDOW_LIST_HEIGHT_RATIO,
+  COMMAND_WINDOW_LIST_MAX_HEIGHT,
+  COMMAND_WINDOW_MARGIN,
+  COMMAND_WINDOW_MAX_WIDTH,
+  COMMAND_WINDOW_VERTICAL_OFFSET_RATIO,
+} from '@shared/constants'
 
 let commandWindow: BrowserWindow | null = null
 let commandOverlayReady = false
@@ -13,6 +21,7 @@ let pendingShow = false
 let commandWindowPresented = false
 let commandWindowShownOnce = false
 let primingHideTimer: ReturnType<typeof setTimeout> | null = null
+const keepCommandWindowVisible = process.platform === 'win32'
 
 function loadCommandWindowContents(window: BrowserWindow) {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -25,7 +34,35 @@ function loadCommandWindowContents(window: BrowserWindow) {
 function getDesiredCommandWindowBounds() {
   const point = screen.getCursorScreenPoint()
   const display = screen.getDisplayNearestPoint(point)
-  return display.workArea
+  const workArea = display.workArea
+
+  const listHeight = Math.min(
+    Math.round(workArea.height * COMMAND_WINDOW_LIST_HEIGHT_RATIO),
+    COMMAND_WINDOW_LIST_MAX_HEIGHT,
+  )
+  const contentHeight = COMMAND_WINDOW_INPUT_HEIGHT + listHeight
+  const contentWidth = Math.min(
+    COMMAND_WINDOW_MAX_WIDTH,
+    Math.max(0, workArea.width - COMMAND_WINDOW_MARGIN * 2),
+  )
+
+  const windowWidth = Math.min(workArea.width, Math.round(contentWidth + COMMAND_WINDOW_MARGIN * 2))
+  const windowHeight = Math.min(
+    workArea.height,
+    Math.round(contentHeight + COMMAND_WINDOW_MARGIN * 2),
+  )
+
+  const x = Math.round(workArea.x + (workArea.width - windowWidth) / 2)
+  const y = Math.round(
+    workArea.y + (workArea.height - windowHeight) * COMMAND_WINDOW_VERTICAL_OFFSET_RATIO,
+  )
+
+  return {
+    x,
+    y,
+    width: windowWidth,
+    height: windowHeight,
+  }
 }
 
 function updateCommandWindowBounds(window: BrowserWindow) {
@@ -57,7 +94,7 @@ function setPresented(window: BrowserWindow, presented: boolean) {
     window.setOpacity(0)
     window.setIgnoreMouseEvents(true, { forward: true })
     window.setFocusable(false)
-    window.hide()
+    if (!keepCommandWindowVisible) window.hide()
   }
 }
 
@@ -131,6 +168,7 @@ function ensureShownOnce(window: BrowserWindow) {
   commandWindowShownOnce = true
   window.setOpacity(0)
   window.showInactive()
+  if (keepCommandWindowVisible) return
   if (primingHideTimer) clearTimeout(primingHideTimer)
   primingHideTimer = setTimeout(() => {
     primingHideTimer = null
