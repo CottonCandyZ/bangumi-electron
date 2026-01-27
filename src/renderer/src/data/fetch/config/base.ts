@@ -1,4 +1,4 @@
-import { AuthorizationHeader } from '@renderer/data/fetch/config/path'
+import { AuthorizationHeader, LOGIN } from '@renderer/data/fetch/config/path'
 import { getAccessToken } from '@renderer/data/fetch/session'
 import { safeLogout } from '@renderer/data/hooks/session'
 import { ofetch } from 'ofetch'
@@ -51,6 +51,28 @@ export const apiFetchWithAuth = ofetch.create({
   async onResponseError({ response }) {
     // Handle 401 Unauthorized errors by logging out the user
     if (response.status === 401) {
+      const token = await getAccessToken()
+      const createTime = token?.create_time ? new Date(token.create_time) : null
+      const expiresAt =
+        token?.expires_in && createTime
+          ? new Date(createTime.getTime() + token.expires_in * 1000)
+          : null
+      const refreshTokenUrl = new URL(LOGIN.OAUTH_ACCESS_TOKEN_URL, HOST).toString()
+
+      console.error('API 401 Unauthorized', {
+        status: response.status,
+        url: response.url,
+      })
+      console.error('Access token info', {
+        access_token: token?.access_token ?? null,
+        refresh_token: token?.refresh_token ?? null,
+        user_id: token?.user_id ?? null,
+        expires_in: token?.expires_in ?? null,
+        create_time: createTime ? createTime.toISOString() : null,
+        expires_at: expiresAt ? expiresAt.toISOString() : null,
+        refresh_token_url: refreshTokenUrl,
+      })
+
       // Use the safeLogout function to handle the logout process
       // This ensures only one logout happens at a time and shows a toast notification
       await safeLogout({ showToast: true })
