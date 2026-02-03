@@ -48,10 +48,7 @@ export function Detail({ personId }: { personId: PersonId }) {
       </div>
       <section>
         {personDetail.summary !== '' ? (
-          <ScrollWrapper
-            className="bbcode max-h-40 whitespace-pre-line"
-            options={{ overflow: { x: 'hidden' } }}
-          >
+          <ScrollWrapper className="bbcode max-h-40 whitespace-pre-line">
             {renderSummery}
           </ScrollWrapper>
         ) : (

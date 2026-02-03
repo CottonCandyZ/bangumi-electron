@@ -27,7 +27,7 @@ function Content(props: {
       <SheetHeader className="pl-6">
         <SheetTitle>{sheetTitle}</SheetTitle>
       </SheetHeader>
-      <ScrollWrapper className="pt-2 pr-4 pl-6" options={{ scrollbars: { autoHide: 'leave' } }}>
+      <ScrollWrapper className="pt-2 pr-4 pl-6">
         <AddOrModifySubjectCollectionForm {...formProps} success={() => props.setOpen(false)} />
       </ScrollWrapper>
     </SheetContent>

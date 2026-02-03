@@ -12,10 +12,7 @@ export function Detail({ characterId }: { characterId: CharacterId }) {
   }
   const renderSummery = renderBBCode(characterDetailData.summary)
   return characterDetailData.summary !== '' ? (
-    <ScrollWrapper
-      className="bbcode max-h-56 min-h-8 py-0.5 whitespace-pre-line"
-      options={{ overflow: { x: 'hidden' } }}
-    >
+    <ScrollWrapper className="bbcode max-h-56 min-h-8 py-0.5 whitespace-pre-line">
       {renderSummery}
     </ScrollWrapper>
   ) : (

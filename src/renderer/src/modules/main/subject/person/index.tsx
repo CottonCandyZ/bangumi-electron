@@ -9,7 +9,7 @@ export function SubjectPersonTable({ subjectId }: { subjectId: SubjectId }) {
   const persons = personsQuery.data
   return (
     <div className="h-full pr-1">
-      <ScrollWrapper className="h-full w-full pr-1" options={{ scrollbars: { autoHide: 'leave' } }}>
+      <ScrollWrapper className="h-full w-full pr-1">
         {persons === undefined ? (
           <div className="flex h-full w-full items-center justify-center p-6" role="status">
             <LoaderCircle className="text-muted-foreground h-8 w-8 animate-spin" />
