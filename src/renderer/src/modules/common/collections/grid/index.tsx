@@ -6,6 +6,7 @@ import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import { gridCache } from '@renderer/state/global-var'
 import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
+import { ScrollArea } from '@base-ui/react/scroll-area'
 import { useSetAtom } from 'jotai'
 import { useEffect, useMemo, useRef } from 'react'
 import { useSession } from '@renderer/data/hooks/session'
@@ -68,18 +69,22 @@ export function CollectionsGrid({
       </div>
     )
   return (
-    <div className="h-full overflow-hidden pr-0.5">
+    <ScrollArea.Root className="group/scroll relative h-full w-full overflow-hidden">
       <MasonryInfiniteGrid
         ref={igRef}
+        // Make the InfiniteGrid wrapper be the Base UI viewport so scrolling is observed correctly.
+        tag={ScrollArea.Viewport as unknown as string}
+        // Make the InfiniteGrid container be the Base UI content wrapper so thumb updates when content grows.
+        container
+        containerTag={ScrollArea.Content as unknown as string}
         onChangeScroll={() => {
           gridCache.set(`${subjectType}-${collectionType}`, igRef.current?.getStatus())
         }}
         onRenderComplete={() => {
           gridCache.set(`${subjectType}-${collectionType}`, igRef.current?.getStatus())
         }}
-        className="h-full overflow-x-hidden px-1 py-1 pr-0.5"
+        className="h-full w-full overflow-x-hidden px-1 py-1 focus-visible:outline-hidden"
         useResizeObserver
-        container
         observeChildren
         placeholder={<CollectionSkeleton />}
         align="stretch"
@@ -108,7 +113,14 @@ export function CollectionsGrid({
           )
         })}
       </MasonryInfiniteGrid>
-    </div>
+
+      <ScrollArea.Scrollbar
+        orientation="vertical"
+        className="absolute top-0 right-0 z-20 flex h-full w-2.5 touch-none p-0.5 opacity-0 transition-opacity duration-150 select-none group-hover/scroll:opacity-100"
+      >
+        <ScrollArea.Thumb className="bg-foreground/10 hover:bg-foreground/30 active:bg-foreground/40 relative [height:var(--scroll-area-thumb-height)] w-full flex-1 rounded-full" />
+      </ScrollArea.Scrollbar>
+    </ScrollArea.Root>
   )
 }
 

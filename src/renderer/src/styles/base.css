@@ -4,6 +4,3 @@
     @apply text-sm font-medium;
   }
 }
-[data-overlayscrollbars-viewport] {
-  z-index: auto !important;
-}

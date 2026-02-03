@@ -1,29 +1,15 @@
 import { cn } from '@renderer/lib/utils'
-// import { PartialOptions } from 'overlayscrollbars'
-import {
-  // OverlayScrollbarsComponent,
-  OverlayScrollbarsComponentProps,
-} from 'overlayscrollbars-react'
+import React from 'react'
 
 export function ScrollWrapper({
   className,
   children,
   // options,
-  // ...props
-}: OverlayScrollbarsComponentProps) {
-  // const typeOptions = options as PartialOptions | undefined
-  // return (
-  //   <OverlayScrollbarsComponent
-  //     className={cn('pr-2', className)}
-  //     options={{
-  //       ...typeOptions,
-  //       scrollbars: { ...typeOptions?.scrollbars, theme: 'os-theme-custom', clickScroll: true },
-  //     }}
-  //     defer
-  //     {...props}
-  //   >
-  //     {children}
-  //   </OverlayScrollbarsComponent>
-  // )
-  return <div className={cn('overflow-auto', className)}>{children}</div>
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div className={cn('overflow-auto', className)} {...props}>
+      {children}
+    </div>
+  )
 }
