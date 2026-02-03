@@ -81,6 +81,13 @@ export async function safeRefreshToken(token: Token): Promise<Token & { create_t
 export async function getAccessToken(userId: string | null = store.get(userIdAtom) ?? null) {
   if (!userId) return null
   // 从缓存中读取，如果未过期，直接返回
+
+  console.log(
+    'isExpired check:',
+    accessTokenCache &&
+      accessTokenCache.expires_in * 1000 + accessTokenCache.create_time.getTime() <
+        new Date().getTime(),
+  )
   if (
     accessTokenCache?.user_id === Number(userId) &&
     accessTokenCache.expires_in * 1000 + accessTokenCache.create_time.getTime() >
@@ -89,9 +96,11 @@ export async function getAccessToken(userId: string | null = store.get(userIdAto
     return accessTokenCache
   }
   const token = await readAccessToken({ user_id: Number(userId) })
+
   // 判断过期
   if (token && token.expires_in * 1000 + token.create_time.getTime() < new Date().getTime()) {
     // refresh token using the safe refresh function
+    console.log('start refreshing token...', token)
     try {
       accessTokenCache = await safeRefreshToken(token)
     } catch (e) {
