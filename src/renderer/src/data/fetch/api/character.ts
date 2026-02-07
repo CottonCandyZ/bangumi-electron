@@ -1,4 +1,9 @@
-import { CHARACTERS, SUBJECTS, apiFetchWithAuth, apiFetch } from '@renderer/data/fetch/config/'
+import {
+  CHARACTERS,
+  SUBJECTS,
+  apiFetchWithOptionalAuth,
+  apiFetch,
+} from '@renderer/data/fetch/config/'
 import { CharacterId, SubjectId } from '@renderer/data/types/bgm'
 import { Character, CharacterDetail } from '@renderer/data/types/character'
 
@@ -6,7 +11,7 @@ import { Character, CharacterDetail } from '@renderer/data/types/character'
  * 从 v0 获得 subject 相关的角色信息
  */
 export function getSubjectCharactersById({ id }: { id: SubjectId }) {
-  return apiFetchWithAuth<Character[]>(SUBJECTS.CHARACTERS_BY_ID(id.toString()))
+  return apiFetchWithOptionalAuth<Character[]>(SUBJECTS.CHARACTERS_BY_ID(id.toString()))
 }
 
 /**

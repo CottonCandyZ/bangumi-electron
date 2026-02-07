@@ -1,11 +1,11 @@
 import { getPersonDetailById, getSubjectPersonsById } from '@renderer/data/fetch/api/person'
-import { useQueryOptionalAuth } from '@renderer/data/hooks/factory'
+import { useAuthQuery } from '@renderer/data/hooks/factory'
 import { PersonId, SubjectId } from '@renderer/data/types/bgm'
 import { useQuery } from '@tanstack/react-query'
 
-// 暂时用不到
 /**
  * 使用 id 获得 Subject 相关的人物信息
+ * @deprecated 当前未使用，后续将删除
  */
 export const useQuerySubjectPersons = ({
   id,
@@ -14,7 +14,7 @@ export const useQuerySubjectPersons = ({
   id: SubjectId | undefined
   enabled?: boolean
 }) =>
-  useQueryOptionalAuth({
+  useAuthQuery({
     queryFn: getSubjectPersonsById,
     queryKey: ['subject-persons'],
     queryProps: { id },

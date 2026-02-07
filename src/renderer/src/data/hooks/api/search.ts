@@ -1,5 +1,5 @@
 import { searchV0 } from '@renderer/data/fetch/api/serach'
-import { useInfinityQueryOptionalAuth, useQueryOptionalAuth } from '@renderer/data/hooks/factory'
+import { useAuthQuery, useInfinityQueryOptionalAuth } from '@renderer/data/hooks/factory'
 import { SearchParam } from '@renderer/data/types/search'
 
 export const useInfinityQuerySearch = ({
@@ -35,7 +35,7 @@ export const useQuerySearch = ({
   searchParam: SearchParam
   keepPreviousData?: boolean
 }) =>
-  useQueryOptionalAuth({
+  useAuthQuery({
     queryKey: ['search'],
     queryFn: searchV0,
     queryProps: { offset, limit, searchParam },

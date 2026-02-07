@@ -1,15 +1,12 @@
 import { getRelatedSubjects, getSubjectById } from '@renderer/data/fetch/api/subject'
-import {
-  useAuthQuery,
-  useQueriesOptionalAuth,
-  useQueryOptionalAuth,
-} from '@renderer/data/hooks/factory'
+import { useAuthQuery, useAuthQueries } from '@renderer/data/hooks/factory'
 import { sortCharacterByRelation } from '@renderer/data/transformer/api'
 import { SubjectId } from '@renderer/data/types/bgm'
 
 /**
  * 使用 id 获得 Subject 的基础信息，走 v0 接口
  * 暂时先用 DB 版本的替代了，故这里用不到
+ * @deprecated 已被 DB 查询链路替代，后续将删除
  */
 export const useSubjectInfoAPIQuery = ({
   subjectId: id,
@@ -20,7 +17,7 @@ export const useSubjectInfoAPIQuery = ({
   enabled?: boolean
   needKeepPreviousData?: boolean
 }) =>
-  useQueryOptionalAuth({
+  useAuthQuery({
     queryFn: getSubjectById,
     queryKey: ['subject-info'],
     queryProps: { id: Number(id) },
@@ -28,7 +25,10 @@ export const useSubjectInfoAPIQuery = ({
     needKeepPreviousData,
   })
 
-/** 暂时先用 DB 版本的替代了，故这里用不到 */
+/**
+ * 暂时先用 DB 版本的替代了，故这里用不到
+ * @deprecated 已被 DB 查询链路替代，后续将删除
+ */
 export const useSubjectsInfoAPIQuery = ({
   subjectIds: ids,
   enabled,
@@ -38,7 +38,7 @@ export const useSubjectsInfoAPIQuery = ({
   enabled?: boolean
   needKeepPreviousData?: boolean
 }) =>
-  useQueriesOptionalAuth({
+  useAuthQueries({
     queryFn: getSubjectById,
     queryIds: ids?.map((id) => Number(id)) ?? [],
     queryKey: ['subject-info'],

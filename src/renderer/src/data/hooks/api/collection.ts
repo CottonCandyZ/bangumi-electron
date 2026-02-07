@@ -15,10 +15,10 @@ import { EpisodeType } from '@renderer/data/types/episode'
 import { UserInfo } from '@renderer/data/types/user'
 import { UseMutationOptions } from '@tanstack/react-query'
 
-type OmitInfinityQFP<P> = Omit<P, 'token' | 'offset'>
+type OmitInfinityQFP<P> = Omit<P, 'offset'>
 
 type ApiMutationOptionsWithoutToken<TFunction> = TFunction extends (arg: infer P) => infer R
-  ? Omit<UseMutationOptions<Awaited<R>, Error, Omit<P, 'token'>>, 'mutationFn'>
+  ? Omit<UseMutationOptions<Awaited<R>, Error, P>, 'mutationFn'>
   : never
 
 export const useInfinityQueryCollectionsByUsername = ({

@@ -1,6 +1,7 @@
-import { AuthorizationHeader, LOGIN } from '@renderer/data/fetch/config/path'
+import { AuthorizationHeader } from '@renderer/data/fetch/config/path'
 import { getAccessToken } from '@renderer/data/fetch/session'
 import { safeLogout } from '@renderer/data/hooks/session'
+import { logger } from '@renderer/lib/logger'
 import { ofetch } from 'ofetch'
 
 /** 主站域名 */
@@ -38,15 +39,28 @@ export const webFetch = ofetch.create({ baseURL: HOST })
 /** ofetch api config  */
 export const apiFetch = ofetch.create({ baseURL: API_HOST, credentials: 'omit' })
 
-/** ofetch api withAuth */
+async function appendAuthHeader(options: { headers?: HeadersInit }) {
+  const token = await getAccessToken()
+  if (!token) return
+  options.headers = new Headers(options.headers)
+  options.headers.append('Authorization', AuthorizationHeader(token.access_token))
+}
+
+/** ofetch api optional auth */
+export const apiFetchWithOptionalAuth = ofetch.create({
+  baseURL: API_HOST,
+  credentials: 'omit',
+  async onRequest({ options }) {
+    await appendAuthHeader(options)
+  },
+})
+
+/** ofetch api must auth */
 export const apiFetchWithAuth = ofetch.create({
   baseURL: API_HOST,
   credentials: 'omit',
   async onRequest({ options }) {
-    const token = await getAccessToken()
-    if (!token) return
-    options.headers = new Headers(options.headers)
-    options.headers.append('Authorization', AuthorizationHeader(token.access_token))
+    await appendAuthHeader(options)
   },
   async onResponseError({ response }) {
     // Handle 401 Unauthorized errors by logging out the user
@@ -57,20 +71,17 @@ export const apiFetchWithAuth = ofetch.create({
         token?.expires_in && createTime
           ? new Date(createTime.getTime() + token.expires_in * 1000)
           : null
-      const refreshTokenUrl = new URL(LOGIN.OAUTH_ACCESS_TOKEN_URL, HOST).toString()
 
-      console.error('API 401 Unauthorized', {
+      await logger.error('auth-fetch', 'API 401 Unauthorized', {
         status: response.status,
         url: response.url,
       })
-      console.error('Access token info', {
-        access_token: token?.access_token ?? null,
-        refresh_token: token?.refresh_token ?? null,
+      await logger.error('auth-fetch', 'Access token status', {
+        has_token: !!token,
         user_id: token?.user_id ?? null,
         expires_in: token?.expires_in ?? null,
         create_time: createTime ? createTime.toISOString() : null,
         expires_at: expiresAt ? expiresAt.toISOString() : null,
-        refresh_token_url: refreshTokenUrl,
       })
 
       // Use the safeLogout function to handle the logout process

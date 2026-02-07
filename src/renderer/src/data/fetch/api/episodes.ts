@@ -1,4 +1,4 @@
-import { apiFetchWithAuth, EPISODES } from '@renderer/data/fetch/config'
+import { apiFetchWithOptionalAuth, EPISODES } from '@renderer/data/fetch/config'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { Episodes } from '@renderer/data/types/episode'
 
@@ -17,7 +17,7 @@ export async function getEpisodesBySubjectId({
   offset?: number
   type?: number
 }) {
-  const info = await apiFetchWithAuth<Episodes>(EPISODES.ROOT, {
+  const info = await apiFetchWithOptionalAuth<Episodes>(EPISODES.ROOT, {
     query: {
       subject_id: subjectId,
       limit,

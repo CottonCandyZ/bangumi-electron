@@ -1,5 +1,4 @@
-import { apiFetch, apiFetchWithAuth, COLLECTIONS } from '@renderer/data/fetch/config/'
-import { getAuthHeader } from '@renderer/data/fetch/utils'
+import { apiFetchWithAuth, COLLECTIONS } from '@renderer/data/fetch/config/'
 import { UserInfo } from '@renderer/data/types/user'
 import { FetchParamError } from '@renderer/lib/utils/error'
 import {
@@ -25,7 +24,6 @@ export async function getSubjectCollectionsByUsernameMustAuth({
   username: UserInfo['username'] | undefined
   subjectType?: SubjectType
   collectionType?: CollectionType
-  token?: string
   limit?: number
   offset: number
 }) {
@@ -41,7 +39,7 @@ export async function getSubjectCollectionsByUsernameMustAuth({
   return info
 }
 
-/** 用条目 ID 和 token 获得 章节收藏 */
+/** 用条目 ID 获得章节收藏 */
 export function getEpisodesCollectionBySubjectId({
   subjectId,
   limit,
@@ -89,7 +87,6 @@ export async function getSubjectCollectionBySubjectIdAndUsername({
 
 export async function AddOrModifySubjectCollectionById({
   subjectId,
-  token,
   collectionType,
   rate,
   comment,
@@ -98,7 +95,6 @@ export async function AddOrModifySubjectCollectionById({
   modify = true,
 }: {
   subjectId: SubjectId
-  token: string
   modify?: boolean
   collectionType?: CollectionType
   rate?: CollectionData['rate']
@@ -106,7 +102,7 @@ export async function AddOrModifySubjectCollectionById({
   isPrivate?: boolean
   tags?: string[]
 }) {
-  const result = await apiFetch<APIError | undefined>(
+  const result = await apiFetchWithAuth<APIError | undefined>(
     COLLECTIONS.ADD_OR_MODIFY_SUBJECT_BY_ID(subjectId),
     {
       method: modify ? 'PATCH' : 'POST',
@@ -117,35 +113,27 @@ export async function AddOrModifySubjectCollectionById({
         private: isPrivate,
         tags: tags,
       },
-      headers: {
-        ...getAuthHeader(token),
-      },
     },
   )
   return result
 }
 
 export async function ModifyEpisodeCollectionBySubjectId({
-  token,
   subjectId,
   episodesId,
   episodeCollectionType,
 }: {
-  token: string
   subjectId: SubjectId
   episodesId: number[]
   episodeCollectionType: EpisodeCollectionType
 }) {
-  const result = await apiFetch<APIError | undefined>(
+  const result = await apiFetchWithAuth<APIError | undefined>(
     COLLECTIONS.MODIFY_EPISODE_BY_SUBJECT_ID(subjectId),
     {
       method: 'PATCH',
       body: {
         type: episodeCollectionType,
         episode_id: episodesId,
-      },
-      headers: {
-        ...getAuthHeader(token),
       },
     },
   )

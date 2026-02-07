@@ -1,4 +1,4 @@
-import { getSubjectByIdWithToken } from '@renderer/data/fetch/api/subject'
+import { getSubjectById } from '@renderer/data/fetch/api/subject'
 import {
   insertSubjectInfo,
   insertSubjectsInfo,
@@ -21,7 +21,7 @@ export const useSubjectInfoQuery = ({
   needKeepPreviousData?: boolean
 }) =>
   useDBQuery({
-    apiQueryFn: getSubjectByIdWithToken,
+    apiQueryFn: getSubjectById,
     apiParams: { id: Number(id) },
     dbQueryFn: readSubjectInfoById,
     dbParams: { id: Number(id) },
@@ -37,7 +37,7 @@ export const useSubjectInfoQuery = ({
 //   subjectIds: SubjectId[] | undefined
 // }) =>
 //   useDBQueries({
-//     apiQueryFn: getSubjectByIdWithToken,
+//     apiQueryFn: getSubjectById,
 //     dbQueryFn: readSubjectsInfoByIds,
 //     dbParams: { ids: ids?.map((id) => Number(id)) },
 //     queryKey: ['subject-info'],
@@ -57,7 +57,7 @@ export const useSubjectsInfoQuery = ({
   needKeepPreviousData?: boolean
 }) =>
   useDBQueries({
-    apiQueryFn: getSubjectByIdWithToken,
+    apiQueryFn: getSubjectById,
     dbQueryFn: readSubjectsInfoByIds,
     dbParams: { ids: ids?.map((id) => Number(id)) },
     queryKey: ['subject-info'],

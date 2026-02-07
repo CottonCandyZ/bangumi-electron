@@ -1,23 +1,17 @@
-import { apiFetch, SEARCH } from '@renderer/data/fetch/config/'
-import { getAuthHeader } from '@renderer/data/fetch/utils'
+import { apiFetchWithOptionalAuth, SEARCH } from '@renderer/data/fetch/config/'
 import { SearchDataPage, SearchParam } from '@renderer/data/types/search'
 
 export async function searchV0({
   limit,
   offset,
   searchParam,
-  token,
 }: {
   limit?: number
   offset: number
   searchParam: SearchParam
-  token?: string
 }) {
-  const result = await apiFetch<SearchDataPage>(SEARCH.V0, {
+  const result = await apiFetchWithOptionalAuth<SearchDataPage>(SEARCH.V0, {
     method: 'POST',
-    headers: {
-      ...getAuthHeader(token),
-    },
     query: {
       limit,
       offset,

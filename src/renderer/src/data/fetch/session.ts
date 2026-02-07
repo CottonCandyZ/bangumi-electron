@@ -5,6 +5,7 @@ import { readAccessToken } from './db/user'
 import { refreshToken } from '@renderer/data/fetch/web/login'
 import { createPromiseCache } from '@renderer/lib/utils/promise'
 import { safeLogout } from '@renderer/data/hooks/session'
+import { logger } from '@renderer/lib/logger'
 import { store } from '@renderer/state/utils'
 import { userIdAtom } from '@renderer/state/session'
 
@@ -37,7 +38,7 @@ export async function isAccessTokenValid(token: Token) {
       }),
     })) as Token & { user_id: string }
   } catch (e) {
-    console.error(e)
+    await logger.error('auth-session', 'isAccessTokenValid failed', e)
     return false
   }
   return !!json.user_id
@@ -47,6 +48,7 @@ export async function isAccessTokenValid(token: Token) {
  * 登出时清除相关内容
  */
 export async function logout() {
+  cleanAccessTokenCache()
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_sid' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_sec_id' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_cookietime' })
@@ -59,6 +61,12 @@ let accessTokenCache: (Token & { create_time: Date }) | null = null
 
 // Create a promise cache for token refresh operations
 const tokenRefreshCache = createPromiseCache<string, Token & { create_time: Date }>()
+
+const REFRESH_AHEAD_MS = 60 * 1000
+
+function isTokenExpired(token: Token & { create_time: Date }, nowTime = Date.now()) {
+  return token.expires_in * 1000 + token.create_time.getTime() <= nowTime + REFRESH_AHEAD_MS
+}
 
 /**
  * 刷新 token 并避免同时多次刷新同一个 token
@@ -80,31 +88,33 @@ export async function safeRefreshToken(token: Token): Promise<Token & { create_t
 /** 获得当前的 AccessToken，没登录时返回 null */
 export async function getAccessToken(userId: string | null = store.get(userIdAtom) ?? null) {
   if (!userId) return null
-  // 从缓存中读取，如果未过期，直接返回
+  const nowTime = Date.now()
 
-  console.log(
-    'isExpired check:',
-    accessTokenCache &&
-      accessTokenCache.expires_in * 1000 + accessTokenCache.create_time.getTime() <
-        new Date().getTime(),
-  )
-  if (
-    accessTokenCache?.user_id === Number(userId) &&
-    accessTokenCache.expires_in * 1000 + accessTokenCache.create_time.getTime() >
-      new Date().getTime()
-  ) {
+  void logger.debug('auth-session', 'isExpired check', {
+    isExpired:
+      accessTokenCache &&
+      accessTokenCache.expires_in * 1000 + accessTokenCache.create_time.getTime() < nowTime,
+    user_id: Number(userId),
+    cache_user_id: accessTokenCache?.user_id ?? null,
+  })
+
+  if (accessTokenCache?.user_id === Number(userId) && !isTokenExpired(accessTokenCache, nowTime)) {
     return accessTokenCache
   }
   const token = await readAccessToken({ user_id: Number(userId) })
 
   // 判断过期
-  if (token && token.expires_in * 1000 + token.create_time.getTime() < new Date().getTime()) {
+  if (token && isTokenExpired(token, nowTime)) {
     // refresh token using the safe refresh function
-    console.log('start refreshing token...', token)
+    await logger.info('auth-session', 'start refreshing token', {
+      user_id: token.user_id,
+      create_time: token.create_time?.toISOString?.() ?? token.create_time,
+      expires_in: token.expires_in,
+    })
     try {
       accessTokenCache = await safeRefreshToken(token)
     } catch (e) {
-      console.error('刷新 Token 失败，自动登出', e)
+      await logger.error('auth-session', 'refresh token failed, logging out', e)
       await safeLogout({ showToast: true })
       return null
     }
