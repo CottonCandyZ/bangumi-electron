@@ -1,5 +1,8 @@
 import { AuthorizationHeader } from '@renderer/data/fetch/config/path'
-import { getAccessToken } from '@renderer/data/fetch/session'
+import {
+  getAccessToken,
+  safeRecoverAccessTokenAfterUnauthorized,
+} from '@renderer/data/fetch/session'
 import { safeLogout } from '@renderer/data/hooks/session'
 import { logger } from '@renderer/lib/logger'
 import { ofetch } from 'ofetch'
@@ -83,6 +86,12 @@ export const apiFetchWithAuth = ofetch.create({
         create_time: createTime ? createTime.toISOString() : null,
         expires_at: expiresAt ? expiresAt.toISOString() : null,
       })
+
+      const recovered = await safeRecoverAccessTokenAfterUnauthorized()
+      if (recovered) {
+        await logger.warn('auth-fetch', '401 handled by token recovery, skip logout')
+        return
+      }
 
       // Use the safeLogout function to handle the logout process
       // This ensures only one logout happens at a time and shows a toast notification

@@ -32,10 +32,13 @@ export async function safeLogout(options?: { showToast?: boolean }) {
   // Only proceed with logout if user is currently logged in
   if (!currentUserId) return
 
-  await logger.error('auth-session', 'Authentication error, logging out user')
+  const firstCaller = !logoutSingleton.isRunning()
+  if (firstCaller) {
+    await logger.error('auth-session', 'Authentication error, logging out user')
+  }
 
   // Show a toast notification only if logout is not already in progress and showToast is true
-  if (options?.showToast && !logoutSingleton.isRunning()) {
+  if (options?.showToast && firstCaller) {
     toast.error('登录已过期，请重新登录', {
       id: 'auth-expired',
       duration: 3000,

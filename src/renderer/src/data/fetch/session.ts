@@ -3,7 +3,7 @@ import { Token } from '@renderer/data/types/login'
 import { client } from '@renderer/lib/client'
 import { readAccessToken } from './db/user'
 import { refreshToken } from '@renderer/data/fetch/web/login'
-import { createPromiseCache } from '@renderer/lib/utils/promise'
+import { createPromiseCache, createSingletonPromise } from '@renderer/lib/utils/promise'
 import { safeLogout } from '@renderer/data/hooks/session'
 import { logger } from '@renderer/lib/logger'
 import { store } from '@renderer/state/utils'
@@ -61,6 +61,7 @@ let accessTokenCache: (Token & { create_time: Date }) | null = null
 
 // Create a promise cache for token refresh operations
 const tokenRefreshCache = createPromiseCache<string, Token & { create_time: Date }>()
+const tokenRecoverSingleton = createSingletonPromise<boolean>()
 
 const REFRESH_AHEAD_MS = 60 * 1000
 
@@ -82,6 +83,46 @@ export async function safeRefreshToken(token: Token): Promise<Token & { create_t
       ...token,
     })
     return { ...newToken, create_time: new Date() }
+  })
+}
+
+/**
+ * 在服务端返回 401 时，强制刷新 token（忽略本地 expires_in 判定）。
+ * 返回 true 表示刷新成功，false 表示无法恢复登录态。
+ */
+export async function recoverAccessTokenAfterUnauthorized(
+  userId: string | null = store.get(userIdAtom) ?? null,
+) {
+  if (!userId) return false
+  const token = await readAccessToken({ user_id: Number(userId) })
+  if (!token) {
+    await logger.warn('auth-session', 'recover token skipped: no db token', {
+      user_id: Number(userId),
+    })
+    return false
+  }
+  try {
+    accessTokenCache = await safeRefreshToken(token)
+    await logger.warn('auth-session', 'recover token success after 401', {
+      user_id: accessTokenCache.user_id,
+      expires_in: accessTokenCache.expires_in,
+      create_time: accessTokenCache.create_time.toISOString(),
+    })
+    return true
+  } catch (error) {
+    await logger.error('auth-session', 'recover token failed after 401', error)
+    return false
+  }
+}
+
+/**
+ * 避免多个 401 同时触发多次刷新
+ */
+export async function safeRecoverAccessTokenAfterUnauthorized(
+  userId: string | null = store.get(userIdAtom) ?? null,
+) {
+  return await tokenRecoverSingleton.runOrAwait(async () => {
+    return await recoverAccessTokenAfterUnauthorized(userId)
   })
 }
 
@@ -129,4 +170,5 @@ export function cleanAccessTokenCache() {
   accessTokenCache = null
   // Also clear any pending refresh token promises
   tokenRefreshCache.clearAllPromises()
+  tokenRecoverSingleton.clear()
 }
