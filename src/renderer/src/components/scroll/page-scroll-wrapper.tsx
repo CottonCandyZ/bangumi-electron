@@ -35,14 +35,24 @@ export function PageScrollWrapper({
     const viewport = viewportRef.current
     if (!viewport) return
 
-    const scrollListener = () => {
+    const syncViewportState = () => {
       scrollCache.set(pathname, viewport.scrollTop)
       setScrollPosition(viewport.scrollTop)
     }
-    viewport.scrollTo({ top: initialScrollTop })
-    viewport.addEventListener('scroll', scrollListener, { passive: true })
+    const wheelListener = (event: WheelEvent) => {
+      // Prevent horizontal trackpad scrolling from affecting the page viewport.
+      if (Math.abs(event.deltaX) > Math.abs(event.deltaY) && Math.abs(event.deltaX) > 0.5) {
+        event.preventDefault()
+      }
+    }
+
+    viewport.scrollTo({ top: initialScrollTop, left: 0 })
+    syncViewportState()
+    viewport.addEventListener('scroll', syncViewportState, { passive: true })
+    viewport.addEventListener('wheel', wheelListener, { passive: false })
     return () => {
-      viewport.removeEventListener('scroll', scrollListener)
+      viewport.removeEventListener('scroll', syncViewportState)
+      viewport.removeEventListener('wheel', wheelListener)
     }
   }, [pathname, initialScrollTop, setScrollPosition])
 

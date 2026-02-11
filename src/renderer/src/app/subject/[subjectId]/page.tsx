@@ -1,5 +1,6 @@
 import { BackgroundImage } from '@renderer/modules/main/subject/background'
 import { SubjectContent } from '@renderer/modules/main/subject/content'
+import { UI_CONFIG } from '@renderer/config'
 import { mainContainerHeight } from '@renderer/state/main-bounding-box'
 import { useAtomValue } from 'jotai'
 import { useParams } from 'react-router-dom'
@@ -14,7 +15,7 @@ export function Component() {
       <SubjectContent
         subjectId={subjectId}
         className="relative pb-10"
-        style={{ paddingTop: `${height * 0.83}px` }}
+        style={{ paddingTop: `${height * UI_CONFIG.SUBJECT_HEADER_TOP_PERCENT}px` }}
       />
     </>
   )
