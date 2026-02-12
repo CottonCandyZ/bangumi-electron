@@ -28,8 +28,8 @@ const calculateGradientRange = (scrollTop: number, containerHeight: number) => {
   const nearTopProgress = Math.min(Math.max(scrollTop / (containerHeight * 0.24), 0), 1)
   const topDepthBoost = (1 - nearTopProgress) * 7
 
-  const from = 10 + start + topDepthBoost
-  const to = 45 + end + topDepthBoost * 0.4
+  const from = 5 + start + topDepthBoost
+  const to = 40 + end + topDepthBoost * 0.4
   return { from, to }
 }
 
