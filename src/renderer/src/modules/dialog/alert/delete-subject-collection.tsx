@@ -9,7 +9,7 @@ import {
   AlertDialogTitle,
 } from '@renderer/components/ui/alert-dialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
-import { useSession } from '@renderer/data/hooks/session'
+import { useSessionUsername } from '@renderer/data/hooks/session'
 import { deleteSubjectCollectionById } from '@renderer/data/fetch/web/collection'
 import { useWebDeleteCollectionHash } from '@renderer/data/hooks/web/collection'
 import { CollectionData } from '@renderer/data/types/collection'
@@ -30,8 +30,7 @@ export function DeleteSubjectCollectionAlert() {
 
 const Content = (props: DeleteCollectionProps) => {
   const { subjectId } = props
-  const userInfo = useSession()
-  const username = userInfo?.username
+  const username = useSessionUsername()
   const hash = useWebDeleteCollectionHash({ subjectId }).data
   const queryClient = useQueryClient()
   const queryKey = ['collection-subject', { subjectId, username }]

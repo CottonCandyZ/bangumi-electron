@@ -65,3 +65,7 @@ function useSessionQuery() {
 export function useSession() {
   return useSessionQuery().data
 }
+
+export function useSessionUsername() {
+  return useSession()?.username
+}

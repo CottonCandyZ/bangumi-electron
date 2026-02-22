@@ -1,6 +1,6 @@
 import { Label } from '@renderer/components/ui/label'
 import { Switch } from '@renderer/components/ui/switch'
-import { useSession } from '@renderer/data/hooks/session'
+import { useSessionUsername } from '@renderer/data/hooks/session'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'
 import { cn } from '@renderer/lib/utils'
@@ -9,8 +9,7 @@ import { toast } from 'sonner'
 
 export function PrivateSwitch({ subjectCollection }: { subjectCollection: CollectionData }) {
   const queryClient = useQueryClient()
-  const userInfo = useSession()
-  const username = userInfo?.username
+  const username = useSessionUsername()
   const queryKey = [
     'collection-subject',
     { subjectId: subjectCollection.subject_id.toString(), username },
