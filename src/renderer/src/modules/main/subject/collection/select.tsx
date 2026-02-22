@@ -1,51 +1,27 @@
 import { SubjectCollectionSelectorContent } from '@renderer/modules/common/collections/subject-select-content'
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
-import { useSession } from '@renderer/data/hooks/session'
-import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
+import { useSessionUsername } from '@renderer/data/hooks/session'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
-import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { useSubjectCollectionTypeMutation } from '@renderer/data/hooks/api/collection-mutation'
 
 export function SubjectCollectionSelector({
   subjectCollection,
 }: {
   subjectCollection: CollectionData
 }) {
-  const queryClient = useQueryClient()
-  const userInfo = useSession()
-  const username = userInfo?.username
-  const queryKey = [
-    'collection-subject',
-    { subjectId: subjectCollection.subject_id.toString(), username },
-  ]
-  const subjectCollectionMutation = useMutationSubjectCollection({
-    mutationKey: ['subject-collection'],
-    onSuccess(_, variable) {
+  const username = useSessionUsername()
+  const subjectCollectionMutation = useSubjectCollectionTypeMutation({
+    subjectId: subjectCollection.subject_id.toString(),
+    username,
+    onSuccess(collectionType) {
       toast.success(
-        `已标记成 ${COLLECTION_TYPE_MAP(subjectCollection.subject_type)[variable.collectionType!]}`,
+        `已标记成 ${COLLECTION_TYPE_MAP(subjectCollection.subject_type)[collectionType]}`,
       )
     },
-    onMutate(variable) {
-      queryClient.cancelQueries({ queryKey })
-      const pre = queryClient.getQueryData(queryKey)
-      queryClient.setQueryData(queryKey, {
-        ...subjectCollection,
-        type: variable.collectionType!,
-      } satisfies CollectionData)
-      return { pre }
-    },
-    onSettled() {
-      queryClient.invalidateQueries({
-        queryKey,
-      })
-      queryClient.invalidateQueries({
-        queryKey: ['collection-subjects'],
-      })
-    },
-    onError(_error, _variable, context) {
+    onError() {
       toast.error('呀，出了点错误...')
-      queryClient.setQueryData(queryKey, (context as { pre: CollectionData }).pre)
     },
   })
 

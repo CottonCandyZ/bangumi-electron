@@ -1,6 +1,6 @@
 import { EpisodeGridSize } from '@renderer/modules/common/episodes/grid/index'
 import { EpisodeGridItem } from '@renderer/modules/common/episodes/grid/item'
-import { useSession } from '@renderer/data/hooks/session'
+import { useSessionUsername } from '@renderer/data/hooks/session'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
 import {
@@ -35,13 +35,12 @@ export function EpisodeGridContent({
   ModifyEpisodeCollectionOptType) {
   let firstTime = Array(7).fill(true) // 用来显示不同种类的数组, type 字段
   firstTime[0] = false // 本篇就不显示了
-  const userInfo = useSession()
-  const username = userInfo?.username
+  const username = useSessionUsername()
   const [enabled, setEnabled] = useState(false)
   const subjectCollectionQuery = useQuerySubjectCollection({
     subjectId,
     username,
-    enabled: !!userInfo && enabled,
+    enabled: !!username && enabled,
     needKeepPreviousData: false,
   })
   const subjectCollection = subjectCollectionQuery.data

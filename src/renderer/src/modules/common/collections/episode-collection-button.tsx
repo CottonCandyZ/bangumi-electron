@@ -19,7 +19,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useQueryKeyWithUserId } from '@renderer/data/hooks/factory'
-import { useSession } from '@renderer/data/hooks/session'
+import { useSessionUsername } from '@renderer/data/hooks/session'
 
 type Props = {
   index: number
@@ -35,15 +35,14 @@ export function EpisodeCollectionButton({
   modifyEpisodeCollectionOpt,
   setEnabledForm,
 }: Props) {
-  const userInfo = useSession()
+  const username = useSessionUsername()
   const collectionEpisodesQuery = useCollectionEpisodesInfoBySubjectIdQuery({
     ...modifyEpisodeCollectionOpt,
     subjectId,
-    enabled: !!userInfo,
+    enabled: !!username,
   })
   const collectionEpisodes = collectionEpisodesQuery.data
   const episodes = collectionEpisodes?.data
-  const username = userInfo?.username
   const queryClient = useQueryClient()
   const episodeCollectionType = episodes?.[index].type
   const [hover, setHover] = useState<(typeof EPISODE_COLLECTION_ACTION)[number] | null>(

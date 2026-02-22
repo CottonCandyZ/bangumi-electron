@@ -4,7 +4,7 @@ import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { EpisodeCollectionButton } from '@renderer/modules/common/collections/episode-collection-button'
 import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { useSession } from '@renderer/data/hooks/session'
+import { useSessionUsername } from '@renderer/data/hooks/session'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionEpisode, CollectionType } from '@renderer/data/types/collection'
 import { Episode } from '@renderer/data/types/episode'
@@ -38,12 +38,11 @@ export function HoverEpisodeDetail() {
   const episode = isCollectionEpisode(episodes) ? episodes[index].episode : episodes[index]
   const duration = getDurationFromSeconds(episode.duration_seconds)
   const [bottom, setBottom] = useState(true)
-  const userInfo = useSession()
-  const username = userInfo?.username
+  const username = useSessionUsername()
   const subjectCollectionQuery = useQuerySubjectCollection({
     subjectId: episode.subject_id.toString(),
     username,
-    enabled: !!userInfo && !!collectionType,
+    enabled: !!username && !!collectionType,
     needKeepPreviousData: false,
   })
   const subjectCollection = subjectCollectionQuery.data

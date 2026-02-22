@@ -1,20 +1,14 @@
 import { CoverMotionImage } from '@renderer/components/image/cover-motion-image'
 import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent } from '@renderer/components/ui/card'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@renderer/components/ui/select'
+import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { SectionPath } from '@renderer/data/types/web'
 import { cn } from '@renderer/lib/utils'
 import dayjs from 'dayjs'
 import { motion } from 'motion/react'
-import { memo } from 'react'
+import { memo, useState } from 'react'
 import { useViewTransitionState, useLocation } from 'react-router-dom'
 import { MyLink } from '@renderer/components/my-link'
 import { useAtomValue, useSetAtom } from 'jotai'
@@ -26,6 +20,14 @@ import {
   PopCardContent,
 } from '@renderer/components/hover-pop-card/fixed-size'
 import { Subject } from '@renderer/data/types/subject'
+import { SubjectCollectionSelectorContent } from '@renderer/modules/common/collections/subject-select-content'
+import { useSessionUsername } from '@renderer/data/hooks/session'
+import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
+import { CollectionType } from '@renderer/data/types/collection'
+import { toast } from 'sonner'
+import { useSubjectCollectionTypeMutation } from '@renderer/data/hooks/api/collection-mutation'
+import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
+import { Loader2 } from 'lucide-react'
 
 export interface SubjectCardProps {
   sectionPath: SectionPath
@@ -47,9 +49,29 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
 
   // 一些状态
   const setActionSection = useSetAtom(activeSectionAtom) // 用来防止轮播图相互覆盖
+  const [isPopCardActive, setIsPopCardActive] = useState(false)
+  const username = useSessionUsername()
   const id = `${sectionPath}-${subjectId}`
   const layoutId = `${sectionId}-${id}`
   const isActive = activeId === layoutId
+  const subjectCollectionQuery = useQuerySubjectCollection({
+    subjectId: subjectId.toString(),
+    username,
+    enabled: isPopCardActive && !!username,
+    needKeepPreviousData: false,
+  })
+  const subjectCollection = subjectCollectionQuery.data
+
+  const subjectCollectionMutation = useSubjectCollectionTypeMutation({
+    subjectId: subjectId.toString(),
+    username,
+    onSuccess(collectionType) {
+      toast.success(`已标记成 ${COLLECTION_TYPE_MAP(subjectInfo.type)[collectionType]}`)
+    },
+    onError() {
+      toast.error('呀，出了点错误...')
+    },
+  })
 
   const isTransitioning = useViewTransitionState(`/subject/${subjectId}`) // viewTransition API
   const { key } = useLocation()
@@ -57,7 +79,10 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
   return (
     <HoverPopCard
       layoutId={layoutId}
-      isActive={(isActive) => (isActive ? setActionSection(sectionPath) : setActionSection(null))}
+      isActive={(isActive) => {
+        setActionSection(isActive ? sectionPath : null)
+        setIsPopCardActive(isActive)
+      }}
     >
       <HoverCardContent
         className="relative z-1 w-full cursor-default"
@@ -88,6 +113,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
                 <motion.div
                   className="flex items-center justify-center gap-1 font-bold text-white"
                   layoutId={`${layoutId}-score`}
+                  layoutDependency={isActive}
                 >
                   {subjectInfo.rating.score.toFixed(1)}
                   <span className="i-mingcute-star-fill mt-0.5 text-xs" />
@@ -98,7 +124,11 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
         }
         Description={
           <div className="mt-2 w-full p-0.5">
-            <motion.h1 className="font-jp h-6 truncate font-medium" layoutId={`${layoutId}-header`}>
+            <motion.h1
+              className="font-jp h-6 truncate font-medium"
+              layoutId={`${layoutId}-header`}
+              layoutDependency={isActive}
+            >
               {subjectInfo.name}
             </motion.h1>
             <motion.h2 className="mt-1 h-4 truncate text-xs">{subjectInfo.name_cn}</motion.h2>
@@ -134,6 +164,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
                     <motion.h1
                       className="font-jp text-sm font-medium"
                       layoutId={`${layoutId}-header`}
+                      layoutDependency={isActive}
                     >
                       {subjectInfo.name}
                     </motion.h1>
@@ -143,6 +174,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
                     <motion.div
                       className="flex items-center justify-center gap-1 text-xs"
                       layoutId={`${layoutId}-score`}
+                      layoutDependency={isActive}
                     >
                       {subjectInfo.rating.score.toFixed(1)}
                       <span className="i-mingcute-star-fill mt-[2px] text-[0.6rem]" />
@@ -162,26 +194,42 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
                   </div>
                 </section>
                 {/* 标记下拉 */}
-                <motion.div
-                  className="grow-0"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  layout
-                >
-                  <Select>
-                    <SelectTrigger className="flex-auto">
-                      <SelectValue placeholder="标记为" />
-                    </SelectTrigger>
-                    <SelectContent align="start">
-                      <SelectItem value="想看">想看</SelectItem>
-                      <SelectItem value="看过">看过</SelectItem>
-                      <SelectItem value="在看">在看</SelectItem>
-                      <SelectItem value="搁置">搁置</SelectItem>
-                      <SelectItem value="抛弃">抛弃</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </motion.div>
+                {!!username && (
+                  <motion.div
+                    className="grow-0"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    layoutDependency={isActive}
+                    onClick={(event) => event.preventDefault()}
+                  >
+                    <Select
+                      value={subjectCollection?.type?.toString()}
+                      disabled={
+                        subjectCollection === undefined || subjectCollectionMutation.isPending
+                      }
+                      onValueChange={(value) => {
+                        subjectCollectionMutation.mutate({
+                          subjectId: subjectId.toString(),
+                          collectionType: Number(value) as CollectionType,
+                          modify: subjectCollection !== null,
+                        })
+                      }}
+                    >
+                      <SelectTrigger className="bg-background w-fit">
+                        {subjectCollection === undefined ? (
+                          <span className="text-muted-foreground inline-flex items-center gap-1">
+                            <Loader2 className="size-3.5 animate-spin" />
+                            同步中
+                          </span>
+                        ) : (
+                          <SelectValue placeholder="标记为" />
+                        )}
+                      </SelectTrigger>
+                      <SubjectCollectionSelectorContent subjectType={subjectInfo.type} />
+                    </Select>
+                  </motion.div>
+                )}
               </section>
               {/* 标签 */}
               <motion.div
@@ -189,7 +237,6 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                layout
               >
                 {subjectInfo.tags.map((item) => (
                   <Button
