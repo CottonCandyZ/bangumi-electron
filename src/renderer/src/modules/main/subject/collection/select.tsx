@@ -14,6 +14,7 @@ export function SubjectCollectionSelector({
   const username = useSessionUsername()
   const subjectCollectionMutation = useSubjectCollectionTypeMutation({
     subjectId: subjectCollection.subject_id.toString(),
+    subjectType: subjectCollection.subject_type,
     username,
     onSuccess(collectionType) {
       toast.success(
@@ -28,6 +29,7 @@ export function SubjectCollectionSelector({
   return (
     <Select
       value={subjectCollection.type.toString()}
+      disabled={subjectCollectionMutation.isPending}
       onValueChange={(value) => {
         subjectCollectionMutation.mutate({
           subjectId: subjectCollection.subject_id.toString(),
