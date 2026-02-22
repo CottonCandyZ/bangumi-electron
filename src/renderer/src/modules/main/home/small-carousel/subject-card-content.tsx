@@ -64,6 +64,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
 
   const subjectCollectionMutation = useSubjectCollectionTypeMutation({
     subjectId: subjectId.toString(),
+    subjectType: subjectInfo.type,
     username,
     onSuccess(collectionType) {
       toast.success(`已标记成 ${COLLECTION_TYPE_MAP(subjectInfo.type)[collectionType]}`)
