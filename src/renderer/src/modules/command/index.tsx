@@ -247,7 +247,7 @@ export function CommandPanel() {
 
   useEffect(() => {
     if (!open) return
-    if (!trimmedQuery) {
+    if (mode !== 'subject-search' || !trimmedQuery) {
       setSearching(false)
       setSubjectResults([])
       return
@@ -272,7 +272,7 @@ export function CommandPanel() {
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [open, trimmedQuery])
+  }, [open, mode, trimmedQuery])
 
   useEffect(() => {
     if (!open) return
@@ -284,8 +284,8 @@ export function CommandPanel() {
       return
     }
 
-    if (mode === 'palette' && matchedPaletteCommandValue) {
-      setSelectedValue(matchedPaletteCommandValue)
+    if (mode === 'palette') {
+      setSelectedValue(matchedPaletteCommandValue ?? 'go-home')
       return
     }
 
@@ -297,8 +297,8 @@ export function CommandPanel() {
     if (userHasNavigatedRef.current) return
     if (trimmedQuery === '') return
 
-    if (mode === 'palette' && matchedPaletteCommandValue) {
-      setSelectedValue(matchedPaletteCommandValue)
+    if (mode === 'palette') {
+      setSelectedValue(matchedPaletteCommandValue ?? 'go-home')
       return
     }
 
@@ -441,7 +441,7 @@ export function CommandPanel() {
           </CommandGroup>
         )}
 
-        {trimmedQuery !== '' && (
+        {mode === 'subject-search' && trimmedQuery !== '' && (
           <>
             <CommandGroup heading="条目">
               {searching && (

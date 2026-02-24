@@ -22,6 +22,7 @@ let commandWindowPresented = false
 let commandWindowShownOnce = false
 let primingHideTimer: ReturnType<typeof setTimeout> | null = null
 const keepCommandWindowVisible = process.platform === 'win32'
+const closeCommandWindowOnDismiss = process.platform === 'linux'
 
 function loadCommandWindowContents(window: BrowserWindow) {
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -94,7 +95,13 @@ function setPresented(window: BrowserWindow, presented: boolean) {
     window.setOpacity(0)
     window.setIgnoreMouseEvents(true, { forward: true })
     window.setFocusable(false)
-    if (!keepCommandWindowVisible) window.hide()
+    if (!keepCommandWindowVisible) {
+      if (closeCommandWindowOnDismiss && window.isVisible()) {
+        window.close()
+        return
+      }
+      window.hide()
+    }
   }
 }
 
@@ -134,10 +141,18 @@ export function getOrCreateCommandWindow() {
   }
 
   window.on('close', (event) => {
-    if (!isAppQuitting()) {
+    if (!isAppQuitting() && !closeCommandWindowOnDismiss) {
       event.preventDefault()
       setPresented(window, false)
     }
+  })
+
+  window.on('closed', () => {
+    if (primingHideTimer) {
+      clearTimeout(primingHideTimer)
+      primingHideTimer = null
+    }
+    if (commandWindow === window) commandWindow = null
   })
 
   window.on('blur', () => {
