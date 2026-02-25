@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Tags } from '@renderer/modules/main/subject/tags/tags'
 import { useSession } from '@renderer/data/hooks/session'
+import { useQueryKeyWithUserId } from '@renderer/data/hooks/factory'
 
 export function QuickTags({
   subjectTags,
@@ -22,10 +23,11 @@ export function QuickTags({
   const [edit, setEdit] = useState(false)
   const userInfo = useSession()
 
-  const queryKey = [
-    'collection-subject',
-    { subjectId: subjectCollection?.subject_id.toString(), username: userInfo?.username },
-  ]
+  const queryKey = useQueryKeyWithUserId(['collection-subject'], {
+    subjectId: subjectCollection?.subject_id.toString(),
+    username: userInfo?.username,
+  })
+  const collectionSubjectsQueryKey = useQueryKeyWithUserId(['collection-subjects'])
 
   useEffect(() => {
     setEdit(false)
@@ -64,7 +66,7 @@ export function QuickTags({
     onSettled() {
       if (subjectCollection && userInfo) queryClient.invalidateQueries({ queryKey })
       queryClient.invalidateQueries({
-        queryKey: ['collection-subjects'],
+        queryKey: collectionSubjectsQueryKey,
       })
     },
   })

@@ -21,6 +21,7 @@ import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collectio
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
 import { Subject, SubjectType } from '@renderer/data/types/subject'
+import { useQueryKeyWithUserId } from '@renderer/data/hooks/factory'
 import { cn } from '@renderer/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
@@ -78,7 +79,8 @@ export function AddOrModifySubjectCollectionForm({
     },
   })
 
-  const queryKey = ['collection-subject', { subjectId, username }]
+  const queryKey = useQueryKeyWithUserId(['collection-subject'], { subjectId, username })
+  const collectionSubjectsQueryKey = useQueryKeyWithUserId(['collection-subjects'])
 
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
@@ -113,7 +115,7 @@ export function AddOrModifySubjectCollectionForm({
         queryKey,
       })
       queryClient.invalidateQueries({
-        queryKey: ['collection-subjects'],
+        queryKey: collectionSubjectsQueryKey,
       })
     },
   })

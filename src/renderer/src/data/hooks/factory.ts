@@ -32,8 +32,16 @@ type InfinityOptionalAuthProps<P> = keyof Omit<P, 'offset' | 'limit'> extends ne
   ? { queryProps?: Omit<P, 'offset' | 'limit'> }
   : { queryProps: Omit<P, 'offset' | 'limit'> }
 
+type QueryKeyWithRoot = [unknown, ...unknown[]]
+
+const createQueryKeyWithUserId = (
+  queryKey: QueryKeyWithRoot,
+  userId: QueryKey[number],
+  ...tail: QueryKey
+): QueryKey => [...queryKey, userId, ...tail]
+
 export const useAuthQueries = <TApiParams, TQueryFnReturn extends { id: number }>({
-  queryKey = [],
+  queryKey,
   queryFn,
   queryIds,
   apiParams,
@@ -41,6 +49,7 @@ export const useAuthQueries = <TApiParams, TQueryFnReturn extends { id: number }
   needKeepPreviousData = true,
   ...props
 }: {
+  queryKey: QueryKeyWithRoot
   queryFn: TApiParams extends { id: number } ? Fn<TApiParams, TQueryFnReturn> : never
   queryIds: number[]
   needKeepPreviousData?: boolean
@@ -53,7 +62,7 @@ export const useAuthQueries = <TApiParams, TQueryFnReturn extends { id: number }
   const queryClient = useQueryClient()
 
   return useQuery({
-    queryKey: [...queryKey, queryIds, apiParams, userId],
+    queryKey: createQueryKeyWithUserId(queryKey, userId, queryIds, apiParams),
     queryFn: async () => {
       const res = await Promise.allSettled(
         queryIds.map((id) => queryFn({ id, ...apiParams } as TApiParams)),
@@ -65,7 +74,10 @@ export const useAuthQueries = <TApiParams, TQueryFnReturn extends { id: number }
           if (e instanceof FetchError && e.statusCode === 401) throw AuthError.expire()
           return null
         }
-        queryClient.setQueryData([...queryKey, { id: item.value.id }, userId], item.value)
+        queryClient.setQueryData(
+          createQueryKeyWithUserId(queryKey, userId, { id: item.value.id }),
+          item.value,
+        )
         return item.value
       })
     },
@@ -76,7 +88,7 @@ export const useAuthQueries = <TApiParams, TQueryFnReturn extends { id: number }
 }
 
 export const useDBQuery = <TApiParams, TDbParams, TQueryFnReturn extends { last_update_at: Date }>({
-  queryKey = [],
+  queryKey,
   apiQueryFn,
   apiParams,
   dbQueryFn,
@@ -87,6 +99,7 @@ export const useDBQuery = <TApiParams, TDbParams, TQueryFnReturn extends { last_
   needKeepPreviousData = true,
   ...props
 }: {
+  queryKey: QueryKeyWithRoot
   apiQueryFn: Fn<TApiParams, TQueryFnReturn>
   dbQueryFn: Fn<TDbParams, TQueryFnReturn | undefined>
   apiParams: TApiParams
@@ -97,7 +110,7 @@ export const useDBQuery = <TApiParams, TDbParams, TQueryFnReturn extends { last_
   needKeepPreviousData?: boolean
 } & Omit<UseQueryOptions<TQueryFnReturn, Error, TQueryFnReturn, QueryKey>, 'queryFn'>) => {
   const userId = useAtomValue(userIdAtom)
-  const dbQueryKey = [...queryKey, dbParams, userId]
+  const dbQueryKey = [...queryKey, userId, dbParams]
   const queryClient = useQueryClient()
 
   const updateDBMutate = useMutation({
@@ -141,19 +154,20 @@ export const useDBQuery = <TApiParams, TDbParams, TQueryFnReturn extends { last_
 }
 
 export const useAuthQuery = <TApiParams, TQueryFnReturn, TData = TQueryFnReturn>({
-  queryKey = [],
+  queryKey,
   queryFn,
   queryProps,
   needKeepPreviousData,
   ...props
 }: {
+  queryKey: QueryKeyWithRoot
   needKeepPreviousData?: boolean
   queryFn: Fn<TApiParams, TQueryFnReturn>
 } & OptionalQueryProps<TApiParams> &
   Omit<UseQueryOptions<TQueryFnReturn, Error, TData, QueryKey>, 'queryFn'>) => {
   const userId = useAtomValue(userIdAtom)
   return useQuery({
-    queryKey: [...queryKey, queryProps, userId],
+    queryKey: createQueryKeyWithUserId(queryKey, userId, queryProps),
     queryFn: async () => {
       try {
         return await queryFn(queryProps as TApiParams)
@@ -174,7 +188,7 @@ export const useDBQueries = <
   TDbParams extends { ids?: number[] },
   TQueryFnReturn extends { last_update_at: Date; id: number },
 >({
-  queryKey = [],
+  queryKey,
   apiQueryFn,
   apiParams,
   dbQueryFn,
@@ -184,6 +198,7 @@ export const useDBQueries = <
   needKeepPreviousData = true,
   ...props
 }: {
+  queryKey: QueryKeyWithRoot
   apiQueryFn: Fn<TApiParams, TQueryFnReturn>
   apiParams?: Omit<TApiParams, 'id'>
   dbQueryFn: Fn<TDbParams, TQueryFnReturn[]>
@@ -196,7 +211,7 @@ export const useDBQueries = <
   'queryFn'
 >) => {
   const userId = useAtomValue(userIdAtom)
-  const dbQueryKey = [...queryKey, dbParams, userId]
+  const dbQueryKey = [...queryKey, userId, dbParams]
   const queryClient = useQueryClient()
 
   const updateDBMutate = useMutation({
@@ -233,9 +248,13 @@ export const useDBQueries = <
     const data = allIds.map((id) => {
       const item = dataMap.get(id) ?? null
       if (item) {
-        queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, userId], item, {
-          updatedAt: item.last_update_at.getTime(),
-        })
+        queryClient.setQueryData<TQueryFnReturn>(
+          createQueryKeyWithUserId(queryKey, userId, { id }),
+          item,
+          {
+            updatedAt: item.last_update_at.getTime(),
+          },
+        )
         minimalTimestamp = Math.min(minimalTimestamp, item.last_update_at.getTime())
       }
       return item
@@ -266,7 +285,11 @@ export const useDBQueries = <
     })
     const dbOrderedData = allIds.map((id) => {
       const data = dataMap.get(id) ?? null
-      if (data) queryClient.setQueryData<TQueryFnReturn>([...queryKey, { id }, userId], data)
+      if (data)
+        queryClient.setQueryData<TQueryFnReturn>(
+          createQueryKeyWithUserId(queryKey, userId, { id }),
+          data,
+        )
       return data
     })
 
@@ -279,7 +302,7 @@ export const useDBQueries = <
   }
 
   return useQuery({
-    queryKey: dbQueryKey,
+    queryKey: [...queryKey, userId, dbParams],
     queryFn: async () => {
       const data = await dbQueryFn({ ...dbParams } as TDbParams)
       return getData(data)
@@ -293,7 +316,7 @@ export const useDBQueries = <
 }
 
 export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
-  queryKey = [],
+  queryKey,
   queryFn,
   queryProps,
   qFLimit,
@@ -303,6 +326,7 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
   getNextPageParam,
   ...props
 }: {
+  queryKey: QueryKeyWithRoot
   queryFn: QP extends { offset: TPageParam; limit?: number } ? Fn<QP, QR> : never
   enabled?: boolean
   qFLimit?: number
@@ -316,7 +340,7 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
   >) => {
   const userId = useAtomValue(userIdAtom)
   return useInfiniteQuery({
-    queryKey: [...queryKey, queryProps, userId],
+    queryKey: createQueryKeyWithUserId(queryKey, userId, queryProps),
     queryFn: async ({ pageParam }) => {
       try {
         return await queryFn({
@@ -364,7 +388,7 @@ export const useMutationMustAuth = <P, R>({
   })
 }
 
-export const useQueryKeyWithUserId = (queryKey: QueryKey) => {
+export const useQueryKeyWithUserId = (queryKey: QueryKeyWithRoot, ...tail: QueryKey) => {
   const userId = useDeferredValue(useAtomValue(userIdAtom))
-  return [...queryKey, userId]
+  return createQueryKeyWithUserId(queryKey, userId, ...tail)
 }

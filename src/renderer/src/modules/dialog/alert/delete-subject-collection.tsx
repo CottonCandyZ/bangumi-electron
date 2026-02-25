@@ -13,6 +13,7 @@ import { useSessionUsername } from '@renderer/data/hooks/session'
 import { deleteSubjectCollectionById } from '@renderer/data/fetch/web/collection'
 import { useWebDeleteCollectionHash } from '@renderer/data/hooks/web/collection'
 import { CollectionData } from '@renderer/data/types/collection'
+import { useQueryKeyWithUserId } from '@renderer/data/hooks/factory'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useAtom } from 'jotai'
@@ -33,7 +34,8 @@ const Content = (props: DeleteCollectionProps) => {
   const username = useSessionUsername()
   const hash = useWebDeleteCollectionHash({ subjectId }).data
   const queryClient = useQueryClient()
-  const queryKey = ['collection-subject', { subjectId, username }]
+  const queryKey = useQueryKeyWithUserId(['collection-subject'], { subjectId, username })
+  const collectionSubjectsQueryKey = useQueryKeyWithUserId(['collection-subjects'])
   const subjectCollectionMutation = useMutation({
     mutationFn: deleteSubjectCollectionById,
     onSuccess() {
@@ -56,7 +58,7 @@ const Content = (props: DeleteCollectionProps) => {
         queryKey,
       })
       queryClient.invalidateQueries({
-        queryKey: ['collection-subjects'],
+        queryKey: collectionSubjectsQueryKey,
       })
     },
   })

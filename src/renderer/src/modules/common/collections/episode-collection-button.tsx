@@ -53,16 +53,21 @@ export function EpisodeCollectionButton({
       episodeCollectionType ? (EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null) : null,
     )
   }, [episodeCollectionType])
-  const queryKey = useQueryKeyWithUserId([
-    'collection-episodes',
-    {
-      subjectId,
-      limit: modifyEpisodeCollectionOpt.limit,
-      offset: modifyEpisodeCollectionOpt.offset,
-      episodeType: undefined,
-    },
-  ])
-  const invalidateQueryKey = ['collection-subject', { subjectId, username }]
+  const queryKey = useQueryKeyWithUserId(['collection-episodes'], {
+    subjectId,
+    limit: modifyEpisodeCollectionOpt.limit,
+    offset: modifyEpisodeCollectionOpt.offset,
+    episodeType: undefined,
+  })
+  const subjectCollectionQueryKey = useQueryKeyWithUserId(['collection-subject'], {
+    subjectId,
+    username,
+  })
+  const collectionSubjectsQueryKey = useQueryKeyWithUserId(['collection-subjects'], {
+    username,
+    collectionType: CollectionType.watching,
+    subjectType,
+  })
 
   const episodeCollectionMutation = useMutationEpisodesCollectionBySubjectId({
     mutationKey: ['subject-collection'],
@@ -102,13 +107,10 @@ export function EpisodeCollectionButton({
       })
       if (episodes)
         queryClient.invalidateQueries({
-          queryKey: [
-            'collection-subjects',
-            { username, collectionType: CollectionType.watching, subjectType },
-          ],
+          queryKey: collectionSubjectsQueryKey,
         })
       queryClient.invalidateQueries({
-        queryKey: invalidateQueryKey,
+        queryKey: subjectCollectionQueryKey,
       })
     },
   })

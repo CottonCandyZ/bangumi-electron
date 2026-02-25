@@ -64,7 +64,8 @@ export function useSubjectCollectionTypeMutation({
   onError?: () => void
 }) {
   const queryClient = useQueryClient()
-  const queryKey = useQueryKeyWithUserId(['collection-subject', { subjectId, username }])
+  const queryKey = useQueryKeyWithUserId(['collection-subject'], { subjectId, username })
+  const collectionSubjectsQueryKey = useQueryKeyWithUserId(['collection-subjects'])
 
   return useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
@@ -97,7 +98,7 @@ export function useSubjectCollectionTypeMutation({
     },
     onSettled() {
       queryClient.invalidateQueries({ queryKey })
-      queryClient.invalidateQueries({ queryKey: ['collection-subjects'] })
+      queryClient.invalidateQueries({ queryKey: collectionSubjectsQueryKey })
     },
     onError(_error, _variable, context) {
       const pre = (context as { pre: CollectionData | null } | undefined)?.pre

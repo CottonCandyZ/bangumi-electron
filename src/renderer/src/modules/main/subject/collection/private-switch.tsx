@@ -3,6 +3,7 @@ import { Switch } from '@renderer/components/ui/switch'
 import { useSessionUsername } from '@renderer/data/hooks/session'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'
+import { useQueryKeyWithUserId } from '@renderer/data/hooks/factory'
 import { cn } from '@renderer/lib/utils'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -10,10 +11,11 @@ import { toast } from 'sonner'
 export function PrivateSwitch({ subjectCollection }: { subjectCollection: CollectionData }) {
   const queryClient = useQueryClient()
   const username = useSessionUsername()
-  const queryKey = [
-    'collection-subject',
-    { subjectId: subjectCollection.subject_id.toString(), username },
-  ]
+  const queryKey = useQueryKeyWithUserId(['collection-subject'], {
+    subjectId: subjectCollection.subject_id.toString(),
+    username,
+  })
+  const collectionSubjectsQueryKey = useQueryKeyWithUserId(['collection-subjects'])
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
     onSuccess() {
@@ -39,7 +41,7 @@ export function PrivateSwitch({ subjectCollection }: { subjectCollection: Collec
         queryKey,
       })
       queryClient.invalidateQueries({
-        queryKey: ['collection-subjects'],
+        queryKey: collectionSubjectsQueryKey,
       })
     },
   })
