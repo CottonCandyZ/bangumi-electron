@@ -27,14 +27,12 @@ export type HoverEpisodeDetailType = {
   index: number
   episodes: Episode[] | CollectionEpisode[]
   collectionType: CollectionType | undefined
-  setEnabledForm: (enabled: boolean) => void
 } & ModifyEpisodeCollectionOptType
 
 export function HoverEpisodeDetail() {
   const hoverCardContent = useAtomValue(hoverCardEpisodeContentAtom)
   if (!hoverCardContent) throw 'Hover Content not set'
-  const { index, episodes, modifyEpisodeCollectionOpt, collectionType, setEnabledForm } =
-    hoverCardContent
+  const { index, episodes, modifyEpisodeCollectionOpt, collectionType } = hoverCardContent
   const episode = isCollectionEpisode(episodes) ? episodes[index].episode : episodes[index]
   const duration = getDurationFromSeconds(episode.duration_seconds)
   const [bottom, setBottom] = useState(true)
@@ -72,11 +70,10 @@ export function HoverEpisodeDetail() {
             subjectCollectionType === CollectionType.watching && (
               <div className="bg-background sticky top-0 pt-4 pb-2">
                 <EpisodeCollectionButton
-                  subjectType={subjectCollection.subject_type}
                   subjectId={episode.subject_id.toString()}
                   index={index}
+                  episodes={episodes}
                   modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
-                  setEnabledForm={setEnabledForm}
                 />
               </div>
             )
@@ -114,11 +111,10 @@ export function HoverEpisodeDetail() {
             subjectCollectionType === CollectionType.watching && (
               <div className="bg-background sticky bottom-0 z-0 pt-2 pb-4">
                 <EpisodeCollectionButton
-                  subjectType={subjectCollection.subject_type}
                   subjectId={episode.subject_id.toString()}
                   index={index}
+                  episodes={episodes}
                   modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
-                  setEnabledForm={setEnabledForm}
                 />
               </div>
             )
