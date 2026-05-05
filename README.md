@@ -32,7 +32,7 @@
 
 ## 如果可以帮助的话
 
-非常欢迎，由于我也在摸索，同时也在参考 [AFFiNE](https://github.com/toeverything/AFFiNE) 和 [Follow](https://github.com/RSSNext/Follow) 以及其他一些优秀的 Web + Electron 项目，如果你有任何的建议（无论是功能还是代码结构问题），可以到[讨论区](https://github.com/CottonCandyZ/bangumi-electron/discussions)讨论。
+非常欢迎，由于我也在摸索，如果你有任何的建议（无论是功能还是代码结构问题），可以到[讨论区](https://github.com/CottonCandyZ/bangumi-electron/discussions)讨论。
 
 ### 使用了哪些常见库
 
