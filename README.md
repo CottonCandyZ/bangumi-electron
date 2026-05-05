@@ -28,11 +28,11 @@
 
 ### 所以说什么时候会有第一版
 
-~~预估 24 年年底~~ ~~当然预估总是不准的~~ 估计要到 25 年年底了~
+~~预估 24 年年底~~ ~~当然预估总是不准的~~ ~~估计要到 25 年年底了~~ 终于有空了（26 年 5 月）准备先推进人物详情和社区～
 
 ## 如果可以帮助的话
 
-非常欢迎，由于我也摸索，同时也在参考 [AFFiNE](https://github.com/toeverything/AFFiNE) 和 [Follow](https://github.com/RSSNext/Follow) 以及其他一些优秀的 Web + Electron 项目，如果你有任何的建议（无论是功能还是代码结构问题），可以到[讨论区](https://github.com/CottonCandyZ/bangumi-electron/discussions)讨论。
+非常欢迎，由于我也在摸索，同时也在参考 [AFFiNE](https://github.com/toeverything/AFFiNE) 和 [Follow](https://github.com/RSSNext/Follow) 以及其他一些优秀的 Web + Electron 项目，如果你有任何的建议（无论是功能还是代码结构问题），可以到[讨论区](https://github.com/CottonCandyZ/bangumi-electron/discussions)讨论。
 
 ### 使用了哪些常见库
 
