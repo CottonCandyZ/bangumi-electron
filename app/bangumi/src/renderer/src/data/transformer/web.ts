@@ -61,7 +61,7 @@ export const parseInfoBoxFromSubjectPage = (HTML: string) => {
 
 export const parseDeleteCollectionHash = (HTML: string) => {
   const match = HTML.match(/eraseSubjectCollect\(\d+,\s*'([^']+)'\)/)
-  if (!match) throw new AuthError('cookie 可能已过期', 2)
+  if (!match) throw AuthError.webCookieExpire()
   const hash = match[1]
   return hash
 }

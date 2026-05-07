@@ -77,7 +77,7 @@ async function handleUnauthorizedResponse(error: FetchError) {
     return true
   }
 
-  await safeLogout({ showToast: true })
+  await safeLogout({ showLoginDialog: true })
   return false
 }
 

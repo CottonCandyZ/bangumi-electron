@@ -266,15 +266,15 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
           control={form.control}
           name="savePassword"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md">
+            <FormItem className="flex flex-row items-center gap-2 space-y-0 rounded-md">
               <FormControl>
                 <Checkbox checked={field.value} onCheckedChange={field.onChange} />
               </FormControl>
-              <FormLabel>
-                {LOGIN_FORM_TITLE.REMEMBER_PASSWORD}{' '}
+              <FormLabel className="flex items-center gap-1.5 leading-none">
+                {LOGIN_FORM_TITLE.REMEMBER_PASSWORD}
                 <HoverCard>
                   <HoverCardTrigger asChild>
-                    <CircleHelp className="-mt-1 inline size-3" />
+                    <CircleHelp className="size-3" />
                   </HoverCardTrigger>
                   <HoverCardContent className="text-sm font-normal">
                     <p>{REMEMBER_PASSWORD_HINT}</p>

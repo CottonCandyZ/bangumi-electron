@@ -9,6 +9,10 @@ export const TEXT_CONFIG = {
   },
   LOGIN_DIALOG: {
     TITLE: '登录',
+    SESSION_EXPIRED: {
+      TITLE: '登录状态已过期',
+      DESCRIPTION: '请确认账号密码并填写验证码，重新登录后会自动恢复会话。',
+    },
     STEP_EXPLAIN: {
       TITLE: '登录将模拟网页版来实现，会执行五个步骤：',
       STEP: ['模拟网页完成登录获得 cookie', '获取授权码的表单', '授权', '获取 token', '保存信息'],

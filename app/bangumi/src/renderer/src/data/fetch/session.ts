@@ -156,7 +156,7 @@ export async function getAccessToken(userId: string | null = store.get(userIdAto
       accessTokenCache = await safeRefreshToken(token)
     } catch (e) {
       await logger.error('auth-session', 'refresh token failed, logging out', e)
-      await safeLogout({ showToast: true })
+      await safeLogout({ showLoginDialog: true })
       return null
     }
     return accessTokenCache

@@ -1,15 +1,18 @@
+import { Alert, AlertDescription, AlertTitle } from '@renderer/components/ui/alert'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@renderer/components/ui/dialog'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import { TEXT_CONFIG } from '@renderer/config/text'
 import { LoginForm } from '@renderer/modules/common/user/login/form'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { useAtom } from 'jotai'
-import { CircleHelp } from 'lucide-react'
+import { AlertCircle, CircleHelp } from 'lucide-react'
 
 const { LOGIN_DIALOG } = TEXT_CONFIG
 
 export function LoginDialog() {
   const [open, setOpen] = useAtom(loginDialogAtom)
+  const showExpiredAlert = open.content?.reason === 'session-expired'
+
   return (
     <Dialog open={open.open} onOpenChange={(open) => setOpen({ open })}>
       <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
@@ -31,6 +34,13 @@ export function LoginDialog() {
             </HoverCard>
           </DialogTitle>
         </DialogHeader>
+        {showExpiredAlert ? (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>{LOGIN_DIALOG.SESSION_EXPIRED.TITLE}</AlertTitle>
+            <AlertDescription>{LOGIN_DIALOG.SESSION_EXPIRED.DESCRIPTION}</AlertDescription>
+          </Alert>
+        ) : null}
         <LoginForm success={() => setOpen({ open: false })} />
       </DialogContent>
     </Dialog>

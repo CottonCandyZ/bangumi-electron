@@ -1,11 +1,11 @@
 import { getUserInfoWithAuth } from '@renderer/data/fetch/api/user'
 import { logout, getAccessToken } from '@renderer/data/fetch/session'
 import { logger } from '@renderer/lib/logger'
+import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { userIdAtom } from '@renderer/state/session'
 import { store } from '@renderer/state/utils'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai'
-import { toast } from 'sonner'
 import { createSingletonPromise } from '@renderer/lib/utils/promise'
 
 /**
@@ -23,9 +23,9 @@ const logoutSingleton = createSingletonPromise<void>()
 
 /**
  * Safe logout function that ensures only one logout operation happens at a time
- * Shows a toast notification for auth expiration if showToast is true
+ * Opens the login dialog for auth expiration if showLoginDialog is true
  */
-export async function safeLogout(options?: { showToast?: boolean }) {
+export async function safeLogout(options?: { showLoginDialog?: boolean }) {
   // Get current user ID to check if we're already logged in
   const currentUserId = store.get(userIdAtom)
 
@@ -37,11 +37,10 @@ export async function safeLogout(options?: { showToast?: boolean }) {
     await logger.error('auth-session', 'Authentication error, logging out user')
   }
 
-  // Show a toast notification only if logout is not already in progress and showToast is true
-  if (options?.showToast && firstCaller) {
-    toast.error('登录已过期，请重新登录', {
-      id: 'auth-expired',
-      duration: 3000,
+  if (options?.showLoginDialog && firstCaller) {
+    store.set(loginDialogAtom, {
+      open: true,
+      content: { reason: 'session-expired' },
     })
   }
 

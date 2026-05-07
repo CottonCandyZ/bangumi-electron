@@ -1,5 +1,7 @@
 import { newIdbStorage } from '@renderer/lib/persister'
-import { AuthError } from '@renderer/lib/utils/error'
+import { AuthCode, AuthError } from '@renderer/lib/utils/error'
+import { loginDialogAtom } from '@renderer/state/dialog/normal'
+import { store } from '@renderer/state/utils'
 import { QueryCache, QueryClient } from '@tanstack/react-query'
 import {
   experimental_createQueryPersister,
@@ -15,6 +17,15 @@ const persister = experimental_createQueryPersister<PersistedQuery>({
   deserialize: (cached) => cached,
 })
 
+function openLoginDialogForAuthError(error: AuthError) {
+  if (error.code === AuthCode.NOT_FOND) return
+  const reason =
+    error.code === AuthCode.EXPIRE || error.code === AuthCode.WEB_COOKIE_EXPIRE
+      ? 'session-expired'
+      : undefined
+  store.set(loginDialogAtom, { open: true, content: { reason } })
+}
+
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
@@ -22,6 +33,7 @@ export const queryClient = new QueryClient({
         if (query.state.data !== undefined) {
           queryClient.setQueryData(query.queryKey, query.state.data)
         }
+        openLoginDialogForAuthError(error)
         return
       }
 

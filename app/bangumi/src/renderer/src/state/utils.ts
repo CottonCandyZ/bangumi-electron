@@ -11,9 +11,10 @@ export const dialogAtomFactory = <T extends object>() => {
     },
     (_, set, props: { open: boolean; content?: T }) => {
       if (props.open) {
-        if (props.content) set(dialogContentAtom, props.content)
+        set(dialogContentAtom, props.content ?? null)
         set(open, true)
       } else {
+        set(dialogContentAtom, null)
         set(open, false)
       }
     },

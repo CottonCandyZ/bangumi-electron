@@ -6,6 +6,7 @@ export enum AuthCode {
   'NOT_AUTH',
   'EXPIRE',
   'NOT_FOND',
+  'WEB_COOKIE_EXPIRE',
 }
 
 /**
@@ -38,6 +39,9 @@ export class AuthError extends Error {
   }
   static notFound() {
     return new AuthError('没有访问权限或者不存在', AuthCode.NOT_FOND)
+  }
+  static webCookieExpire() {
+    return new AuthError('网页登录状态已过期', AuthCode.WEB_COOKIE_EXPIRE)
   }
 }
 
