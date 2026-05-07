@@ -1,4 +1,5 @@
 import { newIdbStorage } from '@renderer/lib/persister'
+import { AuthError } from '@renderer/lib/utils/error'
 import { QueryCache, QueryClient } from '@tanstack/react-query'
 import {
   experimental_createQueryPersister,
@@ -17,6 +18,13 @@ const persister = experimental_createQueryPersister<PersistedQuery>({
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
+      if (error instanceof AuthError) {
+        if (query.state.data !== undefined) {
+          queryClient.setQueryData(query.queryKey, query.state.data)
+        }
+        return
+      }
+
       // Check if this is a 401 error from ofetch
       const isAuthError =
         error instanceof Error &&

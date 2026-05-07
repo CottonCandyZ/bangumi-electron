@@ -5,7 +5,9 @@ import {
 } from '@renderer/data/fetch/session'
 import { safeLogout } from '@renderer/data/hooks/session'
 import { logger } from '@renderer/lib/logger'
-import { ofetch } from 'ofetch'
+import { FetchError, FetchOptions, ofetch } from 'ofetch'
+
+type JsonFetchOptions = FetchOptions<'json'>
 
 /** 主站域名 */
 export const HOST_NAME = 'bgm.tv'
@@ -46,11 +48,62 @@ async function appendAuthHeader(options: { headers?: HeadersInit }) {
   const token = await getAccessToken()
   if (!token) return
   options.headers = new Headers(options.headers)
-  options.headers.append('Authorization', AuthorizationHeader(token.access_token))
+  options.headers.set('Authorization', AuthorizationHeader(token.access_token))
+}
+
+async function handleUnauthorizedResponse(error: FetchError) {
+  const token = await getAccessToken()
+  const createTime = token?.create_time ? new Date(token.create_time) : null
+  const expiresAt =
+    token?.expires_in && createTime
+      ? new Date(createTime.getTime() + token.expires_in * 1000)
+      : null
+
+  await logger.error('auth-fetch', 'API 401 Unauthorized', {
+    status: error.statusCode,
+    url: error.request,
+  })
+  await logger.error('auth-fetch', 'Access token status', {
+    has_token: !!token,
+    user_id: token?.user_id ?? null,
+    expires_in: token?.expires_in ?? null,
+    create_time: createTime ? createTime.toISOString() : null,
+    expires_at: expiresAt ? expiresAt.toISOString() : null,
+  })
+
+  const recovered = await safeRecoverAccessTokenAfterUnauthorized()
+  if (recovered) {
+    await logger.warn('auth-fetch', '401 handled by token recovery, retry request')
+    return true
+  }
+
+  await safeLogout({ showToast: true })
+  return false
+}
+
+async function retryAfterTokenRecovery<T>(
+  request: Parameters<typeof apiFetch>[0],
+  options: JsonFetchOptions | undefined,
+  fetcher: typeof apiFetch,
+) {
+  try {
+    return await fetcher<T>(request, options)
+  } catch (error) {
+    if (!(error instanceof FetchError) || error.statusCode !== 401) {
+      throw error
+    }
+
+    const recovered = await handleUnauthorizedResponse(error)
+    if (!recovered) {
+      throw error
+    }
+
+    return await fetcher<T>(request, options)
+  }
 }
 
 /** ofetch api optional auth */
-export const apiFetchWithOptionalAuth = ofetch.create({
+const apiFetchWithOptionalAuthOnce = ofetch.create({
   baseURL: API_HOST,
   credentials: 'omit',
   async onRequest({ options }) {
@@ -59,47 +112,27 @@ export const apiFetchWithOptionalAuth = ofetch.create({
 })
 
 /** ofetch api must auth */
-export const apiFetchWithAuth = ofetch.create({
+const apiFetchWithAuthOnce = ofetch.create({
   baseURL: API_HOST,
   credentials: 'omit',
   async onRequest({ options }) {
     await appendAuthHeader(options)
   },
-  async onResponseError({ response }) {
-    // Handle 401 Unauthorized errors by logging out the user
-    if (response.status === 401) {
-      const token = await getAccessToken()
-      const createTime = token?.create_time ? new Date(token.create_time) : null
-      const expiresAt =
-        token?.expires_in && createTime
-          ? new Date(createTime.getTime() + token.expires_in * 1000)
-          : null
-
-      await logger.error('auth-fetch', 'API 401 Unauthorized', {
-        status: response.status,
-        url: response.url,
-      })
-      await logger.error('auth-fetch', 'Access token status', {
-        has_token: !!token,
-        user_id: token?.user_id ?? null,
-        expires_in: token?.expires_in ?? null,
-        create_time: createTime ? createTime.toISOString() : null,
-        expires_at: expiresAt ? expiresAt.toISOString() : null,
-      })
-
-      const recovered = await safeRecoverAccessTokenAfterUnauthorized()
-      if (recovered) {
-        await logger.warn('auth-fetch', '401 handled by token recovery, skip logout')
-        return
-      }
-
-      // Use the safeLogout function to handle the logout process
-      // This ensures only one logout happens at a time and shows a toast notification
-      await safeLogout({ showToast: true })
-    }
-    // The error will still be thrown to the caller after this hook
-  },
 })
+
+export function apiFetchWithOptionalAuth<T>(
+  request: Parameters<typeof apiFetch>[0],
+  options?: JsonFetchOptions,
+) {
+  return retryAfterTokenRecovery<T>(request, options, apiFetchWithOptionalAuthOnce)
+}
+
+export function apiFetchWithAuth<T>(
+  request: Parameters<typeof apiFetch>[0],
+  options?: JsonFetchOptions,
+) {
+  return retryAfterTokenRecovery<T>(request, options, apiFetchWithAuthOnce)
+}
 
 /** ofetch next config */
 export const nextFetch = ofetch.create({ baseURL: NEXT_API_HOST, credentials: 'include' })
