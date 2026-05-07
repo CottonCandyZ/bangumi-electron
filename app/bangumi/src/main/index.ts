@@ -9,6 +9,7 @@ import { setAppQuitting } from '@main/app-flags'
 import { registerGlobalShortcuts } from '@main/shortcuts'
 import { toggleCommandWindow, warmCommandWindow } from '@main/command-window'
 import { setMainWindowGetter } from '@main/app-context'
+import { setupAutoUpdate } from '@main/update'
 
 async function boot() {
   // dev 和 prod 的位置
@@ -59,6 +60,7 @@ async function boot() {
     setupTray(getOrCreateMainWindow)
     registerGlobalShortcuts(() => toggleCommandWindow({ mode: 'palette' }))
     warmCommandWindow()
+    setupAutoUpdate()
 
     // Default open or close DevTools by F12 in development
     // and ignore CommandOrControl + R in production.

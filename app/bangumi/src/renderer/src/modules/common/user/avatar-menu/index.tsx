@@ -22,6 +22,7 @@ import { useState } from 'react'
 import { cn } from '@renderer/lib/utils'
 import { useSetAtom } from 'jotai'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
+import { UpdateMenuSub, useUpdateState } from '@renderer/modules/update/menu'
 
 export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   const logoutMutation = useLogoutMutation()
@@ -31,6 +32,7 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
 
   const [dropdownOpen, setDropDownOpen] = useState(false)
   const openDialog = useSetAtom(loginDialogAtom)
+  const { state: updateState, visible: updateVisible } = useUpdateState()
 
   return (
     <DropdownMenu onOpenChange={(open) => setDropDownOpen(open)}>
@@ -78,10 +80,23 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
         )}
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
+          {updateVisible && updateState && (
+            <>
+              <UpdateMenuSub state={updateState} />
+              <DropdownMenuSeparator />
+            </>
+          )}
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>主题</DropdownMenuSubTrigger>
             <DropdownMenuPortal>
-              <DropdownMenuSubContent>
+              <DropdownMenuSubContent
+                collisionPadding={{
+                  right: 8,
+                  left: 8,
+                  bottom: 8,
+                  top: 8,
+                }}
+              >
                 <DropdownMenuRadioGroup
                   value={theme}
                   onValueChange={setTheme as (value: string) => void}

@@ -1,5 +1,6 @@
 import { appFolder } from '@main/constants'
 import { app } from 'electron'
+import { copyFileSync, existsSync, mkdirSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -17,10 +18,26 @@ export const appFolderName = isDev ? appFolder.dev : appFolder.prod
 
 let pathIsInit = false
 
+function migrateLegacyUserDataPath(nextUserDataPath: string) {
+  const legacyUserDataPath = path.join(nextUserDataPath, appFolderName)
+  if (!existsSync(legacyUserDataPath)) return
+
+  mkdirSync(nextUserDataPath, { recursive: true })
+
+  for (const fileName of ['db.json', 'store.sqlite']) {
+    const legacyFilePath = path.join(legacyUserDataPath, fileName)
+    const nextFilePath = path.join(nextUserDataPath, fileName)
+    if (!existsSync(legacyFilePath) || existsSync(nextFilePath)) continue
+    copyFileSync(legacyFilePath, nextFilePath)
+  }
+}
+
 // to solve the order problem
 export const appPath = () => {
   if (!pathIsInit) {
-    app.setPath('appData', path.join(app.getPath('appData'), appFolderName))
+    const userDataPath = path.join(app.getPath('appData'), appFolderName)
+    migrateLegacyUserDataPath(userDataPath)
+    app.setPath('userData', userDataPath)
     pathIsInit = true
   }
   const get = (name: Parameters<typeof app.getPath>[0]) => {
