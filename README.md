@@ -36,10 +36,6 @@
 
 非常欢迎，由于我也在摸索，如果你有任何的建议（无论是功能还是代码结构问题），可以到[讨论区](https://github.com/CottonCandyZ/bangumi-electron/discussions)讨论。
 
-## 发布流程
-
-本项目使用本地打包并上传 GitHub Release 的方式发布 beta / production 版本。发布前检查、beta 通道、正式通道以及后补 macOS 包的步骤见 [Release Checklist](docs/release.md)。
-
 ### 使用了哪些常见库
 
 Framer Motion, React/TanStack Query, Jotai, shadcn/ui, Tailwind
