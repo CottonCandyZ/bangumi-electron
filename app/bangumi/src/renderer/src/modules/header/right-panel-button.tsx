@@ -12,7 +12,7 @@ export function RightPanelButton() {
         <Button
           variant="ghost"
           className={cn(
-            'no-drag-region text-muted-foreground mr-3 p-2 text-[1.4rem]',
+            'no-drag-region text-muted-foreground p-2 text-[1.4rem]',
             open && 'text-primary',
           )}
           onClick={() => {

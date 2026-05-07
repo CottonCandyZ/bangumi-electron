@@ -1,5 +1,6 @@
 import { UI_CONFIG } from '@renderer/config'
 import { cn } from '@renderer/lib/utils'
+import { CommandButton } from '@renderer/modules/header/command-button'
 import { NavButton } from '@renderer/modules/header/nav-button'
 import { OriginalLink } from '@renderer/modules/header/o-link'
 import { RightPanelButton } from '@renderer/modules/header/right-panel-button'
@@ -20,7 +21,8 @@ export function Header() {
         <NavButton />
         <HeaderTitle />
       </div>
-      <div className="flex h-full flex-row items-center gap-0.5">
+      <div className="flex h-full flex-row items-center gap-2">
+        <CommandButton />
         <OriginalLink />
         <RightPanelButton />
         <WindowsButton />

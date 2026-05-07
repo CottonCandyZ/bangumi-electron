@@ -64,7 +64,7 @@ export function PageScrollWrapper({
         ref={viewportRef}
         className="h-full w-full overflow-x-hidden focus-visible:outline-hidden"
       >
-        <ScrollArea.Content className="min-h-full w-full">{children}</ScrollArea.Content>
+        <ScrollArea.Content className="h-full min-h-full w-full">{children}</ScrollArea.Content>
       </ScrollArea.Viewport>
 
       <ScrollArea.Scrollbar

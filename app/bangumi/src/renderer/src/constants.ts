@@ -1,5 +1,5 @@
 export const ERROR_CONSTANTS = {
-  CARD_TITLE: 'Oops! 发生了一个渲染错误 😓',
+  CARD_TITLE: '发生了一个渲染错误',
   ERROR_MESSAGE_LABEL: '错误信息：',
   COPY_BUTTON_TEXT: '复制错误信息',
   COPIED_TEXT: '已复制',

@@ -14,8 +14,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useNavigate } from 'react-router-dom'
 import { COMMAND_WINDOW_LIST_HEIGHT_RATIO, COMMAND_WINDOW_LIST_MAX_HEIGHT } from '@shared/constants'
-
-type PanelMode = 'palette' | 'subject-search'
+import { useAtom } from 'jotai'
+import { commandPanelAtom, type CommandPanelMode } from '@renderer/state/command'
 
 const getSubjectItemValue = (subject: SubjectSearchItem) =>
   `${subject.id} ${subject.name_cn} ${subject.name}`
@@ -30,8 +30,7 @@ const TYPE_ICON_MAP: Record<SubjectSearchItem['type'], React.ReactNode> = {
 
 export function CommandPanel() {
   const navigate = useNavigate()
-  const [open, setOpen] = useState(false)
-  const [mode, setMode] = useState<PanelMode>('palette')
+  const [{ open, mode }, setPanelState] = useAtom(commandPanelAtom)
   const [query, setQuery] = useState('')
   const [searching, setSearching] = useState(false)
   const [subjectResults, setSubjectResults] = useState<SubjectSearchItem[]>([])
@@ -42,6 +41,24 @@ export function CommandPanel() {
   const fallbackValue = useMemo(() => `search-page:${trimmedQuery}`, [trimmedQuery])
   const isCommandOverlayWindow =
     typeof window !== 'undefined' && window.location.hash.startsWith('#/command')
+
+  const setOpen = useCallback(
+    (nextOpen: boolean | ((wasOpen: boolean) => boolean)) => {
+      setPanelState((current) => ({
+        ...current,
+        open: typeof nextOpen === 'function' ? nextOpen(current.open) : nextOpen,
+      }))
+    },
+    [setPanelState],
+  )
+
+  const setMode = useCallback(
+    (nextMode: CommandPanelMode) => {
+      setPanelState((current) => ({ ...current, mode: nextMode }))
+    },
+    [setPanelState],
+  )
+
   const overlayListHeight = useMemo(() => {
     if (!isCommandOverlayWindow || typeof window === 'undefined') return null
     const availableHeight = window.screen?.availHeight ?? window.innerHeight
@@ -78,7 +95,7 @@ export function CommandPanel() {
         navigate(path)
       }
     },
-    [isCommandOverlayWindow, navigate],
+    [isCommandOverlayWindow, navigate, setOpen],
   )
 
   const paletteCommands = useMemo(() => {
@@ -162,7 +179,7 @@ export function CommandPanel() {
     ]
 
     return items
-  }, [openMainAndNavigate])
+  }, [openMainAndNavigate, setMode])
 
   const matchedPaletteCommandValue = useMemo(() => {
     if (mode !== 'palette') return null
@@ -201,15 +218,15 @@ export function CommandPanel() {
   useEffect(() => {
     // Triggered by main process (e.g. global shortcut).
     const unlisten = handlers.openCommandPanel.listen((payload) => {
-      const nextMode: PanelMode = payload?.mode === 'subject-search' ? 'subject-search' : 'palette'
-      setMode(nextMode)
+      const nextMode: CommandPanelMode =
+        payload?.mode === 'subject-search' ? 'subject-search' : 'palette'
       setQuery('')
       setSelectedValue(nextMode === 'subject-search' ? 'go-search-page' : 'go-home')
       userHasNavigatedRef.current = false
-      setOpen(true)
+      setPanelState({ open: true, mode: nextMode })
     })
     return unlisten
-  }, [])
+  }, [setPanelState])
 
   useHotkeys(
     'mod+p',
