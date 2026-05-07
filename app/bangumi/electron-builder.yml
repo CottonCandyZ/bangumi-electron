@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: io.github.cottoncandyz.bangumi-electron
 productName: Bangumi
 directories:
   buildResources: build
@@ -40,6 +40,10 @@ linux:
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
+generateUpdatesFilesForAllChannels: true
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  provider: github
+  owner: CottonCandyZ
+  repo: bangumi-electron
+  releaseType: prerelease
+  channel: beta
