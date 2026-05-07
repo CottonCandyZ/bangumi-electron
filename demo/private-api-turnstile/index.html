@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bangumi Private API Turnstile Demo</title>
+    <script type="module" src="/src/main.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel">
+        <p class="eyebrow">Bangumi Private API</p>
+        <h1>Turnstile 回调验证</h1>
+        <p class="lead">
+          这个页面用于检查 <code>/p1/turnstile</code> 的跳转入口和回调参数。
+        </p>
+
+        <form id="turnstile-form" class="form">
+          <label>
+            <span>回调地址</span>
+            <input id="redirect-uri" name="redirect_uri" autocomplete="off" />
+          </label>
+
+          <label>
+            <span>主题</span>
+            <select id="theme" name="theme">
+              <option value="auto">auto</option>
+              <option value="light">light</option>
+              <option value="dark">dark</option>
+            </select>
+          </label>
+
+          <button type="submit">打开 Turnstile</button>
+        </form>
+
+        <div class="result">
+          <div>
+            <span class="label">生成地址</span>
+            <a id="turnstile-url" href="#" target="_blank" rel="noreferrer"></a>
+          </div>
+          <div>
+            <span class="label">回调 token</span>
+            <code id="callback-token">未检测到</code>
+          </div>
+          <div>
+            <span class="label">当前状态</span>
+            <p id="status"></p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

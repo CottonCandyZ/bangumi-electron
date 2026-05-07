@@ -1,0 +1,15 @@
+{
+  "name": "bangumi-private-api-turnstile-demo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite --host 127.0.0.1 --port 5174",
+    "preview": "vite preview --host 127.0.0.1 --port 4174"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "vite": "^5.3.3"
+  }
+}
