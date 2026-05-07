@@ -107,6 +107,8 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
     const user_id = await save()
     cleanAccessTokenCache()
     store.set(userIdAtom, user_id.toString())
+    await queryClient.invalidateQueries({ queryKey: ['userSession'] })
+    await queryClient.invalidateQueries({ queryKey: ['login-info-list'] })
   }
 
   const captcha = useQuery({
