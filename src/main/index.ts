@@ -7,7 +7,7 @@ import { appPath, isMacOS } from '@main/env'
 import { setupTray } from '@main/tray'
 import { setAppQuitting } from '@main/app-flags'
 import { registerGlobalShortcuts } from '@main/shortcuts'
-import { toggleCommandWindow } from '@main/command-window'
+import { toggleCommandWindow, warmCommandWindow } from '@main/command-window'
 import { setMainWindowGetter } from '@main/app-context'
 
 async function boot() {
@@ -58,6 +58,7 @@ async function boot() {
     mainWindow = getOrCreateMainWindow()
     setupTray(getOrCreateMainWindow)
     registerGlobalShortcuts(() => toggleCommandWindow({ mode: 'palette' }))
+    warmCommandWindow()
 
     // Default open or close DevTools by F12 in development
     // and ignore CommandOrControl + R in production.

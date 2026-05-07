@@ -72,7 +72,7 @@ export function CommandPanel() {
       if (isCommandOverlayWindow) {
         setOpen(false)
         await client.openMainWindowAndNavigate({ path })
-        await client.hideCommandWindow({})
+        await client.hideCommandWindow({ restorePreviousFocus: false })
       } else {
         setOpen(false)
         navigate(path)
@@ -334,7 +334,7 @@ export function CommandPanel() {
       onOpenChange={(nextOpen) => {
         setOpen(nextOpen)
         if (!nextOpen && isCommandOverlayWindow) {
-          client.hideCommandWindow({})
+          client.hideCommandWindow({ restorePreviousFocus: true })
         }
       }}
       title="Command Panel"

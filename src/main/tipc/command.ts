@@ -8,9 +8,11 @@ export const command = {
   commandOverlayReady: t.procedure.input().action(async () => {
     markCommandOverlayReady()
   }),
-  hideCommandWindow: t.procedure.input().action(async () => {
-    hideCommandWindow()
-  }),
+  hideCommandWindow: t.procedure
+    .input<{ restorePreviousFocus?: boolean }>()
+    .action(async ({ input }) => {
+      hideCommandWindow({ restorePreviousFocus: input?.restorePreviousFocus })
+    }),
   openMainWindowAndNavigate: t.procedure.input<{ path: string }>().action(async ({ input }) => {
     const mainWindow = getOrCreateMainWindowFromContext()
     if (mainWindow.isMinimized()) mainWindow.restore()

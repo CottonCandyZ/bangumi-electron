@@ -5,6 +5,7 @@ import { getIconPath } from '@main/helper'
 import { getRendererHandlers } from '@egoist/tipc/main'
 import type { RendererHandlers } from '@main/tipc/renderer-handlers'
 import { isAppQuitting } from '@main/app-flags'
+import { captureForegroundWindow, restoreForegroundWindow } from '@main/windows-focus'
 import {
   COMMAND_WINDOW_INPUT_HEIGHT,
   COMMAND_WINDOW_LIST_HEIGHT_RATIO,
@@ -79,7 +80,11 @@ function updateCommandWindowBounds(window: BrowserWindow) {
   window.setBounds(desired, false)
 }
 
-function setPresented(window: BrowserWindow, presented: boolean) {
+function setPresented(
+  window: BrowserWindow,
+  presented: boolean,
+  options?: { restorePreviousFocus?: boolean },
+) {
   commandWindowPresented = presented
   if (presented) {
     window.setIgnoreMouseEvents(false)
@@ -95,6 +100,7 @@ function setPresented(window: BrowserWindow, presented: boolean) {
     window.setIgnoreMouseEvents(true, { forward: true })
     window.setFocusable(false)
     if (!keepCommandWindowVisible) window.hide()
+    if (options?.restorePreviousFocus) restoreForegroundWindow()
   }
 }
 
@@ -136,7 +142,7 @@ export function getOrCreateCommandWindow() {
   window.on('close', (event) => {
     if (!isAppQuitting()) {
       event.preventDefault()
-      setPresented(window, false)
+      setPresented(window, false, { restorePreviousFocus: true })
     }
   })
 
@@ -161,6 +167,10 @@ export function getOrCreateCommandWindow() {
 
   commandWindow = window
   return window
+}
+
+export function warmCommandWindow() {
+  getOrCreateCommandWindow()
 }
 
 function ensureShownOnce(window: BrowserWindow) {
@@ -205,6 +215,7 @@ export function markCommandOverlayReady() {
 }
 
 export function showCommandWindow(payload?: { mode?: 'palette' | 'subject-search' }) {
+  captureForegroundWindow()
   const window = getOrCreateCommandWindow()
   updateCommandWindowBounds(window)
 
@@ -219,15 +230,17 @@ export function showCommandWindow(payload?: { mode?: 'palette' | 'subject-search
   }
 }
 
-export function hideCommandWindow() {
+export function hideCommandWindow(options?: { restorePreviousFocus?: boolean }) {
   if (!commandWindow || commandWindow.isDestroyed()) return
-  setPresented(commandWindow, false)
+  setPresented(commandWindow, false, {
+    restorePreviousFocus: options?.restorePreviousFocus ?? true,
+  })
 }
 
 export function toggleCommandWindow(payload?: { mode?: 'palette' | 'subject-search' }) {
-  const window = getOrCreateCommandWindow()
-  if (commandWindowPresented) {
-    setPresented(window, false)
+  const window = commandWindow && !commandWindow.isDestroyed() ? commandWindow : null
+  if (window && commandWindowPresented) {
+    setPresented(window, false, { restorePreviousFocus: true })
   } else {
     showCommandWindow(payload)
   }
