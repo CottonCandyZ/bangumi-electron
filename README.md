@@ -18,6 +18,8 @@
 
 [MOVE TO ISSUE](https://github.com/CottonCandyZ/bangumi-electron/issues/5)
 
+另外 beta 包已发布，请移步 [release](https://github.com/CottonCandyZ/bangumi-electron/releases) 查看。
+
 ---
 
 作为桌面客户端，我想要保证有以下特性：

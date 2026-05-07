@@ -27,7 +27,7 @@ pnpm --filter bangumi-electron build
 本地安装包试打，不上传：
 
 ```powershell
-pnpm --dir app/bangumi exec electron-builder --win --publish never
+pnpm build:bangumi:win:beta
 ```
 
 发布前手动验收建议：
@@ -78,10 +78,10 @@ git push origin v0.0.1-beta.1
 
 ```powershell
 $env:GH_TOKEN="ghp_xxx"
-pnpm --dir app/bangumi exec electron-builder --win --publish always
+pnpm publish:bangumi:win:beta
 ```
 
-当前 `electron-builder.yml` 中 beta 发布配置为：
+当前 beta 发布配置在 `app/bangumi/electron-builder.beta.yml`：
 
 ```yaml
 publish:
@@ -102,7 +102,7 @@ publish:
 pnpm --filter bangumi-electron version 0.0.1 --no-git-tag-version
 ```
 
-正式发布前需要把 `electron-builder.yml` 的 publish 配置切换到正式通道：
+正式发布使用 `app/bangumi/electron-builder.prod.yml`
 
 ```yaml
 publish:
@@ -116,7 +116,7 @@ publish:
 提交、打 tag、推送：
 
 ```powershell
-git add app/bangumi/package.json pnpm-lock.yaml app/bangumi/electron-builder.yml
+git add app/bangumi/package.json pnpm-lock.yaml
 git commit -m "chore: release 0.0.1"
 git tag v0.0.1
 git push origin main
@@ -127,7 +127,7 @@ git push origin v0.0.1
 
 ```powershell
 $env:GH_TOKEN="ghp_xxx"
-pnpm --dir app/bangumi exec electron-builder --win --publish always
+pnpm publish:bangumi:win:prod
 ```
 
 ## 后补 macOS 包到同一个 tag
@@ -140,7 +140,7 @@ pnpm --dir app/bangumi exec electron-builder --win --publish always
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm --dir app/bangumi exec electron-builder --mac --publish never
+pnpm --filter bangumi-electron build:mac:beta
 ```
 
 4. 上传 macOS 产物和对应 metadata 到同一个 GitHub Release。
@@ -156,6 +156,18 @@ gh release upload v0.0.1-beta.1 app/bangumi/dist/* --repo CottonCandyZ/bangumi-e
 ```
 
 注意：macOS 自动更新通常需要签名；未签名/未 notarize 的 beta 包可以用于手动下载测试，但不应假设自动更新在 macOS 上完整可用。
+
+## 覆盖已发布资产
+
+GitHub Release 可以替换同名 asset，但不要直接假设发布命令会安全覆盖所有文件。推荐流程是用 `gh release upload --clobber` 明确覆盖：
+
+```powershell
+gh release upload v0.0.1-beta.1 app/bangumi/dist/bangumi-electron-0.0.1-beta.1-setup.exe --repo CottonCandyZ/bangumi-electron --clobber
+gh release upload v0.0.1-beta.1 app/bangumi/dist/bangumi-electron-0.0.1-beta.1-setup.exe.blockmap --repo CottonCandyZ/bangumi-electron --clobber
+gh release upload v0.0.1-beta.1 app/bangumi/dist/beta.yml --repo CottonCandyZ/bangumi-electron --clobber
+```
+
+如果需要替换整个 release，可以先删除 GitHub Release 和 tag，再重新创建。但已经下载到用户机器上的安装包无法召回；如果内容已经发给外部用户，通常更建议发一个新的 prerelease 版本号，例如 `0.0.1-beta.2`。
 
 ## Auto Update Channel
 

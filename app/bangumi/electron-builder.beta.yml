@@ -41,3 +41,9 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 generateUpdatesFilesForAllChannels: true
+publish:
+  provider: github
+  owner: CottonCandyZ
+  repo: bangumi-electron
+  releaseType: prerelease
+  channel: beta
