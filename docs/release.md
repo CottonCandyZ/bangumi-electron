@@ -36,6 +36,15 @@ macOS 机器上试打 macOS 包：
 pnpm build:bangumi:mac:beta
 ```
 
+默认 macOS 命令会同时打 `x64` 和 `arm64`，并合并 `beta-mac.yml`。如果只需要单架构：
+
+```bash
+pnpm build:bangumi:mac:beta:x64
+pnpm build:bangumi:mac:beta:arm64
+```
+
+macOS 打包脚本会按目标架构临时 rebuild `better-sqlite3`，结束后恢复成本机架构；本地 `dev` 启动前也会检查 native 模块架构，避免在 Apple Silicon 上误用 x64 native 包。
+
 发布前手动验收建议：
 
 - 全新安装启动成功。
@@ -94,6 +103,13 @@ export GH_TOKEN="ghp_xxx"
 pnpm publish:bangumi:mac:beta
 ```
 
+只发布单架构时使用：
+
+```bash
+pnpm publish:bangumi:mac:beta:x64
+pnpm publish:bangumi:mac:beta:arm64
+```
+
 当前 beta 发布配置在 `app/bangumi/electron-builder.beta.yml`：
 
 ```yaml
@@ -150,6 +166,13 @@ export GH_TOKEN="ghp_xxx"
 pnpm publish:bangumi:mac:prod
 ```
 
+正式版本同样支持单架构发布：
+
+```bash
+pnpm publish:bangumi:mac:prod:x64
+pnpm publish:bangumi:mac:prod:arm64
+```
+
 ## 后补 macOS 包到同一个 tag
 
 如果 Windows beta 已经发布，例如 `v0.0.1-beta.1`，后续要在同一个 tag 下补 macOS 包：
@@ -162,6 +185,13 @@ pnpm publish:bangumi:mac:prod
 pnpm install --frozen-lockfile
 export GH_TOKEN="ghp_xxx"
 pnpm publish:bangumi:mac:beta
+```
+
+如果只后补单个架构：
+
+```bash
+pnpm publish:bangumi:mac:beta:x64
+pnpm publish:bangumi:mac:beta:arm64
 ```
 
 如果只需要试打包、不上传：
