@@ -30,6 +30,12 @@ pnpm --filter bangumi-electron build
 pnpm build:bangumi:win:beta
 ```
 
+macOS 机器上试打 macOS 包：
+
+```bash
+pnpm build:bangumi:mac:beta
+```
+
 发布前手动验收建议：
 
 - 全新安装启动成功。
@@ -81,6 +87,13 @@ $env:GH_TOKEN="ghp_xxx"
 pnpm publish:bangumi:win:beta
 ```
 
+macOS 机器上发布 macOS beta 包到同一个 prerelease：
+
+```bash
+export GH_TOKEN="ghp_xxx"
+pnpm publish:bangumi:mac:beta
+```
+
 当前 beta 发布配置在 `app/bangumi/electron-builder.beta.yml`：
 
 ```yaml
@@ -130,26 +143,34 @@ $env:GH_TOKEN="ghp_xxx"
 pnpm publish:bangumi:win:prod
 ```
 
+macOS 机器上发布正式 macOS 包：
+
+```bash
+export GH_TOKEN="ghp_xxx"
+pnpm publish:bangumi:mac:prod
+```
+
 ## 后补 macOS 包到同一个 tag
 
 如果 Windows beta 已经发布，例如 `v0.0.1-beta.1`，后续要在同一个 tag 下补 macOS 包：
 
 1. 切到同一个 tag 对应的代码或同一个 release commit。
 2. 确认 `app/bangumi/package.json` 版本仍是 `0.0.1-beta.1`。
-3. 在 macOS 机器上构建 mac 产物。
+3. 在 macOS 机器上发布 macOS 产物到同一个 GitHub Release。
 
 ```bash
 pnpm install --frozen-lockfile
-pnpm --filter bangumi-electron build:mac:beta
+export GH_TOKEN="ghp_xxx"
+pnpm publish:bangumi:mac:beta
 ```
 
-4. 上传 macOS 产物和对应 metadata 到同一个 GitHub Release。
+如果只需要试打包、不上传：
 
 ```bash
-gh release upload v0.0.1-beta.1 app/bangumi/dist/* --repo CottonCandyZ/bangumi-electron
+pnpm build:bangumi:mac:beta
 ```
 
-如果需要替换同名 asset：
+如果 electron-builder 发布未覆盖同名 asset，可用 `gh` 手动替换同名 asset：
 
 ```bash
 gh release upload v0.0.1-beta.1 app/bangumi/dist/* --repo CottonCandyZ/bangumi-electron --clobber

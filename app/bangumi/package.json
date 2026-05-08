@@ -27,6 +27,8 @@
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:mac:beta": "pnpm run build && electron-builder --mac --config electron-builder.beta.yml --publish never",
     "build:mac:prod": "pnpm run build && electron-builder --mac --config electron-builder.prod.yml --publish never",
+    "publish:mac:beta": "pnpm run build && electron-builder --mac --config electron-builder.beta.yml --publish always",
+    "publish:mac:prod": "pnpm run build && electron-builder --mac --config electron-builder.prod.yml --publish always",
     "build:linux": "electron-vite build && electron-builder --linux",
     "build:linux:beta": "pnpm run build && electron-builder --linux --config electron-builder.beta.yml --publish never",
     "build:linux:prod": "pnpm run build && electron-builder --linux --config electron-builder.prod.yml --publish never",
