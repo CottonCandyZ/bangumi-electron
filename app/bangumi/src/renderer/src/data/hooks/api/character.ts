@@ -1,5 +1,8 @@
 import {
+  getCharacterCommentsById,
   getCharacterDetailById,
+  getCharacterRelatedPersonsById,
+  getCharacterRelatedSubjectsById,
   getSubjectCharactersById,
 } from '@renderer/data/fetch/api/character'
 import { useAuthQuery } from '@renderer/data/hooks/factory'
@@ -29,4 +32,54 @@ export const useQueryCharacterDetailByID = ({ id }: { id: CharacterId }) =>
   useQuery({
     queryFn: () => getCharacterDetailById({ id }),
     queryKey: ['characterDetail', id],
+  })
+
+/**
+ * 使用 id 获得角色出场作品
+ */
+export const useQueryCharacterRelatedSubjects = ({
+  id,
+  enabled,
+}: {
+  id: CharacterId
+  enabled?: boolean
+}) =>
+  useAuthQuery({
+    queryFn: getCharacterRelatedSubjectsById,
+    queryKey: ['character-related-subjects'],
+    queryProps: { id },
+    enabled,
+  })
+
+/**
+ * 使用 id 获得角色关联人物
+ */
+export const useQueryCharacterRelatedPersons = ({
+  id,
+  enabled,
+}: {
+  id: CharacterId
+  enabled?: boolean
+}) =>
+  useAuthQuery({
+    queryFn: getCharacterRelatedPersonsById,
+    queryKey: ['character-related-persons'],
+    queryProps: { id },
+    enabled,
+  })
+
+/**
+ * 使用 id 获得角色吐槽箱
+ */
+export const useQueryCharacterComments = ({
+  id,
+  enabled,
+}: {
+  id: CharacterId
+  enabled?: boolean
+}) =>
+  useQuery({
+    queryFn: () => getCharacterCommentsById({ id }),
+    queryKey: ['character-comments', id],
+    enabled,
   })

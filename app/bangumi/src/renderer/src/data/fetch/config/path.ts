@@ -45,12 +45,34 @@ export const EPISODES = {
 
 /** 角色 */
 export const CHARACTERS = {
+  /** v0 角色详情 */
   BY_ID: (id: CharacterId) => `/v0/characters/${id}`,
+  /** v0 角色出场作品 */
+  SUBJECTS_BY_ID: (id: CharacterId) => `/v0/characters/${id}/subjects`,
+  /** v0 角色关联人物 */
+  PERSONS_BY_ID: (id: CharacterId) => `/v0/characters/${id}/persons`,
+}
+
+/** Private API 角色 */
+export const NEXT_CHARACTERS = {
+  /** p1 角色吐槽箱 */
+  COMMENTS_BY_ID: (id: CharacterId) => `/p1/characters/${id}/comments`,
 }
 
 /** 人物 */
 export const PERSONS = {
+  /** v0 人物详情 */
   BY_ID: (id: PersonId) => `/v0/persons/${id}`,
+  /** v0 人物参与作品 */
+  SUBJECTS_BY_ID: (id: PersonId) => `/v0/persons/${id}/subjects`,
+  /** v0 人物出场角色 */
+  CHARACTERS_BY_ID: (id: PersonId) => `/v0/persons/${id}/characters`,
+}
+
+/** Private API 人物 */
+export const NEXT_PERSONS = {
+  /** p1 人物吐槽箱 */
+  COMMENTS_BY_ID: (id: PersonId) => `/p1/persons/${id}/comments`,
 }
 
 /** 收藏 */

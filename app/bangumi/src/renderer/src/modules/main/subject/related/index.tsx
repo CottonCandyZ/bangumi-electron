@@ -1,10 +1,13 @@
 import { Tabs } from '@renderer/components/tabs'
+import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useRelatedSubjectsQuery } from '@renderer/data/hooks/api/subject'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { RelatedSubjectsGrid } from '@renderer/modules/main/subject/related/content'
+import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { useMemo } from 'react'
 
 interface Props {
@@ -12,6 +15,8 @@ interface Props {
 }
 
 export function RelatedSubjects({ subjectId }: Props) {
+  const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
+  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
   const _relatedSubjects = useRelatedSubjectsQuery({
     id: subjectId,
     needKeepPreviousData: false,
@@ -29,12 +34,32 @@ export function RelatedSubjects({ subjectId }: Props) {
   const [filterMap, setFilter] = useAtom(tabFilerAtom)
   const filter = filterMap.get(id) ?? '全部'
   const relations = new Set<string>(['全部', ...(relatedSubjects?.keys() || [])])
+  const allRelatedSubjects = relatedSubjects ? [...relatedSubjects.values()].flat() : []
+  const sourceTitle =
+    subjectInfoQuery.data?.name_cn || subjectInfoQuery.data?.name || `条目 ${subjectId}`
+  const openInSidePanel = () => {
+    if (!relatedSubjects) return
+
+    openMonoListPanelTab({
+      id: `subject-related-${subjectId}`,
+      type: 'subjectRelated',
+      title: '关联条目',
+      sourceTitle,
+      subjectId,
+      relatedSubjects: allRelatedSubjects,
+    })
+  }
 
   if (relatedSubjects?.size === 0) return null
   return (
     <section className="flex flex-col gap-5">
       <div className="flex flex-row items-start justify-between gap-10">
-        <h2 className="shrink-0 text-2xl font-medium">关联条目</h2>
+        <div className="flex shrink-0 flex-row items-center gap-2">
+          <h2 className="text-2xl font-medium">关联条目</h2>
+          <Button variant="ghost" size="icon" className="mt-1 size-8" onClick={openInSidePanel}>
+            <span className="i-mingcute-box-3-line text-lg" />
+          </Button>
+        </div>
         {relatedSubjects ? (
           <Tabs
             currentSelect={filter}

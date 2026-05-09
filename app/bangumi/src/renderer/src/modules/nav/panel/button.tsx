@@ -9,7 +9,10 @@ type Props = (typeof route)[number]
 
 export function PanelButton({ name, panelName, icon, active }: Props) {
   const [panelState, setPanelState] = useAtom(nvaCollectionButtonAtomAction)
-  const isActive = panelState.openState && panelState.subjectType === panelName
+  const isActive =
+    panelState.openState &&
+    panelState.openContent === 'collection' &&
+    panelState.subjectType === panelName
   const [navOpen, setNavOpen] = useAtom(navOpenAtom)
 
   return (
