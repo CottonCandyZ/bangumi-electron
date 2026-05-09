@@ -1,4 +1,3 @@
-import { MasonryInfiniteGrid } from '@egjs/react-infinitegrid'
 import { Tabs } from '@renderer/components/tabs'
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
@@ -16,13 +15,23 @@ import {
   MonoType,
 } from '@renderer/data/types/mono'
 import { SubjectType } from '@renderer/data/types/subject'
+import { useResizeObserver } from '@renderer/hooks/use-resize'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
 import dayjs from 'dayjs'
 import { useAtom, useSetAtom } from 'jotai'
-import { Children, cloneElement, Fragment, useMemo, useState } from 'react'
-import type { ReactElement, ReactNode } from 'react'
+import {
+  Children,
+  cloneElement,
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import type { CSSProperties, ReactElement, ReactNode } from 'react'
 import { useLocation, useNavigate, useViewTransitionState } from 'react-router-dom'
 
 type MonoDetailViewProps = {
@@ -43,13 +52,16 @@ const SUBJECT_TYPE_MAP: Record<SubjectType, string> = {
   [SubjectType.real]: '三次元',
 }
 
-const FOLDED_ITEM_COUNT = 8
+const DEFAULT_FOLDED_ITEM_COUNT = 8
+const FOLDED_ROWS = 2
+const GRID_GAP_REM = 0.75
+const MONO_SUBJECT_CARD_MIN_WIDTH_REM = 15
+const MONO_RELATED_CARD_MIN_WIDTH_REM = 18
 const ALL_SUBJECT_TYPES = '全部类型'
 const ALL_SUBJECT_RELATIONS = '全部职能'
 const MONO_MAIN_IMAGE_FRAME = 'flex aspect-3/4 w-full items-center justify-center'
-const MONO_SUBJECT_IMAGE_LOADING_FRAME = 'aspect-22/31'
+const MONO_SUBJECT_IMAGE_FRAME = 'flex aspect-22/31 w-full items-center justify-center'
 const MONO_RELATED_IMAGE_FRAME = 'flex aspect-square items-center justify-center'
-const MONO_SUBJECT_CARD_WIDTH = 224
 const EXTERNAL_URL_PATTERN = /https?:\/\/[^\s<>"'，。)）\]]+/g
 
 export function MonoDetailView({
@@ -259,7 +271,8 @@ function MonoSubjectsSection({
         tabs={pageFilters}
         total={filteredSubjects.length}
         onShowMore={openInSidePanel}
-        renderContent={(items) => <MonoSubjectMasonry>{items}</MonoSubjectMasonry>}
+        foldedItemMinWidthRem={MONO_SUBJECT_CARD_MIN_WIDTH_REM}
+        renderContent={(items) => <MonoSubjectGrid>{items}</MonoSubjectGrid>}
       >
         <div>{renderSubjectCards(filteredSubjects)}</div>
       </FoldableSection>
@@ -299,17 +312,11 @@ function FilterTabs({
   )
 }
 
-function MonoSubjectMasonry({ children }: { children: ReactNode }) {
+function MonoSubjectGrid({ children }: { children: ReactNode }) {
   return (
-    <MasonryInfiniteGrid
-      className="w-full"
-      useResizeObserver
-      observeChildren
-      align="start"
-      gap={12}
-    >
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(var(--mono-section-card-min-width),1fr))] gap-3">
       {children}
-    </MasonryInfiniteGrid>
+    </div>
   )
 }
 
@@ -331,15 +338,14 @@ function MonoSubjectCard({ subject }: { subject: MonoSubjectItem }) {
       viewTransition
       key={`${subject.id}-${subject.relation}`}
       className="block"
-      style={{ width: MONO_SUBJECT_CARD_WIDTH }}
     >
       <Card className="flex h-full flex-col overflow-hidden p-2 shadow-none transition-shadow hover:shadow-lg">
         {subject.image ? (
           <Image
             imageSrc={subject.image}
-            className="overflow-hidden rounded-md"
-            imageClassName="h-auto w-full object-contain"
-            loadingClassName={MONO_SUBJECT_IMAGE_LOADING_FRAME}
+            className={`${MONO_SUBJECT_IMAGE_FRAME} overflow-hidden rounded-md`}
+            imageClassName="h-full w-full object-contain"
+            loadingClassName={MONO_SUBJECT_IMAGE_FRAME}
             careLoading
             style={{ viewTransitionName: isTransitioning ? viewTransitionName : undefined }}
           />
@@ -439,6 +445,7 @@ function MonoRelatedSection({
         tabs={pageFilters}
         total={filteredItems.length}
         onShowMore={openInSidePanel}
+        foldedItemMinWidthRem={MONO_RELATED_CARD_MIN_WIDTH_REM}
       >
         <MonoRelatedGrid>{renderRelatedCards(filteredItems)}</MonoRelatedGrid>
       </FoldableSection>
@@ -448,7 +455,9 @@ function MonoRelatedSection({
 
 function MonoRelatedGrid({ children }: { children: ReactNode }) {
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] gap-3">{children}</div>
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(var(--mono-section-card-min-width),1fr))] gap-3">
+      {children}
+    </div>
   )
 }
 
@@ -518,6 +527,16 @@ function OpenInSidePanelButton({ onClick }: { onClick: () => void }) {
   )
 }
 
+function getRemPx() {
+  const fontSize = getComputedStyle(document.documentElement).fontSize
+  const remPx = Number.parseFloat(fontSize)
+  return Number.isFinite(remPx) ? remPx : 16
+}
+
+function getGridColumns(width: number, minWidth: number, gap: number) {
+  return Math.max(1, Math.floor((width + gap) / (minWidth + gap)))
+}
+
 function FoldableSection({
   title,
   titleAction,
@@ -525,6 +544,7 @@ function FoldableSection({
   total,
   renderContent,
   onShowMore,
+  foldedItemMinWidthRem,
   children,
 }: {
   title: string
@@ -533,19 +553,54 @@ function FoldableSection({
   total: number
   renderContent?: (children: ReactNode[], state: { folded: boolean; canFold: boolean }) => ReactNode
   onShowMore?: () => void
+  foldedItemMinWidthRem?: number
   children: ReactElement<{ children?: ReactNode }>
 }) {
   const [folded, setFolded] = useState(true)
+  const [foldedItemCount, setFoldedItemCount] = useState(DEFAULT_FOLDED_ITEM_COUNT)
+  const contentRef = useRef<HTMLDivElement>(null)
   const childrenArray = Children.toArray(children.props.children)
-  const canFold = childrenArray.length > FOLDED_ITEM_COUNT
+  const cardMinWidthRem = foldedItemMinWidthRem ?? MONO_SUBJECT_CARD_MIN_WIDTH_REM
+  const updateFoldedItemCount = useCallback(
+    (width: number) => {
+      const remPx = getRemPx()
+      const cardMinWidth = cardMinWidthRem * remPx
+      const gap = GRID_GAP_REM * remPx
+      const columns = getGridColumns(width, cardMinWidth, gap)
+      const nextCount = columns * FOLDED_ROWS
+
+      setFoldedItemCount((prev) => (prev === nextCount ? prev : nextCount))
+    },
+    [cardMinWidthRem],
+  )
+  const handleResize = useCallback(
+    (entry: ResizeObserverEntry) => {
+      updateFoldedItemCount(entry.contentRect.width)
+    },
+    [updateFoldedItemCount],
+  )
+  const canFold = childrenArray.length > foldedItemCount
   const displayChildren =
-    folded && canFold ? childrenArray.slice(0, FOLDED_ITEM_COUNT) : childrenArray
+    folded && canFold ? childrenArray.slice(0, foldedItemCount) : childrenArray
   const content = renderContent
     ? renderContent(displayChildren, { folded, canFold })
     : cloneElement(children, children.props, displayChildren)
+  const sectionStyle = {
+    '--mono-section-card-min-width': `${cardMinWidthRem}rem`,
+  } as CSSProperties
+
+  useEffect(() => {
+    if (contentRef.current) updateFoldedItemCount(contentRef.current.getBoundingClientRect().width)
+  }, [updateFoldedItemCount])
+
+  useResizeObserver({
+    ref: contentRef,
+    callback: handleResize,
+    deps: [handleResize],
+  })
 
   return (
-    <section className="flex flex-col gap-5">
+    <section className="flex flex-col gap-5" style={sectionStyle}>
       <div className="flex flex-row flex-wrap items-start justify-between gap-3">
         <div className="flex flex-row items-center gap-2">
           <h2 className="shrink-0 text-2xl font-medium">
@@ -556,7 +611,7 @@ function FoldableSection({
         </div>
         {tabs}
       </div>
-      {children.props.children ? content : null}
+      <div ref={contentRef}>{children.props.children ? content : null}</div>
       {canFold && (
         <Button
           variant="outline"
