@@ -91,8 +91,23 @@ function linkifyNodes(nodes: ReactNode): ReactNode {
   if (Array.isArray(nodes)) {
     return nodes.map((node, index) => createElement(Fragment, { key: index }, linkifyNodes(node)))
   }
-  if (isValidElement<{ children?: ReactNode }>(nodes)) {
-    if (nodes.type === 'a') return nodes
+  if (isValidElement<{ children?: ReactNode; className?: string; href?: string }>(nodes)) {
+    if (nodes.type === 'a') {
+      const href = typeof nodes.props.href === 'string' ? nodes.props.href : undefined
+      if (!href) return nodes
+
+      const route = getBangumiRoute(href)
+      if (!route) return nodes
+
+      return createElement(
+        Link,
+        {
+          to: route,
+          className: nodes.props.className ?? 'text-primary underline-offset-4 hover:underline',
+        },
+        linkifyNodes(nodes.props.children),
+      )
+    }
     return cloneElement(nodes, nodes.props, linkifyNodes(nodes.props.children))
   }
   return nodes

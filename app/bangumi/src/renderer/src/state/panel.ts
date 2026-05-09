@@ -126,11 +126,13 @@ export const closeMonoListPanelTabAtomAction = atom(null, (get, set, id: string)
 })
 
 export const closeAllMonoListPanelTabsAtomAction = atom(null, (get, set) => {
+  if (get(monoListPanelTabsAtom).length === 0) return
+
+  set(monoListPanelTabsAtom, [])
+  set(monoListPanelActiveTabIdAtom, null)
   set(leftPanelOpenAtom, false)
   window.setTimeout(() => {
-    if (get(leftPanelOpenAtom) || get(leftPanelOpenContentAtom) !== 'monoList') return
-    set(monoListPanelTabsAtom, [])
-    set(monoListPanelActiveTabIdAtom, null)
+    if (get(leftPanelOpenContentAtom) !== 'monoList') return
     set(leftPanelOpenContentAtom, 'collection')
   }, LEFT_PANEL_CLOSE_ANIMATION_MS)
 })
