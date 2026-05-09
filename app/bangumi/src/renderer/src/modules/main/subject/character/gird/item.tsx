@@ -17,8 +17,15 @@ import { Detail } from '@renderer/modules/main/subject/character/gird/detail'
 import type { MouseEvent } from 'react'
 import { useLocation, useNavigate, useViewTransitionState } from 'react-router-dom'
 
-const sectionId = 'Characters'
-export function Item({ character }: { character: Character }) {
+export function Item({
+  character,
+  onHoverChange,
+  sectionId,
+}: {
+  character: Character
+  onHoverChange?: (hovering: boolean) => void
+  sectionId: string
+}) {
   const { key } = useLocation()
   const id = character.id
   const layoutId = `${sectionId}-${id}-${key}`
@@ -27,39 +34,47 @@ export function Item({ character }: { character: Character }) {
   const openCharacter = useOpenCharacter(id, viewTransitionName)
 
   return (
-    <HoverPopCard layoutId={layoutId}>
-      <HoverCardWrapper
-        className="bg-card text-card-foreground rounded-xl border"
-        hoverContent={
-          <HoverCardContent className="h-full cursor-default">
-            <CardContent
-              className={cn(
-                'flex cursor-pointer flex-row items-start gap-4 p-2',
-                isEmpty(character.images.large) && 'pl-4',
-              )}
-              onClick={openCharacter}
-            >
-              {!isEmpty(character.images.large) && (
-                <MyLink
-                  to={`/character/${id}`}
-                  state={{ viewTransitionName }}
-                  viewTransition
-                  className="shrink-0"
-                >
-                  <Image
-                    className="aspect-square size-14 overflow-hidden rounded-lg"
-                    imageSrc={character.images.grid}
-                    style={{ viewTransitionName: isTransitioning ? viewTransitionName : undefined }}
-                  />
-                </MyLink>
-              )}
-              <MetaInfo character={character} viewTransitionName={viewTransitionName} />
-            </CardContent>
-          </HoverCardContent>
-        }
-        popContent={<PopCard character={character} />}
-      />
-    </HoverPopCard>
+    <div
+      className="h-full [&>div]:h-full"
+      onMouseEnter={() => onHoverChange?.(true)}
+      onMouseLeave={() => onHoverChange?.(false)}
+    >
+      <HoverPopCard layoutId={layoutId}>
+        <HoverCardWrapper
+          className="bg-card text-card-foreground rounded-xl border"
+          hoverContent={
+            <HoverCardContent className="h-full cursor-default">
+              <CardContent
+                className={cn(
+                  'flex cursor-pointer flex-row items-start gap-4 p-2',
+                  isEmpty(character.images.large) && 'pl-4',
+                )}
+                onClick={openCharacter}
+              >
+                {!isEmpty(character.images.large) && (
+                  <MyLink
+                    to={`/character/${id}`}
+                    state={{ viewTransitionName }}
+                    viewTransition
+                    className="shrink-0"
+                  >
+                    <Image
+                      className="aspect-square size-14 overflow-hidden rounded-lg"
+                      imageSrc={character.images.grid}
+                      style={{
+                        viewTransitionName: isTransitioning ? viewTransitionName : undefined,
+                      }}
+                    />
+                  </MyLink>
+                )}
+                <MetaInfo character={character} viewTransitionName={viewTransitionName} />
+              </CardContent>
+            </HoverCardContent>
+          }
+          popContent={<PopCard character={character} />}
+        />
+      </HoverPopCard>
+    </div>
   )
 }
 
