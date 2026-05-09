@@ -1,4 +1,12 @@
-import { BloodType, Images, InfoBoxValueList, PersonCareer, Stat } from '@renderer/data/types/bgm'
+import {
+  BloodType,
+  Images,
+  InfoBoxValueList,
+  PersonCareer,
+  PersonId,
+  Stat,
+} from '@renderer/data/types/bgm'
+import { SubjectType } from '@renderer/data/types/subject'
 
 export type Character = {
   images: Images
@@ -15,10 +23,10 @@ export type CharacterDetail = {
   birth_day: number | null
   birth_year: number | null
   blood_type: BloodType | null
-  images: Images
+  images: Images | null
   summary: string
   name: string
-  infobox: InfoBox
+  infobox: InfoBox[]
   stat: Stat
   id: number
   locked: boolean
@@ -46,4 +54,28 @@ export type Actor = {
   id: number
   type: number
   locked: boolean
+}
+
+/** v0 角色出场作品 */
+export type CharacterRelatedSubject = {
+  id: number
+  type: SubjectType
+  staff: string
+  eps?: string
+  name: string
+  name_cn: string
+  image?: string
+}
+
+/** v0 角色关联人物 */
+export type CharacterRelatedPerson = {
+  images?: Images | null
+  name: string
+  subject_name: string
+  subject_name_cn: string
+  subject_type: SubjectType
+  subject_id: number
+  staff: string
+  id: PersonId
+  type: number
 }

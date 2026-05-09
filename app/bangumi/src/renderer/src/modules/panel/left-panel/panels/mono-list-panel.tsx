@@ -1,0 +1,540 @@
+import { MasonryInfiniteGrid } from '@egjs/react-infinitegrid'
+import { ScrollArea } from '@base-ui/react/scroll-area'
+import { Image } from '@renderer/components/image/image'
+import { MyLink } from '@renderer/components/my-link'
+import { Badge } from '@renderer/components/ui/badge'
+import { Tabs } from '@renderer/components/tabs'
+import { SubjectType } from '@renderer/data/types/subject'
+import type { MonoListPanelTab } from '@renderer/state/panel'
+import {
+  closeAllMonoListPanelTabsAtomAction,
+  closeMonoListPanelTabAtomAction,
+  monoListPanelActiveTabIdAtom,
+  monoListPanelTabsAtom,
+} from '@renderer/state/panel'
+import { tabFilerAtom } from '@renderer/state/simple-tab'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { XIcon } from 'lucide-react'
+import { Children, useEffect, useMemo, useRef } from 'react'
+import type { ReactNode } from 'react'
+
+const SUBJECT_TYPE_MAP: Record<SubjectType, string> = {
+  [SubjectType.book]: '书籍',
+  [SubjectType.anime]: '动画',
+  [SubjectType.music]: '音乐',
+  [SubjectType.game]: '游戏',
+  [SubjectType.real]: '三次元',
+}
+
+const ALL_SUBJECT_TYPES = '全部类型'
+const ALL_SUBJECT_RELATIONS = '全部职能'
+const ALL_RELATED_TYPES = '全部类型'
+
+export function MonoListPanel() {
+  const tabs = useAtomValue(monoListPanelTabsAtom)
+  const [activeTabId, setActiveTabId] = useAtom(monoListPanelActiveTabIdAtom)
+  const closeTab = useSetAtom(closeMonoListPanelTabAtomAction)
+  const closeAllTabs = useSetAtom(closeAllMonoListPanelTabsAtomAction)
+  const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0]
+  const tabRefs = useRef(new Map<string, HTMLButtonElement>())
+
+  useEffect(() => {
+    if (!activeTabId && activeTab) setActiveTabId(activeTab.id)
+  }, [activeTab, activeTabId, setActiveTabId])
+
+  useEffect(() => {
+    if (!activeTab) return
+    tabRefs.current.get(activeTab.id)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'nearest',
+    })
+  }, [activeTab])
+
+  if (!activeTab) return null
+
+  return (
+    <div className="flex h-dvh min-w-0 flex-col">
+      <div className="drag-region flex h-14 shrink-0 flex-col justify-center border-b px-2">
+        <div className="no-drag-region flex flex-row items-center gap-1">
+          <div className="flex min-w-0 flex-1 flex-row gap-1 overflow-x-auto">
+            {tabs.map((tab) => (
+              <button
+                className="hover:bg-accent data-[active=true]:bg-accent flex max-w-40 min-w-16 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm"
+                data-active={tab.id === activeTab.id}
+                key={tab.id}
+                title={`${tab.title} - ${tab.sourceTitle}`}
+                ref={(element) => {
+                  if (element) tabRefs.current.set(tab.id, element)
+                  else tabRefs.current.delete(tab.id)
+                }}
+                onClick={() => setActiveTabId(tab.id)}
+              >
+                <span className="line-clamp-1 min-w-0">{tab.title}</span>
+                <span
+                  className="text-muted-foreground hover:text-foreground flex shrink-0"
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    closeTab(tab.id)
+                  }}
+                >
+                  <XIcon className="size-3.5" />
+                </span>
+              </button>
+            ))}
+          </div>
+          <button
+            className="text-muted-foreground hover:bg-accent hover:text-foreground flex size-7 shrink-0 items-center justify-center rounded-md"
+            onClick={() => closeAllTabs()}
+            title="关闭全部"
+          >
+            <span className="i-mingcute-close-circle-line text-base" />
+          </button>
+        </div>
+      </div>
+      <div className="flex shrink-0 flex-col gap-0.5 border-b px-3 py-2">
+        <div className="line-clamp-1 text-sm font-medium">
+          {activeTab.title}
+          <span className="text-muted-foreground ml-1 text-xs font-normal">
+            {getMonoListPanelTabCount(activeTab)}
+          </span>
+        </div>
+        <div className="text-muted-foreground line-clamp-1 text-xs">
+          来自 {activeTab.sourceTitle}
+        </div>
+      </div>
+      {activeTab.type === 'subjects' ? (
+        <MonoSubjectListPanelContent tab={activeTab} />
+      ) : activeTab.type === 'related' ? (
+        <MonoRelatedListPanelContent tab={activeTab} />
+      ) : activeTab.type === 'subjectCharacters' ? (
+        <SubjectCharacterListPanelContent tab={activeTab} />
+      ) : (
+        <SubjectRelatedListPanelContent tab={activeTab} />
+      )}
+    </div>
+  )
+}
+
+function getMonoListPanelTabCount(tab: MonoListPanelTab) {
+  if (tab.type === 'subjects') return tab.subjects.length
+  if (tab.type === 'related') return tab.relatedItems.length
+  if (tab.type === 'subjectCharacters') return tab.characters.length
+  return tab.relatedSubjects.length
+}
+
+function MonoSubjectListPanelContent({
+  tab,
+}: {
+  tab: Extract<MonoListPanelTab, { type: 'subjects' }>
+}) {
+  const [filterMap, setFilter] = useAtom(tabFilerAtom)
+  const typeFilterId = `${tab.id}-panel-type`
+  const relationFilterId = `${tab.id}-panel-relation`
+  const typeFilter = filterMap.get(typeFilterId) ?? ALL_SUBJECT_TYPES
+  const relationFilter = filterMap.get(relationFilterId) ?? ALL_SUBJECT_RELATIONS
+  const typeFilters = useMemo(
+    () =>
+      new Set([
+        ALL_SUBJECT_TYPES,
+        ...tab.subjects.map((subject) => SUBJECT_TYPE_MAP[subject.subjectType]),
+      ]),
+    [tab.subjects],
+  )
+  const relationFilters = useMemo(
+    () =>
+      new Set([
+        ALL_SUBJECT_RELATIONS,
+        ...tab.subjects.map((subject) => subject.relation).filter(Boolean),
+      ]),
+    [tab.subjects],
+  )
+  const items = useMemo(
+    () =>
+      tab.subjects.filter((subject) => {
+        const matchesType =
+          typeFilter === ALL_SUBJECT_TYPES || SUBJECT_TYPE_MAP[subject.subjectType] === typeFilter
+        const matchesRelation =
+          relationFilter === ALL_SUBJECT_RELATIONS || subject.relation === relationFilter
+        return matchesType && matchesRelation
+      }),
+    [relationFilter, tab.subjects, typeFilter],
+  )
+
+  return (
+    <>
+      <MonoListPanelFilters>
+        <PanelFilterTabs
+          label="类型"
+          currentSelect={typeFilter}
+          setCurrentSelect={setFilter}
+          tabsContent={typeFilters}
+          layoutId={typeFilterId}
+        />
+        <PanelFilterTabs
+          label="职能"
+          currentSelect={relationFilter}
+          setCurrentSelect={setFilter}
+          tabsContent={relationFilters}
+          layoutId={relationFilterId}
+        />
+      </MonoListPanelFilters>
+      <MonoPanelInfiniteList>
+        {items.map((item) => (
+          <div key={`${item.id}-${item.relation}`}>
+            <MonoSubjectListItem item={item} />
+          </div>
+        ))}
+      </MonoPanelInfiniteList>
+    </>
+  )
+}
+
+function MonoRelatedListPanelContent({
+  tab,
+}: {
+  tab: Extract<MonoListPanelTab, { type: 'related' }>
+}) {
+  const [filterMap, setFilter] = useAtom(tabFilerAtom)
+  const filterId = `${tab.id}-panel-type`
+  const filter = filterMap.get(filterId) ?? ALL_RELATED_TYPES
+  const filters = useMemo(
+    () =>
+      new Set([
+        ALL_RELATED_TYPES,
+        ...tab.relatedItems
+          .map((item) =>
+            item.subjectType === undefined ? undefined : SUBJECT_TYPE_MAP[item.subjectType],
+          )
+          .filter((item): item is string => item !== undefined),
+      ]),
+    [tab.relatedItems],
+  )
+  const items = useMemo(
+    () =>
+      filter === ALL_RELATED_TYPES
+        ? tab.relatedItems
+        : tab.relatedItems.filter((item) => {
+            if (item.subjectType === undefined) return false
+            return SUBJECT_TYPE_MAP[item.subjectType] === filter
+          }),
+    [filter, tab.relatedItems],
+  )
+
+  return (
+    <>
+      <MonoListPanelFilters>
+        <PanelFilterTabs
+          label="类型"
+          currentSelect={filter}
+          setCurrentSelect={setFilter}
+          tabsContent={filters}
+          layoutId={filterId}
+        />
+      </MonoListPanelFilters>
+      <MonoPanelInfiniteList>
+        {items.map((item) => (
+          <div key={`${item.id}-${item.subjectId ?? item.relation ?? item.name}`}>
+            <MonoRelatedListItem item={item} />
+          </div>
+        ))}
+      </MonoPanelInfiniteList>
+    </>
+  )
+}
+
+function SubjectCharacterListPanelContent({
+  tab,
+}: {
+  tab: Extract<MonoListPanelTab, { type: 'subjectCharacters' }>
+}) {
+  const [filterMap, setFilter] = useAtom(tabFilerAtom)
+  const filterId = `${tab.id}-panel-relation`
+  const filter = filterMap.get(filterId) ?? ALL_SUBJECT_RELATIONS
+  const filters = useMemo(
+    () =>
+      new Set([
+        ALL_SUBJECT_RELATIONS,
+        ...tab.characters.map((character) => character.relation).filter(Boolean),
+      ]),
+    [tab.characters],
+  )
+  const items = useMemo(
+    () =>
+      filter === ALL_SUBJECT_RELATIONS
+        ? tab.characters
+        : tab.characters.filter((character) => character.relation === filter),
+    [filter, tab.characters],
+  )
+
+  return (
+    <>
+      <MonoListPanelFilters>
+        <PanelFilterTabs
+          label="角色类型"
+          currentSelect={filter}
+          setCurrentSelect={setFilter}
+          tabsContent={filters}
+          layoutId={filterId}
+        />
+      </MonoListPanelFilters>
+      <MonoPanelInfiniteList>
+        {items.map((item) => (
+          <div key={item.id}>
+            <SubjectCharacterListItem item={item} />
+          </div>
+        ))}
+      </MonoPanelInfiniteList>
+    </>
+  )
+}
+
+function SubjectRelatedListPanelContent({
+  tab,
+}: {
+  tab: Extract<MonoListPanelTab, { type: 'subjectRelated' }>
+}) {
+  const [filterMap, setFilter] = useAtom(tabFilerAtom)
+  const filterId = `${tab.id}-panel-relation`
+  const filter = filterMap.get(filterId) ?? ALL_SUBJECT_RELATIONS
+  const filters = useMemo(
+    () =>
+      new Set([
+        ALL_SUBJECT_RELATIONS,
+        ...tab.relatedSubjects.map((subject) => subject.relation).filter(Boolean),
+      ]),
+    [tab.relatedSubjects],
+  )
+  const items = useMemo(
+    () =>
+      filter === ALL_SUBJECT_RELATIONS
+        ? tab.relatedSubjects
+        : tab.relatedSubjects.filter((subject) => subject.relation === filter),
+    [filter, tab.relatedSubjects],
+  )
+
+  return (
+    <>
+      <MonoListPanelFilters>
+        <PanelFilterTabs
+          label="关系"
+          currentSelect={filter}
+          setCurrentSelect={setFilter}
+          tabsContent={filters}
+          layoutId={filterId}
+        />
+      </MonoListPanelFilters>
+      <MonoPanelInfiniteList>
+        {items.map((item) => (
+          <div key={`${item.id}-${item.relation}`}>
+            <SubjectRelatedListItem item={item} />
+          </div>
+        ))}
+      </MonoPanelInfiniteList>
+    </>
+  )
+}
+
+function MonoListPanelFilters({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex shrink-0 flex-col items-start gap-2 border-b px-3 py-3">{children}</div>
+  )
+}
+
+function PanelFilterTabs({
+  label,
+  currentSelect,
+  setCurrentSelect,
+  tabsContent,
+  layoutId,
+}: {
+  label: string
+  currentSelect: string
+  setCurrentSelect: (id: string, value: string) => void
+  tabsContent: Set<string>
+  layoutId: string
+}) {
+  if (tabsContent.size <= 1) return null
+
+  return (
+    <div className="flex max-w-full flex-row flex-wrap items-center gap-2">
+      <span className="text-muted-foreground text-xs font-medium whitespace-nowrap">{label}</span>
+      <Tabs
+        currentSelect={currentSelect}
+        setCurrentSelect={setCurrentSelect}
+        tabsContent={tabsContent}
+        layoutId={layoutId}
+        className="justify-start"
+      />
+    </div>
+  )
+}
+
+function MonoPanelInfiniteList({ children }: { children: ReactNode }) {
+  if (Children.count(children) === 0) {
+    return <div className="text-muted-foreground p-4 text-sm">没有符合条件的项目。</div>
+  }
+
+  return (
+    <ScrollArea.Root className="group/scroll relative min-h-0 flex-1 overflow-hidden">
+      <MasonryInfiniteGrid
+        tag={ScrollArea.Viewport as unknown as string}
+        container
+        containerTag={ScrollArea.Content as unknown as string}
+        className="h-full w-full overflow-x-hidden px-2 py-2 focus-visible:outline-hidden"
+        useResizeObserver
+        observeChildren
+        align="stretch"
+        maxStretchColumnSize={512}
+        gap={4}
+      >
+        {children}
+      </MasonryInfiniteGrid>
+      <ScrollArea.Scrollbar
+        orientation="vertical"
+        className="absolute top-0 right-0 z-20 flex h-full w-2.5 touch-none p-0.5 opacity-0 transition-opacity duration-150 select-none group-hover/scroll:opacity-100"
+      >
+        <ScrollArea.Thumb className="bg-foreground/10 hover:bg-foreground/30 active:bg-foreground/40 relative [height:var(--scroll-area-thumb-height)] w-full flex-1 rounded-full" />
+      </ScrollArea.Scrollbar>
+    </ScrollArea.Root>
+  )
+}
+
+function MonoSubjectListItem({
+  item,
+}: {
+  item: Extract<MonoListPanelTab, { type: 'subjects' }>['subjects'][number]
+}) {
+  return (
+    <MyLink
+      className="hover:bg-accent flex min-h-20 flex-row gap-3 rounded-md p-2"
+      to={`/subject/${item.id}`}
+      viewTransition
+    >
+      <PanelItemImage image={item.image} />
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="line-clamp-1 text-sm font-medium">{item.nameCn || item.name}</div>
+        {item.nameCn && (
+          <div className="text-muted-foreground line-clamp-1 text-xs">{item.name}</div>
+        )}
+        <div className="mt-auto flex flex-row flex-wrap gap-1">
+          <Badge variant="outline" className="text-xs">
+            {SUBJECT_TYPE_MAP[item.subjectType]}
+          </Badge>
+          {item.relation && (
+            <Badge variant="secondary" className="text-xs shadow-none">
+              {item.relation}
+            </Badge>
+          )}
+        </div>
+      </div>
+    </MyLink>
+  )
+}
+
+function MonoRelatedListItem({
+  item,
+}: {
+  item: Extract<MonoListPanelTab, { type: 'related' }>['relatedItems'][number]
+}) {
+  return (
+    <MyLink className="hover:bg-accent flex min-h-20 flex-row gap-3 rounded-md p-2" to={item.link}>
+      <PanelItemImage image={item.image} />
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="line-clamp-1 text-sm font-medium">{item.name}</div>
+        {item.subjectName && (
+          <div className="text-muted-foreground line-clamp-1 text-xs">
+            {item.subjectNameCn || item.subjectName}
+          </div>
+        )}
+        <div className="mt-auto flex flex-row flex-wrap gap-1">
+          {item.subjectType && (
+            <Badge variant="outline" className="text-xs">
+              {SUBJECT_TYPE_MAP[item.subjectType]}
+            </Badge>
+          )}
+          {item.relation && (
+            <Badge variant="secondary" className="text-xs shadow-none">
+              {item.relation}
+            </Badge>
+          )}
+        </div>
+      </div>
+    </MyLink>
+  )
+}
+
+function SubjectCharacterListItem({
+  item,
+}: {
+  item: Extract<MonoListPanelTab, { type: 'subjectCharacters' }>['characters'][number]
+}) {
+  const actors = item.actors.map((actor) => actor.name).filter(Boolean)
+
+  return (
+    <MyLink
+      className="hover:bg-accent flex min-h-20 flex-row gap-3 rounded-md p-2"
+      to={`/character/${item.id}`}
+    >
+      <PanelItemImage image={item.images?.grid || item.images?.medium} />
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="line-clamp-1 text-sm font-medium">{item.name}</div>
+        {actors.length > 0 && (
+          <div className="text-muted-foreground line-clamp-1 text-xs">{actors.join(' / ')}</div>
+        )}
+        <div className="mt-auto flex flex-row flex-wrap gap-1">
+          {item.relation && (
+            <Badge variant="secondary" className="text-xs shadow-none">
+              {item.relation}
+            </Badge>
+          )}
+        </div>
+      </div>
+    </MyLink>
+  )
+}
+
+function SubjectRelatedListItem({
+  item,
+}: {
+  item: Extract<MonoListPanelTab, { type: 'subjectRelated' }>['relatedSubjects'][number]
+}) {
+  return (
+    <MyLink
+      className="hover:bg-accent flex min-h-20 flex-row gap-3 rounded-md p-2"
+      to={`/subject/${item.id}`}
+    >
+      <PanelItemImage image={item.images.grid || item.images.common} />
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="line-clamp-1 text-sm font-medium">{item.name_cn || item.name}</div>
+        {item.name_cn && (
+          <div className="text-muted-foreground line-clamp-1 text-xs">{item.name}</div>
+        )}
+        <div className="mt-auto flex flex-row flex-wrap gap-1">
+          <Badge variant="outline" className="text-xs">
+            {SUBJECT_TYPE_MAP[item.type as SubjectType]}
+          </Badge>
+          {item.relation && (
+            <Badge variant="secondary" className="text-xs shadow-none">
+              {item.relation}
+            </Badge>
+          )}
+        </div>
+      </div>
+    </MyLink>
+  )
+}
+
+function PanelItemImage({ image }: { image?: string }) {
+  return image ? (
+    <Image
+      imageSrc={image}
+      className="flex aspect-square h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md"
+      imageClassName="h-full w-full object-contain"
+      loadingClassName="aspect-square h-16 w-16"
+      careLoading
+    />
+  ) : (
+    <div className="bg-muted h-16 w-16 shrink-0 rounded-md" />
+  )
+}

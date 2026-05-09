@@ -5,12 +5,11 @@ import { useLocation } from 'react-router-dom'
 
 export function OriginalLink() {
   const { pathname } = useLocation()
-  let href = ''
-  const isSubject = pathname.includes('subject')
-  if (isSubject) href = `${HOST}${pathname}`
+  const isOriginalLinkPath = /^\/(subject|person|character)\/\d+/.test(pathname)
+  const href = `${HOST}${pathname}`
 
   return (
-    isSubject && (
+    isOriginalLinkPath && (
       <HeaderButton
         Button={
           <Button

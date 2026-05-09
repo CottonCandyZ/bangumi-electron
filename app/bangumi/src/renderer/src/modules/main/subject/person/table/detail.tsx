@@ -1,7 +1,8 @@
 import { Image } from '@renderer/components/image/image'
+import { MyLink } from '@renderer/components/my-link'
 import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { useQueryPersonsById } from '@renderer/data/hooks/api/pesron'
+import { useQueryPersonsById } from '@renderer/data/hooks/api/person'
 import { PersonId } from '@renderer/data/types/bgm'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { isEmpty } from '@renderer/lib/utils/string'
@@ -33,13 +34,16 @@ export function Detail({ personId }: { personId: PersonId }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row gap-4">
-        {!isEmpty(personDetail.img) && (
-          <Image
-            imageSrc={personDetail.img}
-            className="basis-1/3 overflow-hidden rounded-md"
-            loadingClassName="aspect-square"
-            loading="eager"
-          />
+        {!isEmpty(personDetail.img ?? personDetail.images?.medium ?? '') && (
+          <MyLink to={`/person/${personId}`} className="basis-1/3">
+            <Image
+              imageSrc={personDetail.img ?? personDetail.images?.medium}
+              className="flex aspect-3/4 items-center justify-center overflow-hidden rounded-md"
+              imageClassName="h-full w-full object-contain"
+              loadingClassName="aspect-square"
+              loading="eager"
+            />
+          </MyLink>
         )}
         <section className="flex flex-col">
           <h3 className="text-base font-medium">{personDetail.name}</h3>

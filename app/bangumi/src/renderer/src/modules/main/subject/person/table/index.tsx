@@ -1,4 +1,5 @@
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
+import { MyLink } from '@renderer/components/my-link'
 import { Table, TableBody, TableCell, TableRow } from '@renderer/components/ui/table'
 import { UI_CONFIG } from '@renderer/config'
 import { InfoBoxWeb } from '@renderer/data/types/subject'
@@ -29,8 +30,13 @@ export function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
 
                 return (
                   <HoverCard key={index} openDelay={300} closeDelay={200}>
-                    <HoverCardTrigger className="decoration-primary/40 hover:decoration-primary inline-block cursor-pointer underline underline-offset-2">
-                      {item.name}
+                    <HoverCardTrigger className="inline-block">
+                      <MyLink
+                        to={`/person/${item.id}`}
+                        className="decoration-primary/40 hover:decoration-primary cursor-pointer underline underline-offset-2"
+                      >
+                        {item.name}
+                      </MyLink>
                     </HoverCardTrigger>
                     <HoverCardContent side="top" className="w-full max-w-72 min-w-64">
                       <Detail personId={item.id} />
