@@ -57,6 +57,8 @@ export const leftPanelWidth = atomWithStorage('app-sidebar-width', 248)
 
 export const rightPanelWidth = atomWithStorage('app-right-panel-width', 248)
 
+const LEFT_PANEL_CLOSE_ANIMATION_MS = 350
+
 // export const rightPanelOpenContentAtom = atom<RightPanelName | null>(null)
 
 // left
@@ -115,15 +117,22 @@ export const closeMonoListPanelTabAtomAction = atom(null, (get, set, id: string)
 
   if (nextTabs.length === 0) {
     set(leftPanelOpenAtom, false)
-    set(leftPanelOpenContentAtom, 'collection')
+    window.setTimeout(() => {
+      if (get(leftPanelOpenAtom) || get(leftPanelOpenContentAtom) !== 'monoList') return
+      if (get(monoListPanelTabsAtom).length > 0) return
+      set(leftPanelOpenContentAtom, 'collection')
+    }, LEFT_PANEL_CLOSE_ANIMATION_MS)
   }
 })
 
-export const closeAllMonoListPanelTabsAtomAction = atom(null, (_get, set) => {
-  set(monoListPanelTabsAtom, [])
-  set(monoListPanelActiveTabIdAtom, null)
+export const closeAllMonoListPanelTabsAtomAction = atom(null, (get, set) => {
   set(leftPanelOpenAtom, false)
-  set(leftPanelOpenContentAtom, 'collection')
+  window.setTimeout(() => {
+    if (get(leftPanelOpenAtom) || get(leftPanelOpenContentAtom) !== 'monoList') return
+    set(monoListPanelTabsAtom, [])
+    set(monoListPanelActiveTabIdAtom, null)
+    set(leftPanelOpenContentAtom, 'collection')
+  }, LEFT_PANEL_CLOSE_ANIMATION_MS)
 })
 
 export const restoreMonoListPanelAtomAction = atom(
