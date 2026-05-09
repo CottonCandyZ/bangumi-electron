@@ -48,12 +48,12 @@ const FOLDED_ROWS = 2
 const GRID_GAP_REM = 0.75
 const MONO_SUBJECT_CARD_MIN_WIDTH_REM = 11.5
 const MONO_SUBJECT_CARD_HEIGHT_REM = 18
-const MONO_RELATED_CARD_MIN_WIDTH_REM = 14
+const MONO_RELATED_CARD_MIN_WIDTH_REM = 16
 const MONO_RELATED_CARD_HEIGHT_REM = 7
 const ALL_SUBJECT_TYPES = '全部类型'
 const ALL_SUBJECT_RELATIONS = '全部职能'
-const MONO_MAIN_IMAGE_FRAME =
-  'mx-auto flex aspect-3/4 w-full max-w-52 items-center justify-center lg:max-w-none'
+const MONO_MAIN_IMAGE_FRAME = 'mx-auto w-full max-w-52 lg:max-w-64'
+const MONO_MAIN_IMAGE_LOADING_FRAME = 'aspect-3/4'
 const MONO_SUBJECT_IMAGE_FRAME = 'flex h-52 w-full items-center justify-center'
 const MONO_RELATED_IMAGE_FRAME = 'flex aspect-square items-center justify-center'
 const EXTERNAL_URL_PATTERN = /https?:\/\/[^\s<>"'，。)）\]]+/g
@@ -80,15 +80,15 @@ export function MonoDetailView({
             <Image
               imageSrc={image}
               className={`${MONO_MAIN_IMAGE_FRAME} overflow-hidden rounded-lg border shadow-sm`}
-              imageClassName="h-full w-full object-contain"
-              loadingClassName={MONO_MAIN_IMAGE_FRAME}
+              imageClassName="h-auto w-full object-contain"
+              loadingClassName={MONO_MAIN_IMAGE_LOADING_FRAME}
               loading="eager"
               careLoading
               style={{ viewTransitionName: avatarViewTransitionName }}
             />
           ) : (
             <div
-              className={`${MONO_MAIN_IMAGE_FRAME} bg-muted text-muted-foreground rounded-lg border text-sm`}
+              className={`${MONO_MAIN_IMAGE_FRAME} bg-muted text-muted-foreground flex aspect-3/4 items-center justify-center rounded-lg border text-sm`}
               style={{ viewTransitionName: avatarViewTransitionName }}
             >
               暂无图片

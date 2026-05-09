@@ -74,7 +74,9 @@ export function Image({
         src={stateImageSrc}
         draggable={false}
       />
-      <Skeleton className="absolute inset-0 -z-10" />
+      {(!imageSrc || isError || (careLoading && !isLoad)) && (
+        <Skeleton className="absolute inset-0 -z-10" />
+      )}
       {children}
     </div>
   )
