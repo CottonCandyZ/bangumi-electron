@@ -158,7 +158,8 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
         isAnimate
           ? 'absolute'
           : 'h-full hover:-translate-y-0.5 hover:shadow-xl! hover:duration-700',
-        'inset-0 overflow-hidden',
+        'inset-0',
+        isAnimate && 'overflow-hidden',
         isActive && 'z-10',
         className,
       )}

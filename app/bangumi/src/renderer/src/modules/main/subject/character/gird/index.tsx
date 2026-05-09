@@ -1,18 +1,26 @@
 import { Button } from '@renderer/components/ui/button'
 import { Character } from '@renderer/data/types/character'
 import { useResizeObserver } from '@renderer/hooks/use-resize'
+import { cn } from '@renderer/lib/utils'
 import { Item } from '@renderer/modules/main/subject/character/gird/item'
+import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
+import { useAtomValue } from 'jotai'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useLocation } from 'react-router-dom'
 
+const CHARACTER_SECTION_ID = 'Characters'
 const CHARACTER_CARD_MIN_WIDTH_REM = 15
+const CHARACTER_CARD_HEIGHT_REM = 5.25
+const CHARACTER_CLIP_BUFFER_PX = 8
 const CHARACTER_GRID_GAP_REM = 0.5
 const CHARACTER_TOGGLE_WIDTH_REM = 3
 const CHARACTER_ROWS_WHEN_FOLDED = 2
 
 const gridStyle = {
   '--character-card-min-width': `${CHARACTER_CARD_MIN_WIDTH_REM}rem`,
+  '--character-card-height': `${CHARACTER_CARD_HEIGHT_REM}rem`,
+  '--character-clip-buffer': `${CHARACTER_CLIP_BUFFER_PX}px`,
   '--character-grid-gap': `${CHARACTER_GRID_GAP_REM}rem`,
   '--character-toggle-width': `${CHARACTER_TOGGLE_WIDTH_REM}rem`,
 } as CSSProperties
@@ -31,7 +39,11 @@ export function CharactersGrid({ characters }: { characters: Character[] }) {
   const [fold, setFold] = useState(true)
   const [showNumber, setShowNumber] = useState(CHARACTER_ROWS_WHEN_FOLDED * 4)
   const [canFold, setCanFold] = useState(false)
+  const [hoveringCard, setHoveringCard] = useState(false)
+  const activeHoverPopCard = useAtomValue(activeHoverPopCardAtom)
   const slice = fold ? showNumber : characters.length
+  const clipping = fold && canFold
+  const overflowVisible = hoveringCard || activeHoverPopCard?.startsWith(`${CHARACTER_SECTION_ID}-`)
   const { pathname } = useLocation()
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
@@ -78,10 +90,24 @@ export function CharactersGrid({ characters }: { characters: Character[] }) {
       ref={ref}
       style={gridStyle}
     >
-      <div className="grid min-w-0 flex-1 grid-cols-[repeat(auto-fill,minmax(var(--character-card-min-width),1fr))] gap-[var(--character-grid-gap)]">
-        {characters.slice(0, slice).map((item) => (
-          <Item character={item} key={item.id} />
-        ))}
+      <div
+        className={cn(
+          'min-w-0 flex-1',
+          clipping &&
+            'max-h-[calc(var(--character-card-height)*2+var(--character-grid-gap)+var(--character-clip-buffer))]',
+          clipping && (overflowVisible ? 'overflow-visible' : 'overflow-hidden'),
+        )}
+      >
+        <div className="grid auto-rows-[var(--character-card-height)] grid-cols-[repeat(auto-fill,minmax(var(--character-card-min-width),1fr))] gap-[var(--character-grid-gap)]">
+          {characters.slice(0, slice).map((item) => (
+            <Item
+              character={item}
+              key={item.id}
+              onHoverChange={setHoveringCard}
+              sectionId={CHARACTER_SECTION_ID}
+            />
+          ))}
+        </div>
       </div>
       {canFold && (
         <div className="w-[var(--character-toggle-width)] shrink-0">
