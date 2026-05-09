@@ -488,25 +488,25 @@ function MonoRelatedCard({ item }: { item: MonoRelatedItem }) {
           <div className="bg-muted aspect-square rounded-md" />
         )}
       </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <div className="line-clamp-2 font-medium">{item.name}</div>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1 overflow-hidden">
+        <div className="line-clamp-2 min-w-0 font-medium break-words">{item.name}</div>
         {item.subjectId && (
           <MyLink
             to={`/subject/${item.subjectId}`}
-            className="text-primary line-clamp-2 text-sm"
+            className="text-primary line-clamp-1 min-w-0 text-sm break-words"
             onClick={(event) => event.stopPropagation()}
           >
             {item.subjectNameCn || item.subjectName}
           </MyLink>
         )}
-        <div className="mt-auto flex flex-row flex-wrap gap-1 pt-1">
+        <div className="mt-auto flex max-h-6 min-w-0 flex-row flex-nowrap gap-1 overflow-hidden pt-1">
           {item.subjectType && (
             <Badge variant="outline" className="text-xs">
               {SUBJECT_TYPE_MAP[item.subjectType]}
             </Badge>
           )}
           {item.relation && (
-            <Badge variant="secondary" className="text-xs shadow-none">
+            <Badge variant="secondary" className="max-w-full min-w-0 truncate text-xs shadow-none">
               {item.relation}
             </Badge>
           )}

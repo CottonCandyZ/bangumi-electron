@@ -46,7 +46,7 @@ export function Item({
             <HoverCardContent className="h-full cursor-default">
               <CardContent
                 className={cn(
-                  'flex cursor-pointer flex-row items-start gap-4 p-2',
+                  'flex h-full min-w-0 cursor-pointer flex-row items-start gap-4 overflow-hidden p-2',
                   isEmpty(character.images.large) && 'pl-4',
                 )}
                 onClick={openCharacter}
@@ -108,7 +108,7 @@ function PopCard({ character }: { character: Character }) {
               />
             </MyLink>
           )}
-          <div className="flex w-full flex-col gap-2">
+          <div className="flex min-w-0 flex-1 flex-col gap-2 overflow-hidden">
             <MetaInfo character={character} showAll viewTransitionName={viewTransitionName} />
             <Separator />
             <Detail characterId={character.id.toString()} />
@@ -143,13 +143,16 @@ function MetaInfo({
   viewTransitionName: string
 }) {
   return (
-    <section className="flex w-full flex-col gap-2">
+    <section className="flex min-w-0 flex-1 flex-col gap-2 overflow-hidden">
       <div className="flex flex-row items-start justify-between gap-2">
         <MyLink
           to={`/character/${character.id}`}
           state={{ viewTransitionName }}
           viewTransition
-          className="leading-5 font-medium"
+          className={cn(
+            'min-w-0 leading-5 font-medium break-words',
+            showAll ? 'line-clamp-2' : 'line-clamp-1',
+          )}
         >
           {character.name}
         </MyLink>
