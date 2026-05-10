@@ -52,7 +52,9 @@ export type MonoListPanelTab =
       title: string
       sourceTitle: string
       subjectId: string
-      episodes: Episode[] | CollectionEpisode[]
+      episodes?: Episode[] | CollectionEpisode[]
+      episodeTotal?: number
+      initialOffset?: number
     }
 
 export const navOpenAtom = atom(false)

@@ -4,11 +4,16 @@ import { BackToTopButton } from '@renderer/components/button/back-to-top'
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
 import { Badge } from '@renderer/components/ui/badge'
+import { Skeleton } from '@renderer/components/ui/skeleton'
 import { Tabs } from '@renderer/components/tabs'
+import { useCollectionEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/api/collection'
+import { useEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/api/episodes'
+import { useSession } from '@renderer/data/hooks/session'
 import { CollectionEpisode } from '@renderer/data/types/collection'
 import { Episode, EpisodeType } from '@renderer/data/types/episode'
 import { SubjectType } from '@renderer/data/types/subject'
 import type { MonoRelatedItem } from '@renderer/data/types/mono'
+import { PageSelector } from '@renderer/modules/common/episodes/grid/page-selector'
 import type { MonoListPanelTab } from '@renderer/state/panel'
 import {
   closeLeftPanelImmediatelyAtomAction,
@@ -42,6 +47,7 @@ export function MonoListPanel() {
   const closeTab = useSetAtom(closeMonoListPanelTabAtomAction)
   const closeAllTabs = useSetAtom(closeAllMonoListPanelTabsAtomAction)
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0]
+  const activeTabCount = activeTab ? getMonoListPanelTabCount(activeTab) : null
   const tabRefs = useRef(new Map<string, HTMLButtonElement>())
 
   useEffect(() => {
@@ -101,9 +107,9 @@ export function MonoListPanel() {
       <div className="flex shrink-0 flex-col gap-0.5 border-b px-3 py-2">
         <div className="line-clamp-1 text-sm font-medium">
           {activeTab.title}
-          <span className="text-muted-foreground ml-1 text-xs font-normal">
-            {getMonoListPanelTabCount(activeTab)}
-          </span>
+          {activeTabCount !== null && (
+            <span className="text-muted-foreground ml-1 text-xs font-normal">{activeTabCount}</span>
+          )}
         </div>
         <div className="text-muted-foreground line-clamp-1 text-xs">
           来自 {activeTab.sourceTitle}
@@ -128,7 +134,7 @@ function getMonoListPanelTabCount(tab: MonoListPanelTab) {
   if (tab.type === 'subjects') return tab.subjects.length
   if (tab.type === 'related') return tab.relatedItems.length
   if (tab.type === 'subjectCharacters') return tab.characters.length
-  if (tab.type === 'subjectEpisodes') return tab.episodes.length
+  if (tab.type === 'subjectEpisodes') return tab.episodeTotal ?? tab.episodes?.length ?? null
   return tab.relatedSubjects.length
 }
 
@@ -349,46 +355,62 @@ function SubjectEpisodeListPanelContent({
 }: {
   tab: Extract<MonoListPanelTab, { type: 'subjectEpisodes' }>
 }) {
-  const [filterMap, setFilter] = useAtom(tabFilerAtom)
-  const filterId = `${tab.id}-panel-type`
-  const filter = filterMap.get(filterId) ?? ALL_RELATED_TYPES
-  const filters = useMemo(
-    () =>
-      new Set([
-        ALL_RELATED_TYPES,
-        ...tab.episodes.map((episode) => EpisodeType[getPanelEpisode(episode).type] ?? '其他'),
-      ]),
-    [tab.episodes],
-  )
-  const items = useMemo(
-    () =>
-      filter === ALL_RELATED_TYPES
-        ? tab.episodes
-        : tab.episodes.filter((episode) => {
-            const item = getPanelEpisode(episode)
-            return (EpisodeType[item.type] ?? '其他') === filter
-          }),
-    [filter, tab.episodes],
-  )
+  const userInfo = useSession()
+  const [offset, setOffset] = useState(tab.initialOffset ?? 0)
+  const limit = 100
+  const episodesQuery = useEpisodesInfoBySubjectIdQuery({
+    subjectId: tab.subjectId,
+    offset,
+    limit,
+    enabled: !userInfo,
+  })
+  const collectionEpisodesQuery = useCollectionEpisodesInfoBySubjectIdQuery({
+    subjectId: tab.subjectId,
+    offset,
+    limit,
+    enabled: !!userInfo,
+  })
+  const episodeQuery = userInfo ? collectionEpisodesQuery : episodesQuery
+
+  useEffect(() => {
+    setOffset(tab.initialOffset ?? 0)
+  }, [tab.id, tab.initialOffset])
+
+  if (userInfo === undefined || episodeQuery.data === undefined) {
+    return <SubjectEpisodeListPanelSkeleton />
+  }
+
+  if (episodeQuery.data.data === null) {
+    return <div className="text-muted-foreground p-4 text-sm">暂无章节。</div>
+  }
 
   return (
     <>
       <MonoListPanelFilters>
-        <PanelFilterTabs
-          label="章节类型"
-          currentSelect={filter}
-          setCurrentSelect={setFilter}
-          tabsContent={filters}
-          layoutId={filterId}
-        />
+        <PageSelector episodes={episodeQuery} limit={limit} offset={offset} setOffSet={setOffset} />
       </MonoListPanelFilters>
       <MonoPanelInfiniteList>
-        {items.map((item) => (
+        {episodeQuery.data.data.map((item) => (
           <div key={getPanelEpisode(item).id}>
             <SubjectEpisodeListItem item={item} />
           </div>
         ))}
       </MonoPanelInfiniteList>
+    </>
+  )
+}
+
+function SubjectEpisodeListPanelSkeleton() {
+  return (
+    <>
+      <MonoListPanelFilters>
+        <Skeleton className="h-9 w-28" />
+      </MonoListPanelFilters>
+      <div className="flex min-h-0 flex-1 flex-col gap-2 px-2 py-2">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <Skeleton key={index} className="h-20 w-full rounded-md" />
+        ))}
+      </div>
     </>
   )
 }

@@ -16,16 +16,18 @@ export function PageSelector({
   episodes,
   setOffSet,
   limit,
+  offset = 0,
 }: {
   episodes: UseQueryResult<Episodes | CollectionEpisodes, Error>
   setOffSet: React.Dispatch<React.SetStateAction<number>>
   limit: number
+  offset?: number
 }) {
   if (!episodes.data) return null
-  const selectArray = getPageArrayFromTotal(episodes.data.total)
+  const selectArray = getPageArrayFromTotal(episodes.data.total, limit)
   return (
     selectArray.length !== 1 && (
-      <Select onValueChange={(value) => setOffSet(Number(value))} defaultValue="0">
+      <Select onValueChange={(value) => setOffSet(Number(value))} value={offset.toString()}>
         <SelectTrigger className={cn('w-min', episodes.isFetching && 'text-muted-foreground')}>
           <div className="flex items-center gap-2">
             {episodes.isFetching && <span className="i-mingcute-loading-line animate-spin" />}
