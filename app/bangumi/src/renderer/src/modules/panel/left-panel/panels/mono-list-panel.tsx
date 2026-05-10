@@ -123,6 +123,8 @@ export function MonoListPanel() {
         <SubjectCharacterListPanelContent tab={activeTab} />
       ) : activeTab.type === 'subjectRelated' ? (
         <SubjectRelatedListPanelContent tab={activeTab} />
+      ) : activeTab.type === 'subjectTankobon' ? (
+        <SubjectTankobonListPanelContent tab={activeTab} />
       ) : (
         <SubjectEpisodeListPanelContent tab={activeTab} />
       )}
@@ -135,6 +137,7 @@ function getMonoListPanelTabCount(tab: MonoListPanelTab) {
   if (tab.type === 'related') return tab.relatedItems.length
   if (tab.type === 'subjectCharacters') return tab.characters.length
   if (tab.type === 'subjectEpisodes') return tab.episodeTotal ?? tab.episodes?.length ?? null
+  if (tab.type === 'subjectTankobon') return tab.relatedSubjects.length
   return tab.relatedSubjects.length
 }
 
@@ -397,6 +400,22 @@ function SubjectEpisodeListPanelContent({
         ))}
       </MonoPanelInfiniteList>
     </>
+  )
+}
+
+function SubjectTankobonListPanelContent({
+  tab,
+}: {
+  tab: Extract<MonoListPanelTab, { type: 'subjectTankobon' }>
+}) {
+  return (
+    <MonoPanelInfiniteList>
+      {tab.relatedSubjects.map((item) => (
+        <div key={item.id}>
+          <SubjectRelatedListItem item={item} />
+        </div>
+      ))}
+    </MonoPanelInfiniteList>
   )
 }
 

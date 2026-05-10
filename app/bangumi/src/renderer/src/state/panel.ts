@@ -48,6 +48,14 @@ export type MonoListPanelTab =
     }
   | {
       id: string
+      type: 'subjectTankobon'
+      title: string
+      sourceTitle: string
+      subjectId: string
+      relatedSubjects: RelatedSubject[]
+    }
+  | {
+      id: string
       type: 'subjectEpisodes'
       title: string
       sourceTitle: string
