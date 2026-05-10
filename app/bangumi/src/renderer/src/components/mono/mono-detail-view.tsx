@@ -1,5 +1,4 @@
 import { Tabs } from '@renderer/components/tabs'
-import { BackToTopButton } from '@renderer/components/button/back-to-top'
 import { CommentBox } from '@renderer/components/comment/comment-box'
 import {
   ViewTransitionElement,
@@ -22,6 +21,7 @@ import {
 import { SubjectType } from '@renderer/data/types/subject'
 import { useResizeObserver } from '@renderer/hooks/use-resize'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
+import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
 import { monoAvatarImageInViewAtom } from '@renderer/state/in-view'
 import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
@@ -174,13 +174,8 @@ export function MonoDetailView({
         title={relatedTitle}
         items={relatedItems}
       />
-      <CommentBox
-        comments={comments}
-        error={commentsError}
-        virtual={false}
-        onInView={onCommentsInView}
-      />
-      <BackToTopButton />
+      <CommentBox comments={comments} error={commentsError} onInView={onCommentsInView} />
+      <MainBackToTopButton />
     </div>
   )
 }

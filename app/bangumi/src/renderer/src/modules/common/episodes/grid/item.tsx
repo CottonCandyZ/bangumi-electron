@@ -18,6 +18,7 @@ import {
   hoverCardOpenAtom,
   hoverCardOpenAtomAction,
 } from '@renderer/state/hover-card'
+import { closeLeftPanelImmediatelyAtomAction } from '@renderer/state/panel'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { MouseEvent, useEffect, useState } from 'react'
 import { EpisodeButton } from '@renderer/components/button/episode'
@@ -46,6 +47,7 @@ export function EpisodeGridItem({
   const navigate = useNavigate()
   const [hoverCardContent, setHoverCardContent] = useAtom(hoverCardEpisodeContentAtom)
   const setHoverCardOpen = useSetAtom(hoverCardOpenAtomAction)
+  const closeLeftPanelImmediately = useSetAtom(closeLeftPanelImmediatelyAtomAction)
   const collectionEpisodes = isCollectionEpisode(episodes) ? episodes : undefined
   const { currentAction, mutateByAction } = useEpisodeCollectionActions({
     index,
@@ -117,6 +119,7 @@ export function EpisodeGridItem({
           setHoverCardOpen(false, 0)
           setSelfOpen(false)
           setHoverCardContent(null)
+          closeLeftPanelImmediately()
           navigate(`/episode/${episode.id}`)
         }}
       >

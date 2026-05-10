@@ -11,6 +11,7 @@ import { SubjectType } from '@renderer/data/types/subject'
 import type { MonoRelatedItem } from '@renderer/data/types/mono'
 import type { MonoListPanelTab } from '@renderer/state/panel'
 import {
+  closeLeftPanelImmediatelyAtomAction,
   closeAllMonoListPanelTabsAtomAction,
   closeMonoListPanelTabAtomAction,
   monoListPanelActiveTabIdAtom,
@@ -650,11 +651,13 @@ function SubjectRelatedListItem({
 
 function SubjectEpisodeListItem({ item }: { item: Episode | CollectionEpisode }) {
   const episode = getPanelEpisode(item)
+  const closeLeftPanelImmediately = useSetAtom(closeLeftPanelImmediatelyAtomAction)
 
   return (
     <MyLink
       className="hover:bg-accent flex min-h-20 flex-row gap-3 rounded-md p-2"
       to={`/episode/${episode.id}`}
+      onClick={() => closeLeftPanelImmediately()}
     >
       <div className="bg-muted flex h-16 w-16 shrink-0 items-center justify-center rounded-md text-sm font-medium">
         {episode.sort}
