@@ -43,13 +43,13 @@ export function BBCodeImage({ src, alt = '' }: { src: string; alt?: string }) {
           <Button
             variant="outline"
             size="sm"
-            className="gap-2"
+            className="group border-primary/30 bg-background hover:border-primary hover:bg-primary hover:text-primary-foreground gap-2 shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-95"
             onClick={() => {
               setStatus('loading')
               setRetryKey((key) => key + 1)
             }}
           >
-            <RefreshCcwIcon className="size-4" />
+            <RefreshCcwIcon className="size-4 transition-transform duration-150 group-hover:-rotate-45 group-active:rotate-180" />
             重试
           </Button>
         </span>
