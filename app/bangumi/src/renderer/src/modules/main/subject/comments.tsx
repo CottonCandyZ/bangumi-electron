@@ -26,6 +26,10 @@ export function SubjectComments({ subjectId }: { subjectId: SubjectId }) {
     [commentsQuery.data],
   )
   const total = commentsQuery.data?.pages[0]?.total
+  const floorNumbers = useMemo(
+    () => (comments && total !== undefined ? comments.map((_, index) => total - index) : undefined),
+    [comments, total],
+  )
   const hasMore = total !== undefined && comments !== undefined && comments.length < total
 
   const openCommentsPanel = () => {
@@ -37,6 +41,7 @@ export function SubjectComments({ subjectId }: { subjectId: SubjectId }) {
     <CommentBox
       comments={comments}
       error={commentsQuery.isError}
+      floorNumbers={floorNumbers}
       onInView={enableComments}
       footer={
         hasMore ? (

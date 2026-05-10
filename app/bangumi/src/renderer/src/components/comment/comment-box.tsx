@@ -31,6 +31,7 @@ type CommentBoxProps = {
   isFetchingMore?: boolean
   appendPlaceholderCount?: number
   virtualGroupKeys?: number[]
+  floorNumbers?: number[]
   showBackToTop?: boolean
   footer?: ReactNode
 }
@@ -51,6 +52,7 @@ export function CommentBox({
   isFetchingMore = false,
   appendPlaceholderCount = DEFAULT_COMMENT_PLACEHOLDER_COUNT,
   virtualGroupKeys,
+  floorNumbers,
   showBackToTop = false,
   footer,
 }: CommentBoxProps) {
@@ -93,6 +95,7 @@ export function CommentBox({
         isFetchingMore={isFetchingMore}
         onNearBottom={onListNearBottom}
         showBackToTop={showBackToTop}
+        floorNumbers={floorNumbers}
         virtualGroupKeys={virtualGroupKeys}
         virtual={virtual}
       />
@@ -107,6 +110,7 @@ export function CommentBox({
     listClassName,
     onListNearBottom,
     showBackToTop,
+    floorNumbers,
     virtualGroupKeys,
     virtual,
   ])
@@ -143,6 +147,7 @@ function CommentList({
   isFetchingMore,
   onNearBottom,
   showBackToTop,
+  floorNumbers,
   virtualGroupKeys,
   virtual,
 }: {
@@ -153,6 +158,7 @@ function CommentList({
   isFetchingMore?: boolean
   onNearBottom?: () => Promise<unknown> | void
   showBackToTop?: boolean
+  floorNumbers?: number[]
   virtualGroupKeys?: number[]
   virtual: boolean
 }) {
@@ -163,8 +169,12 @@ function CommentList({
   if (!virtual) {
     return (
       <div className={cn('flex flex-col gap-3', className)}>
-        {comments.map((comment) => (
-          <CommentItem comment={comment} key={comment.id} />
+        {comments.map((comment, index) => (
+          <CommentItem
+            comment={comment}
+            floorNumber={floorNumbers?.[index] ?? index + 1}
+            key={comment.id}
+          />
         ))}
       </div>
     )
@@ -212,7 +222,11 @@ function CommentList({
               virtualGroupKeys?.[index] ?? Math.floor(index / appendPlaceholderCount)
             }
           >
-            <CommentItem comment={comment} key={comment.id} />
+            <CommentItem
+              comment={comment}
+              floorNumber={floorNumbers?.[index] ?? index + 1}
+              key={comment.id}
+            />
           </div>
         ))}
       </MasonryInfiniteGrid>
@@ -242,9 +256,12 @@ function CommentSkeleton() {
   )
 }
 
-function CommentItem({ comment }: { comment: Comment }) {
+function CommentItem({ comment, floorNumber }: { comment: Comment; floorNumber: number }) {
   return (
-    <Card className="flex flex-row gap-3 p-3 shadow-none">
+    <Card className="relative flex flex-row gap-3 p-3 pr-12 shadow-none">
+      <span className="text-muted-foreground absolute top-3 right-3 text-xs tabular-nums">
+        #{floorNumber}
+      </span>
       {comment.user?.avatar.medium ? (
         <Image
           imageSrc={comment.user.avatar.medium}
