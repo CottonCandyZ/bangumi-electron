@@ -8,14 +8,21 @@ import { SubjectType } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { useLocation } from 'react-router-dom'
 
-export function CollectionItem({ collectionItemInfo }: { collectionItemInfo: CollectionData }) {
+export function CollectionItem({
+  collectionItemInfo,
+  showEpisodeList,
+}: {
+  collectionItemInfo: CollectionData
+  showEpisodeList: boolean
+}) {
   const { pathname } = useLocation()
   const mainSubjectId = pathname.split('/').at(-1)
 
   // 判断是否要显示 episode
   const needEpisodes =
-    collectionItemInfo.subject.type === SubjectType.anime ||
-    collectionItemInfo.subject.type === SubjectType.real
+    showEpisodeList &&
+    (collectionItemInfo.subject.type === SubjectType.anime ||
+      collectionItemInfo.subject.type === SubjectType.real)
 
   return (
     <MyLink

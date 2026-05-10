@@ -1,5 +1,4 @@
 import { CommentBox } from '@renderer/components/comment/comment-box'
-import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useSubjectCommentsQuery } from '@renderer/data/hooks/api/subject'
 import { toCommentFromSubjectInterest } from '@renderer/data/transformer/comment'
@@ -22,7 +21,6 @@ export function SubjectCommentsPanel({
     () => commentsQuery.data?.pages.flatMap((page) => page.data.map(toCommentFromSubjectInterest)),
     [commentsQuery.data],
   )
-  const total = commentsQuery.data?.pages.at(-1)?.total
   const loadMore = useCallback(() => {
     if (commentsQuery.isError || !commentsQuery.hasNextPage || commentsQuery.isFetchingNextPage) {
       return
@@ -46,30 +44,18 @@ export function SubjectCommentsPanel({
   }
 
   return (
-    <div className="h-full min-h-0 p-3">
+    <div className="h-full min-h-0">
       <CommentBox
         title={null}
         className="h-full min-h-0"
         contentClassName="min-h-0 flex-1"
-        listClassName="h-full max-h-none"
+        listClassName="h-full max-h-none px-3 py-3"
         comments={comments}
         error={commentsQuery.isError}
         emptyText="还没有吐槽。"
         virtual
+        showBackToTop
         onListNearBottom={loadMore}
-        footer={
-          commentsQuery.hasNextPage ? (
-            <Button
-              variant="outline"
-              disabled={commentsQuery.isFetchingNextPage}
-              onClick={() => commentsQuery.fetchNextPage()}
-            >
-              {commentsQuery.isFetchingNextPage
-                ? '加载中'
-                : `查看更多${total ? ` ${comments?.length ?? 0}/${total}` : ''}`}
-            </Button>
-          ) : null
-        }
       />
     </div>
   )
