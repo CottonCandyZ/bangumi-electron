@@ -26,6 +26,8 @@
     "build:win:prod": "pnpm run build && electron-builder --win --config electron-builder.prod.yml --publish never",
     "publish:win:beta": "pnpm run build && node scripts/with-github-token.mjs electron-builder --win --config electron-builder.beta.yml --publish always",
     "publish:win:prod": "pnpm run build && node scripts/with-github-token.mjs electron-builder --win --config electron-builder.prod.yml --publish always",
+    "upload:win:beta": "node scripts/with-github-token.mjs node scripts/upload-win-release.mjs --config electron-builder.beta.yml",
+    "upload:win:prod": "node scripts/with-github-token.mjs node scripts/upload-win-release.mjs --config electron-builder.prod.yml",
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:mac:beta": "pnpm run build && node scripts/release-mac.mjs --config electron-builder.beta.yml --arch all --publish never",
     "build:mac:beta:arm64": "pnpm run build && node scripts/release-mac.mjs --config electron-builder.beta.yml --arch arm64 --publish never",

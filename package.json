@@ -25,6 +25,8 @@
     "publish:bangumi:mac:prod:x64": "pnpm --filter bangumi-electron publish:mac:prod:x64",
     "publish:bangumi:win:beta": "pnpm --filter bangumi-electron publish:win:beta",
     "publish:bangumi:win:prod": "pnpm --filter bangumi-electron publish:win:prod",
+    "upload:bangumi:win:beta": "pnpm --filter bangumi-electron upload:win:beta",
+    "upload:bangumi:win:prod": "pnpm --filter bangumi-electron upload:win:prod",
     "start": "pnpm --filter bangumi-electron start",
     "turnstile:build": "pnpm --filter bangumi-private-api-turnstile-demo build",
     "turnstile:dev": "pnpm --filter bangumi-private-api-turnstile-demo dev",
