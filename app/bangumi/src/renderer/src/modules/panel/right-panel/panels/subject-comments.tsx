@@ -1,13 +1,10 @@
-import { ScrollArea } from '@base-ui/react/scroll-area'
 import { CommentBox } from '@renderer/components/comment/comment-box'
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useSubjectCommentsQuery } from '@renderer/data/hooks/api/subject'
+import { toCommentFromSubjectInterest } from '@renderer/data/transformer/comment'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { Comment } from '@renderer/data/types/comment'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
-
-const LOAD_MORE_THRESHOLD_PX = 160
+import { useCallback, useMemo } from 'react'
 
 export function SubjectCommentsPanel({
   subjectId,
@@ -21,9 +18,8 @@ export function SubjectCommentsPanel({
     enabled,
     limit: 20,
   })
-  const viewportRef = useRef<HTMLDivElement>(null)
   const comments = useMemo(
-    () => commentsQuery.data?.pages.flatMap((page) => page.data.map(toComment)),
+    () => commentsQuery.data?.pages.flatMap((page) => page.data.map(toCommentFromSubjectInterest)),
     [commentsQuery.data],
   )
   const total = commentsQuery.data?.pages.at(-1)?.total
@@ -34,18 +30,6 @@ export function SubjectCommentsPanel({
 
     commentsQuery.fetchNextPage()
   }, [commentsQuery])
-  const maybeLoadMore = useCallback(() => {
-    const viewport = viewportRef.current
-    if (!viewport) return
-
-    const distanceToBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
-    if (distanceToBottom <= LOAD_MORE_THRESHOLD_PX) loadMore()
-  }, [loadMore])
-
-  useEffect(() => {
-    if (!enabled || comments === undefined) return
-    maybeLoadMore()
-  }, [comments?.length, enabled, maybeLoadMore])
 
   if (!enabled) return null
 
@@ -62,30 +46,19 @@ export function SubjectCommentsPanel({
   }
 
   return (
-    <ScrollArea.Root className="group/scroll relative h-full min-h-0 w-full overflow-hidden">
-      <ScrollArea.Viewport
-        ref={viewportRef}
-        className="h-full w-full overflow-x-hidden px-2 py-3 focus-visible:outline-hidden"
-        onScroll={maybeLoadMore}
-      >
-        <ScrollArea.Content className="flex flex-col gap-3">
-          <CommentBox
-            title={null}
-            comments={comments}
-            error={commentsQuery.isError}
-            emptyText="还没有吐槽。"
-            virtual={false}
-          />
-          {commentsQuery.isFetchingNextPage && (
-            <div className="flex flex-col gap-3">
-              {Array(3)
-                .fill(undefined)
-                .map((_, index) => (
-                  <CommentSkeleton key={index} />
-                ))}
-            </div>
-          )}
-          {commentsQuery.hasNextPage && (
+    <div className="h-full min-h-0 p-3">
+      <CommentBox
+        title={null}
+        className="h-full min-h-0"
+        contentClassName="min-h-0 flex-1"
+        listClassName="h-full max-h-none"
+        comments={comments}
+        error={commentsQuery.isError}
+        emptyText="还没有吐槽。"
+        virtual
+        onListNearBottom={loadMore}
+        footer={
+          commentsQuery.hasNextPage ? (
             <Button
               variant="outline"
               disabled={commentsQuery.isFetchingNextPage}
@@ -95,16 +68,10 @@ export function SubjectCommentsPanel({
                 ? '加载中'
                 : `查看更多${total ? ` ${comments?.length ?? 0}/${total}` : ''}`}
             </Button>
-          )}
-        </ScrollArea.Content>
-      </ScrollArea.Viewport>
-      <ScrollArea.Scrollbar
-        orientation="vertical"
-        className="absolute top-0 right-0 z-20 flex h-full w-2.5 touch-none p-0.5 opacity-0 transition-opacity duration-150 select-none group-hover/scroll:opacity-100"
-      >
-        <ScrollArea.Thumb className="bg-foreground/10 hover:bg-foreground/30 active:bg-foreground/40 relative [height:var(--scroll-area-thumb-height)] w-full flex-1 rounded-full" />
-      </ScrollArea.Scrollbar>
-    </ScrollArea.Root>
+          ) : null
+        }
+      />
+    </div>
   )
 }
 
@@ -119,23 +86,4 @@ function CommentSkeleton() {
       </div>
     </div>
   )
-}
-
-function toComment(comment: {
-  id: number
-  user: Comment['user']
-  comment: string
-  updatedAt: number
-}): Comment {
-  return {
-    id: comment.id,
-    mainID: comment.id,
-    creatorID: comment.user?.id ?? 0,
-    relatedID: 0,
-    createdAt: comment.updatedAt,
-    content: comment.comment,
-    state: 0,
-    user: comment.user,
-    replies: [],
-  }
 }

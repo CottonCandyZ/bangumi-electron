@@ -1,5 +1,4 @@
 import { MyLink } from '@renderer/components/my-link'
-import { BackToTopButton } from '@renderer/components/button/back-to-top'
 import { CommentBox } from '@renderer/components/comment/comment-box'
 import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
@@ -13,6 +12,7 @@ import {
   useEpisodesInfoBySubjectIdQuery,
 } from '@renderer/data/hooks/api/episodes'
 import { Episode, EpisodeType } from '@renderer/data/types/episode'
+import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
 import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
 import { useSetAtom } from 'jotai'
 import { useCallback, useState } from 'react'
@@ -94,10 +94,9 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
       <CommentBox
         comments={commentsQuery.data}
         error={commentsQuery.isError}
-        virtual={false}
         onInView={enableComments}
       />
-      <BackToTopButton />
+      <MainBackToTopButton />
     </div>
   )
 }

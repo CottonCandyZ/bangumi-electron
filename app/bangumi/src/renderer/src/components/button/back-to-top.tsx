@@ -1,59 +1,52 @@
 import { Button } from '@renderer/components/ui/button'
 import { cn } from '@renderer/lib/utils'
-import { mainContainerRight } from '@renderer/state/main-bounding-box'
-import { mainPanelScrollPositionAtom, scrollViewportAtom } from '@renderer/state/scroll'
-import { useAtomValue } from 'jotai'
 import { ArrowUpIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 
 const SHOW_THRESHOLD = 160
 const PROGRESS_PATH = 'M 18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32'
 
 type BackToTopButtonProps = {
   className?: string
+  style?: CSSProperties
   scrollTop?: number
-  viewport?: HTMLElement | null
+  viewport: HTMLElement | null
 }
 
-export function BackToTopButton({ className, scrollTop, viewport }: BackToTopButtonProps) {
-  const mainScrollTop = useAtomValue(mainPanelScrollPositionAtom)
-  const mainViewport = useAtomValue(scrollViewportAtom)
-  const mainRight = useAtomValue(mainContainerRight)
+export function BackToTopButton({ className, scrollTop, style, viewport }: BackToTopButtonProps) {
   const [maxScrollTop, setMaxScrollTop] = useState(0)
   const [trackedScrollTop, setTrackedScrollTop] = useState(0)
-  const isMainViewport = viewport === undefined
-  const targetViewport = viewport === undefined ? mainViewport : viewport
-  const currentScrollTop = scrollTop ?? (isMainViewport ? mainScrollTop : trackedScrollTop)
+  const currentScrollTop = scrollTop ?? trackedScrollTop
   const progress = maxScrollTop > 0 ? Math.min(1, Math.max(0, currentScrollTop / maxScrollTop)) : 0
   const visible = currentScrollTop > SHOW_THRESHOLD && maxScrollTop > SHOW_THRESHOLD
 
   useEffect(() => {
-    if (!targetViewport) {
+    if (!viewport) {
       setMaxScrollTop(0)
       return
     }
 
     const updateMaxScrollTop = () => {
-      setMaxScrollTop(Math.max(0, targetViewport.scrollHeight - targetViewport.clientHeight))
+      setMaxScrollTop(Math.max(0, viewport.scrollHeight - viewport.clientHeight))
     }
     const resizeObserver = new ResizeObserver(updateMaxScrollTop)
 
     updateMaxScrollTop()
-    resizeObserver.observe(targetViewport)
-    if (targetViewport.firstElementChild) resizeObserver.observe(targetViewport.firstElementChild)
+    resizeObserver.observe(viewport)
+    if (viewport.firstElementChild) resizeObserver.observe(viewport.firstElementChild)
 
     return () => resizeObserver.disconnect()
-  }, [targetViewport])
+  }, [viewport])
 
   useEffect(() => {
-    if (!targetViewport || scrollTop !== undefined || viewport === undefined) return
+    if (!viewport || scrollTop !== undefined) return
 
-    const updateScrollTop = () => setTrackedScrollTop(targetViewport.scrollTop)
+    const updateScrollTop = () => setTrackedScrollTop(viewport.scrollTop)
 
     updateScrollTop()
-    targetViewport.addEventListener('scroll', updateScrollTop, { passive: true })
-    return () => targetViewport.removeEventListener('scroll', updateScrollTop)
-  }, [scrollTop, targetViewport, viewport])
+    viewport.addEventListener('scroll', updateScrollTop, { passive: true })
+    return () => viewport.removeEventListener('scroll', updateScrollTop)
+  }, [scrollTop, viewport])
 
   return (
     <Button
@@ -65,12 +58,8 @@ export function BackToTopButton({ className, scrollTop, viewport }: BackToTopBut
         visible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-2 opacity-0',
         className,
       )}
-      style={
-        isMainViewport && mainRight > 0
-          ? { right: `calc(100vw - ${mainRight}px + 1.5rem)` }
-          : undefined
-      }
-      onClick={() => targetViewport?.scrollTo({ top: 0, behavior: 'smooth' })}
+      style={style}
+      onClick={() => viewport?.scrollTo({ top: 0, behavior: 'smooth' })}
     >
       <svg className="absolute inset-0 size-full" viewBox="0 0 36 36" aria-hidden>
         <path

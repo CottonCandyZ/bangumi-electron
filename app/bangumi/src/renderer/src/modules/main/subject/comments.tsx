@@ -1,8 +1,8 @@
 import { CommentBox } from '@renderer/components/comment/comment-box'
 import { Button } from '@renderer/components/ui/button'
 import { useSubjectCommentsQuery } from '@renderer/data/hooks/api/subject'
+import { toCommentFromSubjectInterest } from '@renderer/data/transformer/comment'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { Comment } from '@renderer/data/types/comment'
 import { COMMENTS_TAB } from '@renderer/modules/panel/right-panel/panels/subject-info'
 import { rightPanelOpenAtom } from '@renderer/state/panel'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
@@ -22,7 +22,7 @@ export function SubjectComments({ subjectId }: { subjectId: SubjectId }) {
     limit: SUBJECT_COMMENTS_PREVIEW_LIMIT,
   })
   const comments = useMemo(
-    () => commentsQuery.data?.pages.flatMap((page) => page.data.map(toComment)),
+    () => commentsQuery.data?.pages.flatMap((page) => page.data.map(toCommentFromSubjectInterest)),
     [commentsQuery.data],
   )
   const total = commentsQuery.data?.pages[0]?.total
@@ -49,23 +49,4 @@ export function SubjectComments({ subjectId }: { subjectId: SubjectId }) {
       }
     />
   )
-}
-
-function toComment(comment: {
-  id: number
-  user: Comment['user']
-  comment: string
-  updatedAt: number
-}): Comment {
-  return {
-    id: comment.id,
-    mainID: comment.id,
-    creatorID: comment.user?.id ?? 0,
-    relatedID: 0,
-    createdAt: comment.updatedAt,
-    content: comment.comment,
-    state: 0,
-    user: comment.user,
-    replies: [],
-  }
 }

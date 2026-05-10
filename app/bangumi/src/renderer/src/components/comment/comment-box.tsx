@@ -5,13 +5,12 @@ import { Comment, CommentBase } from '@renderer/data/types/comment'
 import { cn } from '@renderer/lib/utils'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import dayjs from 'dayjs'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useInView } from 'react-intersection-observer'
 
 const VIRTUAL_ITEM_HEIGHT = 156
 const VIRTUAL_OVERSCAN = 4
-const VIRTUAL_MIN_COUNT = 24
 
 type CommentBoxProps = {
   title?: ReactNode
@@ -20,10 +19,13 @@ type CommentBoxProps = {
   emptyText?: string
   loadingText?: string
   className?: string
+  contentClassName?: string
   listClassName?: string
   framed?: boolean
   virtual?: boolean
   onInView?: () => void
+  onListNearBottom?: () => void
+  listNearBottomThreshold?: number
   footer?: ReactNode
 }
 
@@ -33,10 +35,13 @@ export function CommentBox({
   error,
   emptyText = '还没有吐槽。',
   className,
+  contentClassName,
   listClassName,
   framed = false,
-  virtual = true,
+  virtual = false,
   onInView,
+  onListNearBottom,
+  listNearBottomThreshold,
   footer,
 }: CommentBoxProps) {
   const { ref, inView } = useInView({
@@ -73,10 +78,20 @@ export function CommentBox({
       <CommentList
         comments={comments}
         className={listClassName}
-        virtual={virtual && comments.length >= VIRTUAL_MIN_COUNT}
+        onNearBottom={onListNearBottom}
+        nearBottomThreshold={listNearBottomThreshold}
+        virtual={virtual}
       />
     )
-  }, [comments, emptyText, error, listClassName, virtual])
+  }, [
+    comments,
+    emptyText,
+    error,
+    listClassName,
+    listNearBottomThreshold,
+    onListNearBottom,
+    virtual,
+  ])
 
   return (
     <section ref={ref} className={cn('flex flex-col gap-5', className)}>
@@ -88,7 +103,15 @@ export function CommentBox({
           )}
         </div>
       )}
-      <div className={cn(framed && 'bg-background/60 rounded-lg border p-3')}>{content}</div>
+      <div
+        className={cn(
+          'min-h-0',
+          framed && 'bg-background/60 rounded-lg border p-3',
+          contentClassName,
+        )}
+      >
+        {content}
+      </div>
       {footer}
     </section>
   )
@@ -97,15 +120,28 @@ export function CommentBox({
 function CommentList({
   comments,
   className,
+  nearBottomThreshold,
+  onNearBottom,
   virtual,
 }: {
   comments: Comment[]
   className?: string
+  onNearBottom?: () => void
+  nearBottomThreshold?: number
   virtual: boolean
 }) {
   const viewportRef = useRef<HTMLDivElement>(null)
   const [scrollTop, setScrollTop] = useState(0)
   const [viewportHeight, setViewportHeight] = useState(0)
+  const nearBottomThresholdPx = nearBottomThreshold ?? 160
+
+  const notifyIfNearBottom = useCallback(() => {
+    const viewport = viewportRef.current
+    if (!viewport || !onNearBottom) return
+
+    const distanceToBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
+    if (distanceToBottom <= nearBottomThresholdPx) onNearBottom()
+  }, [nearBottomThresholdPx, onNearBottom])
 
   useEffect(() => {
     const viewport = viewportRef.current
@@ -118,6 +154,11 @@ function CommentList({
     observer.observe(viewport)
     return () => observer.disconnect()
   }, [])
+
+  useEffect(() => {
+    if (!virtual) return
+    notifyIfNearBottom()
+  }, [comments.length, notifyIfNearBottom, virtual])
 
   if (!virtual) {
     return (
@@ -142,7 +183,10 @@ function CommentList({
     <div
       ref={viewportRef}
       className={cn('max-h-[40rem] overflow-y-auto pr-2', className)}
-      onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
+      onScroll={(event) => {
+        setScrollTop(event.currentTarget.scrollTop)
+        notifyIfNearBottom()
+      }}
     >
       <div style={{ height: topHeight }} />
       <div className="flex flex-col gap-3">
