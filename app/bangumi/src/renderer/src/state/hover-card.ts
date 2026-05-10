@@ -3,6 +3,8 @@ import { atom } from 'jotai'
 
 export const hoverCardOpenAtom = atom(false)
 
+export const hoverCardInstantClosingAtom = atom(false)
+
 let timeId: ReturnType<typeof setTimeout> | undefined
 
 export const hoverCardOpenAtomAction = atom(
@@ -18,3 +20,11 @@ export const hoverCardOpenAtomAction = atom(
 export const triggerClientRectAtom = atom<DOMRect | null>(null)
 
 export const hoverCardEpisodeContentAtom = atom<HoverEpisodeDetailType | null>(null)
+
+export const closeHoverCardImmediatelyAtomAction = atom(null, (_get, set) => {
+  clearTimeout(timeId)
+  set(hoverCardInstantClosingAtom, true)
+  set(hoverCardOpenAtom, false)
+  set(hoverCardEpisodeContentAtom, null)
+  window.requestAnimationFrame(() => set(hoverCardInstantClosingAtom, false))
+})

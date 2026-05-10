@@ -1,7 +1,11 @@
 import { calcPos } from '@renderer/components/hover-card/utils'
 import { UI_CONFIG } from '@renderer/config'
 import { cn } from '@renderer/lib/utils'
-import { hoverCardOpenAtomAction, triggerClientRectAtom } from '@renderer/state/hover-card'
+import {
+  hoverCardInstantClosingAtom,
+  hoverCardOpenAtomAction,
+  triggerClientRectAtom,
+} from '@renderer/state/hover-card'
 import { Align, Side } from '@renderer/type/ui'
 import { animate } from 'motion'
 import { motion } from 'motion/react'
@@ -36,6 +40,7 @@ export function HoverCardContent({
   const beforeBottom = useRef(true)
   const firstRender = useRef(true)
   const setOpen = useSetAtom(hoverCardOpenAtomAction)
+  const instantClosing = useAtomValue(hoverCardInstantClosingAtom)
 
   const calc = useCallback(() => {
     if (!triggerClientRect || !ref.current) return
@@ -86,7 +91,7 @@ export function HoverCardContent({
         isCollision ? 'w-max overflow-x-hidden' : 'overflow-hidden',
       )}
       transition={{
-        duration: 0.15,
+        duration: instantClosing ? 0 : 0.15,
         ease: 'easeInOut',
       }}
       initial={{
@@ -100,6 +105,7 @@ export function HoverCardContent({
       exit={{
         opacity: 0.1,
         y: -10,
+        transition: { duration: instantClosing ? 0 : 0.15 },
       }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}

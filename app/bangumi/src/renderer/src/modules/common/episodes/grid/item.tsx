@@ -14,9 +14,9 @@ import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
 import { getOnAirStatus } from '@renderer/lib/utils/date'
 import {
+  closeHoverCardImmediatelyAtomAction,
   hoverCardEpisodeContentAtom,
   hoverCardOpenAtom,
-  hoverCardOpenAtomAction,
 } from '@renderer/state/hover-card'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { MouseEvent, useEffect, useState } from 'react'
@@ -45,7 +45,7 @@ export function EpisodeGridItem({
   const episode = isCollectionEpisode(episodes) ? episodes[index].episode : episodes[index]
   const navigate = useNavigate()
   const [hoverCardContent, setHoverCardContent] = useAtom(hoverCardEpisodeContentAtom)
-  const setHoverCardOpen = useSetAtom(hoverCardOpenAtomAction)
+  const closeHoverCardImmediately = useSetAtom(closeHoverCardImmediatelyAtomAction)
   const collectionEpisodes = isCollectionEpisode(episodes) ? episodes : undefined
   const { currentAction, mutateByAction } = useEpisodeCollectionActions({
     index,
@@ -114,9 +114,8 @@ export function EpisodeGridItem({
               return
             }
           }
-          setHoverCardOpen(false, 0)
           setSelfOpen(false)
-          setHoverCardContent(null)
+          closeHoverCardImmediately()
           navigate(`/episode/${episode.id}`)
         }}
       >
