@@ -11,10 +11,11 @@ export function Header() {
   return (
     <header
       className={cn(
-        'drag-region relative z-10 flex shrink-0 flex-row items-center justify-between gap-10 border-b pl-2',
+        'bg-background drag-region relative z-10 flex shrink-0 flex-row items-center justify-between gap-10 border-b pl-2',
       )}
       style={{
         height: UI_CONFIG.HEADER_HEIGHT,
+        viewTransitionName: 'app-header',
       }}
     >
       <div className="flex h-full flex-row items-center gap-3">

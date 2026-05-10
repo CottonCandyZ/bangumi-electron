@@ -23,6 +23,7 @@ export function NavBar() {
         )}
         style={{
           width: open ? '15rem' : UI_CONFIG.NAV_WIDTH,
+          viewTransitionName: 'app-nav',
         }}
       >
         <div

@@ -4,3 +4,23 @@
     @apply text-sm font-medium;
   }
 }
+
+::view-transition-group(app-header),
+::view-transition-group(app-nav) {
+  z-index: 100;
+  animation: none;
+}
+
+::view-transition-old(app-header),
+::view-transition-old(app-nav) {
+  opacity: 0;
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(app-header),
+::view-transition-new(app-nav) {
+  opacity: 1;
+  animation: none;
+  mix-blend-mode: normal;
+}
