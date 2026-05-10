@@ -30,6 +30,7 @@ type CommentBoxProps = {
   hasMore?: boolean
   isFetchingMore?: boolean
   appendPlaceholderCount?: number
+  virtualGroupKeys?: number[]
   showBackToTop?: boolean
   footer?: ReactNode
 }
@@ -49,6 +50,7 @@ export function CommentBox({
   hasMore = false,
   isFetchingMore = false,
   appendPlaceholderCount = DEFAULT_COMMENT_PLACEHOLDER_COUNT,
+  virtualGroupKeys,
   showBackToTop = false,
   footer,
 }: CommentBoxProps) {
@@ -91,6 +93,7 @@ export function CommentBox({
         isFetchingMore={isFetchingMore}
         onNearBottom={onListNearBottom}
         showBackToTop={showBackToTop}
+        virtualGroupKeys={virtualGroupKeys}
         virtual={virtual}
       />
     )
@@ -104,6 +107,7 @@ export function CommentBox({
     listClassName,
     onListNearBottom,
     showBackToTop,
+    virtualGroupKeys,
     virtual,
   ])
 
@@ -139,6 +143,7 @@ function CommentList({
   isFetchingMore,
   onNearBottom,
   showBackToTop,
+  virtualGroupKeys,
   virtual,
 }: {
   comments: Comment[]
@@ -148,6 +153,7 @@ function CommentList({
   isFetchingMore?: boolean
   onNearBottom?: () => Promise<unknown> | void
   showBackToTop?: boolean
+  virtualGroupKeys?: number[]
   virtual: boolean
 }) {
   const loadingMoreRef = useRef(false)
@@ -172,6 +178,7 @@ function CommentList({
         containerTag={ScrollArea.Content as unknown as string}
         className={cn('max-h-[40rem] w-full overflow-x-hidden overflow-y-auto pr-2', className)}
         useResizeObserver
+        observeChildren
         placeholder={<CommentSkeleton />}
         align="stretch"
         maxStretchColumnSize={9999}
@@ -199,7 +206,12 @@ function CommentList({
         }}
       >
         {comments.map((comment, index) => (
-          <div key={comment.id} data-grid-groupkey={Math.floor(index / appendPlaceholderCount)}>
+          <div
+            key={comment.id}
+            data-grid-groupkey={
+              virtualGroupKeys?.[index] ?? Math.floor(index / appendPlaceholderCount)
+            }
+          >
             <CommentItem comment={comment} key={comment.id} />
           </div>
         ))}
