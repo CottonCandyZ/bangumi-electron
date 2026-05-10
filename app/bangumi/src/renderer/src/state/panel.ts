@@ -69,8 +69,6 @@ export const navOpenAtom = atom(false)
 
 export const leftPanelOpenAtom = atom(false)
 
-export const leftPanelAnimationEnabledAtom = atom(true)
-
 export const rightPanelOpenAtom = atom(false)
 
 export const leftPanelOpenContentAtom = atom<LeftPanelName>('collection')
@@ -110,12 +108,6 @@ export const nvaCollectionButtonAtomAction = atom(
 
 export const triggerLeftOpenAtomAction = atom(null, (get, set) => {
   set(leftPanelOpenAtom, !get(leftPanelOpenAtom))
-})
-
-export const closeLeftPanelImmediatelyAtomAction = atom(null, (_get, set) => {
-  set(leftPanelAnimationEnabledAtom, false)
-  set(leftPanelOpenAtom, false)
-  window.requestAnimationFrame(() => set(leftPanelAnimationEnabledAtom, true))
 })
 
 export const openMonoListPanelTabAtomAction = atom(null, (get, set, tab: MonoListPanelTab) => {
