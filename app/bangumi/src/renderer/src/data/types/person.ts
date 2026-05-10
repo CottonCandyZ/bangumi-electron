@@ -6,6 +6,7 @@ import {
   PersonId,
   Stat,
 } from '@renderer/data/types/bgm'
+import { Comment, CommentBase, CommentUser } from '@renderer/data/types/comment'
 import { SubjectType } from '@renderer/data/types/subject'
 
 export type PersonGrid = {
@@ -70,31 +71,10 @@ export type PersonRelatedCharacter = {
 }
 
 /** private p1 评论用户 */
-export type PersonCommentUser = {
-  id: number
-  username: string
-  nickname: string
-  avatar: {
-    small: string
-    medium: string
-    large: string
-  }
-}
+export type PersonCommentUser = CommentUser
 
 /** private p1 人物吐槽箱单条评论基础结构 */
-export type PersonCommentBase = {
-  id: number
-  mainID: number
-  creatorID: number
-  relatedID: number
-  relatedPhotoID?: number
-  createdAt: number
-  content: string
-  state: number
-  user?: PersonCommentUser
-}
+export type PersonCommentBase = CommentBase
 
 /** private p1 人物吐槽箱评论，包含楼中楼回复 */
-export type PersonComment = PersonCommentBase & {
-  replies: PersonCommentBase[]
-}
+export type PersonComment = Comment

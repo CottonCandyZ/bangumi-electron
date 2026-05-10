@@ -23,13 +23,15 @@ export function MainContainer({ children }: PropsWithChildren) {
   useResizeObserver({
     ref: mainContainerRef,
     callback: (entry) => {
-      const height = entry.target.getBoundingClientRect().height
+      const rect = entry.target.getBoundingClientRect()
+      const height = rect.height
       subjectInitScroll.x = height * UI_CONFIG.SUBJECT_INIT_SCROLL_PERCENT
-      setLeft(entry.target.getBoundingClientRect().left)
-      setRight(entry.target.getBoundingClientRect().right)
+      setLeft(rect.left)
+      setRight(rect.right)
+      setWidth(rect.width)
       setHeight(height)
     },
-    deps: [setWidth, setHeight],
+    deps: [setLeft, setRight, setWidth, setHeight],
   })
   return (
     <div className="flex h-full w-full flex-row overflow-hidden">

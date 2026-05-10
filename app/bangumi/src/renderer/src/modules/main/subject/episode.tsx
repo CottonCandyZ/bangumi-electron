@@ -16,7 +16,11 @@ export function SubjectEpisodes({ subjectId }: { subjectId: SubjectId }) {
   // TODO:音乐的章节待做...
   return (
     <section className="flex flex-col gap-5">
-      <EpisodesGrid subjectId={subjectId} eps={subjectInfo.eps} />
+      <EpisodesGrid
+        subjectId={subjectId}
+        eps={subjectInfo.eps}
+        sourceTitle={subjectInfo.name_cn || subjectInfo.name || `条目 ${subjectId}`}
+      />
     </section>
   )
 }

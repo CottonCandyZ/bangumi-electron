@@ -1,5 +1,13 @@
-import { getRelatedSubjects, getSubjectById } from '@renderer/data/fetch/api/subject'
-import { useAuthQuery, useAuthQueries } from '@renderer/data/hooks/factory'
+import {
+  getRelatedSubjects,
+  getSubjectById,
+  getSubjectCommentsById,
+} from '@renderer/data/fetch/api/subject'
+import {
+  useAuthQuery,
+  useAuthQueries,
+  useInfinityQueryOptionalAuth,
+} from '@renderer/data/hooks/factory'
 import { sortCharacterByRelation } from '@renderer/data/transformer/api'
 import { SubjectId } from '@renderer/data/types/bgm'
 
@@ -59,4 +67,29 @@ export const useRelatedSubjectsQuery = ({
     queryProps: { id },
     select: sortCharacterByRelation(),
     needKeepPreviousData,
+  })
+
+/**
+ * 使用 id 获得条目吐槽箱。p1 subject comments 支持 limit/offset 分页。
+ */
+export const useSubjectCommentsQuery = ({
+  id,
+  enabled,
+  limit = 20,
+}: {
+  id: SubjectId
+  enabled?: boolean
+  limit?: number
+}) =>
+  useInfinityQueryOptionalAuth({
+    queryFn: getSubjectCommentsById,
+    queryKey: ['subject-comments'],
+    queryProps: { id, cacheKeyLimit: limit },
+    qFLimit: limit,
+    enabled,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
+      return nextOffset < lastPage.total ? nextOffset : undefined
+    },
   })

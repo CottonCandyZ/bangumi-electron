@@ -13,11 +13,16 @@ import { Episode } from '@renderer/data/types/episode'
 import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
 import { getOnAirStatus } from '@renderer/lib/utils/date'
-import { hoverCardEpisodeContentAtom, hoverCardOpenAtom } from '@renderer/state/hover-card'
-import { useAtom, useAtomValue } from 'jotai'
+import {
+  hoverCardEpisodeContentAtom,
+  hoverCardOpenAtom,
+  hoverCardOpenAtomAction,
+} from '@renderer/state/hover-card'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { MouseEvent, useEffect, useState } from 'react'
 import { EpisodeButton } from '@renderer/components/button/episode'
 import { useEpisodeCollectionActions } from '@renderer/modules/common/collections/use-episode-collection-actions'
+import { useNavigate } from 'react-router-dom'
 
 function isCollectionEpisode(
   episodes: Episode[] | CollectionEpisode[],
@@ -38,7 +43,9 @@ export function EpisodeGridItem({
 } & EpisodeGridSize &
   ModifyEpisodeCollectionOptType) {
   const episode = isCollectionEpisode(episodes) ? episodes[index].episode : episodes[index]
+  const navigate = useNavigate()
   const [hoverCardContent, setHoverCardContent] = useAtom(hoverCardEpisodeContentAtom)
+  const setHoverCardOpen = useSetAtom(hoverCardOpenAtomAction)
   const collectionEpisodes = isCollectionEpisode(episodes) ? episodes : undefined
   const { currentAction, mutateByAction } = useEpisodeCollectionActions({
     index,
@@ -95,15 +102,22 @@ export function EpisodeGridItem({
         )}
         variant={selfOpen && open ? `${status}Hover` : status}
         onClick={(e) => {
-          if (!collectionEpisodes) return
-          const action = resolveEpisodeCollectionActionByShortcut({
-            defaultAction: '想看',
-            modifierState: toModifierState(e),
-          })
-          if (action === '想看' || action === currentAction) return
           e.preventDefault()
           e.stopPropagation()
-          mutateByAction(action)
+          if (collectionEpisodes) {
+            const action = resolveEpisodeCollectionActionByShortcut({
+              defaultAction: '想看',
+              modifierState: toModifierState(e),
+            })
+            if (action !== '想看' && action !== currentAction) {
+              mutateByAction(action)
+              return
+            }
+          }
+          setHoverCardOpen(false, 0)
+          setSelfOpen(false)
+          setHoverCardContent(null)
+          navigate(`/episode/${episode.id}`)
         }}
       >
         {episode.sort}

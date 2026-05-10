@@ -1,4 +1,5 @@
 import { Images, InfoBoxValueList, Stat } from '@renderer/data/types/bgm'
+import { Comment, CommentBase, CommentUser } from '@renderer/data/types/comment'
 import { SubjectType } from '@renderer/data/types/subject'
 
 export type MonoType = 'person' | 'character'
@@ -42,25 +43,8 @@ export type MonoRelatedItem = {
   relation?: string
 }
 
-export type MonoCommentUser = {
-  id: number
-  username: string
-  nickname: string
-  avatar: {
-    small: string
-    medium: string
-    large: string
-  }
-}
+export type MonoCommentUser = CommentUser
 
-export type MonoCommentBase = {
-  id: number
-  creatorID: number
-  createdAt: number
-  content: string
-  user?: MonoCommentUser
-}
+export type MonoCommentBase = CommentBase
 
-export type MonoComment = MonoCommentBase & {
-  replies: MonoCommentBase[]
-}
+export type MonoComment = Comment

@@ -4,6 +4,7 @@ import { SubjectId } from '@renderer/data/types/bgm'
 import { cn } from '@renderer/lib/utils'
 import { SubjectCharacters } from '@renderer/modules/main/subject/character'
 import { SubjectCollection } from '@renderer/modules/main/subject/collection'
+import { SubjectComments } from '@renderer/modules/main/subject/comments'
 import { SubjectCoverImage } from '@renderer/modules/main/subject/cover-image'
 import { SubjectEpisodes } from '@renderer/modules/main/subject/episode'
 import { SubjectHeaderInfo } from '@renderer/modules/main/subject/header-info'
@@ -52,6 +53,7 @@ export const SubjectContent = ({
         </section>
         <SubjectCharacters subjectId={subjectId} />
         <RelatedSubjects subjectId={subjectId} />
+        <SubjectComments subjectId={subjectId} />
       </div>
     </div>
   )

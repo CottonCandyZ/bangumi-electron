@@ -1,9 +1,12 @@
 import { MasonryInfiniteGrid } from '@egjs/react-infinitegrid'
 import { ScrollArea } from '@base-ui/react/scroll-area'
+import { BackToTopButton } from '@renderer/components/button/back-to-top'
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
 import { Badge } from '@renderer/components/ui/badge'
 import { Tabs } from '@renderer/components/tabs'
+import { CollectionEpisode } from '@renderer/data/types/collection'
+import { Episode, EpisodeType } from '@renderer/data/types/episode'
 import { SubjectType } from '@renderer/data/types/subject'
 import type { MonoRelatedItem } from '@renderer/data/types/mono'
 import type { MonoListPanelTab } from '@renderer/state/panel'
@@ -16,8 +19,8 @@ import {
 import { tabFilerAtom } from '@renderer/state/simple-tab'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { XIcon } from 'lucide-react'
-import { Children, useEffect, useMemo, useRef } from 'react'
-import type { ReactNode } from 'react'
+import { Children, useEffect, useMemo, useRef, useState } from 'react'
+import type { ReactNode, UIEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const SUBJECT_TYPE_MAP: Record<SubjectType, string> = {
@@ -111,8 +114,10 @@ export function MonoListPanel() {
         <MonoRelatedListPanelContent tab={activeTab} />
       ) : activeTab.type === 'subjectCharacters' ? (
         <SubjectCharacterListPanelContent tab={activeTab} />
-      ) : (
+      ) : activeTab.type === 'subjectRelated' ? (
         <SubjectRelatedListPanelContent tab={activeTab} />
+      ) : (
+        <SubjectEpisodeListPanelContent tab={activeTab} />
       )}
     </div>
   )
@@ -122,6 +127,7 @@ function getMonoListPanelTabCount(tab: MonoListPanelTab) {
   if (tab.type === 'subjects') return tab.subjects.length
   if (tab.type === 'related') return tab.relatedItems.length
   if (tab.type === 'subjectCharacters') return tab.characters.length
+  if (tab.type === 'subjectEpisodes') return tab.episodes.length
   return tab.relatedSubjects.length
 }
 
@@ -337,6 +343,55 @@ function SubjectRelatedListPanelContent({
   )
 }
 
+function SubjectEpisodeListPanelContent({
+  tab,
+}: {
+  tab: Extract<MonoListPanelTab, { type: 'subjectEpisodes' }>
+}) {
+  const [filterMap, setFilter] = useAtom(tabFilerAtom)
+  const filterId = `${tab.id}-panel-type`
+  const filter = filterMap.get(filterId) ?? ALL_RELATED_TYPES
+  const filters = useMemo(
+    () =>
+      new Set([
+        ALL_RELATED_TYPES,
+        ...tab.episodes.map((episode) => EpisodeType[getPanelEpisode(episode).type] ?? '其他'),
+      ]),
+    [tab.episodes],
+  )
+  const items = useMemo(
+    () =>
+      filter === ALL_RELATED_TYPES
+        ? tab.episodes
+        : tab.episodes.filter((episode) => {
+            const item = getPanelEpisode(episode)
+            return (EpisodeType[item.type] ?? '其他') === filter
+          }),
+    [filter, tab.episodes],
+  )
+
+  return (
+    <>
+      <MonoListPanelFilters>
+        <PanelFilterTabs
+          label="章节类型"
+          currentSelect={filter}
+          setCurrentSelect={setFilter}
+          tabsContent={filters}
+          layoutId={filterId}
+        />
+      </MonoListPanelFilters>
+      <MonoPanelInfiniteList>
+        {items.map((item) => (
+          <div key={getPanelEpisode(item).id}>
+            <SubjectEpisodeListItem item={item} />
+          </div>
+        ))}
+      </MonoPanelInfiniteList>
+    </>
+  )
+}
+
 function MonoListPanelFilters({ children }: { children: ReactNode }) {
   return (
     <div className="flex shrink-0 flex-col items-start gap-2 border-b px-3 py-3">{children}</div>
@@ -373,6 +428,9 @@ function PanelFilterTabs({
 }
 
 function MonoPanelInfiniteList({ children }: { children: ReactNode }) {
+  const [viewport, setViewport] = useState<HTMLElement | null>(null)
+  const [scrollTop, setScrollTop] = useState(0)
+
   if (Children.count(children) === 0) {
     return <div className="text-muted-foreground p-4 text-sm">没有符合条件的项目。</div>
   }
@@ -389,9 +447,19 @@ function MonoPanelInfiniteList({ children }: { children: ReactNode }) {
         align="stretch"
         maxStretchColumnSize={512}
         gap={4}
+        onScroll={(event: UIEvent<HTMLElement>) => {
+          const nextViewport = event.currentTarget
+          setViewport((prev) => (prev === nextViewport ? prev : nextViewport))
+          setScrollTop(nextViewport.scrollTop)
+        }}
       >
         {children}
       </MasonryInfiniteGrid>
+      <BackToTopButton
+        className="absolute right-4 bottom-4"
+        scrollTop={scrollTop}
+        viewport={viewport}
+      />
       <ScrollArea.Scrollbar
         orientation="vertical"
         className="absolute top-0 right-0 z-20 flex h-full w-2.5 touch-none p-0.5 opacity-0 transition-opacity duration-150 select-none group-hover/scroll:opacity-100"
@@ -578,6 +646,43 @@ function SubjectRelatedListItem({
       </div>
     </MyLink>
   )
+}
+
+function SubjectEpisodeListItem({ item }: { item: Episode | CollectionEpisode }) {
+  const episode = getPanelEpisode(item)
+
+  return (
+    <MyLink
+      className="hover:bg-accent flex min-h-20 flex-row gap-3 rounded-md p-2"
+      to={`/episode/${episode.id}`}
+    >
+      <div className="bg-muted flex h-16 w-16 shrink-0 items-center justify-center rounded-md text-sm font-medium">
+        {episode.sort}
+      </div>
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="line-clamp-1 text-sm font-medium">
+          {episode.name_cn || episode.name || `ep.${episode.sort}`}
+        </div>
+        {episode.name_cn && (
+          <div className="text-muted-foreground line-clamp-1 text-xs">{episode.name}</div>
+        )}
+        <div className="mt-auto flex flex-row flex-wrap gap-1">
+          <Badge variant="outline" className="text-xs">
+            {EpisodeType[episode.type] ?? '其他'}
+          </Badge>
+          {episode.comment > 0 && (
+            <Badge variant="secondary" className="text-xs shadow-none">
+              {episode.comment} 吐槽
+            </Badge>
+          )}
+        </div>
+      </div>
+    </MyLink>
+  )
+}
+
+function getPanelEpisode(item: Episode | CollectionEpisode) {
+  return (item as CollectionEpisode).episode ?? item
 }
 
 function PanelItemImage({ image }: { image?: string }) {

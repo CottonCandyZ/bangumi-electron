@@ -10,6 +10,7 @@ type ViewTransitionElementProps = {
   children?: ReactNode
   className?: string
   initialInView?: boolean
+  onInViewChange?: (inView: boolean) => void
   style?: React.CSSProperties
   viewTransitionName?: string
 }
@@ -20,6 +21,7 @@ export const ViewTransitionElement = memo(function ViewTransitionElement({
   children,
   className,
   initialInView = true,
+  onInViewChange,
   style,
   viewTransitionName,
 }: ViewTransitionElementProps) {
@@ -31,7 +33,8 @@ export const ViewTransitionElement = memo(function ViewTransitionElement({
 
   useEffect(() => {
     if (cacheKey) setter(inView)
-  }, [cacheKey, inView, setter])
+    onInViewChange?.(inView)
+  }, [cacheKey, inView, onInViewChange, setter])
 
   return (
     <div
@@ -58,6 +61,7 @@ export const ViewTransitionImage = memo(function ViewTransitionImage({
   className,
   imageContainerClassName,
   initialInView,
+  onInViewChange,
   style,
   viewTransitionName,
   ...imageProps
@@ -68,6 +72,7 @@ export const ViewTransitionImage = memo(function ViewTransitionImage({
       cacheKey={cacheKey}
       className={className}
       initialInView={initialInView}
+      onInViewChange={onInViewChange}
       style={style}
       viewTransitionName={viewTransitionName}
     >

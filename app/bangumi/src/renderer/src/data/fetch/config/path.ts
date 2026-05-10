@@ -34,6 +34,12 @@ export const SUBJECTS = {
   TRENDS: (sectionPath: SectionPath) => `/${sectionPath}/browser/?sort=trends`,
 }
 
+/** Private API 条目 */
+export const NEXT_SUBJECTS = {
+  /** p1 条目吐槽箱 */
+  COMMENTS_BY_ID: (id: SubjectId) => `/p1/subjects/${id}/comments`,
+}
+
 export const HTML_SUBJECTS = {
   BY_ID: (id: SubjectId) => `/subject/${id}`,
 }
@@ -41,6 +47,13 @@ export const HTML_SUBJECTS = {
 /** 章节相关 */
 export const EPISODES = {
   ROOT: `/v0/episodes`,
+  BY_ID: (id: string) => `/v0/episodes/${id}`,
+}
+
+/** Private API 章节 */
+export const NEXT_EPISODES = {
+  /** p1 章节吐槽箱 */
+  COMMENTS_BY_ID: (id: string) => `/p1/episodes/${id}/comments`,
 }
 
 /** 角色 */

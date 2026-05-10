@@ -1,5 +1,6 @@
 import { Tabs } from '@renderer/components/tabs'
-import { Image } from '@renderer/components/image/image'
+import { BackToTopButton } from '@renderer/components/button/back-to-top'
+import { CommentBox } from '@renderer/components/comment/comment-box'
 import {
   ViewTransitionElement,
   ViewTransitionImage,
@@ -21,9 +22,9 @@ import {
 import { SubjectType } from '@renderer/data/types/subject'
 import { useResizeObserver } from '@renderer/hooks/use-resize'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
+import { monoAvatarImageInViewAtom } from '@renderer/state/in-view'
 import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
-import dayjs from 'dayjs'
 import { useAtom, useSetAtom } from 'jotai'
 import {
   Children,
@@ -36,7 +37,6 @@ import {
   useState,
 } from 'react'
 import type { CSSProperties, ReactElement, ReactNode } from 'react'
-import { useInView } from 'react-intersection-observer'
 import { useLocation, useNavigate, useViewTransitionState } from 'react-router-dom'
 
 type MonoDetailViewProps = {
@@ -83,6 +83,12 @@ export function MonoDetailView({
   onCommentsInView,
   avatarViewTransitionName,
 }: MonoDetailViewProps) {
+  const setAvatarInView = useSetAtom(monoAvatarImageInViewAtom)
+
+  useEffect(() => {
+    setAvatarInView(true)
+  }, [detail?.id, setAvatarInView])
+
   if (!detail) return <MonoDetailSkeleton />
 
   const infobox = getDisplayInfobox(detail.infobox)
@@ -103,6 +109,7 @@ export function MonoDetailView({
               loadingClassName={MONO_MAIN_IMAGE_LOADING_FRAME}
               loading="eager"
               careLoading
+              onInViewChange={setAvatarInView}
               viewTransitionName={avatarViewTransitionName}
             />
           ) : (
@@ -110,6 +117,7 @@ export function MonoDetailView({
               active={!!avatarViewTransitionName}
               cacheKey="monoAvatarInView"
               className={`${MONO_MAIN_IMAGE_FRAME} bg-muted text-muted-foreground flex aspect-3/4 items-center justify-center rounded-lg border text-sm`}
+              onInViewChange={setAvatarInView}
               viewTransitionName={avatarViewTransitionName}
             >
               暂无图片
@@ -166,7 +174,13 @@ export function MonoDetailView({
         title={relatedTitle}
         items={relatedItems}
       />
-      <MonoComments comments={comments} error={commentsError} onInView={onCommentsInView} />
+      <CommentBox
+        comments={comments}
+        error={commentsError}
+        virtual={false}
+        onInView={onCommentsInView}
+      />
+      <BackToTopButton />
     </div>
   )
 }
@@ -731,99 +745,6 @@ function FoldableSection({
 
 function getRelatedItemViewTransitionName(item: MonoRelatedItem, locationKey: string) {
   return `mono-related-image-${item.id}-${item.subjectId ?? 'none'}-${locationKey}`
-}
-
-function MonoComments({
-  comments,
-  error,
-  onInView,
-}: {
-  comments?: MonoComment[]
-  error?: boolean
-  onInView?: () => void
-}) {
-  const { ref, inView } = useInView({
-    rootMargin: '240px 0px',
-    triggerOnce: true,
-  })
-
-  useEffect(() => {
-    if (inView) onInView?.()
-  }, [inView, onInView])
-
-  if (error) {
-    return (
-      <section ref={ref} className="flex flex-col gap-3">
-        <h2 className="text-2xl font-medium">吐槽箱</h2>
-        <p className="text-muted-foreground text-sm">暂时无法读取吐槽箱。</p>
-      </section>
-    )
-  }
-  if (comments === undefined) {
-    return (
-      <section ref={ref} className="flex flex-col gap-5">
-        <h2 className="text-2xl font-medium">吐槽箱</h2>
-        <div className="flex flex-col gap-3">
-          {Array(3)
-            .fill(0)
-            .map((_, index) => (
-              <Skeleton className="h-24 rounded-lg" key={index} />
-            ))}
-        </div>
-      </section>
-    )
-  }
-  if (comments.length === 0) return null
-
-  return (
-    <section ref={ref} className="flex flex-col gap-5">
-      <h2 className="text-2xl font-medium">吐槽箱</h2>
-      <div className="flex flex-col gap-3">
-        {comments.map((comment) => (
-          <CommentItem comment={comment} key={comment.id} />
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function CommentItem({ comment }: { comment: MonoComment }) {
-  return (
-    <Card className="flex flex-row gap-3 p-3 shadow-none">
-      {comment.user?.avatar.medium ? (
-        <Image
-          imageSrc={comment.user.avatar.medium}
-          className="size-10 shrink-0 overflow-hidden rounded-full"
-        />
-      ) : (
-        <div className="bg-muted size-10 shrink-0 rounded-full" />
-      )}
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <div className="flex flex-row flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="font-medium">{comment.user?.nickname ?? `#${comment.creatorID}`}</span>
-          <span className="text-muted-foreground text-xs">
-            {dayjs.unix(comment.createdAt).format('YYYY-MM-DD HH:mm')}
-          </span>
-        </div>
-        <div className="bbcode text-sm leading-6 whitespace-pre-line">
-          {renderBBCode(comment.content)}
-        </div>
-        {comment.replies.length > 0 && (
-          <div className="bg-muted/40 flex flex-col gap-2 rounded-md p-2">
-            {comment.replies.map((reply) => (
-              <div className="text-sm" key={reply.id}>
-                <span className="font-medium">{reply.user?.nickname ?? `#${reply.creatorID}`}</span>
-                <span className="text-muted-foreground mx-1">
-                  {dayjs.unix(reply.createdAt).format('YYYY-MM-DD HH:mm')}
-                </span>
-                <span className="bbcode whitespace-pre-line">{renderBBCode(reply.content)}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </Card>
-  )
 }
 
 function CardGridSkeleton({ title }: { title: string }) {

@@ -1,5 +1,7 @@
 import { SubjectType } from '@renderer/data/types/subject'
 import type { Character } from '@renderer/data/types/character'
+import type { CollectionEpisode } from '@renderer/data/types/collection'
+import type { Episode } from '@renderer/data/types/episode'
 import type { RelatedSubject } from '@renderer/data/types/subject'
 import type { MonoRelatedItem, MonoSubjectItem, MonoType } from '@renderer/data/types/mono'
 import { atom } from 'jotai'
@@ -43,6 +45,14 @@ export type MonoListPanelTab =
       sourceTitle: string
       subjectId: string
       relatedSubjects: RelatedSubject[]
+    }
+  | {
+      id: string
+      type: 'subjectEpisodes'
+      title: string
+      sourceTitle: string
+      subjectId: string
+      episodes: Episode[] | CollectionEpisode[]
     }
 
 export const navOpenAtom = atom(false)
