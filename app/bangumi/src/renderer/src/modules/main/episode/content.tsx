@@ -9,12 +9,10 @@ import { useSubjectInfoAPIQuery } from '@renderer/data/hooks/api/subject'
 import {
   useEpisodeCommentsByIdQuery,
   useEpisodeInfoByIdQuery,
-  useEpisodesInfoBySubjectIdQuery,
 } from '@renderer/data/hooks/api/episodes'
 import { Episode, EpisodeType } from '@renderer/data/types/episode'
+import { useOpenSubjectEpisodesPanel } from '@renderer/modules/common/episodes/use-open-subject-episodes-panel'
 import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
-import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
-import { useSetAtom } from 'jotai'
 import { useCallback, useState } from 'react'
 
 export function EpisodeContent({ episodeId }: { episodeId: string }) {
@@ -27,11 +25,6 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
     subjectId,
     enabled: !!subjectId,
     needKeepPreviousData: false,
-  })
-  const episodesQuery = useEpisodesInfoBySubjectIdQuery({
-    subjectId: subjectId ?? '',
-    limit: 100,
-    enabled: !!subjectId,
   })
   const commentsQuery = useEpisodeCommentsByIdQuery({
     episodeId,
@@ -79,7 +72,7 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
             <EpisodeActions
               episode={episode}
               subjectTitle={subjectQuery.data?.name_cn || subjectQuery.data?.name}
-              episodes={episodesQuery.data?.data ?? undefined}
+              episodeTotal={subjectQuery.data?.total_episodes}
             />
           </div>
           {episode.desc && (
@@ -127,30 +120,26 @@ function EpisodeMeta({ episode }: { episode: Episode }) {
 function EpisodeActions({
   episode,
   subjectTitle,
-  episodes,
+  episodeTotal,
 }: {
   episode: Episode
   subjectTitle?: string
-  episodes?: Episode[] | null
+  episodeTotal?: number
 }) {
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const episodesPanel = useOpenSubjectEpisodesPanel({
+    subjectId: episode.subject_id.toString(),
+    sourceTitle: subjectTitle || `条目 ${episode.subject_id}`,
+    episodeTotal,
+    initialOffset: getEpisodeInitialOffset(episode.sort),
+  })
 
-  if (!episodes || episodes.length === 0) return null
+  if (!episodesPanel.canOpen) return null
 
   return (
     <Button
       variant="outline"
       className="w-fit gap-2 justify-self-start md:justify-self-end"
-      onClick={() =>
-        openMonoListPanelTab({
-          id: `subject-episodes-${episode.subject_id}`,
-          type: 'subjectEpisodes',
-          title: '章节',
-          sourceTitle: subjectTitle || `条目 ${episode.subject_id}`,
-          subjectId: episode.subject_id.toString(),
-          episodes,
-        })
-      }
+      onClick={episodesPanel.open}
     >
       <span className="i-mingcute-box-3-line text-base" />
       章节列表
@@ -179,4 +168,9 @@ function EpisodeSkeleton() {
 
 function getEpisodeTitle(episode: Episode) {
   return (episode.name_cn || episode.name || `ep.${episode.sort}`).trim()
+}
+
+function getEpisodeInitialOffset(sort: number | undefined) {
+  if (!sort || sort <= 1) return 0
+  return Math.floor((sort - 1) / 100) * 100
 }

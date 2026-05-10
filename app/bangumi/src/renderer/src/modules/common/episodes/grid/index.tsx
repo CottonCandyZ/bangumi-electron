@@ -6,11 +6,10 @@ import { useCollectionEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/
 import { useEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/api/episodes'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionType } from '@renderer/data/types/collection'
+import { useOpenSubjectEpisodesPanel } from '@renderer/modules/common/episodes/use-open-subject-episodes-panel'
 import { cn } from '@renderer/lib/utils'
 import { useState } from 'react'
 import { useSession } from '@renderer/data/hooks/session'
-import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
-import { useSetAtom } from 'jotai'
 
 export type EpisodeGridSize = {
   size?: 'small' | 'default'
@@ -31,7 +30,6 @@ export function EpisodesGrid({
   sourceTitle?: string
 } & EpisodeGridSize) {
   const userInfo = useSession()
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
   const [offset, setOffSet] = useState(0)
   const limit = 100
   let skeletonNumber = eps ?? 12
@@ -50,38 +48,40 @@ export function EpisodesGrid({
     enabled: !!userInfo,
   })
 
+  const episode = userInfo ? collectionEpisodesQuery : episodesQuery
+  const episodesPanel = useOpenSubjectEpisodesPanel({
+    subjectId,
+    sourceTitle: sourceTitle || `条目 ${subjectId}`,
+    episodeTotal: episode.data?.total,
+    initialOffset: offset,
+  })
+
   if (userInfo === undefined) return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
 
-  const episode = userInfo ? collectionEpisodesQuery : episodesQuery
   if (episode.data === undefined) {
     return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
   }
   if (episode.data.data === null) return null
-  const openInSidePanel = () => {
-    if (!episode.data?.data) return
-
-    openMonoListPanelTab({
-      id: `subject-episodes-${subjectId}`,
-      type: 'subjectEpisodes',
-      title: '章节',
-      sourceTitle: sourceTitle || `条目 ${subjectId}`,
-      subjectId,
-      episodes: episode.data.data,
-    })
-  }
-
   return (
     <div className="flex flex-col gap-5">
       {size === 'default' && (
         <div className="flex flex-row items-center gap-2">
           <h2 className="text-2xl font-medium">章节</h2>
-          <Button variant="ghost" size="icon" className="mt-1 size-8" onClick={openInSidePanel}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mt-1 size-8"
+            disabled={!episodesPanel.canOpen}
+            onClick={episodesPanel.open}
+          >
             <span className="i-mingcute-box-3-line text-lg" />
           </Button>
         </div>
       )}
       <div className={cn('flex flex-col gap-4')}>
-        {selector && <PageSelector episodes={episode} limit={limit} setOffSet={setOffSet} />}
+        {selector && (
+          <PageSelector episodes={episode} limit={limit} offset={offset} setOffSet={setOffSet} />
+        )}
         <EpisodeGridContent
           episodes={episode.data.data}
           size={size}

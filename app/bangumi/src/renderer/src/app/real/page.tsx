@@ -1,5 +1,5 @@
-import { JSX } from 'react'
+import { DevelopingPage } from '@renderer/components/placeholder/developing-page'
 
-export function Component(): JSX.Element {
-  return <div>RealHome</div>
+export function Component() {
+  return <DevelopingPage />
 }

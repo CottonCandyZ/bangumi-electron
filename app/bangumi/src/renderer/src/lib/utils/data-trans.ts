@@ -14,12 +14,8 @@ export function extractInfoBox(infoBox: InfoBox[], key: InfoKey): InfoBox | unde
 
 /** 获得分页时展示的分页选项 */
 export function getPageArrayFromTotal(total: number, limit: number = 100) {
-  const length = Math.floor(total / limit)
-  const array: number[] = Array(length + 1)
-  for (let i = 0; i <= length; i++) {
-    array[i] = i * limit
-  }
-  return array
+  const pageCount = Math.max(1, Math.ceil(total / limit))
+  return Array.from({ length: pageCount }, (_, index) => index * limit)
 }
 
 /** 把秒转换成小时分钟秒 */
