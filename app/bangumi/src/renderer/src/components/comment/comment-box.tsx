@@ -1,3 +1,5 @@
+import { MasonryInfiniteGrid } from '@egjs/react-infinitegrid'
+import { ScrollArea } from '@base-ui/react/scroll-area'
 import { Image } from '@renderer/components/image/image'
 import { BackToTopButton } from '@renderer/components/button/back-to-top'
 import { Card } from '@renderer/components/ui/card'
@@ -6,12 +8,11 @@ import { Comment, CommentBase } from '@renderer/data/types/comment'
 import { cn } from '@renderer/lib/utils'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import dayjs from 'dayjs'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useInView } from 'react-intersection-observer'
 
-const VIRTUAL_ITEM_HEIGHT = 156
-const VIRTUAL_OVERSCAN = 4
+const DEFAULT_COMMENT_PLACEHOLDER_COUNT = 6
 
 type CommentBoxProps = {
   title?: ReactNode
@@ -25,8 +26,10 @@ type CommentBoxProps = {
   framed?: boolean
   virtual?: boolean
   onInView?: () => void
-  onListNearBottom?: () => void
-  listNearBottomThreshold?: number
+  onListNearBottom?: () => Promise<unknown> | void
+  hasMore?: boolean
+  isFetchingMore?: boolean
+  appendPlaceholderCount?: number
   showBackToTop?: boolean
   footer?: ReactNode
 }
@@ -43,7 +46,9 @@ export function CommentBox({
   virtual = false,
   onInView,
   onListNearBottom,
-  listNearBottomThreshold,
+  hasMore = false,
+  isFetchingMore = false,
+  appendPlaceholderCount = DEFAULT_COMMENT_PLACEHOLDER_COUNT,
   showBackToTop = false,
   footer,
 }: CommentBoxProps) {
@@ -81,8 +86,10 @@ export function CommentBox({
       <CommentList
         comments={comments}
         className={listClassName}
+        appendPlaceholderCount={appendPlaceholderCount}
+        hasMore={hasMore}
+        isFetchingMore={isFetchingMore}
         onNearBottom={onListNearBottom}
-        nearBottomThreshold={listNearBottomThreshold}
         showBackToTop={showBackToTop}
         virtual={virtual}
       />
@@ -91,8 +98,10 @@ export function CommentBox({
     comments,
     emptyText,
     error,
+    appendPlaceholderCount,
+    hasMore,
+    isFetchingMore,
     listClassName,
-    listNearBottomThreshold,
     onListNearBottom,
     showBackToTop,
     virtual,
@@ -125,52 +134,25 @@ export function CommentBox({
 function CommentList({
   comments,
   className,
-  nearBottomThreshold,
+  appendPlaceholderCount = DEFAULT_COMMENT_PLACEHOLDER_COUNT,
+  hasMore,
+  isFetchingMore,
   onNearBottom,
   showBackToTop,
   virtual,
 }: {
   comments: Comment[]
   className?: string
-  onNearBottom?: () => void
-  nearBottomThreshold?: number
+  appendPlaceholderCount?: number
+  hasMore?: boolean
+  isFetchingMore?: boolean
+  onNearBottom?: () => Promise<unknown> | void
   showBackToTop?: boolean
   virtual: boolean
 }) {
-  const viewportRef = useRef<HTMLDivElement>(null)
+  const loadingMoreRef = useRef(false)
+  const viewportRef = useRef<HTMLElement | null>(null)
   const [viewport, setViewport] = useState<HTMLElement | null>(null)
-  const [scrollTop, setScrollTop] = useState(0)
-  const [viewportHeight, setViewportHeight] = useState(0)
-  const nearBottomThresholdPx = nearBottomThreshold ?? 160
-  const setViewportRef = useCallback((element: HTMLDivElement | null) => {
-    viewportRef.current = element
-    setViewport(element)
-  }, [])
-
-  const notifyIfNearBottom = useCallback(() => {
-    const viewport = viewportRef.current
-    if (!viewport || !onNearBottom) return
-
-    const distanceToBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight
-    if (distanceToBottom <= nearBottomThresholdPx) onNearBottom()
-  }, [nearBottomThresholdPx, onNearBottom])
-
-  useEffect(() => {
-    const viewport = viewportRef.current
-    if (!viewport) return
-
-    const updateHeight = () => setViewportHeight(viewport.clientHeight)
-    updateHeight()
-
-    const observer = new ResizeObserver(updateHeight)
-    observer.observe(viewport)
-    return () => observer.disconnect()
-  }, [viewport])
-
-  useEffect(() => {
-    if (!virtual) return
-    notifyIfNearBottom()
-  }, [comments.length, notifyIfNearBottom, virtual])
 
   if (!virtual) {
     return (
@@ -182,40 +164,68 @@ function CommentList({
     )
   }
 
-  const start = Math.max(0, Math.floor(scrollTop / VIRTUAL_ITEM_HEIGHT) - VIRTUAL_OVERSCAN)
-  const end = Math.min(
-    comments.length,
-    Math.ceil((scrollTop + viewportHeight) / VIRTUAL_ITEM_HEIGHT) + VIRTUAL_OVERSCAN,
-  )
-  const visibleComments = comments.slice(start, end)
-  const topHeight = start * VIRTUAL_ITEM_HEIGHT
-  const bottomHeight = Math.max(0, (comments.length - end) * VIRTUAL_ITEM_HEIGHT)
-
   return (
-    <div className="relative h-full min-h-0">
-      <div
-        ref={setViewportRef}
-        className={cn('max-h-[40rem] overflow-y-auto pr-2', className)}
+    <ScrollArea.Root className="group/scroll relative h-full min-h-0 overflow-hidden">
+      <MasonryInfiniteGrid
+        tag={ScrollArea.Viewport as unknown as string}
+        container
+        containerTag={ScrollArea.Content as unknown as string}
+        className={cn('max-h-[40rem] w-full overflow-x-hidden overflow-y-auto pr-2', className)}
+        useResizeObserver
+        placeholder={<CommentSkeleton />}
+        align="stretch"
+        maxStretchColumnSize={9999}
+        gap={12}
+        onRequestAppend={(event) => {
+          if (!hasMore || isFetchingMore || loadingMoreRef.current || !onNearBottom) return
+
+          loadingMoreRef.current = true
+          event.wait()
+          event.currentTarget.appendPlaceholders(
+            appendPlaceholderCount,
+            (+event.groupKey! || 0) + 1,
+          )
+          Promise.resolve(onNearBottom()).finally(() => {
+            loadingMoreRef.current = false
+            event.ready()
+          })
+        }}
         onScroll={(event) => {
-          setScrollTop(event.currentTarget.scrollTop)
-          notifyIfNearBottom()
+          const nextViewport = event.currentTarget
+          if (viewportRef.current === nextViewport) return
+
+          viewportRef.current = nextViewport
+          setViewport(nextViewport)
         }}
       >
-        <div style={{ height: topHeight }} />
-        <div className="flex flex-col gap-3">
-          {visibleComments.map((comment) => (
+        {comments.map((comment, index) => (
+          <div key={comment.id} data-grid-groupkey={Math.floor(index / appendPlaceholderCount)}>
             <CommentItem comment={comment} key={comment.id} />
-          ))}
-        </div>
-        <div style={{ height: bottomHeight }} />
-      </div>
+          </div>
+        ))}
+      </MasonryInfiniteGrid>
       {showBackToTop && (
-        <BackToTopButton
-          className="absolute right-3 bottom-3 size-9"
-          scrollTop={scrollTop}
-          viewport={viewport}
-        />
+        <BackToTopButton className="absolute right-3 bottom-3 size-9" viewport={viewport} />
       )}
+      <ScrollArea.Scrollbar
+        orientation="vertical"
+        className="absolute top-0 right-0 z-20 flex h-full w-2.5 touch-none p-0.5 opacity-0 transition-opacity duration-150 select-none group-hover/scroll:opacity-100"
+      >
+        <ScrollArea.Thumb className="bg-foreground/10 hover:bg-foreground/30 active:bg-foreground/40 relative [height:var(--scroll-area-thumb-height)] w-full flex-1 rounded-full" />
+      </ScrollArea.Scrollbar>
+    </ScrollArea.Root>
+  )
+}
+
+function CommentSkeleton() {
+  return (
+    <div className="flex w-full flex-row gap-3 p-2">
+      <Skeleton className="size-10 shrink-0 rounded-full" />
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-4/5" />
+      </div>
     </div>
   )
 }
