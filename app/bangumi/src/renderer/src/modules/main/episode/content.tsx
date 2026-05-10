@@ -13,6 +13,7 @@ import {
 import { Episode, EpisodeType } from '@renderer/data/types/episode'
 import { useOpenSubjectEpisodesPanel } from '@renderer/modules/common/episodes/use-open-subject-episodes-panel'
 import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
+import { EpisodeCollectionActions } from '@renderer/modules/main/episode/collection-actions'
 import { useCallback, useState } from 'react'
 
 export function EpisodeContent({ episodeId }: { episodeId: string }) {
@@ -69,11 +70,14 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
         <Card className="bg-background/70 p-4 shadow-none">
           <div className="grid gap-4 md:grid-cols-[1fr_auto]">
             <EpisodeMeta episode={episode} />
-            <EpisodeActions
-              episode={episode}
-              subjectTitle={subjectQuery.data?.name_cn || subjectQuery.data?.name}
-              episodeTotal={subjectQuery.data?.total_episodes}
-            />
+            <div className="flex flex-col items-start gap-2 md:items-end">
+              <EpisodeCollectionActions episode={episode} />
+              <EpisodeActions
+                episode={episode}
+                subjectTitle={subjectQuery.data?.name_cn || subjectQuery.data?.name}
+                episodeTotal={subjectQuery.data?.total_episodes}
+              />
+            </div>
           </div>
           {episode.desc && (
             <>
