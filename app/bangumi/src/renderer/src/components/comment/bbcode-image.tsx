@@ -2,18 +2,28 @@ import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
 import { RefreshCcwIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type ImageStatus = 'loading' | 'loaded' | 'error'
 
 export function BBCodeImage({ src, alt = '' }: { src: string; alt?: string }) {
   const [status, setStatus] = useState<ImageStatus>('loading')
   const [retryKey, setRetryKey] = useState(0)
+  const [retrying, setRetrying] = useState(false)
+  const retryTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
     setStatus('loading')
     setRetryKey(0)
+    setRetrying(false)
+    if (retryTimerRef.current) window.clearTimeout(retryTimerRef.current)
   }, [src])
+
+  useEffect(() => {
+    return () => {
+      if (retryTimerRef.current) window.clearTimeout(retryTimerRef.current)
+    }
+  }, [])
 
   return (
     <span
@@ -43,14 +53,26 @@ export function BBCodeImage({ src, alt = '' }: { src: string; alt?: string }) {
           <Button
             variant="outline"
             size="sm"
-            className="group border-primary/30 bg-background hover:border-primary hover:bg-primary hover:text-primary-foreground gap-2 shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-95"
+            className={cn(
+              'group border-primary/40 bg-background hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:ring-primary/40 hover:ring-primary/20 active:bg-primary/90 gap-2 shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md hover:ring-2 active:translate-y-0 active:scale-95 active:shadow-inner',
+              retrying &&
+                'border-primary bg-primary text-primary-foreground ring-primary/30 ring-2',
+            )}
             onClick={() => {
               setStatus('loading')
+              setRetrying(true)
               setRetryKey((key) => key + 1)
+              if (retryTimerRef.current) window.clearTimeout(retryTimerRef.current)
+              retryTimerRef.current = window.setTimeout(() => setRetrying(false), 700)
             }}
           >
-            <RefreshCcwIcon className="size-4 transition-transform duration-150 group-hover:-rotate-45 group-active:rotate-180" />
-            重试
+            <RefreshCcwIcon
+              className={cn(
+                'size-4 transition-transform duration-150 group-hover:-rotate-45 group-active:rotate-180',
+                retrying && 'animate-spin',
+              )}
+            />
+            {retrying ? '正在重试' : '重试'}
           </Button>
         </span>
       )}
