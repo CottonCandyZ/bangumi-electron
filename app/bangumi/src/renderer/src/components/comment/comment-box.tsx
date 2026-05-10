@@ -1,10 +1,15 @@
 import { MasonryInfiniteGrid } from '@egjs/react-infinitegrid'
 import { ScrollArea } from '@base-ui/react/scroll-area'
+import {
+  BangumiSmile,
+  REACTION_VALUE_TO_BANGUMI_SMILE,
+} from '@renderer/components/comment/bangumi-smile'
 import { Image } from '@renderer/components/image/image'
 import { BackToTopButton } from '@renderer/components/button/back-to-top'
 import { Card } from '@renderer/components/ui/card'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { Comment, CommentBase } from '@renderer/data/types/comment'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
+import { Comment, CommentBase, CommentReaction } from '@renderer/data/types/comment'
 import { cn } from '@renderer/lib/utils'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import dayjs from 'dayjs'
@@ -282,6 +287,7 @@ function CommentItem({ comment, floorNumber }: { comment: Comment; floorNumber: 
         <div className="bbcode text-sm leading-6 whitespace-pre-line">
           {renderBBCode(comment.content)}
         </div>
+        <CommentReactions reactions={comment.reactions} />
         {comment.replies.length > 0 && (
           <div className="bg-muted/40 flex flex-col gap-2 rounded-md p-2">
             {comment.replies.map((reply) => (
@@ -313,6 +319,49 @@ function ReplyItem({ reply }: { reply: CommentBase }) {
         {dayjs.unix(reply.createdAt).format('YYYY-MM-DD HH:mm')}
       </span>
       <span className="bbcode whitespace-pre-line">{renderBBCode(reply.content)}</span>
+      <CommentReactions reactions={reply.reactions} compact />
+    </div>
+  )
+}
+
+function CommentReactions({
+  reactions,
+  compact = false,
+}: {
+  reactions?: CommentReaction[]
+  compact?: boolean
+}) {
+  const visibleReactions = useMemo(
+    () => reactions?.filter((reaction) => reaction.users.length > 0) ?? [],
+    [reactions],
+  )
+
+  if (visibleReactions.length === 0) return null
+
+  return (
+    <div className={cn('flex flex-row flex-wrap gap-1.5', compact ? 'mt-1' : 'mt-0.5')}>
+      {visibleReactions.map((reaction) => {
+        const smileCode = REACTION_VALUE_TO_BANGUMI_SMILE[reaction.value]
+        const userNames = reaction.users.map((user) => user.nickname || user.username).join('、')
+
+        return (
+          <Tooltip key={reaction.value}>
+            <TooltipTrigger asChild>
+              <span className="border-border/70 bg-muted/30 hover:bg-muted/60 inline-flex h-[25px] items-center gap-1 rounded-full border px-1.5 text-xs leading-none transition-colors">
+                {smileCode ? (
+                  <BangumiSmile code={smileCode} variant="reaction" />
+                ) : (
+                  <span className="text-muted-foreground tabular-nums">{reaction.value}</span>
+                )}
+                <span className="text-muted-foreground tabular-nums">{reaction.users.length}</span>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-72 leading-5" sideOffset={6}>
+              {userNames}
+            </TooltipContent>
+          </Tooltip>
+        )
+      })}
     </div>
   )
 }

@@ -1,12 +1,15 @@
 import { createPreset } from '@bbob/preset'
 import { render } from '@bbob/react'
+import { BangumiSmile } from '@renderer/components/comment/bangumi-smile'
 import { BBCodeImage } from '@renderer/components/comment/bbcode-image'
+import { Bmoji } from '@renderer/components/comment/bmoji'
 import { cloneElement, createElement, Fragment, isValidElement, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 // noinspection ES6UnusedImports
 import {} from '@bbob/types'
 
 const URL_PATTERN = /https?:\/\/[^\s<>"'，。)）\]]+/g
+const INLINE_TOKEN_PATTERN = /\((bgm\d+|bmoC?[A-Za-z0-9_\-:=|.]*)\)/g
 const BANGUMI_HOSTS = new Set(['bangumi.tv', 'bgm.tv'])
 const BANGUMI_ROUTE_PATTERN = /^\/(subject|person|character|ep)\/(\d+)\/?$/
 const ALLOWED_COLOR_PATTERN =
@@ -193,13 +196,45 @@ function linkifyText(text: string) {
     const index = match.index ?? 0
     if (!href) continue
 
-    if (index > lastIndex) parts.push(text.slice(lastIndex, index))
+    if (index > lastIndex)
+      parts.push(...renderInlineTokens(text.slice(lastIndex, index), lastIndex))
     parts.push(renderLink(href, `${href}-${index}`))
     lastIndex = index + match[0].length
   }
 
-  if (lastIndex < text.length) parts.push(text.slice(lastIndex))
+  if (lastIndex < text.length) parts.push(...renderInlineTokens(text.slice(lastIndex), lastIndex))
   return parts.length > 0 ? parts : text
+}
+
+function renderInlineTokens(text: string, offset = 0) {
+  const parts: ReactNode[] = []
+  let lastIndex = 0
+
+  for (const match of text.matchAll(INLINE_TOKEN_PATTERN)) {
+    const token = match[1]
+    const index = match.index ?? 0
+
+    if (index > lastIndex) parts.push(text.slice(lastIndex, index))
+    if (token.startsWith('bgm')) {
+      parts.push(
+        createElement(BangumiSmile, {
+          code: token,
+          key: `${token}-${offset + index}`,
+        }),
+      )
+    } else {
+      parts.push(
+        createElement(Bmoji, {
+          code: token,
+          key: `${token}-${offset + index}`,
+        }),
+      )
+    }
+    lastIndex = index + match[0].length
+  }
+
+  if (lastIndex < text.length) parts.push(text.slice(lastIndex))
+  return parts.length > 0 ? parts : [text]
 }
 
 function renderLink(href: string, key: string) {

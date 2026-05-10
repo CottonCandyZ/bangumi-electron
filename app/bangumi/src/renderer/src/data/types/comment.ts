@@ -7,6 +7,20 @@ export type CommentUser = {
     medium: string
     large: string
   }
+  group: number
+  sign: string
+  joinedAt: number
+}
+
+export type CommentReactionUser = {
+  id: number
+  username: string
+  nickname: string
+}
+
+export type CommentReaction = {
+  users: CommentReactionUser[]
+  value: number
 }
 
 export type CommentBase = {
@@ -19,6 +33,7 @@ export type CommentBase = {
   content: string
   state: number
   user?: CommentUser
+  reactions?: CommentReaction[]
 }
 
 export type Comment = CommentBase & {

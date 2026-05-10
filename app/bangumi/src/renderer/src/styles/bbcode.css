@@ -16,4 +16,25 @@
   img {
     @apply max-w-full;
   }
+
+  .bbcode-smile {
+    @apply relative top-[2px] mx-0.5 inline-block size-5 align-baseline;
+    background-repeat: no-repeat;
+  }
+
+  .bbcode-bmoji {
+    @apply mx-0.5 inline-flex size-6 align-text-bottom;
+  }
+
+  .bbcode-bmoji canvas,
+  .bbcode-bmoji img {
+    width: 100% !important;
+    height: 100% !important;
+    image-rendering: pixelated;
+  }
+
+  .bbcode-bmoji[data-bmoji-status='loading'],
+  .bbcode-bmoji[data-bmoji-status='error'] {
+    @apply text-muted-foreground text-xs;
+  }
 }
