@@ -36,7 +36,7 @@ export function BBCodeImage({ src, alt = '' }: { src: string; alt?: string }) {
         key={`${src}-${retryKey}`}
         className={cn(
           'max-h-96 max-w-full rounded-md object-contain select-none',
-          status !== 'loaded' && 'absolute inset-0 h-full w-full opacity-0',
+          status !== 'loaded' && 'pointer-events-none absolute inset-0 h-full w-full opacity-0',
         )}
         src={src}
         alt={alt}
@@ -48,9 +48,10 @@ export function BBCodeImage({ src, alt = '' }: { src: string; alt?: string }) {
       />
       {status === 'loading' && <Skeleton className="absolute inset-0" />}
       {status === 'error' && (
-        <span className="bg-muted/70 flex h-full min-h-32 w-full flex-col items-center justify-center gap-2 rounded-md border p-4">
+        <span className="bg-muted/70 relative z-10 flex h-full min-h-32 w-full flex-col items-center justify-center gap-2 rounded-md border p-4">
           <span className="text-muted-foreground text-sm">图片加载失败</span>
           <Button
+            type="button"
             variant="outline"
             size="sm"
             className={cn(
