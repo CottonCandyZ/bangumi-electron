@@ -1,5 +1,9 @@
 import { Tabs } from '@renderer/components/tabs'
 import { Image } from '@renderer/components/image/image'
+import {
+  ViewTransitionElement,
+  ViewTransitionImage,
+} from '@renderer/components/image/view-transition-image'
 import { MyLink } from '@renderer/components/my-link'
 import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
@@ -21,8 +25,18 @@ import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
 import dayjs from 'dayjs'
 import { useAtom, useSetAtom } from 'jotai'
-import { Children, cloneElement, Fragment, useCallback, useMemo, useRef, useState } from 'react'
+import {
+  Children,
+  cloneElement,
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import type { CSSProperties, ReactElement, ReactNode } from 'react'
+import { useInView } from 'react-intersection-observer'
 import { useLocation, useNavigate, useViewTransitionState } from 'react-router-dom'
 
 type MonoDetailViewProps = {
@@ -32,6 +46,7 @@ type MonoDetailViewProps = {
   relatedTitle: string
   comments?: MonoComment[]
   commentsError?: boolean
+  onCommentsInView?: () => void
   avatarViewTransitionName?: string
 }
 
@@ -65,6 +80,7 @@ export function MonoDetailView({
   relatedTitle,
   comments,
   commentsError,
+  onCommentsInView,
   avatarViewTransitionName,
 }: MonoDetailViewProps) {
   if (!detail) return <MonoDetailSkeleton />
@@ -77,22 +93,27 @@ export function MonoDetailView({
       <section className="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)]">
         <div className="flex flex-col gap-4">
           {image ? (
-            <Image
+            <ViewTransitionImage
+              active={!!avatarViewTransitionName}
+              cacheKey="monoAvatarInView"
+              className={MONO_MAIN_IMAGE_FRAME}
+              imageContainerClassName="w-full overflow-hidden rounded-lg border shadow-sm"
               imageSrc={image}
-              className={`${MONO_MAIN_IMAGE_FRAME} overflow-hidden rounded-lg border shadow-sm`}
               imageClassName="h-auto w-full object-contain"
               loadingClassName={MONO_MAIN_IMAGE_LOADING_FRAME}
               loading="eager"
               careLoading
-              style={{ viewTransitionName: avatarViewTransitionName }}
+              viewTransitionName={avatarViewTransitionName}
             />
           ) : (
-            <div
+            <ViewTransitionElement
+              active={!!avatarViewTransitionName}
+              cacheKey="monoAvatarInView"
               className={`${MONO_MAIN_IMAGE_FRAME} bg-muted text-muted-foreground flex aspect-3/4 items-center justify-center rounded-lg border text-sm`}
-              style={{ viewTransitionName: avatarViewTransitionName }}
+              viewTransitionName={avatarViewTransitionName}
             >
               暂无图片
-            </div>
+            </ViewTransitionElement>
           )}
           <div className="flex flex-row flex-wrap gap-2">
             <Badge variant="outline">{detail.typeLabel}</Badge>
@@ -145,7 +166,7 @@ export function MonoDetailView({
         title={relatedTitle}
         items={relatedItems}
       />
-      <MonoComments comments={comments} error={commentsError} />
+      <MonoComments comments={comments} error={commentsError} onInView={onCommentsInView} />
     </div>
   )
 }
@@ -323,52 +344,94 @@ function renderSubjectCards(subjects: MonoSubjectItem[]) {
 
 function MonoSubjectCard({ subject }: { subject: MonoSubjectItem }) {
   const { key } = useLocation()
+  const navigate = useNavigate()
   const isTransitioning = useViewTransitionState(`/subject/${subject.id}`)
   const viewTransitionName = `cover-image-${key}`
+  const relatedItems = subject.relatedItems ?? []
 
   return (
-    <MyLink
-      to={`/subject/${subject.id}`}
-      state={{ viewTransitionName }}
-      viewTransition
-      key={`${subject.id}-${subject.relation}`}
-      className="block h-full"
+    <Card
+      className="flex h-full cursor-pointer flex-col overflow-hidden p-2 shadow-none transition-shadow hover:shadow-lg"
+      role="link"
+      tabIndex={0}
+      onClick={() =>
+        navigate(`/subject/${subject.id}`, {
+          state: { viewTransitionName },
+          viewTransition: true,
+        })
+      }
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        navigate(`/subject/${subject.id}`, {
+          state: { viewTransitionName },
+          viewTransition: true,
+        })
+      }}
     >
-      <Card className="flex h-full flex-col overflow-hidden p-2 shadow-none transition-shadow hover:shadow-lg">
-        {subject.image ? (
-          <Image
-            imageSrc={subject.image}
-            className={`${MONO_SUBJECT_IMAGE_FRAME} mx-auto max-w-52 overflow-hidden rounded-md`}
-            imageClassName="h-full w-full object-contain"
-            loadingClassName={MONO_SUBJECT_IMAGE_FRAME}
-            careLoading
-            style={{ viewTransitionName: isTransitioning ? viewTransitionName : undefined }}
-          />
-        ) : (
-          <div
-            className="bg-muted aspect-square rounded-md"
-            style={{ viewTransitionName: isTransitioning ? viewTransitionName : undefined }}
-          />
+      {subject.image ? (
+        <ViewTransitionImage
+          active={isTransitioning}
+          imageSrc={subject.image}
+          className={`${MONO_SUBJECT_IMAGE_FRAME} mx-auto max-w-52 overflow-hidden rounded-md`}
+          imageClassName="h-full w-full object-contain"
+          loadingClassName={MONO_SUBJECT_IMAGE_FRAME}
+          careLoading
+          viewTransitionName={viewTransitionName}
+        />
+      ) : (
+        <ViewTransitionElement
+          active={isTransitioning}
+          className="bg-muted aspect-square rounded-md"
+          viewTransitionName={viewTransitionName}
+        />
+      )}
+      <div className="flex flex-1 flex-col gap-1 pt-2">
+        <div className="line-clamp-2 text-sm font-medium">{subject.nameCn || subject.name}</div>
+        {subject.nameCn && (
+          <div className="text-muted-foreground line-clamp-1 text-xs">{subject.name}</div>
         )}
-        <div className="flex flex-1 flex-col gap-1 pt-2">
-          <div className="line-clamp-2 text-sm font-medium">{subject.nameCn || subject.name}</div>
-          {subject.nameCn && (
-            <div className="text-muted-foreground line-clamp-1 text-xs">{subject.name}</div>
-          )}
-          <div className="mt-auto flex flex-row flex-wrap gap-1 pt-2">
-            <Badge variant="outline" className="text-xs">
-              {SUBJECT_TYPE_MAP[subject.subjectType]}
+        {relatedItems.length > 0 && <RelatedItemSummary items={relatedItems} />}
+        <div className="mt-auto flex flex-row flex-wrap gap-1 pt-2">
+          <Badge variant="outline" className="text-xs">
+            {SUBJECT_TYPE_MAP[subject.subjectType]}
+          </Badge>
+          {subject.relation && (
+            <Badge variant="secondary" className="text-xs shadow-none">
+              {subject.relation}
             </Badge>
-            {subject.relation && (
-              <Badge variant="secondary" className="text-xs shadow-none">
-                {subject.relation}
-              </Badge>
-            )}
-          </div>
+          )}
         </div>
-      </Card>
-    </MyLink>
+      </div>
+    </Card>
   )
+}
+
+function RelatedItemSummary({ items }: { items: MonoRelatedItem[] }) {
+  const displayItems = items.slice(0, 3)
+
+  return (
+    <div className="text-muted-foreground flex min-w-0 flex-col items-start gap-0.5 pt-1 text-xs">
+      {displayItems.map((item) => (
+        <MyLink
+          className="text-primary hover:bg-primary/10 focus-visible:ring-ring/50 -mx-1 block w-fit max-w-full truncate rounded-sm px-1 underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-hidden"
+          key={`${item.id}-${item.relation ?? item.name}`}
+          to={item.link}
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
+        >
+          {formatRelatedItemLabel(item)}
+        </MyLink>
+      ))}
+      {items.length > displayItems.length && (
+        <div className="text-muted-foreground/80">+{items.length - displayItems.length}</div>
+      )}
+    </div>
+  )
+}
+
+function formatRelatedItemLabel(item: MonoRelatedItem) {
+  return item.relation ? `${item.name} (${item.relation})` : item.name
 }
 
 function MonoRelatedSection({
@@ -468,24 +531,48 @@ function renderRelatedCards(items: MonoRelatedItem[]) {
 }
 
 function MonoRelatedCard({ item }: { item: MonoRelatedItem }) {
+  const { key } = useLocation()
   const navigate = useNavigate()
+  const isTransitioning = useViewTransitionState(item.link)
+  const viewTransitionName = getRelatedItemViewTransitionName(item, key)
 
   return (
     <Card
       className="flex h-full cursor-pointer flex-row gap-3 overflow-hidden p-2 shadow-none transition-shadow hover:shadow-lg"
-      onClick={() => navigate(item.link)}
+      role="link"
+      tabIndex={0}
+      onClick={() =>
+        navigate(item.link, {
+          state: { viewTransitionName },
+          viewTransition: true,
+        })
+      }
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        navigate(item.link, {
+          state: { viewTransitionName },
+          viewTransition: true,
+        })
+      }}
     >
       <div className="w-24 shrink-0">
         {item.image ? (
-          <Image
+          <ViewTransitionImage
+            active={isTransitioning}
             imageSrc={item.image}
             className={`${MONO_RELATED_IMAGE_FRAME} overflow-hidden rounded-md`}
             imageClassName="h-full w-full object-contain"
             loadingClassName={MONO_RELATED_IMAGE_FRAME}
             careLoading
+            viewTransitionName={viewTransitionName}
           />
         ) : (
-          <div className="bg-muted aspect-square rounded-md" />
+          <ViewTransitionElement
+            active={isTransitioning}
+            className="bg-muted aspect-square rounded-md"
+            viewTransitionName={viewTransitionName}
+          />
         )}
       </div>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-1 overflow-hidden">
@@ -493,8 +580,9 @@ function MonoRelatedCard({ item }: { item: MonoRelatedItem }) {
         {item.subjectId && (
           <MyLink
             to={`/subject/${item.subjectId}`}
-            className="text-primary line-clamp-1 min-w-0 text-sm break-words"
+            className="text-primary hover:bg-primary/10 focus-visible:ring-ring/50 -mx-1 line-clamp-1 w-fit max-w-full rounded-sm px-1 text-sm break-words underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-hidden"
             onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
           >
             {item.subjectNameCn || item.subjectName}
           </MyLink>
@@ -641,10 +729,31 @@ function FoldableSection({
   )
 }
 
-function MonoComments({ comments, error }: { comments?: MonoComment[]; error?: boolean }) {
+function getRelatedItemViewTransitionName(item: MonoRelatedItem, locationKey: string) {
+  return `mono-related-image-${item.id}-${item.subjectId ?? 'none'}-${locationKey}`
+}
+
+function MonoComments({
+  comments,
+  error,
+  onInView,
+}: {
+  comments?: MonoComment[]
+  error?: boolean
+  onInView?: () => void
+}) {
+  const { ref, inView } = useInView({
+    rootMargin: '240px 0px',
+    triggerOnce: true,
+  })
+
+  useEffect(() => {
+    if (inView) onInView?.()
+  }, [inView, onInView])
+
   if (error) {
     return (
-      <section className="flex flex-col gap-3">
+      <section ref={ref} className="flex flex-col gap-3">
         <h2 className="text-2xl font-medium">吐槽箱</h2>
         <p className="text-muted-foreground text-sm">暂时无法读取吐槽箱。</p>
       </section>
@@ -652,7 +761,7 @@ function MonoComments({ comments, error }: { comments?: MonoComment[]; error?: b
   }
   if (comments === undefined) {
     return (
-      <section className="flex flex-col gap-5">
+      <section ref={ref} className="flex flex-col gap-5">
         <h2 className="text-2xl font-medium">吐槽箱</h2>
         <div className="flex flex-col gap-3">
           {Array(3)
@@ -667,7 +776,7 @@ function MonoComments({ comments, error }: { comments?: MonoComment[]; error?: b
   if (comments.length === 0) return null
 
   return (
-    <section className="flex flex-col gap-5">
+    <section ref={ref} className="flex flex-col gap-5">
       <h2 className="text-2xl font-medium">吐槽箱</h2>
       <div className="flex flex-col gap-3">
         {comments.map((comment) => (

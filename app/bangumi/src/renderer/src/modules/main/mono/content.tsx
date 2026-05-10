@@ -31,6 +31,7 @@ import {
   PersonRelatedSubject,
 } from '@renderer/data/types/person'
 import { SubjectType } from '@renderer/data/types/subject'
+import { useCallback, useState } from 'react'
 import { useLocation, useViewTransitionState } from 'react-router-dom'
 
 const PERSON_TYPE_MAP: Record<Person['type'], string> = {
@@ -63,19 +64,35 @@ export function MonoContent({ monoType, monoId }: { monoType: MonoType; monoId: 
 
 function PersonMonoContent({ personId }: { personId: PersonId }) {
   const avatarViewTransitionName = useAvatarViewTransitionName('person', personId)
+  const [enabledCommentsId, setEnabledCommentsId] = useState<PersonId | null>(null)
+  const enableComments = useCallback(() => setEnabledCommentsId(personId), [personId])
   const detailQuery = useQueryPersonsById({ id: personId })
   const subjectsQuery = useQueryPersonRelatedSubjects({ id: personId, enabled: !!personId })
   const charactersQuery = useQueryPersonRelatedCharacters({ id: personId, enabled: !!personId })
-  const commentsQuery = useQueryPersonComments({ id: personId, enabled: !!personId })
+  const commentsQuery = useQueryPersonComments({
+    id: personId,
+    enabled: !!personId && enabledCommentsId === personId,
+  })
+  const subjects = subjectsQuery.data?.map(toMonoSubject)
+  const relatedCharacters = charactersQuery.data?.map(toCharacterRelatedItem)
+  const mergedSubjects =
+    subjects && relatedCharacters
+      ? mergeSubjectsWithRelatedItems(subjects, relatedCharacters)
+      : subjects
 
   return (
     <MonoDetailView
       detail={detailQuery.data ? toPersonMonoDetail(detailQuery.data) : undefined}
-      subjects={subjectsQuery.data?.map(toMonoSubject)}
-      relatedItems={charactersQuery.data?.map(toCharacterRelatedItem)}
+      subjects={mergedSubjects}
+      relatedItems={
+        subjects && relatedCharacters
+          ? getUnmatchedRelatedItems(subjects, relatedCharacters)
+          : undefined
+      }
       relatedTitle="出场角色"
       comments={commentsQuery.data?.map(toMonoComment)}
       commentsError={commentsQuery.isError}
+      onCommentsInView={enableComments}
       avatarViewTransitionName={avatarViewTransitionName}
     />
   )
@@ -83,22 +100,34 @@ function PersonMonoContent({ personId }: { personId: PersonId }) {
 
 function CharacterMonoContent({ characterId }: { characterId: CharacterId }) {
   const avatarViewTransitionName = useAvatarViewTransitionName('character', characterId)
+  const [enabledCommentsId, setEnabledCommentsId] = useState<CharacterId | null>(null)
+  const enableComments = useCallback(() => setEnabledCommentsId(characterId), [characterId])
   const detailQuery = useQueryCharacterDetailByID({ id: characterId })
   const subjectsQuery = useQueryCharacterRelatedSubjects({
     id: characterId,
     enabled: !!characterId,
   })
   const personsQuery = useQueryCharacterRelatedPersons({ id: characterId, enabled: !!characterId })
-  const commentsQuery = useQueryCharacterComments({ id: characterId, enabled: !!characterId })
+  const commentsQuery = useQueryCharacterComments({
+    id: characterId,
+    enabled: !!characterId && enabledCommentsId === characterId,
+  })
+  const subjects = subjectsQuery.data?.map(toMonoSubject)
+  const relatedPersons = personsQuery.data?.map(toPersonRelatedItem)
+  const mergedSubjects =
+    subjects && relatedPersons ? mergeSubjectsWithRelatedItems(subjects, relatedPersons) : subjects
 
   return (
     <MonoDetailView
       detail={detailQuery.data ? toCharacterMonoDetail(detailQuery.data) : undefined}
-      subjects={subjectsQuery.data?.map(toMonoSubject)}
-      relatedItems={mergeCharacterRelatedPersons(personsQuery.data?.map(toPersonRelatedItem))}
+      subjects={mergedSubjects}
+      relatedItems={
+        subjects && relatedPersons ? getUnmatchedRelatedItems(subjects, relatedPersons) : undefined
+      }
       relatedTitle="关联人物"
       comments={commentsQuery.data?.map(toMonoComment)}
       commentsError={commentsQuery.isError}
+      onCommentsInView={enableComments}
       avatarViewTransitionName={avatarViewTransitionName}
     />
   )
@@ -178,7 +207,7 @@ function toPersonRelatedItem(person: CharacterRelatedPerson): MonoRelatedItem {
   }
 }
 
-function mergeCharacterRelatedPersons(items?: MonoRelatedItem[]) {
+function mergeRelatedItems(items?: MonoRelatedItem[]) {
   if (!items) return undefined
 
   const itemMap = new Map<string, MonoRelatedItem>()
@@ -203,6 +232,33 @@ function mergeCharacterRelatedPersons(items?: MonoRelatedItem[]) {
   }
 
   return [...itemMap.values()]
+}
+
+function mergeSubjectsWithRelatedItems(
+  subjects: MonoSubjectItem[],
+  relatedItems: MonoRelatedItem[],
+) {
+  const relatedItemMap = new Map<number, MonoRelatedItem[]>()
+
+  for (const item of relatedItems) {
+    if (item.subjectId === undefined) continue
+    const items = relatedItemMap.get(item.subjectId) ?? []
+    items.push(item)
+    relatedItemMap.set(item.subjectId, items)
+  }
+
+  return subjects.map((subject) => ({
+    ...subject,
+    relatedItems: mergeRelatedItems(relatedItemMap.get(subject.id)) ?? [],
+  }))
+}
+
+function getUnmatchedRelatedItems(subjects: MonoSubjectItem[], relatedItems: MonoRelatedItem[]) {
+  const subjectIds = new Set(subjects.map((subject) => subject.id))
+
+  return mergeRelatedItems(
+    relatedItems.filter((item) => item.subjectId === undefined || !subjectIds.has(item.subjectId)),
+  )
 }
 
 function mergeSubjectType(prev?: SubjectType, next?: SubjectType) {

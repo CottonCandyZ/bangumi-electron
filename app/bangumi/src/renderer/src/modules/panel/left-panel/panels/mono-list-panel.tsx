@@ -5,6 +5,7 @@ import { MyLink } from '@renderer/components/my-link'
 import { Badge } from '@renderer/components/ui/badge'
 import { Tabs } from '@renderer/components/tabs'
 import { SubjectType } from '@renderer/data/types/subject'
+import type { MonoRelatedItem } from '@renderer/data/types/mono'
 import type { MonoListPanelTab } from '@renderer/state/panel'
 import {
   closeAllMonoListPanelTabsAtomAction,
@@ -17,6 +18,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { XIcon } from 'lucide-react'
 import { Children, useEffect, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const SUBJECT_TYPE_MAP: Record<SubjectType, string> = {
   [SubjectType.book]: '书籍',
@@ -405,11 +407,20 @@ function MonoSubjectListItem({
 }: {
   item: Extract<MonoListPanelTab, { type: 'subjects' }>['subjects'][number]
 }) {
+  const navigate = useNavigate()
+  const relatedItems = item.relatedItems ?? []
+
   return (
-    <MyLink
-      className="hover:bg-accent flex min-h-20 flex-row gap-3 rounded-md p-2"
-      to={`/subject/${item.id}`}
-      viewTransition
+    <div
+      className="hover:bg-accent flex min-h-20 cursor-pointer flex-row gap-3 rounded-md p-2"
+      role="link"
+      tabIndex={0}
+      onClick={() => navigate(`/subject/${item.id}`)}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        navigate(`/subject/${item.id}`)
+      }}
     >
       <PanelItemImage image={item.image} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -417,6 +428,7 @@ function MonoSubjectListItem({
         {item.nameCn && (
           <div className="text-muted-foreground line-clamp-1 text-xs">{item.name}</div>
         )}
+        {relatedItems.length > 0 && <RelatedItemLinks className="pt-0.5" items={relatedItems} />}
         <div className="mt-auto flex flex-row flex-wrap gap-1">
           <Badge variant="outline" className="text-xs">
             {SUBJECT_TYPE_MAP[item.subjectType]}
@@ -428,8 +440,30 @@ function MonoSubjectListItem({
           )}
         </div>
       </div>
-    </MyLink>
+    </div>
   )
+}
+
+function RelatedItemLinks({ className, items }: { className?: string; items: MonoRelatedItem[] }) {
+  return (
+    <div className={`flex min-w-0 flex-row flex-wrap gap-x-2 gap-y-0.5 text-xs ${className ?? ''}`}>
+      {items.map((item) => (
+        <MyLink
+          className="text-primary hover:bg-primary/10 focus-visible:ring-ring/50 -mx-1 block w-fit max-w-full truncate rounded-sm px-1 underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-hidden"
+          key={`${item.id}-${item.relation ?? item.name}`}
+          to={item.link}
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
+        >
+          {formatRelatedItemLabel(item)}
+        </MyLink>
+      ))}
+    </div>
+  )
+}
+
+function formatRelatedItemLabel(item: MonoRelatedItem) {
+  return item.relation ? `${item.name} (${item.relation})` : item.name
 }
 
 function MonoRelatedListItem({
@@ -437,16 +471,37 @@ function MonoRelatedListItem({
 }: {
   item: Extract<MonoListPanelTab, { type: 'related' }>['relatedItems'][number]
 }) {
+  const navigate = useNavigate()
+
   return (
-    <MyLink className="hover:bg-accent flex min-h-20 flex-row gap-3 rounded-md p-2" to={item.link}>
+    <div
+      className="hover:bg-accent flex min-h-20 cursor-pointer flex-row gap-3 rounded-md p-2"
+      role="link"
+      tabIndex={0}
+      onClick={() => navigate(item.link)}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        navigate(item.link)
+      }}
+    >
       <PanelItemImage image={item.image} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="line-clamp-1 text-sm font-medium">{item.name}</div>
-        {item.subjectName && (
+        {item.subjectId ? (
+          <MyLink
+            className="text-primary hover:bg-primary/10 focus-visible:ring-ring/50 -mx-1 line-clamp-1 w-fit max-w-full rounded-sm px-1 text-xs underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-hidden"
+            to={`/subject/${item.subjectId}`}
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+          >
+            {item.subjectNameCn || item.subjectName}
+          </MyLink>
+        ) : item.subjectName ? (
           <div className="text-muted-foreground line-clamp-1 text-xs">
             {item.subjectNameCn || item.subjectName}
           </div>
-        )}
+        ) : null}
         <div className="mt-auto flex flex-row flex-wrap gap-1">
           {item.subjectType && (
             <Badge variant="outline" className="text-xs">
@@ -460,7 +515,7 @@ function MonoRelatedListItem({
           )}
         </div>
       </div>
-    </MyLink>
+    </div>
   )
 }
 

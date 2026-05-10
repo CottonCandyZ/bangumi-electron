@@ -1,5 +1,8 @@
 import { TooltipArrow } from '@radix-ui/react-tooltip'
-import { Image } from '@renderer/components/image/image'
+import {
+  ViewTransitionElement,
+  ViewTransitionImage,
+} from '@renderer/components/image/view-transition-image'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import { useRelatedSubjectsQuery } from '@renderer/data/hooks/api/subject'
@@ -47,13 +50,18 @@ function Item({ item }: { item: RelatedSubject }) {
           viewTransition
         >
           {!isEmpty(item.images.small) ? (
-            <Image
+            <ViewTransitionImage
+              active={isTransitioning}
               imageSrc={item.images.small}
-              style={{ viewTransitionName: isTransitioning ? `cover-image-${key}` : undefined }}
               className="size-20 overflow-hidden rounded-xl border shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xl"
+              viewTransitionName={`cover-image-${key}`}
             />
           ) : (
-            <div className="bg-accent size-20 rounded-xl border shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xl" />
+            <ViewTransitionElement
+              active={isTransitioning}
+              className="bg-accent size-20 rounded-xl border shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-xl"
+              viewTransitionName={`cover-image-${key}`}
+            />
           )}
         </Link>
       </TooltipTrigger>

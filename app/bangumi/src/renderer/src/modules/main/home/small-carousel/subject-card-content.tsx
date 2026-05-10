@@ -1,4 +1,5 @@
 import { CoverMotionImage } from '@renderer/components/image/cover-motion-image'
+import { ViewTransitionElement } from '@renderer/components/image/view-transition-image'
 import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
@@ -87,41 +88,43 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
     >
       <HoverCardContent
         className="relative z-1 w-full cursor-default"
-        style={{
-          viewTransitionName: !isActive && isTransitioning ? `cover-image-${key}` : undefined,
-        }}
         CardContent={
-          <MyLink
-            to={`/subject/${subjectId}`}
-            className="cursor-default"
-            viewTransition
-            state={{ viewTransitionName: `cover-image-${key}` }}
+          <ViewTransitionElement
+            active={!isActive && isTransitioning}
+            viewTransitionName={`cover-image-${key}`}
           >
-            <CardContent className="p-0">
-              <CoverMotionImage
-                className={cn(
-                  'aspect-2/3 overflow-hidden rounded-xl',
-                  sectionPath === 'music' && 'aspect-square',
-                )}
-                loading="eager"
-                imageSrc={subjectInfo.images.common}
-                layoutId={`${layoutId}-image`}
-              />
+            <MyLink
+              to={`/subject/${subjectId}`}
+              className="cursor-default"
+              viewTransition
+              state={{ viewTransitionName: `cover-image-${key}` }}
+            >
+              <CardContent className="p-0">
+                <CoverMotionImage
+                  className={cn(
+                    'aspect-2/3 overflow-hidden rounded-xl',
+                    sectionPath === 'music' && 'aspect-square',
+                  )}
+                  loading="eager"
+                  imageSrc={subjectInfo.images.common}
+                  layoutId={`${layoutId}-image`}
+                />
 
-              <div
-                className={`absolute right-0 bottom-0 left-0 z-20 flex h-12 items-end justify-between bg-linear-to-t from-black/50 px-2 py-1`}
-              >
-                <motion.div
-                  className="flex items-center justify-center gap-1 font-bold text-white"
-                  layoutId={`${layoutId}-score`}
-                  layoutDependency={isActive}
+                <div
+                  className={`absolute right-0 bottom-0 left-0 z-20 flex h-12 items-end justify-between bg-linear-to-t from-black/50 px-2 py-1`}
                 >
-                  {subjectInfo.rating.score.toFixed(1)}
-                  <span className="i-mingcute-star-fill mt-0.5 text-xs" />
-                </motion.div>
-              </div>
-            </CardContent>
-          </MyLink>
+                  <motion.div
+                    className="flex items-center justify-center gap-1 font-bold text-white"
+                    layoutId={`${layoutId}-score`}
+                    layoutDependency={isActive}
+                  >
+                    {subjectInfo.rating.score.toFixed(1)}
+                    <span className="i-mingcute-star-fill mt-0.5 text-xs" />
+                  </motion.div>
+                </div>
+              </CardContent>
+            </MyLink>
+          </ViewTransitionElement>
         }
         Description={
           <div className="mt-2 w-full p-0.5">
@@ -148,14 +151,17 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
               {/* Cover */}
               <section className="flex w-full flex-row items-start gap-2 p-4">
                 {subjectInfo ? (
-                  <CoverMotionImage
-                    imageSrc={subjectInfo.images.common}
-                    className="shrink-0 basis-1/6 overflow-hidden rounded-lg shadow-lg"
-                    layoutId={`${layoutId}-image`}
-                    style={{
-                      viewTransitionName: isTransitioning ? `cover-image-${key}` : undefined,
-                    }}
-                  />
+                  <ViewTransitionElement
+                    active={isTransitioning}
+                    className="shrink-0 basis-1/6"
+                    viewTransitionName={`cover-image-${key}`}
+                  >
+                    <CoverMotionImage
+                      imageSrc={subjectInfo.images.common}
+                      className="overflow-hidden rounded-lg shadow-lg"
+                      layoutId={`${layoutId}-image`}
+                    />
+                  </ViewTransitionElement>
                 ) : (
                   <Skeleton className="aspect-square shrink-0 basis-1/6" />
                 )}

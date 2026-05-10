@@ -1,4 +1,4 @@
-import { Image } from '@renderer/components/image/image'
+import { ViewTransitionImage } from '@renderer/components/image/view-transition-image'
 import {
   HoverCardContent,
   HoverCardWrapper,
@@ -58,12 +58,11 @@ export function Item({
                     viewTransition
                     className="shrink-0"
                   >
-                    <Image
+                    <ViewTransitionImage
+                      active={isTransitioning}
                       className="aspect-square size-14 overflow-hidden rounded-lg"
                       imageSrc={character.images.grid}
-                      style={{
-                        viewTransitionName: isTransitioning ? viewTransitionName : undefined,
-                      }}
+                      viewTransitionName={viewTransitionName}
                     />
                   </MyLink>
                 )}
@@ -98,13 +97,15 @@ function PopCard({ character }: { character: Character }) {
               viewTransition
               className="basis-1/4"
             >
-              <Image
+              <ViewTransitionImage
+                active={isTransitioning}
                 className="h-fit overflow-hidden rounded-lg"
+                imageContainerClassName="h-fit"
                 imageSrc={character.images.medium}
                 loadingClassName="aspect-square"
                 careLoading
                 loading="eager"
-                style={{ viewTransitionName: isTransitioning ? viewTransitionName : undefined }}
+                viewTransitionName={viewTransitionName}
               />
             </MyLink>
           )}
@@ -143,7 +144,9 @@ function MetaInfo({
   viewTransitionName: string
 }) {
   return (
-    <section className="flex min-w-0 flex-1 flex-col gap-2 overflow-hidden">
+    <section
+      className={cn('flex min-w-0 flex-col gap-2 overflow-hidden', showAll ? 'shrink-0' : 'flex-1')}
+    >
       <div className="flex flex-row items-start justify-between gap-2">
         <MyLink
           to={`/character/${character.id}`}

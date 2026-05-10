@@ -3,8 +3,10 @@ import { mainPanelScrollPositionAtom, scrollViewportAtom } from '@renderer/state
 import { cn } from '@renderer/lib/utils'
 import { ScrollArea } from '@base-ui/react/scroll-area'
 import { useSetAtom } from 'jotai'
-import { PropsWithChildren, useEffect, useMemo, useRef } from 'react'
+import { PropsWithChildren, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
+
+const SCROLL_RESTORE_TOLERANCE = 2
 
 export function PageScrollWrapper({
   initScrollTo = 0,
@@ -16,6 +18,7 @@ export function PageScrollWrapper({
 }>) {
   const { pathname } = useLocation()
   const viewportRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
   const setViewport = useSetAtom(scrollViewportAtom)
   const setScrollPosition = useSetAtom(mainPanelScrollPositionAtom)
 
@@ -31,30 +34,79 @@ export function PageScrollWrapper({
     )
   }, [pathname, initScrollTo])
 
+  const updateViewportState = useCallback(
+    (pathname: string, scrollTop: number, shouldCache: boolean) => {
+      if (shouldCache) scrollCache.set(pathname, scrollTop)
+      setScrollPosition(scrollTop)
+    },
+    [setScrollPosition],
+  )
+
   useEffect(() => {
     const viewport = viewportRef.current
+    const content = contentRef.current
     if (!viewport) return
 
+    let isRestoring = initialScrollTop > 0
+    const getMaxScrollTop = () => Math.max(0, viewport.scrollHeight - viewport.clientHeight)
+    const canRestoreTarget = () => initialScrollTop <= getMaxScrollTop() + SCROLL_RESTORE_TOLERANCE
+
     const syncViewportState = () => {
-      scrollCache.set(pathname, viewport.scrollTop)
-      setScrollPosition(viewport.scrollTop)
+      updateViewportState(pathname, viewport.scrollTop, !isRestoring)
+    }
+    const restoreScrollPosition = (force = false) => {
+      if (!force && !isRestoring) return
+
+      const nextScrollTop = Math.min(initialScrollTop, getMaxScrollTop())
+
+      viewport.scrollTo({ top: nextScrollTop, left: 0 })
+
+      if (initialScrollTop === 0 || canRestoreTarget()) {
+        isRestoring = false
+        updateViewportState(pathname, viewport.scrollTop, true)
+        return
+      }
+
+      updateViewportState(pathname, viewport.scrollTop, false)
+    }
+    const cancelRestore = () => {
+      if (!isRestoring) return
+      isRestoring = false
+      updateViewportState(pathname, viewport.scrollTop, true)
     }
     const wheelListener = (event: WheelEvent) => {
       // Prevent horizontal trackpad scrolling from affecting the page viewport.
       if (Math.abs(event.deltaX) > Math.abs(event.deltaY) && Math.abs(event.deltaX) > 0.5) {
         event.preventDefault()
+        return
+      }
+
+      if (Math.abs(event.deltaY) > 0.5) {
+        cancelRestore()
       }
     }
+    const pointerDownListener = () => {
+      cancelRestore()
+    }
+    const resizeObserver = new ResizeObserver(() => restoreScrollPosition())
+    const mutationObserver = new MutationObserver(() => restoreScrollPosition())
 
-    viewport.scrollTo({ top: initialScrollTop, left: 0 })
-    syncViewportState()
+    restoreScrollPosition(true)
+    if (content) {
+      resizeObserver.observe(content)
+      mutationObserver.observe(content, { childList: true, subtree: true })
+    }
     viewport.addEventListener('scroll', syncViewportState, { passive: true })
     viewport.addEventListener('wheel', wheelListener, { passive: false })
+    viewport.addEventListener('pointerdown', pointerDownListener)
     return () => {
+      resizeObserver.disconnect()
+      mutationObserver.disconnect()
       viewport.removeEventListener('scroll', syncViewportState)
       viewport.removeEventListener('wheel', wheelListener)
+      viewport.removeEventListener('pointerdown', pointerDownListener)
     }
-  }, [pathname, initialScrollTop, setScrollPosition])
+  }, [pathname, initialScrollTop, updateViewportState])
 
   return (
     <ScrollArea.Root
@@ -64,7 +116,9 @@ export function PageScrollWrapper({
         ref={viewportRef}
         className="h-full w-full overflow-x-hidden focus-visible:outline-hidden"
       >
-        <ScrollArea.Content className="h-full min-h-full w-full">{children}</ScrollArea.Content>
+        <ScrollArea.Content ref={contentRef} className="h-full min-h-full w-full">
+          {children}
+        </ScrollArea.Content>
       </ScrollArea.Viewport>
 
       <ScrollArea.Scrollbar

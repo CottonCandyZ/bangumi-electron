@@ -1,4 +1,5 @@
 import { Image } from '@renderer/components/image/image'
+import { ViewTransitionElement } from '@renderer/components/image/view-transition-image'
 import { Card } from '@renderer/components/ui/card'
 import { RelatedSubject } from '@renderer/data/types/subject'
 import { Link, useViewTransitionState, useLocation } from 'react-router-dom'
@@ -17,20 +18,23 @@ export function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
         state={{ viewTransitionName: `cover-image-${key}` }}
         viewTransition
       >
-        <Card
-          className="overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
-          style={{ viewTransitionName: isTransitioning ? `cover-image-${key}` : undefined }}
+        <ViewTransitionElement
+          active={isTransitioning}
+          className="overflow-hidden rounded-xl"
+          viewTransitionName={`cover-image-${key}`}
         >
-          {relatedSubject.images.common !== '' ? (
-            <Image
-              key={`${layoutId}-image`}
-              imageSrc={relatedSubject.images.common}
-              className="aspect-square"
-            />
-          ) : (
-            <div className="bg-muted aspect-square" />
-          )}
-        </Card>
+          <Card className="overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700">
+            {relatedSubject.images.common !== '' ? (
+              <Image
+                key={`${layoutId}-image`}
+                imageSrc={relatedSubject.images.common}
+                className="aspect-square"
+              />
+            ) : (
+              <div className="bg-muted aspect-square" />
+            )}
+          </Card>
+        </ViewTransitionElement>
       </Link>
       <div className="flex flex-col">
         <span className="line-clamp-3 text-xs">{relatedSubject.name}</span>

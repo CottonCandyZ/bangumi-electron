@@ -27,6 +27,7 @@ export type MonoSubjectItem = {
   image?: string
   subjectType: SubjectType
   relation: string
+  relatedItems?: MonoRelatedItem[]
 }
 
 export type MonoRelatedItem = {
