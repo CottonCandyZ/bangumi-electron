@@ -1,7 +1,7 @@
 import { Button } from '@renderer/components/ui/button'
 import { cn } from '@renderer/lib/utils'
 import { ArrowUpIcon } from 'lucide-react'
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 
 const SHOW_THRESHOLD = 160
 const PROGRESS_PATH = 'M 18 2 a 16 16 0 1 1 0 32 a 16 16 0 1 1 0 -32'
@@ -16,6 +16,7 @@ type BackToTopButtonProps = {
 export function BackToTopButton({ className, scrollTop, style, viewport }: BackToTopButtonProps) {
   const [maxScrollTop, setMaxScrollTop] = useState(0)
   const [trackedScrollTop, setTrackedScrollTop] = useState(0)
+  const updateFrameRef = useRef<number | null>(null)
   const currentScrollTop = scrollTop ?? trackedScrollTop
   const progress = maxScrollTop > 0 ? Math.min(1, Math.max(0, currentScrollTop / maxScrollTop)) : 0
   const visible = currentScrollTop > SHOW_THRESHOLD && maxScrollTop > SHOW_THRESHOLD
@@ -29,14 +30,41 @@ export function BackToTopButton({ className, scrollTop, style, viewport }: BackT
     const updateMaxScrollTop = () => {
       setMaxScrollTop(Math.max(0, viewport.scrollHeight - viewport.clientHeight))
     }
+    const scheduleUpdateMaxScrollTop = () => {
+      if (updateFrameRef.current !== null) return
+      updateFrameRef.current = window.requestAnimationFrame(() => {
+        updateFrameRef.current = null
+        updateMaxScrollTop()
+      })
+    }
     const resizeObserver = new ResizeObserver(updateMaxScrollTop)
+    const mutationObserver = new MutationObserver(scheduleUpdateMaxScrollTop)
 
     updateMaxScrollTop()
     resizeObserver.observe(viewport)
     if (viewport.firstElementChild) resizeObserver.observe(viewport.firstElementChild)
+    mutationObserver.observe(viewport, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    })
+    viewport.addEventListener('scroll', scheduleUpdateMaxScrollTop, { passive: true })
 
-    return () => resizeObserver.disconnect()
+    return () => {
+      resizeObserver.disconnect()
+      mutationObserver.disconnect()
+      viewport.removeEventListener('scroll', scheduleUpdateMaxScrollTop)
+      if (updateFrameRef.current !== null) {
+        window.cancelAnimationFrame(updateFrameRef.current)
+        updateFrameRef.current = null
+      }
+    }
   }, [viewport])
+
+  useEffect(() => {
+    if (!viewport) return
+    setMaxScrollTop(Math.max(0, viewport.scrollHeight - viewport.clientHeight))
+  }, [scrollTop, viewport])
 
   useEffect(() => {
     if (!viewport || scrollTop !== undefined) return
