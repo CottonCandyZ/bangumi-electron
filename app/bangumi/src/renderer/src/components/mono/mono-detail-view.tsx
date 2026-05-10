@@ -449,13 +449,17 @@ function MonoSubjectCard({ subject }: { subject: MonoSubjectItem }) {
           <div className="text-muted-foreground line-clamp-1 text-xs">{subject.name}</div>
         )}
         {relatedItems.length > 0 && <RelatedItemSummary items={relatedItems} />}
-        <div className="mt-auto flex flex-row flex-wrap gap-1 pt-2">
+        <div className="mt-auto flex min-w-0 flex-row flex-wrap gap-1 pt-2">
           <Badge variant="outline" className="text-xs">
             {SUBJECT_TYPE_MAP[subject.subjectType]}
           </Badge>
           {subject.relation && (
-            <Badge variant="secondary" className="text-xs shadow-none">
-              {subject.relation}
+            <Badge
+              variant="secondary"
+              className="max-w-full min-w-0 text-xs shadow-none"
+              title={subject.relation}
+            >
+              <span className="min-w-0 truncate">{subject.relation}</span>
             </Badge>
           )}
         </div>

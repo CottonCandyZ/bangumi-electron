@@ -5,6 +5,7 @@ import { animate } from 'motion/react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import {
   createContext,
+  CSSProperties,
   FC,
   HTMLProps,
   PropsWithChildren,
@@ -52,7 +53,10 @@ export const HoverPopCard: FC<PropsWithChildren<HoverCardProps>> = ({
         setBox,
       }}
     >
-      <div className={cn('relative z-30', (isActive || isAnimate) && 'z-40')} style={{ ...box }}>
+      <div
+        className={cn('relative z-30', (isActive || isAnimate) && 'z-40')}
+        style={getBoxStyle(box)}
+      >
         {children}
       </div>
     </HoverPopCardContext.Provider>
@@ -176,7 +180,8 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
       ) : (
         <HoverCardContent
           ref={hoverRef}
-          style={{ height: hoverBox.height, width: hoverBox.width }}
+          className="h-full w-full"
+          style={getBoxStyle(hoverBox)}
           onMouseEnter={() => {
             setActiveId(null)
             timeoutRef.current = setTimeout(() => {
@@ -201,4 +206,12 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
       )}
     </div>
   )
+}
+
+function getBoxStyle(box: Record<'height' | 'width', 'auto' | string>): CSSProperties | undefined {
+  const style: CSSProperties = {}
+  if (box.height !== 'auto') style.height = box.height
+  if (box.width !== 'auto') style.width = box.width
+
+  return Object.keys(style).length > 0 ? style : undefined
 }

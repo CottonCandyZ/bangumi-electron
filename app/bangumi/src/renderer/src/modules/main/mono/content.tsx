@@ -240,20 +240,21 @@ function mergeRelatedItems(items?: MonoRelatedItem[]) {
 }
 
 function mergeSubjects(subjects: MonoSubjectItem[]) {
-  const subjectMap = new Map<number, MonoSubjectItem>()
+  const subjectMap = new Map<string, MonoSubjectItem>()
 
   for (const subject of subjects) {
-    const prev = subjectMap.get(subject.id)
+    const key = getSubjectMergeKey(subject.id)
+    const prev = subjectMap.get(key)
 
     if (!prev) {
-      subjectMap.set(subject.id, {
+      subjectMap.set(key, {
         ...subject,
         relation: mergeRelationLabels(subject.relation),
       })
       continue
     }
 
-    subjectMap.set(subject.id, {
+    subjectMap.set(key, {
       ...prev,
       name: prev.name || subject.name,
       nameCn: prev.nameCn || subject.nameCn,
@@ -273,27 +274,34 @@ function mergeSubjectsWithRelatedItems(
   subjects: MonoSubjectItem[],
   relatedItems: MonoRelatedItem[],
 ) {
-  const relatedItemMap = new Map<number, MonoRelatedItem[]>()
+  const relatedItemMap = new Map<string, MonoRelatedItem[]>()
 
   for (const item of relatedItems) {
     if (item.subjectId === undefined) continue
-    const items = relatedItemMap.get(item.subjectId) ?? []
+    const key = getSubjectMergeKey(item.subjectId)
+    const items = relatedItemMap.get(key) ?? []
     items.push(item)
-    relatedItemMap.set(item.subjectId, items)
+    relatedItemMap.set(key, items)
   }
 
   return subjects.map((subject) => ({
     ...subject,
-    relatedItems: mergeRelatedItems(relatedItemMap.get(subject.id)) ?? [],
+    relatedItems: mergeRelatedItems(relatedItemMap.get(getSubjectMergeKey(subject.id))) ?? [],
   }))
 }
 
 function getUnmatchedRelatedItems(subjects: MonoSubjectItem[], relatedItems: MonoRelatedItem[]) {
-  const subjectIds = new Set(subjects.map((subject) => subject.id))
+  const subjectIds = new Set(subjects.map((subject) => getSubjectMergeKey(subject.id)))
 
   return mergeRelatedItems(
-    relatedItems.filter((item) => item.subjectId === undefined || !subjectIds.has(item.subjectId)),
+    relatedItems.filter(
+      (item) => item.subjectId === undefined || !subjectIds.has(getSubjectMergeKey(item.subjectId)),
+    ),
   )
+}
+
+function getSubjectMergeKey(subjectId: number) {
+  return subjectId.toString()
 }
 
 function mergeSubjectType(prev?: SubjectType, next?: SubjectType) {

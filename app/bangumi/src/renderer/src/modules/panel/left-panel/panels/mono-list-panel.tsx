@@ -595,13 +595,17 @@ function MonoSubjectListItem({
           <div className="text-muted-foreground line-clamp-1 text-xs">{item.name}</div>
         )}
         {relatedItems.length > 0 && <RelatedItemLinks className="pt-0.5" items={relatedItems} />}
-        <div className="mt-auto flex flex-row flex-wrap gap-1">
+        <div className="mt-auto flex min-w-0 flex-row flex-wrap gap-1">
           <Badge variant="outline" className="text-xs">
             {SUBJECT_TYPE_MAP[item.subjectType]}
           </Badge>
           {item.relation && (
-            <Badge variant="secondary" className="text-xs shadow-none">
-              {item.relation}
+            <Badge
+              variant="secondary"
+              className="max-w-full min-w-0 text-xs shadow-none"
+              title={item.relation}
+            >
+              <span className="min-w-0 truncate">{item.relation}</span>
             </Badge>
           )}
         </div>
