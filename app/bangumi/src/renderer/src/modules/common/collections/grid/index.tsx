@@ -14,9 +14,11 @@ import { useSession } from '@renderer/data/hooks/session'
 export function CollectionsGrid({
   collectionType,
   subjectType,
+  showEpisodeList,
 }: {
   collectionType: CollectionType
   subjectType: SubjectType
+  showEpisodeList: boolean
 }) {
   const userInfo = useSession()
   const collectionsQuery = useInfinityQueryCollectionsByUsername({
@@ -108,7 +110,7 @@ export function CollectionsGrid({
         {items.map((item) => {
           return (
             <div key={item.data.subject_id} data-grid-groupkey={item.index}>
-              <CollectionItem collectionItemInfo={item.data} />
+              <CollectionItem collectionItemInfo={item.data} showEpisodeList={showEpisodeList} />
             </div>
           )
         })}

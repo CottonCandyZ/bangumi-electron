@@ -1,4 +1,5 @@
 import { Image } from '@renderer/components/image/image'
+import { BackToTopButton } from '@renderer/components/button/back-to-top'
 import { Card } from '@renderer/components/ui/card'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { Comment, CommentBase } from '@renderer/data/types/comment'
@@ -26,6 +27,7 @@ type CommentBoxProps = {
   onInView?: () => void
   onListNearBottom?: () => void
   listNearBottomThreshold?: number
+  showBackToTop?: boolean
   footer?: ReactNode
 }
 
@@ -42,6 +44,7 @@ export function CommentBox({
   onInView,
   onListNearBottom,
   listNearBottomThreshold,
+  showBackToTop = false,
   footer,
 }: CommentBoxProps) {
   const { ref, inView } = useInView({
@@ -80,6 +83,7 @@ export function CommentBox({
         className={listClassName}
         onNearBottom={onListNearBottom}
         nearBottomThreshold={listNearBottomThreshold}
+        showBackToTop={showBackToTop}
         virtual={virtual}
       />
     )
@@ -90,6 +94,7 @@ export function CommentBox({
     listClassName,
     listNearBottomThreshold,
     onListNearBottom,
+    showBackToTop,
     virtual,
   ])
 
@@ -122,18 +127,25 @@ function CommentList({
   className,
   nearBottomThreshold,
   onNearBottom,
+  showBackToTop,
   virtual,
 }: {
   comments: Comment[]
   className?: string
   onNearBottom?: () => void
   nearBottomThreshold?: number
+  showBackToTop?: boolean
   virtual: boolean
 }) {
   const viewportRef = useRef<HTMLDivElement>(null)
+  const [viewport, setViewport] = useState<HTMLElement | null>(null)
   const [scrollTop, setScrollTop] = useState(0)
   const [viewportHeight, setViewportHeight] = useState(0)
   const nearBottomThresholdPx = nearBottomThreshold ?? 160
+  const setViewportRef = useCallback((element: HTMLDivElement | null) => {
+    viewportRef.current = element
+    setViewport(element)
+  }, [])
 
   const notifyIfNearBottom = useCallback(() => {
     const viewport = viewportRef.current
@@ -153,7 +165,7 @@ function CommentList({
     const observer = new ResizeObserver(updateHeight)
     observer.observe(viewport)
     return () => observer.disconnect()
-  }, [])
+  }, [viewport])
 
   useEffect(() => {
     if (!virtual) return
@@ -180,21 +192,30 @@ function CommentList({
   const bottomHeight = Math.max(0, (comments.length - end) * VIRTUAL_ITEM_HEIGHT)
 
   return (
-    <div
-      ref={viewportRef}
-      className={cn('max-h-[40rem] overflow-y-auto pr-2', className)}
-      onScroll={(event) => {
-        setScrollTop(event.currentTarget.scrollTop)
-        notifyIfNearBottom()
-      }}
-    >
-      <div style={{ height: topHeight }} />
-      <div className="flex flex-col gap-3">
-        {visibleComments.map((comment) => (
-          <CommentItem comment={comment} key={comment.id} />
-        ))}
+    <div className="relative h-full min-h-0">
+      <div
+        ref={setViewportRef}
+        className={cn('max-h-[40rem] overflow-y-auto pr-2', className)}
+        onScroll={(event) => {
+          setScrollTop(event.currentTarget.scrollTop)
+          notifyIfNearBottom()
+        }}
+      >
+        <div style={{ height: topHeight }} />
+        <div className="flex flex-col gap-3">
+          {visibleComments.map((comment) => (
+            <CommentItem comment={comment} key={comment.id} />
+          ))}
+        </div>
+        <div style={{ height: bottomHeight }} />
       </div>
-      <div style={{ height: bottomHeight }} />
+      {showBackToTop && (
+        <BackToTopButton
+          className="absolute right-3 bottom-3 size-9"
+          scrollTop={scrollTop}
+          viewport={viewport}
+        />
+      )}
     </div>
   )
 }
