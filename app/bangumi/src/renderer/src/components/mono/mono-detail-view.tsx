@@ -21,6 +21,7 @@ import {
 import { SubjectType } from '@renderer/data/types/subject'
 import { useResizeObserver } from '@renderer/hooks/use-resize'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
+import { splitRelationLabels } from '@renderer/lib/utils/relation'
 import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
 import { monoAvatarImageInViewAtom } from '@renderer/state/in-view'
 import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
@@ -248,29 +249,57 @@ function MonoSubjectsSection({
   const relationFilterId = `mono-subjects-relation-${monoType}-${monoId}`
   const typeFilter = filterMap.get(typeFilterId) ?? ALL_SUBJECT_TYPES
   const relationFilter = filterMap.get(relationFilterId) ?? ALL_SUBJECT_RELATIONS
+  const subjectsMatchingRelation = useMemo(
+    () =>
+      (subjects ?? []).filter(
+        (subject) =>
+          relationFilter === ALL_SUBJECT_RELATIONS ||
+          splitRelationLabels(subject.relation).includes(relationFilter),
+      ),
+    [relationFilter, subjects],
+  )
+  const subjectsMatchingType = useMemo(
+    () =>
+      (subjects ?? []).filter(
+        (subject) =>
+          typeFilter === ALL_SUBJECT_TYPES || SUBJECT_TYPE_MAP[subject.subjectType] === typeFilter,
+      ),
+    [subjects, typeFilter],
+  )
   const typeFilters = useMemo(
     () =>
       new Set([
         ALL_SUBJECT_TYPES,
-        ...(subjects ?? []).map((subject) => SUBJECT_TYPE_MAP[subject.subjectType]),
+        ...subjectsMatchingRelation.map((subject) => SUBJECT_TYPE_MAP[subject.subjectType]),
       ]),
-    [subjects],
+    [subjectsMatchingRelation],
   )
   const relationFilters = useMemo(
     () =>
       new Set([
         ALL_SUBJECT_RELATIONS,
-        ...(subjects ?? []).map((subject) => subject.relation).filter(Boolean),
+        ...subjectsMatchingType.flatMap((subject) => splitRelationLabels(subject.relation)),
       ]),
-    [subjects],
+    [subjectsMatchingType],
   )
+  useEffect(() => {
+    if (typeFilter !== ALL_SUBJECT_TYPES && !typeFilters.has(typeFilter)) {
+      setFilter(typeFilterId, ALL_SUBJECT_TYPES)
+    }
+  }, [setFilter, typeFilter, typeFilterId, typeFilters])
+  useEffect(() => {
+    if (relationFilter !== ALL_SUBJECT_RELATIONS && !relationFilters.has(relationFilter)) {
+      setFilter(relationFilterId, ALL_SUBJECT_RELATIONS)
+    }
+  }, [relationFilter, relationFilterId, relationFilters, setFilter])
   const filteredSubjects = useMemo(
     () =>
       (subjects ?? []).filter((subject) => {
         const matchesType =
           typeFilter === ALL_SUBJECT_TYPES || SUBJECT_TYPE_MAP[subject.subjectType] === typeFilter
         const matchesRelation =
-          relationFilter === ALL_SUBJECT_RELATIONS || subject.relation === relationFilter
+          relationFilter === ALL_SUBJECT_RELATIONS ||
+          splitRelationLabels(subject.relation).includes(relationFilter)
         return matchesType && matchesRelation
       }),
     [relationFilter, subjects, typeFilter],

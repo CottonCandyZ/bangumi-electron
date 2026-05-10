@@ -13,6 +13,7 @@ import { CollectionEpisode } from '@renderer/data/types/collection'
 import { Episode, EpisodeType } from '@renderer/data/types/episode'
 import { SubjectType } from '@renderer/data/types/subject'
 import type { MonoRelatedItem } from '@renderer/data/types/mono'
+import { splitRelationLabels } from '@renderer/lib/utils/relation'
 import { PageSelector } from '@renderer/modules/common/episodes/grid/page-selector'
 import type { MonoListPanelTab } from '@renderer/state/panel'
 import {
@@ -47,8 +48,13 @@ export function MonoListPanel() {
   const [activeTabId, setActiveTabId] = useAtom(monoListPanelActiveTabIdAtom)
   const closeTab = useSetAtom(closeMonoListPanelTabAtomAction)
   const closeAllTabs = useSetAtom(closeAllMonoListPanelTabsAtomAction)
+  const { pathname } = useLocation()
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0]
   const activeTabCount = activeTab ? getMonoListPanelTabCount(activeTab) : null
+  const activeTabSourceTo = activeTab ? getMonoListPanelTabSourceTo(activeTab) : null
+  const activeTabSourceActive = activeTabSourceTo
+    ? isRoutePathActive(pathname, activeTabSourceTo)
+    : false
   const tabRefs = useRef(new Map<string, HTMLButtonElement>())
 
   useEffect(() => {
@@ -113,7 +119,20 @@ export function MonoListPanel() {
           )}
         </div>
         <div className="text-muted-foreground line-clamp-1 text-xs">
-          来自 {activeTab.sourceTitle}
+          来自{' '}
+          {activeTabSourceTo ? (
+            <MyLink
+              className="text-primary hover:bg-primary/10 focus-visible:ring-ring/50 -mx-1 rounded-sm px-1 underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-hidden"
+              to={activeTabSourceTo}
+              onClick={(event) => {
+                if (activeTabSourceActive) event.preventDefault()
+              }}
+            >
+              {activeTab.sourceTitle}
+            </MyLink>
+          ) : (
+            activeTab.sourceTitle
+          )}
         </div>
       </div>
       {activeTab.type === 'subjects' ? (
@@ -142,6 +161,14 @@ function getMonoListPanelTabCount(tab: MonoListPanelTab) {
   return tab.relatedSubjects.length
 }
 
+function getMonoListPanelTabSourceTo(tab: MonoListPanelTab) {
+  if (tab.type === 'subjects' || tab.type === 'related') {
+    return `/${tab.monoType}/${tab.monoId}`
+  }
+
+  return `/subject/${tab.subjectId}`
+}
+
 function MonoSubjectListPanelContent({
   tab,
 }: {
@@ -152,29 +179,57 @@ function MonoSubjectListPanelContent({
   const relationFilterId = `${tab.id}-panel-relation`
   const typeFilter = filterMap.get(typeFilterId) ?? ALL_SUBJECT_TYPES
   const relationFilter = filterMap.get(relationFilterId) ?? ALL_SUBJECT_RELATIONS
+  const subjectsMatchingRelation = useMemo(
+    () =>
+      tab.subjects.filter(
+        (subject) =>
+          relationFilter === ALL_SUBJECT_RELATIONS ||
+          splitRelationLabels(subject.relation).includes(relationFilter),
+      ),
+    [relationFilter, tab.subjects],
+  )
+  const subjectsMatchingType = useMemo(
+    () =>
+      tab.subjects.filter(
+        (subject) =>
+          typeFilter === ALL_SUBJECT_TYPES || SUBJECT_TYPE_MAP[subject.subjectType] === typeFilter,
+      ),
+    [tab.subjects, typeFilter],
+  )
   const typeFilters = useMemo(
     () =>
       new Set([
         ALL_SUBJECT_TYPES,
-        ...tab.subjects.map((subject) => SUBJECT_TYPE_MAP[subject.subjectType]),
+        ...subjectsMatchingRelation.map((subject) => SUBJECT_TYPE_MAP[subject.subjectType]),
       ]),
-    [tab.subjects],
+    [subjectsMatchingRelation],
   )
   const relationFilters = useMemo(
     () =>
       new Set([
         ALL_SUBJECT_RELATIONS,
-        ...tab.subjects.map((subject) => subject.relation).filter(Boolean),
+        ...subjectsMatchingType.flatMap((subject) => splitRelationLabels(subject.relation)),
       ]),
-    [tab.subjects],
+    [subjectsMatchingType],
   )
+  useEffect(() => {
+    if (typeFilter !== ALL_SUBJECT_TYPES && !typeFilters.has(typeFilter)) {
+      setFilter(typeFilterId, ALL_SUBJECT_TYPES)
+    }
+  }, [setFilter, typeFilter, typeFilterId, typeFilters])
+  useEffect(() => {
+    if (relationFilter !== ALL_SUBJECT_RELATIONS && !relationFilters.has(relationFilter)) {
+      setFilter(relationFilterId, ALL_SUBJECT_RELATIONS)
+    }
+  }, [relationFilter, relationFilterId, relationFilters, setFilter])
   const items = useMemo(
     () =>
       tab.subjects.filter((subject) => {
         const matchesType =
           typeFilter === ALL_SUBJECT_TYPES || SUBJECT_TYPE_MAP[subject.subjectType] === typeFilter
         const matchesRelation =
-          relationFilter === ALL_SUBJECT_RELATIONS || subject.relation === relationFilter
+          relationFilter === ALL_SUBJECT_RELATIONS ||
+          splitRelationLabels(subject.relation).includes(relationFilter)
         return matchesType && matchesRelation
       }),
     [relationFilter, tab.subjects, typeFilter],

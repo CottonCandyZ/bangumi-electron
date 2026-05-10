@@ -31,6 +31,7 @@ import {
   PersonRelatedSubject,
 } from '@renderer/data/types/person'
 import { SubjectType } from '@renderer/data/types/subject'
+import { mergeRelationLabels } from '@renderer/lib/utils/relation'
 import { useCallback, useState } from 'react'
 import { useLocation, useViewTransitionState } from 'react-router-dom'
 
@@ -73,7 +74,9 @@ function PersonMonoContent({ personId }: { personId: PersonId }) {
     id: personId,
     enabled: !!personId && enabledCommentsId === personId,
   })
-  const subjects = subjectsQuery.data?.map(toMonoSubject)
+  const subjects = subjectsQuery.data
+    ? mergeSubjects(subjectsQuery.data.map(toMonoSubject))
+    : undefined
   const relatedCharacters = charactersQuery.data?.map(toCharacterRelatedItem)
   const mergedSubjects =
     subjects && relatedCharacters
@@ -112,7 +115,9 @@ function CharacterMonoContent({ characterId }: { characterId: CharacterId }) {
     id: characterId,
     enabled: !!characterId && enabledCommentsId === characterId,
   })
-  const subjects = subjectsQuery.data?.map(toMonoSubject)
+  const subjects = subjectsQuery.data
+    ? mergeSubjects(subjectsQuery.data.map(toMonoSubject))
+    : undefined
   const relatedPersons = personsQuery.data?.map(toPersonRelatedItem)
   const mergedSubjects =
     subjects && relatedPersons ? mergeSubjectsWithRelatedItems(subjects, relatedPersons) : subjects
@@ -227,11 +232,41 @@ function mergeRelatedItems(items?: MonoRelatedItem[]) {
       subjectNameCn: undefined,
       subjectId: undefined,
       subjectType: mergeSubjectType(prev.subjectType, item.subjectType),
-      relation: mergeRelations(prev.relation, item.relation),
+      relation: mergeRelationLabels(prev.relation, item.relation),
     })
   }
 
   return [...itemMap.values()]
+}
+
+function mergeSubjects(subjects: MonoSubjectItem[]) {
+  const subjectMap = new Map<number, MonoSubjectItem>()
+
+  for (const subject of subjects) {
+    const prev = subjectMap.get(subject.id)
+
+    if (!prev) {
+      subjectMap.set(subject.id, {
+        ...subject,
+        relation: mergeRelationLabels(subject.relation),
+      })
+      continue
+    }
+
+    subjectMap.set(subject.id, {
+      ...prev,
+      name: prev.name || subject.name,
+      nameCn: prev.nameCn || subject.nameCn,
+      image: prev.image ?? subject.image,
+      relation: mergeRelationLabels(prev.relation, subject.relation),
+      relatedItems: mergeRelatedItems([
+        ...(prev.relatedItems ?? []),
+        ...(subject.relatedItems ?? []),
+      ]),
+    })
+  }
+
+  return [...subjectMap.values()]
 }
 
 function mergeSubjectsWithRelatedItems(
@@ -263,17 +298,6 @@ function getUnmatchedRelatedItems(subjects: MonoSubjectItem[], relatedItems: Mon
 
 function mergeSubjectType(prev?: SubjectType, next?: SubjectType) {
   return prev === next ? prev : undefined
-}
-
-function mergeRelations(...relations: Array<string | undefined>) {
-  return [
-    ...new Set(
-      relations
-        .flatMap((relation) => relation?.split(/[、,/]/) ?? [])
-        .map((relation) => relation.trim())
-        .filter(Boolean),
-    ),
-  ].join('、')
 }
 
 function toMonoComment(comment: PersonComment): MonoComment {
