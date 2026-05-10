@@ -8,7 +8,9 @@ export function HoverCard() {
   const open = useAtomValue(hoverCardOpenAtom)
   return (
     <AnimatePresence>
-      {open && content !== null && content.id === 'episode-content' && <HoverEpisodeDetail />}
+      {open && content !== null && content.id === 'episode-content' && (
+        <HoverEpisodeDetail content={content} />
+      )}
     </AnimatePresence>
   )
 }

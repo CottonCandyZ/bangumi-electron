@@ -5,8 +5,9 @@ import { useLocation } from 'react-router-dom'
 
 export function OriginalLink() {
   const { pathname } = useLocation()
-  const isOriginalLinkPath = /^\/(subject|person|character)\/\d+/.test(pathname)
-  const href = `${HOST}${pathname}`
+  const episodePath = pathname.match(/^\/episode\/(\d+)/)
+  const isOriginalLinkPath = /^\/(subject|person|character)\/\d+/.test(pathname) || !!episodePath
+  const href = episodePath ? `${HOST}/ep/${episodePath[1]}` : `${HOST}${pathname}`
 
   return (
     isOriginalLinkPath && (

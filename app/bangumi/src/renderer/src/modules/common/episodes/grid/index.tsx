@@ -1,5 +1,6 @@
 import { EpisodeGridContent } from '@renderer/modules/common/episodes/grid/content'
 import { PageSelector } from '@renderer/modules/common/episodes/grid/page-selector'
+import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useCollectionEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/api/collection'
 import { useEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/api/episodes'
@@ -8,6 +9,8 @@ import { CollectionType } from '@renderer/data/types/collection'
 import { cn } from '@renderer/lib/utils'
 import { useState } from 'react'
 import { useSession } from '@renderer/data/hooks/session'
+import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
+import { useSetAtom } from 'jotai'
 
 export type EpisodeGridSize = {
   size?: 'small' | 'default'
@@ -19,13 +22,16 @@ export function EpisodesGrid({
   size = 'default',
   selector = true,
   collectionType,
+  sourceTitle,
 }: {
   subjectId: SubjectId
   eps: number
   selector?: boolean
   collectionType?: CollectionType
+  sourceTitle?: string
 } & EpisodeGridSize) {
   const userInfo = useSession()
+  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
   const [offset, setOffSet] = useState(0)
   const limit = 100
   let skeletonNumber = eps ?? 12
@@ -51,10 +57,29 @@ export function EpisodesGrid({
     return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
   }
   if (episode.data.data === null) return null
+  const openInSidePanel = () => {
+    if (!episode.data?.data) return
+
+    openMonoListPanelTab({
+      id: `subject-episodes-${subjectId}`,
+      type: 'subjectEpisodes',
+      title: '章节',
+      sourceTitle: sourceTitle || `条目 ${subjectId}`,
+      subjectId,
+      episodes: episode.data.data,
+    })
+  }
 
   return (
     <div className="flex flex-col gap-5">
-      {size === 'default' && <h2 className="text-2xl font-medium">章节</h2>}
+      {size === 'default' && (
+        <div className="flex flex-row items-center gap-2">
+          <h2 className="text-2xl font-medium">章节</h2>
+          <Button variant="ghost" size="icon" className="mt-1 size-8" onClick={openInSidePanel}>
+            <span className="i-mingcute-box-3-line text-lg" />
+          </Button>
+        </div>
+      )}
       <div className={cn('flex flex-col gap-4')}>
         {selector && <PageSelector episodes={episode} limit={limit} setOffSet={setOffSet} />}
         <EpisodeGridContent

@@ -127,4 +127,5 @@ export type InfoBoxWebValue = string | InfoBoxWebValueLinkItem
 export type InfoBoxWebValueLinkItem = {
   name: string
   id: string
+  href: string
 }

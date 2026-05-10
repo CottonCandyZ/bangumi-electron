@@ -28,35 +28,51 @@ export const parseInfoBoxFromSubjectPage = (HTML: string) => {
   const infobox_list = dom.querySelector('#infobox')
   if (!infobox_list) return result
   for (const item of infobox_list.children) {
-    let key: string | null = null
-    const value: InfoBoxWebValue[] = []
-    for (const node of item.childNodes) {
-      if (node.nodeName === 'SPAN' && node.textContent !== null) {
-        key = node.textContent
-      }
-      if (node.nodeName === 'A') {
-        const aNode = node as HTMLAnchorElement
-        if (aNode.textContent !== null && aNode.href !== null) {
-          const id = aNode.href.split('/').at(-1)
-          if (id !== undefined) {
-            value.push({ name: aNode.textContent, id })
-          }
-        }
-      }
-      if (node.nodeName === '#text' && node.textContent !== null) {
-        value.push(node.textContent)
-      }
-    }
-    if (key !== null) {
-      if (result.has(key)) {
-        const arr = result.get(key)!
-        arr.push(...value)
-      } else {
-        result.set(key, value)
-      }
+    const items = item.classList.contains('sub_container')
+      ? Array.from(item.querySelectorAll('li'))
+      : [item]
+
+    for (const infoItem of items) {
+      const parsed = parseInfoBoxItem(infoItem)
+      if (!parsed) continue
+      const arr = result.get(parsed.key)
+      if (arr) arr.push(...parsed.value)
+      else result.set(parsed.key, parsed.value)
     }
   }
   return result
+}
+
+function parseInfoBoxItem(item: Element) {
+  const keyNode = Array.from(item.children).find(
+    (node) => node.nodeName === 'SPAN' && node.classList.contains('tip'),
+  )
+  const key = keyNode?.textContent
+  const value: InfoBoxWebValue[] = []
+
+  if (!key) return undefined
+
+  for (const node of item.childNodes) {
+    if (node === keyNode) continue
+
+    if (node.nodeName === 'A') {
+      const aNode = node as HTMLAnchorElement
+      const href = aNode.getAttribute('href')
+
+      if (aNode.textContent !== null && href !== null) {
+        const id = href.split('/').at(-1)
+        if (id !== undefined) {
+          value.push({ name: aNode.textContent, id, href })
+        }
+      }
+    }
+
+    if (node.nodeName === '#text' && node.textContent !== null && node.textContent.trim() !== '') {
+      value.push(node.textContent)
+    }
+  }
+
+  return { key, value }
 }
 
 export const parseDeleteCollectionHash = (HTML: string) => {

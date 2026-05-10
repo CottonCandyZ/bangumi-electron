@@ -1,5 +1,11 @@
-import { SUBJECTS, apiFetchWithOptionalAuth } from '@renderer/data/fetch/config/'
+import {
+  NEXT_SUBJECTS,
+  SUBJECTS,
+  apiFetchWithOptionalAuth,
+  nextFetch,
+} from '@renderer/data/fetch/config/'
 import { SubjectId } from '@renderer/data/types/bgm'
+import { SubjectInterestComments } from '@renderer/data/types/comment'
 import { RelatedSubject, Subject, SubjectAPI } from '@renderer/data/types/subject'
 import { FetchParamError } from '@renderer/lib/utils/error'
 import dayjs from 'dayjs'
@@ -32,4 +38,25 @@ export async function getRelatedSubjects({ id }: { id: SubjectId }) {
   return await apiFetchWithOptionalAuth<RelatedSubject[]>(
     SUBJECTS.RELATED_SUBJECT_BY_ID(id.toString()),
   )
+}
+
+/**
+ * 从 private p1 API 获得条目吐槽箱
+ */
+export async function getSubjectCommentsById({
+  id,
+  limit,
+  offset,
+}: {
+  id: SubjectId
+  limit?: number
+  offset: number
+  cacheKeyLimit?: number
+}) {
+  return await nextFetch<SubjectInterestComments>(NEXT_SUBJECTS.COMMENTS_BY_ID(id.toString()), {
+    query: {
+      limit,
+      offset,
+    },
+  })
 }

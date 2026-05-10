@@ -12,8 +12,6 @@ import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
 import { getDurationFromSeconds } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
-import { hoverCardEpisodeContentAtom } from '@renderer/state/hover-card'
-import { useAtomValue } from 'jotai'
 import { useState } from 'react'
 
 function isCollectionEpisode(
@@ -29,10 +27,8 @@ export type HoverEpisodeDetailType = {
   collectionType: CollectionType | undefined
 } & ModifyEpisodeCollectionOptType
 
-export function HoverEpisodeDetail() {
-  const hoverCardContent = useAtomValue(hoverCardEpisodeContentAtom)
-  if (!hoverCardContent) throw 'Hover Content not set'
-  const { index, episodes, modifyEpisodeCollectionOpt, collectionType } = hoverCardContent
+export function HoverEpisodeDetail({ content }: { content: HoverEpisodeDetailType }) {
+  const { index, episodes, modifyEpisodeCollectionOpt, collectionType } = content
   const episode = isCollectionEpisode(episodes) ? episodes[index].episode : episodes[index]
   const duration = getDurationFromSeconds(episode.duration_seconds)
   const [bottom, setBottom] = useState(true)
