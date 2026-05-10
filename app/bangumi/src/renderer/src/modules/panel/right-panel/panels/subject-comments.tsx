@@ -1,6 +1,5 @@
 import { ScrollArea } from '@base-ui/react/scroll-area'
-import { CommentBox } from '@renderer/components/comment/comment-box'
-import { Skeleton } from '@renderer/components/ui/skeleton'
+import { CommentBox, CommentSkeleton } from '@renderer/components/comment/comment-box'
 import { useSubjectCommentsQuery } from '@renderer/data/hooks/api/subject'
 import { toCommentFromSubjectInterest } from '@renderer/data/transformer/comment'
 import { SubjectId } from '@renderer/data/types/bgm'
@@ -88,19 +87,6 @@ export function SubjectCommentsPanel({
         virtualGroupKeys={virtualGroupKeys}
         onListNearBottom={loadMore}
       />
-    </div>
-  )
-}
-
-function CommentSkeleton() {
-  return (
-    <div className="flex w-full flex-row gap-3 p-2">
-      <Skeleton className="size-10 shrink-0 rounded-full" />
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <Skeleton className="h-4 w-28" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-4/5" />
-      </div>
     </div>
   )
 }

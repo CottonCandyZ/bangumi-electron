@@ -1,5 +1,6 @@
 import { Tabs } from '@renderer/components/tabs'
 import { Button } from '@renderer/components/ui/button'
+import { Card } from '@renderer/components/ui/card'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useRelatedSubjectsQuery } from '@renderer/data/hooks/api/subject'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
@@ -86,8 +87,22 @@ function RelatedGridSkeleton() {
       {Array(5)
         .fill(0)
         .map((_, index) => (
-          <Skeleton className="aspect-square" key={index} />
+          <RelatedSubjectSkeleton key={index} />
         ))}
+    </div>
+  )
+}
+
+function RelatedSubjectSkeleton() {
+  return (
+    <div className="flex flex-col gap-2">
+      <Card className="overflow-hidden shadow-none">
+        <Skeleton className="aspect-square rounded-xl" />
+      </Card>
+      <div className="flex flex-col gap-1">
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-2/3" />
+      </div>
     </div>
   )
 }

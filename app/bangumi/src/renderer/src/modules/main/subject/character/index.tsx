@@ -1,5 +1,6 @@
 import { Tabs } from '@renderer/components/tabs'
 import { Button } from '@renderer/components/ui/button'
+import { Card } from '@renderer/components/ui/card'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectCharacters } from '@renderer/data/hooks/api/character'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
@@ -54,7 +55,7 @@ export function SubjectCharacters({ subjectId }: Props) {
           {Array(8)
             .fill(0)
             .map((_, index) => (
-              <Skeleton className="h-20" key={index} />
+              <CharacterCardSkeleton key={index} />
             ))}
         </div>
       </section>
@@ -99,8 +100,26 @@ function CharactersGridSkeleton() {
       {Array(8)
         .fill(0)
         .map((_, index) => (
-          <Skeleton className="h-20" key={index} />
+          <CharacterCardSkeleton key={index} />
         ))}
     </div>
+  )
+}
+
+function CharacterCardSkeleton() {
+  return (
+    <Card className="flex h-20 flex-row items-start gap-4 overflow-hidden p-2 shadow-none">
+      <Skeleton className="size-14 shrink-0 rounded-lg" />
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="flex flex-row items-start justify-between gap-2">
+          <Skeleton className="h-5 w-24" />
+          <Skeleton className="h-5 w-12 rounded-full" />
+        </div>
+        <div className="flex flex-row items-center gap-2">
+          <Skeleton className="size-6 shrink-0 rounded-full" />
+          <Skeleton className="h-4 w-20" />
+        </div>
+      </div>
+    </Card>
   )
 }

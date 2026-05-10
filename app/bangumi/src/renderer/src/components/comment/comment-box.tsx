@@ -71,15 +71,7 @@ export function CommentBox({
     }
 
     if (comments === undefined) {
-      return (
-        <div className="flex flex-col gap-3">
-          {Array(3)
-            .fill(0)
-            .map((_, index) => (
-              <Skeleton className="h-24 rounded-lg" key={index} />
-            ))}
-        </div>
-      )
+      return <CommentSkeletonList />
     }
 
     if (comments.length === 0) {
@@ -243,12 +235,27 @@ function CommentList({
   )
 }
 
-function CommentSkeleton() {
+function CommentSkeletonList({ count = 4 }: { count?: number }) {
+  return (
+    <div className="flex flex-col gap-3">
+      {Array(count)
+        .fill(0)
+        .map((_, index) => (
+          <CommentSkeleton key={index} />
+        ))}
+    </div>
+  )
+}
+
+export function CommentSkeleton() {
   return (
     <div className="flex w-full flex-row gap-3 p-2">
       <Skeleton className="size-10 shrink-0 rounded-full" />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <Skeleton className="h-4 w-28" />
+        <div className="flex flex-row items-center gap-2">
+          <Skeleton className="h-4 w-28" />
+          <Skeleton className="h-3 w-20" />
+        </div>
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-4/5" />
       </div>

@@ -183,13 +183,32 @@ export function MonoDetailView({
 function MonoDetailSkeleton() {
   return (
     <div className="max-w-8xl mx-auto grid w-full gap-8 px-10 pt-12 lg:grid-cols-[16rem_minmax(0,1fr)]">
-      <Skeleton className="aspect-3/4 rounded-lg" />
+      <div className="flex flex-col gap-4">
+        <Skeleton className="aspect-3/4 rounded-lg" />
+        <div className="flex flex-row flex-wrap gap-2">
+          <Skeleton className="h-6 w-16 rounded-full" />
+          <Skeleton className="h-6 w-20 rounded-full" />
+          <Skeleton className="h-6 w-14 rounded-full" />
+        </div>
+      </div>
       <div className="flex flex-col gap-4">
         <Skeleton className="h-12 w-72" />
-        <Skeleton className="h-6 w-48" />
-        <Skeleton className="h-5 w-full" />
-        <Skeleton className="h-5 w-4/5" />
-        <Skeleton className="h-5 w-2/3" />
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-11/12" />
+          <Skeleton className="h-5 w-4/5" />
+        </div>
+        <Separator />
+        <div className="grid grid-cols-[5rem_minmax(0,1fr)] gap-x-5 gap-y-2">
+          {Array(5)
+            .fill(0)
+            .map((_, index) => (
+              <Fragment key={index}>
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-full max-w-md" />
+              </Fragment>
+            ))}
+        </div>
       </div>
     </div>
   )
@@ -274,7 +293,7 @@ function MonoSubjectsSection({
       />
     </SectionFilters>
   )
-  if (subjects === undefined) return <CardGridSkeleton title="参与作品" />
+  if (subjects === undefined) return <CardGridSkeleton title="参与作品" variant="subject" />
   if (subjects.length === 0) return null
   const openInSidePanel = () =>
     openMonoListPanelTab({
@@ -491,7 +510,7 @@ function MonoRelatedSection({
         layoutId={filterId}
       />
     ) : undefined
-  if (items === undefined) return <CardGridSkeleton title={title} />
+  if (items === undefined) return <CardGridSkeleton title={title} variant="related" />
   if (items.length === 0) return null
   const openInSidePanel = () =>
     openMonoListPanelTab({
@@ -742,18 +761,58 @@ function getRelatedItemViewTransitionName(item: MonoRelatedItem, locationKey: st
   return `mono-related-image-${item.id}-${item.subjectId ?? 'none'}-${locationKey}`
 }
 
-function CardGridSkeleton({ title }: { title: string }) {
+function CardGridSkeleton({ title, variant }: { title: string; variant: 'subject' | 'related' }) {
   return (
     <section className="flex flex-col gap-5">
-      <h2 className="text-2xl font-medium">{title}</h2>
+      <div className="flex flex-row flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-row items-center gap-2">
+          <h2 className="text-2xl font-medium">{title}</h2>
+          <Skeleton className="mt-1 size-8 rounded-md" />
+        </div>
+        <Skeleton className="h-9 w-40" />
+      </div>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-3">
         {Array(6)
           .fill(0)
           .map((_, index) => (
-            <Skeleton className="aspect-square rounded-lg" key={index} />
+            <Fragment key={index}>
+              {variant === 'subject' ? <MonoSubjectCardSkeleton /> : <MonoRelatedCardSkeleton />}
+            </Fragment>
           ))}
       </div>
     </section>
+  )
+}
+
+function MonoSubjectCardSkeleton() {
+  return (
+    <Card className="flex h-72 flex-col overflow-hidden p-2 shadow-none">
+      <Skeleton className="h-52 w-full rounded-md" />
+      <div className="flex flex-1 flex-col gap-2 pt-2">
+        <Skeleton className="h-4 w-5/6" />
+        <Skeleton className="h-3 w-2/3" />
+        <div className="mt-auto flex flex-row flex-wrap gap-1 pt-2">
+          <Skeleton className="h-5 w-12 rounded-full" />
+          <Skeleton className="h-5 w-16 rounded-full" />
+        </div>
+      </div>
+    </Card>
+  )
+}
+
+function MonoRelatedCardSkeleton() {
+  return (
+    <Card className="flex h-28 flex-row gap-3 overflow-hidden p-2 shadow-none">
+      <Skeleton className="size-24 shrink-0 rounded-md" />
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <Skeleton className="h-5 w-4/5" />
+        <Skeleton className="h-4 w-2/3" />
+        <div className="mt-auto flex flex-row gap-1 pt-1">
+          <Skeleton className="h-5 w-12 rounded-full" />
+          <Skeleton className="h-5 w-16 rounded-full" />
+        </div>
+      </div>
+    </Card>
   )
 }
 

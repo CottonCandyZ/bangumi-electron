@@ -1,5 +1,5 @@
 import { MyLink } from '@renderer/components/my-link'
-import { CommentBox } from '@renderer/components/comment/comment-box'
+import { CommentBox, CommentSkeleton } from '@renderer/components/comment/comment-box'
 import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
 import { Card } from '@renderer/components/ui/card'
@@ -155,16 +155,53 @@ function EpisodeSkeleton() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8 px-10 py-10">
       <section className="flex flex-col gap-5">
-        <Skeleton className="h-8 w-24" />
-        <Skeleton className="h-11 w-2/3" />
-        <Card className="p-4 shadow-none">
-          <Skeleton className="h-24 w-full" />
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-row flex-wrap items-center gap-2">
+            <Skeleton className="h-6 w-14 rounded-full" />
+            <Skeleton className="h-6 w-16 rounded-full" />
+            <Skeleton className="h-6 w-20 rounded-full" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-10 w-2/3" />
+            <Skeleton className="h-6 w-1/3" />
+          </div>
+          <Skeleton className="h-5 w-48" />
+        </div>
+
+        <Card className="bg-background/70 p-4 shadow-none">
+          <div className="grid gap-4 md:grid-cols-[1fr_auto]">
+            <div className="grid gap-3 sm:grid-cols-3">
+              {Array(3)
+                .fill(0)
+                .map((_, index) => (
+                  <div className="flex flex-col gap-1" key={index}>
+                    <Skeleton className="h-3 w-10" />
+                    <Skeleton className="h-5 w-24" />
+                  </div>
+                ))}
+            </div>
+            <div className="flex flex-col items-start gap-2 md:items-end">
+              <Skeleton className="h-9 w-36" />
+              <Skeleton className="h-9 w-28" />
+            </div>
+          </div>
+          <Separator className="my-4" />
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
         </Card>
       </section>
       <section className="flex flex-col gap-5">
         <Skeleton className="h-8 w-24" />
-        <Skeleton className="h-24 w-full rounded-lg" />
-        <Skeleton className="h-24 w-full rounded-lg" />
+        <div className="flex flex-col gap-3">
+          {Array(4)
+            .fill(0)
+            .map((_, index) => (
+              <CommentSkeleton key={index} />
+            ))}
+        </div>
       </section>
     </div>
   )
