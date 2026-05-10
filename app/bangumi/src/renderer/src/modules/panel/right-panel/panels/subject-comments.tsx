@@ -31,6 +31,11 @@ export function SubjectCommentsPanel({
     [commentsQuery.data],
   )
   const comments = useMemo(() => commentList?.map((item) => item.comment), [commentList])
+  const total = commentsQuery.data?.pages[0]?.total
+  const floorNumbers = useMemo(
+    () => (comments && total !== undefined ? comments.map((_, index) => total - index) : undefined),
+    [comments, total],
+  )
   const virtualGroupKeys = useMemo(() => commentList?.map((item) => item.groupKey), [commentList])
   const loadMore = useCallback(() => {
     if (commentsQuery.isError || !commentsQuery.hasNextPage || commentsQuery.isFetchingNextPage) {
@@ -74,6 +79,7 @@ export function SubjectCommentsPanel({
         comments={comments}
         error={commentsQuery.isError}
         emptyText="还没有吐槽。"
+        floorNumbers={floorNumbers}
         virtual
         showBackToTop
         hasMore={!!commentsQuery.hasNextPage}
