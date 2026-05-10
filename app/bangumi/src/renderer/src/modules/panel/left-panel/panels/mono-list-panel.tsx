@@ -25,8 +25,8 @@ import { tabFilerAtom } from '@renderer/state/simple-tab'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { XIcon } from 'lucide-react'
 import { Children, useEffect, useMemo, useRef, useState } from 'react'
-import type { ReactNode, UIEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import type { PropsWithChildren, ReactNode, UIEvent } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const SUBJECT_TYPE_MAP: Record<SubjectType, string> = {
   [SubjectType.book]: '书籍',
@@ -39,6 +39,8 @@ const SUBJECT_TYPE_MAP: Record<SubjectType, string> = {
 const ALL_SUBJECT_TYPES = '全部类型'
 const ALL_SUBJECT_RELATIONS = '全部职能'
 const ALL_RELATED_TYPES = '全部类型'
+const PANEL_ITEM_CLASS =
+  'hover:bg-accent data-[active=true]:bg-accent flex min-h-20 cursor-pointer flex-row gap-3 rounded-md p-2'
 
 export function MonoListPanel() {
   const tabs = useAtomValue(monoListPanelTabsAtom)
@@ -525,21 +527,12 @@ function MonoSubjectListItem({
 }: {
   item: Extract<MonoListPanelTab, { type: 'subjects' }>['subjects'][number]
 }) {
-  const navigate = useNavigate()
   const relatedItems = item.relatedItems ?? []
+  const to = `/subject/${item.id}`
+  const active = useIsRouteActive(to)
 
   return (
-    <div
-      className="hover:bg-accent flex min-h-20 cursor-pointer flex-row gap-3 rounded-md p-2"
-      role="link"
-      tabIndex={0}
-      onClick={() => navigate(`/subject/${item.id}`)}
-      onKeyDown={(event) => {
-        if (event.key !== 'Enter' && event.key !== ' ') return
-        event.preventDefault()
-        navigate(`/subject/${item.id}`)
-      }}
-    >
+    <PanelButtonItem active={active} to={to}>
       <PanelItemImage image={item.image} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="line-clamp-1 text-sm font-medium">{item.nameCn || item.name}</div>
@@ -558,24 +551,39 @@ function MonoSubjectListItem({
           )}
         </div>
       </div>
-    </div>
+    </PanelButtonItem>
   )
 }
 
 function RelatedItemLinks({ className, items }: { className?: string; items: MonoRelatedItem[] }) {
+  const { pathname } = useLocation()
+  const hasActiveItem = items.some((item) => isRoutePathActive(pathname, item.link))
+  const ref = useActivePanelItemRef(hasActiveItem)
+
   return (
-    <div className={`flex min-w-0 flex-row flex-wrap gap-x-2 gap-y-0.5 text-xs ${className ?? ''}`}>
-      {items.map((item) => (
-        <MyLink
-          className="text-primary hover:bg-primary/10 focus-visible:ring-ring/50 -mx-1 block w-fit max-w-full truncate rounded-sm px-1 underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-hidden"
-          key={`${item.id}-${item.relation ?? item.name}`}
-          to={item.link}
-          onClick={(event) => event.stopPropagation()}
-          onKeyDown={(event) => event.stopPropagation()}
-        >
-          {formatRelatedItemLabel(item)}
-        </MyLink>
-      ))}
+    <div
+      className={`flex min-w-0 flex-row flex-wrap gap-x-2 gap-y-0.5 text-xs ${className ?? ''}`}
+      ref={ref}
+    >
+      {items.map((item) => {
+        const active = isRoutePathActive(pathname, item.link)
+
+        return (
+          <MyLink
+            className="text-primary hover:bg-primary/10 focus-visible:ring-ring/50 data-[active=true]:bg-primary/10 -mx-1 block w-fit max-w-full truncate rounded-sm px-1 underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-hidden data-[active=true]:underline"
+            data-active={active}
+            key={`${item.id}-${item.relation ?? item.name}`}
+            to={item.link}
+            onClick={(event) => {
+              event.stopPropagation()
+              if (active) event.preventDefault()
+            }}
+            onKeyDown={(event) => event.stopPropagation()}
+          >
+            {formatRelatedItemLabel(item)}
+          </MyLink>
+        )
+      })}
     </div>
   )
 }
@@ -589,20 +597,10 @@ function MonoRelatedListItem({
 }: {
   item: Extract<MonoListPanelTab, { type: 'related' }>['relatedItems'][number]
 }) {
-  const navigate = useNavigate()
+  const active = useIsRouteActive(item.link)
 
   return (
-    <div
-      className="hover:bg-accent flex min-h-20 cursor-pointer flex-row gap-3 rounded-md p-2"
-      role="link"
-      tabIndex={0}
-      onClick={() => navigate(item.link)}
-      onKeyDown={(event) => {
-        if (event.key !== 'Enter' && event.key !== ' ') return
-        event.preventDefault()
-        navigate(item.link)
-      }}
-    >
+    <PanelButtonItem active={active} to={item.link}>
       <PanelItemImage image={item.image} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="line-clamp-1 text-sm font-medium">{item.name}</div>
@@ -633,7 +631,7 @@ function MonoRelatedListItem({
           )}
         </div>
       </div>
-    </div>
+    </PanelButtonItem>
   )
 }
 
@@ -643,12 +641,11 @@ function SubjectCharacterListItem({
   item: Extract<MonoListPanelTab, { type: 'subjectCharacters' }>['characters'][number]
 }) {
   const actors = item.actors.map((actor) => actor.name).filter(Boolean)
+  const to = `/character/${item.id}`
+  const active = useIsRouteActive(to)
 
   return (
-    <MyLink
-      className="hover:bg-accent flex min-h-20 flex-row gap-3 rounded-md p-2"
-      to={`/character/${item.id}`}
-    >
+    <PanelLinkItem active={active} to={to}>
       <PanelItemImage image={item.images?.grid || item.images?.medium} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="line-clamp-1 text-sm font-medium">{item.name}</div>
@@ -663,7 +660,7 @@ function SubjectCharacterListItem({
           )}
         </div>
       </div>
-    </MyLink>
+    </PanelLinkItem>
   )
 }
 
@@ -672,11 +669,11 @@ function SubjectRelatedListItem({
 }: {
   item: Extract<MonoListPanelTab, { type: 'subjectRelated' }>['relatedSubjects'][number]
 }) {
+  const to = `/subject/${item.id}`
+  const active = useIsRouteActive(to)
+
   return (
-    <MyLink
-      className="hover:bg-accent flex min-h-20 flex-row gap-3 rounded-md p-2"
-      to={`/subject/${item.id}`}
-    >
+    <PanelLinkItem active={active} to={to}>
       <PanelItemImage image={item.images.grid || item.images.common} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="line-clamp-1 text-sm font-medium">{item.name_cn || item.name}</div>
@@ -694,18 +691,17 @@ function SubjectRelatedListItem({
           )}
         </div>
       </div>
-    </MyLink>
+    </PanelLinkItem>
   )
 }
 
 function SubjectEpisodeListItem({ item }: { item: Episode | CollectionEpisode }) {
   const episode = getPanelEpisode(item)
+  const to = `/episode/${episode.id}`
+  const active = useIsRouteActive(to)
 
   return (
-    <MyLink
-      className="hover:bg-accent flex min-h-20 flex-row gap-3 rounded-md p-2"
-      to={`/episode/${episode.id}`}
-    >
+    <PanelLinkItem active={active} to={to}>
       <div className="bg-muted flex h-16 w-16 shrink-0 items-center justify-center rounded-md text-sm font-medium">
         {episode.sort}
       </div>
@@ -727,7 +723,7 @@ function SubjectEpisodeListItem({ item }: { item: Episode | CollectionEpisode })
           )}
         </div>
       </div>
-    </MyLink>
+    </PanelLinkItem>
   )
 }
 
@@ -747,4 +743,93 @@ function PanelItemImage({ image }: { image?: string }) {
   ) : (
     <div className="bg-muted h-16 w-16 shrink-0 rounded-md" />
   )
+}
+
+function PanelButtonItem({
+  active,
+  children,
+  to,
+}: PropsWithChildren<{ active: boolean; to: string }>) {
+  const navigate = useNavigate()
+  const ref = useActivePanelItemRef(active)
+
+  const open = () => {
+    if (!active) navigate(to)
+  }
+
+  return (
+    <div
+      className={PANEL_ITEM_CLASS}
+      data-active={active}
+      ref={ref}
+      role="link"
+      tabIndex={0}
+      onClick={open}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        open()
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+function PanelLinkItem({
+  active,
+  children,
+  to,
+}: PropsWithChildren<{ active: boolean; to: string }>) {
+  const ref = useActivePanelItemRef(active)
+
+  return (
+    <div ref={ref}>
+      <MyLink
+        className={PANEL_ITEM_CLASS}
+        data-active={active}
+        to={to}
+        onClick={(event) => {
+          if (active) event.preventDefault()
+        }}
+      >
+        {children}
+      </MyLink>
+    </div>
+  )
+}
+
+function useIsRouteActive(to: string) {
+  const { pathname } = useLocation()
+  return isRoutePathActive(pathname, to)
+}
+
+function useActivePanelItemRef(active: boolean) {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!active) return
+
+    const frame = window.requestAnimationFrame(() => {
+      ref.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest',
+      })
+    })
+
+    return () => window.cancelAnimationFrame(frame)
+  }, [active])
+
+  return ref
+}
+
+function normalizeRoutePath(path: string) {
+  const pathOnly = path.split(/[?#]/)[0]
+  if (pathOnly.length <= 1) return pathOnly
+  return pathOnly.replace(/\/+$/, '')
+}
+
+function isRoutePathActive(pathname: string, to: string) {
+  return normalizeRoutePath(pathname) === normalizeRoutePath(to)
 }
