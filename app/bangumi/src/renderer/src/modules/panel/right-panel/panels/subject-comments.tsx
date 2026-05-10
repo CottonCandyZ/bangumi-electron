@@ -6,6 +6,8 @@ import { toCommentFromSubjectInterest } from '@renderer/data/transformer/comment
 import { SubjectId } from '@renderer/data/types/bgm'
 import { useCallback, useMemo } from 'react'
 
+const SUBJECT_COMMENTS_PAGE_LIMIT = 20
+
 export function SubjectCommentsPanel({
   subjectId,
   enabled,
@@ -16,12 +18,20 @@ export function SubjectCommentsPanel({
   const commentsQuery = useSubjectCommentsQuery({
     id: subjectId,
     enabled,
-    limit: 20,
+    limit: SUBJECT_COMMENTS_PAGE_LIMIT,
   })
-  const comments = useMemo(
-    () => commentsQuery.data?.pages.flatMap((page) => page.data.map(toCommentFromSubjectInterest)),
+  const commentList = useMemo(
+    () =>
+      commentsQuery.data?.pages.flatMap((page, pageIndex) =>
+        page.data.map((comment) => ({
+          comment: toCommentFromSubjectInterest(comment),
+          groupKey: pageIndex,
+        })),
+      ),
     [commentsQuery.data],
   )
+  const comments = useMemo(() => commentList?.map((item) => item.comment), [commentList])
+  const virtualGroupKeys = useMemo(() => commentList?.map((item) => item.groupKey), [commentList])
   const loadMore = useCallback(() => {
     if (commentsQuery.isError || !commentsQuery.hasNextPage || commentsQuery.isFetchingNextPage) {
       return undefined
@@ -68,7 +78,8 @@ export function SubjectCommentsPanel({
         showBackToTop
         hasMore={!!commentsQuery.hasNextPage}
         isFetchingMore={commentsQuery.isFetchingNextPage}
-        appendPlaceholderCount={20}
+        appendPlaceholderCount={SUBJECT_COMMENTS_PAGE_LIMIT}
+        virtualGroupKeys={virtualGroupKeys}
         onListNearBottom={loadMore}
       />
     </div>
