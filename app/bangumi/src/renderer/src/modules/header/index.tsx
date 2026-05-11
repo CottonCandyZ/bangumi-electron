@@ -1,4 +1,5 @@
 import { UI_CONFIG } from '@renderer/config'
+import { client } from '@renderer/lib/client'
 import { cn } from '@renderer/lib/utils'
 import { CommandButton } from '@renderer/modules/header/command-button'
 import { NavButton } from '@renderer/modules/header/nav-button'
@@ -6,6 +7,8 @@ import { OriginalLink } from '@renderer/modules/header/o-link'
 import { RightPanelButton } from '@renderer/modules/header/right-panel-button'
 import { HeaderTitle } from '@renderer/modules/header/subject-title'
 import { WindowsButton } from '@renderer/modules/header/windows-button'
+
+const platform = await client.platform({})
 
 export function Header() {
   return (
@@ -22,7 +25,9 @@ export function Header() {
         <NavButton />
         <HeaderTitle />
       </div>
-      <div className="flex h-full flex-row items-center gap-2">
+      <div
+        className={cn('flex h-full flex-row items-center gap-2', platform === 'darwin' && 'pr-2')}
+      >
         <CommandButton />
         <OriginalLink />
         <RightPanelButton />

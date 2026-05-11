@@ -9,18 +9,34 @@
 ::view-transition-group(app-nav) {
   z-index: 100;
   animation: none;
+  border-radius: 0;
+  overflow: visible;
+}
+
+::view-transition-image-pair(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  border-radius: 0.75rem;
+  clip-path: inset(0 round 0.75rem);
+  overflow: hidden;
 }
 
 ::view-transition-old(app-header),
 ::view-transition-old(app-nav) {
   opacity: 0;
   animation: none;
+  border-radius: 0;
+  clip-path: none;
   mix-blend-mode: normal;
+  overflow: visible;
 }
 
 ::view-transition-new(app-header),
 ::view-transition-new(app-nav) {
   opacity: 1;
   animation: none;
+  border-radius: 0;
+  clip-path: none;
   mix-blend-mode: normal;
+  overflow: visible;
 }

@@ -47,7 +47,7 @@ export function Image({
   return (
     <div
       className={cn(
-        'relative z-0',
+        'relative z-0 rounded-[inherit]',
         (!stateImageSrc || (careLoading && !isLoad)) && loadingClassName,
         className,
       )}
@@ -57,7 +57,7 @@ export function Image({
     >
       <img
         className={cn(
-          'h-full w-full max-w-none object-cover select-none',
+          'h-full w-full max-w-none rounded-[inherit] object-cover select-none',
           imageClassName,
           (!imageSrc || isError || (careLoading && !isLoad)) && 'invisible',
         )}
@@ -74,7 +74,9 @@ export function Image({
         src={stateImageSrc}
         draggable={false}
       />
-      {(!imageSrc || isError || !isLoad) && <Skeleton className="absolute inset-0 -z-10" />}
+      {(!imageSrc || isError || !isLoad) && (
+        <Skeleton className="absolute inset-0 -z-10 rounded-[inherit]" />
+      )}
       {children}
     </div>
   )
