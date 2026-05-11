@@ -13,6 +13,8 @@ const URL_PATTERN = /https?:\/\/[^\s<>"'，。)）\]]+/g
 const INLINE_TOKEN_PATTERN = /\((bgm\d+|musume_\d+|bmoC?[A-Za-z0-9_\-:=|.]*)\)/g
 const BANGUMI_HOSTS = new Set(['bangumi.tv', 'bgm.tv'])
 const BANGUMI_ROUTE_PATTERN = /^\/(subject|person|character|ep)\/(\d+)\/?$/
+const BBCODE_LINK_CLASS =
+  'text-blue-600 underline decoration-blue-500/45 underline-offset-2 transition-colors hover:text-blue-700 hover:decoration-blue-600 dark:text-blue-400 dark:decoration-blue-400/50 dark:hover:text-blue-300 dark:hover:decoration-blue-300'
 const ALLOWED_COLOR_PATTERN =
   /^(#[0-9a-f]{3,8}|[a-z]+|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)|rgba\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*(0|1|0?\.\d+)\s*\)|hsl\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%\s*\)|hsla\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%\s*,\s*(0|1|0?\.\d+)\s*\))$/i
 
@@ -169,7 +171,7 @@ function linkifyNodes(nodes: ReactNode): ReactNode {
         Link,
         {
           to: route,
-          className: nodes.props.className ?? 'text-primary underline-offset-4 hover:underline',
+          className: nodes.props.className ?? BBCODE_LINK_CLASS,
         },
         linkifyNodes(nodes.props.children),
       )
@@ -252,7 +254,7 @@ function renderLink(href: string, key: string) {
       Link,
       {
         to: route,
-        className: 'text-primary underline-offset-4 hover:underline',
+        className: BBCODE_LINK_CLASS,
         key,
       },
       href,
@@ -265,7 +267,7 @@ function renderLink(href: string, key: string) {
       href,
       target: '_blank',
       rel: 'noreferrer',
-      className: 'text-primary underline-offset-4 hover:underline',
+      className: BBCODE_LINK_CLASS,
       key,
     },
     href,

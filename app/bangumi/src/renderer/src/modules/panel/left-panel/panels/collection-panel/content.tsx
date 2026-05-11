@@ -6,7 +6,7 @@ import {
   sidePanelCollectionTypeFilterAtom,
   sidePanelShowEpisodeListAtom,
 } from '@renderer/state/collection'
-import { collectionPanelSubjectTypeAtom } from '@renderer/state/panel'
+import { collectionPanelSubjectTypeAtom, collectionPanelUsernameAtom } from '@renderer/state/panel'
 import { useAtomValue } from 'jotai'
 
 export function SubjectCollectionPanelContent() {
@@ -14,10 +14,13 @@ export function SubjectCollectionPanelContent() {
   const filterMap = useAtomValue(sidePanelCollectionTypeFilterAtom)
   const showEpisodeList = useAtomValue(sidePanelShowEpisodeListAtom)
   const userInfo = useSession()
+  const panelUsername = useAtomValue(collectionPanelUsernameAtom)
+  const username = panelUsername ?? userInfo?.username
   const currentSelect = filterMap.get(subjectType.toString()) ?? CollectionType['watching']
   return (
-    !!userInfo && (
+    !!username && (
       <CollectionsGrid
+        username={username}
         subjectType={subjectType}
         collectionType={currentSelect}
         showEpisodeList={showEpisodeList}

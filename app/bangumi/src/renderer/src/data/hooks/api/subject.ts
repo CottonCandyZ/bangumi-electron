@@ -87,6 +87,7 @@ export const useSubjectCommentsQuery = ({
     queryProps: { id, cacheKeyLimit: limit },
     qFLimit: limit,
     enabled,
+    needKeepPreviousData: false,
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)

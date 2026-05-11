@@ -35,7 +35,6 @@ export function SubjectCommentsPanel({
     () => (comments && total !== undefined ? comments.map((_, index) => total - index) : undefined),
     [comments, total],
   )
-  const virtualGroupKeys = useMemo(() => commentList?.map((item) => item.groupKey), [commentList])
   const loadMore = useCallback(() => {
     if (commentsQuery.isError || !commentsQuery.hasNextPage || commentsQuery.isFetchingNextPage) {
       return undefined
@@ -48,7 +47,10 @@ export function SubjectCommentsPanel({
 
   if (comments === undefined && !commentsQuery.isError) {
     return (
-      <ScrollArea.Root className="group/scroll relative h-full w-full overflow-hidden">
+      <ScrollArea.Root
+        className="group/scroll relative h-full w-full overflow-hidden"
+        key={`subject-comments-${subjectId}`}
+      >
         <ScrollArea.Viewport className="h-full w-full overflow-x-hidden px-3 py-3 focus-visible:outline-hidden">
           <ScrollArea.Content className="flex min-h-full w-full flex-col gap-3">
             {Array(8)
@@ -79,12 +81,12 @@ export function SubjectCommentsPanel({
         error={commentsQuery.isError}
         emptyText="还没有吐槽。"
         floorNumbers={floorNumbers}
+        scrollAreaKey={`subject-comments-${subjectId}`}
         virtual
         showBackToTop
         hasMore={!!commentsQuery.hasNextPage}
         isFetchingMore={commentsQuery.isFetchingNextPage}
         appendPlaceholderCount={SUBJECT_COMMENTS_PAGE_LIMIT}
-        virtualGroupKeys={virtualGroupKeys}
         onListNearBottom={loadMore}
       />
     </div>

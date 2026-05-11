@@ -1,29 +1,27 @@
-import { MasonryInfiniteGrid } from '@egjs/react-infinitegrid'
-import { ScrollArea } from '@base-ui/react/scroll-area'
 import {
   BangumiSmile,
   REACTION_VALUE_TO_BANGUMI_SMILE,
 } from '@renderer/components/comment/bangumi-smile'
-import { Image } from '@renderer/components/image/image'
-import { BackToTopButton } from '@renderer/components/button/back-to-top'
+import { ViewTransitionImage } from '@renderer/components/image/view-transition-image'
+import { MyLink } from '@renderer/components/my-link'
 import { Button } from '@renderer/components/ui/button'
 import { Card } from '@renderer/components/ui/card'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
+import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
 import { Comment, CommentBase, CommentReaction } from '@renderer/data/types/comment'
 import { cn } from '@renderer/lib/utils'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
+import { formatRecentUnixTime } from '@renderer/lib/utils/date'
 import dayjs from 'dayjs'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import type { ComponentClass, ReactNode } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useInView } from 'react-intersection-observer'
+import { useLocation, useViewTransitionState } from 'react-router-dom'
 
 const DEFAULT_COMMENT_PLACEHOLDER_COUNT = 6
 const DEFAULT_VISIBLE_REPLY_COUNT = 3
-const MasonryInfiniteGridCompat = MasonryInfiniteGrid as unknown as ComponentClass<
-  Record<string, unknown>
->
 
 type CommentBoxProps = {
   title?: ReactNode
@@ -41,8 +39,8 @@ type CommentBoxProps = {
   hasMore?: boolean
   isFetchingMore?: boolean
   appendPlaceholderCount?: number
-  virtualGroupKeys?: number[]
   floorNumbers?: number[]
+  scrollAreaKey?: string
   showBackToTop?: boolean
   footer?: ReactNode
 }
@@ -62,8 +60,8 @@ export function CommentBox({
   hasMore = false,
   isFetchingMore = false,
   appendPlaceholderCount = DEFAULT_COMMENT_PLACEHOLDER_COUNT,
-  virtualGroupKeys,
   floorNumbers,
+  scrollAreaKey,
   showBackToTop = false,
   footer,
 }: CommentBoxProps) {
@@ -99,7 +97,7 @@ export function CommentBox({
         onNearBottom={onListNearBottom}
         showBackToTop={showBackToTop}
         floorNumbers={floorNumbers}
-        virtualGroupKeys={virtualGroupKeys}
+        scrollAreaKey={scrollAreaKey}
         virtual={virtual}
       />
     )
@@ -114,7 +112,7 @@ export function CommentBox({
     onListNearBottom,
     showBackToTop,
     floorNumbers,
-    virtualGroupKeys,
+    scrollAreaKey,
     virtual,
   ])
 
@@ -151,7 +149,7 @@ function CommentList({
   onNearBottom,
   showBackToTop,
   floorNumbers,
-  virtualGroupKeys,
+  scrollAreaKey,
   virtual,
 }: {
   comments: Comment[]
@@ -162,13 +160,9 @@ function CommentList({
   onNearBottom?: () => Promise<unknown> | void
   showBackToTop?: boolean
   floorNumbers?: number[]
-  virtualGroupKeys?: number[]
+  scrollAreaKey?: string
   virtual: boolean
 }) {
-  const loadingMoreRef = useRef(false)
-  const viewportRef = useRef<HTMLElement | null>(null)
-  const [viewport, setViewport] = useState<HTMLElement | null>(null)
-
   if (!virtual) {
     return (
       <div className={cn('flex flex-col gap-3', className)}>
@@ -184,65 +178,24 @@ function CommentList({
   }
 
   return (
-    <ScrollArea.Root className="group/scroll relative h-full min-h-0 overflow-hidden">
-      <MasonryInfiniteGridCompat
-        tag={ScrollArea.Viewport as unknown as string}
-        container
-        containerTag={ScrollArea.Content as unknown as string}
-        className={cn('max-h-[40rem] w-full overflow-x-hidden overflow-y-auto pr-2', className)}
-        useResizeObserver
-        observeChildren
-        placeholder={<CommentSkeleton />}
-        align="stretch"
-        maxStretchColumnSize={9999}
-        gap={12}
-        onRequestAppend={(event) => {
-          if (!hasMore || isFetchingMore || loadingMoreRef.current || !onNearBottom) return
-
-          loadingMoreRef.current = true
-          event.wait()
-          event.currentTarget.appendPlaceholders(
-            appendPlaceholderCount,
-            (+event.groupKey! || 0) + 1,
-          )
-          Promise.resolve(onNearBottom()).finally(() => {
-            loadingMoreRef.current = false
-            event.ready()
-          })
-        }}
-        onScroll={(event) => {
-          const nextViewport = event.currentTarget
-          if (viewportRef.current === nextViewport) return
-
-          viewportRef.current = nextViewport
-          setViewport(nextViewport)
-        }}
-      >
-        {comments.map((comment, index) => (
-          <div
-            key={comment.id}
-            data-grid-groupkey={
-              virtualGroupKeys?.[index] ?? Math.floor(index / appendPlaceholderCount)
-            }
-          >
-            <CommentItem
-              comment={comment}
-              floorNumber={floorNumbers?.[index] ?? index + 1}
-              key={comment.id}
-            />
-          </div>
-        ))}
-      </MasonryInfiniteGridCompat>
-      {showBackToTop && (
-        <BackToTopButton className="absolute right-3 bottom-3 size-9" viewport={viewport} />
+    <SingleColumnVirtualList
+      items={comments}
+      getKey={(comment) => comment.id}
+      renderItem={(comment, index) => (
+        <CommentItem comment={comment} floorNumber={floorNumbers?.[index] ?? index + 1} />
       )}
-      <ScrollArea.Scrollbar
-        orientation="vertical"
-        className="absolute top-0 right-0 z-20 flex h-full w-2.5 touch-none p-0.5 opacity-0 transition-opacity duration-150 select-none group-hover/scroll:opacity-100"
-      >
-        <ScrollArea.Thumb className="bg-foreground/10 hover:bg-foreground/30 active:bg-foreground/40 relative [height:var(--scroll-area-thumb-height)] w-full flex-1 rounded-full" />
-      </ScrollArea.Scrollbar>
-    </ScrollArea.Root>
+      rootClassName="h-full"
+      className={cn('max-h-[40rem] pr-2', className)}
+      estimateSize={132}
+      gap={12}
+      hasMore={hasMore}
+      isFetchingMore={isFetchingMore}
+      appendPlaceholderCount={appendPlaceholderCount}
+      renderPlaceholder={() => <CommentSkeleton />}
+      onNearBottom={onNearBottom}
+      scrollAreaKey={scrollAreaKey}
+      showBackToTop={showBackToTop}
+    />
   )
 }
 
@@ -291,9 +244,11 @@ function CommentItem({ comment, floorNumber }: { comment: Comment; floorNumber: 
         #{floorNumber}
       </span>
       {comment.user?.avatar.medium ? (
-        <Image
-          imageSrc={comment.user.avatar.medium}
-          className="size-10 shrink-0 overflow-hidden rounded-full"
+        <CommentUserAvatarLink
+          className="size-10 shrink-0"
+          imageClassName="size-10 overflow-hidden rounded-full"
+          transitionKey={`comment-${comment.id}`}
+          user={comment.user}
         />
       ) : (
         <div className="bg-muted size-10 shrink-0 rounded-full" />
@@ -338,9 +293,23 @@ function CommentItem({ comment, floorNumber }: { comment: Comment; floorNumber: 
 function CommentHeader({ comment }: { comment: Comment }) {
   return (
     <div className="flex flex-row flex-wrap items-center gap-x-2 gap-y-1">
-      <span className="font-medium">{comment.user?.nickname ?? `#${comment.creatorID}`}</span>
+      {comment.user ? (
+        <UserProfileLink
+          className="hover:text-primary font-medium transition-colors"
+          user={comment.user}
+        >
+          {comment.user.nickname}
+        </UserProfileLink>
+      ) : (
+        <span className="font-medium">#{comment.creatorID}</span>
+      )}
       <span className="text-muted-foreground text-xs">
-        {dayjs.unix(comment.createdAt).format('YYYY-MM-DD HH:mm')}
+        <time
+          dateTime={dayjs.unix(comment.createdAt).toISOString()}
+          title={dayjs.unix(comment.createdAt).format('YYYY-MM-DD HH:mm')}
+        >
+          {formatRecentUnixTime(comment.createdAt)}
+        </time>
       </span>
     </div>
   )
@@ -350,24 +319,91 @@ function ReplyItem({ reply }: { reply: CommentBase }) {
   return (
     <div className="flex flex-row gap-2 py-2.5 text-sm first:pt-2 last:pb-2">
       {reply.user?.avatar.medium ? (
-        <Image
-          imageSrc={reply.user.avatar.medium}
-          className="mt-0.5 size-7 shrink-0 overflow-hidden rounded-full"
+        <CommentUserAvatarLink
+          className="mt-0.5 size-7 shrink-0"
+          imageClassName="size-7 overflow-hidden rounded-full"
+          transitionKey={`reply-${reply.id}`}
+          user={reply.user}
         />
       ) : (
         <div className="bg-muted mt-0.5 size-7 shrink-0 rounded-full" />
       )}
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex flex-row flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <span className="font-medium">{reply.user?.nickname ?? `#${reply.creatorID}`}</span>
+          {reply.user ? (
+            <UserProfileLink
+              className="hover:text-primary font-medium transition-colors"
+              user={reply.user}
+            >
+              {reply.user.nickname}
+            </UserProfileLink>
+          ) : (
+            <span className="font-medium">#{reply.creatorID}</span>
+          )}
           <span className="text-muted-foreground text-xs">
-            {dayjs.unix(reply.createdAt).format('YYYY-MM-DD HH:mm')}
+            <time
+              dateTime={dayjs.unix(reply.createdAt).toISOString()}
+              title={dayjs.unix(reply.createdAt).format('YYYY-MM-DD HH:mm')}
+            >
+              {formatRecentUnixTime(reply.createdAt)}
+            </time>
           </span>
         </div>
         <div className="bbcode whitespace-pre-line">{renderBBCode(reply.content)}</div>
         <CommentReactions reactions={reply.reactions} compact />
       </div>
     </div>
+  )
+}
+
+function UserProfileLink({
+  children,
+  className,
+  user,
+  viewTransitionName,
+}: {
+  children: ReactNode
+  className?: string
+  user: NonNullable<CommentBase['user']>
+  viewTransitionName?: string
+}) {
+  return (
+    <MyLink
+      className={className}
+      state={viewTransitionName ? { viewTransitionName } : undefined}
+      to={`/user/${encodeURIComponent(user.username)}`}
+      viewTransition={!!viewTransitionName}
+    >
+      {children}
+    </MyLink>
+  )
+}
+
+function CommentUserAvatarLink({
+  className,
+  imageClassName,
+  transitionKey,
+  user,
+}: {
+  className?: string
+  imageClassName?: string
+  transitionKey: string
+  user: NonNullable<CommentBase['user']>
+}) {
+  const { key } = useLocation()
+  const to = `/user/${encodeURIComponent(user.username)}`
+  const isTransitioning = useViewTransitionState(to)
+  const viewTransitionName = `user-avatar-${user.id}-${transitionKey}-${key}`
+
+  return (
+    <UserProfileLink className={className} user={user} viewTransitionName={viewTransitionName}>
+      <ViewTransitionImage
+        active={isTransitioning}
+        className={imageClassName}
+        imageSrc={user.avatar.medium}
+        viewTransitionName={viewTransitionName}
+      />
+    </UserProfileLink>
   )
 }
 

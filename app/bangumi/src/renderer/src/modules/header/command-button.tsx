@@ -15,7 +15,7 @@ export function CommandButton() {
     <Button
       variant="outline"
       aria-label="搜索条目"
-      className="no-drag-region text-muted-foreground hover:text-foreground bg-muted/30 h-8 w-56 max-w-[36vw] justify-between px-2.5 font-normal shadow-none"
+      className="no-drag-region text-muted-foreground hover:text-foreground bg-muted/30 mr-2 h-8 w-56 max-w-[36vw] justify-between px-2.5 font-normal shadow-none"
       onClick={() => setCommandPanel({ open: true, mode: 'subject-search' })}
     >
       <span className="flex min-w-0 items-center gap-2">

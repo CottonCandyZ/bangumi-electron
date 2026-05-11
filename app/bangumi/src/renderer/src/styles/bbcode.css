@@ -6,7 +6,7 @@
   }
 
   a {
-    @apply text-primary underline-offset-4 hover:underline;
+    @apply text-blue-600 underline decoration-blue-500/45 underline-offset-2 transition-colors hover:text-blue-700 hover:decoration-blue-600 dark:text-blue-400 dark:decoration-blue-400/50 dark:hover:text-blue-300 dark:hover:decoration-blue-300;
   }
 
   a.bbcode-image-action-link {

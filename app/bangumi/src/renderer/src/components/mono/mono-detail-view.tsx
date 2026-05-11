@@ -475,7 +475,7 @@ function RelatedItemSummary({ items }: { items: MonoRelatedItem[] }) {
     <div className="text-muted-foreground flex min-w-0 flex-col items-start gap-0.5 pt-1 text-xs">
       {displayItems.map((item) => (
         <MyLink
-          className="text-primary hover:bg-primary/10 focus-visible:ring-ring/50 -mx-1 block w-fit max-w-full truncate rounded-sm px-1 underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-hidden"
+          className="text-primary hover:bg-primary/10 focus-visible:ring-ring/50 block w-fit max-w-full truncate rounded-sm px-1 underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-hidden"
           key={`${item.id}-${item.relation ?? item.name}`}
           to={item.link}
           onClick={(event) => event.stopPropagation()}
@@ -641,7 +641,7 @@ function MonoRelatedCard({ item }: { item: MonoRelatedItem }) {
         {item.subjectId && (
           <MyLink
             to={`/subject/${item.subjectId}`}
-            className="text-primary hover:bg-primary/10 focus-visible:ring-ring/50 -mx-1 line-clamp-1 w-fit max-w-full rounded-sm px-1 text-sm break-words underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-hidden"
+            className="text-primary hover:bg-primary/10 focus-visible:ring-ring/50 line-clamp-1 w-fit max-w-full rounded-sm px-1 text-sm break-words underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-hidden"
             onClick={(event) => event.stopPropagation()}
             onKeyDown={(event) => event.stopPropagation()}
           >

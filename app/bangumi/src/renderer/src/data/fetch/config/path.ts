@@ -22,6 +22,13 @@ export const LOGIN = {
 /** 用户相关 */
 export const USER = {
   ME: '/v0/me',
+  BY_USERNAME: (username: UserInfo['username']) => `/v0/users/${username}`,
+}
+
+/** Private API 用户 */
+export const NEXT_USERS = {
+  BY_USERNAME: (username: UserInfo['username']) => `/p1/users/${username}`,
+  TIMELINE_BY_USERNAME: (username: UserInfo['username']) => `/p1/users/${username}/timeline`,
 }
 
 /** 条目相关 */

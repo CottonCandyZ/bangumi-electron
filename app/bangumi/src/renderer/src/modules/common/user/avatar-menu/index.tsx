@@ -23,12 +23,14 @@ import { cn } from '@renderer/lib/utils'
 import { useSetAtom } from 'jotai'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { UpdateMenuSub, useUpdateState } from '@renderer/modules/update/menu'
+import { useNavigate } from 'react-router-dom'
 
 export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   const logoutMutation = useLogoutMutation()
   const userInfo = useSession()
   const isLogin = !!userInfo
   const { theme, setTheme } = useTheme()
+  const navigate = useNavigate()
 
   const [dropdownOpen, setDropDownOpen] = useState(false)
   const openDialog = useSetAtom(loginDialogAtom)
@@ -85,6 +87,9 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
               <UpdateMenuSub state={updateState} />
               <DropdownMenuSeparator />
             </>
+          )}
+          {isLogin && (
+            <DropdownMenuItem onClick={() => navigate('/profile')}>个人主页</DropdownMenuItem>
           )}
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>主题</DropdownMenuSubTrigger>
