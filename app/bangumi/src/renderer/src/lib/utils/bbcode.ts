@@ -3,13 +3,14 @@ import { render } from '@bbob/react'
 import { BangumiSmile } from '@renderer/components/comment/bangumi-smile'
 import { BBCodeImage } from '@renderer/components/comment/bbcode-image'
 import { Bmoji } from '@renderer/components/comment/bmoji'
+import { DynamicSmile } from '@renderer/components/comment/dynamic-smile'
 import { cloneElement, createElement, Fragment, isValidElement, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 // noinspection ES6UnusedImports
 import {} from '@bbob/types'
 
 const URL_PATTERN = /https?:\/\/[^\s<>"'，。)）\]]+/g
-const INLINE_TOKEN_PATTERN = /\((bgm\d+|bmoC?[A-Za-z0-9_\-:=|.]*)\)/g
+const INLINE_TOKEN_PATTERN = /\((bgm\d+|musume_\d+|bmoC?[A-Za-z0-9_\-:=|.]*)\)/g
 const BANGUMI_HOSTS = new Set(['bangumi.tv', 'bgm.tv'])
 const BANGUMI_ROUTE_PATTERN = /^\/(subject|person|character|ep)\/(\d+)\/?$/
 const ALLOWED_COLOR_PATTERN =
@@ -218,6 +219,13 @@ function renderInlineTokens(text: string, offset = 0) {
     if (token.startsWith('bgm')) {
       parts.push(
         createElement(BangumiSmile, {
+          code: token,
+          key: `${token}-${offset + index}`,
+        }),
+      )
+    } else if (token.startsWith('musume_')) {
+      parts.push(
+        createElement(DynamicSmile, {
           code: token,
           key: `${token}-${offset + index}`,
         }),

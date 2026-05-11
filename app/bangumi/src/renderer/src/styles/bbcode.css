@@ -1,4 +1,6 @@
 @utility bbcode {
+  line-height: 2.25rem;
+
   .mask {
     text-shadow: #555 0 0 20px;
     border-radius: 2px;
@@ -24,6 +26,12 @@
 
   .bbcode-bmoji {
     @apply mx-0.5 inline-flex size-6 align-text-bottom;
+  }
+
+  .bbcode-dynamic-smile {
+    width: 36px !important;
+    height: 36px !important;
+    @apply mx-0.5 align-text-bottom;
   }
 
   .bbcode-bmoji canvas,

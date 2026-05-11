@@ -540,7 +540,6 @@ function PanelFilterTabs({
 
 function MonoPanelInfiniteList({ children }: { children: ReactNode }) {
   const [viewport, setViewport] = useState<HTMLElement | null>(null)
-  const [scrollTop, setScrollTop] = useState(0)
 
   if (Children.count(children) === 0) {
     return <div className="text-muted-foreground p-4 text-sm">没有符合条件的项目。</div>
@@ -561,16 +560,11 @@ function MonoPanelInfiniteList({ children }: { children: ReactNode }) {
         onScroll={(event: UIEvent<HTMLElement>) => {
           const nextViewport = event.currentTarget
           setViewport((prev) => (prev === nextViewport ? prev : nextViewport))
-          setScrollTop(nextViewport.scrollTop)
         }}
       >
         {children}
       </MasonryInfiniteGridCompat>
-      <BackToTopButton
-        className="absolute right-4 bottom-4"
-        scrollTop={scrollTop}
-        viewport={viewport}
-      />
+      <BackToTopButton className="absolute right-4 bottom-4" viewport={viewport} />
       <ScrollArea.Scrollbar
         orientation="vertical"
         className="absolute top-0 right-0 z-20 flex h-full w-2.5 touch-none p-0.5 opacity-0 transition-opacity duration-150 select-none group-hover/scroll:opacity-100"

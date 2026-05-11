@@ -287,9 +287,7 @@ function CommentItem({ comment, floorNumber }: { comment: Comment; floorNumber: 
       )}
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <CommentHeader comment={comment} />
-        <div className="bbcode text-sm leading-6 whitespace-pre-line">
-          {renderBBCode(comment.content)}
-        </div>
+        <div className="bbcode text-sm whitespace-pre-line">{renderBBCode(comment.content)}</div>
         <CommentReactions reactions={comment.reactions} />
         {comment.replies.length > 0 && (
           <div className="bg-muted/40 flex flex-col gap-2 rounded-md p-2">
