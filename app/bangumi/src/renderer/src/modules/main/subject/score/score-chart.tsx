@@ -2,6 +2,10 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@renderer/com
 import { RatingCount } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { Bar, BarChart, LabelList, XAxis } from 'recharts'
+import type { ComponentClass } from 'react'
+
+const BarCompat = Bar as unknown as ComponentClass<Record<string, unknown>>
+const XAxisCompat = XAxis as unknown as ComponentClass<Record<string, unknown>>
 
 export function ScoreChart({
   ratingCount,
@@ -35,14 +39,19 @@ export function ScoreChart({
           top: 30,
         }}
       >
-        <XAxis dataKey="name" tickLine={false} axisLine={false} tickFormatter={(value) => value} />
+        <XAxisCompat
+          dataKey="name"
+          tickLine={false}
+          axisLine={false}
+          tickFormatter={(value) => value}
+        />
         <ChartTooltip
           cursor={false}
           content={<ChartTooltipContent nameKey="percent" hideLabel />}
         />
-        <Bar dataKey="score" radius={4}>
+        <BarCompat dataKey="score" radius={4}>
           <LabelList position="top" offset={10} className="fill-foreground" fontSize={10} />
-        </Bar>
+        </BarCompat>
       </BarChart>
     </ChartContainer>
   )

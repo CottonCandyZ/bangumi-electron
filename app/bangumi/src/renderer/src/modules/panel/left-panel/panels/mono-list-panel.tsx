@@ -26,8 +26,12 @@ import { tabFilerAtom } from '@renderer/state/simple-tab'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { XIcon } from 'lucide-react'
 import { Children, useEffect, useMemo, useRef, useState } from 'react'
-import type { PropsWithChildren, ReactNode, UIEvent } from 'react'
+import type { ComponentClass, PropsWithChildren, ReactNode, UIEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+
+const MasonryInfiniteGridCompat = MasonryInfiniteGrid as unknown as ComponentClass<
+  Record<string, unknown>
+>
 
 const SUBJECT_TYPE_MAP: Record<SubjectType, string> = {
   [SubjectType.book]: '书籍',
@@ -544,7 +548,7 @@ function MonoPanelInfiniteList({ children }: { children: ReactNode }) {
 
   return (
     <ScrollArea.Root className="group/scroll relative min-h-0 flex-1 overflow-hidden">
-      <MasonryInfiniteGrid
+      <MasonryInfiniteGridCompat
         tag={ScrollArea.Viewport as unknown as string}
         container
         containerTag={ScrollArea.Content as unknown as string}
@@ -561,7 +565,7 @@ function MonoPanelInfiniteList({ children }: { children: ReactNode }) {
         }}
       >
         {children}
-      </MasonryInfiniteGrid>
+      </MasonryInfiniteGridCompat>
       <BackToTopButton
         className="absolute right-4 bottom-4"
         scrollTop={scrollTop}

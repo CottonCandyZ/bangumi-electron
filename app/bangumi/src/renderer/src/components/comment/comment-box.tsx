@@ -14,10 +14,13 @@ import { cn } from '@renderer/lib/utils'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { ComponentClass, ReactNode } from 'react'
 import { useInView } from 'react-intersection-observer'
 
 const DEFAULT_COMMENT_PLACEHOLDER_COUNT = 6
+const MasonryInfiniteGridCompat = MasonryInfiniteGrid as unknown as ComponentClass<
+  Record<string, unknown>
+>
 
 type CommentBoxProps = {
   title?: ReactNode
@@ -179,7 +182,7 @@ function CommentList({
 
   return (
     <ScrollArea.Root className="group/scroll relative h-full min-h-0 overflow-hidden">
-      <MasonryInfiniteGrid
+      <MasonryInfiniteGridCompat
         tag={ScrollArea.Viewport as unknown as string}
         container
         containerTag={ScrollArea.Content as unknown as string}
@@ -226,7 +229,7 @@ function CommentList({
             />
           </div>
         ))}
-      </MasonryInfiniteGrid>
+      </MasonryInfiniteGridCompat>
       {showBackToTop && (
         <BackToTopButton className="absolute right-3 bottom-3 size-9" viewport={viewport} />
       )}

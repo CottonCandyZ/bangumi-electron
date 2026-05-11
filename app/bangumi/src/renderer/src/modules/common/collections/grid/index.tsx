@@ -9,7 +9,12 @@ import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
 import { ScrollArea } from '@base-ui/react/scroll-area'
 import { useSetAtom } from 'jotai'
 import { useEffect, useMemo, useRef } from 'react'
+import type { Component, ComponentClass, Ref } from 'react'
 import { useSession } from '@renderer/data/hooks/session'
+
+const MasonryInfiniteGridCompat = MasonryInfiniteGrid as unknown as ComponentClass<
+  Record<string, unknown>
+>
 
 export function CollectionsGrid({
   collectionType,
@@ -28,7 +33,7 @@ export function CollectionsGrid({
     enabled: !!userInfo,
     needKeepPreviousData: false,
   })
-  const igRef = useRef<MasonryInfiniteGrid>(null)
+  const igRef = useRef<MasonryInfiniteGrid | null>(null)
   const setIsRefetching = useSetAtom(collectionPanelIsRefetchingAtom)
   useEffect(() => {
     if (gridCache.has(`${subjectType}-${collectionType}`)) {
@@ -72,8 +77,8 @@ export function CollectionsGrid({
     )
   return (
     <ScrollArea.Root className="group/scroll relative h-full w-full overflow-hidden">
-      <MasonryInfiniteGrid
-        ref={igRef}
+      <MasonryInfiniteGridCompat
+        ref={igRef as unknown as Ref<Component<Record<string, unknown>>>}
         // Make the InfiniteGrid wrapper be the Base UI viewport so scrolling is observed correctly.
         tag={ScrollArea.Viewport as unknown as string}
         // Make the InfiniteGrid container be the Base UI content wrapper so thumb updates when content grows.
@@ -114,7 +119,7 @@ export function CollectionsGrid({
             </div>
           )
         })}
-      </MasonryInfiniteGrid>
+      </MasonryInfiniteGridCompat>
 
       <ScrollArea.Scrollbar
         orientation="vertical"
