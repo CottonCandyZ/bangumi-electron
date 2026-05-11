@@ -1,7 +1,7 @@
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
-import { RefreshCcwIcon } from 'lucide-react'
+import { ExternalLinkIcon, RefreshCcwIcon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 
 type ImageStatus = 'loading' | 'loaded' | 'error'
@@ -50,31 +50,35 @@ export function BBCodeImage({ src, alt = '' }: { src: string; alt?: string }) {
       {status === 'error' && (
         <span className="bg-muted/70 relative z-10 flex h-full min-h-32 w-full flex-col items-center justify-center gap-2 rounded-md border p-4">
           <span className="text-muted-foreground text-sm">图片加载失败</span>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className={cn(
-              'group border-primary/40 bg-background hover:border-primary hover:bg-primary hover:text-primary-foreground focus-visible:ring-primary/40 hover:ring-primary/20 active:bg-primary/90 gap-2 shadow-sm transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md hover:ring-2 active:translate-y-0 active:scale-95 active:shadow-inner',
-              retrying &&
-                'border-primary bg-primary text-primary-foreground ring-primary/30 ring-2',
-            )}
-            onClick={() => {
-              setStatus('loading')
-              setRetrying(true)
-              setRetryKey((key) => key + 1)
-              if (retryTimerRef.current) window.clearTimeout(retryTimerRef.current)
-              retryTimerRef.current = window.setTimeout(() => setRetrying(false), 700)
-            }}
-          >
-            <RefreshCcwIcon
-              className={cn(
-                'size-4 transition-transform duration-150 group-hover:-rotate-45 group-active:rotate-180',
-                retrying && 'animate-spin',
-              )}
-            />
-            {retrying ? '正在重试' : '重试'}
-          </Button>
+          <span className="flex flex-row flex-wrap items-center justify-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className={cn('group gap-2 shadow-none', retrying && 'text-primary')}
+              onClick={() => {
+                setStatus('loading')
+                setRetrying(true)
+                setRetryKey((key) => key + 1)
+                if (retryTimerRef.current) window.clearTimeout(retryTimerRef.current)
+                retryTimerRef.current = window.setTimeout(() => setRetrying(false), 700)
+              }}
+            >
+              <RefreshCcwIcon
+                className={cn(
+                  'size-4 transition-transform duration-150 group-active:rotate-90',
+                  retrying && 'animate-spin',
+                )}
+              />
+              {retrying ? '正在重试' : '重试'}
+            </Button>
+            <Button asChild variant="outline" size="sm" className="gap-2 shadow-none">
+              <a className="bbcode-image-action-link" href={src} target="_blank" rel="noreferrer">
+                <ExternalLinkIcon className="size-4" />
+                浏览器打开
+              </a>
+            </Button>
+          </span>
         </span>
       )}
     </span>

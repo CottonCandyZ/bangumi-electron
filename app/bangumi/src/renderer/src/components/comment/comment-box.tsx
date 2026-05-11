@@ -6,6 +6,7 @@ import {
 } from '@renderer/components/comment/bangumi-smile'
 import { Image } from '@renderer/components/image/image'
 import { BackToTopButton } from '@renderer/components/button/back-to-top'
+import { Button } from '@renderer/components/ui/button'
 import { Card } from '@renderer/components/ui/card'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
@@ -13,11 +14,13 @@ import { Comment, CommentBase, CommentReaction } from '@renderer/data/types/comm
 import { cn } from '@renderer/lib/utils'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import dayjs from 'dayjs'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ComponentClass, ReactNode } from 'react'
 import { useInView } from 'react-intersection-observer'
 
 const DEFAULT_COMMENT_PLACEHOLDER_COUNT = 6
+const DEFAULT_VISIBLE_REPLY_COUNT = 3
 const MasonryInfiniteGridCompat = MasonryInfiniteGrid as unknown as ComponentClass<
   Record<string, unknown>
 >
@@ -272,6 +275,16 @@ export function CommentSkeleton() {
 }
 
 function CommentItem({ comment, floorNumber }: { comment: Comment; floorNumber: number }) {
+  const [showAllReplies, setShowAllReplies] = useState(false)
+  const replyCount = comment.replies.length
+  const hasHiddenReplies = replyCount > DEFAULT_VISIBLE_REPLY_COUNT
+  const visibleReplies =
+    hasHiddenReplies && !showAllReplies
+      ? comment.replies.slice(0, DEFAULT_VISIBLE_REPLY_COUNT)
+      : comment.replies
+  const hiddenReplyCount = replyCount - DEFAULT_VISIBLE_REPLY_COUNT
+  const repliesId = `comment-${comment.id}-replies`
+
   return (
     <Card className="relative flex flex-row gap-3 p-3 pr-12 shadow-none">
       <span className="text-muted-foreground absolute top-3 right-3 text-xs tabular-nums">
@@ -289,12 +302,33 @@ function CommentItem({ comment, floorNumber }: { comment: Comment; floorNumber: 
         <CommentHeader comment={comment} />
         <div className="bbcode text-sm whitespace-pre-line">{renderBBCode(comment.content)}</div>
         <CommentReactions reactions={comment.reactions} />
-        {comment.replies.length > 0 && (
-          <div className="bg-muted/40 flex flex-col gap-2 rounded-md p-2">
-            {comment.replies.map((reply) => (
+        {replyCount > 0 && (
+          <div
+            className="border-border/60 bg-muted/25 divide-border flex flex-col divide-y rounded-md border px-2"
+            id={repliesId}
+          >
+            {visibleReplies.map((reply) => (
               <ReplyItem reply={reply} key={reply.id} />
             ))}
           </div>
+        )}
+        {hasHiddenReplies && (
+          <Button
+            aria-controls={repliesId}
+            aria-expanded={showAllReplies}
+            className="text-muted-foreground hover:text-foreground -ml-2 h-7 w-fit px-2 text-xs"
+            onClick={() => setShowAllReplies((value) => !value)}
+            size="sm"
+            type="button"
+            variant="ghost"
+          >
+            {showAllReplies ? (
+              <ChevronUp className="size-3.5" />
+            ) : (
+              <ChevronDown className="size-3.5" />
+            )}
+            {showAllReplies ? '收起回复' : `展开剩余 ${hiddenReplyCount} 条回复`}
+          </Button>
         )}
       </div>
     </Card>
@@ -314,13 +348,25 @@ function CommentHeader({ comment }: { comment: Comment }) {
 
 function ReplyItem({ reply }: { reply: CommentBase }) {
   return (
-    <div className="text-sm">
-      <span className="font-medium">{reply.user?.nickname ?? `#${reply.creatorID}`}</span>
-      <span className="text-muted-foreground mx-1">
-        {dayjs.unix(reply.createdAt).format('YYYY-MM-DD HH:mm')}
-      </span>
-      <span className="bbcode whitespace-pre-line">{renderBBCode(reply.content)}</span>
-      <CommentReactions reactions={reply.reactions} compact />
+    <div className="flex flex-row gap-2 py-2.5 text-sm first:pt-2 last:pb-2">
+      {reply.user?.avatar.medium ? (
+        <Image
+          imageSrc={reply.user.avatar.medium}
+          className="mt-0.5 size-7 shrink-0 overflow-hidden rounded-full"
+        />
+      ) : (
+        <div className="bg-muted mt-0.5 size-7 shrink-0 rounded-full" />
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="mb-1 flex flex-row flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <span className="font-medium">{reply.user?.nickname ?? `#${reply.creatorID}`}</span>
+          <span className="text-muted-foreground text-xs">
+            {dayjs.unix(reply.createdAt).format('YYYY-MM-DD HH:mm')}
+          </span>
+        </div>
+        <div className="bbcode whitespace-pre-line">{renderBBCode(reply.content)}</div>
+        <CommentReactions reactions={reply.reactions} compact />
+      </div>
     </div>
   )
 }

@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 
 const DYNAMIC_SMILE_PATTERN = /^(musume)_(\d+)$/
 const DYNAMIC_SMILE_HOST = 'https://lain.bgm.tv/img/smiles'
-const DYNAMIC_SMILE_DISPLAY_SIZE = 36
+const DYNAMIC_SMILE_DISPLAY_SIZE = 52
 
 export function DynamicSmile({ code, className }: { code: string; className?: string }) {
   const match = code.match(DYNAMIC_SMILE_PATTERN)

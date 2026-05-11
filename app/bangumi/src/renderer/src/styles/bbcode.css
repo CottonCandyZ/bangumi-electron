@@ -1,6 +1,4 @@
 @utility bbcode {
-  line-height: 2.25rem;
-
   .mask {
     text-shadow: #555 0 0 20px;
     border-radius: 2px;
@@ -9,6 +7,14 @@
 
   a {
     @apply text-primary underline-offset-4 hover:underline;
+  }
+
+  a.bbcode-image-action-link {
+    text-decoration-line: none !important;
+  }
+
+  a.bbcode-image-action-link:hover {
+    text-decoration-line: none !important;
   }
 
   blockquote {
@@ -29,8 +35,8 @@
   }
 
   .bbcode-dynamic-smile {
-    width: 36px !important;
-    height: 36px !important;
+    width: 52px !important;
+    height: 52px !important;
     @apply mx-0.5 align-text-bottom;
   }
 

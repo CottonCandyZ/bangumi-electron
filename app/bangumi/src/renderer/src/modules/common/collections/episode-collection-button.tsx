@@ -48,7 +48,7 @@ export function EpisodeCollectionButton({
           return (
             <button
               className={cn(
-                `ring-offset-background hover:border-border hover:bg-background hover:text-foreground focus-visible:ring-ring relative inline-flex h-full cursor-pointer items-center justify-center rounded-md border border-transparent px-3 py-1 text-sm font-medium whitespace-nowrap focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50`,
+                `ring-offset-background hover:border-border hover:bg-background hover:text-foreground focus-visible:ring-ring relative inline-flex h-full cursor-default items-center justify-center rounded-md border border-transparent px-3 py-1 text-sm font-medium whitespace-nowrap focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50`,
                 hover === item && 'border-border bg-background text-foreground',
                 currentAction == item && 'cursor-default',
               )}
