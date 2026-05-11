@@ -207,7 +207,7 @@ function ProfileHeader({
         )}
 
         {profile?.bio && (
-          <div className="bbcode bg-muted/25 max-h-48 overflow-hidden rounded-md border p-3 text-sm leading-6 whitespace-pre-line">
+          <div className="bbcode bg-muted/25 max-h-48 overflow-x-hidden overflow-y-auto rounded-md border p-3 text-sm leading-6 whitespace-pre-line">
             {renderBBCode(profile.bio)}
           </div>
         )}
