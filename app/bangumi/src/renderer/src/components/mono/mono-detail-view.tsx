@@ -706,6 +706,7 @@ function FoldableSection({
 }) {
   const [folded, setFolded] = useState(true)
   const [foldedItemCount, setFoldedItemCount] = useState(DEFAULT_FOLDED_ITEM_COUNT)
+  const [contentHovering, setContentHovering] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
   const childrenArray = Children.toArray(children.props.children)
   const cardMinWidthRem = foldedItemMinWidthRem ?? MONO_SUBJECT_CARD_MIN_WIDTH_REM
@@ -738,7 +739,7 @@ function FoldableSection({
     folded && canFold
       ? ({
           maxHeight: `${foldedMaxHeightRem}rem`,
-          overflow: 'hidden',
+          overflow: contentHovering ? 'visible' : 'hidden',
         } as CSSProperties)
       : undefined
   const sectionStyle = {
@@ -764,7 +765,12 @@ function FoldableSection({
         </div>
         {tabs}
       </div>
-      <div ref={contentRef} style={clipStyle}>
+      <div
+        ref={contentRef}
+        style={clipStyle}
+        onPointerEnter={() => setContentHovering(true)}
+        onPointerLeave={() => setContentHovering(false)}
+      >
         {children.props.children ? content : null}
       </div>
       {canFold && (
