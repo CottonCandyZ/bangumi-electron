@@ -18,6 +18,7 @@ import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { sidePanelCollectionTypeFilterAtom } from '@renderer/state/collection'
+import { userProfileAvatarInViewAtom } from '@renderer/state/in-view'
 import {
   nvaCollectionButtonAtomAction,
   openMonoListPanelTabAtomAction,
@@ -31,6 +32,7 @@ import {
 import { useSetAtom } from 'jotai'
 import { Activity, CalendarDays, UserRound } from 'lucide-react'
 import dayjs from 'dayjs'
+import { useEffect } from 'react'
 import { useLocation, useParams, useViewTransitionState } from 'react-router-dom'
 
 const COLLECTION_PREVIEW_LIMIT = 10
@@ -62,6 +64,7 @@ export function Component() {
   const profileQuery = useUserProfileQuery({ username, enabled: !!username })
   const userInfoQuery = useUserInfoByUsernameQuery({ username, enabled: !!username })
   const timelineQuery = useUserTimelineQuery({ username, limit: 4, enabled: !!username })
+  const setAvatarInView = useSetAtom(userProfileAvatarInViewAtom)
   const user = profileQuery.data ?? userInfoQuery.data ?? (canUseSessionFallback ? session : null)
   const userMissing = !user && !profileQuery.isPending && !userInfoQuery.isPending
   const avatarViewTransitionName = useProfileAvatarViewTransitionName(
@@ -71,6 +74,10 @@ export function Component() {
     (section) => sumSubjectStats(profileQuery.data?.stats.subject[section.type]) > 0,
   )
   const setRightPanelOpen = useSetAtom(rightPanelOpenAtom)
+
+  useEffect(() => {
+    setAvatarInView(true)
+  }, [setAvatarInView, username])
 
   if (!username) {
     return (
@@ -114,6 +121,7 @@ export function Component() {
       <ProfileHeader
         avatarViewTransitionName={avatarViewTransitionName}
         loading={profileQuery.isPending && userInfoQuery.isPending}
+        onAvatarInViewChange={setAvatarInView}
         profile={profileQuery.data}
         user={user}
       />
@@ -154,11 +162,13 @@ export function Component() {
 function ProfileHeader({
   avatarViewTransitionName,
   loading,
+  onAvatarInViewChange,
   profile,
   user,
 }: {
   avatarViewTransitionName?: string
   loading: boolean
+  onAvatarInViewChange: (inView: boolean) => void
   profile: UserProfile | null | undefined
   user: UserInfo | UserProfile | null | undefined
 }) {
@@ -179,8 +189,10 @@ function ProfileHeader({
     <section className="flex flex-col gap-5 lg:flex-row lg:items-start">
       <ViewTransitionImage
         active={!!avatarViewTransitionName}
+        cacheKey="userProfileAvatarInView"
         className="size-24 shrink-0 overflow-hidden rounded-2xl border shadow-xs"
         imageSrc={user.avatar.large || user.avatar.medium}
+        onInViewChange={onAvatarInViewChange}
         viewTransitionName={avatarViewTransitionName}
       />
       <div className="min-w-0 flex-1 space-y-4">

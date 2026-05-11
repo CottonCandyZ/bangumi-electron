@@ -5,3 +5,5 @@ export const collectionBoxInViewAtom = atom(false)
 export const subjectCoverImageInViewAtom = atom(true)
 
 export const monoAvatarImageInViewAtom = atom(true)
+
+export const userProfileAvatarInViewAtom = atom(true)

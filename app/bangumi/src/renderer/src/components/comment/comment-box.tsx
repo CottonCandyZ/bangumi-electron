@@ -399,6 +399,7 @@ function CommentUserAvatarLink({
     <UserProfileLink className={className} user={user} viewTransitionName={viewTransitionName}>
       <ViewTransitionImage
         active={isTransitioning}
+        cacheKey={`commentUserAvatar-${transitionKey}`}
         className={imageClassName}
         imageSrc={user.avatar.medium}
         viewTransitionName={viewTransitionName}

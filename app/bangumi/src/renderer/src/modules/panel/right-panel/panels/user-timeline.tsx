@@ -20,6 +20,8 @@ const VIRTUAL_OVERSCAN = 6
 const APPEND_SKELETON_COUNT = 4
 const LOAD_MORE_ROW_THRESHOLD = 6
 
+const scrollTopCache = new Map<string, number>()
+
 type UserTimelineRow =
   | {
       type: 'day'
@@ -83,6 +85,7 @@ export function UserTimelinePanel() {
           hasMore={!!timelineQuery.hasNextPage}
           isFetchingMore={timelineQuery.isFetchingNextPage}
           onListNearBottom={loadMore}
+          scrollAreaKey={username ? `user-timeline-${username}` : undefined}
         />
       </div>
     </div>
@@ -95,15 +98,18 @@ function UserTimelineVirtualGrid({
   hasMore,
   isFetchingMore,
   onListNearBottom,
+  scrollAreaKey,
 }: {
   entries: UserTimelineItem[] | undefined
   error: boolean
   hasMore: boolean
   isFetchingMore: boolean
   onListNearBottom: () => Promise<unknown> | void
+  scrollAreaKey?: string
 }) {
   const viewportRef = useRef<HTMLElement | null>(null)
   const loadingMoreRef = useRef(false)
+  const restoredScrollKeyRef = useRef<string | undefined>(undefined)
   const rows = useMemo(() => (entries ? toTimelineRows(entries) : undefined), [entries])
   const itemCount = (rows?.length ?? 0) + (isFetchingMore ? APPEND_SKELETON_COUNT : 0)
   const requestMore = useCallback(() => {
@@ -132,6 +138,27 @@ function UserTimelineVirtualGrid({
     virtualizer.measure()
   }, [rows?.length, virtualizer])
 
+  useEffect(() => {
+    restoredScrollKeyRef.current = undefined
+  }, [scrollAreaKey])
+
+  useEffect(() => {
+    if (!scrollAreaKey || itemCount === 0) return
+    if (restoredScrollKeyRef.current === scrollAreaKey) return
+
+    const viewport = viewportRef.current
+    const cachedScrollTop = scrollTopCache.get(scrollAreaKey)
+    if (!viewport || cachedScrollTop === undefined) return
+
+    restoredScrollKeyRef.current = scrollAreaKey
+    requestAnimationFrame(() => {
+      viewport.scrollTop = Math.min(
+        cachedScrollTop,
+        Math.max(0, viewport.scrollHeight - viewport.clientHeight),
+      )
+    })
+  }, [itemCount, scrollAreaKey])
+
   if (rows === undefined && !error) {
     return <UserTimelineSkeletonScroll count={8} />
   }
@@ -148,6 +175,9 @@ function UserTimelineVirtualGrid({
     <ScrollArea.Root className="group/scroll relative h-full min-h-0 overflow-hidden">
       <ScrollArea.Viewport
         className="h-full w-full overflow-x-hidden px-3 py-3 focus-visible:outline-hidden"
+        onScroll={(event) => {
+          if (scrollAreaKey) scrollTopCache.set(scrollAreaKey, event.currentTarget.scrollTop)
+        }}
         ref={(node) => {
           viewportRef.current = node
         }}

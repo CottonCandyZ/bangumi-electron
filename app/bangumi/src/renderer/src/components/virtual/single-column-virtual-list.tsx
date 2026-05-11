@@ -5,6 +5,8 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Key, ReactNode } from 'react'
 
+const scrollTopCache = new Map<string, number>()
+
 type SingleColumnVirtualListProps<T> = {
   items: T[]
   getKey: (item: T, index: number) => Key
@@ -46,6 +48,7 @@ export function SingleColumnVirtualList<T>({
 }: SingleColumnVirtualListProps<T>) {
   const viewportRef = useRef<HTMLElement | null>(null)
   const loadingMoreRef = useRef(false)
+  const restoredScrollKeyRef = useRef<string | undefined>(undefined)
   const [viewport, setViewport] = useState<HTMLElement | null>(null)
   const itemCount = items.length + (isFetchingMore ? appendPlaceholderCount : 0)
   const virtualizer = useVirtualizer({
@@ -77,6 +80,27 @@ export function SingleColumnVirtualList<T>({
     virtualizer.scrollToIndex(activeIndex, { align: 'center' })
   }, [activeIndex, items.length, viewport, virtualizer])
 
+  useEffect(() => {
+    restoredScrollKeyRef.current = undefined
+  }, [scrollAreaKey])
+
+  useEffect(() => {
+    if (!scrollAreaKey || itemCount === 0) return
+    if (restoredScrollKeyRef.current === scrollAreaKey) return
+
+    const viewport = viewportRef.current
+    const cachedScrollTop = scrollTopCache.get(scrollAreaKey)
+    if (!viewport || cachedScrollTop === undefined) return
+
+    restoredScrollKeyRef.current = scrollAreaKey
+    requestAnimationFrame(() => {
+      viewport.scrollTop = Math.min(
+        cachedScrollTop,
+        Math.max(0, viewport.scrollHeight - viewport.clientHeight),
+      )
+    })
+  }, [itemCount, scrollAreaKey])
+
   if (items.length === 0 && empty) return empty
 
   return (
@@ -86,6 +110,9 @@ export function SingleColumnVirtualList<T>({
     >
       <ScrollArea.Viewport
         className={cn('h-full w-full overflow-x-hidden focus-visible:outline-hidden', className)}
+        onScroll={(event) => {
+          if (scrollAreaKey) scrollTopCache.set(scrollAreaKey, event.currentTarget.scrollTop)
+        }}
         ref={(node) => {
           viewportRef.current = node
           setViewport((prev) => (prev === node ? prev : node))
