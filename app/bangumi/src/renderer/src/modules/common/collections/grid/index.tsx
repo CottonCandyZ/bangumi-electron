@@ -10,7 +10,6 @@ import { ScrollArea } from '@base-ui/react/scroll-area'
 import { useSetAtom } from 'jotai'
 import { useEffect, useMemo, useRef } from 'react'
 import type { Component, ComponentClass, Ref } from 'react'
-import { useSession } from '@renderer/data/hooks/session'
 
 const MasonryInfiniteGridCompat = MasonryInfiniteGrid as unknown as ComponentClass<
   Record<string, unknown>
@@ -20,17 +19,18 @@ export function CollectionsGrid({
   collectionType,
   subjectType,
   showEpisodeList,
+  username,
 }: {
   collectionType: CollectionType
   subjectType: SubjectType
   showEpisodeList: boolean
+  username: string
 }) {
-  const userInfo = useSession()
   const collectionsQuery = useInfinityQueryCollectionsByUsername({
-    username: userInfo?.username,
+    username,
     collectionType: collectionType,
     subjectType: subjectType,
-    enabled: !!userInfo,
+    enabled: !!username,
     needKeepPreviousData: false,
   })
   const igRef = useRef<MasonryInfiniteGrid | null>(null)

@@ -3,7 +3,10 @@ import { Button } from '@renderer/components/ui/button'
 import { useSubjectCommentsQuery } from '@renderer/data/hooks/api/subject'
 import { toCommentFromSubjectInterest } from '@renderer/data/transformer/comment'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { COMMENTS_TAB } from '@renderer/modules/panel/right-panel/panels/subject-info'
+import {
+  COMMENTS_TAB,
+  SUBJECT_RIGHT_PANEL_TAB_ID,
+} from '@renderer/modules/panel/right-panel/panels/subject-info'
 import { rightPanelOpenAtom } from '@renderer/state/panel'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
 import { useSetAtom } from 'jotai'
@@ -33,7 +36,7 @@ export function SubjectComments({ subjectId }: { subjectId: SubjectId }) {
   const hasMore = total !== undefined && comments !== undefined && comments.length < total
 
   const openCommentsPanel = () => {
-    setTabFilter(`subject-right-panel-${subjectId}`, COMMENTS_TAB)
+    setTabFilter(SUBJECT_RIGHT_PANEL_TAB_ID, COMMENTS_TAB)
     setRightPanelOpen(true)
   }
 

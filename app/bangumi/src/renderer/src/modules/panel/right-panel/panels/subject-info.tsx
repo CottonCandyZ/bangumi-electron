@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom'
 export const BASIC_INFO_TAB = '基础信息'
 export const COMMENTS_TAB = '吐槽箱'
 const SUBJECT_INFO_TABS = new Set([BASIC_INFO_TAB, COMMENTS_TAB])
+export const SUBJECT_RIGHT_PANEL_TAB_ID = 'subject-right-panel'
 
 export function SubjectInfoPanel() {
   const subjectId = useParams().subjectId
@@ -15,7 +16,7 @@ export function SubjectInfoPanel() {
 
   if (!subjectId) return null
 
-  const tabId = `subject-right-panel-${subjectId}`
+  const tabId = SUBJECT_RIGHT_PANEL_TAB_ID
   const currentTab = filterMap.get(tabId) ?? BASIC_INFO_TAB
 
   return (

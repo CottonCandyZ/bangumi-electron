@@ -1,13 +1,27 @@
 import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
 import { Button } from '@renderer/components/ui/button'
 import { HOST } from '@renderer/data/fetch/config/'
+import { useSession } from '@renderer/data/hooks/session'
 import { useLocation } from 'react-router-dom'
 
 export function OriginalLink() {
   const { pathname } = useLocation()
+  const session = useSession()
   const episodePath = pathname.match(/^\/episode\/(\d+)/)
-  const isOriginalLinkPath = /^\/(subject|person|character)\/\d+/.test(pathname) || !!episodePath
-  const href = episodePath ? `${HOST}/ep/${episodePath[1]}` : `${HOST}${pathname}`
+  const userPath = pathname.match(/^\/user\/([^/]+)/)
+  const profileUsername = pathname === '/profile' ? session?.username : undefined
+  const isOriginalLinkPath =
+    /^\/(subject|person|character)\/\d+/.test(pathname) ||
+    !!episodePath ||
+    !!userPath ||
+    !!profileUsername
+  const href = episodePath
+    ? `${HOST}/ep/${episodePath[1]}`
+    : userPath
+      ? `${HOST}/user/${userPath[1]}`
+      : profileUsername
+        ? `${HOST}/user/${profileUsername}`
+        : `${HOST}${pathname}`
 
   return (
     isOriginalLinkPath && (

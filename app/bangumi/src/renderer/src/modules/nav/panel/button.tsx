@@ -12,7 +12,8 @@ export function PanelButton({ name, panelName, icon, active }: Props) {
   const isActive =
     panelState.openState &&
     panelState.openContent === 'collection' &&
-    panelState.subjectType === panelName
+    panelState.subjectType === panelName &&
+    !panelState.username
   const [navOpen, setNavOpen] = useAtom(navOpenAtom)
 
   return (
@@ -26,7 +27,7 @@ export function PanelButton({ name, panelName, icon, active }: Props) {
       onClick={() => {
         startTransition(() => {
           if (navOpen) setNavOpen(false)
-          setPanelState(panelName, !isActive)
+          setPanelState(panelName, !isActive, undefined)
         })
       }}
     >

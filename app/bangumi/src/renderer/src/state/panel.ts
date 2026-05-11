@@ -1,6 +1,6 @@
 import { SubjectType } from '@renderer/data/types/subject'
 import type { Character } from '@renderer/data/types/character'
-import type { CollectionEpisode } from '@renderer/data/types/collection'
+import type { CollectionEpisode, CollectionType } from '@renderer/data/types/collection'
 import type { Episode } from '@renderer/data/types/episode'
 import type { RelatedSubject } from '@renderer/data/types/subject'
 import type { MonoRelatedItem, MonoSubjectItem, MonoType } from '@renderer/data/types/mono'
@@ -64,6 +64,15 @@ export type MonoListPanelTab =
       episodeTotal?: number
       initialOffset?: number
     }
+  | {
+      id: string
+      type: 'userCollections'
+      title: string
+      sourceTitle: string
+      username: string
+      subjectType: SubjectType
+      collectionType: CollectionType
+    }
 
 export const navOpenAtom = atom(false)
 
@@ -85,6 +94,8 @@ const LEFT_PANEL_CLOSE_ANIMATION_MS = 350
 
 export const collectionPanelSubjectTypeAtom = atom<keyof typeof SubjectType>('anime')
 
+export const collectionPanelUsernameAtom = atom<string | undefined>(undefined)
+
 export const monoListPanelTabsAtom = atom<MonoListPanelTab[]>([])
 
 export const monoListPanelActiveTabIdAtom = atom<string | null>(null)
@@ -95,13 +106,17 @@ export const nvaCollectionButtonAtomAction = atom(
     openState: get(leftPanelOpenAtom),
     openContent: get(leftPanelOpenContentAtom),
     subjectType: get(collectionPanelSubjectTypeAtom),
+    username: get(collectionPanelUsernameAtom),
   }),
-  (_get, set, subjectType: keyof typeof SubjectType, open: boolean) => {
-    if (!open) set(leftPanelOpenAtom, false)
-    else {
+  (_get, set, subjectType: keyof typeof SubjectType, open: boolean, username?: string) => {
+    if (!open) {
+      set(leftPanelOpenAtom, false)
+      set(collectionPanelUsernameAtom, undefined)
+    } else {
       set(leftPanelOpenAtom, true)
       set(leftPanelOpenContentAtom, 'collection')
       set(collectionPanelSubjectTypeAtom, subjectType)
+      set(collectionPanelUsernameAtom, username)
     }
   },
 )

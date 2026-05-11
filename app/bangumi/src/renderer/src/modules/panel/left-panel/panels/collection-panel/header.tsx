@@ -15,7 +15,7 @@ import {
   sidePanelShowEpisodeListAtom,
 } from '@renderer/state/collection'
 import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
-import { collectionPanelSubjectTypeAtom } from '@renderer/state/panel'
+import { collectionPanelSubjectTypeAtom, collectionPanelUsernameAtom } from '@renderer/state/panel'
 import { useAtom, useAtomValue } from 'jotai'
 import { SettingsIcon } from 'lucide-react'
 
@@ -24,11 +24,12 @@ export function SubjectCollectionPanelHeader() {
   const [filterMap, setCurrentTypeFilter] = useAtom(sidePanelCollectionTypeFilterAtom)
   const [showEpisodeList, setShowEpisodeList] = useAtom(sidePanelShowEpisodeListAtom)
   const userInfo = useSession()
+  const panelUsername = useAtomValue(collectionPanelUsernameAtom)
   const currentSelect = filterMap.get(subjectType.toString()) ?? CollectionType['watching']
   const isRefetching = useAtomValue(collectionPanelIsRefetchingAtom)
   return (
     <div className="drag-region flex h-14 shrink-0 flex-row items-center justify-between gap-5 border-b px-2">
-      {!!userInfo && (
+      {(!!userInfo || !!panelUsername) && (
         <>
           <div className="flex min-w-0 flex-row items-center gap-2">
             <Select
