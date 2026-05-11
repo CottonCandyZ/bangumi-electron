@@ -1,9 +1,11 @@
+import { MyLink } from '@renderer/components/my-link'
 import { Button } from '@renderer/components/ui/button'
 import { useEpisodeInfoByIdQuery } from '@renderer/data/hooks/api/episodes'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { EpId } from '@renderer/data/types/bgm'
 import { useOpenSubjectEpisodesPanel } from '@renderer/modules/common/episodes/use-open-subject-episodes-panel'
 import { StaticHeaderTitle } from '@renderer/modules/header/title/static'
+import { CornerUpLeft } from 'lucide-react'
 
 export function EpisodeHeaderTitle({ episodeId }: { episodeId: EpId }) {
   const episodeQuery = useEpisodeInfoByIdQuery({ episodeId })
@@ -28,6 +30,17 @@ export function EpisodeHeaderTitle({ episodeId }: { episodeId: EpId }) {
     <div className="flex min-w-0 flex-row items-center gap-2">
       <StaticHeaderTitle
         image={subjectInfo?.images.common}
+        imageOverlay={
+          subjectId ? (
+            <MyLink
+              to={`/subject/${subjectId}`}
+              aria-label="返回原条目"
+              className="no-drag-region absolute inset-0 flex cursor-default items-center justify-center bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none"
+            >
+              <CornerUpLeft className="size-4" />
+            </MyLink>
+          ) : undefined
+        }
         imageFallback={`ep.${episode.sort}`}
         name={episode.name}
         nameCn={episode.name_cn || `ep.${episode.sort}`}

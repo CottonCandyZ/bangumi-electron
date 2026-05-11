@@ -2,15 +2,18 @@ import { Image } from '@renderer/components/image/image'
 import { Subject } from '@renderer/data/types/subject'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { AnimatePresence, motion } from 'motion/react'
+import { ReactNode } from 'react'
 
 export function StaticHeaderTitle({
   image,
+  imageOverlay,
   imageFallback,
   name,
   nameCn,
   visible = true,
 }: {
   image?: string
+  imageOverlay?: ReactNode
   imageFallback?: string
   name: string
   nameCn?: string
@@ -27,10 +30,13 @@ export function StaticHeaderTitle({
             exit={{ y: '120%', opacity: 0 }}
           >
             {image ? (
-              <Image className="size-9 shrink-0 overflow-hidden rounded-lg" imageSrc={image} />
+              <Image className="group size-9 shrink-0 overflow-hidden rounded-lg" imageSrc={image}>
+                {imageOverlay}
+              </Image>
             ) : imageFallback ? (
-              <div className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg text-xs font-medium">
+              <div className="bg-muted text-muted-foreground group relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg text-xs font-medium">
                 {imageFallback}
+                {imageOverlay}
               </div>
             ) : null}
             <Header name={name} name_cn={nameCn ?? ''} />
