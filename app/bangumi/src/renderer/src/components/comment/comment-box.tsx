@@ -42,6 +42,7 @@ type CommentBoxProps = {
   floorNumbers?: number[]
   scrollAreaKey?: string
   showBackToTop?: boolean
+  userAvatarViewTransition?: boolean
   footer?: ReactNode
 }
 
@@ -63,6 +64,7 @@ export function CommentBox({
   floorNumbers,
   scrollAreaKey,
   showBackToTop = false,
+  userAvatarViewTransition = true,
   footer,
 }: CommentBoxProps) {
   const { ref, inView } = useInView({
@@ -98,6 +100,7 @@ export function CommentBox({
         showBackToTop={showBackToTop}
         floorNumbers={floorNumbers}
         scrollAreaKey={scrollAreaKey}
+        userAvatarViewTransition={userAvatarViewTransition}
         virtual={virtual}
       />
     )
@@ -114,6 +117,7 @@ export function CommentBox({
     floorNumbers,
     scrollAreaKey,
     virtual,
+    userAvatarViewTransition,
   ])
 
   return (
@@ -150,6 +154,7 @@ function CommentList({
   showBackToTop,
   floorNumbers,
   scrollAreaKey,
+  userAvatarViewTransition,
   virtual,
 }: {
   comments: Comment[]
@@ -161,6 +166,7 @@ function CommentList({
   showBackToTop?: boolean
   floorNumbers?: number[]
   scrollAreaKey?: string
+  userAvatarViewTransition: boolean
   virtual: boolean
 }) {
   if (!virtual) {
@@ -171,6 +177,7 @@ function CommentList({
             comment={comment}
             floorNumber={floorNumbers?.[index] ?? index + 1}
             key={comment.id}
+            userAvatarViewTransition={userAvatarViewTransition}
           />
         ))}
       </div>
@@ -182,7 +189,11 @@ function CommentList({
       items={comments}
       getKey={(comment) => comment.id}
       renderItem={(comment, index) => (
-        <CommentItem comment={comment} floorNumber={floorNumbers?.[index] ?? index + 1} />
+        <CommentItem
+          comment={comment}
+          floorNumber={floorNumbers?.[index] ?? index + 1}
+          userAvatarViewTransition={userAvatarViewTransition}
+        />
       )}
       rootClassName="h-full"
       className={cn('max-h-[40rem] pr-2', className)}
@@ -227,7 +238,15 @@ export function CommentSkeleton() {
   )
 }
 
-function CommentItem({ comment, floorNumber }: { comment: Comment; floorNumber: number }) {
+function CommentItem({
+  comment,
+  floorNumber,
+  userAvatarViewTransition,
+}: {
+  comment: Comment
+  floorNumber: number
+  userAvatarViewTransition: boolean
+}) {
   const [showAllReplies, setShowAllReplies] = useState(false)
   const replyCount = comment.replies.length
   const hasHiddenReplies = replyCount > DEFAULT_VISIBLE_REPLY_COUNT
@@ -249,6 +268,7 @@ function CommentItem({ comment, floorNumber }: { comment: Comment; floorNumber: 
           imageClassName="size-10 overflow-hidden rounded-full"
           transitionKey={`comment-${comment.id}`}
           user={comment.user}
+          viewTransition={userAvatarViewTransition}
         />
       ) : (
         <div className="bg-muted size-10 shrink-0 rounded-full" />
@@ -263,7 +283,11 @@ function CommentItem({ comment, floorNumber }: { comment: Comment; floorNumber: 
             id={repliesId}
           >
             {visibleReplies.map((reply) => (
-              <ReplyItem reply={reply} key={reply.id} />
+              <ReplyItem
+                reply={reply}
+                key={reply.id}
+                userAvatarViewTransition={userAvatarViewTransition}
+              />
             ))}
           </div>
         )}
@@ -315,7 +339,13 @@ function CommentHeader({ comment }: { comment: Comment }) {
   )
 }
 
-function ReplyItem({ reply }: { reply: CommentBase }) {
+function ReplyItem({
+  reply,
+  userAvatarViewTransition,
+}: {
+  reply: CommentBase
+  userAvatarViewTransition: boolean
+}) {
   return (
     <div className="flex flex-row gap-2 py-2.5 text-sm first:pt-2 last:pb-2">
       {reply.user?.avatar.medium ? (
@@ -324,6 +354,7 @@ function ReplyItem({ reply }: { reply: CommentBase }) {
           imageClassName="size-7 overflow-hidden rounded-full"
           transitionKey={`reply-${reply.id}`}
           user={reply.user}
+          viewTransition={userAvatarViewTransition}
         />
       ) : (
         <div className="bg-muted mt-0.5 size-7 shrink-0 rounded-full" />
@@ -384,11 +415,13 @@ function CommentUserAvatarLink({
   imageClassName,
   transitionKey,
   user,
+  viewTransition,
 }: {
   className?: string
   imageClassName?: string
   transitionKey: string
   user: NonNullable<CommentBase['user']>
+  viewTransition: boolean
 }) {
   const { key } = useLocation()
   const to = `/user/${encodeURIComponent(user.username)}`
@@ -396,9 +429,13 @@ function CommentUserAvatarLink({
   const viewTransitionName = `user-avatar-${user.id}-${transitionKey}-${key}`
 
   return (
-    <UserProfileLink className={className} user={user} viewTransitionName={viewTransitionName}>
+    <UserProfileLink
+      className={className}
+      user={user}
+      viewTransitionName={viewTransition ? viewTransitionName : undefined}
+    >
       <ViewTransitionImage
-        active={isTransitioning}
+        active={viewTransition && isTransitioning}
         cacheKey={`commentUserAvatar-${transitionKey}`}
         className={imageClassName}
         imageSrc={user.avatar.medium}

@@ -84,6 +84,7 @@ export function SubjectCommentsPanel({
         scrollAreaKey={`subject-comments-${subjectId}`}
         virtual
         showBackToTop
+        userAvatarViewTransition={false}
         hasMore={!!commentsQuery.hasNextPage}
         isFetchingMore={commentsQuery.isFetchingNextPage}
         appendPlaceholderCount={SUBJECT_COMMENTS_PAGE_LIMIT}
