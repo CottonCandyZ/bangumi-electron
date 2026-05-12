@@ -238,7 +238,7 @@ export function CommentSkeleton() {
   )
 }
 
-function CommentItem({
+export function CommentItem({
   comment,
   floorNumber,
   userAvatarViewTransition,

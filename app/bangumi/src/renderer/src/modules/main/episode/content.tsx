@@ -1,5 +1,5 @@
 import { MyLink } from '@renderer/components/my-link'
-import { CommentBox, CommentSkeleton } from '@renderer/components/comment/comment-box'
+import { CommentItem, CommentSkeleton } from '@renderer/components/comment/comment-box'
 import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
@@ -15,11 +15,22 @@ import { Episode, EpisodeType } from '@renderer/data/types/episode'
 import { useOpenSubjectEpisodesPanel } from '@renderer/modules/common/episodes/use-open-subject-episodes-panel'
 import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
 import { EpisodeCollectionActions } from '@renderer/modules/main/episode/collection-actions'
-import { useCallback, useState } from 'react'
+import { scrollViewportAtom } from '@renderer/state/scroll'
+import { useAtomValue } from 'jotai'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
+import { useInView } from 'react-intersection-observer'
+import { Virtualizer } from 'virtua'
+
+const EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE = 148
+const EPISODE_PAGE_VIRTUAL_OVERSCAN = 8
 
 export function EpisodeContent({ episodeId }: { episodeId: string }) {
   const [enabledCommentsId, setEnabledCommentsId] = useState<string | null>(null)
   const enableComments = useCallback(() => setEnabledCommentsId(episodeId), [episodeId])
+  const scrollViewport = useAtomValue(scrollViewportAtom)
+  const scrollRef = useMemo(() => ({ current: scrollViewport }), [scrollViewport])
+
   const episodeQuery = useEpisodeInfoByIdQuery({ episodeId })
   const episode = episodeQuery.data
   const subjectId = episode?.subject_id.toString()
@@ -37,65 +48,266 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
   if (episodeQuery.isLoading || !episode) return <EpisodeSkeleton />
 
   const title = getEpisodeTitle(episode)
+  const rows = getEpisodePageRows({
+    comments: commentsQuery.data,
+    commentsError: commentsQuery.isError,
+    episode,
+  })
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-8 px-10 py-10">
-      <section className="flex flex-col gap-5">
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-row flex-wrap items-center gap-2">
-            <Badge variant="outline">{EpisodeType[episode.type] ?? '其他'}</Badge>
+    <div className="min-h-full">
+      <Virtualizer
+        data={rows}
+        item={EpisodePageVirtualItem}
+        itemSize={EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE}
+        scrollRef={scrollRef}
+        bufferSize={EPISODE_PAGE_VIRTUAL_OVERSCAN * EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE}
+      >
+        {(row) => (
+          <EpisodePageRow
+            row={row}
+            title={title}
+            episode={episode}
+            subject={subjectQuery.data}
+            onCommentsInView={enableComments}
+          />
+        )}
+      </Virtualizer>
+      <MainBackToTopButton />
+    </div>
+  )
+}
+
+type EpisodePageRow =
+  | {
+      key: string
+      type: 'detail'
+    }
+  | {
+      count?: number
+      key: string
+      type: 'comment-title'
+    }
+  | {
+      key: string
+      type: 'loading'
+    }
+  | {
+      key: string
+      type: 'error'
+    }
+  | {
+      key: string
+      type: 'empty'
+    }
+  | {
+      comment: NonNullable<ReturnType<typeof useEpisodeCommentsByIdQuery>['data']>[number]
+      floorNumber: number
+      key: string
+      type: 'comment'
+    }
+
+function getEpisodePageRows({
+  comments,
+  commentsError,
+  episode,
+}: {
+  comments?: NonNullable<ReturnType<typeof useEpisodeCommentsByIdQuery>['data']>
+  commentsError: boolean
+  episode: Episode
+}): EpisodePageRow[] {
+  const rows: EpisodePageRow[] = [{ key: 'detail', type: 'detail' }]
+  const count = comments?.length ?? (episode.comment > 0 ? episode.comment : undefined)
+
+  rows.push({ count, key: 'comment-title', type: 'comment-title' })
+
+  if (commentsError) {
+    rows.push({ key: 'comments-error', type: 'error' })
+    return rows
+  }
+
+  if (comments === undefined) {
+    rows.push({ key: 'comments-loading', type: 'loading' })
+    return rows
+  }
+
+  if (comments.length === 0) {
+    rows.push({ key: 'comments-empty', type: 'empty' })
+    return rows
+  }
+
+  rows.push(
+    ...comments.map((comment, index) => ({
+      comment,
+      floorNumber: index + 1,
+      key: `comment-${comment.id}`,
+      type: 'comment' as const,
+    })),
+  )
+
+  return rows
+}
+
+function EpisodePageRow({
+  row,
+  title,
+  episode,
+  subject,
+  onCommentsInView,
+}: {
+  row: EpisodePageRow
+  title: string
+  episode: Episode
+  subject?: NonNullable<ReturnType<typeof useSubjectInfoAPIQuery>['data']>
+  onCommentsInView: () => void
+}) {
+  if (row.type === 'detail') {
+    return (
+      <div className="mx-auto max-w-6xl px-10 pt-10 pb-8">
+        <EpisodeDetailSection episode={episode} subject={subject} title={title} />
+      </div>
+    )
+  }
+
+  if (row.type === 'comment-title') {
+    return (
+      <div className="mx-auto flex max-w-6xl flex-row items-center justify-between gap-4 px-10 pb-5">
+        <h2 className="text-2xl font-medium">吐槽箱</h2>
+        {row.count !== undefined && (
+          <span className="text-muted-foreground text-sm">{row.count}</span>
+        )}
+      </div>
+    )
+  }
+
+  if (row.type === 'loading') {
+    return <EpisodeCommentsLoading onInView={onCommentsInView} />
+  }
+
+  if (row.type === 'error') {
+    return (
+      <div className="mx-auto max-w-6xl px-10 pb-10">
+        <p className="text-muted-foreground text-sm">暂时无法读取吐槽箱。</p>
+      </div>
+    )
+  }
+
+  if (row.type === 'empty') {
+    return (
+      <div className="mx-auto max-w-6xl px-10 pb-10">
+        <p className="text-muted-foreground text-sm">还没有吐槽。</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mx-auto max-w-6xl px-10 pb-3">
+      <CommentItem
+        comment={row.comment}
+        floorNumber={row.floorNumber}
+        userAvatarViewTransition={true}
+      />
+    </div>
+  )
+}
+
+function EpisodeDetailSection({
+  episode,
+  subject,
+  title,
+}: {
+  episode: Episode
+  subject?: NonNullable<ReturnType<typeof useSubjectInfoAPIQuery>['data']>
+  title: string
+}) {
+  return (
+    <section className="flex flex-col gap-5">
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-row flex-wrap items-center gap-2">
+          <Badge variant="outline">{EpisodeType[episode.type] ?? '其他'}</Badge>
+          <Badge variant="secondary" className="shadow-none">
+            ep.{episode.sort}
+          </Badge>
+          {episode.comment > 0 && (
             <Badge variant="secondary" className="shadow-none">
-              ep.{episode.sort}
+              {episode.comment} 吐槽
             </Badge>
-            {episode.comment > 0 && (
-              <Badge variant="secondary" className="shadow-none">
-                {episode.comment} 吐槽
-              </Badge>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl leading-tight font-semibold">{title}</h1>
-            {episode.name_cn && episode.name && (
-              <p className="text-muted-foreground text-lg">{episode.name}</p>
-            )}
-          </div>
-          {subjectQuery.data && (
-            <MyLink
-              to={`/subject/${subjectQuery.data.id}`}
-              className="text-primary hover:bg-primary/10 w-fit rounded-sm px-1 text-sm underline-offset-2 hover:underline"
-            >
-              {subjectQuery.data.name_cn || subjectQuery.data.name}
-            </MyLink>
           )}
         </div>
-
-        <Card className="bg-background/70 p-4 shadow-none">
-          <div className="grid gap-4 md:grid-cols-[1fr_auto]">
-            <EpisodeMeta episode={episode} />
-            <div className="flex flex-col items-start gap-2 md:items-end">
-              <EpisodeCollectionActions episode={episode} />
-              <EpisodeActions
-                episode={episode}
-                subjectTitle={subjectQuery.data?.name_cn || subjectQuery.data?.name}
-                episodeTotal={subjectQuery.data?.total_episodes}
-              />
-            </div>
-          </div>
-          {episode.desc && (
-            <>
-              <Separator className="my-4" />
-              <p className="text-sm leading-7 whitespace-pre-wrap">{episode.desc}</p>
-            </>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl leading-tight font-semibold">{title}</h1>
+          {episode.name_cn && episode.name && (
+            <p className="text-muted-foreground text-lg">{episode.name}</p>
           )}
-        </Card>
-      </section>
+        </div>
+        {subject && (
+          <MyLink
+            to={`/subject/${subject.id}`}
+            className="text-primary hover:bg-primary/10 w-fit rounded-sm px-1 text-sm underline-offset-2 hover:underline"
+          >
+            {subject.name_cn || subject.name}
+          </MyLink>
+        )}
+      </div>
 
-      <CommentBox
-        comments={commentsQuery.data}
-        error={commentsQuery.isError}
-        onInView={enableComments}
-      />
-      <MainBackToTopButton />
+      <Card className="bg-background/70 p-4 shadow-none">
+        <div className="grid gap-4 md:grid-cols-[1fr_auto]">
+          <EpisodeMeta episode={episode} />
+          <div className="flex flex-col items-start gap-2 md:items-end">
+            <EpisodeCollectionActions episode={episode} />
+            <EpisodeActions
+              episode={episode}
+              subjectTitle={subject?.name_cn || subject?.name}
+              episodeTotal={subject?.total_episodes}
+            />
+          </div>
+        </div>
+        {episode.desc && (
+          <>
+            <Separator className="my-4" />
+            <p className="text-sm leading-7 whitespace-pre-wrap">{episode.desc}</p>
+          </>
+        )}
+      </Card>
+    </section>
+  )
+}
+
+function EpisodeCommentsLoading({ onInView }: { onInView: () => void }) {
+  const { ref, inView } = useInView({
+    rootMargin: '240px 0px',
+    triggerOnce: true,
+  })
+
+  useEffect(() => {
+    if (inView) onInView()
+  }, [inView, onInView])
+
+  return (
+    <div ref={ref} className="mx-auto flex max-w-6xl flex-col gap-3 px-10 pb-10">
+      {Array(4)
+        .fill(undefined)
+        .map((_, index) => (
+          <CommentSkeleton key={index} />
+        ))}
+    </div>
+  )
+}
+
+function EpisodePageVirtualItem({
+  children,
+  index,
+  ref,
+  style,
+}: {
+  children: ReactNode
+  index: number
+  ref?: React.Ref<HTMLDivElement>
+  style: CSSProperties
+}) {
+  return (
+    <div className="w-full" data-index={index} ref={ref} style={style}>
+      {children}
     </div>
   )
 }
