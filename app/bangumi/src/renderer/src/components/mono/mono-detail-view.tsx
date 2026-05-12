@@ -19,10 +19,12 @@ import {
   MonoType,
 } from '@renderer/data/types/mono'
 import { SubjectType } from '@renderer/data/types/subject'
+import { useStateHook } from '@renderer/hooks/use-cache-state'
 import { useResizeObserver } from '@renderer/hooks/use-resize'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { splitRelationLabels } from '@renderer/lib/utils/relation'
 import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
+import { scrollCache } from '@renderer/state/global-var'
 import { monoAvatarImageInViewAtom } from '@renderer/state/in-view'
 import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
@@ -84,11 +86,15 @@ export function MonoDetailView({
   onCommentsInView,
   avatarViewTransitionName,
 }: MonoDetailViewProps) {
+  const { pathname } = useLocation()
+  const { init: cachedAvatarInView } = useStateHook<boolean>({ key: 'monoAvatarInView' })
   const setAvatarInView = useSetAtom(monoAvatarImageInViewAtom)
 
   useEffect(() => {
-    setAvatarInView(true)
-  }, [detail?.id, setAvatarInView])
+    setAvatarInView(
+      cachedAvatarInView !== undefined ? cachedAvatarInView : (scrollCache.get(pathname) ?? 0) <= 0,
+    )
+  }, [cachedAvatarInView, detail?.id, pathname, setAvatarInView])
 
   if (!detail) return <MonoDetailSkeleton />
 
@@ -103,6 +109,7 @@ export function MonoDetailView({
             <ViewTransitionImage
               active={!!avatarViewTransitionName}
               cacheKey="monoAvatarInView"
+              key={`${detail.type}-${detail.id}-avatar-image`}
               className={MONO_MAIN_IMAGE_FRAME}
               imageContainerClassName="w-full overflow-hidden rounded-lg border shadow-sm"
               imageSrc={image}
@@ -117,6 +124,7 @@ export function MonoDetailView({
             <ViewTransitionElement
               active={!!avatarViewTransitionName}
               cacheKey="monoAvatarInView"
+              key={`${detail.type}-${detail.id}-avatar-placeholder`}
               className={`${MONO_MAIN_IMAGE_FRAME} bg-muted text-muted-foreground flex aspect-3/4 items-center justify-center rounded-lg border text-sm`}
               onInViewChange={setAvatarInView}
               viewTransitionName={avatarViewTransitionName}

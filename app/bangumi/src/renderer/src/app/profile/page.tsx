@@ -13,11 +13,13 @@ import { useSession } from '@renderer/data/hooks/session'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import { UserInfo, UserProfile, UserTimelineItem } from '@renderer/data/types/user'
+import { useStateHook } from '@renderer/hooks/use-cache-state'
 import { cn } from '@renderer/lib/utils'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { sidePanelCollectionTypeFilterAtom } from '@renderer/state/collection'
+import { scrollCache } from '@renderer/state/global-var'
 import { userProfileAvatarInViewAtom } from '@renderer/state/in-view'
 import {
   nvaCollectionButtonAtomAction,
@@ -64,20 +66,22 @@ export function Component() {
   const profileQuery = useUserProfileQuery({ username, enabled: !!username })
   const userInfoQuery = useUserInfoByUsernameQuery({ username, enabled: !!username })
   const timelineQuery = useUserTimelineQuery({ username, limit: 4, enabled: !!username })
+  const { init: cachedAvatarInView } = useStateHook<boolean>({ key: 'userProfileAvatarInView' })
   const setAvatarInView = useSetAtom(userProfileAvatarInViewAtom)
+  const pathname = routeUsername ? `/user/${encodeURIComponent(routeUsername)}` : '/profile'
   const user = profileQuery.data ?? userInfoQuery.data ?? (canUseSessionFallback ? session : null)
   const userMissing = !user && !profileQuery.isPending && !userInfoQuery.isPending
-  const avatarViewTransitionName = useProfileAvatarViewTransitionName(
-    routeUsername ? `/user/${encodeURIComponent(routeUsername)}` : '/profile',
-  )
+  const avatarViewTransitionName = useProfileAvatarViewTransitionName(pathname)
   const collectionSections = PROFILE_SUBJECT_SECTIONS.filter(
     (section) => sumSubjectStats(profileQuery.data?.stats.subject[section.type]) > 0,
   )
   const setRightPanelOpen = useSetAtom(rightPanelOpenAtom)
 
   useEffect(() => {
-    setAvatarInView(true)
-  }, [setAvatarInView, username])
+    setAvatarInView(
+      cachedAvatarInView !== undefined ? cachedAvatarInView : (scrollCache.get(pathname) ?? 0) <= 0,
+    )
+  }, [cachedAvatarInView, pathname, setAvatarInView, username])
 
   if (!username) {
     return (
@@ -124,6 +128,7 @@ export function Component() {
         onAvatarInViewChange={setAvatarInView}
         profile={profileQuery.data}
         user={user}
+        username={username}
       />
 
       <TimelinePreview
@@ -165,12 +170,14 @@ function ProfileHeader({
   onAvatarInViewChange,
   profile,
   user,
+  username,
 }: {
   avatarViewTransitionName?: string
   loading: boolean
   onAvatarInViewChange: (inView: boolean) => void
   profile: UserProfile | null | undefined
   user: UserInfo | UserProfile | null | undefined
+  username: string
 }) {
   if (loading || !user) {
     return (
@@ -190,6 +197,7 @@ function ProfileHeader({
       <ViewTransitionImage
         active={!!avatarViewTransitionName}
         cacheKey="userProfileAvatarInView"
+        key={`user-${username}-avatar`}
         className="size-24 shrink-0 overflow-hidden rounded-2xl border shadow-xs"
         imageSrc={user.avatar.large || user.avatar.medium}
         onInViewChange={onAvatarInViewChange}

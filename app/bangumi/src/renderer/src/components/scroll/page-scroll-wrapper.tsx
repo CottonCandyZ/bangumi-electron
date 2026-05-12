@@ -3,7 +3,7 @@ import { mainPanelScrollPositionAtom, scrollViewportAtom } from '@renderer/state
 import { cn } from '@renderer/lib/utils'
 import { ScrollArea } from '@base-ui/react/scroll-area'
 import { useSetAtom } from 'jotai'
-import { PropsWithChildren, useCallback, useEffect, useMemo, useRef } from 'react'
+import { PropsWithChildren, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const SCROLL_RESTORE_TOLERANCE = 2
@@ -42,7 +42,7 @@ export function PageScrollWrapper({
     [setScrollPosition],
   )
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const viewport = viewportRef.current
     const content = contentRef.current
     if (!viewport) return
@@ -100,6 +100,7 @@ export function PageScrollWrapper({
     viewport.addEventListener('wheel', wheelListener, { passive: false })
     viewport.addEventListener('pointerdown', pointerDownListener)
     return () => {
+      scrollCache.set(pathname, viewport.scrollTop)
       resizeObserver.disconnect()
       mutationObserver.disconnect()
       viewport.removeEventListener('scroll', syncViewportState)

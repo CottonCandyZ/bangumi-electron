@@ -7,8 +7,10 @@ export function useStateHook<T extends number | string | boolean>({ key }: { key
   if (otherCache.get(pathname) === undefined) {
     otherCache.set(pathname, new Map<string, T>())
   }
+  const cache = otherCache.get(pathname) as Map<string, T> | undefined
+
   return {
-    init: otherCache.get(pathname)?.get(key),
-    setter: (value: T) => otherCache.get(pathname)?.set(key, value),
+    init: cache?.get(key),
+    setter: (value: T) => cache?.set(key, value),
   }
 }
