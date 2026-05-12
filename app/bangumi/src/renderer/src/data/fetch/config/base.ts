@@ -136,3 +136,18 @@ export function apiFetchWithAuth<T>(
 
 /** ofetch next config */
 export const nextFetch = ofetch.create({ baseURL: NEXT_API_HOST, credentials: 'include' })
+
+const nextFetchWithOptionalAuthOnce = ofetch.create({
+  baseURL: NEXT_API_HOST,
+  credentials: 'include',
+  async onRequest({ options }) {
+    await appendAuthHeader(options)
+  },
+})
+
+export function nextFetchWithOptionalAuth<T>(
+  request: Parameters<typeof nextFetch>[0],
+  options?: JsonFetchOptions,
+) {
+  return retryAfterTokenRecovery<T>(request, options, nextFetchWithOptionalAuthOnce)
+}

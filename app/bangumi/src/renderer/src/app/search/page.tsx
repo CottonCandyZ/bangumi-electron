@@ -3,7 +3,7 @@ import { JSX } from 'react'
 
 export function Component(): JSX.Element {
   return (
-    <div className="mx-auto pb-7">
+    <div className="mx-auto flex min-h-full flex-col">
       <Search />
     </div>
   )

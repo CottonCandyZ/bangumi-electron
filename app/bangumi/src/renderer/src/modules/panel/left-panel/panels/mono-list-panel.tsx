@@ -1,8 +1,11 @@
 import { MyLink } from '@renderer/components/my-link'
+import { Label } from '@renderer/components/ui/label'
+import { Switch } from '@renderer/components/ui/switch'
 import {
   MonoRelatedListPanelContent,
   MonoSubjectListPanelContent,
 } from './mono-list-panel/mono-content'
+import { SearchSubjectsListPanelContent } from './mono-list-panel/search-content'
 import {
   SubjectCharacterListPanelContent,
   SubjectEpisodeListPanelContent,
@@ -15,6 +18,7 @@ import {
   closeAllMonoListPanelTabsAtomAction,
   closeMonoListPanelTabAtomAction,
   monoListPanelActiveTabIdAtom,
+  monoListPanelCenterActiveItemAtom,
   monoListPanelTabsAtom,
 } from '@renderer/state/panel'
 import { isRoutePathActive } from './mono-list-panel/shared'
@@ -28,6 +32,7 @@ export function MonoListPanel() {
   const [activeTabId, setActiveTabId] = useAtom(monoListPanelActiveTabIdAtom)
   const closeTab = useSetAtom(closeMonoListPanelTabAtomAction)
   const closeAllTabs = useSetAtom(closeAllMonoListPanelTabsAtomAction)
+  const [centerActiveItem, setCenterActiveItem] = useAtom(monoListPanelCenterActiveItemAtom)
   const { pathname } = useLocation()
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0]
   const activeTabCount = activeTab ? getMonoListPanelTabCount(activeTab) : null
@@ -92,11 +97,23 @@ export function MonoListPanel() {
         </div>
       </div>
       <div className="flex shrink-0 flex-col gap-0.5 border-b px-3 py-2">
-        <div className="line-clamp-1 text-sm font-medium">
-          {activeTab.title}
-          {activeTabCount !== null && (
-            <span className="text-muted-foreground ml-1 text-xs font-normal">{activeTabCount}</span>
-          )}
+        <div className="flex min-w-0 flex-row items-center justify-between gap-2">
+          <div className="line-clamp-1 min-w-0 text-sm font-medium">
+            {activeTab.title}
+            {activeTabCount !== null && (
+              <span className="text-muted-foreground ml-1 text-xs font-normal">
+                {activeTabCount}
+              </span>
+            )}
+          </div>
+          <Label className="text-muted-foreground no-drag-region shrink-0 gap-1.5 text-xs font-normal">
+            <Switch
+              checked={centerActiveItem}
+              onCheckedChange={setCenterActiveItem}
+              className="scale-90"
+            />
+            居中
+          </Label>
         </div>
         <div className="text-muted-foreground line-clamp-1 text-xs">
           来自{' '}
@@ -129,6 +146,7 @@ function MonoListPanelContent({ tab }: { tab: MonoListPanelTab }) {
   if (tab.type === 'subjectRelated') return <SubjectRelatedListPanelContent tab={tab} />
   if (tab.type === 'subjectTankobon') return <SubjectTankobonListPanelContent tab={tab} />
   if (tab.type === 'subjectEpisodes') return <SubjectEpisodeListPanelContent tab={tab} />
+  if (tab.type === 'searchSubjects') return <SearchSubjectsListPanelContent tab={tab} />
   return <UserCollectionsListPanelContent tab={tab} />
 }
 
@@ -138,11 +156,14 @@ function getMonoListPanelTabCount(tab: MonoListPanelTab) {
   if (tab.type === 'subjectCharacters') return tab.characters.length
   if (tab.type === 'subjectEpisodes') return tab.episodeTotal ?? tab.episodes?.length ?? null
   if (tab.type === 'subjectTankobon') return tab.relatedSubjects.length
+  if (tab.type === 'searchSubjects') return null
   if (tab.type === 'userCollections') return null
   return tab.relatedSubjects.length
 }
 
 function getMonoListPanelTabSourceTo(tab: MonoListPanelTab) {
+  if (tab.type === 'searchSubjects') return tab.sourceTo
+
   if (tab.type === 'subjects' || tab.type === 'related') {
     return `/${tab.monoType}/${tab.monoId}`
   }

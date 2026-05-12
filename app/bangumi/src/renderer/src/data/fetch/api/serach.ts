@@ -1,6 +1,8 @@
 import { apiFetchWithOptionalAuth, SEARCH } from '@renderer/data/fetch/config/'
 import { SearchDataPage, SearchParam } from '@renderer/data/types/search'
 
+const nonEmpty = <T>(value: T[] | undefined) => (value && value.length > 0 ? value : undefined)
+
 export async function searchV0({
   limit,
   offset,
@@ -10,24 +12,32 @@ export async function searchV0({
   offset: number
   searchParam: SearchParam
 }) {
-  const result = await apiFetchWithOptionalAuth<SearchDataPage>(SEARCH.V0, {
-    method: 'POST',
-    query: {
-      limit,
-      offset,
-    },
-    body: {
-      keyword: searchParam.keyword,
-      sort: searchParam.sort,
-      filter: {
-        type: searchParam.filter?.type,
-        tag: searchParam.filter?.tag,
-        air_date: searchParam.filter?.airDate,
-        rating: searchParam.filter?.rating,
-        rank: searchParam.filter?.rank,
-        nsfw: searchParam.filter?.nsfw,
+  const result = await apiFetchWithOptionalAuth<Omit<SearchDataPage, 'limit' | 'offset'>>(
+    SEARCH.V0,
+    {
+      method: 'POST',
+      query: {
+        limit,
+        offset,
+      },
+      body: {
+        keyword: searchParam.keyword ?? '',
+        sort: searchParam.sort,
+        filter: {
+          type: nonEmpty(searchParam.filter?.type),
+          tag: nonEmpty(searchParam.filter?.tag),
+          meta_tags: nonEmpty(searchParam.filter?.metaTag),
+          air_date: nonEmpty(searchParam.filter?.airDate),
+          rating: nonEmpty(searchParam.filter?.rating),
+          rank: nonEmpty(searchParam.filter?.rank),
+          nsfw: searchParam.filter?.nsfw || undefined,
+        },
       },
     },
-  })
-  return result
+  )
+  return {
+    ...result,
+    limit: limit ?? 20,
+    offset,
+  }
 }

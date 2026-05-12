@@ -10,6 +10,7 @@ import { toast } from 'sonner'
 import { Tags } from '@renderer/modules/main/subject/tags/tags'
 import { useSession } from '@renderer/data/hooks/session'
 import { useQueryKeyWithUserId } from '@renderer/data/hooks/factory'
+import { useOpenTagSearchPanel } from '@renderer/modules/main/search/use-open-tag-search-panel'
 
 export function QuickTags({
   subjectTags,
@@ -22,6 +23,7 @@ export function QuickTags({
   const queryClient = useQueryClient()
   const [edit, setEdit] = useState(false)
   const userInfo = useSession()
+  const openTagSearchPanel = useOpenTagSearchPanel()
 
   const queryKey = useQueryKeyWithUserId(['collection-subject'], {
     subjectId: subjectCollection?.subject_id.toString(),
@@ -76,14 +78,19 @@ export function QuickTags({
       <Tags
         subjectTags={subjectTags}
         collectionTags={subjectCollection?.tags}
-        onTagClicked={(value) =>
+        onTagClicked={(value) => {
+          if (!edit) {
+            openTagSearchPanel(value)
+            return
+          }
+
           setTags((tags) => {
             const newTags = new Set(tags)
             if (tags.has(value)) newTags.delete(value)
             else newTags.add(value)
             return newTags
           })
-        }
+        }}
         selectedTags={tags}
         edit={edit}
         setEdit={setEdit}

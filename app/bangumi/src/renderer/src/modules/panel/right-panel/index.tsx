@@ -1,15 +1,23 @@
 import { ResizePanel } from '@renderer/components/resize-panel'
 import { RightPanel } from '@renderer/modules/panel/right-panel/panel'
 import { panelSize } from '@renderer/state/global-var'
-import { rightPanelOpenAtom, rightPanelWidth } from '@renderer/state/panel'
+import {
+  getRightPanelContentByPathname,
+  rightPanelOpenAtom,
+  rightPanelWidth,
+} from '@renderer/state/panel'
 import { useAtom, useAtomValue } from 'jotai'
 import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 const MAX_WIDTH = 480
 const MIN_WIDTH = 248
 
 export function RightResizablePanel() {
-  const open = useAtomValue(rightPanelOpenAtom)
+  const desiredOpen = useAtomValue(rightPanelOpenAtom)
+  const { pathname } = useLocation()
+  const hasContent = getRightPanelContentByPathname(pathname) !== null
+  const open = desiredOpen && hasContent
   const [resizing, setResizing] = useState(false)
   const [width, setWidth] = useAtom(rightPanelWidth)
   useEffect(() => {
@@ -28,6 +36,7 @@ export function RightResizablePanel() {
       width={width}
       onWidthChange={setWidth}
       className="bg-background border-l"
+      enableAnimation={hasContent}
       resizeHandlePos="left"
     >
       <RightPanel />

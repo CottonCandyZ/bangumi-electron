@@ -19,13 +19,13 @@ export function SubjectTypeFilterButtons({
   onFilterClick: (filter: null | SubjectType) => void
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex min-w-0 flex-wrap gap-2">
       {subjectTypeFilter.map((item) => (
         <Button
           key={item.name}
           variant="outline"
           className={cn(
-            'cursor-default gap-0 rounded-2xl shadow-none transition-all duration-300',
+            'h-9 cursor-default gap-0 rounded-2xl px-3 shadow-none transition-all duration-300',
             ((item.type === null && filter.size === 0) ||
               (item.type !== null && filter.has(item.type))) &&
               'bg-accent gap-2',

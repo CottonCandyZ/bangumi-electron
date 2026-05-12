@@ -7,7 +7,7 @@ export function FilterButton() {
   const [sideOpen, setSideOpen] = useAtom(rightPanelOpenAtom)
   return (
     <Button
-      className={cn('rounded-2xl shadow-none', sideOpen && 'bg-accent')}
+      className={cn('size-9 shrink-0 rounded-2xl p-0 shadow-none', sideOpen && 'bg-accent')}
       variant="ghost"
       onClick={() => setSideOpen(!sideOpen)}
     >

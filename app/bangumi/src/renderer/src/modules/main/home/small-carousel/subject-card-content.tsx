@@ -29,6 +29,7 @@ import { toast } from 'sonner'
 import { useSubjectCollectionTypeMutation } from '@renderer/data/hooks/api/collection-mutation'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { Loader2 } from 'lucide-react'
+import { useOpenTagSearchPanel } from '@renderer/modules/main/search/use-open-tag-search-panel'
 
 export interface SubjectCardProps {
   sectionPath: SectionPath
@@ -52,6 +53,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
   const setActionSection = useSetAtom(activeSectionAtom) // 用来防止轮播图相互覆盖
   const [isPopCardActive, setIsPopCardActive] = useState(false)
   const username = useSessionUsername()
+  const openTagSearchPanel = useOpenTagSearchPanel()
   const id = `${sectionPath}-${subjectId}`
   const layoutId = `${sectionId}-${id}`
   const isActive = activeId === layoutId
@@ -250,7 +252,11 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
                     key={item.name}
                     className="h-auto flex-auto justify-center px-1.5 py-1.5 text-xs whitespace-normal"
                     variant="outline"
-                    onClick={(e) => e.preventDefault()}
+                    onClick={(event) => {
+                      event.preventDefault()
+                      event.stopPropagation()
+                      openTagSearchPanel(item.name)
+                    }}
                   >
                     {item.name}
                   </Button>

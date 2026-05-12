@@ -1,25 +1,31 @@
 import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
 import { Button } from '@renderer/components/ui/button'
 import { cn } from '@renderer/lib/utils'
-import { rightPanelOpenAtom } from '@renderer/state/panel'
+import { getRightPanelContentByPathname, rightPanelOpenAtom } from '@renderer/state/panel'
 import { useAtom } from 'jotai'
+import { useLocation } from 'react-router-dom'
 
 export function RightPanelButton() {
   const [open, setOpen] = useAtom(rightPanelOpenAtom)
+  const { pathname } = useLocation()
+  const hasContent = getRightPanelContentByPathname(pathname) !== null
+  const active = open && hasContent
+
   return (
     <HeaderButton
       Button={
         <Button
           variant="ghost"
+          disabled={!hasContent}
           className={cn(
             'no-drag-region text-muted-foreground p-2 text-[1.4rem]',
-            open && 'text-primary',
+            active && 'text-primary',
           )}
           onClick={() => {
             setOpen(!open)
           }}
         >
-          {open ? (
+          {active ? (
             <span className="i-tabler-layout-sidebar-right-filled" />
           ) : (
             <span className="i-tabler-layout-sidebar-right" />
