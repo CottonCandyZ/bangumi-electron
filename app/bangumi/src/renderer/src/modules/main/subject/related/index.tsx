@@ -1,3 +1,4 @@
+import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Tabs } from '@renderer/components/tabs'
 import { Button } from '@renderer/components/ui/button'
 import { Card } from '@renderer/components/ui/card'
@@ -18,10 +19,12 @@ interface Props {
 export function RelatedSubjects({ subjectId }: Props) {
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
-  const _relatedSubjects = useRelatedSubjectsQuery({
+  const relatedSubjectsQuery = useRelatedSubjectsQuery({
     id: subjectId,
     needKeepPreviousData: false,
-  }).data
+  })
+  const _relatedSubjects = relatedSubjectsQuery.data
+  usePageScrollRestoreReady(!subjectInfoQuery.isPending && !relatedSubjectsQuery.isPending)
   // 书籍处理特殊化
   const relatedSubjects = useMemo(() => {
     if (_relatedSubjects) {

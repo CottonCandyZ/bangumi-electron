@@ -1,3 +1,4 @@
+import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Tabs } from '@renderer/components/tabs'
 import { Button } from '@renderer/components/ui/button'
 import { Card } from '@renderer/components/ui/card'
@@ -17,6 +18,7 @@ interface Props {
 export function SubjectCharacters({ subjectId }: Props) {
   const charactersQuery = useQuerySubjectCharacters({ id: subjectId, needKeepPreviousData: false })
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
+  usePageScrollRestoreReady(!charactersQuery.isPending && !subjectInfoQuery.isPending)
   const id = `subject-characters-tab-${subjectId}`
   const [filterMap, setFilter] = useAtom(tabFilerAtom)
   const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)

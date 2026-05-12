@@ -1,5 +1,6 @@
 import { ViewTransitionImage } from '@renderer/components/image/view-transition-image'
 import { MyLink } from '@renderer/components/my-link'
+import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { Skeleton } from '@renderer/components/ui/skeleton'
@@ -76,6 +77,12 @@ export function Component() {
     (section) => sumSubjectStats(profileQuery.data?.stats.subject[section.type]) > 0,
   )
   const setRightPanelOpen = useSetAtom(rightPanelOpenAtom)
+  usePageScrollRestoreReady(
+    !username ||
+      ((!profileQuery.isPending || profileQuery.isError) &&
+        (!userInfoQuery.isPending || userInfoQuery.isError) &&
+        (!timelineQuery.isPending || timelineQuery.isError)),
+  )
 
   useEffect(() => {
     setAvatarInView(
@@ -394,6 +401,7 @@ function CollectionPreviewRow({
     needKeepPreviousData: false,
   })
   const collections = collectionsQuery.data?.pages[0]?.data
+  usePageScrollRestoreReady(!collectionsQuery.isPending || collectionsQuery.isError)
 
   if (collectionsQuery.isError) return null
   if (!collections) return <CollectionSkeletonGrid subjectType={subjectType} />

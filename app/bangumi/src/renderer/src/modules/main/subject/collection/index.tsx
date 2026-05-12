@@ -1,4 +1,5 @@
 import { AddSubjectCollection } from '@renderer/modules/common/collections/modify/add'
+import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
@@ -31,6 +32,9 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const openLoginDialog = useSetAtom(loginDialogAtom)
+  usePageScrollRestoreReady(
+    !subjectInfoQuery.isPending && (!userInfo || !subjectCollectionQuery.isPending),
+  )
 
   const ref = useRef<null | HTMLDivElement>(null)
   const isInView = useInView(ref)

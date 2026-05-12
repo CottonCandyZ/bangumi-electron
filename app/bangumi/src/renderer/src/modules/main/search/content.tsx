@@ -1,4 +1,5 @@
 import { BigPagination } from '@renderer/components/big-pagination'
+import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySearch } from '@renderer/data/hooks/api/search'
 import { SearchParam } from '@renderer/data/types/search'
@@ -14,7 +15,7 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
   const { setOffset, offset } = useSearchParams(() => {
     setTotal(0)
   })
-  const { pathname } = useLocation()
+  const location = useLocation()
   const updateScrollPosition = useSetAtom(setScrollPositionAction)
   const limit = 20
 
@@ -24,6 +25,7 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
     offset,
     keepPreviousData: false,
   })
+  usePageScrollRestoreReady(!searchResultQuery.isPending)
   const searchResult = searchResultQuery.data
 
   useEffect(() => {
@@ -54,8 +56,12 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
             total={Math.ceil(total / limit)}
             value={Math.floor(offset / 20) + 1}
             onValueChanged={(value) => {
-              setOffset((value - 1) * limit)
-              updateScrollPosition(125, pathname)
+              const nextOffset = (value - 1) * limit
+              const nextSearchParams = new URLSearchParams(location.search)
+
+              nextSearchParams.set('offset', String(nextOffset))
+              setOffset(nextOffset)
+              updateScrollPosition(125, `${location.pathname}?${nextSearchParams.toString()}`)
             }}
           />
         )}

@@ -1,4 +1,5 @@
 import { MonoDetailView } from '@renderer/components/mono/mono-detail-view'
+import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import {
   useQueryCharacterComments,
   useQueryCharacterDetailByID,
@@ -74,6 +75,9 @@ function PersonMonoContent({ personId }: { personId: PersonId }) {
     id: personId,
     enabled: !!personId && enabledCommentsId === personId,
   })
+  usePageScrollRestoreReady(
+    !detailQuery.isPending && !subjectsQuery.isPending && !charactersQuery.isPending,
+  )
   const subjects = subjectsQuery.data
     ? mergeSubjects(subjectsQuery.data.map(toMonoSubject))
     : undefined
@@ -115,6 +119,9 @@ function CharacterMonoContent({ characterId }: { characterId: CharacterId }) {
     id: characterId,
     enabled: !!characterId && enabledCommentsId === characterId,
   })
+  usePageScrollRestoreReady(
+    !detailQuery.isPending && !subjectsQuery.isPending && !personsQuery.isPending,
+  )
   const subjects = subjectsQuery.data
     ? mergeSubjects(subjectsQuery.data.map(toMonoSubject))
     : undefined

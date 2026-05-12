@@ -1,5 +1,6 @@
 import { MyLink } from '@renderer/components/my-link'
 import { CommentBox, CommentSkeleton } from '@renderer/components/comment/comment-box'
+import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
 import { Card } from '@renderer/components/ui/card'
@@ -31,6 +32,7 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
     episodeId,
     enabled: enabledCommentsId === episodeId,
   })
+  usePageScrollRestoreReady(!episodeQuery.isPending && (!subjectId || !subjectQuery.isPending))
 
   if (episodeQuery.isLoading || !episode) return <EpisodeSkeleton />
 

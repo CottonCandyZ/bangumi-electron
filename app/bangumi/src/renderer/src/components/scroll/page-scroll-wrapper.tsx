@@ -3,10 +3,48 @@ import { mainPanelScrollPositionAtom, scrollViewportAtom } from '@renderer/state
 import { cn } from '@renderer/lib/utils'
 import { ScrollArea } from '@base-ui/react/scroll-area'
 import { useSetAtom } from 'jotai'
-import { PropsWithChildren, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import {
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { useLocation } from 'react-router-dom'
 
 const SCROLL_RESTORE_TOLERANCE = 2
+const SCROLL_RESTORE_TIMEOUT = 1600
+
+type ScrollRestoreReadyContextValue = {
+  register: (id: symbol, ready: boolean) => void
+  unregister: (id: symbol) => void
+}
+
+const ScrollRestoreReadyContext = createContext<ScrollRestoreReadyContextValue | null>(null)
+
+export function usePageScrollRestoreReady(ready: boolean) {
+  const context = useContext(ScrollRestoreReadyContext)
+  const idRef = useRef<symbol | null>(null)
+
+  if (idRef.current === null) {
+    idRef.current = Symbol('page-scroll-restore-ready')
+  }
+
+  useLayoutEffect(() => {
+    const id = idRef.current
+    if (!context || !id) return
+
+    context.register(id, ready)
+
+    return () => {
+      context.unregister(id)
+    }
+  }, [context, ready])
+}
 
 export function PageScrollWrapper({
   initScrollTo = 0,
@@ -16,27 +54,72 @@ export function PageScrollWrapper({
   initScrollTo?: number
   className?: string
 }>) {
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
+  const scrollKey = `${pathname}${search}`
   const viewportRef = useRef<HTMLDivElement>(null)
-  const contentRef = useRef<HTMLDivElement>(null)
+  const scrollKeyRef = useRef(scrollKey)
+  const lastScrollTopRef = useRef(0)
+  const restoringRef = useRef(false)
+  const restoreFrameRef = useRef<number | null>(null)
+  const [readyEntries, setReadyEntries] = useState<Map<symbol, boolean>>(() => new Map())
+  const [allowNoReadyEntries, setAllowNoReadyEntries] = useState(false)
   const setViewport = useSetAtom(scrollViewportAtom)
   const setScrollPosition = useSetAtom(mainPanelScrollPositionAtom)
+  const restoreReady =
+    readyEntries.size > 0 ? Array.from(readyEntries.values()).every(Boolean) : allowNoReadyEntries
+
+  const restoreReadyContextValue = useMemo<ScrollRestoreReadyContextValue>(
+    () => ({
+      register: (id, ready) => {
+        setReadyEntries((entries) => {
+          const current = entries.get(id)
+          if (current === ready) return entries
+
+          const next = new Map(entries)
+          next.set(id, ready)
+          return next
+        })
+      },
+      unregister: (id) => {
+        setReadyEntries((entries) => {
+          if (!entries.has(id)) return entries
+
+          const next = new Map(entries)
+          next.delete(id)
+          return next
+        })
+      },
+    }),
+    [],
+  )
 
   useEffect(() => {
     setViewport(viewportRef.current)
     return () => setViewport(null)
   }, [setViewport])
 
-  const initialScrollTop = useMemo(() => {
-    return (
+  const getInitialScrollTop = useCallback(
+    (pathname: string, scrollKey: string) =>
+      scrollCache.get(scrollKey) ??
       scrollCache.get(pathname) ??
-      (pathname.includes('subject') ? subjectInitScroll.x : initScrollTo)
-    )
-  }, [pathname, initScrollTo])
+      (pathname.includes('subject') ? subjectInitScroll.x : initScrollTo),
+    [initScrollTo],
+  )
+
+  useLayoutEffect(() => {
+    setAllowNoReadyEntries(false)
+
+    const frame = requestAnimationFrame(() => {
+      setAllowNoReadyEntries(true)
+    })
+
+    return () => cancelAnimationFrame(frame)
+  }, [scrollKey])
 
   const updateViewportState = useCallback(
-    (pathname: string, scrollTop: number, shouldCache: boolean) => {
-      if (shouldCache) scrollCache.set(pathname, scrollTop)
+    (scrollTop: number, shouldCache = true) => {
+      lastScrollTopRef.current = scrollTop
+      if (shouldCache) scrollCache.set(scrollKeyRef.current, scrollTop)
       setScrollPosition(scrollTop)
     },
     [setScrollPosition],
@@ -44,35 +127,68 @@ export function PageScrollWrapper({
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current
-    const content = contentRef.current
     if (!viewport) return
 
-    let isRestoring = initialScrollTop > 0
-    const getMaxScrollTop = () => Math.max(0, viewport.scrollHeight - viewport.clientHeight)
-    const canRestoreTarget = () => initialScrollTop <= getMaxScrollTop() + SCROLL_RESTORE_TOLERANCE
-
-    const syncViewportState = () => {
-      updateViewportState(pathname, viewport.scrollTop, !isRestoring)
+    if (scrollKeyRef.current !== scrollKey && !restoringRef.current) {
+      scrollCache.set(scrollKeyRef.current, lastScrollTopRef.current)
     }
-    const restoreScrollPosition = (force = false) => {
-      if (!force && !isRestoring) return
+    scrollKeyRef.current = scrollKey
 
-      const nextScrollTop = Math.min(initialScrollTop, getMaxScrollTop())
+    const initialScrollTop = getInitialScrollTop(pathname, scrollKey)
+    const startedAt = performance.now()
+    let cancelled = false
+
+    const restoreScrollPosition = () => {
+      if (cancelled) return
+
+      const maxScrollTop = Math.max(0, viewport.scrollHeight - viewport.clientHeight)
+      const nextScrollTop = Math.min(initialScrollTop, maxScrollTop)
 
       viewport.scrollTo({ top: nextScrollTop, left: 0 })
+      updateViewportState(viewport.scrollTop, false)
 
-      if (initialScrollTop === 0 || canRestoreTarget()) {
-        isRestoring = false
-        updateViewportState(pathname, viewport.scrollTop, true)
+      const targetCanFit = initialScrollTop <= maxScrollTop + SCROLL_RESTORE_TOLERANCE
+      const timedOut = performance.now() - startedAt >= SCROLL_RESTORE_TIMEOUT
+      if (initialScrollTop === 0 || (restoreReady && targetCanFit) || timedOut) {
+        restoringRef.current = false
+        restoreFrameRef.current = null
+        updateViewportState(viewport.scrollTop)
         return
       }
 
-      updateViewportState(pathname, viewport.scrollTop, false)
+      restoreFrameRef.current = requestAnimationFrame(restoreScrollPosition)
     }
+
+    restoringRef.current = initialScrollTop > 0
+    restoreScrollPosition()
+
+    return () => {
+      const wasRestoring = restoringRef.current
+      cancelled = true
+      if (restoreFrameRef.current !== null) {
+        cancelAnimationFrame(restoreFrameRef.current)
+        restoreFrameRef.current = null
+      }
+      restoringRef.current = false
+      if (!wasRestoring) scrollCache.set(scrollKey, lastScrollTopRef.current)
+    }
+  }, [getInitialScrollTop, pathname, restoreReady, scrollKey, updateViewportState])
+
+  useEffect(() => {
+    const viewport = viewportRef.current
+    if (!viewport) return
+
     const cancelRestore = () => {
-      if (!isRestoring) return
-      isRestoring = false
-      updateViewportState(pathname, viewport.scrollTop, true)
+      if (!restoringRef.current) return
+      restoringRef.current = false
+      if (restoreFrameRef.current !== null) {
+        cancelAnimationFrame(restoreFrameRef.current)
+        restoreFrameRef.current = null
+      }
+      updateViewportState(viewport.scrollTop)
+    }
+    const syncViewportState = () => {
+      updateViewportState(viewport.scrollTop, !restoringRef.current)
     }
     const wheelListener = (event: WheelEvent) => {
       // Prevent horizontal trackpad scrolling from affecting the page viewport.
@@ -85,29 +201,19 @@ export function PageScrollWrapper({
         cancelRestore()
       }
     }
-    const pointerDownListener = () => {
-      cancelRestore()
-    }
-    const resizeObserver = new ResizeObserver(() => restoreScrollPosition())
-    const mutationObserver = new MutationObserver(() => restoreScrollPosition())
-
-    restoreScrollPosition(true)
-    if (content) {
-      resizeObserver.observe(content)
-      mutationObserver.observe(content, { childList: true, subtree: true })
-    }
     viewport.addEventListener('scroll', syncViewportState, { passive: true })
     viewport.addEventListener('wheel', wheelListener, { passive: false })
-    viewport.addEventListener('pointerdown', pointerDownListener)
+    viewport.addEventListener('pointerdown', cancelRestore)
+    viewport.addEventListener('touchstart', cancelRestore, { passive: true })
+    viewport.addEventListener('keydown', cancelRestore)
     return () => {
-      scrollCache.set(pathname, viewport.scrollTop)
-      resizeObserver.disconnect()
-      mutationObserver.disconnect()
       viewport.removeEventListener('scroll', syncViewportState)
       viewport.removeEventListener('wheel', wheelListener)
-      viewport.removeEventListener('pointerdown', pointerDownListener)
+      viewport.removeEventListener('pointerdown', cancelRestore)
+      viewport.removeEventListener('touchstart', cancelRestore)
+      viewport.removeEventListener('keydown', cancelRestore)
     }
-  }, [pathname, initialScrollTop, updateViewportState])
+  }, [updateViewportState])
 
   return (
     <ScrollArea.Root
@@ -117,8 +223,10 @@ export function PageScrollWrapper({
         ref={viewportRef}
         className="h-full w-full overflow-x-hidden focus-visible:outline-hidden"
       >
-        <ScrollArea.Content ref={contentRef} className="h-full min-h-full w-full">
-          {children}
+        <ScrollArea.Content className="h-full min-h-full w-full">
+          <ScrollRestoreReadyContext.Provider value={restoreReadyContextValue}>
+            {children}
+          </ScrollRestoreReadyContext.Provider>
         </ScrollArea.Content>
       </ScrollArea.Viewport>
 

@@ -305,7 +305,7 @@ function TimelineSubject({
           <div
             className={cn(
               'bbcode bg-muted/35 border-border/60 mt-2 rounded-md border px-2.5 py-2 text-sm leading-6 whitespace-pre-line',
-              !expanded && 'line-clamp-3',
+              !expanded && 'max-h-28 overflow-x-hidden overflow-y-auto pr-2',
             )}
           >
             {rate ? <TimelineRate rate={rate} className="mr-2 align-[0.05em]" /> : null}

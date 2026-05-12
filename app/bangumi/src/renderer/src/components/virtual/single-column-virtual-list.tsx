@@ -4,8 +4,7 @@ import { cn } from '@renderer/lib/utils'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Key, ReactNode } from 'react'
-
-const scrollTopCache = new Map<string, number>()
+import { useVirtualScrollRestoration } from './use-virtual-scroll-restoration'
 
 type SingleColumnVirtualListProps<T> = {
   items: T[]
@@ -19,6 +18,7 @@ type SingleColumnVirtualListProps<T> = {
   gap?: number
   hasMore?: boolean
   isFetchingMore?: boolean
+  loadMoreRowThreshold?: number
   onNearBottom?: () => Promise<unknown> | void
   overscan?: number
   renderPlaceholder?: (index: number) => ReactNode
@@ -39,6 +39,7 @@ export function SingleColumnVirtualList<T>({
   gap = 4,
   hasMore = false,
   isFetchingMore = false,
+  loadMoreRowThreshold = 1,
   onNearBottom,
   overscan = 6,
   renderPlaceholder,
@@ -48,7 +49,6 @@ export function SingleColumnVirtualList<T>({
 }: SingleColumnVirtualListProps<T>) {
   const viewportRef = useRef<HTMLElement | null>(null)
   const loadingMoreRef = useRef(false)
-  const restoredScrollKeyRef = useRef<string | undefined>(undefined)
   const [viewport, setViewport] = useState<HTMLElement | null>(null)
   const itemCount = items.length + (isFetchingMore ? appendPlaceholderCount : 0)
   const virtualizer = useVirtualizer({
@@ -57,6 +57,26 @@ export function SingleColumnVirtualList<T>({
     estimateSize: () => estimateSize,
     overscan,
     gap,
+  })
+  const getViewport = useCallback(() => viewportRef.current, [])
+  const getVirtualItems = useCallback(() => virtualizer.getVirtualItems(), [virtualizer])
+  const scrollToIndex = useCallback(
+    (index: number) => virtualizer.scrollToIndex(index, { align: 'start' }),
+    [virtualizer],
+  )
+  const scrollToOffset = useCallback(
+    (offset: number) => virtualizer.scrollToOffset(offset),
+    [virtualizer],
+  )
+  const scrollRestoration = useVirtualScrollRestoration({
+    getKey,
+    getViewport,
+    getVirtualItems,
+    itemCount,
+    items,
+    scrollKey: scrollAreaKey,
+    scrollToIndex,
+    scrollToOffset,
   })
   const virtualItems = virtualizer.getVirtualItems()
   const lastVirtualIndex = virtualItems.at(-1)?.index
@@ -71,35 +91,14 @@ export function SingleColumnVirtualList<T>({
 
   useEffect(() => {
     if (lastVirtualIndex === undefined || items.length === 0) return
-    if (lastVirtualIndex >= items.length - 1) requestMore()
-  }, [items.length, lastVirtualIndex, requestMore])
+    if (lastVirtualIndex >= items.length - loadMoreRowThreshold) requestMore()
+  }, [items.length, lastVirtualIndex, loadMoreRowThreshold, requestMore])
 
   useEffect(() => {
     if (!viewport) return
     if (activeIndex === undefined || activeIndex < 0 || activeIndex >= items.length) return
     virtualizer.scrollToIndex(activeIndex, { align: 'center' })
   }, [activeIndex, items.length, viewport, virtualizer])
-
-  useEffect(() => {
-    restoredScrollKeyRef.current = undefined
-  }, [scrollAreaKey])
-
-  useEffect(() => {
-    if (!scrollAreaKey || itemCount === 0) return
-    if (restoredScrollKeyRef.current === scrollAreaKey) return
-
-    const viewport = viewportRef.current
-    const cachedScrollTop = scrollTopCache.get(scrollAreaKey)
-    if (!viewport || cachedScrollTop === undefined) return
-
-    restoredScrollKeyRef.current = scrollAreaKey
-    requestAnimationFrame(() => {
-      viewport.scrollTop = Math.min(
-        cachedScrollTop,
-        Math.max(0, viewport.scrollHeight - viewport.clientHeight),
-      )
-    })
-  }, [itemCount, scrollAreaKey])
 
   if (items.length === 0 && empty) return empty
 
@@ -110,8 +109,12 @@ export function SingleColumnVirtualList<T>({
     >
       <ScrollArea.Viewport
         className={cn('h-full w-full overflow-x-hidden focus-visible:outline-hidden', className)}
-        onScroll={(event) => {
-          if (scrollAreaKey) scrollTopCache.set(scrollAreaKey, event.currentTarget.scrollTop)
+        onKeyDown={scrollRestoration.onUserScrollIntent}
+        onPointerDown={scrollRestoration.onUserScrollIntent}
+        onScroll={scrollRestoration.onScroll}
+        onTouchStart={scrollRestoration.onUserScrollIntent}
+        onWheel={(event) => {
+          if (Math.abs(event.deltaY) > 0.5) scrollRestoration.onUserScrollIntent()
         }}
         ref={(node) => {
           viewportRef.current = node

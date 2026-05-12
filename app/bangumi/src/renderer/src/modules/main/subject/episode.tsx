@@ -1,3 +1,4 @@
+import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { EpisodesGrid } from '@renderer/modules/common/episodes/grid'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { SubjectType } from '@renderer/data/types/subject'
@@ -6,6 +7,7 @@ import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 
 export function SubjectEpisodes({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
+  usePageScrollRestoreReady(!subjectInfoQuery.isPending)
   const subjectInfo = subjectInfoQuery.data
   if (!subjectInfo) {
     return null

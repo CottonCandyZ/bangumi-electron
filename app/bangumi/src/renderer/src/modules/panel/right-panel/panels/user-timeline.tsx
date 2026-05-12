@@ -1,5 +1,4 @@
-import { ScrollArea } from '@base-ui/react/scroll-area'
-import { useVirtualizer } from '@tanstack/react-virtual'
+import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
 import {
   hasUserTimelineItemDetails,
   UserTimelineItemCard,
@@ -11,7 +10,7 @@ import { UserTimelineItem } from '@renderer/data/types/user'
 import { rightPanelOpenAtom } from '@renderer/state/panel'
 import dayjs from 'dayjs'
 import { useAtomValue } from 'jotai'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 
 const USER_TIMELINE_PAGE_LIMIT = 20
@@ -19,8 +18,6 @@ const ESTIMATED_TIMELINE_ITEM_HEIGHT = 132
 const VIRTUAL_OVERSCAN = 6
 const APPEND_SKELETON_COUNT = 4
 const LOAD_MORE_ROW_THRESHOLD = 6
-
-const scrollTopCache = new Map<string, number>()
 
 type UserTimelineRow =
   | {
@@ -107,57 +104,12 @@ function UserTimelineVirtualGrid({
   onListNearBottom: () => Promise<unknown> | void
   scrollAreaKey?: string
 }) {
-  const viewportRef = useRef<HTMLElement | null>(null)
-  const loadingMoreRef = useRef(false)
-  const restoredScrollKeyRef = useRef<string | undefined>(undefined)
   const rows = useMemo(() => (entries ? toTimelineRows(entries) : undefined), [entries])
-  const itemCount = (rows?.length ?? 0) + (isFetchingMore ? APPEND_SKELETON_COUNT : 0)
   const requestMore = useCallback(() => {
-    if (!hasMore || isFetchingMore || loadingMoreRef.current) return
+    if (!hasMore || isFetchingMore) return
 
-    loadingMoreRef.current = true
-    Promise.resolve(onListNearBottom()).finally(() => {
-      loadingMoreRef.current = false
-    })
+    return onListNearBottom()
   }, [hasMore, isFetchingMore, onListNearBottom])
-  const virtualizer = useVirtualizer({
-    count: itemCount,
-    getScrollElement: () => viewportRef.current,
-    estimateSize: () => ESTIMATED_TIMELINE_ITEM_HEIGHT,
-    overscan: VIRTUAL_OVERSCAN,
-    gap: 12,
-    onChange: (instance) => {
-      const lastItem = instance.getVirtualItems().at(-1)
-      if (!lastItem || rows === undefined) return
-      if (lastItem.index >= rows.length - LOAD_MORE_ROW_THRESHOLD) requestMore()
-    },
-  })
-  const virtualItems = virtualizer.getVirtualItems()
-
-  useEffect(() => {
-    virtualizer.measure()
-  }, [rows?.length, virtualizer])
-
-  useEffect(() => {
-    restoredScrollKeyRef.current = undefined
-  }, [scrollAreaKey])
-
-  useEffect(() => {
-    if (!scrollAreaKey || itemCount === 0) return
-    if (restoredScrollKeyRef.current === scrollAreaKey) return
-
-    const viewport = viewportRef.current
-    const cachedScrollTop = scrollTopCache.get(scrollAreaKey)
-    if (!viewport || cachedScrollTop === undefined) return
-
-    restoredScrollKeyRef.current = scrollAreaKey
-    requestAnimationFrame(() => {
-      viewport.scrollTop = Math.min(
-        cachedScrollTop,
-        Math.max(0, viewport.scrollHeight - viewport.clientHeight),
-      )
-    })
-  }, [itemCount, scrollAreaKey])
 
   if (rows === undefined && !error) {
     return <UserTimelineSkeletonScroll count={8} />
@@ -172,49 +124,29 @@ function UserTimelineVirtualGrid({
   }
 
   return (
-    <ScrollArea.Root className="group/scroll relative h-full min-h-0 overflow-hidden">
-      <ScrollArea.Viewport
-        className="h-full w-full overflow-x-hidden px-3 py-3 focus-visible:outline-hidden"
-        onScroll={(event) => {
-          if (scrollAreaKey) scrollTopCache.set(scrollAreaKey, event.currentTarget.scrollTop)
-        }}
-        ref={(node) => {
-          viewportRef.current = node
-        }}
-      >
-        <ScrollArea.Content className="w-full">
-          <div className="relative w-full" style={{ height: `${virtualizer.getTotalSize()}px` }}>
-            {virtualItems.map((virtualItem) => {
-              const row = rows[virtualItem.index]
-
-              return (
-                <div
-                  className="absolute top-0 right-0 left-0"
-                  data-index={virtualItem.index}
-                  key={row?.key ?? `skeleton-${virtualItem.index}`}
-                  ref={virtualizer.measureElement}
-                  style={{ transform: `translateY(${virtualItem.start}px)` }}
-                >
-                  {row?.type === 'day' ? (
-                    <UserTimelineDayHeader label={row.label} />
-                  ) : row?.type === 'item' ? (
-                    <UserTimelineItemCard compact expanded item={row.item} surface="plain" />
-                  ) : (
-                    <UserTimelineSkeletonItem />
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </ScrollArea.Content>
-      </ScrollArea.Viewport>
-      <ScrollArea.Scrollbar
-        orientation="vertical"
-        className="absolute top-0 right-0 z-20 flex h-full w-2.5 touch-none p-0.5 opacity-0 transition-opacity duration-150 select-none group-hover/scroll:opacity-100"
-      >
-        <ScrollArea.Thumb className="bg-foreground/10 hover:bg-foreground/30 active:bg-foreground/40 relative [height:var(--scroll-area-thumb-height)] w-full flex-1 rounded-full" />
-      </ScrollArea.Scrollbar>
-    </ScrollArea.Root>
+    <SingleColumnVirtualList
+      items={rows}
+      getKey={(row) => row.key}
+      renderItem={(row) =>
+        row.type === 'day' ? (
+          <UserTimelineDayHeader label={row.label} />
+        ) : (
+          <UserTimelineItemCard compact expanded item={row.item} surface="plain" />
+        )
+      }
+      appendPlaceholderCount={APPEND_SKELETON_COUNT}
+      className="px-3 py-3"
+      estimateSize={ESTIMATED_TIMELINE_ITEM_HEIGHT}
+      gap={12}
+      hasMore={hasMore}
+      isFetchingMore={isFetchingMore}
+      loadMoreRowThreshold={LOAD_MORE_ROW_THRESHOLD}
+      onNearBottom={requestMore}
+      overscan={VIRTUAL_OVERSCAN}
+      renderPlaceholder={() => <UserTimelineSkeletonItem />}
+      rootClassName="h-full"
+      scrollAreaKey={scrollAreaKey}
+    />
   )
 }
 
@@ -265,22 +197,12 @@ function UserTimelineDayHeader({ label }: { label: string }) {
 
 function UserTimelineSkeletonScroll({ count }: { count: number }) {
   return (
-    <ScrollArea.Root className="group/scroll relative h-full w-full overflow-hidden">
-      <ScrollArea.Viewport className="h-full w-full overflow-x-hidden px-3 py-3 focus-visible:outline-hidden">
-        <ScrollArea.Content className="flex min-h-full w-full flex-col gap-3">
-          {Array(count)
-            .fill(undefined)
-            .map((_, index) => (
-              <UserTimelineSkeletonItem key={index} />
-            ))}
-        </ScrollArea.Content>
-      </ScrollArea.Viewport>
-      <ScrollArea.Scrollbar
-        orientation="vertical"
-        className="absolute top-0 right-0 z-20 flex h-full w-2.5 touch-none p-0.5 opacity-0 transition-opacity duration-150 select-none group-hover/scroll:opacity-100"
-      >
-        <ScrollArea.Thumb className="bg-foreground/10 hover:bg-foreground/30 active:bg-foreground/40 relative [height:var(--scroll-area-thumb-height)] w-full flex-1 rounded-full" />
-      </ScrollArea.Scrollbar>
-    </ScrollArea.Root>
+    <div className="flex h-full w-full flex-col gap-3 overflow-hidden px-3 py-3">
+      {Array(count)
+        .fill(undefined)
+        .map((_, index) => (
+          <UserTimelineSkeletonItem key={index} />
+        ))}
+    </div>
   )
 }

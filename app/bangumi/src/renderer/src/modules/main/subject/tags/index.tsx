@@ -1,3 +1,4 @@
+import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useSession } from '@renderer/data/hooks/session'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
@@ -10,12 +11,16 @@ export function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subjectInfo = subjectInfoQuery.data
   const userInfo = useSession()
-  const subjectCollection = useQuerySubjectCollection({
+  const subjectCollectionQuery = useQuerySubjectCollection({
     subjectId,
     username: userInfo?.username,
     enabled: !!userInfo,
     needKeepPreviousData: false,
-  }).data
+  })
+  const subjectCollection = subjectCollectionQuery.data
+  usePageScrollRestoreReady(
+    !subjectInfoQuery.isPending && (!userInfo || !subjectCollectionQuery.isPending),
+  )
 
   if (subjectInfo === undefined)
     return (
