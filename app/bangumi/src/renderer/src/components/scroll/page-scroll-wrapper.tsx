@@ -1,5 +1,6 @@
 import { scrollCache, subjectInitScroll } from '@renderer/state/global-var'
 import { mainPanelScrollPositionAtom, scrollViewportAtom } from '@renderer/state/scroll'
+import { UI_CONFIG } from '@renderer/config'
 import { cn } from '@renderer/lib/utils'
 import { ScrollArea } from '@base-ui/react/scroll-area'
 import { useSetAtom } from 'jotai'
@@ -98,12 +99,22 @@ export function PageScrollWrapper({
     return () => setViewport(null)
   }, [setViewport])
 
+  const getInitialRouteScrollTop = useCallback(
+    (pathname: string, viewport: HTMLElement) => {
+      if (!pathname.startsWith('/subject')) return initScrollTo
+
+      const viewportInitialScroll = viewport.clientHeight * UI_CONFIG.SUBJECT_INIT_SCROLL_PERCENT
+      return viewportInitialScroll > 0 ? viewportInitialScroll : subjectInitScroll.x
+    },
+    [initScrollTo],
+  )
+
   const getInitialScrollTop = useCallback(
-    (pathname: string, scrollKey: string) =>
+    (pathname: string, scrollKey: string, viewport: HTMLElement) =>
       scrollCache.get(scrollKey) ??
       scrollCache.get(pathname) ??
-      (pathname.includes('subject') ? subjectInitScroll.x : initScrollTo),
-    [initScrollTo],
+      getInitialRouteScrollTop(pathname, viewport),
+    [getInitialRouteScrollTop],
   )
 
   useLayoutEffect(() => {
@@ -134,7 +145,7 @@ export function PageScrollWrapper({
     }
     scrollKeyRef.current = scrollKey
 
-    const initialScrollTop = getInitialScrollTop(pathname, scrollKey)
+    const initialScrollTop = getInitialScrollTop(pathname, scrollKey, viewport)
     const startedAt = performance.now()
     let cancelled = false
 
