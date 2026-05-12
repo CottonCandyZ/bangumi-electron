@@ -7,7 +7,7 @@ import {
   rightPanelWidth,
 } from '@renderer/state/panel'
 import { useAtom, useAtomValue } from 'jotai'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const MAX_WIDTH = 480
@@ -17,9 +17,16 @@ export function RightResizablePanel() {
   const desiredOpen = useAtomValue(rightPanelOpenAtom)
   const { pathname } = useLocation()
   const hasContent = getRightPanelContentByPathname(pathname) !== null
+  const prevHasContentRef = useRef(hasContent)
+  const routeContentStable = prevHasContentRef.current === hasContent
   const open = desiredOpen && hasContent
   const [resizing, setResizing] = useState(false)
   const [width, setWidth] = useAtom(rightPanelWidth)
+
+  useEffect(() => {
+    prevHasContentRef.current = hasContent
+  }, [hasContent])
+
   useEffect(() => {
     panelSize.right_width = width
     if (!open) {
@@ -36,7 +43,7 @@ export function RightResizablePanel() {
       width={width}
       onWidthChange={setWidth}
       className="bg-background border-l"
-      enableAnimation={hasContent}
+      enableAnimation={hasContent && routeContentStable}
       resizeHandlePos="left"
     >
       <RightPanel />
