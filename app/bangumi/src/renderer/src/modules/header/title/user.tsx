@@ -23,6 +23,11 @@ export function UserHeaderTitle({ username }: { username?: string }) {
   if (!user) return null
 
   return (
-    <StaticHeaderTitle image={image} name={user.nickname || user.username} visible={!isInView} />
+    <StaticHeaderTitle
+      image={image}
+      name={user.nickname || user.username}
+      presenceKey={`user-${profileUsername ?? user.username}`}
+      visible={!isInView}
+    />
   )
 }

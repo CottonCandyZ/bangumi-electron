@@ -10,6 +10,7 @@ export function StaticHeaderTitle({
   imageFallback,
   name,
   nameCn,
+  presenceKey,
   visible = true,
 }: {
   image?: string
@@ -17,11 +18,12 @@ export function StaticHeaderTitle({
   imageFallback?: string
   name: string
   nameCn?: string
+  presenceKey?: string | number
   visible?: boolean
 }) {
   return (
     <div className="flex h-full items-center overflow-hidden select-none">
-      <AnimatePresence>
+      <AnimatePresence key={presenceKey}>
         {visible && (
           <motion.div
             className="flex min-w-0 flex-row items-center gap-3"

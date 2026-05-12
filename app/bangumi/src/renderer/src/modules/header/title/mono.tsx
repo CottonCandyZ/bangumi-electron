@@ -13,7 +13,15 @@ export function PersonHeaderTitle({ personId }: { personId: PersonId }) {
 
   if (!person) return null
 
-  return <StaticHeaderTitle image={image} name={person.name} visible={!isInView} />
+  return (
+    <StaticHeaderTitle
+      image={image}
+      name={person.name}
+      nameCn={getSimplifiedChineseName(person.infobox)}
+      presenceKey={`person-${personId}`}
+      visible={!isInView}
+    />
+  )
 }
 
 export function CharacterHeaderTitle({ characterId }: { characterId: CharacterId }) {
@@ -24,5 +32,21 @@ export function CharacterHeaderTitle({ characterId }: { characterId: CharacterId
 
   if (!character) return null
 
-  return <StaticHeaderTitle image={image} name={character.name} visible={!isInView} />
+  return (
+    <StaticHeaderTitle
+      image={image}
+      name={character.name}
+      nameCn={getSimplifiedChineseName(character.infobox)}
+      presenceKey={`character-${characterId}`}
+      visible={!isInView}
+    />
+  )
+}
+
+function getSimplifiedChineseName(infobox: { key: string; value: unknown }[]) {
+  const value = infobox.find((item) => item.key === '简体中文名')?.value
+  if (typeof value !== 'string') return undefined
+
+  const name = value.trim()
+  return name === '' ? undefined : name
 }
