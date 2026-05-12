@@ -37,12 +37,12 @@ export function SearchSubjectRow({
   return (
     <MyLink
       to={`/subject/${searchItem.id}`}
-      className="group focus-visible:ring-ring/50 block min-w-0 focus-visible:ring-2 focus-visible:outline-hidden"
+      className="group focus-visible:ring-ring/50 block min-w-0 cursor-default focus-visible:ring-2 focus-visible:outline-hidden"
     >
       <Card className="group-hover:bg-accent rounded-none border-x-0 border-t-0 shadow-none transition-colors">
         <CardContent
           className={cn(
-            'relative flex min-w-0 flex-row items-stretch gap-4 p-3',
+            'relative mx-auto flex w-full max-w-4xl min-w-0 flex-row items-stretch gap-4 p-3',
             dense && 'gap-3 p-2',
           )}
         >

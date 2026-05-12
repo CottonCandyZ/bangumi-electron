@@ -6,11 +6,11 @@ import { SearchParam } from '@renderer/data/types/search'
 import { useSearchParams } from '@renderer/hooks/use-search-params'
 import { PinSearchButton, SearchItemCard } from '@renderer/modules/main/search/item-card'
 import { createSearchPanelId, createSearchPanelTitle } from '@renderer/modules/main/search/utils'
-import { setScrollPositionAction } from '@renderer/state/scroll'
+import { scrollViewportAtom, setScrollPositionAction } from '@renderer/state/scroll'
 import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
 import { searchSummaryAtom } from '@renderer/state/search'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
 export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
@@ -18,7 +18,9 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
   const { setOffset, offset } = useSearchParams(() => {
     setTotal(0)
   })
+  const contentRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
+  const scrollViewport = useAtomValue(scrollViewportAtom)
   const updateScrollPosition = useSetAtom(setScrollPositionAction)
   const setSearchSummary = useSetAtom(searchSummaryAtom)
   const limit = 20
@@ -42,6 +44,18 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
     setSearchSummary({ total, loading: searchResultQuery.isLoading })
   }, [searchResultQuery.isLoading, setSearchSummary, total])
 
+  const getContentScrollTop = useCallback(() => {
+    const content = contentRef.current
+    if (!content || !scrollViewport) return 0
+
+    return Math.max(
+      0,
+      scrollViewport.scrollTop +
+        content.getBoundingClientRect().top -
+        scrollViewport.getBoundingClientRect().top,
+    )
+  }, [scrollViewport])
+
   // if (searchResult === undefined)
   //   return (
   //     <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(25rem,1fr))] gap-4 px-10">
@@ -50,15 +64,15 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
   //   )
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
-      <div className="w-full">
+    <div ref={contentRef} className="flex min-h-0 flex-1 flex-col items-center justify-start">
+      <div className="w-full flex-1">
         {searchResultQuery.isLoading ? (
           <SkeletonList />
         ) : (
           searchResult?.data?.map((item) => <SearchItemCard searchItem={item} key={item.id} />)
         )}
       </div>
-      <div className="bg-background sticky bottom-0 mt-auto w-full border-t py-3">
+      <div className="bg-background sticky bottom-0 w-full border-t py-3">
         {total > 0 && (
           <BigPagination
             total={Math.ceil(total / limit)}
@@ -69,7 +83,10 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
 
               nextSearchParams.set('offset', String(nextOffset))
               setOffset(nextOffset)
-              updateScrollPosition(125, `${location.pathname}?${nextSearchParams.toString()}`)
+              updateScrollPosition(
+                getContentScrollTop(),
+                `${location.pathname}?${nextSearchParams.toString()}`,
+              )
             }}
           />
         )}
@@ -116,27 +133,26 @@ function SkeletonList() {
   return (
     <>
       {Array.from({ length: 12 }).map((_, index) => (
-        <div
-          key={index}
-          className="flex min-h-[136px] w-full flex-row items-stretch gap-4 border-b px-3 py-3"
-        >
-          <Skeleton className="h-28 w-20 shrink-0 rounded-md" />
-          <div className="flex min-w-0 flex-1 flex-col gap-2 py-1">
-            <Skeleton className="h-5 w-52 max-w-[70%]" />
-            <Skeleton className="h-3 w-36 max-w-[55%]" />
-            <Skeleton className="h-3 w-72 max-w-[80%]" />
-            <Skeleton className="h-8 w-full max-w-xl" />
-            <div className="mt-auto flex flex-row gap-1.5">
-              <Skeleton className="h-5 w-12 rounded-md" />
-              <Skeleton className="h-5 w-14 rounded-md" />
-              <Skeleton className="h-5 w-16 rounded-md" />
+        <div key={index} className="w-full border-b">
+          <div className="mx-auto flex min-h-[136px] w-full max-w-4xl flex-row items-stretch gap-4 px-3 py-3">
+            <Skeleton className="h-28 w-20 shrink-0 rounded-md" />
+            <div className="flex min-w-0 flex-1 flex-col gap-2 py-1">
+              <Skeleton className="h-5 w-52 max-w-[70%]" />
+              <Skeleton className="h-3 w-36 max-w-[55%]" />
+              <Skeleton className="h-3 w-72 max-w-[80%]" />
+              <Skeleton className="h-8 w-full max-w-xl" />
+              <div className="mt-auto flex flex-row gap-1.5">
+                <Skeleton className="h-5 w-12 rounded-md" />
+                <Skeleton className="h-5 w-14 rounded-md" />
+                <Skeleton className="h-5 w-16 rounded-md" />
+              </div>
             </div>
-          </div>
-          <div className="flex w-64 shrink-0 flex-col justify-center gap-2 self-center max-lg:w-56 max-md:hidden">
-            <Skeleton className="h-8 w-24 rounded-md" />
-            <div className="flex flex-row gap-4">
-              <Skeleton className="h-4 w-16" />
-              <Skeleton className="h-4 w-20" />
+            <div className="flex w-64 shrink-0 flex-col justify-center gap-2 self-center max-lg:w-56 max-md:hidden">
+              <Skeleton className="h-8 w-24 rounded-md" />
+              <div className="flex flex-row gap-4">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-20" />
+              </div>
             </div>
           </div>
         </div>

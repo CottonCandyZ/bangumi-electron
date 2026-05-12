@@ -17,29 +17,31 @@ export function BigPagination({
   value: number
   onValueChanged: (value: number) => void
 }) {
+  const setPage = (nextValue: number) => {
+    if (nextValue < 1 || nextValue > total || nextValue === value) return
+    onValueChanged(nextValue)
+  }
+
   if (total < 10)
     return (
       <Pagination>
         <PaginationContent>
           {/* 上一页 */}
           <PaginationItem>
-            <PaginationPrevious disabled={value === 1} onClick={() => onValueChanged(value - 1)} />
+            <PaginationPrevious disabled={value === 1} onClick={() => setPage(value - 1)} />
           </PaginationItem>
           {Array(total)
             .fill(0)
             .map((_, index) => (
               <PaginationItem key={index}>
-                <PaginationLink
-                  isActive={value == index + 1}
-                  onClick={() => onValueChanged(index + 1)}
-                >
+                <PaginationLink isActive={value === index + 1} onClick={() => setPage(index + 1)}>
                   {index + 1}
                 </PaginationLink>
               </PaginationItem>
             ))}
           {/* 下一页 */}
           <PaginationItem>
-            <PaginationNext disabled={value === total} onClick={() => onValueChanged(value + 1)} />
+            <PaginationNext disabled={value === total} onClick={() => setPage(value + 1)} />
           </PaginationItem>
         </PaginationContent>
       </Pagination>
@@ -49,12 +51,12 @@ export function BigPagination({
       <PaginationContent>
         {/* 上一页 */}
         <PaginationItem>
-          <PaginationPrevious disabled={value === 1} onClick={() => onValueChanged(value - 1)} />
+          <PaginationPrevious disabled={value === 1} onClick={() => setPage(value - 1)} />
         </PaginationItem>
 
         {/* 第一页 */}
         <PaginationItem>
-          <PaginationLink isActive={value == 1} onClick={() => onValueChanged(1)}>
+          <PaginationLink isActive={value === 1} onClick={() => setPage(1)}>
             1
           </PaginationLink>
         </PaginationItem>
@@ -73,7 +75,7 @@ export function BigPagination({
                   <PaginationItem key={index}>
                     <PaginationLink
                       isActive={value === index + 2}
-                      onClick={() => onValueChanged(index + 2)}
+                      onClick={() => setPage(index + 2)}
                     >
                       {index + 2}
                     </PaginationLink>
@@ -89,7 +91,7 @@ export function BigPagination({
                     <PaginationItem key={total + index - 6}>
                       <PaginationLink
                         isActive={value === total + index - 6}
-                        onClick={() => onValueChanged(total + index - 6)}
+                        onClick={() => setPage(total + index - 6)}
                       >
                         {total + index - 6}
                       </PaginationLink>
@@ -103,8 +105,8 @@ export function BigPagination({
                   return (
                     <PaginationItem key={value + index - 2}>
                       <PaginationLink
-                        isActive={0 === index - 2}
-                        onClick={() => onValueChanged(value + index - 2)}
+                        isActive={value === value + index - 2}
+                        onClick={() => setPage(value + index - 2)}
                       >
                         {value + index - 2}
                       </PaginationLink>
@@ -119,13 +121,13 @@ export function BigPagination({
         )}
         {/* 最后一页 */}
         <PaginationItem>
-          <PaginationLink isActive={value === total} onClick={() => onValueChanged(total)}>
+          <PaginationLink isActive={value === total} onClick={() => setPage(total)}>
             {total}
           </PaginationLink>
         </PaginationItem>
         {/* 下一页 */}
         <PaginationItem>
-          <PaginationNext disabled={value === total} onClick={() => onValueChanged(value + 1)} />
+          <PaginationNext disabled={value === total} onClick={() => setPage(value + 1)} />
         </PaginationItem>
       </PaginationContent>
     </Pagination>

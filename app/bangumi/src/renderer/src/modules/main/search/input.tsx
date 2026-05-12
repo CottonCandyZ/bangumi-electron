@@ -7,6 +7,10 @@ export function SearchInput() {
   const [keyword, setKeywordState] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
   const { keyword: searchKeyword, setKeyword } = useSearchParams()
+  const submitKeyword = () => {
+    setKeyword(keyword)
+    inputRef.current?.blur()
+  }
 
   useEffect(() => {
     setKeywordState(searchKeyword ?? '')
@@ -22,10 +26,7 @@ export function SearchInput() {
         className="h-full w-full bg-transparent focus-visible:outline-hidden"
         onChange={(e) => setKeywordState(e.target.value)}
         onKeyDownCapture={(e) => {
-          if (keyword !== '' && e.code === 'Enter') {
-            setKeyword(keyword)
-            inputRef.current?.blur()
-          }
+          if (e.code === 'Enter') submitKeyword()
         }}
       />
       {/* clear Button */}
@@ -44,11 +45,8 @@ export function SearchInput() {
       <Button
         className="rounded-lg"
         onClick={(e) => {
-          if (keyword !== '') {
-            setKeyword(keyword)
-            inputRef.current?.blur()
-            e.currentTarget.blur()
-          }
+          submitKeyword()
+          e.currentTarget.blur()
         }}
       >
         搜索

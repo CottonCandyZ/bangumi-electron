@@ -8,15 +8,16 @@ import { SubjectTypeFilter } from '@renderer/modules/main/search/type-filter'
 
 export function Search() {
   return (
-    <div className="flex min-h-full w-full flex-col gap-4">
-      <div className="flex min-w-0 flex-row flex-wrap items-center justify-center gap-3 px-3 pt-4">
-        <div className="w-full max-w-2xl min-w-72">
-          <SearchInput />
+    <div className="flex h-full min-h-full w-full flex-col gap-4">
+      <div className="px-3 pt-4">
+        <div className="mx-auto flex w-full max-w-4xl min-w-0 flex-row items-center justify-start">
+          <div className="w-full min-w-72">
+            <SearchInput />
+          </div>
         </div>
-        <SearchSummaryAction />
       </div>
-      <div className="flex min-w-0 justify-center px-3">
-        <div className="flex w-full max-w-4xl min-w-72 flex-row items-start gap-2 overflow-x-auto">
+      <div className="px-3">
+        <div className="mx-auto flex w-full max-w-4xl min-w-72 flex-row items-start justify-start gap-2 overflow-x-auto">
           <div className="shrink-0">
             <SubjectTypeFilter />
           </div>
@@ -29,6 +30,7 @@ export function Search() {
           <div className="shrink-0">
             <FilterButton />
           </div>
+          <SearchSummaryAction />
         </div>
       </div>
       <SearchContentWrapper />

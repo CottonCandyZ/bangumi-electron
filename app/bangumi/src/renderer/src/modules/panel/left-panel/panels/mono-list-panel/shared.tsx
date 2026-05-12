@@ -22,7 +22,7 @@ export const ALL_SUBJECT_RELATIONS = '全部职能'
 export const ALL_RELATED_TYPES = '全部类型'
 
 const PANEL_ITEM_CLASS =
-  'hover:bg-accent data-[active=true]:bg-accent flex min-h-20 cursor-pointer flex-row gap-3 rounded-md p-2'
+  'hover:bg-accent data-[active=true]:bg-accent flex min-h-20 cursor-default flex-row gap-3 rounded-md p-2'
 
 export function MonoListPanelFilters({ children }: { children: ReactNode }) {
   return (

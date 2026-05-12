@@ -147,7 +147,7 @@ function SearchPanelItem({ item }: { item: SearchData }) {
     <div ref={ref}>
       <MyLink
         className={cn(
-          'hover:bg-accent data-[active=true]:bg-accent flex min-h-24 cursor-pointer flex-row gap-3 rounded-md p-2',
+          'hover:bg-accent data-[active=true]:bg-accent flex min-h-24 cursor-default flex-row gap-3 rounded-md p-2',
         )}
         data-active={active}
         to={to}
@@ -174,7 +174,6 @@ function SearchPanelItem({ item }: { item: SearchData }) {
           </div>
           <div className="mt-auto flex min-w-0 flex-row flex-wrap items-center gap-x-2 gap-y-1 text-xs">
             <span className="text-muted-foreground inline-flex items-baseline gap-1">
-              评分
               <span
                 className="font-semibold tabular-nums"
                 style={{ color: `hsl(var(--chart-score-${Math.floor(score + 0.5) || 1}))` }}
@@ -184,7 +183,7 @@ function SearchPanelItem({ item }: { item: SearchData }) {
             </span>
             {rank > 0 && (
               <Badge variant="secondary" className="h-5 rounded-md px-1.5 text-[11px] tabular-nums">
-                Rank {rank}
+                # {rank}
               </Badge>
             )}
             <span className="text-muted-foreground">
