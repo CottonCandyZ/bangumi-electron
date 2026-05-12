@@ -17,19 +17,17 @@ import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
 import { EpisodeCollectionActions } from '@renderer/modules/main/episode/collection-actions'
 import { scrollViewportAtom } from '@renderer/state/scroll'
 import { useAtomValue } from 'jotai'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { useInView } from 'react-intersection-observer'
 import { Virtualizer } from 'virtua'
 
 const EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE = 148
 const EPISODE_PAGE_VIRTUAL_OVERSCAN = 8
 
 export function EpisodeContent({ episodeId }: { episodeId: string }) {
-  const [enabledCommentsId, setEnabledCommentsId] = useState<string | null>(null)
-  const enableComments = useCallback(() => setEnabledCommentsId(episodeId), [episodeId])
   const scrollViewport = useAtomValue(scrollViewportAtom)
-  const scrollRef = useMemo(() => ({ current: scrollViewport }), [scrollViewport])
+  const scrollRef = useRef<HTMLElement | null>(null)
+  scrollRef.current = scrollViewport
 
   const episodeQuery = useEpisodeInfoByIdQuery({ episodeId })
   const episode = episodeQuery.data
@@ -41,11 +39,12 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
   })
   const commentsQuery = useEpisodeCommentsByIdQuery({
     episodeId,
-    enabled: enabledCommentsId === episodeId,
   })
-  usePageScrollRestoreReady(!episodeQuery.isPending && (!subjectId || !subjectQuery.isPending))
+  usePageScrollRestoreReady(
+    !!scrollViewport && !episodeQuery.isPending && (!subjectId || !subjectQuery.isPending),
+  )
 
-  if (episodeQuery.isLoading || !episode) return <EpisodeSkeleton />
+  if (episodeQuery.isLoading || !episode || !scrollViewport) return <EpisodeSkeleton />
 
   const title = getEpisodeTitle(episode)
   const rows = getEpisodePageRows({
@@ -64,13 +63,7 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
         bufferSize={EPISODE_PAGE_VIRTUAL_OVERSCAN * EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE}
       >
         {(row) => (
-          <EpisodePageRow
-            row={row}
-            title={title}
-            episode={episode}
-            subject={subjectQuery.data}
-            onCommentsInView={enableComments}
-          />
+          <EpisodePageRow row={row} title={title} episode={episode} subject={subjectQuery.data} />
         )}
       </Virtualizer>
       <MainBackToTopButton />
@@ -153,13 +146,11 @@ function EpisodePageRow({
   title,
   episode,
   subject,
-  onCommentsInView,
 }: {
   row: EpisodePageRow
   title: string
   episode: Episode
   subject?: NonNullable<ReturnType<typeof useSubjectInfoAPIQuery>['data']>
-  onCommentsInView: () => void
 }) {
   if (row.type === 'detail') {
     return (
@@ -181,7 +172,7 @@ function EpisodePageRow({
   }
 
   if (row.type === 'loading') {
-    return <EpisodeCommentsLoading onInView={onCommentsInView} />
+    return <EpisodeCommentsLoading />
   }
 
   if (row.type === 'error') {
@@ -273,18 +264,9 @@ function EpisodeDetailSection({
   )
 }
 
-function EpisodeCommentsLoading({ onInView }: { onInView: () => void }) {
-  const { ref, inView } = useInView({
-    rootMargin: '240px 0px',
-    triggerOnce: true,
-  })
-
-  useEffect(() => {
-    if (inView) onInView()
-  }, [inView, onInView])
-
+function EpisodeCommentsLoading() {
   return (
-    <div ref={ref} className="mx-auto flex max-w-6xl flex-col gap-3 px-10 pb-10">
+    <div className="mx-auto flex max-w-6xl flex-col gap-3 px-10 pb-10">
       {Array(4)
         .fill(undefined)
         .map((_, index) => (
