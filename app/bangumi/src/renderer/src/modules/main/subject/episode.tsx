@@ -14,7 +14,12 @@ export function SubjectEpisodes({ subjectId }: { subjectId: SubjectId }) {
   }
   // 如果不是动画或者三次元的话
   if (subjectInfo.type === SubjectType.book) return <Tankobon subjectId={subjectId} />
-  if (subjectInfo.type !== SubjectType.anime && subjectInfo.type !== SubjectType.music) return null
+  if (
+    subjectInfo.type !== SubjectType.anime &&
+    subjectInfo.type !== SubjectType.music &&
+    subjectInfo.type !== SubjectType.real
+  )
+    return null
   // TODO:音乐的章节待做...
   return (
     <section className="flex flex-col gap-5">
