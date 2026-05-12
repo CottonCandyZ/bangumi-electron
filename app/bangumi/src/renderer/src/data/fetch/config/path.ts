@@ -118,4 +118,5 @@ export const NEXT_COLLECTIONS = {
 /** 搜索 */
 export const SEARCH = {
   V0: '/v0/search/subjects',
+  P1: '/p1/search/subjects',
 }

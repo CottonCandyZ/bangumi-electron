@@ -13,7 +13,7 @@ export function SearchInput() {
   }, [searchKeyword])
 
   return (
-    <search className="group bg-accent/50 focus-within:bg-background hover:bg-background flex h-12 w-full items-center gap-2 border-b px-2 pl-4 transition-colors">
+    <search className="group bg-accent/50 focus-within:bg-background hover:bg-background flex h-12 w-full items-center gap-2 rounded-lg border px-2 pl-4 transition-colors">
       {/* search Icon */}
       <span className="i-mingcute-search-2-line text-4xl" />
       <input

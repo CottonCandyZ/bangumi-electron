@@ -12,6 +12,13 @@ export const searchSortAtom = atom<SearchParam['sort']>('match')
 
 export const isSearchLoadingAtom = atom(false)
 
+export const lastSearchQueryStringAtom = atom<string | null>(null)
+
+export const searchSummaryAtom = atom({
+  total: 0,
+  loading: false,
+})
+
 export const searchKeywordActionAtom = atom(null, (get, set, keyword: string) => {
   set(searchPaginationOffsetAtom, 0)
   set(searchParamAtom, {

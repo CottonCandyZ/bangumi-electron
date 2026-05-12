@@ -22,6 +22,7 @@ export const useInfinityQuerySearch = ({
       else return next
     },
     initialPageParam,
+    persister: undefined,
   })
 
 export const useQuerySearch = ({
@@ -40,4 +41,5 @@ export const useQuerySearch = ({
     queryFn: searchV0,
     queryProps: { offset, limit, searchParam },
     needKeepPreviousData: keepPreviousData,
+    persister: undefined,
   })

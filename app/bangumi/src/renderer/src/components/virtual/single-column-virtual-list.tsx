@@ -97,6 +97,10 @@ export function SingleColumnVirtualList<T>({
   const cachedEntry = scrollAreaKey ? virtualScrollCache.get(scrollAreaKey) : undefined
   const restoredCache =
     cachedEntry && cachedEntry.itemCount === rows.length ? cachedEntry.cache : undefined
+  const activeItemKey =
+    activeIndex !== undefined && activeIndex >= 0 && activeIndex < items.length
+      ? rows[activeIndex]?.key
+      : undefined
 
   const saveScrollState = useCallback(() => {
     if (!scrollAreaKey || !virtualizerRef.current) return
@@ -144,7 +148,7 @@ export function SingleColumnVirtualList<T>({
   useEffect(() => {
     if (activeIndex === undefined || activeIndex < 0 || activeIndex >= items.length) return
     virtualizerRef.current?.scrollToIndex(activeIndex, { align: 'center' })
-  }, [activeIndex, items.length])
+  }, [activeIndex, activeItemKey])
 
   useEffect(() => {
     restoredKeyRef.current = undefined

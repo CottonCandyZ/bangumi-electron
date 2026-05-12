@@ -4,9 +4,12 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySearch } from '@renderer/data/hooks/api/search'
 import { SearchParam } from '@renderer/data/types/search'
 import { useSearchParams } from '@renderer/hooks/use-search-params'
-import { SearchItemCard } from '@renderer/modules/main/search/item-card'
+import { PinSearchButton, SearchItemCard } from '@renderer/modules/main/search/item-card'
+import { createSearchPanelId, createSearchPanelTitle } from '@renderer/modules/main/search/utils'
 import { setScrollPositionAction } from '@renderer/state/scroll'
-import { useSetAtom } from 'jotai'
+import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
+import { searchSummaryAtom } from '@renderer/state/search'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 
@@ -17,6 +20,7 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
   })
   const location = useLocation()
   const updateScrollPosition = useSetAtom(setScrollPositionAction)
+  const setSearchSummary = useSetAtom(searchSummaryAtom)
   const limit = 20
 
   const searchResultQuery = useQuerySearch({
@@ -34,6 +38,10 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
     }
   }, [searchResult, searchParam])
 
+  useEffect(() => {
+    setSearchSummary({ total, loading: searchResultQuery.isLoading })
+  }, [searchResultQuery.isLoading, setSearchSummary, total])
+
   // if (searchResult === undefined)
   //   return (
   //     <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(25rem,1fr))] gap-4 px-10">
@@ -42,15 +50,15 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
   //   )
 
   return (
-    <div className="flex flex-col items-center justify-center gap-5">
-      <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(25rem,1fr))] gap-4 px-10">
+    <div className="flex min-h-0 flex-1 flex-col items-center justify-center">
+      <div className="w-full">
         {searchResultQuery.isLoading ? (
           <SkeletonList />
         ) : (
-          searchResult?.data.map((item) => <SearchItemCard searchItem={item} key={item.id} />)
+          searchResult?.data?.map((item) => <SearchItemCard searchItem={item} key={item.id} />)
         )}
       </div>
-      <div className="bg-background sticky bottom-0 w-full border-t py-3">
+      <div className="bg-background sticky bottom-0 mt-auto w-full border-t py-3">
         {total > 0 && (
           <BigPagination
             total={Math.ceil(total / limit)}
@@ -70,14 +78,69 @@ export function SearchContent({ searchParam }: { searchParam: SearchParam }) {
   )
 }
 
+export function SearchSummaryAction() {
+  const { getSearchParam } = useSearchParams()
+  const searchParam = getSearchParam()
+  const location = useLocation()
+  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const searchSummary = useAtomValue(searchSummaryAtom)
+
+  if (!searchParam) return null
+
+  const pinSearchResult = () => {
+    openMonoListPanelTab({
+      id: createSearchPanelId(searchParam),
+      type: 'searchSubjects',
+      title: createSearchPanelTitle(searchParam),
+      sourceTitle: '搜索结果',
+      sourceTo: `${location.pathname}${location.search}`,
+      searchParam,
+    })
+  }
+
+  return (
+    <div className="flex shrink-0 flex-row items-center gap-3">
+      <div className="text-muted-foreground min-w-20 text-right text-sm">
+        {searchSummary.total > 0
+          ? `${searchSummary.total} 个结果`
+          : searchSummary.loading
+            ? '搜索中'
+            : '没有结果'}
+      </div>
+      <PinSearchButton onClick={pinSearchResult} />
+    </div>
+  )
+}
+
 function SkeletonList() {
   return (
     <>
-      {Array(20)
-        .fill(0)
-        .map((_, index) => (
-          <Skeleton key={index} className="h-52 w-full" />
-        ))}
+      {Array.from({ length: 12 }).map((_, index) => (
+        <div
+          key={index}
+          className="flex min-h-[136px] w-full flex-row items-stretch gap-4 border-b px-3 py-3"
+        >
+          <Skeleton className="h-28 w-20 shrink-0 rounded-md" />
+          <div className="flex min-w-0 flex-1 flex-col gap-2 py-1">
+            <Skeleton className="h-5 w-52 max-w-[70%]" />
+            <Skeleton className="h-3 w-36 max-w-[55%]" />
+            <Skeleton className="h-3 w-72 max-w-[80%]" />
+            <Skeleton className="h-8 w-full max-w-xl" />
+            <div className="mt-auto flex flex-row gap-1.5">
+              <Skeleton className="h-5 w-12 rounded-md" />
+              <Skeleton className="h-5 w-14 rounded-md" />
+              <Skeleton className="h-5 w-16 rounded-md" />
+            </div>
+          </div>
+          <div className="flex w-64 shrink-0 flex-col justify-center gap-2 self-center max-lg:w-56 max-md:hidden">
+            <Skeleton className="h-8 w-24 rounded-md" />
+            <div className="flex flex-row gap-4">
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-4 w-20" />
+            </div>
+          </div>
+        </div>
+      ))}
     </>
   )
 }

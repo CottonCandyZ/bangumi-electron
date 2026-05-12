@@ -12,17 +12,26 @@ const sort = [
 export function SortButton({
   value,
   onValueChanged,
+  size = 'default',
+  shape = 'pill',
 }: {
   value: SearchParam['sort']
   onValueChanged: (value: SearchParam['sort']) => void
+  size?: 'default' | 'sm'
+  shape?: 'pill' | 'square'
 }) {
   return (
-    <div className="flex flex-row gap-2">
+    <div className={cn('flex min-w-0 flex-row flex-nowrap', size === 'sm' ? 'gap-1' : 'gap-2')}>
       {sort.map((item) => (
         <Button
           key={item.type}
           variant="ghost"
-          className={cn(value === item.type && 'bg-accent')}
+          className={cn(
+            'shrink-0 shadow-none',
+            shape === 'square' ? 'rounded-md' : 'rounded-2xl',
+            size === 'sm' ? 'h-7 px-2 text-xs' : 'h-9 px-3',
+            value === item.type && 'bg-accent',
+          )}
           onClick={() => onValueChanged(item.type)}
         >
           {item.name}

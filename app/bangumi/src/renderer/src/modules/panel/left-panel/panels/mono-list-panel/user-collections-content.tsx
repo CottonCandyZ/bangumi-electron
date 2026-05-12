@@ -3,7 +3,8 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
 import { useInfinityQueryCollectionsByUsername } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'
-import type { MonoListPanelTab } from '@renderer/state/panel'
+import { monoListPanelCenterActiveItemAtom, type MonoListPanelTab } from '@renderer/state/panel'
+import { useAtomValue } from 'jotai'
 import { useEffect, useMemo } from 'react'
 import {
   isRoutePathActive,
@@ -22,6 +23,7 @@ export function UserCollectionsListPanelContent({
   tab: Extract<MonoListPanelTab, { type: 'userCollections' }>
 }) {
   const { pathname } = useLocation()
+  const centerActiveItem = useAtomValue(monoListPanelCenterActiveItemAtom)
   const collectionsQuery = useInfinityQueryCollectionsByUsername({
     username: tab.username,
     subjectType: tab.subjectType,
@@ -74,7 +76,7 @@ export function UserCollectionsListPanelContent({
       items={items}
       getKey={(item) => item.data.subject_id}
       renderItem={(item) => <UserCollectionListItem item={item.data} />}
-      activeIndex={activeIndex}
+      activeIndex={centerActiveItem ? activeIndex : undefined}
       rootClassName="flex-1"
       className="px-2 py-2"
       estimateSize={84}

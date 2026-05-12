@@ -3,7 +3,9 @@ import { MyLink } from '@renderer/components/my-link'
 import { Tabs } from '@renderer/components/tabs'
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
 import { SubjectType } from '@renderer/data/types/subject'
-import { Children, isValidElement, useEffect, useRef } from 'react'
+import { monoListPanelCenterActiveItemAtom } from '@renderer/state/panel'
+import { useAtomValue } from 'jotai'
+import { Children, isValidElement, useRef } from 'react'
 import type { Key, PropsWithChildren, ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -64,6 +66,7 @@ export function MonoPanelInfiniteList({
   activeIndex?: number
   children: ReactNode
 }) {
+  const centerActiveItem = useAtomValue(monoListPanelCenterActiveItemAtom)
   const items = Children.toArray(children)
 
   if (items.length === 0) {
@@ -75,7 +78,7 @@ export function MonoPanelInfiniteList({
       items={items}
       getKey={(item, index) => getReactNodeKey(item) ?? index}
       renderItem={(item) => item}
-      activeIndex={activeIndex}
+      activeIndex={centerActiveItem ? activeIndex : undefined}
       rootClassName="flex-1"
       className="px-2 py-2"
       estimateSize={84}
@@ -163,21 +166,8 @@ export function useIsRouteActive(to: string) {
 }
 
 export function useActivePanelItemRef(active: boolean) {
+  void active
   const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!active) return
-
-    const frame = window.requestAnimationFrame(() => {
-      ref.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'nearest',
-      })
-    })
-
-    return () => window.cancelAnimationFrame(frame)
-  }, [active])
 
   return ref
 }

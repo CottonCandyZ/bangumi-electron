@@ -1,22 +1,36 @@
 import { Pagination } from '@renderer/data/types/bgm'
-import { SubjectType, Tag } from '@renderer/data/types/subject'
+import { CoverImages, RatingCount, SubjectType, Tag } from '@renderer/data/types/subject'
 
 export type SearchDataPage = {
   data: SearchData[]
 } & Pagination
 
 export type SearchData = {
-  date: string
-  image: string
-  type: SubjectType
-  summary: string
+  id: number
   name: string
   name_cn: string
+  type: SubjectType
+  images: CoverImages
+  image?: string
+  summary: string
+  date?: string
+  platform?: string
   tags: Tag[]
-  score: number
-  id: number
-  rank: number
+  eps?: number
+  volumes?: number
+  total_episodes?: number
+  meta_tags?: string[]
+  series?: boolean
+  rating: SearchSubjectRating
+  locked: boolean
   nsfw: boolean
+}
+
+export type SearchSubjectRating = {
+  rank: number
+  count: RatingCount
+  score: number
+  total: number
 }
 
 export type SearchParam = {
@@ -28,6 +42,7 @@ export type SearchParam = {
 export type Filter = {
   type?: SubjectType[]
   tag?: string[]
+  metaTag?: string[]
   airDate?: string[]
   rating?: string[]
   rank?: string[]

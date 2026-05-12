@@ -4,12 +4,15 @@ import type { CollectionEpisode, CollectionType } from '@renderer/data/types/col
 import type { Episode } from '@renderer/data/types/episode'
 import type { RelatedSubject } from '@renderer/data/types/subject'
 import type { MonoRelatedItem, MonoSubjectItem, MonoType } from '@renderer/data/types/mono'
+import type { SearchParam } from '@renderer/data/types/search'
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 
 export type LeftPanelName = 'collection' | 'monoList'
 
 export type RightPanelName = 'subjectInfo'
+
+export type RightPanelContent = 'searchFilter' | 'subjectInfo' | 'userTimeline'
 
 export type MonoListPanelTab =
   | {
@@ -73,6 +76,14 @@ export type MonoListPanelTab =
       subjectType: SubjectType
       collectionType: CollectionType
     }
+  | {
+      id: string
+      type: 'searchSubjects'
+      title: string
+      sourceTitle: string
+      searchParam: SearchParam
+      sourceTo?: string
+    }
 
 export const navOpenAtom = atom(false)
 
@@ -85,6 +96,13 @@ export const leftPanelOpenContentAtom = atom<LeftPanelName>('collection')
 export const leftPanelWidth = atomWithStorage('app-sidebar-width', 248)
 
 export const rightPanelWidth = atomWithStorage('app-right-panel-width', 248)
+
+export function getRightPanelContentByPathname(pathname: string): RightPanelContent | null {
+  if (pathname.includes('profile') || pathname.includes('user')) return 'userTimeline'
+  if (pathname.includes('subject')) return 'subjectInfo'
+  if (pathname.includes('search')) return 'searchFilter'
+  return null
+}
 
 const LEFT_PANEL_CLOSE_ANIMATION_MS = 350
 
@@ -99,6 +117,11 @@ export const collectionPanelUsernameAtom = atom<string | undefined>(undefined)
 export const monoListPanelTabsAtom = atom<MonoListPanelTab[]>([])
 
 export const monoListPanelActiveTabIdAtom = atom<string | null>(null)
+
+export const monoListPanelCenterActiveItemAtom = atomWithStorage(
+  'mono-list-panel-center-active-item',
+  false,
+)
 
 // action
 export const nvaCollectionButtonAtomAction = atom(
