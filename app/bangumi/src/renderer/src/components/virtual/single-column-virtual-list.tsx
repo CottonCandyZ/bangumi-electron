@@ -1,10 +1,10 @@
 import { ScrollArea } from '@base-ui/react/scroll-area'
 import { BackToTopButton } from '@renderer/components/button/back-to-top'
 import { cn } from '@renderer/lib/utils'
-import { useVirtualizer } from '@tanstack/react-virtual'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import type { Key, ReactNode } from 'react'
-import { useVirtualScrollRestoration } from './use-virtual-scroll-restoration'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties, Key, ReactNode } from 'react'
+import { Virtualizer } from 'virtua'
+import type { CacheSnapshot, VirtualizerHandle } from 'virtua'
 
 type SingleColumnVirtualListProps<T> = {
   items: T[]
@@ -27,6 +27,27 @@ type SingleColumnVirtualListProps<T> = {
   showBackToTop?: boolean
 }
 
+type VirtualListRow<T> =
+  | {
+      index: number
+      item: T
+      key: Key
+      type: 'item'
+    }
+  | {
+      index: number
+      key: Key
+      type: 'placeholder'
+    }
+
+type VirtualScrollEntry = {
+  cache: CacheSnapshot
+  itemCount: number
+  scrollOffset: number
+}
+
+const virtualScrollCache = new Map<string, VirtualScrollEntry>()
+
 export function SingleColumnVirtualList<T>({
   items,
   getKey,
@@ -48,38 +69,45 @@ export function SingleColumnVirtualList<T>({
   showBackToTop = false,
 }: SingleColumnVirtualListProps<T>) {
   const viewportRef = useRef<HTMLElement | null>(null)
+  const virtualizerRef = useRef<VirtualizerHandle>(null)
   const loadingMoreRef = useRef(false)
+  const restoredKeyRef = useRef<string | undefined>(undefined)
   const [viewport, setViewport] = useState<HTMLElement | null>(null)
-  const itemCount = items.length + (isFetchingMore ? appendPlaceholderCount : 0)
-  const virtualizer = useVirtualizer({
-    count: itemCount,
-    getScrollElement: () => viewportRef.current,
-    estimateSize: () => estimateSize,
-    overscan,
-    gap,
-  })
-  const getViewport = useCallback(() => viewportRef.current, [])
-  const getVirtualItems = useCallback(() => virtualizer.getVirtualItems(), [virtualizer])
-  const scrollToIndex = useCallback(
-    (index: number) => virtualizer.scrollToIndex(index, { align: 'start' }),
-    [virtualizer],
+  const rows = useMemo<VirtualListRow<T>[]>(
+    () => [
+      ...items.map((item, index) => ({
+        index,
+        item,
+        key: getKey(item, index),
+        type: 'item' as const,
+      })),
+      ...(isFetchingMore
+        ? Array.from({ length: appendPlaceholderCount }, (_, placeholderIndex) => {
+            const index = items.length + placeholderIndex
+            return {
+              index,
+              key: `placeholder-${index}`,
+              type: 'placeholder' as const,
+            }
+          })
+        : []),
+    ],
+    [appendPlaceholderCount, getKey, isFetchingMore, items],
   )
-  const scrollToOffset = useCallback(
-    (offset: number) => virtualizer.scrollToOffset(offset),
-    [virtualizer],
-  )
-  const scrollRestoration = useVirtualScrollRestoration({
-    getKey,
-    getViewport,
-    getVirtualItems,
-    itemCount,
-    items,
-    scrollKey: scrollAreaKey,
-    scrollToIndex,
-    scrollToOffset,
-  })
-  const virtualItems = virtualizer.getVirtualItems()
-  const lastVirtualIndex = virtualItems.at(-1)?.index
+  const cachedEntry = scrollAreaKey ? virtualScrollCache.get(scrollAreaKey) : undefined
+  const restoredCache =
+    cachedEntry && cachedEntry.itemCount === rows.length ? cachedEntry.cache : undefined
+
+  const saveScrollState = useCallback(() => {
+    if (!scrollAreaKey || !virtualizerRef.current) return
+
+    virtualScrollCache.set(scrollAreaKey, {
+      cache: virtualizerRef.current.cache,
+      itemCount: rows.length,
+      scrollOffset: virtualizerRef.current.scrollOffset,
+    })
+  }, [rows.length, scrollAreaKey])
+
   const requestMore = useCallback(() => {
     if (!hasMore || isFetchingMore || loadingMoreRef.current || !onNearBottom) return
 
@@ -89,16 +117,59 @@ export function SingleColumnVirtualList<T>({
     })
   }, [hasMore, isFetchingMore, onNearBottom])
 
-  useEffect(() => {
-    if (lastVirtualIndex === undefined || items.length === 0) return
-    if (lastVirtualIndex >= items.length - loadMoreRowThreshold) requestMore()
-  }, [items.length, lastVirtualIndex, loadMoreRowThreshold, requestMore])
+  const isNearBottom = useCallback(() => {
+    const virtualizer = virtualizerRef.current
+    if (virtualizer) {
+      return (
+        virtualizer.scrollOffset + virtualizer.viewportSize >=
+        virtualizer.scrollSize - estimateSize * loadMoreRowThreshold
+      )
+    }
+
+    const viewport = viewportRef.current
+    if (!viewport) return false
+
+    return (
+      viewport.scrollTop + viewport.clientHeight >=
+      viewport.scrollHeight - estimateSize * loadMoreRowThreshold
+    )
+  }, [estimateSize, loadMoreRowThreshold])
+
+  const handleScroll = useCallback(() => {
+    saveScrollState()
+    if (rows.length === 0 || !isNearBottom()) return
+    requestMore()
+  }, [isNearBottom, requestMore, rows.length, saveScrollState])
 
   useEffect(() => {
-    if (!viewport) return
     if (activeIndex === undefined || activeIndex < 0 || activeIndex >= items.length) return
-    virtualizer.scrollToIndex(activeIndex, { align: 'center' })
-  }, [activeIndex, items.length, viewport, virtualizer])
+    virtualizerRef.current?.scrollToIndex(activeIndex, { align: 'center' })
+  }, [activeIndex, items.length])
+
+  useEffect(() => {
+    restoredKeyRef.current = undefined
+  }, [scrollAreaKey])
+
+  useEffect(() => {
+    if (!scrollAreaKey || !cachedEntry || !virtualizerRef.current) return
+    if (restoredKeyRef.current === scrollAreaKey) return
+
+    restoredKeyRef.current = scrollAreaKey
+
+    const frame = requestAnimationFrame(() => {
+      virtualizerRef.current?.scrollTo(cachedEntry.scrollOffset)
+      saveScrollState()
+    })
+
+    return () => cancelAnimationFrame(frame)
+  }, [cachedEntry, saveScrollState, scrollAreaKey])
+
+  useEffect(() => {
+    if (rows.length === 0 || !isNearBottom()) return
+    requestMore()
+  }, [isNearBottom, requestMore, rows.length])
+
+  useEffect(() => saveScrollState, [saveScrollState])
 
   if (items.length === 0 && empty) return empty
 
@@ -109,39 +180,32 @@ export function SingleColumnVirtualList<T>({
     >
       <ScrollArea.Viewport
         className={cn('h-full w-full overflow-x-hidden focus-visible:outline-hidden', className)}
-        onKeyDown={scrollRestoration.onUserScrollIntent}
-        onPointerDown={scrollRestoration.onUserScrollIntent}
-        onScroll={scrollRestoration.onScroll}
-        onTouchStart={scrollRestoration.onUserScrollIntent}
-        onWheel={(event) => {
-          if (Math.abs(event.deltaY) > 0.5) scrollRestoration.onUserScrollIntent()
-        }}
+        onScroll={saveScrollState}
         ref={(node) => {
           viewportRef.current = node
           setViewport((prev) => (prev === node ? prev : node))
         }}
       >
-        <ScrollArea.Content
-          className="relative w-full"
-          style={{ height: `${virtualizer.getTotalSize()}px` }}
-        >
-          {virtualItems.map((virtualItem) => {
-            const item = items[virtualItem.index]
-
-            return (
-              <div
-                className="absolute top-0 right-0 left-0"
-                data-index={virtualItem.index}
-                key={item ? getKey(item, virtualItem.index) : `placeholder-${virtualItem.index}`}
-                ref={virtualizer.measureElement}
-                style={{ transform: `translateY(${virtualItem.start}px)` }}
-              >
-                {item
-                  ? renderItem(item, virtualItem.index)
-                  : renderPlaceholder?.(virtualItem.index)}
+        <ScrollArea.Content className="relative w-full">
+          <Virtualizer
+            cache={restoredCache}
+            data={rows}
+            item={VirtualListItem}
+            itemSize={estimateSize}
+            onScroll={handleScroll}
+            onScrollEnd={saveScrollState}
+            ref={virtualizerRef}
+            scrollRef={viewportRef}
+            bufferSize={overscan * estimateSize}
+          >
+            {(row) => (
+              <div style={{ paddingBottom: gap > 0 ? `${gap}px` : undefined }}>
+                {row.type === 'item'
+                  ? renderItem(row.item, row.index)
+                  : renderPlaceholder?.(row.index)}
               </div>
-            )
-          })}
+            )}
+          </Virtualizer>
         </ScrollArea.Content>
       </ScrollArea.Viewport>
       {showBackToTop && (
@@ -154,5 +218,23 @@ export function SingleColumnVirtualList<T>({
         <ScrollArea.Thumb className="bg-foreground/10 hover:bg-foreground/30 active:bg-foreground/40 relative [height:var(--scroll-area-thumb-height)] w-full flex-1 rounded-full" />
       </ScrollArea.Scrollbar>
     </ScrollArea.Root>
+  )
+}
+
+function VirtualListItem({
+  children,
+  index,
+  ref,
+  style,
+}: {
+  children: ReactNode
+  index: number
+  ref?: React.Ref<HTMLDivElement>
+  style: CSSProperties
+}) {
+  return (
+    <div className="w-full" data-index={index} ref={ref} style={style}>
+      {children}
+    </div>
   )
 }
