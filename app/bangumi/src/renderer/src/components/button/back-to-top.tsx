@@ -9,11 +9,12 @@ const HIDDEN_CLASSES = ['pointer-events-none', 'translate-y-2', 'opacity-0']
 
 type BackToTopButtonProps = {
   className?: string
+  onBackToTop?: () => void
   style?: CSSProperties
   viewport: HTMLElement | null
 }
 
-export function BackToTopButton({ className, style, viewport }: BackToTopButtonProps) {
+export function BackToTopButton({ className, onBackToTop, style, viewport }: BackToTopButtonProps) {
   const buttonRef = useRef<HTMLButtonElement>(null)
   const updateFrameRef = useRef<number | null>(null)
 
@@ -83,7 +84,14 @@ export function BackToTopButton({ className, style, viewport }: BackToTopButtonP
         className,
       )}
       style={style}
-      onClick={() => viewport?.scrollTo({ top: 0, behavior: 'smooth' })}
+      onClick={() => {
+        if (onBackToTop) {
+          onBackToTop()
+          return
+        }
+
+        viewport?.scrollTo({ top: 0, behavior: 'smooth' })
+      }}
     >
       <span className="bg-background text-primary flex size-full items-center justify-center rounded-full">
         <ArrowUpIcon className="size-5" strokeWidth={2.75} />

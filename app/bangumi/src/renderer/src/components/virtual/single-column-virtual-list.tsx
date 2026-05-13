@@ -1,5 +1,6 @@
 import { ScrollArea } from '@base-ui/react/scroll-area'
 import { BackToTopButton } from '@renderer/components/button/back-to-top'
+import { useNativeSmoothVirtualizerScrollToTop } from '@renderer/components/virtual/use-native-smooth-virtualizer-scroll-to-top'
 import { cn } from '@renderer/lib/utils'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, Key, ReactNode } from 'react'
@@ -102,15 +103,24 @@ export function SingleColumnVirtualList<T>({
       ? rows[activeIndex]?.key
       : undefined
 
-  const saveScrollState = useCallback(() => {
-    if (!scrollAreaKey || !virtualizerRef.current) return
+  const saveScrollState = useCallback(
+    (scrollOffset?: number) => {
+      if (!scrollAreaKey || !virtualizerRef.current) return
 
-    virtualScrollCache.set(scrollAreaKey, {
-      cache: virtualizerRef.current.cache,
-      itemCount: rows.length,
-      scrollOffset: virtualizerRef.current.scrollOffset,
-    })
-  }, [rows.length, scrollAreaKey])
+      virtualScrollCache.set(scrollAreaKey, {
+        cache: virtualizerRef.current.cache,
+        itemCount: rows.length,
+        scrollOffset: scrollOffset ?? virtualizerRef.current.scrollOffset,
+      })
+    },
+    [rows.length, scrollAreaKey],
+  )
+
+  const scrollToTop = useNativeSmoothVirtualizerScrollToTop({
+    saveScrollState,
+    viewport,
+    virtualizerRef,
+  })
 
   const requestMore = useCallback(() => {
     if (!hasMore || isFetchingMore || loadingMoreRef.current || !onNearBottom) return
@@ -184,7 +194,7 @@ export function SingleColumnVirtualList<T>({
     >
       <ScrollArea.Viewport
         className={cn('h-full w-full overflow-x-hidden focus-visible:outline-hidden', className)}
-        onScroll={saveScrollState}
+        onScroll={() => saveScrollState()}
         ref={(node) => {
           viewportRef.current = node
           setViewport((prev) => (prev === node ? prev : node))
@@ -213,7 +223,11 @@ export function SingleColumnVirtualList<T>({
         </ScrollArea.Content>
       </ScrollArea.Viewport>
       {showBackToTop && (
-        <BackToTopButton className="absolute right-4 bottom-4" viewport={viewport} />
+        <BackToTopButton
+          className="absolute right-4 bottom-4"
+          onBackToTop={scrollToTop}
+          viewport={viewport}
+        />
       )}
       <ScrollArea.Scrollbar
         orientation="vertical"

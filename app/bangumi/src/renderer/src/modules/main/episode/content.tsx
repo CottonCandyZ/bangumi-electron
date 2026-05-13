@@ -6,6 +6,7 @@ import { Button } from '@renderer/components/ui/button'
 import { Card } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
+import { useNativeSmoothVirtualizerScrollToTop } from '@renderer/components/virtual/use-native-smooth-virtualizer-scroll-to-top'
 import { useSubjectInfoAPIQuery } from '@renderer/data/hooks/api/subject'
 import {
   useEpisodeCommentsByIdQuery,
@@ -84,6 +85,12 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
     [commentsQuery.isPending, rows.length, virtualScrollKey],
   )
 
+  const scrollToTop = useNativeSmoothVirtualizerScrollToTop({
+    saveScrollState: saveVirtualScrollState,
+    viewport: scrollViewport,
+    virtualizerRef,
+  })
+
   usePageScrollRestoreReady(
     !!scrollViewport && !episodeQuery.isPending && (!subjectId || !subjectQuery.isPending),
   )
@@ -141,7 +148,7 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
           <EpisodePageRow row={row} title={title} episode={episode} subject={subjectQuery.data} />
         )}
       </Virtualizer>
-      <MainBackToTopButton />
+      <MainBackToTopButton onBackToTop={scrollToTop} />
     </div>
   )
 }
