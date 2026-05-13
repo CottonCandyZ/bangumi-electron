@@ -70,16 +70,19 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
   const restoreOffset = canUseVirtualScrollCache ? cachedVirtualScroll.scrollOffset : undefined
   const virtualizerMountKey = `${virtualScrollKey}:${commentsQuery.isPending ? 'pending' : 'ready'}:${rows.length}`
 
-  const saveVirtualScrollState = useCallback(() => {
-    const virtualizer = virtualizerRef.current
-    if (!virtualizer || commentsQuery.isPending || rows.length === 0) return
+  const saveVirtualScrollState = useCallback(
+    (scrollOffset?: number) => {
+      const virtualizer = virtualizerRef.current
+      if (!virtualizer || commentsQuery.isPending || rows.length === 0) return
 
-    episodePageVirtualScrollCache.set(virtualScrollKey, {
-      cache: virtualizer.cache,
-      rowCount: rows.length,
-      scrollOffset: virtualizer.scrollOffset,
-    })
-  }, [commentsQuery.isPending, rows.length, virtualScrollKey])
+      episodePageVirtualScrollCache.set(virtualScrollKey, {
+        cache: virtualizer.cache,
+        rowCount: rows.length,
+        scrollOffset: scrollOffset ?? virtualizer.scrollOffset,
+      })
+    },
+    [commentsQuery.isPending, rows.length, virtualScrollKey],
+  )
 
   usePageScrollRestoreReady(
     !!scrollViewport && !episodeQuery.isPending && (!subjectId || !subjectQuery.isPending),
@@ -115,8 +118,6 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
     saveVirtualScrollState,
     virtualScrollKey,
   ])
-
-  useEffect(() => saveVirtualScrollState, [saveVirtualScrollState])
 
   if (episodeQuery.isLoading || !episode || !scrollViewport) return <EpisodeSkeleton />
 

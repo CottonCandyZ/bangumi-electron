@@ -19,6 +19,7 @@ import { useLocation } from 'react-router-dom'
 
 const SCROLL_RESTORE_TOLERANCE = 2
 const SCROLL_RESTORE_TIMEOUT = 1600
+const PAGE_SCROLL_CACHE_DISABLED_PATHS = [/^\/episode\//]
 
 type ScrollRestoreReadyContextValue = {
   register: (id: symbol, ready: boolean) => void
@@ -68,6 +69,9 @@ export function PageScrollWrapper({
   const setScrollPosition = useSetAtom(mainPanelScrollPositionAtom)
   const restoreReady =
     readyEntries.size > 0 ? Array.from(readyEntries.values()).every(Boolean) : allowNoReadyEntries
+  const pageScrollCacheEnabled = !PAGE_SCROLL_CACHE_DISABLED_PATHS.some((pattern) =>
+    pattern.test(pathname),
+  )
 
   const restoreReadyContextValue = useMemo<ScrollRestoreReadyContextValue>(
     () => ({
@@ -111,10 +115,9 @@ export function PageScrollWrapper({
 
   const getInitialScrollTop = useCallback(
     (pathname: string, scrollKey: string, viewport: HTMLElement) =>
-      scrollCache.get(scrollKey) ??
-      scrollCache.get(pathname) ??
+      (pageScrollCacheEnabled ? (scrollCache.get(scrollKey) ?? scrollCache.get(pathname)) : 0) ??
       getInitialRouteScrollTop(pathname, viewport),
-    [getInitialRouteScrollTop],
+    [getInitialRouteScrollTop, pageScrollCacheEnabled],
   )
 
   useLayoutEffect(() => {
@@ -130,17 +133,17 @@ export function PageScrollWrapper({
   const updateViewportState = useCallback(
     (scrollTop: number, shouldCache = true) => {
       lastScrollTopRef.current = scrollTop
-      if (shouldCache) scrollCache.set(scrollKeyRef.current, scrollTop)
+      if (shouldCache && pageScrollCacheEnabled) scrollCache.set(scrollKeyRef.current, scrollTop)
       setScrollPosition(scrollTop)
     },
-    [setScrollPosition],
+    [pageScrollCacheEnabled, setScrollPosition],
   )
 
   useLayoutEffect(() => {
     const viewport = viewportRef.current
     if (!viewport) return
 
-    if (scrollKeyRef.current !== scrollKey && !restoringRef.current) {
+    if (pageScrollCacheEnabled && scrollKeyRef.current !== scrollKey && !restoringRef.current) {
       scrollCache.set(scrollKeyRef.current, lastScrollTopRef.current)
     }
     scrollKeyRef.current = scrollKey
@@ -181,9 +184,18 @@ export function PageScrollWrapper({
         restoreFrameRef.current = null
       }
       restoringRef.current = false
-      if (!wasRestoring) scrollCache.set(scrollKey, lastScrollTopRef.current)
+      if (!wasRestoring && pageScrollCacheEnabled) {
+        scrollCache.set(scrollKey, lastScrollTopRef.current)
+      }
     }
-  }, [getInitialScrollTop, pathname, restoreReady, scrollKey, updateViewportState])
+  }, [
+    getInitialScrollTop,
+    pageScrollCacheEnabled,
+    pathname,
+    restoreReady,
+    scrollKey,
+    updateViewportState,
+  ])
 
   useEffect(() => {
     const viewport = viewportRef.current
