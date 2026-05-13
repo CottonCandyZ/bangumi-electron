@@ -1,5 +1,5 @@
 import { app, BrowserWindow } from 'electron'
-import { electronApp, optimizer } from '@electron-toolkit/utils'
+import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { initialize } from '@main/init'
 import { APP_PROTOCOL } from '@shared/constants'
 import { createMainWindow } from '@main/window'
@@ -10,6 +10,13 @@ import { registerGlobalShortcuts } from '@main/shortcuts'
 import { toggleCommandWindow, warmCommandWindow } from '@main/command-window'
 import { setMainWindowGetter } from '@main/app-context'
 import { setupAutoUpdate } from '@main/update'
+
+const DEV_CDP_PORT = process.env.BANGUMI_ELECTRON_CDP_PORT || '9222'
+
+if (is.dev) {
+  app.commandLine.appendSwitch('remote-debugging-address', '127.0.0.1')
+  app.commandLine.appendSwitch('remote-debugging-port', DEV_CDP_PORT)
+}
 
 async function boot() {
   // dev 和 prod 的位置

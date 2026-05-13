@@ -18,9 +18,17 @@ if (!existsSync(electronPackage)) {
 }
 
 const nodePath = [projectNodeModules, process.env.NODE_PATH].filter(Boolean).join(delimiter)
+const cdpPort = process.env.BANGUMI_ELECTRON_CDP_PORT || '9222'
+const env = {
+  ...process.env,
+  NODE_PATH: nodePath,
+  BANGUMI_ELECTRON_CDP_PORT: cdpPort,
+  REMOTE_DEBUGGING_PORT: process.env.REMOTE_DEBUGGING_PORT || cdpPort,
+}
+
 const result = spawnSync(command, commandArgs, {
   cwd: process.cwd(),
-  env: { ...process.env, NODE_PATH: nodePath },
+  env,
   shell: process.platform === 'win32',
   stdio: 'inherit',
 })
