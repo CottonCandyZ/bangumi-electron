@@ -17,16 +17,27 @@ import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
 import { EpisodeCollectionActions } from '@renderer/modules/main/episode/collection-actions'
 import { scrollViewportAtom } from '@renderer/state/scroll'
 import { useAtomValue } from 'jotai'
-import { useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { Virtualizer } from 'virtua'
+import type { CacheSnapshot, VirtualizerHandle } from 'virtua'
 
 const EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE = 148
 const EPISODE_PAGE_VIRTUAL_OVERSCAN = 8
 
+type EpisodePageVirtualScrollEntry = {
+  cache: CacheSnapshot
+  rowCount: number
+  scrollOffset: number
+}
+
+const episodePageVirtualScrollCache = new Map<string, EpisodePageVirtualScrollEntry>()
+
 export function EpisodeContent({ episodeId }: { episodeId: string }) {
   const scrollViewport = useAtomValue(scrollViewportAtom)
   const scrollRef = useRef<HTMLElement | null>(null)
+  const virtualizerRef = useRef<VirtualizerHandle>(null)
+  const restoredVirtualScrollKeyRef = useRef<string | undefined>(undefined)
   scrollRef.current = scrollViewport
 
   const episodeQuery = useEpisodeInfoByIdQuery({ episodeId })
@@ -40,25 +51,88 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
   const commentsQuery = useEpisodeCommentsByIdQuery({
     episodeId,
   })
+  const rows = useMemo(
+    () =>
+      episode
+        ? getEpisodePageRows({
+            comments: commentsQuery.data,
+            commentsError: commentsQuery.isError,
+            episode,
+          })
+        : [],
+    [commentsQuery.data, commentsQuery.isError, episode],
+  )
+  const virtualScrollKey = `episode-page:${episodeId}`
+  const cachedVirtualScroll = episodePageVirtualScrollCache.get(virtualScrollKey)
+  const canUseVirtualScrollCache =
+    !commentsQuery.isPending && cachedVirtualScroll?.rowCount === rows.length
+  const restoredVirtualCache = canUseVirtualScrollCache ? cachedVirtualScroll.cache : undefined
+  const restoreOffset = canUseVirtualScrollCache ? cachedVirtualScroll.scrollOffset : undefined
+  const virtualizerMountKey = `${virtualScrollKey}:${commentsQuery.isPending ? 'pending' : 'ready'}:${rows.length}`
+
+  const saveVirtualScrollState = useCallback(() => {
+    const virtualizer = virtualizerRef.current
+    if (!virtualizer || commentsQuery.isPending || rows.length === 0) return
+
+    episodePageVirtualScrollCache.set(virtualScrollKey, {
+      cache: virtualizer.cache,
+      rowCount: rows.length,
+      scrollOffset: virtualizer.scrollOffset,
+    })
+  }, [commentsQuery.isPending, rows.length, virtualScrollKey])
+
   usePageScrollRestoreReady(
     !!scrollViewport && !episodeQuery.isPending && (!subjectId || !subjectQuery.isPending),
   )
 
+  useEffect(() => {
+    restoredVirtualScrollKeyRef.current = undefined
+  }, [virtualScrollKey])
+
+  useEffect(() => {
+    if (commentsQuery.isPending || rows.length === 0 || !virtualizerRef.current) return
+
+    const restoreKey = `${virtualScrollKey}:${rows.length}`
+    if (restoredVirtualScrollKeyRef.current === restoreKey) return
+
+    restoredVirtualScrollKeyRef.current = restoreKey
+
+    if (!restoreOffset || restoreOffset <= 0) {
+      saveVirtualScrollState()
+      return
+    }
+
+    const frame = requestAnimationFrame(() => {
+      virtualizerRef.current?.scrollTo(restoreOffset)
+      saveVirtualScrollState()
+    })
+
+    return () => cancelAnimationFrame(frame)
+  }, [
+    commentsQuery.isPending,
+    restoreOffset,
+    rows.length,
+    saveVirtualScrollState,
+    virtualScrollKey,
+  ])
+
+  useEffect(() => saveVirtualScrollState, [saveVirtualScrollState])
+
   if (episodeQuery.isLoading || !episode || !scrollViewport) return <EpisodeSkeleton />
 
   const title = getEpisodeTitle(episode)
-  const rows = getEpisodePageRows({
-    comments: commentsQuery.data,
-    commentsError: commentsQuery.isError,
-    episode,
-  })
 
   return (
     <div className="min-h-full">
       <Virtualizer
+        cache={restoredVirtualCache}
         data={rows}
         item={EpisodePageVirtualItem}
         itemSize={EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE}
+        key={virtualizerMountKey}
+        onScroll={saveVirtualScrollState}
+        onScrollEnd={saveVirtualScrollState}
+        ref={virtualizerRef}
         scrollRef={scrollRef}
         bufferSize={EPISODE_PAGE_VIRTUAL_OVERSCAN * EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE}
       >
