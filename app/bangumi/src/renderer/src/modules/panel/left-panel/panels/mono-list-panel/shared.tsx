@@ -62,9 +62,11 @@ export function PanelFilterTabs({
 export function MonoPanelInfiniteList({
   activeIndex,
   children,
+  scrollAreaKey,
 }: {
   activeIndex?: number
   children: ReactNode
+  scrollAreaKey?: string
 }) {
   const centerActiveItem = useAtomValue(monoListPanelCenterActiveItemAtom)
   const items = Children.toArray(children)
@@ -83,6 +85,7 @@ export function MonoPanelInfiniteList({
       className="px-2 py-2"
       estimateSize={84}
       gap={4}
+      scrollAreaKey={scrollAreaKey}
       showBackToTop
     />
   )

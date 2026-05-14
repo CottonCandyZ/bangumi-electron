@@ -119,7 +119,10 @@ export function MonoSubjectListPanelContent({
           layoutId={relationFilterId}
         />
       </MonoListPanelFilters>
-      <MonoPanelInfiniteList activeIndex={activeIndex}>
+      <MonoPanelInfiniteList
+        activeIndex={activeIndex}
+        scrollAreaKey={`mono-list:${tab.id}:type:${typeFilter}:relation:${relationFilter}`}
+      >
         {items.map((item) => (
           <div key={`${item.id}-${item.relation}`}>
             <MonoSubjectListItem item={item} />
@@ -177,7 +180,10 @@ export function MonoRelatedListPanelContent({
           layoutId={filterId}
         />
       </MonoListPanelFilters>
-      <MonoPanelInfiniteList activeIndex={activeIndex}>
+      <MonoPanelInfiniteList
+        activeIndex={activeIndex}
+        scrollAreaKey={`mono-list:${tab.id}:${filter}`}
+      >
         {items.map((item) => (
           <div key={`${item.id}-${item.subjectId ?? item.relation ?? item.name}`}>
             <MonoRelatedListItem item={item} />

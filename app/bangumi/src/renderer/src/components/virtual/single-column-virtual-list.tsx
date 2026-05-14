@@ -1,11 +1,12 @@
 import { ScrollArea } from '@base-ui/react/scroll-area'
 import { BackToTopButton } from '@renderer/components/button/back-to-top'
 import { useNativeSmoothVirtualizerScrollToTop } from '@renderer/components/virtual/use-native-smooth-virtualizer-scroll-to-top'
+import { useVirtualScrollMemory } from '@renderer/components/virtual/use-virtual-scroll-memory'
 import { cn } from '@renderer/lib/utils'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, Key, ReactNode } from 'react'
 import { Virtualizer } from 'virtua'
-import type { CacheSnapshot, VirtualizerHandle } from 'virtua'
+import type { VirtualizerHandle } from 'virtua'
 
 type SingleColumnVirtualListProps<T> = {
   items: T[]
@@ -41,14 +42,6 @@ type VirtualListRow<T> =
       type: 'placeholder'
     }
 
-type VirtualScrollEntry = {
-  cache: CacheSnapshot
-  itemCount: number
-  scrollOffset: number
-}
-
-const virtualScrollCache = new Map<string, VirtualScrollEntry>()
-
 export function SingleColumnVirtualList<T>({
   items,
   getKey,
@@ -72,7 +65,6 @@ export function SingleColumnVirtualList<T>({
   const viewportRef = useRef<HTMLElement | null>(null)
   const virtualizerRef = useRef<VirtualizerHandle>(null)
   const loadingMoreRef = useRef(false)
-  const restoredKeyRef = useRef<string | undefined>(undefined)
   const [viewport, setViewport] = useState<HTMLElement | null>(null)
   const rows = useMemo<VirtualListRow<T>[]>(
     () => [
@@ -95,26 +87,18 @@ export function SingleColumnVirtualList<T>({
     ],
     [appendPlaceholderCount, getKey, isFetchingMore, items],
   )
-  const cachedEntry = scrollAreaKey ? virtualScrollCache.get(scrollAreaKey) : undefined
-  const restoredCache =
-    cachedEntry && cachedEntry.itemCount === rows.length ? cachedEntry.cache : undefined
   const activeItemKey =
     activeIndex !== undefined && activeIndex >= 0 && activeIndex < items.length
       ? rows[activeIndex]?.key
       : undefined
-
-  const saveScrollState = useCallback(
-    (scrollOffset?: number) => {
-      if (!scrollAreaKey || !virtualizerRef.current) return
-
-      virtualScrollCache.set(scrollAreaKey, {
-        cache: virtualizerRef.current.cache,
-        itemCount: rows.length,
-        scrollOffset: scrollOffset ?? virtualizerRef.current.scrollOffset,
-      })
-    },
-    [rows.length, scrollAreaKey],
-  )
+  const { cache: restoredCache, saveScrollState } = useVirtualScrollMemory({
+    canSave: !isFetchingMore,
+    itemCount: items.length,
+    scrollKey: scrollAreaKey,
+    viewport,
+    viewportRef,
+    virtualizerRef,
+  })
 
   const scrollToTop = useNativeSmoothVirtualizerScrollToTop({
     saveScrollState,
@@ -161,29 +145,9 @@ export function SingleColumnVirtualList<T>({
   }, [activeIndex, activeItemKey])
 
   useEffect(() => {
-    restoredKeyRef.current = undefined
-  }, [scrollAreaKey])
-
-  useEffect(() => {
-    if (!scrollAreaKey || !cachedEntry || !virtualizerRef.current) return
-    if (restoredKeyRef.current === scrollAreaKey) return
-
-    restoredKeyRef.current = scrollAreaKey
-
-    const frame = requestAnimationFrame(() => {
-      virtualizerRef.current?.scrollTo(cachedEntry.scrollOffset)
-      saveScrollState()
-    })
-
-    return () => cancelAnimationFrame(frame)
-  }, [cachedEntry, saveScrollState, scrollAreaKey])
-
-  useEffect(() => {
     if (rows.length === 0 || !isNearBottom()) return
     requestMore()
   }, [isNearBottom, requestMore, rows.length])
-
-  useEffect(() => saveScrollState, [saveScrollState])
 
   if (items.length === 0 && empty) return empty
 
@@ -194,7 +158,7 @@ export function SingleColumnVirtualList<T>({
     >
       <ScrollArea.Viewport
         className={cn('h-full w-full overflow-x-hidden focus-visible:outline-hidden', className)}
-        onScroll={() => saveScrollState()}
+        onScroll={(event) => saveScrollState(event.currentTarget.scrollTop)}
         ref={(node) => {
           viewportRef.current = node
           setViewport((prev) => (prev === node ? prev : node))
