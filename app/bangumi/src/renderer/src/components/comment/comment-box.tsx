@@ -2,6 +2,7 @@ import {
   BangumiSmile,
   REACTION_VALUE_TO_BANGUMI_SMILE,
 } from '@renderer/components/comment/bangumi-smile'
+import { BBCodeImagePreviewProvider } from '@renderer/components/comment/bbcode-image'
 import { ViewTransitionImage } from '@renderer/components/image/view-transition-image'
 import { MyLink } from '@renderer/components/my-link'
 import { Button } from '@renderer/components/ui/button'
@@ -273,43 +274,45 @@ export function CommentItem({
       ) : (
         <div className="bg-muted size-10 shrink-0 rounded-full" />
       )}
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <CommentHeader comment={comment} />
-        <div className="bbcode text-sm whitespace-pre-line">{renderBBCode(comment.content)}</div>
-        <CommentReactions reactions={comment.reactions} />
-        {replyCount > 0 && (
-          <div
-            className="border-border/60 bg-muted/25 divide-border flex flex-col divide-y rounded-md border px-2"
-            id={repliesId}
-          >
-            {visibleReplies.map((reply) => (
-              <ReplyItem
-                reply={reply}
-                key={reply.id}
-                userAvatarViewTransition={userAvatarViewTransition}
-              />
-            ))}
-          </div>
-        )}
-        {hasHiddenReplies && (
-          <Button
-            aria-controls={repliesId}
-            aria-expanded={showAllReplies}
-            className="text-muted-foreground hover:text-foreground -ml-2 h-7 w-fit px-2 text-xs"
-            onClick={() => setShowAllReplies((value) => !value)}
-            size="sm"
-            type="button"
-            variant="ghost"
-          >
-            {showAllReplies ? (
-              <ChevronUp className="size-3.5" />
-            ) : (
-              <ChevronDown className="size-3.5" />
-            )}
-            {showAllReplies ? '收起回复' : `展开剩余 ${hiddenReplyCount} 条回复`}
-          </Button>
-        )}
-      </div>
+      <BBCodeImagePreviewProvider>
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <CommentHeader comment={comment} />
+          <div className="bbcode text-sm whitespace-pre-line">{renderBBCode(comment.content)}</div>
+          <CommentReactions reactions={comment.reactions} />
+          {replyCount > 0 && (
+            <div
+              className="border-border/60 bg-muted/25 divide-border flex flex-col divide-y rounded-md border px-2"
+              id={repliesId}
+            >
+              {visibleReplies.map((reply) => (
+                <ReplyItem
+                  reply={reply}
+                  key={reply.id}
+                  userAvatarViewTransition={userAvatarViewTransition}
+                />
+              ))}
+            </div>
+          )}
+          {hasHiddenReplies && (
+            <Button
+              aria-controls={repliesId}
+              aria-expanded={showAllReplies}
+              className="text-muted-foreground hover:text-foreground -ml-2 h-7 w-fit px-2 text-xs"
+              onClick={() => setShowAllReplies((value) => !value)}
+              size="sm"
+              type="button"
+              variant="ghost"
+            >
+              {showAllReplies ? (
+                <ChevronUp className="size-3.5" />
+              ) : (
+                <ChevronDown className="size-3.5" />
+              )}
+              {showAllReplies ? '收起回复' : `展开剩余 ${hiddenReplyCount} 条回复`}
+            </Button>
+          )}
+        </div>
+      </BBCodeImagePreviewProvider>
     </Card>
   )
 }
