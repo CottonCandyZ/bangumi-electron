@@ -1,6 +1,6 @@
 {
   "name": "bangumi-electron",
-  "version": "0.0.1-beta.9",
+  "version": "0.0.1-beta.10",
   "type": "module",
   "description": "An Electron application for bangumi",
   "main": "./out/main/index.js",
