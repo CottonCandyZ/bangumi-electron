@@ -11,9 +11,11 @@ import { useLocation } from 'react-router-dom'
 export function CollectionItem({
   collectionItemInfo,
   showEpisodeList,
+  useOneBasedEpisodeSort,
 }: {
   collectionItemInfo: CollectionData
   showEpisodeList: boolean
+  useOneBasedEpisodeSort: boolean
 }) {
   const { pathname } = useLocation()
   const mainSubjectId = pathname.split('/').at(-1)
@@ -54,6 +56,7 @@ export function CollectionItem({
                     selector={false}
                     subjectId={collectionItemInfo.subject_id.toString()}
                     collectionType={collectionItemInfo.type}
+                    useOneBasedEpisodeSort={useOneBasedEpisodeSort}
                   />
                 </section>
               )}

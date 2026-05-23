@@ -14,9 +14,11 @@ export function EpisodeGridContent({
   size = 'default',
   modifyEpisodeCollectionOpt,
   collectionType,
+  mainEpisodeSortOffset = 0,
 }: {
   episodes: Episode[] | CollectionEpisode[]
   collectionType: CollectionType | undefined
+  mainEpisodeSortOffset?: number
 } & EpisodeGridSize &
   ModifyEpisodeCollectionOptType) {
   let firstTime = Array(7).fill(true) // 用来显示不同种类的数组, type 字段
@@ -62,6 +64,7 @@ export function EpisodeGridContent({
                 episodes={episodes}
                 modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
                 collectionType={collectionType}
+                mainEpisodeSortOffset={mainEpisodeSortOffset}
               />
             </Fragment>
           )
@@ -74,6 +77,7 @@ export function EpisodeGridContent({
             episodes={episodes}
             modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
             collectionType={collectionType}
+            mainEpisodeSortOffset={mainEpisodeSortOffset}
           />
         )
       })}

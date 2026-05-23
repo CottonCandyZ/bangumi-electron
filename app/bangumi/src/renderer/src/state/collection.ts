@@ -6,6 +6,11 @@ const sidePanelCollectionTypeFilterMapAtom = atom(new Map<string, CollectionType
 
 export const sidePanelShowEpisodeListAtom = atomWithStorage('side-panel-show-episode-list', true)
 
+export const sidePanelOneBasedEpisodeSortAtom = atomWithStorage(
+  'side-panel-one-based-episode-sort',
+  false,
+)
+
 export const sidePanelCollectionTypeFilterAtom = atom(
   (get) => {
     return get(sidePanelCollectionTypeFilterMapAtom)

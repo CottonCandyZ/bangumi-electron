@@ -19,11 +19,13 @@ export function CollectionsGrid({
   collectionType,
   subjectType,
   showEpisodeList,
+  useOneBasedEpisodeSort,
   username,
 }: {
   collectionType: CollectionType
   subjectType: SubjectType
   showEpisodeList: boolean
+  useOneBasedEpisodeSort: boolean
   username: string
 }) {
   const collectionsQuery = useInfinityQueryCollectionsByUsername({
@@ -115,7 +117,11 @@ export function CollectionsGrid({
         {items.map((item) => {
           return (
             <div key={item.data.subject_id} data-grid-groupkey={item.index}>
-              <CollectionItem collectionItemInfo={item.data} showEpisodeList={showEpisodeList} />
+              <CollectionItem
+                collectionItemInfo={item.data}
+                showEpisodeList={showEpisodeList}
+                useOneBasedEpisodeSort={useOneBasedEpisodeSort}
+              />
             </div>
           )
         })}

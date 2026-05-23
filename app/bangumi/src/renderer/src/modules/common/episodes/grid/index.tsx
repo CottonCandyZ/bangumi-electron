@@ -2,13 +2,16 @@ import { EpisodeGridContent } from '@renderer/modules/common/episodes/grid/conte
 import { PageSelector } from '@renderer/modules/common/episodes/grid/page-selector'
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import { useCollectionEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/api/collection'
 import { useEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/api/episodes'
 import { SubjectId } from '@renderer/data/types/bgm'
-import { CollectionType } from '@renderer/data/types/collection'
+import { CollectionEpisode, CollectionType } from '@renderer/data/types/collection'
+import { Episode, EpisodeType } from '@renderer/data/types/episode'
 import { useOpenSubjectEpisodesPanel } from '@renderer/modules/common/episodes/use-open-subject-episodes-panel'
 import { cn } from '@renderer/lib/utils'
-import { useState } from 'react'
+import { ListRestart } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useSession } from '@renderer/data/hooks/session'
 
 export type EpisodeGridSize = {
@@ -22,15 +25,18 @@ export function EpisodesGrid({
   selector = true,
   collectionType,
   sourceTitle,
+  useOneBasedEpisodeSort = false,
 }: {
   subjectId: SubjectId
   eps: number
   selector?: boolean
   collectionType?: CollectionType
   sourceTitle?: string
+  useOneBasedEpisodeSort?: boolean
 } & EpisodeGridSize) {
   const userInfo = useSession()
   const [offset, setOffSet] = useState(0)
+  const [temporaryOneBasedEpisodeSort, setTemporaryOneBasedEpisodeSort] = useState(false)
   const limit = 100
   let skeletonNumber = eps ?? 12
   if (skeletonNumber > 100) skeletonNumber = 100
@@ -55,6 +61,18 @@ export function EpisodesGrid({
     episodeTotal: episode.data?.total,
     initialOffset: offset,
   })
+  const episodeSortStart = getMainEpisodeSortStart(episode.data?.data, offset)
+  const canUseOneBasedEpisodeSort = episodeSortStart !== null && episodeSortStart !== 1
+  const showOneBasedEpisodeSort = useOneBasedEpisodeSort || temporaryOneBasedEpisodeSort
+  const mainEpisodeSortOffset =
+    canUseOneBasedEpisodeSort && showOneBasedEpisodeSort ? 1 - episodeSortStart : 0
+  const oneBasedSortButtonLabel = showOneBasedEpisodeSort
+    ? `还原为从 ${episodeSortStart} 开始计数`
+    : '切换为从 1 开始计数'
+
+  useEffect(() => {
+    setTemporaryOneBasedEpisodeSort(false)
+  }, [subjectId])
 
   if (userInfo === undefined) return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
 
@@ -67,6 +85,22 @@ export function EpisodesGrid({
       {size === 'default' && (
         <div className="flex flex-row items-center gap-2">
           <h2 className="text-2xl font-medium">章节</h2>
+          {canUseOneBasedEpisodeSort && (
+            <Tooltip delayDuration={300}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant={showOneBasedEpisodeSort ? 'secondary' : 'outline'}
+                  size="icon"
+                  className="mt-1 size-8 shadow-none"
+                  aria-label={oneBasedSortButtonLabel}
+                  onClick={() => setTemporaryOneBasedEpisodeSort((value) => !value)}
+                >
+                  <ListRestart className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{oneBasedSortButtonLabel}</TooltipContent>
+            </Tooltip>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -87,10 +121,27 @@ export function EpisodesGrid({
           size={size}
           modifyEpisodeCollectionOpt={{ limit, offset }}
           collectionType={collectionType}
+          mainEpisodeSortOffset={mainEpisodeSortOffset}
         />
       </div>
     </div>
   )
+}
+
+function getEpisodeFromGridItem(item: Episode | CollectionEpisode) {
+  return (item as CollectionEpisode).episode ?? item
+}
+
+function getMainEpisodeSortStart(
+  episodes: Episode[] | CollectionEpisode[] | null | undefined,
+  offset: number,
+) {
+  const firstMainEpisode = episodes
+    ?.map(getEpisodeFromGridItem)
+    .filter((item) => item.type === EpisodeType['本篇'])
+    .at(0)
+
+  return firstMainEpisode === undefined ? null : firstMainEpisode.sort - offset
 }
 
 function EpisodeSkeleton({

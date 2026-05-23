@@ -12,6 +12,7 @@ import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import {
   sidePanelCollectionTypeFilterAtom,
+  sidePanelOneBasedEpisodeSortAtom,
   sidePanelShowEpisodeListAtom,
 } from '@renderer/state/collection'
 import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
@@ -23,6 +24,9 @@ export function SubjectCollectionPanelHeader() {
   const subjectType = SubjectType[useAtomValue(collectionPanelSubjectTypeAtom)]
   const [filterMap, setCurrentTypeFilter] = useAtom(sidePanelCollectionTypeFilterAtom)
   const [showEpisodeList, setShowEpisodeList] = useAtom(sidePanelShowEpisodeListAtom)
+  const [useOneBasedEpisodeSort, setUseOneBasedEpisodeSort] = useAtom(
+    sidePanelOneBasedEpisodeSortAtom,
+  )
   const userInfo = useSession()
   const panelUsername = useAtomValue(collectionPanelUsernameAtom)
   const currentSelect = filterMap.get(subjectType.toString()) ?? CollectionType['watching']
@@ -58,6 +62,13 @@ export function SubjectCollectionPanelHeader() {
                 onSelect={(event) => event.preventDefault()}
               >
                 显示章节列表
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={useOneBasedEpisodeSort}
+                onCheckedChange={(value) => setUseOneBasedEpisodeSort(value === true)}
+                onSelect={(event) => event.preventDefault()}
+              >
+                章节从 1 计数
               </DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>

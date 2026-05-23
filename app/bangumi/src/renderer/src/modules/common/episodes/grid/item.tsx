@@ -9,7 +9,7 @@ import {
   CollectionType,
   EpisodeCollectionType,
 } from '@renderer/data/types/collection'
-import { Episode } from '@renderer/data/types/episode'
+import { Episode, EpisodeType } from '@renderer/data/types/episode'
 import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
 import { getOnAirStatus } from '@renderer/lib/utils/date'
@@ -36,13 +36,17 @@ export function EpisodeGridItem({
   episodes,
   modifyEpisodeCollectionOpt,
   collectionType,
+  mainEpisodeSortOffset = 0,
 }: {
   index: number
   episodes: Episode[] | CollectionEpisode[]
   collectionType: CollectionType | undefined
+  mainEpisodeSortOffset?: number
 } & EpisodeGridSize &
   ModifyEpisodeCollectionOptType) {
   const episode = isCollectionEpisode(episodes) ? episodes[index].episode : episodes[index]
+  const displaySort =
+    episode.type === EpisodeType['本篇'] ? episode.sort + mainEpisodeSortOffset : episode.sort
   const navigate = useNavigate()
   const [hoverCardContent, setHoverCardContent] = useAtom(hoverCardEpisodeContentAtom)
   const closeHoverCardImmediately = useSetAtom(closeHoverCardImmediatelyAtomAction)
@@ -119,7 +123,7 @@ export function EpisodeGridItem({
           navigate(`/episode/${episode.id}`)
         }}
       >
-        {episode.sort}
+        {displaySort}
       </EpisodeButton>
     </HoverCardTrigger>
   )
