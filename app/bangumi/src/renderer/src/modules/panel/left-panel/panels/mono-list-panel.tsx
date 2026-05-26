@@ -60,11 +60,11 @@ export function MonoListPanel() {
   return (
     <div className="flex h-dvh min-w-0 flex-col">
       <div className="drag-region flex h-14 shrink-0 flex-col justify-center border-b px-2">
-        <div className="no-drag-region flex flex-row items-center gap-1">
+        <div className="flex flex-row items-center gap-1">
           <div className="flex min-w-0 flex-1 flex-row gap-1 overflow-x-auto">
             {tabs.map((tab) => (
               <button
-                className="hover:bg-accent data-[active=true]:bg-accent flex max-w-40 min-w-16 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm"
+                className="no-drag-region hover:bg-accent data-[active=true]:bg-accent flex max-w-40 min-w-16 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm"
                 data-active={tab.id === activeTab.id}
                 key={tab.id}
                 title={`${tab.title} - ${tab.sourceTitle}`}
@@ -88,7 +88,7 @@ export function MonoListPanel() {
             ))}
           </div>
           <button
-            className="text-muted-foreground hover:bg-accent hover:text-foreground flex size-7 shrink-0 items-center justify-center rounded-md"
+            className="text-muted-foreground no-drag-region hover:bg-accent hover:text-foreground flex size-7 shrink-0 items-center justify-center rounded-md"
             onClick={() => closeAllTabs()}
             title="关闭全部"
           >
