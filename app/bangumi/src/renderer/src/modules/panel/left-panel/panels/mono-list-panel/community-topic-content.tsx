@@ -7,6 +7,7 @@ import {
   useGroupTopicsQuery,
   useRecentGroupTopicsQuery,
   useRecentSubjectTopicsQuery,
+  useSubjectTopicsQuery,
   useTrendingSubjectTopicsQuery,
 } from '@renderer/data/hooks/api/community'
 import type { CommunityTopic } from '@renderer/data/types/community'
@@ -38,6 +39,19 @@ export function CommunityGroupTopicsListPanelContent({
   const query = useGroupTopicsQuery({
     groupName: tab.groupName,
     group: tab.group,
+    limit: 24,
+  })
+  return <CommunityTopicsVirtualList tab={tab} query={query} />
+}
+
+export function CommunitySubjectTopicsListPanelContent({
+  tab,
+}: {
+  tab: Extract<MonoListPanelTab, { type: 'communitySubjectTopics' }>
+}) {
+  const query = useSubjectTopicsQuery({
+    subjectId: tab.subjectId,
+    subject: tab.subject,
     limit: 24,
   })
   return <CommunityTopicsVirtualList tab={tab} query={query} />
@@ -75,7 +89,10 @@ function CommunityTopicsVirtualList({
   tab,
 }: {
   query: CommunityTopicQuery
-  tab: Extract<MonoListPanelTab, { type: 'communityGroupTopics' | 'communityTopics' }>
+  tab: Extract<
+    MonoListPanelTab,
+    { type: 'communityGroupTopics' | 'communitySubjectTopics' | 'communityTopics' }
+  >
 }) {
   const { pathname } = useLocation()
   const centerActiveItem = useAtomValue(monoListPanelCenterActiveItemAtom)
@@ -87,7 +104,10 @@ function CommunityTopicsVirtualList({
     () => topics.findIndex((topic) => isRoutePathActive(pathname, getCommunityTopicRoute(topic))),
     [pathname, topics],
   )
-  const leadingKind = tab.type === 'communityGroupTopics' ? 'creator' : 'source'
+  const leadingKind =
+    tab.type === 'communityGroupTopics' || tab.type === 'communitySubjectTopics'
+      ? 'creator'
+      : 'source'
 
   if (query.isLoading && topics.length === 0) {
     return (

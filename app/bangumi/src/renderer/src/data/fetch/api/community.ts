@@ -13,8 +13,10 @@ import {
   GroupTopicListItem,
   SlimGroup,
   SubjectTopic,
+  SubjectTopicSource,
   TopicResponse,
 } from '@renderer/data/types/community'
+import type { SubjectId } from '@renderer/data/types/bgm'
 import type { UserInfo } from '@renderer/data/types/user'
 
 type GroupResponse = {
@@ -121,6 +123,28 @@ export async function getRecentSubjectTopics({ limit, offset }: { limit: number;
   }
 }
 
+export async function getSubjectTopics({
+  subject,
+  subjectId,
+  limit,
+  offset,
+}: {
+  subject?: SubjectTopicSource | null
+  subjectId: SubjectId | undefined
+  limit: number
+  offset: number
+}) {
+  if (!subjectId) return { data: [], total: 0 }
+  const response = await nextFetchWithOptionalAuth<TopicResponse<GroupTopicListItem>>(
+    NEXT_COMMUNITY.SUBJECT_TOPICS({ subjectId, limit, offset }),
+  )
+
+  return {
+    ...response,
+    data: response.data.map((topic) => toCommunitySubjectTopicFromList(topic, subjectId, subject)),
+  }
+}
+
 export async function getTrendingSubjectTopics({
   limit,
   offset,
@@ -185,6 +209,31 @@ function toCommunityGroupTopicFromList(
       route: group?.name ? `/group/${group.name}` : '',
       image: normalizeImageUrl(group?.icon?.medium ?? group?.icon?.small),
       meta: group?.members !== undefined ? `${group.members} 成员` : undefined,
+    },
+  }
+}
+
+function toCommunitySubjectTopicFromList(
+  topic: GroupTopicListItem,
+  subjectId: SubjectId,
+  subject: SubjectTopicSource | null | undefined,
+): CommunityTopic {
+  const subjectTitle = subject?.nameCN || subject?.name_cn || subject?.name || `条目 ${subjectId}`
+
+  return {
+    id: topic.id,
+    kind: 'subject',
+    title: topic.title,
+    creator: topic.creator,
+    replyCount: topic.replyCount,
+    createdAt: topic.createdAt,
+    updatedAt: topic.updatedAt,
+    route: `/subject/topic/${topic.id}`,
+    source: {
+      title: subjectTitle,
+      route: `/subject/${subjectId}`,
+      image: normalizeImageUrl(subject?.images?.grid ?? subject?.images?.small),
+      meta: subject?.name_cn || subject?.nameCN ? subject.name : undefined,
     },
   }
 }

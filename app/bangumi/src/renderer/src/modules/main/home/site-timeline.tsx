@@ -24,10 +24,14 @@ export function SiteTimelinePreview() {
   const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
   const selectedTab = mode === 'friends' ? '关注' : '全站'
   const query = useTimelineQuery({ mode, limit: 8 })
-  const refetchTimeline = query.refetch
+  const refetchTimelineRef = useRef(query.refetch)
   const mountedRef = useRef(false)
   const [now, setNow] = useState(() => Date.now())
   const visibleItems = query.data?.filter(hasUserTimelineItemDetails).slice(0, 6)
+
+  useEffect(() => {
+    refetchTimelineRef.current = query.refetch
+  }, [query.refetch])
 
   useEffect(() => {
     if (!mountedRef.current) {
@@ -35,8 +39,8 @@ export function SiteTimelinePreview() {
       return
     }
 
-    refetchTimeline()
-  }, [mode, refetchTimeline])
+    refetchTimelineRef.current()
+  }, [mode])
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 30 * 1000)

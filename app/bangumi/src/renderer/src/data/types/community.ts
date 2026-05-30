@@ -96,6 +96,20 @@ export type SubjectTopic = TopicBase & {
   replies: TopicReply[]
 }
 
+export type SubjectTopicSource = {
+  id: number
+  name: string
+  nameCN?: string
+  name_cn?: string
+  images?: {
+    large?: string
+    common?: string
+    medium?: string
+    small?: string
+    grid?: string
+  }
+}
+
 export type CommunityTopicKind = 'group' | 'subject' | 'trending-subject'
 
 export type CommunityTopic = {

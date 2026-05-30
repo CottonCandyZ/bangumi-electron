@@ -151,6 +151,15 @@ export const NEXT_COMMUNITY = {
     `/p1/groups/-/topics?mode=${mode}&limit=${limit}&offset=${offset}`,
   RECENT_SUBJECT_TOPICS: ({ limit, offset }: { limit: number; offset: number }) =>
     `/p1/subjects/-/topics?limit=${limit}&offset=${offset}`,
+  SUBJECT_TOPICS: ({
+    subjectId,
+    limit,
+    offset,
+  }: {
+    subjectId: SubjectId
+    limit: number
+    offset: number
+  }) => `/p1/subjects/${subjectId}/topics?limit=${limit}&offset=${offset}`,
   TRENDING_SUBJECT_TOPICS: ({ limit, offset }: { limit: number; offset: number }) =>
     `/p1/trending/subjects/topics?limit=${limit}&offset=${offset}`,
 }
