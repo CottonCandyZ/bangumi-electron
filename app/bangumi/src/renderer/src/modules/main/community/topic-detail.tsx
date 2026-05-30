@@ -211,7 +211,7 @@ function TopicHeader({
     kind === 'group'
       ? {
           title: (topic as GroupTopic).group.title || (topic as GroupTopic).group.name,
-          to: undefined,
+          to: `/group/${(topic as GroupTopic).group.name}`,
         }
       : {
           title:
