@@ -1,3 +1,4 @@
+import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
@@ -56,14 +57,24 @@ export function GroupTopicsVirtualList({
 }
 
 function GroupTopicItem({ topic }: { topic: CommunityTopic }) {
+  const creatorAvatar = topic.creator?.avatar.medium || topic.creator?.avatar.small
+
   return (
     <MyLink
       className="hover:bg-accent flex min-h-20 cursor-default gap-3 rounded-md p-2 transition-colors"
       to={`/group/topic/${topic.id}`}
     >
-      <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center rounded-md">
-        <span className="i-mingcute-chat-3-line text-xl" />
-      </div>
+      {creatorAvatar ? (
+        <Image
+          className="size-12 shrink-0 overflow-hidden rounded-md"
+          imageSrc={creatorAvatar}
+          loading="eager"
+        />
+      ) : (
+        <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center rounded-md">
+          <span className="i-mingcute-user-3-line text-xl" />
+        </div>
+      )}
       <div className="min-w-0 flex-1">
         <div className="line-clamp-2 text-sm font-medium">{topic.title}</div>
         <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
