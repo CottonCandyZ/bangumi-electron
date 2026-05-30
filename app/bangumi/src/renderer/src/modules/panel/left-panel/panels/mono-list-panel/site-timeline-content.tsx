@@ -43,6 +43,7 @@ export function SiteTimelineListPanelContent({
   const timelineQuery = useTimelineInfiniteQuery({ mode, limit: SITE_TIMELINE_PAGE_LIMIT })
   const refreshFirstPage = timelineQuery.refreshFirstPage
   const mountedRef = useRef(false)
+  const refreshFirstPageRef = useRef(refreshFirstPage)
   const entries = useMemo(() => {
     const seen = new Set<number>()
     return timelineQuery.data?.pages.flatMap((page) =>
@@ -67,13 +68,17 @@ export function SiteTimelineListPanelContent({
   }, [refreshFirstPage])
 
   useEffect(() => {
+    refreshFirstPageRef.current = refreshFirstPage
+  }, [refreshFirstPage])
+
+  useEffect(() => {
     if (!mountedRef.current) {
       mountedRef.current = true
       return
     }
 
-    refreshFirstPage()
-  }, [mode, refreshFirstPage])
+    refreshFirstPageRef.current()
+  }, [mode])
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">

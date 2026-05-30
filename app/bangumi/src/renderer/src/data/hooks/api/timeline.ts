@@ -42,6 +42,9 @@ export const useTimelineQuery = ({
     queryKey: ['site-timeline-v1', userId, mode, limit],
     queryFn: () => getTimeline({ limit, mode }),
     enabled,
+    refetchOnMount: (query) => query.isStale(),
+    refetchOnReconnect: (query) => query.isStale(),
+    refetchOnWindowFocus: (query) => query.isStale(),
     staleTime,
   })
 }
@@ -87,31 +90,34 @@ export const useTimelineInfiniteQuery = ({
     },
     enabled,
     refetchOnMount: (query) => {
+      const willRefetch = query.isStale()
       trimInfiniteQueryPagesIf<UserTimelineItem[], number | undefined>({
         pageLimit: refetchPageLimit,
         queryClient,
         queryKey,
-        shouldTrim: query.isStale(),
+        shouldTrim: willRefetch,
       })
-      return true
+      return willRefetch
     },
     refetchOnReconnect: (query) => {
+      const willRefetch = query.isStale()
       trimInfiniteQueryPagesIf<UserTimelineItem[], number | undefined>({
         pageLimit: refetchPageLimit,
         queryClient,
         queryKey,
-        shouldTrim: query.isStale(),
+        shouldTrim: willRefetch,
       })
-      return true
+      return willRefetch
     },
     refetchOnWindowFocus: (query) => {
+      const willRefetch = query.isStale()
       trimInfiniteQueryPagesIf<UserTimelineItem[], number | undefined>({
         pageLimit: refetchPageLimit,
         queryClient,
         queryKey,
-        shouldTrim: query.isStale(),
+        shouldTrim: willRefetch,
       })
-      return true
+      return willRefetch
     },
     staleTime,
   })

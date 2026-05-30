@@ -1,5 +1,6 @@
 import { SubjectType } from '@renderer/data/types/subject'
 import type { Character } from '@renderer/data/types/character'
+import type { SubjectId } from '@renderer/data/types/bgm'
 import type { CollectionEpisode, CollectionType } from '@renderer/data/types/collection'
 import type { Episode } from '@renderer/data/types/episode'
 import type { RelatedSubject } from '@renderer/data/types/subject'
@@ -10,6 +11,7 @@ import type {
   CommunityTopicKind,
   GroupSort,
   SlimGroup,
+  SubjectTopicSource,
 } from '@renderer/data/types/community'
 import type { TimelineMode } from '@renderer/data/types/timeline'
 import type { SectionPath } from '@renderer/data/types/web'
@@ -120,6 +122,17 @@ export type MonoListPanelTab =
       sourceTo: string
       groupName: string
       group?: SlimGroup | null
+      topics: CommunityTopic[]
+    }
+  | {
+      id: string
+      type: 'communitySubjectTopics'
+      title: string
+      panelTitle: string
+      sourceTitle: string
+      sourceTo: string
+      subjectId: SubjectId
+      subject?: SubjectTopicSource | null
       topics: CommunityTopic[]
     }
   | {

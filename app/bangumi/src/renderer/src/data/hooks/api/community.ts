@@ -7,12 +7,14 @@ import {
   getRecentGroupTopics,
   getRecentSubjectTopics,
   getSubjectTopic,
+  getSubjectTopics,
   getTrendingSubjectTopics,
   getUserGroups,
 } from '@renderer/data/fetch/api/community'
 import { useAuthQuery, useInfinityQueryOptionalAuth } from '@renderer/data/hooks/factory'
+import type { SubjectId } from '@renderer/data/types/bgm'
 import type { GroupSort } from '@renderer/data/types/community'
-import type { SlimGroup } from '@renderer/data/types/community'
+import type { SlimGroup, SubjectTopicSource } from '@renderer/data/types/community'
 import type { UserInfo } from '@renderer/data/types/user'
 
 export const useGroupsQuery = ({
@@ -147,6 +149,30 @@ export const useRecentSubjectTopicsQuery = ({ limit = 20 }: { limit?: number } =
     queryKey: ['community-subject-topics-v3'],
     qFLimit: limit,
     initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
+      return nextOffset < lastPage.total ? nextOffset : undefined
+    },
+  })
+
+export const useSubjectTopicsQuery = ({
+  enabled,
+  limit = 20,
+  subject,
+  subjectId,
+}: {
+  enabled?: boolean
+  limit?: number
+  subject?: SubjectTopicSource | null
+  subjectId: SubjectId | undefined
+}) =>
+  useInfinityQueryOptionalAuth({
+    queryFn: getSubjectTopics,
+    queryKey: ['community-single-subject-topics-v1'],
+    queryProps: { subjectId, subject },
+    qFLimit: limit,
+    initialPageParam: 0,
+    enabled,
     getNextPageParam: (lastPage, pages) => {
       const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
       return nextOffset < lastPage.total ? nextOffset : undefined

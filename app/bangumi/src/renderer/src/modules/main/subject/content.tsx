@@ -6,6 +6,7 @@ import { SubjectCharacters } from '@renderer/modules/main/subject/character'
 import { SubjectCollection } from '@renderer/modules/main/subject/collection'
 import { SubjectComments } from '@renderer/modules/main/subject/comments'
 import { SubjectCoverImage } from '@renderer/modules/main/subject/cover-image'
+import { SubjectDiscussions } from '@renderer/modules/main/subject/discussions'
 import { SubjectEpisodes } from '@renderer/modules/main/subject/episode'
 import { SubjectHeaderInfo } from '@renderer/modules/main/subject/header-info'
 import { RelatedSubjects } from '@renderer/modules/main/subject/related'
@@ -53,7 +54,10 @@ export const SubjectContent = ({
         </section>
         <SubjectCharacters subjectId={subjectId} />
         <RelatedSubjects subjectId={subjectId} />
-        <SubjectComments subjectId={subjectId} />
+        <section className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">
+          <SubjectComments subjectId={subjectId} />
+          <SubjectDiscussions subjectId={subjectId} />
+        </section>
       </div>
     </div>
   )

@@ -10,6 +10,7 @@ import { SearchSubjectsListPanelContent } from './mono-list-panel/search-content
 import {
   CommunityGroupsListPanelContent,
   CommunityGroupTopicsListPanelContent,
+  CommunitySubjectTopicsListPanelContent,
   CommunityTopicsListPanelContent,
 } from './mono-list-panel/community-content'
 import {
@@ -159,6 +160,9 @@ function MonoListPanelContent({ tab }: { tab: MonoListPanelTab }) {
   if (tab.type === 'searchMonos') return <SearchMonosListPanelContent tab={tab} />
   if (tab.type === 'communityTopics') return <CommunityTopicsListPanelContent tab={tab} />
   if (tab.type === 'communityGroupTopics') return <CommunityGroupTopicsListPanelContent tab={tab} />
+  if (tab.type === 'communitySubjectTopics') {
+    return <CommunitySubjectTopicsListPanelContent tab={tab} />
+  }
   if (tab.type === 'communityGroups') return <CommunityGroupsListPanelContent tab={tab} />
   if (tab.type === 'siteTimeline') return <SiteTimelineListPanelContent tab={tab} />
   if (tab.type === 'trendingSubjects') return <TrendingSubjectsListPanelContent tab={tab} />
@@ -175,6 +179,7 @@ function getMonoListPanelTabCount(tab: MonoListPanelTab) {
   if (tab.type === 'searchMonos') return null
   if (tab.type === 'communityTopics') return tab.topics.length
   if (tab.type === 'communityGroupTopics') return tab.group?.topics ?? null
+  if (tab.type === 'communitySubjectTopics') return null
   if (tab.type === 'communityGroups') return tab.groups.length
   if (tab.type === 'siteTimeline') return null
   if (tab.type === 'trendingSubjects') return null
@@ -186,6 +191,7 @@ function getMonoListPanelTabDisplayTitle(tab: MonoListPanelTab) {
   if (
     tab.type === 'communityTopics' ||
     tab.type === 'communityGroupTopics' ||
+    tab.type === 'communitySubjectTopics' ||
     tab.type === 'communityGroups' ||
     tab.type === 'siteTimeline' ||
     tab.type === 'trendingSubjects'
@@ -199,6 +205,7 @@ function getMonoListPanelTabSourceTo(tab: MonoListPanelTab) {
   if (tab.type === 'searchSubjects' || tab.type === 'searchMonos') return tab.sourceTo
   if (tab.type === 'communityTopics') return tab.sourceTo
   if (tab.type === 'communityGroupTopics') return tab.sourceTo
+  if (tab.type === 'communitySubjectTopics') return tab.sourceTo
   if (tab.type === 'communityGroups') return tab.sourceTo
   if (tab.type === 'siteTimeline') return tab.sourceTo
   if (tab.type === 'trendingSubjects') return tab.sourceTo
