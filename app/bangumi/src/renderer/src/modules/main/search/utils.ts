@@ -1,6 +1,6 @@
-import type { SearchData, SearchParam } from '@renderer/data/types/search'
+import type { SearchParam, SearchSubjectData } from '@renderer/data/types/search'
 
-export function getSearchSubjectImage(item: SearchData) {
+export function getSearchSubjectImage(item: SearchSubjectData) {
   return (
     item.image ||
     item.images?.grid ||
@@ -10,11 +10,11 @@ export function getSearchSubjectImage(item: SearchData) {
   )
 }
 
-export function getSearchSubjectTitle(item: SearchData) {
+export function getSearchSubjectTitle(item: SearchSubjectData) {
   return item.name_cn || item.name
 }
 
-export function getSearchSubjectSubtitle(item: SearchData) {
+export function getSearchSubjectSubtitle(item: SearchSubjectData) {
   if (!item.name_cn) return null
   return item.name
 }

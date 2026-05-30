@@ -10,8 +10,10 @@ export function NavButton() {
   const [forwardDisable, setForwardDisable] = useState(true)
 
   useEffect(() => {
-    setBackDisable(history.state.idx === 0)
-    setForwardDisable(history.state.idx === history.length - 1)
+    const historyIndex = typeof history.state?.idx === 'number' ? history.state.idx : 0
+
+    setBackDisable(historyIndex === 0)
+    setForwardDisable(historyIndex >= history.length - 1)
   }, [key])
   return (
     <div className="flex items-center justify-center gap-0.5">

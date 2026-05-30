@@ -84,6 +84,14 @@ export type MonoListPanelTab =
       searchParam: SearchParam
       sourceTo?: string
     }
+  | {
+      id: string
+      type: 'searchMonos'
+      title: string
+      sourceTitle: string
+      searchParam: SearchParam
+      sourceTo?: string
+    }
 
 export const navOpenAtom = atom(false)
 
