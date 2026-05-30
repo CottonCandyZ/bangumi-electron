@@ -1,5 +1,33 @@
 # Agent Notes
 
+## Git Commit Messages
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) for all agent-created commits.
+In this repository, a scope is required.
+
+- Format: `<type>(<scope>): <description>`
+- Common types: `feat`, `fix`, `refactor`, `perf`, `chore`, `docs`, `test`, `build`, `ci`
+- Use `feat` for user-facing capabilities and `fix` for user-facing bug fixes.
+- Use `!` after the scope for breaking changes, and include a `BREAKING CHANGE:` footer.
+- Keep the description imperative, concise, and lower-case unless it names a proper noun.
+- Prefer concrete user-facing semantics over vague messages.
+- Examples: `fix(mono-list): handle trending page retry`, `feat(community): add topic sidebar`
+
+Scope definitions:
+
+- `home`: home page layout, carousels, timeline, and home previews.
+- `community`: community/talk pages, groups, topics, and discussion previews.
+- `group`: group detail pages and group topic/member lists.
+- `subject`: subject detail pages, related sections, discussions, episodes, and characters.
+- `mono-list`: left-panel mono list tabs, virtual lists, panel refresh/retry behavior.
+- `collection`: collection panel, collection lists, and collection item interactions.
+- `search`: search pages, search filters, tags, and search-side panels.
+- `timeline`: site/user timeline data and timeline presentation.
+- `api`: API hooks, fetchers, query caching, and request/session behavior.
+- `release`: version bumps, packaging, signing, and publishing.
+- `build`: build tooling, bundling, lint/typecheck, and CI-adjacent scripts.
+- `docs`: repository documentation and agent instructions.
+
 ## Electron CDP
 
 Development runs expose the Electron Chrome DevTools Protocol endpoint by default.
