@@ -59,6 +59,7 @@ function SubjectTopicDetail({ topicId }: { topicId: number }) {
 
 function TopicDetail({ topic, kind }: { topic: GroupTopic | SubjectTopic; kind: TopicKind }) {
   const scrollViewport = useAtomValue(scrollViewportAtom)
+  const setTitleInView = useSetAtom(communityTopicTitleInViewAtom)
   const scrollRef = useRef<HTMLElement | null>(null)
   const virtualizerRef = useRef<VirtualizerHandle>(null)
   scrollRef.current = scrollViewport
@@ -83,6 +84,11 @@ function TopicDetail({ topic, kind }: { topic: GroupTopic | SubjectTopic; kind: 
   })
 
   usePageScrollRestoreReady(!!scrollViewport)
+
+  useEffect(() => {
+    setTitleInView(true)
+    return () => setTitleInView(true)
+  }, [setTitleInView, topic.id])
 
   if (!scrollViewport) return <TopicDetailSkeleton />
 
@@ -223,7 +229,6 @@ function TopicHeader({
 
   useEffect(() => {
     setTitleInView(inView)
-    return () => setTitleInView(true)
   }, [inView, setTitleInView, topic.id])
 
   return (
