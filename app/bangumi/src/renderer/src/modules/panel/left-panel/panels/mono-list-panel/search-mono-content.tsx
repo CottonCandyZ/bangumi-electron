@@ -105,6 +105,7 @@ function SearchMonoPanelItem({
   const active = isRoutePathActive(useLocation().pathname, to)
   const ref = useActivePanelItemRef(active)
   const image = item.image || item.images?.medium || item.images?.grid
+  const summary = item.summary || item.short_summary
 
   return (
     <div ref={ref}>
@@ -122,7 +123,7 @@ function SearchMonoPanelItem({
           <Image
             imageSrc={image}
             className="flex h-20 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md"
-            imageClassName="h-full w-full object-cover"
+            imageClassName="h-full w-full object-cover object-top"
             loadingClassName="h-20 w-14"
             careLoading
           />
@@ -135,7 +136,7 @@ function SearchMonoPanelItem({
             {monoType === 'person' ? '人物' : '角色'}
           </div>
           <div className="text-muted-foreground line-clamp-3 text-xs leading-relaxed">
-            {item.summary || '--'}
+            {summary || '--'}
           </div>
         </div>
       </MyLink>
