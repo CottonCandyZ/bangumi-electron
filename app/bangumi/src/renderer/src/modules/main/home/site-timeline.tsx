@@ -25,7 +25,7 @@ export function SiteTimelinePreview() {
   const selectedTab = mode === 'friends' ? '关注' : '全站'
   const query = useTimelineQuery({ mode, limit: 8 })
   const refetchTimelineRef = useRef(query.refetch)
-  const mountedRef = useRef(false)
+  const refreshAfterModeChangeRef = useRef(false)
   const [now, setNow] = useState(() => Date.now())
   const visibleItems = query.data?.filter(hasUserTimelineItemDetails).slice(0, 6)
 
@@ -34,11 +34,11 @@ export function SiteTimelinePreview() {
   }, [query.refetch])
 
   useEffect(() => {
-    if (!mountedRef.current) {
-      mountedRef.current = true
+    if (!refreshAfterModeChangeRef.current) {
       return
     }
 
+    refreshAfterModeChangeRef.current = false
     refetchTimelineRef.current()
   }, [mode])
 
@@ -62,7 +62,13 @@ export function SiteTimelinePreview() {
             className="min-h-8 shrink-0 p-0.5"
             currentSelect={selectedTab}
             layoutId="home-site-timeline-mode"
-            setCurrentSelect={(_, value) => setMode(value === '关注' ? 'friends' : 'all')}
+            setCurrentSelect={(_, value) => {
+              const nextMode = value === '关注' ? 'friends' : 'all'
+              if (nextMode === mode) return
+
+              refreshAfterModeChangeRef.current = true
+              setMode(nextMode)
+            }}
             tabsContent={TIMELINE_MODE_TABS}
           />
         </div>
