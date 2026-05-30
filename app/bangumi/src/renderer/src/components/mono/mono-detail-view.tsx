@@ -24,9 +24,9 @@ import { useResizeObserver } from '@renderer/hooks/use-resize'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { splitRelationLabels } from '@renderer/lib/utils/relation'
 import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
 import { scrollCache } from '@renderer/state/global-var'
 import { monoAvatarImageInViewAtom } from '@renderer/state/in-view'
-import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
 import { useAtom, useSetAtom } from 'jotai'
 import {
@@ -252,7 +252,7 @@ function MonoSubjectsSection({
   subjects?: MonoSubjectItem[]
 }) {
   const [filterMap, setFilter] = useAtom(tabFilerAtom)
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const typeFilterId = `mono-subjects-type-${monoType}-${monoId}`
   const relationFilterId = `mono-subjects-relation-${monoType}-${monoId}`
   const typeFilter = filterMap.get(typeFilterId) ?? ALL_SUBJECT_TYPES
@@ -517,7 +517,7 @@ function MonoRelatedSection({
   items?: MonoRelatedItem[]
 }) {
   const [filterMap, setFilter] = useAtom(tabFilerAtom)
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const filterId = `mono-related-${monoType}-${monoId}`
   const filter = filterMap.get(filterId) ?? '全部'
   const filters = useMemo(

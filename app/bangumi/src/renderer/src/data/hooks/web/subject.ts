@@ -9,6 +9,7 @@ import {
 } from '@renderer/data/hooks/infinite-query'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { SectionPath } from '@renderer/data/types/web'
+import type { TopList } from '@renderer/data/types/web'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { useSession } from '@renderer/data/hooks/session'
 import { useCallback, useMemo } from 'react'
@@ -30,33 +31,29 @@ export const useTopListQuery = (sectionPath: SectionPath) => {
 
 export const useTrendsInfiniteQuery = (sectionPath: SectionPath) => {
   const queryClient = useQueryClient()
-  const queryKey = useMemo(() => ['SectionTrendsInfinite', sectionPath] as const, [sectionPath])
+  const queryKey = useMemo(() => ['SectionTrendsInfiniteV2', sectionPath] as const, [sectionPath])
   const query = useInfiniteQuery({
-    queryKey: ['SectionTrendsInfinite', sectionPath],
-    queryFn: async ({ pageParam }) => await fetchTrends({ sectionPath, page: pageParam }),
+    queryKey: ['SectionTrendsInfiniteV2', sectionPath],
+    queryFn: async ({ pageParam }) => {
+      const html = await fetchTrends({ sectionPath, page: pageParam })
+      return parseTrendsFromHTML(html)
+    },
     initialPageParam: 1,
-    select: (data) => ({
-      ...data,
-      pages: data.pages.map(parseTrendsFromHTML),
-    }),
     getNextPageParam: (lastPage, pages) => {
-      const lastItems = parseTrendsFromHTML(lastPage)
-      if (lastItems.length === 0) return undefined
+      if (lastPage.length === 0) return undefined
 
       const previousIds = new Set(
         pages
           .slice(0, -1)
-          .flatMap(parseTrendsFromHTML)
+          .flatMap((page) => page)
           .map((item) => item.SubjectId)
           .filter(Boolean),
       )
-      const hasNewItem = lastItems.some(
-        (item) => item.SubjectId && !previousIds.has(item.SubjectId),
-      )
+      const hasNewItem = lastPage.some((item) => item.SubjectId && !previousIds.has(item.SubjectId))
       return hasNewItem ? pages.length + 1 : undefined
     },
     refetchOnMount: (query) => {
-      trimInfiniteQueryPagesIf<string, number>({
+      trimInfiniteQueryPagesIf<TopList[], number>({
         queryClient,
         queryKey,
         shouldTrim: query.isStale(),
@@ -64,7 +61,7 @@ export const useTrendsInfiniteQuery = (sectionPath: SectionPath) => {
       return true
     },
     refetchOnReconnect: (query) => {
-      trimInfiniteQueryPagesIf<string, number>({
+      trimInfiniteQueryPagesIf<TopList[], number>({
         queryClient,
         queryKey,
         shouldTrim: query.isStale(),
@@ -72,7 +69,7 @@ export const useTrendsInfiniteQuery = (sectionPath: SectionPath) => {
       return true
     },
     refetchOnWindowFocus: (query) => {
-      trimInfiniteQueryPagesIf<string, number>({
+      trimInfiniteQueryPagesIf<TopList[], number>({
         queryClient,
         queryKey,
         shouldTrim: query.isStale(),
@@ -83,7 +80,7 @@ export const useTrendsInfiniteQuery = (sectionPath: SectionPath) => {
   const { refetch: originalRefetch } = query
   const refetch = useCallback(
     (...args: Parameters<typeof originalRefetch>) => {
-      trimInfiniteQueryPages<string, number>({
+      trimInfiniteQueryPages<TopList[], number>({
         queryClient,
         queryKey,
       })

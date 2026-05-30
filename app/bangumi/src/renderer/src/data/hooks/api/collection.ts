@@ -29,11 +29,13 @@ export const useInfinityQueryCollectionsByUsername = ({
   initialPageParam = 0,
   enabled,
   needKeepPreviousData,
+  refetchPageLimit,
 }: OmitInfinityQFP<Parameters<typeof getSubjectCollectionsByUsernameMustAuth>[0]> & {
   username: UserInfo['username'] | undefined
   initialPageParam?: number
   enabled?: boolean
   needKeepPreviousData?: boolean
+  refetchPageLimit?: number
 }) =>
   useInfinityQueryOptionalAuth({
     queryFn: getSubjectCollectionsByUsernameMustAuth,
@@ -48,6 +50,7 @@ export const useInfinityQueryCollectionsByUsername = ({
     initialPageParam: initialPageParam,
     enabled,
     needKeepPreviousData,
+    refetchPageLimit,
   })
 
 /** 用条目 ID 获得 章节收藏, must auth */

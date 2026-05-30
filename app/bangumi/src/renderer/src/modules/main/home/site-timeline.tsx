@@ -6,12 +6,9 @@ import {
   UserTimelineItemCard,
   UserTimelineSkeleton,
 } from '@renderer/modules/common/user/timeline'
-import {
-  homeSiteTimelineModeAtom,
-  openMonoListPanelTabAtomAction,
-  type MonoListPanelTab,
-} from '@renderer/state/panel'
-import { useAtom, useSetAtom } from 'jotai'
+import { homeSiteTimelineModeAtom, type MonoListPanelTab } from '@renderer/state/panel'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { useAtom } from 'jotai'
 import { useEffect, useRef, useState } from 'react'
 
 import { TimelineRefreshButton } from './timeline-refresh-button'
@@ -21,7 +18,7 @@ const TIMELINE_PREVIEW_ITEM_LIMIT = 3
 
 export function SiteTimelinePreview() {
   const [mode, setMode] = useAtom(homeSiteTimelineModeAtom)
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const selectedTab = mode === 'friends' ? '关注' : '全站'
   const query = useTimelineQuery({ mode, limit: 8 })
   const refetchTimelineRef = useRef(query.refetch)

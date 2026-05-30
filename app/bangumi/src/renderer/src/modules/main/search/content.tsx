@@ -6,8 +6,8 @@ import { SearchParam } from '@renderer/data/types/search'
 import { useSearchParams } from '@renderer/hooks/use-search-params'
 import { PinSearchButton, SearchItemCard } from '@renderer/modules/main/search/item-card'
 import { createSearchPanelId, createSearchPanelTitle } from '@renderer/modules/main/search/utils'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
 import { scrollViewportAtom, setScrollPositionAction } from '@renderer/state/scroll'
-import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
 import { searchSummaryAtom } from '@renderer/state/search'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -99,7 +99,7 @@ export function SearchSummaryAction() {
   const { getSearchParam } = useSearchParams()
   const searchParam = getSearchParam()
   const location = useLocation()
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const searchSummary = useAtomValue(searchSummaryAtom)
 
   if (!searchParam) return null

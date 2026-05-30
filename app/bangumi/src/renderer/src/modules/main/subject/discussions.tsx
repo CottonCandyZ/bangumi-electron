@@ -9,8 +9,8 @@ import type { SubjectId } from '@renderer/data/types/bgm'
 import type { CommunityTopic } from '@renderer/data/types/community'
 import { cn } from '@renderer/lib/utils'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
-import { openMonoListPanelTabAtomAction, type MonoListPanelTab } from '@renderer/state/panel'
-import { useSetAtom } from 'jotai'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { type MonoListPanelTab } from '@renderer/state/panel'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
 
@@ -32,7 +32,7 @@ export function SubjectDiscussions({
     enabled: enabledSubjectId === subjectId && !subjectInfoQuery.isPending,
     limit: SUBJECT_DISCUSSIONS_PREVIEW_LIMIT,
   })
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const fetchedTopics = useMemo(
     () => topicsQuery.data?.pages.flatMap((page) => page.data),
     [topicsQuery.data],

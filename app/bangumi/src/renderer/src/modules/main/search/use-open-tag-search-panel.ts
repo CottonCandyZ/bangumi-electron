@@ -1,10 +1,9 @@
 import { SearchParam } from '@renderer/data/types/search'
-import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
-import { useSetAtom } from 'jotai'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
 import { useCallback } from 'react'
 
 export function useOpenTagSearchPanel() {
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
 
   return useCallback(
     (tag: string) => {

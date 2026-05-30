@@ -1,8 +1,8 @@
 import { Button } from '@renderer/components/ui/button'
 import type { SlimGroup } from '@renderer/data/types/community'
 import { cn } from '@renderer/lib/utils'
-import { openMonoListPanelTabAtomAction, type MonoListPanelTab } from '@renderer/state/panel'
-import { useSetAtom } from 'jotai'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { type MonoListPanelTab } from '@renderer/state/panel'
 import type { MouseEvent } from 'react'
 
 export function OpenGroupTopicsPanelButton({
@@ -12,7 +12,7 @@ export function OpenGroupTopicsPanelButton({
   className?: string
   group: SlimGroup
 }) {
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
 
   const open = (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault()

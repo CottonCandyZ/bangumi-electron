@@ -3,21 +3,22 @@ import { MyLink } from '@renderer/components/my-link'
 import { Badge } from '@renderer/components/ui/badge'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
-import { useSubjectsInfoQuery } from '@renderer/data/hooks/db/subject'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { useTrendsInfiniteQuery } from '@renderer/data/hooks/web/subject'
-import type { Subject } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { SUBJECT_TYPE_MAP } from '@renderer/lib/utils/map'
 import { monoListPanelCenterActiveItemAtom, type MonoListPanelTab } from '@renderer/state/panel'
 import dayjs from 'dayjs'
 import { useAtomValue } from 'jotai'
-import type { Ref } from 'react'
+import type { ReactNode, Ref } from 'react'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 
 import { isRoutePathActive, MonoListPanelFilters, useActivePanelItemRef } from './shared'
+import { useMonoListPanelRefreshAction } from './use-panel-refresh-action'
 
 const ESTIMATED_SUBJECT_HEIGHT = 96
+const TRENDING_SUBJECT_INFO_STALE_TIME = 1000 * 60 * 60 * 24
 
 export function TrendingSubjectsListPanelContent({
   tab,
@@ -27,6 +28,11 @@ export function TrendingSubjectsListPanelContent({
   const { pathname } = useLocation()
   const centerActiveItem = useAtomValue(monoListPanelCenterActiveItemAtom)
   const trendsQuery = useTrendsInfiniteQuery(tab.sectionPath)
+  useMonoListPanelRefreshAction({
+    onRefresh: () => trendsQuery.refetch(),
+    refreshing: trendsQuery.isFetching && !trendsQuery.isFetchingNextPage,
+    tabId: tab.id,
+  })
   const subjectIds = useMemo(() => {
     const seen = new Set<string>()
     return (
@@ -39,24 +45,12 @@ export function TrendingSubjectsListPanelContent({
       ) ?? []
     )
   }, [trendsQuery.data])
-  const subjectsQuery = useSubjectsInfoQuery({
-    subjectIds,
-    enabled: subjectIds.length > 0,
-  })
-  const items = useMemo(
-    () =>
-      subjectIds.map((id, index) => ({
-        id,
-        subject: subjectsQuery.data?.[index] ?? null,
-      })),
-    [subjectIds, subjectsQuery.data],
-  )
   const activeIndex = useMemo(
-    () => items.findIndex((item) => isRoutePathActive(pathname, `/subject/${item.id}`)),
-    [items, pathname],
+    () => subjectIds.findIndex((id) => isRoutePathActive(pathname, `/subject/${id}`)),
+    [pathname, subjectIds],
   )
 
-  if (trendsQuery.isLoading && items.length === 0) {
+  if (trendsQuery.isLoading && subjectIds.length === 0) {
     return (
       <>
         <TrendingSubjectsPanelStatus label="加载近期热门" />
@@ -65,25 +59,36 @@ export function TrendingSubjectsListPanelContent({
     )
   }
 
-  if (trendsQuery.isError) {
+  if (trendsQuery.isError && subjectIds.length === 0) {
     return <div className="text-muted-foreground p-4 text-sm">暂时无法读取近期热门。</div>
   }
 
   return (
     <>
       <TrendingSubjectsPanelStatus
-        label={`已加载 ${items.length.toLocaleString()} 个近期热门`}
+        label={`已加载 ${subjectIds.length.toLocaleString()} 个近期热门`}
         loading={trendsQuery.isFetching}
+        action={
+          trendsQuery.isFetchNextPageError ? (
+            <button
+              className="text-primary hover:text-primary/80 disabled:text-muted-foreground no-drag-region h-4 shrink-0 rounded-sm px-1 text-xs leading-4 underline-offset-2 hover:underline disabled:no-underline"
+              disabled={trendsQuery.isFetchingNextPage}
+              onClick={() => trendsQuery.fetchNextPage()}
+            >
+              {trendsQuery.isFetchingNextPage ? '重试中' : '重试'}
+            </button>
+          ) : undefined
+        }
       />
       <SingleColumnVirtualList
-        items={items}
-        getKey={(item) => item.id}
-        renderItem={(item) => <TrendingSubjectPanelItem id={item.id} subject={item.subject} />}
+        items={subjectIds}
+        getKey={(id) => id}
+        renderItem={(id) => <TrendingSubjectPanelItem id={id} />}
         activeIndex={centerActiveItem ? activeIndex : undefined}
         empty={<div className="text-muted-foreground p-4 text-sm">没有近期热门条目。</div>}
         estimateSize={ESTIMATED_SUBJECT_HEIGHT}
         gap={4}
-        hasMore={!!trendsQuery.hasNextPage}
+        hasMore={!trendsQuery.isFetchNextPageError && !!trendsQuery.hasNextPage}
         isFetchingMore={trendsQuery.isFetchingNextPage}
         onNearBottom={() => trendsQuery.fetchNextPage()}
         renderPlaceholder={() => <TrendingSubjectPanelItemSkeleton />}
@@ -97,9 +102,11 @@ export function TrendingSubjectsListPanelContent({
 }
 
 function TrendingSubjectsPanelStatus({
+  action,
   label,
   loading = false,
 }: {
+  action?: ReactNode
   label: string
   loading?: boolean
 }) {
@@ -107,7 +114,7 @@ function TrendingSubjectsPanelStatus({
     <MonoListPanelFilters>
       <div className="text-muted-foreground flex w-full items-center justify-between gap-2 text-xs">
         <span>{label}</span>
-        {loading && <span>刷新中</span>}
+        {action ?? (loading && <span>刷新中</span>)}
       </div>
     </MonoListPanelFilters>
   )
@@ -123,10 +130,15 @@ function TrendingSubjectsPanelSkeleton() {
   )
 }
 
-function TrendingSubjectPanelItem({ id, subject }: { id: string; subject: Subject | null }) {
+function TrendingSubjectPanelItem({ id }: { id: string }) {
   const to = `/subject/${id}`
   const active = isRoutePathActive(useLocation().pathname, to)
   const ref = useActivePanelItemRef(active)
+  const subjectQuery = useSubjectInfoQuery({
+    subjectId: id,
+    dbStaleTime: TRENDING_SUBJECT_INFO_STALE_TIME,
+  })
+  const subject = subjectQuery.data ?? null
 
   if (!subject) {
     return <TrendingSubjectPanelItemSkeleton innerRef={ref} />

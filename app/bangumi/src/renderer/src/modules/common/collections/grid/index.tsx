@@ -1,19 +1,14 @@
-import { MasonryInfiniteGrid } from '@egjs/react-infinitegrid'
-import { CollectionItem } from '@renderer/modules/common/collections/grid/item'
 import { Skeleton } from '@renderer/components/ui/skeleton'
+import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
 import { useInfinityQueryCollectionsByUsername } from '@renderer/data/hooks/api/collection'
 import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
-import { gridCache } from '@renderer/state/global-var'
+import { CollectionItem } from '@renderer/modules/common/collections/grid/item'
 import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
-import { ScrollArea } from '@base-ui/react/scroll-area'
 import { useSetAtom } from 'jotai'
 import { useEffect, useMemo, useRef } from 'react'
-import type { Component, ComponentClass, Ref } from 'react'
 
-const MasonryInfiniteGridCompat = MasonryInfiniteGrid as unknown as ComponentClass<
-  Record<string, unknown>
->
+const COLLECTION_PANEL_LIMIT = 10
 
 export function CollectionsGrid({
   collectionType,
@@ -34,17 +29,19 @@ export function CollectionsGrid({
     subjectType: subjectType,
     enabled: !!username,
     needKeepPreviousData: false,
+    refetchPageLimit: 0,
   })
-  const igRef = useRef<MasonryInfiniteGrid | null>(null)
+  const {
+    fetchNextPage,
+    hasNextPage,
+    isError,
+    isFetching,
+    isFetchingNextPage,
+    isRefetching,
+    refetch,
+  } = collectionsQuery
+  const handledDuplicateSignatureRef = useRef<string | null>(null)
   const setIsRefetching = useSetAtom(collectionPanelIsRefetchingAtom)
-  useEffect(() => {
-    if (gridCache.has(`${subjectType}-${collectionType}`)) {
-      const status = gridCache.get(`${subjectType}-${collectionType}`)
-      if (status) {
-        igRef.current?.setStatus(status)
-      }
-    }
-  }, [subjectType, collectionType, igRef])
   const collections = collectionsQuery.data
   const items = useMemo(
     () =>
@@ -59,81 +56,59 @@ export function CollectionsGrid({
     [collections],
   )
   useEffect(() => {
-    if (new Set(items.map((item) => item.data.subject_id)).size !== items.length)
-      collectionsQuery.refetch()
-  }, [items, collectionsQuery])
+    const subjectIds = items.map((item) => item.data.subject_id)
+    if (new Set(subjectIds).size === subjectIds.length) {
+      handledDuplicateSignatureRef.current = null
+      return
+    }
+
+    const duplicateSignature = subjectIds.join(',')
+    if (handledDuplicateSignatureRef.current === duplicateSignature || isFetching || isRefetching) {
+      return
+    }
+
+    handledDuplicateSignatureRef.current = duplicateSignature
+    refetch()
+  }, [isFetching, isRefetching, items, refetch])
   useEffect(() => {
-    setIsRefetching(collectionsQuery.isRefetching)
-  }, [collectionsQuery.isRefetching, setIsRefetching])
+    setIsRefetching(isRefetching)
+  }, [isRefetching, setIsRefetching])
   if (!collections)
     return (
-      <div className="relative flex flex-col items-center justify-start gap-5 overflow-hidden p-1">
-        <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-1">
-          {Array(20)
-            .fill(undefined)
-            .map((_, index) => (
-              <CollectionSkeleton key={index} />
-            ))}
-        </div>
+      <div className="flex min-h-0 flex-1 flex-col gap-1 px-1 py-1">
+        {Array.from({ length: 8 }).map((_, index) => (
+          <CollectionSkeleton key={index} />
+        ))}
       </div>
     )
-  return (
-    <ScrollArea.Root className="group/scroll relative h-full w-full overflow-hidden">
-      <MasonryInfiniteGridCompat
-        ref={igRef as unknown as Ref<Component<Record<string, unknown>>>}
-        // Make the InfiniteGrid wrapper be the Base UI viewport so scrolling is observed correctly.
-        tag={ScrollArea.Viewport as unknown as string}
-        // Make the InfiniteGrid container be the Base UI content wrapper so thumb updates when content grows.
-        container
-        containerTag={ScrollArea.Content as unknown as string}
-        onChangeScroll={() => {
-          gridCache.set(`${subjectType}-${collectionType}`, igRef.current?.getStatus())
-        }}
-        onRenderComplete={() => {
-          gridCache.set(`${subjectType}-${collectionType}`, igRef.current?.getStatus())
-        }}
-        className="h-full w-full overflow-x-hidden px-1 py-1 focus-visible:outline-hidden"
-        useResizeObserver
-        observeChildren
-        placeholder={<CollectionSkeleton />}
-        align="stretch"
-        maxStretchColumnSize={384}
-        gap={4}
-        onRequestAppend={(e) => {
-          if (
-            !collectionsQuery.isError &&
-            collectionsQuery.hasNextPage &&
-            !collectionsQuery.isFetchingNextPage
-          ) {
-            e.wait()
-            e.currentTarget.appendPlaceholders(
-              collections.pages[0].data.length,
-              (+e.groupKey! || 0) + 1,
-            )
-            collectionsQuery.fetchNextPage().then(() => e.ready())
-          }
-        }}
-      >
-        {items.map((item) => {
-          return (
-            <div key={item.data.subject_id} data-grid-groupkey={item.index}>
-              <CollectionItem
-                collectionItemInfo={item.data}
-                showEpisodeList={showEpisodeList}
-                useOneBasedEpisodeSort={useOneBasedEpisodeSort}
-              />
-            </div>
-          )
-        })}
-      </MasonryInfiniteGridCompat>
 
-      <ScrollArea.Scrollbar
-        orientation="vertical"
-        className="absolute top-0 right-0 z-20 flex h-full w-2.5 touch-none p-0.5 opacity-0 transition-opacity duration-150 select-none group-hover/scroll:opacity-100"
-      >
-        <ScrollArea.Thumb className="bg-foreground/10 hover:bg-foreground/30 active:bg-foreground/40 relative [height:var(--scroll-area-thumb-height)] w-full flex-1 rounded-full" />
-      </ScrollArea.Scrollbar>
-    </ScrollArea.Root>
+  if (items.length === 0) {
+    return <div className="text-muted-foreground p-4 text-sm">没有符合条件的项目。</div>
+  }
+
+  return (
+    <SingleColumnVirtualList
+      items={items}
+      getKey={(item) => item.data.subject_id}
+      renderItem={(item) => (
+        <CollectionItem
+          collectionItemInfo={item.data}
+          showEpisodeList={showEpisodeList}
+          useOneBasedEpisodeSort={useOneBasedEpisodeSort}
+        />
+      )}
+      appendPlaceholderCount={collections.pages[0]?.data.length || COLLECTION_PANEL_LIMIT}
+      className="px-1 py-1"
+      estimateSize={showEpisodeList ? 156 : 84}
+      gap={4}
+      hasMore={!isError && !!hasNextPage}
+      isFetchingMore={isFetchingNextPage}
+      onNearBottom={() => fetchNextPage()}
+      renderPlaceholder={() => <CollectionSkeleton />}
+      rootClassName="flex-1"
+      scrollAreaKey={`collection-panel:${username}:${subjectType}:${collectionType}:${showEpisodeList}:${useOneBasedEpisodeSort}`}
+      showBackToTop
+    />
   )
 }
 

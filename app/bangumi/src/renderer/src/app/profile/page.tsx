@@ -22,16 +22,13 @@ import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { sidePanelCollectionTypeFilterAtom } from '@renderer/state/collection'
 import { scrollCache } from '@renderer/state/global-var'
 import { userProfileAvatarInViewAtom } from '@renderer/state/in-view'
-import {
-  nvaCollectionButtonAtomAction,
-  openMonoListPanelTabAtomAction,
-  rightPanelOpenAtom,
-} from '@renderer/state/panel'
+import { nvaCollectionButtonAtomAction, rightPanelOpenAtom } from '@renderer/state/panel'
 import {
   hasUserTimelineItemDetails,
   UserTimelineItemCard,
   UserTimelineSkeleton,
 } from '@renderer/modules/common/user/timeline'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
 import { useSetAtom } from 'jotai'
 import { Activity, CalendarDays, UserRound } from 'lucide-react'
 import dayjs from 'dayjs'
@@ -460,7 +457,7 @@ function useOpenCollectionPanel({
 }) {
   const openCollectionPanel = useSetAtom(nvaCollectionButtonAtomAction)
   const setCollectionTypeFilter = useSetAtom(sidePanelCollectionTypeFilterAtom)
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
 
   return (collectionType: CollectionType) => {
     if (ownProfile) {

@@ -11,8 +11,7 @@ import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { RelatedSubject } from '@renderer/data/types/subject'
 import { isEmpty } from '@renderer/lib/utils/string'
-import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
-import { useSetAtom } from 'jotai'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
 import { Link, useViewTransitionState, useLocation } from 'react-router-dom'
 
 interface Props {
@@ -22,7 +21,7 @@ interface Props {
 /** 单行本列表 */
 export function Tankobon({ subjectId }: Props) {
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
   /** 由于 API 给单行版的列表现在是在关联条目里面，所以 */
   const relatedSubjects = useRelatedSubjectsQuery({
     id: subjectId,

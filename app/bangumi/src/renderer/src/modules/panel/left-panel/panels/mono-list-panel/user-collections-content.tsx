@@ -5,7 +5,7 @@ import { useInfinityQueryCollectionsByUsername } from '@renderer/data/hooks/api/
 import { CollectionData } from '@renderer/data/types/collection'
 import { monoListPanelCenterActiveItemAtom, type MonoListPanelTab } from '@renderer/state/panel'
 import { useAtomValue } from 'jotai'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import {
   isRoutePathActive,
   PanelItemImage,
@@ -32,7 +32,10 @@ export function UserCollectionsListPanelContent({
     initialPageParam: 0,
     enabled: !!tab.username,
     needKeepPreviousData: false,
+    refetchPageLimit: 0,
   })
+  const { isFetching, isRefetching, refetch } = collectionsQuery
+  const handledDuplicateSignatureRef = useRef<string | null>(null)
   const collections = collectionsQuery.data
   const items = useMemo(
     () =>
@@ -52,10 +55,20 @@ export function UserCollectionsListPanelContent({
     [items, pathname],
   )
   useEffect(() => {
-    if (new Set(items.map((item) => item.data.subject_id)).size !== items.length) {
-      collectionsQuery.refetch()
+    const subjectIds = items.map((item) => item.data.subject_id)
+    if (new Set(subjectIds).size === subjectIds.length) {
+      handledDuplicateSignatureRef.current = null
+      return
     }
-  }, [collectionsQuery, items])
+
+    const duplicateSignature = subjectIds.join(',')
+    if (handledDuplicateSignatureRef.current === duplicateSignature || isFetching || isRefetching) {
+      return
+    }
+
+    handledDuplicateSignatureRef.current = duplicateSignature
+    refetch()
+  }, [isFetching, isRefetching, items, refetch])
 
   if (!collections) {
     return (

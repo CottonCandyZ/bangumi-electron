@@ -12,9 +12,10 @@ import {
 import { SectionPath } from '@renderer/data/types/web'
 import { useStateHook } from '@renderer/hooks/use-cache-state'
 import { cn } from '@renderer/lib/utils'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
 import { activeSectionAtom } from '@renderer/state/small-carousel'
-import { openMonoListPanelTabAtomAction, type MonoListPanelTab } from '@renderer/state/panel'
-import { useAtomValue, useSetAtom } from 'jotai'
+import { type MonoListPanelTab } from '@renderer/state/panel'
+import { useAtomValue } from 'jotai'
 import { ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTopListQuery } from '@renderer/data/hooks/web/subject'
@@ -28,7 +29,7 @@ export type SmallCarouselProps = {
 }
 
 export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const topList = useTopListQuery(sectionPath)
   const subjectIds = topList.data
     ?.map((item) => item.SubjectId)

@@ -5,6 +5,7 @@ session.defaultSession.webRequest.onBeforeSendHeaders(
   (details, callback) => {
     if (details.url.startsWith('https://bgm.tv/')) {
       details.requestHeaders['Referer'] = 'https://bgm.tv/'
+      details.requestHeaders['Origin'] = 'https://bgm.tv'
     }
     if (details.url.startsWith('https://next.bgm.tv/')) {
       details.requestHeaders['Referer'] = 'https://next.bgm.tv/'

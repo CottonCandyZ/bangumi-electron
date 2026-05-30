@@ -13,10 +13,12 @@ import { SubjectId } from '@renderer/data/types/bgm'
  */
 export const useSubjectInfoQuery = ({
   subjectId: id,
+  dbStaleTime,
   enabled,
   needKeepPreviousData,
 }: {
   subjectId: SubjectId | undefined
+  dbStaleTime?: number
   enabled?: boolean
   needKeepPreviousData?: boolean
 }) =>
@@ -27,6 +29,7 @@ export const useSubjectInfoQuery = ({
     dbParams: { id: Number(id) },
     queryKey: ['subject-info'],
     updateDB: insertSubjectInfo,
+    dbStaleTime,
     enabled,
     needKeepPreviousData,
   })
@@ -49,10 +52,12 @@ export const useSubjectInfoQuery = ({
  */
 export const useSubjectsInfoQuery = ({
   subjectIds: ids,
+  dbStaleTime,
   enabled,
   needKeepPreviousData,
 }: {
   subjectIds: SubjectId[] | undefined
+  dbStaleTime?: number
   enabled?: boolean
   needKeepPreviousData?: boolean
 }) =>
@@ -62,6 +67,7 @@ export const useSubjectsInfoQuery = ({
     dbParams: { ids: ids?.map((id) => Number(id)) },
     queryKey: ['subject-info'],
     updateDB: insertSubjectsInfo,
+    dbStaleTime,
     enabled,
     needKeepPreviousData,
   })

@@ -6,6 +6,7 @@ import {
   useGroupTopicsQuery,
 } from '@renderer/data/hooks/api/community'
 import { OpenGroupTopicsPanelButton } from '@renderer/modules/common/community/open-group-topics-panel-button'
+import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 
 import { GroupHeader } from './header'
 import { GroupMembersPreview } from './members-preview'
@@ -69,6 +70,10 @@ export function GroupHome({ groupName }: { groupName: string | undefined }) {
               <h2 className="text-xl font-medium">小组话题</h2>
               {group && <OpenGroupTopicsPanelButton group={group} />}
             </div>
+            <QueryRefreshButton
+              onRefresh={() => topicsQuery.refetch()}
+              refreshing={topicsQuery.isFetching && !topicsQuery.isFetchingNextPage}
+            />
           </div>
           <GroupTopicsVirtualList
             error={topicsQuery.isError}
@@ -84,6 +89,8 @@ export function GroupHome({ groupName }: { groupName: string | undefined }) {
           error={membersQuery.isError}
           loading={membersQuery.isLoading}
           members={membersQuery.data?.pages.flatMap((page) => page.data) ?? []}
+          onRefresh={() => membersQuery.refetch()}
+          refreshing={membersQuery.isFetching && !membersQuery.isFetchingNextPage}
         />
       </div>
     </div>

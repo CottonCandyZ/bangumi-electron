@@ -20,6 +20,7 @@ import { useLocation } from 'react-router-dom'
 
 import type { CommunityTopicQuery } from './community-types'
 import { isRoutePathActive, useActivePanelItemRef } from './shared'
+import { useMonoListPanelRefreshAction } from './use-panel-refresh-action'
 
 export function CommunityTopicsListPanelContent({
   tab,
@@ -108,6 +109,11 @@ function CommunityTopicsVirtualList({
     tab.type === 'communityGroupTopics' || tab.type === 'communitySubjectTopics'
       ? 'creator'
       : 'source'
+  useMonoListPanelRefreshAction({
+    onRefresh: () => query.refetch(),
+    refreshing: query.isFetching && !query.isFetchingNextPage,
+    tabId: tab.id,
+  })
 
   if (query.isLoading && topics.length === 0) {
     return (

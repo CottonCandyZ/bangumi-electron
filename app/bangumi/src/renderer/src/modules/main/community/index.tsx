@@ -15,7 +15,11 @@ import { CommunityTopicSection } from './topic-preview-section'
 export function Community() {
   const session = useSession()
   const groupTopicsQuery = useRecentGroupTopicsQuery({ mode: 'all', limit: 24 })
-  const joinedGroupTopicsQuery = useRecentGroupTopicsQuery({ mode: 'joined', limit: 24 })
+  const joinedGroupTopicsQuery = useRecentGroupTopicsQuery({
+    mode: 'joined',
+    limit: 24,
+    enabled: !!session?.username,
+  })
   const subjectTopicsQuery = useRecentSubjectTopicsQuery({ limit: 24 })
   const trendingTopicsQuery = useTrendingSubjectTopicsQuery({ limit: 24 })
   const popularGroupsQuery = useGroupsQuery({ sort: 'members', limit: 15 })
@@ -27,7 +31,7 @@ export function Community() {
 
   usePageScrollRestoreReady(
     !groupTopicsQuery.isLoading &&
-      !joinedGroupTopicsQuery.isLoading &&
+      (!session?.username || !joinedGroupTopicsQuery.isLoading) &&
       !subjectTopicsQuery.isLoading &&
       !trendingTopicsQuery.isLoading &&
       !popularGroupsQuery.isLoading &&
@@ -50,6 +54,8 @@ export function Community() {
               title: '我的小组',
               topicKind: 'group',
             }}
+            loginRequired={!session?.username}
+            loginText="后显示加入小组的讨论。"
             query={joinedGroupTopicsQuery}
           />
           <CommunityTopicSection
@@ -91,7 +97,10 @@ export function Community() {
             groups={joinedGroupsQuery.data?.pages.flatMap((page) => page.data) ?? []}
             listKind="user"
             loading={!!session?.username && joinedGroupsQuery.isLoading}
+            onRefresh={() => joinedGroupsQuery.refetch()}
             panelTitle="关注小组"
+            refreshDisabled={!session?.username}
+            refreshing={joinedGroupsQuery.isFetching && !joinedGroupsQuery.isFetchingNextPage}
             signedIn={!!session?.username}
             sourceTitle="讨论"
             sourceTo="/talk"
@@ -103,8 +112,10 @@ export function Community() {
             groups={popularGroupsQuery.data?.pages.flatMap((page) => page.data) ?? []}
             listKind="all"
             loading={popularGroupsQuery.isLoading}
+            onRefresh={() => popularGroupsQuery.refetch()}
             panelTitle="热门小组"
             previewLimit={15}
+            refreshing={popularGroupsQuery.isFetching && !popularGroupsQuery.isFetchingNextPage}
             signedIn
             sort="members"
             sourceTitle="讨论"

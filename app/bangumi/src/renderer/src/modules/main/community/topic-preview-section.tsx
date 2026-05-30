@@ -4,8 +4,10 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import type { CommunityTopic } from '@renderer/data/types/community'
 import { cn } from '@renderer/lib/utils'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
-import { openMonoListPanelTabAtomAction, type MonoListPanelTab } from '@renderer/state/panel'
-import { useSetAtom } from 'jotai'
+import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
+import { LoginInlineAction } from '@renderer/modules/common/user/login/login-inline-action'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { type MonoListPanelTab } from '@renderer/state/panel'
 import type { ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -14,9 +16,13 @@ import type { CommunityOverviewSection, CommunityTopicQuery } from './types'
 const PREVIEW_COUNT = 10
 
 export function CommunityTopicSection({
+  loginRequired = false,
+  loginText,
   query,
   section,
 }: {
+  loginRequired?: boolean
+  loginText?: string
   query: CommunityTopicQuery
   section: CommunityOverviewSection
 }) {
@@ -31,19 +37,30 @@ export function CommunityTopicSection({
         </div>
         <OpenCommunityPanelButton
           disabled={topics.length === 0}
+          onRefresh={() => query.refetch()}
+          refreshing={query.isFetching && !query.isFetchingNextPage}
           section={section}
           topics={topics}
         />
       </div>
-      <CommunityTopicPreviewList query={query} topics={topics} />
+      <CommunityTopicPreviewList
+        loginRequired={loginRequired}
+        loginText={loginText}
+        query={query}
+        topics={topics}
+      />
     </section>
   )
 }
 
 function CommunityTopicPreviewList({
+  loginRequired,
+  loginText,
   query,
   topics,
 }: {
+  loginRequired: boolean
+  loginText?: string
   query: CommunityTopicQuery
   topics: CommunityTopic[]
 }) {
@@ -58,6 +75,15 @@ function CommunityTopicPreviewList({
             <Button size="sm" variant="outline" onClick={() => query.refetch()}>
               重试
             </Button>
+          }
+        />
+      ) : loginRequired ? (
+        <CommunitySectionMessage
+          text={
+            <>
+              <LoginInlineAction />
+              {loginText}
+            </>
           }
         />
       ) : query.isLoading && previewTopics.length === 0 ? (
@@ -75,39 +101,46 @@ function CommunityTopicPreviewList({
 
 function OpenCommunityPanelButton({
   disabled,
+  onRefresh,
+  refreshing,
   section,
   topics,
 }: {
   disabled: boolean
+  onRefresh: () => Promise<unknown> | unknown
+  refreshing: boolean
   section: CommunityOverviewSection
   topics: CommunityTopic[]
 }) {
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
 
   return (
-    <Button
-      variant="ghost"
-      size="sm"
-      className="no-drag-region text-muted-foreground hover:text-foreground h-8 shrink-0 gap-1 px-2"
-      disabled={disabled}
-      onClick={() =>
-        openMonoListPanelTab({
-          groupMode: section.groupMode,
-          id: section.id,
-          panelTitle: section.panelTitle,
-          sourceTitle: '讨论',
-          sourceTo: '/talk',
-          title: section.title,
-          topicKind: section.topicKind,
-          topics,
-          type: 'communityTopics',
-        } satisfies MonoListPanelTab)
-      }
-      title="在侧栏查看更多"
-    >
-      <span>查看更多</span>
-      <span className="i-mingcute-right-line text-base" />
-    </Button>
+    <div className="flex shrink-0 items-center gap-1">
+      <QueryRefreshButton onRefresh={onRefresh} refreshing={refreshing} />
+      <Button
+        variant="ghost"
+        size="sm"
+        className="no-drag-region text-muted-foreground hover:text-foreground h-8 shrink-0 gap-1 px-2"
+        disabled={disabled}
+        onClick={() =>
+          openMonoListPanelTab({
+            groupMode: section.groupMode,
+            id: section.id,
+            panelTitle: section.panelTitle,
+            sourceTitle: '讨论',
+            sourceTo: '/talk',
+            title: section.title,
+            topicKind: section.topicKind,
+            topics,
+            type: 'communityTopics',
+          } satisfies MonoListPanelTab)
+        }
+        title="在侧栏查看更多"
+      >
+        <span>查看更多</span>
+        <span className="i-mingcute-right-line text-base" />
+      </Button>
+    </div>
   )
 }
 
@@ -201,7 +234,7 @@ function CommunityPreviewSkeleton() {
   )
 }
 
-function CommunitySectionMessage({ action, text }: { action?: ReactNode; text: string }) {
+function CommunitySectionMessage({ action, text }: { action?: ReactNode; text: ReactNode }) {
   return (
     <div className="border-border bg-muted/30 flex min-h-40 flex-1 flex-col items-center justify-center gap-3 rounded-md border border-dashed text-sm">
       <span className="text-muted-foreground">{text}</span>

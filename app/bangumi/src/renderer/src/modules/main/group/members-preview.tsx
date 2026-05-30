@@ -3,19 +3,27 @@ import { MyLink } from '@renderer/components/my-link'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import type { GroupMember } from '@renderer/data/types/community'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
+import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 
 export function GroupMembersPreview({
   error,
   loading,
   members,
+  onRefresh,
+  refreshing,
 }: {
   error: boolean
   loading: boolean
   members: GroupMember[]
+  onRefresh: () => Promise<unknown> | unknown
+  refreshing: boolean
 }) {
   return (
     <aside className="hidden min-h-0 w-64 shrink-0 flex-col lg:flex">
-      <h2 className="mb-3 shrink-0 text-xl font-medium">近期加入</h2>
+      <div className="mb-3 flex shrink-0 items-center justify-between gap-3">
+        <h2 className="text-xl font-medium">近期加入</h2>
+        <QueryRefreshButton onRefresh={onRefresh} refreshing={refreshing} />
+      </div>
       <div className="min-h-0 flex-1 overflow-y-auto pr-1">
         {error ? (
           <p className="text-muted-foreground text-sm">暂时无法读取成员。</p>

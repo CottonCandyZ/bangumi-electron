@@ -199,6 +199,15 @@ export const monoListPanelTabsAtom = atom<MonoListPanelTab[]>([])
 
 export const monoListPanelActiveTabIdAtom = atom<string | null>(null)
 
+export type MonoListPanelRefreshAction = {
+  disabled?: boolean
+  onRefresh: () => Promise<unknown> | unknown
+  refreshing: boolean
+  tabId: string
+}
+
+export const monoListPanelRefreshActionAtom = atom<MonoListPanelRefreshAction | null>(null)
+
 export const monoListPanelCenterActiveItemAtom = atomWithStorage(
   'mono-list-panel-center-active-item',
   false,
@@ -245,6 +254,10 @@ export const openMonoListPanelTabAtomAction = atom(null, (get, set, tab: MonoLis
     ? tabs.map((item) => (item.id === tab.id ? tab : item))
     : [...tabs, tab]
 
+  if (tab.type === 'siteTimeline') {
+    set(monoListSiteTimelineModeAtom, tab.mode)
+  }
+
   set(monoListPanelTabsAtom, nextTabs)
   set(monoListPanelActiveTabIdAtom, tab.id)
   set(leftPanelOpenContentAtom, 'monoList')
@@ -281,7 +294,8 @@ export const closeAllMonoListPanelTabsAtomAction = atom(null, (get, set) => {
   set(monoListPanelActiveTabIdAtom, null)
   set(leftPanelOpenAtom, false)
   window.setTimeout(() => {
-    if (get(leftPanelOpenContentAtom) !== 'monoList') return
+    if (get(leftPanelOpenAtom) || get(leftPanelOpenContentAtom) !== 'monoList') return
+    if (get(monoListPanelTabsAtom).length > 0) return
     set(leftPanelOpenContentAtom, 'collection')
   }, LEFT_PANEL_CLOSE_ANIMATION_MS)
 })

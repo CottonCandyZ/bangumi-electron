@@ -9,9 +9,10 @@ import {
 import { useSession } from '@renderer/data/hooks/session'
 import type { CommunityTopic, CommunityTopicKind } from '@renderer/data/types/community'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
+import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 import { LoginInlineAction } from '@renderer/modules/common/user/login/login-inline-action'
-import { openMonoListPanelTabAtomAction, type MonoListPanelTab } from '@renderer/state/panel'
-import { useSetAtom } from 'jotai'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { type MonoListPanelTab } from '@renderer/state/panel'
 
 const PREVIEW_LIMIT = 5
 
@@ -37,8 +38,11 @@ export function HomeJoinedGroupsPreview() {
       emptyText="近期没有小组讨论"
       loginRequired={!session}
       loginText="后显示加入小组的讨论"
+      onRefresh={() => joinedTopicsQuery.refetch()}
       queryError={joinedTopicsQuery.isError}
       queryLoading={joinedTopicsQuery.isLoading}
+      refreshDisabled={!session}
+      refreshing={joinedTopicsQuery.isFetching && !joinedTopicsQuery.isFetchingNextPage}
       section={{
         description: '你加入的小组里的新回复',
         groupMode: 'joined',
@@ -58,8 +62,10 @@ export function HomeTrendingSubjectTopicsPreview() {
   return (
     <HomeTopicSection
       emptyText="近期没有热门条目讨论"
+      onRefresh={() => trendingTopicsQuery.refetch()}
       queryError={trendingTopicsQuery.isError}
       queryLoading={trendingTopicsQuery.isLoading}
+      refreshing={trendingTopicsQuery.isFetching && !trendingTopicsQuery.isFetchingNextPage}
       section={{
         description: '站内正在热聊的条目帖子',
         id: 'home-trending-subject-topics',
@@ -74,22 +80,28 @@ export function HomeTrendingSubjectTopicsPreview() {
 
 function HomeTopicSection({
   emptyText,
-  queryError,
-  queryLoading,
   loginRequired = false,
   loginText,
+  onRefresh,
+  queryError,
+  queryLoading,
+  refreshDisabled,
+  refreshing,
   section,
   topics,
 }: {
   emptyText: string
   loginRequired?: boolean
   loginText?: string
+  onRefresh: () => Promise<unknown> | unknown
   queryError: boolean
   queryLoading: boolean
+  refreshDisabled?: boolean
+  refreshing: boolean
   section: HomeTopicSectionConfig
   topics: CommunityTopic[]
 }) {
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const previewTopics = topics.slice(0, PREVIEW_LIMIT)
 
   return (
@@ -99,28 +111,35 @@ function HomeTopicSection({
           <h2 className="line-clamp-1 text-xl font-semibold">{section.title}</h2>
           <p className="text-muted-foreground mt-0.5 line-clamp-1 text-sm">{section.description}</p>
         </div>
-        <Button
-          className="h-8 shrink-0 gap-1 px-2 text-xs"
-          disabled={topics.length === 0}
-          onClick={() =>
-            openMonoListPanelTab({
-              groupMode: section.groupMode,
-              id: section.id,
-              panelTitle: section.panelTitle,
-              sourceTitle: '首页',
-              sourceTo: '/',
-              title: section.title,
-              topicKind: section.topicKind,
-              topics,
-              type: 'communityTopics',
-            } satisfies MonoListPanelTab)
-          }
-          size="sm"
-          variant="ghost"
-        >
-          查看更多
-          <span className="i-mingcute-right-line text-base" />
-        </Button>
+        <div className="flex shrink-0 items-center gap-1">
+          <QueryRefreshButton
+            disabled={refreshDisabled}
+            onRefresh={onRefresh}
+            refreshing={refreshing}
+          />
+          <Button
+            className="h-8 shrink-0 gap-1 px-2 text-xs"
+            disabled={topics.length === 0}
+            onClick={() =>
+              openMonoListPanelTab({
+                groupMode: section.groupMode,
+                id: section.id,
+                panelTitle: section.panelTitle,
+                sourceTitle: '首页',
+                sourceTo: '/',
+                title: section.title,
+                topicKind: section.topicKind,
+                topics,
+                type: 'communityTopics',
+              } satisfies MonoListPanelTab)
+            }
+            size="sm"
+            variant="ghost"
+          >
+            查看更多
+            <span className="i-mingcute-right-line text-base" />
+          </Button>
+        </div>
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         {queryError ? (

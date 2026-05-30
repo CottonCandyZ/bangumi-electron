@@ -1,6 +1,7 @@
 import { MyLink } from '@renderer/components/my-link'
 import { Label } from '@renderer/components/ui/label'
 import { Switch } from '@renderer/components/ui/switch'
+import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 import {
   MonoRelatedListPanelContent,
   MonoSubjectListPanelContent,
@@ -28,6 +29,7 @@ import {
   closeMonoListPanelTabAtomAction,
   monoListPanelActiveTabIdAtom,
   monoListPanelCenterActiveItemAtom,
+  monoListPanelRefreshActionAtom,
   monoListPanelTabsAtom,
 } from '@renderer/state/panel'
 import { isRoutePathActive } from './mono-list-panel/shared'
@@ -42,11 +44,14 @@ export function MonoListPanel() {
   const closeTab = useSetAtom(closeMonoListPanelTabAtomAction)
   const closeAllTabs = useSetAtom(closeAllMonoListPanelTabsAtomAction)
   const [centerActiveItem, setCenterActiveItem] = useAtom(monoListPanelCenterActiveItemAtom)
+  const refreshAction = useAtomValue(monoListPanelRefreshActionAtom)
   const { pathname, search } = useLocation()
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0]
   const activeTabCount = activeTab ? getMonoListPanelTabCount(activeTab) : null
   const activeTabTitle = activeTab ? getMonoListPanelTabDisplayTitle(activeTab) : ''
   const activeTabSourceTo = activeTab ? getMonoListPanelTabSourceTo(activeTab) : null
+  const activeRefreshAction =
+    activeTab && refreshAction?.tabId === activeTab.id ? refreshAction : null
   const activeTabSourceActive = activeTabSourceTo
     ? isRoutePathActive(`${pathname}${search}`, activeTabSourceTo)
     : false
@@ -108,12 +113,22 @@ export function MonoListPanel() {
       </div>
       <div className="flex shrink-0 flex-col gap-0.5 border-b px-3 py-2">
         <div className="flex min-w-0 flex-row items-center justify-between gap-2">
-          <div className="line-clamp-1 min-w-0 text-sm font-medium">
-            {activeTabTitle}
-            {activeTabCount !== null && (
-              <span className="text-muted-foreground ml-1 text-xs font-normal">
-                {activeTabCount}
-              </span>
+          <div className="flex min-w-0 flex-1 items-center gap-1">
+            <div className="line-clamp-1 min-w-0 text-sm font-medium">
+              {activeTabTitle}
+              {activeTabCount !== null && (
+                <span className="text-muted-foreground ml-1 text-xs font-normal">
+                  {activeTabCount}
+                </span>
+              )}
+            </div>
+            {activeRefreshAction && (
+              <QueryRefreshButton
+                className="size-7"
+                disabled={activeRefreshAction.disabled}
+                onRefresh={activeRefreshAction.onRefresh}
+                refreshing={activeRefreshAction.refreshing}
+              />
             )}
           </div>
           <Label className="text-muted-foreground no-drag-region shrink-0 gap-1.5 text-xs font-normal">

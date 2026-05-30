@@ -3,9 +3,10 @@ import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import type { SlimGroup } from '@renderer/data/types/community'
 import { OpenGroupTopicsPanelButton } from '@renderer/modules/common/community/open-group-topics-panel-button'
+import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 import { LoginInlineAction } from '@renderer/modules/common/user/login/login-inline-action'
-import { openMonoListPanelTabAtomAction, type MonoListPanelTab } from '@renderer/state/panel'
-import { useSetAtom } from 'jotai'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { type MonoListPanelTab } from '@renderer/state/panel'
 import { Link } from 'react-router-dom'
 
 export function GroupsSection({
@@ -14,8 +15,11 @@ export function GroupsSection({
   listKind,
   loginText,
   loading,
+  onRefresh,
   panelTitle,
   previewLimit,
+  refreshDisabled,
+  refreshing,
   signedIn,
   sort,
   sourceTitle,
@@ -28,8 +32,11 @@ export function GroupsSection({
   listKind: 'all' | 'user'
   loginText?: string
   loading: boolean
+  onRefresh: () => Promise<unknown> | unknown
   panelTitle: string
   previewLimit?: number
+  refreshDisabled?: boolean
+  refreshing: boolean
   signedIn: boolean
   sort?: 'posts' | 'topics' | 'members' | 'created' | 'updated'
   sourceTitle: string
@@ -37,7 +44,7 @@ export function GroupsSection({
   title: string
   username?: string
 }) {
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const previewGroups = previewLimit ? groups.slice(0, previewLimit) : groups
 
   return (
@@ -49,29 +56,36 @@ export function GroupsSection({
             {listKind === 'user' ? '你加入的小组' : '成员数最多的小组'}
           </p>
         </div>
-        <Button
-          className="h-8 shrink-0 gap-1 px-2 text-xs"
-          disabled={groups.length === 0}
-          onClick={() =>
-            openMonoListPanelTab({
-              groups,
-              id: listKind === 'user' ? `groups-user-${username}` : `groups-${sort ?? 'members'}`,
-              listKind,
-              panelTitle,
-              sort,
-              sourceTitle,
-              sourceTo,
-              title,
-              type: 'communityGroups',
-              username,
-            } satisfies MonoListPanelTab)
-          }
-          size="sm"
-          variant="ghost"
-        >
-          查看更多
-          <span className="i-mingcute-right-line text-base" />
-        </Button>
+        <div className="flex shrink-0 items-center gap-1">
+          <QueryRefreshButton
+            disabled={refreshDisabled}
+            onRefresh={onRefresh}
+            refreshing={refreshing}
+          />
+          <Button
+            className="h-8 shrink-0 gap-1 px-2 text-xs"
+            disabled={groups.length === 0}
+            onClick={() =>
+              openMonoListPanelTab({
+                groups,
+                id: listKind === 'user' ? `groups-user-${username}` : `groups-${sort ?? 'members'}`,
+                listKind,
+                panelTitle,
+                sort,
+                sourceTitle,
+                sourceTo,
+                title,
+                type: 'communityGroups',
+                username,
+              } satisfies MonoListPanelTab)
+            }
+            size="sm"
+            variant="ghost"
+          >
+            查看更多
+            <span className="i-mingcute-right-line text-base" />
+          </Button>
+        </div>
       </div>
       {!signedIn ? (
         <p className="text-muted-foreground text-sm">

@@ -12,6 +12,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 
 import type { CommunityGroupQuery } from './community-types'
 import { isRoutePathActive, useActivePanelItemRef } from './shared'
+import { useMonoListPanelRefreshAction } from './use-panel-refresh-action'
 
 export function CommunityGroupsListPanelContent({
   tab,
@@ -57,6 +58,11 @@ function CommunityGroupsVirtualList({
     () => groups.findIndex((group) => isRoutePathActive(pathname, `/group/${group.name}`)),
     [groups, pathname],
   )
+  useMonoListPanelRefreshAction({
+    onRefresh: () => query.refetch(),
+    refreshing: query.isFetching && !query.isFetchingNextPage,
+    tabId: tab.id,
+  })
 
   if (query.isLoading && groups.length === 0) {
     return (

@@ -7,9 +7,9 @@ import { useQuerySubjectCharacters } from '@renderer/data/hooks/api/character'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CharactersGrid } from '@renderer/modules/main/subject/character/gird'
-import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
-import { useAtom, useSetAtom } from 'jotai'
+import { useAtom } from 'jotai'
 
 interface Props {
   subjectId: SubjectId
@@ -21,7 +21,7 @@ export function SubjectCharacters({ subjectId }: Props) {
   usePageScrollRestoreReady(!charactersQuery.isPending && !subjectInfoQuery.isPending)
   const id = `subject-characters-tab-${subjectId}`
   const [filterMap, setFilter] = useAtom(tabFilerAtom)
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const filter = filterMap.get(id) ?? '全部'
   const characters = charactersQuery.data
   const relations = new Set<string>(['全部', ...(characters?.keys() || [])])

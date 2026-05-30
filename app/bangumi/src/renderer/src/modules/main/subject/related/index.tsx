@@ -7,9 +7,9 @@ import { useRelatedSubjectsQuery } from '@renderer/data/hooks/api/subject'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { RelatedSubjectsGrid } from '@renderer/modules/main/subject/related/content'
-import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
-import { useAtom, useSetAtom } from 'jotai'
+import { useAtom } from 'jotai'
 import { useMemo } from 'react'
 
 interface Props {
@@ -18,7 +18,7 @@ interface Props {
 
 export function RelatedSubjects({ subjectId }: Props) {
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const relatedSubjectsQuery = useRelatedSubjectsQuery({
     id: subjectId,
     needKeepPreviousData: false,

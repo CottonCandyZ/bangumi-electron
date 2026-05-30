@@ -1,6 +1,5 @@
 import { SubjectId } from '@renderer/data/types/bgm'
-import { openMonoListPanelTabAtomAction } from '@renderer/state/panel'
-import { useSetAtom } from 'jotai'
+import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
 import { useCallback } from 'react'
 
 export function useOpenSubjectEpisodesPanel({
@@ -14,7 +13,7 @@ export function useOpenSubjectEpisodesPanel({
   episodeTotal?: number
   initialOffset?: number
 }) {
-  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
+  const openMonoListPanelTab = useOpenMonoListPanelTab()
 
   const open = useCallback(() => {
     if (!subjectId) return
