@@ -23,7 +23,10 @@ export const SubjectContent = ({
   style?: React.CSSProperties
 }) => {
   return (
-    <div className={cn('max-w-8xl mx-auto flex flex-col gap-10 px-10', className)} style={style}>
+    <div
+      className={cn('max-w-8xl @container mx-auto flex flex-col gap-10 px-10', className)}
+      style={style}
+    >
       <section className="@container">
         <div className="flex w-full flex-col items-center gap-8 @3xl:flex-row @3xl:items-start">
           {/* cover */}
@@ -54,7 +57,7 @@ export const SubjectContent = ({
         </section>
         <SubjectCharacters subjectId={subjectId} />
         <RelatedSubjects subjectId={subjectId} />
-        <section className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">
+        <section className="grid grid-cols-1 gap-8 @5xl:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">
           <SubjectComments subjectId={subjectId} />
           <SubjectDiscussions subjectId={subjectId} />
         </section>
