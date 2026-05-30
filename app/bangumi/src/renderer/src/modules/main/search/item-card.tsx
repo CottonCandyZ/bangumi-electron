@@ -20,6 +20,7 @@ export function SearchItemCard({ searchItem }: { searchItem: SearchData }) {
 
 function SearchMonoRow({ searchItem }: { searchItem: SearchMonoData }) {
   const image = searchItem.image || searchItem.images?.medium || searchItem.images?.grid
+  const summary = searchItem.summary || searchItem.short_summary
   const isPerson = 'career' in searchItem
   const to = `/${isPerson ? 'person' : 'character'}/${searchItem.id}`
 
@@ -34,7 +35,7 @@ function SearchMonoRow({ searchItem }: { searchItem: SearchMonoData }) {
             <Image
               imageSrc={image}
               className="bg-muted flex h-24 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md"
-              imageClassName="h-full w-full object-cover"
+              imageClassName="h-full w-full object-cover object-top"
               loadingClassName="h-24 w-16"
               careLoading
             />
@@ -51,7 +52,7 @@ function SearchMonoRow({ searchItem }: { searchItem: SearchMonoData }) {
               </div>
             </div>
             <div className="text-muted-foreground line-clamp-3 text-xs leading-relaxed">
-              {searchItem.summary || '--'}
+              {summary || '--'}
             </div>
           </div>
         </CardContent>

@@ -37,6 +37,7 @@ export type SearchMonoData = {
   images?: Images | null
   image?: string
   summary?: string
+  short_summary?: string
   infobox?: unknown[]
   locked?: boolean
   nsfw?: boolean
