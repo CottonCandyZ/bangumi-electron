@@ -18,7 +18,6 @@ import dayjs from 'dayjs'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useMemo, useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
-import { useInView } from 'react-intersection-observer'
 import { Virtualizer } from 'virtua'
 import type { VirtualizerHandle } from 'virtua'
 
@@ -26,6 +25,8 @@ type TopicKind = 'group' | 'subject'
 
 const TOPIC_DETAIL_ITEM_ESTIMATE = 148
 const TOPIC_DETAIL_OVERSCAN = 8
+const TOPIC_TITLE_HEADER_SHOW_OFFSET = 64
+const TOPIC_TITLE_HEADER_HIDE_OFFSET = 96
 
 export function CommunityTopicDetail({ kind, topicId }: { kind: TopicKind; topicId: number }) {
   if (!Number.isFinite(topicId)) {
@@ -211,8 +212,11 @@ function TopicHeader({
   kind: TopicKind
   mainComment?: Comment
 }) {
+  const titleInView = useAtomValue(communityTopicTitleInViewAtom)
   const setTitleInView = useSetAtom(communityTopicTitleInViewAtom)
-  const { ref, inView } = useInView({ initialInView: true, threshold: 0.1 })
+  const scrollViewport = useAtomValue(scrollViewportAtom)
+  const titleRef = useRef<HTMLHeadingElement | null>(null)
+  const titleInViewRef = useRef(true)
   const source =
     kind === 'group'
       ? {
@@ -228,11 +232,50 @@ function TopicHeader({
         }
 
   useEffect(() => {
-    setTitleInView(inView)
-  }, [inView, setTitleInView, topic.id])
+    titleInViewRef.current = titleInView
+
+    if (!scrollViewport) return
+
+    let raf = 0
+    const updateTitleInView = () => {
+      raf = 0
+      const titleElement = titleRef.current
+      if (!titleElement) return
+
+      const titleBottom = titleElement.getBoundingClientRect().bottom
+      const viewportTop = scrollViewport.getBoundingClientRect().top
+      const currentInView = titleInViewRef.current
+      let nextInView = currentInView
+
+      if (currentInView && titleBottom <= viewportTop + TOPIC_TITLE_HEADER_SHOW_OFFSET) {
+        nextInView = false
+      } else if (!currentInView && titleBottom >= viewportTop + TOPIC_TITLE_HEADER_HIDE_OFFSET) {
+        nextInView = true
+      }
+
+      if (nextInView === currentInView) return
+
+      titleInViewRef.current = nextInView
+      setTitleInView(nextInView)
+    }
+    const scheduleUpdate = () => {
+      if (raf) return
+      raf = window.requestAnimationFrame(updateTitleInView)
+    }
+
+    updateTitleInView()
+    scrollViewport.addEventListener('scroll', scheduleUpdate, { passive: true })
+    window.addEventListener('resize', scheduleUpdate)
+
+    return () => {
+      if (raf) window.cancelAnimationFrame(raf)
+      scrollViewport.removeEventListener('scroll', scheduleUpdate)
+      window.removeEventListener('resize', scheduleUpdate)
+    }
+  }, [scrollViewport, setTitleInView, titleInView, topic.id])
 
   return (
-    <section className="flex flex-col gap-5" ref={ref}>
+    <section className="flex flex-col gap-5">
       <div className="flex flex-col gap-3">
         <div className="flex flex-row flex-wrap items-center gap-2">
           <Badge variant="outline">{kind === 'group' ? '小组' : '条目'}</Badge>
@@ -240,7 +283,9 @@ function TopicHeader({
             {topic.replyCount} 回复
           </Badge>
         </div>
-        <h1 className="text-3xl leading-tight font-semibold">{topic.title}</h1>
+        <h1 className="text-3xl leading-tight font-semibold" ref={titleRef}>
+          {topic.title}
+        </h1>
         <div className="flex flex-row items-center gap-3">
           {topic.creator?.avatar.medium ? (
             <MyLink
