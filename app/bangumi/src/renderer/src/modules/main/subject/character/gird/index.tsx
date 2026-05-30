@@ -16,6 +16,7 @@ const CHARACTER_CLIP_BUFFER_PX = 8
 const CHARACTER_GRID_GAP_REM = 0.5
 const CHARACTER_TOGGLE_WIDTH_REM = 3
 const CHARACTER_ROWS_WHEN_FOLDED = 2
+const CHARACTER_POP_CARD_CLOSE_OVERFLOW_GRACE_MS = 450
 
 const gridStyle = {
   '--character-card-min-width': `${CHARACTER_CARD_MIN_WIDTH_REM}rem`,
@@ -40,15 +41,30 @@ export function CharactersGrid({ characters }: { characters: Character[] }) {
   const [showNumber, setShowNumber] = useState(CHARACTER_ROWS_WHEN_FOLDED * 4)
   const [canFold, setCanFold] = useState(false)
   const [hoveringCard, setHoveringCard] = useState(false)
+  const [keepOverflowVisible, setKeepOverflowVisible] = useState(false)
   const activeHoverPopCard = useAtomValue(activeHoverPopCardAtom)
   const slice = fold ? showNumber : characters.length
   const clipping = fold && canFold
-  const overflowVisible = hoveringCard || activeHoverPopCard?.startsWith(`${CHARACTER_SECTION_ID}-`)
+  const activeCharacterPopCard = activeHoverPopCard?.startsWith(`${CHARACTER_SECTION_ID}-`) ?? false
+  const overflowVisible = hoveringCard || activeCharacterPopCard || keepOverflowVisible
   const { pathname } = useLocation()
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => {
     setFold(true)
   }, [pathname])
+
+  useEffect(() => {
+    if (activeCharacterPopCard) {
+      setKeepOverflowVisible(true)
+      return
+    }
+
+    const timer = window.setTimeout(() => {
+      setKeepOverflowVisible(false)
+    }, CHARACTER_POP_CARD_CLOSE_OVERFLOW_GRACE_MS)
+
+    return () => window.clearTimeout(timer)
+  }, [activeCharacterPopCard])
 
   const updateLayout = useCallback(
     (width: number) => {
