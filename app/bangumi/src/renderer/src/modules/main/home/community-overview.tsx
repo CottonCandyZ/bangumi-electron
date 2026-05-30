@@ -1,5 +1,3 @@
-import { Image } from '@renderer/components/image/image'
-import { MyLink } from '@renderer/components/my-link'
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import {
@@ -9,10 +7,12 @@ import {
 import { useSession } from '@renderer/data/hooks/session'
 import type { CommunityTopic, CommunityTopicKind } from '@renderer/data/types/community'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
+import { CommunityTopicLeadingImage } from '@renderer/modules/common/community/community-topic-leading'
 import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 import { LoginInlineAction } from '@renderer/modules/common/user/login/login-inline-action'
 import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
 import { type MonoListPanelTab } from '@renderer/state/panel'
+import { Link, useNavigate } from 'react-router-dom'
 
 const PREVIEW_LIMIT = 5
 
@@ -162,35 +162,47 @@ function HomeTopicSection({
 }
 
 function HomeTopicItem({ topic }: { topic: CommunityTopic }) {
-  const sourceTo = topic.kind === 'group' ? undefined : topic.source.route
+  const navigate = useNavigate()
+  const sourceTo = topic.source.route
+  const openTopic = () => navigate(topic.route)
 
   return (
-    <MyLink
-      className="hover:bg-accent flex min-w-0 gap-2 rounded-md p-2 transition-colors"
-      to={topic.route}
+    <article
+      className="hover:bg-accent focus-visible:ring-ring/50 flex min-w-0 cursor-default gap-2 rounded-md p-2 transition-colors focus-visible:ring-2 focus-visible:outline-hidden"
+      role="link"
+      tabIndex={0}
+      onClick={openTopic}
+      onKeyDown={(event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        openTopic()
+      }}
     >
-      {topic.source.image ? (
-        <Image
-          className="size-10 shrink-0 overflow-hidden rounded-md border"
-          imageSrc={topic.source.image}
-        />
-      ) : (
-        <div className="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-md border">
-          <span className="i-mingcute-chat-3-line text-lg" />
-        </div>
-      )}
+      <CommunityTopicLeadingImage
+        className="size-10 border"
+        iconClassName="text-lg"
+        topic={topic}
+      />
       <div className="min-w-0 flex-1">
-        <div className="line-clamp-1 text-sm font-medium">{topic.title}</div>
+        <p className="line-clamp-1 text-sm font-medium">{topic.title}</p>
         <div className="text-muted-foreground mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
           <span className="line-clamp-1 max-w-28">{topic.creator?.nickname ?? `#${topic.id}`}</span>
           <span>{topic.replyCount} 回复</span>
           <span>{formatRecentUnixTime(topic.updatedAt)}</span>
         </div>
-        <div className="text-primary mt-0.5 line-clamp-1 text-xs">
-          {sourceTo ? <span>{topic.source.title}</span> : topic.source.title}
-        </div>
+        {sourceTo ? (
+          <Link
+            className="text-primary mt-0.5 line-clamp-1 w-fit max-w-full text-xs underline-offset-2 hover:underline"
+            to={sourceTo}
+            onClick={(event) => event.stopPropagation()}
+          >
+            {topic.source.title}
+          </Link>
+        ) : (
+          <div className="text-primary mt-0.5 line-clamp-1 text-xs">{topic.source.title}</div>
+        )}
       </div>
-    </MyLink>
+    </article>
   )
 }
 

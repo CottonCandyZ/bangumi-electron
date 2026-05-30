@@ -1,9 +1,8 @@
-import { Image } from '@renderer/components/image/image'
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import type { CommunityTopic } from '@renderer/data/types/community'
-import { cn } from '@renderer/lib/utils'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
+import { CommunityTopicLeadingImage } from '@renderer/modules/common/community/community-topic-leading'
 import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 import { LoginInlineAction } from '@renderer/modules/common/user/login/login-inline-action'
 import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
@@ -164,13 +163,7 @@ function CommunityPreviewItem({ topic }: { topic: CommunityTopic }) {
     >
       <TopicSourceImage topic={topic} />
       <div className="min-w-0 flex-1">
-        <Link
-          className="line-clamp-1 w-fit max-w-full text-sm font-medium underline-offset-2 hover:underline"
-          to={to}
-          onClick={(event) => event.stopPropagation()}
-        >
-          {topic.title}
-        </Link>
+        <p className="line-clamp-1 text-sm font-medium">{topic.title}</p>
         <div className="text-muted-foreground mt-1 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs">
           <span className="line-clamp-1 max-w-32">{topic.creator?.nickname ?? `#${topic.id}`}</span>
           <span>{formatRecentUnixTime(topic.updatedAt)}</span>
@@ -197,27 +190,13 @@ function CommunityPreviewItem({ topic }: { topic: CommunityTopic }) {
 }
 
 function TopicSourceImage({ topic }: { topic: CommunityTopic }) {
-  if (topic.source.image) {
-    return (
-      <Image
-        className="bg-muted size-10 shrink-0 overflow-hidden rounded-md"
-        imageSrc={topic.source.image}
-        loading="eager"
-      />
-    )
-  }
-
-  const icon = topic.kind === 'group' ? 'i-mingcute-group-3-line' : 'i-mingcute-book-6-line'
-
   return (
-    <div
-      className={cn(
-        'bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-md',
-        topic.kind === 'trending-subject' && 'text-primary',
-      )}
-    >
-      <span className={`${icon} text-xl`} />
-    </div>
+    <CommunityTopicLeadingImage
+      className="size-10"
+      iconClassName="text-xl"
+      loading="eager"
+      topic={topic}
+    />
   )
 }
 

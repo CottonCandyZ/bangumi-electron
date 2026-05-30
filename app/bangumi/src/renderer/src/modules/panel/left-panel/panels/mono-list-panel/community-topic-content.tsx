@@ -1,5 +1,3 @@
-import { Image } from '@renderer/components/image/image'
-import { MyLink } from '@renderer/components/my-link'
 import { Badge } from '@renderer/components/ui/badge'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
@@ -13,10 +11,16 @@ import {
 import type { CommunityTopic } from '@renderer/data/types/community'
 import { cn } from '@renderer/lib/utils'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
+import {
+  CommunityTopicLeadingImage,
+  getCommunityTopicLeadingKind,
+  getCommunityTopicLeadingTitle,
+  type CommunityTopicLeadingKind,
+} from '@renderer/modules/common/community/community-topic-leading'
 import { monoListPanelCenterActiveItemAtom, type MonoListPanelTab } from '@renderer/state/panel'
 import { useAtomValue } from 'jotai'
 import { useMemo } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import type { CommunityTopicQuery } from './community-types'
 import { isRoutePathActive, useActivePanelItemRef } from './shared'
@@ -105,10 +109,10 @@ function CommunityTopicsVirtualList({
     () => topics.findIndex((topic) => isRoutePathActive(pathname, getCommunityTopicRoute(topic))),
     [pathname, topics],
   )
-  const leadingKind =
+  const fixedLeadingKind =
     tab.type === 'communityGroupTopics' || tab.type === 'communitySubjectTopics'
       ? 'creator'
-      : 'source'
+      : undefined
   useMonoListPanelRefreshAction({
     onRefresh: () => query.refetch(),
     refreshing: query.isFetching && !query.isFetchingNextPage,
@@ -129,12 +133,14 @@ function CommunityTopicsVirtualList({
     <SingleColumnVirtualList
       items={topics}
       getKey={(topic) => `${topic.kind}-${topic.id}`}
-      renderItem={(topic) => <CommunityTopicPanelItem leadingKind={leadingKind} topic={topic} />}
+      renderItem={(topic) => (
+        <CommunityTopicPanelItem fixedLeadingKind={fixedLeadingKind} topic={topic} />
+      )}
       activeIndex={centerActiveItem ? activeIndex : undefined}
       empty={<div className="text-muted-foreground p-4 text-sm">没有讨论。</div>}
       rootClassName="flex-1"
       className="px-2 py-2"
-      estimateSize={96}
+      estimateSize={104}
       gap={4}
       hasMore={!query.isError && !!query.hasNextPage}
       isFetchingMore={query.isFetchingNextPage}
@@ -147,65 +153,88 @@ function CommunityTopicsVirtualList({
 }
 
 function CommunityTopicPanelItem({
-  leadingKind,
+  fixedLeadingKind,
   topic,
 }: {
-  leadingKind: 'creator' | 'source'
+  fixedLeadingKind?: CommunityTopicLeadingKind
   topic: CommunityTopic
 }) {
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
   const to = getCommunityTopicRoute(topic)
-  const active = isRoutePathActive(useLocation().pathname, to)
+  const active = isRoutePathActive(pathname, to)
   const ref = useActivePanelItemRef(active)
-  const leadingImage =
-    leadingKind === 'creator'
-      ? topic.creator?.avatar.medium || topic.creator?.avatar.small
-      : topic.source.image
-  const leadingIcon =
-    leadingKind === 'creator' ? 'i-mingcute-user-3-line' : 'i-mingcute-chat-3-line'
-  const metaTitle =
-    leadingKind === 'creator' ? (topic.creator?.nickname ?? `#${topic.id}`) : topic.source.title
+  const leadingKind = fixedLeadingKind ?? getCommunityTopicLeadingKind(topic)
+  const metaTitle = getCommunityTopicLeadingTitle(topic, leadingKind)
+  const sourceTitle = leadingKind === 'creator' ? topic.source.title : null
+  const sourceTo = topic.source.route
+  const openTopic = () => {
+    if (!active) navigate(to)
+  }
 
   return (
     <div ref={ref}>
-      <MyLink
+      <article
         className={cn(
-          'hover:bg-accent data-[active=true]:bg-accent flex min-h-20 cursor-default flex-row gap-2 rounded-md p-2',
+          'hover:bg-accent data-[active=true]:bg-accent flex min-h-24 cursor-default flex-row gap-2 rounded-md p-2',
         )}
         data-active={active}
-        to={to}
-        onClick={(event) => {
-          if (active) event.preventDefault()
+        role="link"
+        tabIndex={0}
+        onClick={openTopic}
+        onKeyDown={(event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return
+          event.preventDefault()
+          openTopic()
         }}
       >
-        {leadingImage ? (
-          <Image
-            className="size-12 shrink-0 overflow-hidden rounded-md"
-            imageSrc={leadingImage}
-            loading="eager"
-          />
-        ) : (
-          <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center rounded-md">
-            <span className={`${leadingIcon} text-xl`} />
-          </div>
-        )}
+        <CommunityTopicLeadingImage
+          className="size-12"
+          iconClassName="text-xl"
+          kind={leadingKind}
+          loading="eager"
+          topic={topic}
+        />
         <div className="min-w-0 flex-1">
           <p className="line-clamp-2 text-sm font-medium">{topic.title}</p>
           <div className="text-muted-foreground mt-1 flex flex-row flex-wrap items-center gap-1.5 text-xs">
-            <span className="line-clamp-1">{metaTitle}</span>
+            {leadingKind === 'source' && sourceTo ? (
+              <Link
+                className="text-primary line-clamp-1 underline-offset-2 hover:underline"
+                to={sourceTo}
+                onClick={(event) => event.stopPropagation()}
+              >
+                {metaTitle}
+              </Link>
+            ) : (
+              <span className="line-clamp-1">{metaTitle}</span>
+            )}
             <Badge variant="outline" className="h-5 rounded-sm px-1 text-[10px]">
               {topic.replyCount}
             </Badge>
             <span>{formatRecentUnixTime(topic.updatedAt)}</span>
           </div>
+          {sourceTitle &&
+            (sourceTo ? (
+              <Link
+                className="text-primary mt-1 line-clamp-1 w-fit max-w-full text-xs underline-offset-2 hover:underline"
+                to={sourceTo}
+                onClick={(event) => event.stopPropagation()}
+              >
+                {sourceTitle}
+              </Link>
+            ) : (
+              <div className="text-primary mt-1 line-clamp-1 text-xs">{sourceTitle}</div>
+            ))}
         </div>
-      </MyLink>
+      </article>
     </div>
   )
 }
 
 function CommunityTopicPanelItemSkeleton() {
   return (
-    <div className="flex min-h-20 flex-row gap-2 rounded-md p-2">
+    <div className="flex min-h-24 flex-row gap-2 rounded-md p-2">
       <Skeleton className="size-12 shrink-0 rounded-md" />
       <div className="min-w-0 flex-1 space-y-2">
         <Skeleton className="h-4 w-4/5" />
