@@ -2,11 +2,13 @@ import { createHashRouter } from 'react-router-dom'
 import type { RouteObject } from 'react-router-dom'
 import App from './App'
 import MainErrorElement from '@renderer/error/main-error-element'
+import AppShellErrorElement from '@renderer/error/app-shell-error-element'
 
 const pageModules = import.meta.glob('./app/**/page.tsx')
 
 const toRoutePath = (filePath: string): string => {
-  const rawPath = filePath.replace('./app/', '').replace('/page.tsx', '')
+  const normalizedPath = filePath.replace(/\\/g, '/')
+  const rawPath = normalizedPath.replace('./app/', '').replace('/page.tsx', '')
   if (rawPath === 'home') {
     return ''
   }
@@ -34,6 +36,7 @@ export const router: ReturnType<typeof createHashRouter> = createHashRouter(
         },
         {
           path: '',
+          errorElement: <AppShellErrorElement />,
           lazy: () => import('@renderer/app/layout'),
           children: pageRoutes,
         },

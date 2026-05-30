@@ -14,8 +14,14 @@ export async function fetchSectionHome({ sectionPath }: { sectionPath: SectionPa
   })
 }
 
-export async function fetchTrends({ sectionPath }: { sectionPath: SectionPath }) {
-  return await webFetch<string>(SUBJECTS.TRENDS(sectionPath), {
+export async function fetchTrends({
+  page,
+  sectionPath,
+}: {
+  page?: number
+  sectionPath: SectionPath
+}) {
+  return await webFetch<string>(SUBJECTS.TRENDS(sectionPath, page), {
     parseResponse: (text) => text,
   })
 }

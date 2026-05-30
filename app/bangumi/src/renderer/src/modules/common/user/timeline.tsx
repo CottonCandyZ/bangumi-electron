@@ -1,7 +1,6 @@
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
 import { Card } from '@renderer/components/ui/card'
-import { Skeleton } from '@renderer/components/ui/skeleton'
 import { SubjectType } from '@renderer/data/types/subject'
 import {
   UserTimelineEpisode,
@@ -17,28 +16,179 @@ import { formatRecentUnixTime } from '@renderer/lib/utils/date'
 import dayjs from 'dayjs'
 import type { ReactNode } from 'react'
 
+export { UserTimelineSkeleton, UserTimelineSkeletonItem } from './timeline-skeleton'
+
 export function UserTimelineItemCard({
   className,
   compact = false,
   expanded = false,
   item,
+  previewItemLimit,
+  showUser = false,
   surface = 'card',
 }: {
   className?: string
   compact?: boolean
   expanded?: boolean
   item: UserTimelineItem
-  surface?: 'card' | 'plain'
+  previewItemLimit?: number
+  showUser?: boolean
+  surface?: 'card' | 'plain' | 'timeline'
 }) {
   const statusText = (item.memo.status?.tsukkomi ?? item.memo.status?.sign)?.trim()
   const nicknameChange = item.memo.status?.nickname
-  const subjects = item.memo.subject ?? []
+  const subjects = limitTimelineItems(item.memo.subject ?? [], previewItemLimit)
   const progress = item.memo.progress
   const batchProgressMeta = progress?.batch ? formatBatchProgressMeta(progress.batch) : undefined
   const hasDetails = hasUserTimelineItemDetails(item)
+  const monoCharacters = limitTimelineItems(item.memo.mono?.characters ?? [], previewItemLimit)
+  const monoPersons = limitTimelineItems(item.memo.mono?.persons ?? [], previewItemLimit)
+  const dailyUsers = limitTimelineItems(item.memo.daily?.users ?? [], previewItemLimit)
+  const dailyGroups = limitTimelineItems(item.memo.daily?.groups ?? [], previewItemLimit)
 
   if (!hasDetails) return null
+  const action = getTimelineAction(item)
   const Container = surface === 'card' ? Card : 'div'
+
+  if (surface === 'timeline') {
+    return (
+      <div className={cn('relative flex min-w-0 flex-row gap-3 pl-1', className)}>
+        <div className="flex w-6 shrink-0 justify-center">
+          <div className="bg-border/70 relative h-full w-px">
+            <div className="bg-background absolute top-0 left-1/2 flex size-6 -translate-x-1/2 items-center justify-center rounded-full">
+              <span
+                className={cn(
+                  'bg-primary/10 text-primary flex size-5 items-center justify-center rounded-full text-xs',
+                  action.icon,
+                )}
+                title={action.label}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="border-border/70 min-w-0 flex-1 border-b pb-4">
+          <div className="flex min-w-0 flex-col gap-2">
+            <TimelineTimelineHeader action={action.label} item={item} showUser={showUser} />
+
+            {statusText && (
+              <div className="bbcode text-sm leading-6 whitespace-pre-line">
+                {renderBBCode(statusText)}
+              </div>
+            )}
+
+            {nicknameChange && (
+              <div className="text-muted-foreground text-sm">
+                昵称由 <span className="text-foreground">{nicknameChange.before}</span> 改为{' '}
+                <span className="text-foreground">{nicknameChange.after}</span>
+              </div>
+            )}
+
+            {subjects.length > 0 && (
+              <div className="flex flex-col gap-2">
+                {subjects.map((subjectItem) => (
+                  <TimelineSubject
+                    comment={subjectItem.comment}
+                    key={`${item.id}-${subjectItem.subject.id}-${subjectItem.collectID ?? ''}`}
+                    rate={subjectItem.rate}
+                    subject={subjectItem.subject}
+                    compact={compact}
+                    expanded={expanded}
+                  />
+                ))}
+                <TimelineRemainingCount
+                  count={(item.memo.subject?.length ?? 0) - subjects.length}
+                  label="条目"
+                />
+              </div>
+            )}
+
+            {progress?.batch && (
+              <TimelineSubject
+                subject={progress.batch.subject}
+                meta={batchProgressMeta}
+                compact={compact}
+                expanded={expanded}
+              />
+            )}
+
+            {progress?.single && (
+              <TimelineEpisodeProgress
+                episode={progress.single.episode}
+                subject={progress.single.subject}
+                compact={compact}
+                expanded={expanded}
+              />
+            )}
+
+            {item.memo.wiki?.subject && (
+              <TimelineSubject
+                subject={item.memo.wiki.subject}
+                meta="维基编辑"
+                compact={compact}
+                expanded={expanded}
+              />
+            )}
+
+            {item.memo.blog && (
+              <TimelineText
+                title={item.memo.blog.title}
+                description={item.memo.blog.summary}
+                meta={item.memo.blog.replies > 0 ? `${item.memo.blog.replies} 回复` : undefined}
+                expanded={expanded}
+              />
+            )}
+
+            {item.memo.index && (
+              <TimelineText
+                title={item.memo.index.title}
+                meta={`${item.memo.index.total} 个项目`}
+                expanded={expanded}
+              />
+            )}
+
+            {item.memo.mono && (monoCharacters.length > 0 || monoPersons.length > 0) && (
+              <div className="flex flex-col gap-2">
+                {monoCharacters.map((character) => (
+                  <TimelineMono
+                    item={character}
+                    key={`character-${character.id}`}
+                    type="character"
+                  />
+                ))}
+                {monoPersons.map((person) => (
+                  <TimelineMono item={person} key={`person-${person.id}`} type="person" />
+                ))}
+                <TimelineRemainingCount
+                  count={
+                    item.memo.mono.characters.length +
+                    item.memo.mono.persons.length -
+                    (monoCharacters.length + monoPersons.length)
+                  }
+                  label="人物"
+                />
+              </div>
+            )}
+
+            {dailyUsers.length > 0 && (
+              <TimelineUsers
+                remainingCount={(item.memo.daily?.users?.length ?? 0) - dailyUsers.length}
+                users={dailyUsers}
+              />
+            )}
+
+            {dailyGroups.length > 0 && (
+              <TimelineGroups
+                groups={dailyGroups}
+                remainingCount={(item.memo.daily?.groups?.length ?? 0) - dailyGroups.length}
+              />
+            )}
+
+            <TimelineItemMeta item={item} />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <Container
@@ -49,6 +199,8 @@ export function UserTimelineItemCard({
         className,
       )}
     >
+      {showUser && item.user && <TimelineItemUser user={item.user} />}
+
       {statusText && (
         <div className="bbcode text-sm leading-6 whitespace-pre-line">
           {renderBBCode(statusText)}
@@ -74,6 +226,10 @@ export function UserTimelineItemCard({
               expanded={expanded}
             />
           ))}
+          <TimelineRemainingCount
+            count={(item.memo.subject?.length ?? 0) - subjects.length}
+            label="条目"
+          />
         </div>
       )}
 
@@ -121,27 +277,137 @@ export function UserTimelineItemCard({
         />
       )}
 
-      {item.memo.mono && (
+      {item.memo.mono && (monoCharacters.length > 0 || monoPersons.length > 0) && (
         <div className="flex flex-col gap-2">
-          {item.memo.mono.characters.map((character) => (
+          {monoCharacters.map((character) => (
             <TimelineMono item={character} key={`character-${character.id}`} type="character" />
           ))}
-          {item.memo.mono.persons.map((person) => (
+          {monoPersons.map((person) => (
             <TimelineMono item={person} key={`person-${person.id}`} type="person" />
           ))}
+          <TimelineRemainingCount
+            count={
+              item.memo.mono.characters.length +
+              item.memo.mono.persons.length -
+              (monoCharacters.length + monoPersons.length)
+            }
+            label="人物"
+          />
         </div>
       )}
 
-      {item.memo.daily?.users && item.memo.daily.users.length > 0 && (
-        <TimelineUsers users={item.memo.daily.users} />
+      {dailyUsers.length > 0 && (
+        <TimelineUsers
+          remainingCount={(item.memo.daily?.users?.length ?? 0) - dailyUsers.length}
+          users={dailyUsers}
+        />
       )}
 
-      {item.memo.daily?.groups && item.memo.daily.groups.length > 0 && (
-        <TimelineGroups groups={item.memo.daily.groups} />
+      {dailyGroups.length > 0 && (
+        <TimelineGroups
+          groups={dailyGroups}
+          remainingCount={(item.memo.daily?.groups?.length ?? 0) - dailyGroups.length}
+        />
       )}
 
       <TimelineItemMeta item={item} />
     </Container>
+  )
+}
+
+function TimelineTimelineHeader({
+  action,
+  item,
+  showUser,
+}: {
+  action: string
+  item: UserTimelineItem
+  showUser: boolean
+}) {
+  if (!showUser || !item.user) {
+    return <div className="text-muted-foreground text-xs font-medium">{action}</div>
+  }
+
+  return (
+    <div className="flex min-w-0 flex-row items-center gap-2 text-sm">
+      <MyLink
+        className="text-foreground hover:text-primary flex min-w-0 flex-row items-center gap-2 font-medium transition-colors"
+        to={`/user/${encodeURIComponent(item.user.username)}`}
+      >
+        {item.user.avatar?.medium ? (
+          <Image
+            className="size-6 shrink-0 overflow-hidden rounded-full"
+            imageClassName="h-full w-full object-cover"
+            imageSrc={item.user.avatar.medium}
+          />
+        ) : (
+          <div className="bg-muted size-6 shrink-0 rounded-full" />
+        )}
+        <span className="line-clamp-1">{item.user.nickname || item.user.username}</span>
+      </MyLink>
+      <span className="text-muted-foreground shrink-0 text-xs">{action}</span>
+    </div>
+  )
+}
+
+function getTimelineAction(item: UserTimelineItem) {
+  if (item.memo.status?.nickname) {
+    return { icon: 'i-mingcute-user-setting-line', label: '更新资料' }
+  }
+  if (item.memo.status?.tsukkomi || item.memo.status?.sign) {
+    return { icon: 'i-mingcute-chat-3-line', label: '吐槽' }
+  }
+  if (item.memo.progress?.single || item.memo.progress?.batch) {
+    return { icon: 'i-mingcute-play-circle-line', label: '进度' }
+  }
+  if ((item.memo.subject?.length ?? 0) > 0) {
+    return { icon: 'i-mingcute-star-line', label: '收藏' }
+  }
+  if (item.memo.blog) {
+    return { icon: 'i-mingcute-edit-2-line', label: '日志' }
+  }
+  if (item.memo.index) {
+    return { icon: 'i-mingcute-list-check-line', label: '目录' }
+  }
+  if (item.memo.mono?.characters.length || item.memo.mono?.persons.length) {
+    return { icon: 'i-mingcute-user-star-line', label: '人物' }
+  }
+  if (item.memo.daily?.users?.length) {
+    return { icon: 'i-mingcute-user-add-line', label: '好友' }
+  }
+  if (item.memo.daily?.groups?.length) {
+    return { icon: 'i-mingcute-group-line', label: '小组' }
+  }
+  if (item.memo.wiki?.subject) {
+    return { icon: 'i-mingcute-book-2-line', label: '维基' }
+  }
+  return { icon: 'i-mingcute-pulse-line', label: '动态' }
+}
+
+function limitTimelineItems<T>(items: T[], limit: number | undefined) {
+  return limit === undefined ? items : items.slice(0, limit)
+}
+
+function TimelineItemUser({ user }: { user: UserTimelineSlimUser }) {
+  return (
+    <MyLink
+      className="hover:text-primary flex min-w-0 flex-row items-center gap-2 transition-colors"
+      to={`/user/${encodeURIComponent(user.username)}`}
+    >
+      {user.avatar?.medium ? (
+        <Image
+          className="size-8 shrink-0 overflow-hidden rounded-full"
+          imageClassName="h-full w-full object-cover"
+          imageSrc={user.avatar.medium}
+        />
+      ) : (
+        <div className="bg-muted size-8 shrink-0 rounded-full" />
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="line-clamp-1 text-sm font-medium">{user.nickname || user.username}</div>
+        <div className="text-muted-foreground line-clamp-1 text-xs">@{user.username}</div>
+      </div>
+    </MyLink>
   )
 }
 
@@ -394,7 +660,23 @@ function TimelineMono({
   )
 }
 
-function TimelineUsers({ users }: { users: UserTimelineSlimUser[] }) {
+function TimelineRemainingCount({ count, label }: { count: number; label: string }) {
+  if (count <= 0) return null
+
+  return (
+    <div className="text-muted-foreground text-xs">
+      还有 {count} 个{label}
+    </div>
+  )
+}
+
+function TimelineUsers({
+  remainingCount = 0,
+  users,
+}: {
+  remainingCount?: number
+  users: UserTimelineSlimUser[]
+}) {
   return (
     <div className="flex flex-col gap-2">
       {users.map((user) => (
@@ -419,11 +701,18 @@ function TimelineUsers({ users }: { users: UserTimelineSlimUser[] }) {
           <span className="text-muted-foreground shrink-0 text-xs">添加为好友</span>
         </MyLink>
       ))}
+      <TimelineRemainingCount count={remainingCount} label="用户" />
     </div>
   )
 }
 
-function TimelineGroups({ groups }: { groups: UserTimelineSlimGroup[] }) {
+function TimelineGroups({
+  groups,
+  remainingCount = 0,
+}: {
+  groups: UserTimelineSlimGroup[]
+  remainingCount?: number
+}) {
   return (
     <div className="flex flex-col gap-2">
       {groups.map((group) => (
@@ -448,37 +737,7 @@ function TimelineGroups({ groups }: { groups: UserTimelineSlimGroup[] }) {
           <span className="text-muted-foreground shrink-0 text-xs">加入小组</span>
         </div>
       ))}
-    </div>
-  )
-}
-
-export function UserTimelineSkeleton({
-  className,
-  count = 4,
-}: {
-  className?: string
-  count?: number
-}) {
-  return (
-    <div className={cn('flex flex-col gap-3', className)}>
-      {Array.from({ length: count }).map((_, index) => (
-        <UserTimelineSkeletonItem key={index} />
-      ))}
-    </div>
-  )
-}
-
-export function UserTimelineSkeletonItem() {
-  return (
-    <div className="flex flex-col gap-3 rounded-xl border p-3">
-      <div className="flex flex-row justify-between gap-3">
-        <div className="flex flex-1 flex-col gap-2">
-          <Skeleton className="h-4 w-36" />
-          <Skeleton className="h-3 w-24" />
-        </div>
-        <Skeleton className="h-3 w-10" />
-      </div>
-      <Skeleton className="h-14 w-full" />
+      <TimelineRemainingCount count={remainingCount} label="小组" />
     </div>
   )
 }

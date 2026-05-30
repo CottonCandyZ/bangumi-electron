@@ -1,4 +1,9 @@
 import { DB_CONFIG } from '@renderer/config'
+import {
+  DEFAULT_INFINITE_REFETCH_PAGE_LIMIT,
+  trimInfiniteQueryPagesIf,
+  trimInfiniteQueryPages,
+} from '@renderer/data/hooks/infinite-query'
 import { AuthError } from '@renderer/lib/utils/error'
 import { userIdAtom } from '@renderer/state/session'
 import type {
@@ -18,7 +23,7 @@ import {
 } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai'
 import { FetchError } from 'ofetch'
-import { useDeferredValue } from 'react'
+import { useCallback, useDeferredValue, useMemo } from 'react'
 
 type Fn<P, R> = (P: P) => Promise<R>
 
@@ -322,6 +327,7 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
   qFLimit,
   enabled = true,
   needKeepPreviousData = true,
+  refetchPageLimit = DEFAULT_INFINITE_REFETCH_PAGE_LIMIT,
   initialPageParam,
   getNextPageParam,
   ...props
@@ -333,14 +339,24 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
   needKeepPreviousData?: boolean
   initialPageParam: TPageParam
   getNextPageParam: GetNextPageParamFunction<TPageParam, QR>
+  refetchPageLimit?: number
 } & InfinityOptionalAuthProps<QP> &
   Omit<
     UseInfiniteQueryOptions<QR, Error, InfiniteData<QR, TPageParam>, QueryKey, TPageParam>,
     'queryFn'
   >) => {
   const userId = useAtomValue(userIdAtom)
-  return useInfiniteQuery({
-    queryKey: createQueryKeyWithUserId(queryKey, userId, queryProps),
+  const queryClient = useQueryClient()
+  const queryKeyWithUserId = useMemo(
+    () => createQueryKeyWithUserId(queryKey, userId, queryProps, refetchPageLimit),
+    [queryKey, queryProps, refetchPageLimit, userId],
+  )
+  const { refetchOnMount, refetchOnReconnect, refetchOnWindowFocus, ...queryOptions } = props
+  const refetchOnMountValue = refetchOnMount as boolean | 'always' | undefined
+  const refetchOnReconnectValue = refetchOnReconnect as boolean | 'always' | undefined
+  const refetchOnWindowFocusValue = refetchOnWindowFocus as boolean | 'always' | undefined
+  const query = useInfiniteQuery({
+    queryKey: [...queryKey, userId, queryProps, refetchPageLimit],
     queryFn: async ({ pageParam }) => {
       try {
         return await queryFn({
@@ -359,8 +375,59 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     initialPageParam,
     getNextPageParam,
-    ...props,
+    ...queryOptions,
+    refetchOnMount: (query) => {
+      const shouldRefetch = refetchOnMountValue ?? true
+      const willRefetch = shouldRefetch === 'always' || (shouldRefetch !== false && query.isStale())
+      trimInfiniteQueryPagesIf<QR, TPageParam>({
+        pageLimit: refetchPageLimit,
+        queryClient,
+        queryKey: queryKeyWithUserId,
+        shouldTrim: willRefetch,
+      })
+      return shouldRefetch
+    },
+    refetchOnReconnect: (query) => {
+      const shouldRefetch = refetchOnReconnectValue ?? true
+      const willRefetch = shouldRefetch === 'always' || (shouldRefetch !== false && query.isStale())
+      trimInfiniteQueryPagesIf<QR, TPageParam>({
+        pageLimit: refetchPageLimit,
+        queryClient,
+        queryKey: queryKeyWithUserId,
+        shouldTrim: willRefetch,
+      })
+      return shouldRefetch
+    },
+    refetchOnWindowFocus: (query) => {
+      const shouldRefetch = refetchOnWindowFocusValue ?? true
+      const willRefetch = shouldRefetch === 'always' || (shouldRefetch !== false && query.isStale())
+      trimInfiniteQueryPagesIf<QR, TPageParam>({
+        pageLimit: refetchPageLimit,
+        queryClient,
+        queryKey: queryKeyWithUserId,
+        shouldTrim: willRefetch,
+      })
+      return shouldRefetch
+    },
   })
+  const { refetch: originalRefetch } = query
+  const refetch = useCallback(
+    (...args: Parameters<typeof originalRefetch>) => {
+      trimInfiniteQueryPages<QR, TPageParam>({
+        pageLimit: refetchPageLimit,
+        queryClient,
+        queryKey: queryKeyWithUserId,
+      })
+
+      return originalRefetch(...args)
+    },
+    [originalRefetch, queryClient, queryKeyWithUserId, refetchPageLimit],
+  )
+
+  return {
+    ...query,
+    refetch,
+  }
 }
 
 export const useMutationMustAuth = <P, R>({

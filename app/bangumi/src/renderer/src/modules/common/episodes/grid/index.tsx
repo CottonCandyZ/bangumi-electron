@@ -1,5 +1,8 @@
 import { EpisodeGridContent } from '@renderer/modules/common/episodes/grid/content'
-import { PageSelector } from '@renderer/modules/common/episodes/grid/page-selector'
+import {
+  PageSelector,
+  PageSelectorSkeleton,
+} from '@renderer/modules/common/episodes/grid/page-selector'
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
@@ -74,10 +77,24 @@ export function EpisodesGrid({
     setTemporaryOneBasedEpisodeSort(false)
   }, [subjectId])
 
-  if (userInfo === undefined) return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
+  if (userInfo === undefined) {
+    return (
+      <EpisodeSkeleton
+        showSelector={selector && eps > limit}
+        skeletonNumber={skeletonNumber}
+        size={size}
+      />
+    )
+  }
 
   if (episode.data === undefined) {
-    return <EpisodeSkeleton skeletonNumber={skeletonNumber} size={size} />
+    return (
+      <EpisodeSkeleton
+        showSelector={selector && eps > limit}
+        skeletonNumber={skeletonNumber}
+        size={size}
+      />
+    )
   }
   if (episode.data.data === null) return null
   return (
@@ -145,18 +162,25 @@ function getMainEpisodeSortStart(
 }
 
 function EpisodeSkeleton({
+  showSelector = false,
   skeletonNumber,
   size = 'default',
-}: { skeletonNumber: number } & EpisodeGridSize) {
+}: {
+  showSelector?: boolean
+  skeletonNumber: number
+} & EpisodeGridSize) {
   return (
     <div className="flex flex-col gap-5">
       {size === 'default' && <h2 className="text-2xl font-medium">章节</h2>}
-      <div className={cn('flex flex-row flex-wrap gap-1.5', size === 'small' && 'gap-1')}>
-        {Array(skeletonNumber)
-          .fill(0)
-          .map((_, index) => (
-            <Skeleton className={cn('size-9', size === 'small' && 'size-5')} key={index} />
-          ))}
+      <div className="flex flex-col gap-4">
+        {showSelector && <PageSelectorSkeleton />}
+        <div className={cn('flex flex-row flex-wrap gap-1.5', size === 'small' && 'gap-1')}>
+          {Array(skeletonNumber)
+            .fill(0)
+            .map((_, index) => (
+              <Skeleton className={cn('size-9', size === 'small' && 'size-5')} key={index} />
+            ))}
+        </div>
       </div>
     </div>
   )

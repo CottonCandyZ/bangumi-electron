@@ -37,7 +37,7 @@ export function useVirtualScrollMemory({
   const cache = canUseCachedEntry ? cachedEntry.cache : undefined
   const restoreOffset = canUseCachedEntry ? cachedEntry.scrollOffset : undefined
   const mountKey = scrollKey
-    ? [scrollKey, ready ? 'ready' : 'pending', itemCount, ...mountKeyParts]
+    ? [scrollKey, ready ? 'ready' : 'pending', ...mountKeyParts]
         .filter((part) => part !== undefined)
         .join(':')
     : undefined

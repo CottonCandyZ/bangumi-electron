@@ -176,9 +176,9 @@ export function useActivePanelItemRef(active: boolean) {
 }
 
 function normalizeRoutePath(path: string) {
-  const pathOnly = path.split(/[?#]/)[0]
-  if (pathOnly.length <= 1) return pathOnly
-  return pathOnly.replace(/\/+$/, '')
+  const [pathOnly, query = ''] = path.split('#').pop()?.split('?') ?? path.split('?')
+  const normalizedPath = pathOnly.length <= 1 ? pathOnly : pathOnly.replace(/\/+$/, '')
+  return query ? `${normalizedPath}?${query}` : normalizedPath
 }
 
 export function isRoutePathActive(pathname: string, to: string) {

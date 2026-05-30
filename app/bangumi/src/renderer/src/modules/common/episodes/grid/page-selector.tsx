@@ -5,6 +5,7 @@ import {
   SelectValue,
   SelectItem,
 } from '@renderer/components/ui/select'
+import { Skeleton } from '@renderer/components/ui/skeleton'
 import { CollectionEpisodes } from '@renderer/data/types/collection'
 import { Episodes } from '@renderer/data/types/episode'
 import { cn } from '@renderer/lib/utils'
@@ -44,4 +45,8 @@ export function PageSelector({
       </Select>
     )
   )
+}
+
+export function PageSelectorSkeleton() {
+  return <Skeleton className="h-9 w-28" />
 }

@@ -7,3 +7,5 @@ export const subjectCoverImageInViewAtom = atom(true)
 export const monoAvatarImageInViewAtom = atom(true)
 
 export const userProfileAvatarInViewAtom = atom(true)
+
+export const communityTopicTitleInViewAtom = atom(true)

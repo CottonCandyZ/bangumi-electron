@@ -5,6 +5,14 @@ import type { Episode } from '@renderer/data/types/episode'
 import type { RelatedSubject } from '@renderer/data/types/subject'
 import type { MonoRelatedItem, MonoSubjectItem, MonoType } from '@renderer/data/types/mono'
 import type { SearchParam } from '@renderer/data/types/search'
+import type {
+  CommunityTopic,
+  CommunityTopicKind,
+  GroupSort,
+  SlimGroup,
+} from '@renderer/data/types/community'
+import type { TimelineMode } from '@renderer/data/types/timeline'
+import type { SectionPath } from '@renderer/data/types/web'
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 
@@ -92,6 +100,58 @@ export type MonoListPanelTab =
       searchParam: SearchParam
       sourceTo?: string
     }
+  | {
+      id: string
+      type: 'communityTopics'
+      title: string
+      panelTitle: string
+      sourceTitle: string
+      sourceTo: string
+      groupMode?: 'all' | 'joined' | 'created' | 'replied'
+      topicKind: CommunityTopicKind
+      topics: CommunityTopic[]
+    }
+  | {
+      id: string
+      type: 'communityGroupTopics'
+      title: string
+      panelTitle: string
+      sourceTitle: string
+      sourceTo: string
+      groupName: string
+      group?: SlimGroup | null
+      topics: CommunityTopic[]
+    }
+  | {
+      id: string
+      type: 'communityGroups'
+      title: string
+      panelTitle: string
+      sourceTitle: string
+      sourceTo: string
+      groups: SlimGroup[]
+      listKind: 'all' | 'user'
+      sort?: GroupSort
+      username?: string
+    }
+  | {
+      id: string
+      type: 'siteTimeline'
+      title: string
+      panelTitle: string
+      sourceTitle: string
+      sourceTo: string
+      mode: TimelineMode
+    }
+  | {
+      id: string
+      type: 'trendingSubjects'
+      title: string
+      panelTitle: string
+      sourceTitle: string
+      sourceTo: string
+      sectionPath: SectionPath
+    }
 
 export const navOpenAtom = atom(false)
 
@@ -129,6 +189,16 @@ export const monoListPanelActiveTabIdAtom = atom<string | null>(null)
 export const monoListPanelCenterActiveItemAtom = atomWithStorage(
   'mono-list-panel-center-active-item',
   false,
+)
+
+export const homeSiteTimelineModeAtom = atomWithStorage<TimelineMode>(
+  'home-site-timeline-mode',
+  'all',
+)
+
+export const monoListSiteTimelineModeAtom = atomWithStorage<TimelineMode>(
+  'mono-list-site-timeline-mode',
+  'all',
 )
 
 // action

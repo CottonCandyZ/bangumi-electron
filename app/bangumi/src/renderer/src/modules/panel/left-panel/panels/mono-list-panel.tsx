@@ -8,11 +8,18 @@ import {
 import { SearchMonosListPanelContent } from './mono-list-panel/search-mono-content'
 import { SearchSubjectsListPanelContent } from './mono-list-panel/search-content'
 import {
+  CommunityGroupsListPanelContent,
+  CommunityGroupTopicsListPanelContent,
+  CommunityTopicsListPanelContent,
+} from './mono-list-panel/community-content'
+import {
   SubjectCharacterListPanelContent,
   SubjectEpisodeListPanelContent,
   SubjectRelatedListPanelContent,
   SubjectTankobonListPanelContent,
 } from './mono-list-panel/subject-content'
+import { SiteTimelineListPanelContent } from './mono-list-panel/site-timeline-content'
+import { TrendingSubjectsListPanelContent } from './mono-list-panel/trending-subjects-content'
 import { UserCollectionsListPanelContent } from './mono-list-panel/user-collections-content'
 import type { MonoListPanelTab } from '@renderer/state/panel'
 import {
@@ -34,12 +41,13 @@ export function MonoListPanel() {
   const closeTab = useSetAtom(closeMonoListPanelTabAtomAction)
   const closeAllTabs = useSetAtom(closeAllMonoListPanelTabsAtomAction)
   const [centerActiveItem, setCenterActiveItem] = useAtom(monoListPanelCenterActiveItemAtom)
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
   const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0]
   const activeTabCount = activeTab ? getMonoListPanelTabCount(activeTab) : null
+  const activeTabTitle = activeTab ? getMonoListPanelTabDisplayTitle(activeTab) : ''
   const activeTabSourceTo = activeTab ? getMonoListPanelTabSourceTo(activeTab) : null
   const activeTabSourceActive = activeTabSourceTo
-    ? isRoutePathActive(pathname, activeTabSourceTo)
+    ? isRoutePathActive(`${pathname}${search}`, activeTabSourceTo)
     : false
   const tabRefs = useRef(new Map<string, HTMLButtonElement>())
 
@@ -100,7 +108,7 @@ export function MonoListPanel() {
       <div className="flex shrink-0 flex-col gap-0.5 border-b px-3 py-2">
         <div className="flex min-w-0 flex-row items-center justify-between gap-2">
           <div className="line-clamp-1 min-w-0 text-sm font-medium">
-            {activeTab.title}
+            {activeTabTitle}
             {activeTabCount !== null && (
               <span className="text-muted-foreground ml-1 text-xs font-normal">
                 {activeTabCount}
@@ -149,6 +157,11 @@ function MonoListPanelContent({ tab }: { tab: MonoListPanelTab }) {
   if (tab.type === 'subjectEpisodes') return <SubjectEpisodeListPanelContent tab={tab} />
   if (tab.type === 'searchSubjects') return <SearchSubjectsListPanelContent tab={tab} />
   if (tab.type === 'searchMonos') return <SearchMonosListPanelContent tab={tab} />
+  if (tab.type === 'communityTopics') return <CommunityTopicsListPanelContent tab={tab} />
+  if (tab.type === 'communityGroupTopics') return <CommunityGroupTopicsListPanelContent tab={tab} />
+  if (tab.type === 'communityGroups') return <CommunityGroupsListPanelContent tab={tab} />
+  if (tab.type === 'siteTimeline') return <SiteTimelineListPanelContent tab={tab} />
+  if (tab.type === 'trendingSubjects') return <TrendingSubjectsListPanelContent tab={tab} />
   return <UserCollectionsListPanelContent tab={tab} />
 }
 
@@ -160,12 +173,35 @@ function getMonoListPanelTabCount(tab: MonoListPanelTab) {
   if (tab.type === 'subjectTankobon') return tab.relatedSubjects.length
   if (tab.type === 'searchSubjects') return null
   if (tab.type === 'searchMonos') return null
+  if (tab.type === 'communityTopics') return tab.topics.length
+  if (tab.type === 'communityGroupTopics') return tab.group?.topics ?? null
+  if (tab.type === 'communityGroups') return tab.groups.length
+  if (tab.type === 'siteTimeline') return null
+  if (tab.type === 'trendingSubjects') return null
   if (tab.type === 'userCollections') return null
   return tab.relatedSubjects.length
 }
 
+function getMonoListPanelTabDisplayTitle(tab: MonoListPanelTab) {
+  if (
+    tab.type === 'communityTopics' ||
+    tab.type === 'communityGroupTopics' ||
+    tab.type === 'communityGroups' ||
+    tab.type === 'siteTimeline' ||
+    tab.type === 'trendingSubjects'
+  ) {
+    return tab.panelTitle
+  }
+  return tab.title
+}
+
 function getMonoListPanelTabSourceTo(tab: MonoListPanelTab) {
   if (tab.type === 'searchSubjects' || tab.type === 'searchMonos') return tab.sourceTo
+  if (tab.type === 'communityTopics') return tab.sourceTo
+  if (tab.type === 'communityGroupTopics') return tab.sourceTo
+  if (tab.type === 'communityGroups') return tab.sourceTo
+  if (tab.type === 'siteTimeline') return tab.sourceTo
+  if (tab.type === 'trendingSubjects') return tab.sourceTo
 
   if (tab.type === 'subjects' || tab.type === 'related') {
     return `/${tab.monoType}/${tab.monoId}`
