@@ -87,6 +87,7 @@ function CommunityTopicsVirtualList({
     () => topics.findIndex((topic) => isRoutePathActive(pathname, getCommunityTopicRoute(topic))),
     [pathname, topics],
   )
+  const leadingKind = tab.type === 'communityGroupTopics' ? 'creator' : 'source'
 
   if (query.isLoading && topics.length === 0) {
     return (
@@ -102,7 +103,7 @@ function CommunityTopicsVirtualList({
     <SingleColumnVirtualList
       items={topics}
       getKey={(topic) => `${topic.kind}-${topic.id}`}
-      renderItem={(topic) => <CommunityTopicPanelItem topic={topic} />}
+      renderItem={(topic) => <CommunityTopicPanelItem leadingKind={leadingKind} topic={topic} />}
       activeIndex={centerActiveItem ? activeIndex : undefined}
       empty={<div className="text-muted-foreground p-4 text-sm">没有讨论。</div>}
       rootClassName="flex-1"
@@ -119,10 +120,24 @@ function CommunityTopicsVirtualList({
   )
 }
 
-function CommunityTopicPanelItem({ topic }: { topic: CommunityTopic }) {
+function CommunityTopicPanelItem({
+  leadingKind,
+  topic,
+}: {
+  leadingKind: 'creator' | 'source'
+  topic: CommunityTopic
+}) {
   const to = getCommunityTopicRoute(topic)
   const active = isRoutePathActive(useLocation().pathname, to)
   const ref = useActivePanelItemRef(active)
+  const leadingImage =
+    leadingKind === 'creator'
+      ? topic.creator?.avatar.medium || topic.creator?.avatar.small
+      : topic.source.image
+  const leadingIcon =
+    leadingKind === 'creator' ? 'i-mingcute-user-3-line' : 'i-mingcute-chat-3-line'
+  const metaTitle =
+    leadingKind === 'creator' ? (topic.creator?.nickname ?? `#${topic.id}`) : topic.source.title
 
   return (
     <div ref={ref}>
@@ -136,21 +151,21 @@ function CommunityTopicPanelItem({ topic }: { topic: CommunityTopic }) {
           if (active) event.preventDefault()
         }}
       >
-        {topic.source.image ? (
+        {leadingImage ? (
           <Image
             className="size-12 shrink-0 overflow-hidden rounded-md"
-            imageSrc={topic.source.image}
+            imageSrc={leadingImage}
             loading="eager"
           />
         ) : (
           <div className="bg-muted text-muted-foreground flex size-12 shrink-0 items-center justify-center rounded-md">
-            <span className="i-mingcute-chat-3-line text-xl" />
+            <span className={`${leadingIcon} text-xl`} />
           </div>
         )}
         <div className="min-w-0 flex-1">
           <p className="line-clamp-2 text-sm font-medium">{topic.title}</p>
           <div className="text-muted-foreground mt-1 flex flex-row flex-wrap items-center gap-1.5 text-xs">
-            <span className="line-clamp-1">{topic.source.title}</span>
+            <span className="line-clamp-1">{metaTitle}</span>
             <Badge variant="outline" className="h-5 rounded-sm px-1 text-[10px]">
               {topic.replyCount}
             </Badge>
