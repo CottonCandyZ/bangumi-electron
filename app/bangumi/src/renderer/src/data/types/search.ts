@@ -1,11 +1,15 @@
-import { Pagination } from '@renderer/data/types/bgm'
+import { Images, Pagination } from '@renderer/data/types/bgm'
 import { CoverImages, RatingCount, SubjectType, Tag } from '@renderer/data/types/subject'
 
 export type SearchDataPage = {
   data: SearchData[]
 } & Pagination
 
-export type SearchData = {
+export type SearchCategory = 'subjects' | 'characters' | 'persons'
+
+export type SearchData = SearchSubjectData | SearchMonoData
+
+export type SearchSubjectData = {
   id: number
   name: string
   name_cn: string
@@ -26,6 +30,19 @@ export type SearchData = {
   nsfw: boolean
 }
 
+export type SearchMonoData = {
+  id: number
+  name: string
+  type: number
+  images?: Images | null
+  image?: string
+  summary?: string
+  infobox?: unknown[]
+  locked?: boolean
+  nsfw?: boolean
+  career?: string[]
+}
+
 export type SearchSubjectRating = {
   rank: number
   count: RatingCount
@@ -35,6 +52,7 @@ export type SearchSubjectRating = {
 
 export type SearchParam = {
   keyword?: string
+  category?: SearchCategory
   // https://github.com/bangumi/server/blob/5c576e267268c490a0b97686d0668ffc36bf1dd9/internal/search/handle.go#L172-L183
   sort?: 'match' | 'score' | 'heat' | 'rank'
   filter?: Filter

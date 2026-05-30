@@ -107,9 +107,9 @@ export function SearchSummaryAction() {
   const pinSearchResult = () => {
     openMonoListPanelTab({
       id: createSearchPanelId(searchParam),
-      type: 'searchSubjects',
+      type: searchParam.category === 'subjects' ? 'searchSubjects' : 'searchMonos',
       title: createSearchPanelTitle(searchParam),
-      sourceTitle: '搜索结果',
+      sourceTitle: `${getSearchCategoryLabel(searchParam.category)}搜索结果`,
       sourceTo: `${location.pathname}${location.search}`,
       searchParam,
     })
@@ -127,6 +127,12 @@ export function SearchSummaryAction() {
       <PinSearchButton onClick={pinSearchResult} />
     </div>
   )
+}
+
+function getSearchCategoryLabel(category: SearchParam['category']) {
+  if (category === 'characters') return '角色'
+  if (category === 'persons') return '人物'
+  return '条目'
 }
 
 function SkeletonList() {

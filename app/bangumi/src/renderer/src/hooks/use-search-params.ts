@@ -1,10 +1,11 @@
-import { SearchParam } from '@renderer/data/types/search'
+import { SearchCategory, SearchParam } from '@renderer/data/types/search'
 import { SubjectType } from '@renderer/data/types/subject'
 import { useCallback, useMemo } from 'react'
 import { useSearchParams as useRouterSearchParams } from 'react-router-dom'
 
 type RangeFilterKey = 'airDate' | 'rating' | 'rank'
 type ArrayFilterKey = 'tag' | 'metaTag'
+const SEARCH_CATEGORIES = new Set<SearchCategory>(['subjects', 'characters', 'persons'])
 
 const ARRAY_PARAM_KEY: Record<ArrayFilterKey, string> = {
   tag: 'tag',
@@ -21,6 +22,10 @@ export function useSearchParams(onChange?: () => void) {
   const [searchParams, setSearchParams] = useRouterSearchParams()
 
   const keyword = searchParams.get('keyword') || ''
+  const categoryParam = searchParams.get('category')
+  const category: SearchCategory = SEARCH_CATEGORIES.has(categoryParam as SearchCategory)
+    ? (categoryParam as SearchCategory)
+    : 'subjects'
   const sort = (searchParams.get('sort') || 'match') as SearchParam['sort']
   const typeFilters = useMemo(
     () => searchParams.getAll('type').map((type) => Number(type) as SubjectType),
@@ -62,6 +67,23 @@ export function useSearchParams(onChange?: () => void) {
           newParams.set('keyword', newKeyword)
         } else {
           newParams.delete('keyword')
+        }
+        resetOffset(newParams)
+        return newParams
+      })
+    },
+    [setSearchParams, onChange],
+  )
+
+  const setCategory = useCallback(
+    (newCategory: SearchCategory) => {
+      onChange?.()
+      setSearchParams((prev) => {
+        const newParams = new URLSearchParams(prev)
+        if (newCategory === 'subjects') {
+          newParams.delete('category')
+        } else {
+          newParams.set('category', newCategory)
         }
         resetOffset(newParams)
         return newParams
@@ -196,15 +218,17 @@ export function useSearchParams(onChange?: () => void) {
       filter.rank.length > 0 ||
       filter.nsfw
 
-    if (!keyword && !hasFilter) return null
+    if (!keyword && (category !== 'subjects' || !hasFilter)) return null
 
     return {
       keyword: keyword || undefined,
-      filter,
-      sort,
+      category,
+      filter: category === 'subjects' ? filter : undefined,
+      sort: category === 'subjects' ? sort : undefined,
     }
   }, [
     keyword,
+    category,
     typeFilters,
     tagFilters,
     metaTagFilters,
@@ -217,6 +241,7 @@ export function useSearchParams(onChange?: () => void) {
 
   return {
     keyword,
+    category,
     sort,
     typeFilters,
     tagFilters,
@@ -227,6 +252,7 @@ export function useSearchParams(onChange?: () => void) {
     nsfw,
     offset,
     setKeyword,
+    setCategory,
     setSort,
     setTypeFilters,
     setTagFilters: (values: string[]) => setArrayFilter('tag', values),

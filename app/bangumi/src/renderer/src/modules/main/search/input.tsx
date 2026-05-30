@@ -1,12 +1,16 @@
 import { Button } from '@renderer/components/ui/button'
+import { Separator } from '@renderer/components/ui/separator'
 import { useSearchParams } from '@renderer/hooks/use-search-params'
 import { cn } from '@renderer/lib/utils'
+import { SearchCategorySelect } from '@renderer/modules/main/search/category-select'
 import { useEffect, useRef, useState } from 'react'
 
 export function SearchInput() {
   const [keyword, setKeywordState] = useState('')
+  const [categorySelectOpen, setCategorySelectOpen] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const { keyword: searchKeyword, setKeyword } = useSearchParams()
+  const isComposingRef = useRef(false)
+  const { category, keyword: searchKeyword, setKeyword } = useSearchParams()
   const submitKeyword = () => {
     setKeyword(keyword)
     inputRef.current?.blur()
@@ -14,18 +18,33 @@ export function SearchInput() {
 
   useEffect(() => {
     setKeywordState(searchKeyword ?? '')
-  }, [searchKeyword])
+  }, [category, searchKeyword])
 
   return (
-    <search className="group bg-accent/50 focus-within:bg-background hover:bg-background flex h-12 w-full items-center gap-2 rounded-lg border px-2 pl-4 transition-colors">
+    <search
+      className={cn(
+        'group bg-accent/50 hover:bg-background focus-within:bg-background flex h-12 w-full items-center gap-2 rounded-lg border px-2 pl-4 transition-colors',
+        categorySelectOpen && 'bg-background',
+      )}
+    >
       {/* search Icon */}
       <span className="i-mingcute-search-2-line text-4xl" />
+      <SearchCategorySelect onOpenChange={setCategorySelectOpen} />
+      <Separator orientation="vertical" className="h-5" />
       <input
         value={keyword}
         ref={inputRef}
         className="h-full w-full bg-transparent focus-visible:outline-hidden"
         onChange={(e) => setKeywordState(e.target.value)}
+        onCompositionStart={() => {
+          isComposingRef.current = true
+        }}
+        onCompositionEnd={(e) => {
+          isComposingRef.current = false
+          setKeywordState(e.currentTarget.value)
+        }}
         onKeyDownCapture={(e) => {
+          if (isComposingRef.current || e.nativeEvent.isComposing || e.keyCode === 229) return
           if (e.code === 'Enter') submitKeyword()
         }}
       />

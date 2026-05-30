@@ -5,6 +5,7 @@ import {
   MonoRelatedListPanelContent,
   MonoSubjectListPanelContent,
 } from './mono-list-panel/mono-content'
+import { SearchMonosListPanelContent } from './mono-list-panel/search-mono-content'
 import { SearchSubjectsListPanelContent } from './mono-list-panel/search-content'
 import {
   SubjectCharacterListPanelContent,
@@ -147,6 +148,7 @@ function MonoListPanelContent({ tab }: { tab: MonoListPanelTab }) {
   if (tab.type === 'subjectTankobon') return <SubjectTankobonListPanelContent tab={tab} />
   if (tab.type === 'subjectEpisodes') return <SubjectEpisodeListPanelContent tab={tab} />
   if (tab.type === 'searchSubjects') return <SearchSubjectsListPanelContent tab={tab} />
+  if (tab.type === 'searchMonos') return <SearchMonosListPanelContent tab={tab} />
   return <UserCollectionsListPanelContent tab={tab} />
 }
 
@@ -157,12 +159,13 @@ function getMonoListPanelTabCount(tab: MonoListPanelTab) {
   if (tab.type === 'subjectEpisodes') return tab.episodeTotal ?? tab.episodes?.length ?? null
   if (tab.type === 'subjectTankobon') return tab.relatedSubjects.length
   if (tab.type === 'searchSubjects') return null
+  if (tab.type === 'searchMonos') return null
   if (tab.type === 'userCollections') return null
   return tab.relatedSubjects.length
 }
 
 function getMonoListPanelTabSourceTo(tab: MonoListPanelTab) {
-  if (tab.type === 'searchSubjects') return tab.sourceTo
+  if (tab.type === 'searchSubjects' || tab.type === 'searchMonos') return tab.sourceTo
 
   if (tab.type === 'subjects' || tab.type === 'related') {
     return `/${tab.monoType}/${tab.monoId}`

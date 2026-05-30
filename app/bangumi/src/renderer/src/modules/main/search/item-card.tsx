@@ -4,7 +4,7 @@ import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
-import type { SearchData } from '@renderer/data/types/search'
+import type { SearchData, SearchMonoData, SearchSubjectData } from '@renderer/data/types/search'
 import { cn } from '@renderer/lib/utils'
 import { SUBJECT_TYPE_MAP } from '@renderer/lib/utils/map'
 import {
@@ -14,14 +14,57 @@ import {
 } from '@renderer/modules/main/search/utils'
 
 export function SearchItemCard({ searchItem }: { searchItem: SearchData }) {
-  return <SearchSubjectRow searchItem={searchItem} />
+  if ('rating' in searchItem) return <SearchSubjectRow searchItem={searchItem} />
+  return <SearchMonoRow searchItem={searchItem} />
+}
+
+function SearchMonoRow({ searchItem }: { searchItem: SearchMonoData }) {
+  const image = searchItem.image || searchItem.images?.medium || searchItem.images?.grid
+  const isPerson = 'career' in searchItem
+  const to = `/${isPerson ? 'person' : 'character'}/${searchItem.id}`
+
+  return (
+    <MyLink
+      to={to}
+      className="group focus-visible:ring-ring/50 block min-w-0 cursor-default focus-visible:ring-2 focus-visible:outline-hidden"
+    >
+      <Card className="group-hover:bg-accent rounded-none border-x-0 border-t-0 shadow-none transition-colors">
+        <CardContent className="relative mx-auto flex min-h-[112px] w-full max-w-4xl min-w-0 flex-row items-stretch gap-4 p-3">
+          {image ? (
+            <Image
+              imageSrc={image}
+              className="bg-muted flex h-24 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md"
+              imageClassName="h-full w-full object-cover"
+              loadingClassName="h-24 w-16"
+              careLoading
+            />
+          ) : (
+            <div className="bg-muted text-muted-foreground flex h-24 w-16 shrink-0 items-center justify-center rounded-md text-xs">
+              --
+            </div>
+          )}
+          <div className="flex min-w-0 flex-1 flex-col gap-2 py-0.5">
+            <div className="min-w-0">
+              <div className="line-clamp-1 text-base font-semibold">{searchItem.name}</div>
+              <div className="text-muted-foreground line-clamp-1 text-xs">
+                {isPerson ? '人物' : '角色'}
+              </div>
+            </div>
+            <div className="text-muted-foreground line-clamp-3 text-xs leading-relaxed">
+              {searchItem.summary || '--'}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </MyLink>
+  )
 }
 
 export function SearchSubjectRow({
   searchItem,
   dense = false,
 }: {
-  searchItem: SearchData
+  searchItem: SearchSubjectData
   dense?: boolean
 }) {
   const image = getSearchSubjectImage(searchItem)
