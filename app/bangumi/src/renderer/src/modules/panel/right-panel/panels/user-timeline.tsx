@@ -1,4 +1,5 @@
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
+import { Button } from '@renderer/components/ui/button'
 import {
   hasUserTimelineItemDetails,
   UserTimelineItemCard,
@@ -8,9 +9,10 @@ import { useUserTimelineInfiniteQuery } from '@renderer/data/hooks/api/user'
 import { useSession } from '@renderer/data/hooks/session'
 import { UserTimelineItem } from '@renderer/data/types/user'
 import { rightPanelOpenAtom } from '@renderer/state/panel'
+import { cn } from '@renderer/lib/utils'
 import dayjs from 'dayjs'
 import { useAtomValue } from 'jotai'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 
 const USER_TIMELINE_PAGE_LIMIT = 20
@@ -36,6 +38,7 @@ export function UserTimelinePanel() {
   const open = useAtomValue(rightPanelOpenAtom)
   const params = useParams()
   const username = params.username ?? session?.username
+  const [scrollToTopSignal, setScrollToTopSignal] = useState(0)
   const timelineQuery = useUserTimelineInfiniteQuery({
     username,
     limit: USER_TIMELINE_PAGE_LIMIT,
@@ -59,6 +62,10 @@ export function UserTimelinePanel() {
 
     return timelineQuery.fetchNextPage()
   }, [timelineQuery])
+  const refreshTimeline = useCallback(() => {
+    setScrollToTopSignal((value) => value + 1)
+    return timelineQuery.refreshFirstPage()
+  }, [timelineQuery])
 
   useEffect(() => {
     if (!open || entries === undefined || entries.length > 0 || !timelineQuery.hasNextPage) return
@@ -67,13 +74,28 @@ export function UserTimelinePanel() {
 
   return (
     <div className="flex h-full min-w-0 flex-col">
-      <div className="drag-region flex h-14 shrink-0 items-center border-b px-3">
+      <div className="drag-region flex h-14 shrink-0 items-center justify-between gap-2 border-b px-3">
         <div className="no-drag-region flex min-w-0 flex-row items-baseline gap-2">
           <h2 className="line-clamp-1 text-sm font-medium">时间线</h2>
           {username && (
             <span className="text-muted-foreground line-clamp-1 min-w-0 text-xs">@{username}</span>
           )}
         </div>
+        <Button
+          className="no-drag-region size-8 shrink-0"
+          disabled={timelineQuery.isFetching}
+          onClick={refreshTimeline}
+          size="icon"
+          title="刷新时间线"
+          variant="ghost"
+        >
+          <span
+            className={cn(
+              'i-mingcute-refresh-2-line text-base',
+              timelineQuery.isFetching && 'animate-spin',
+            )}
+          />
+        </Button>
       </div>
       <div className="min-h-0 flex-1">
         <UserTimelineVirtualGrid
@@ -83,6 +105,7 @@ export function UserTimelinePanel() {
           isFetchingMore={timelineQuery.isFetchingNextPage}
           onListNearBottom={loadMore}
           scrollAreaKey={username ? `user-timeline-${username}` : undefined}
+          scrollToTopSignal={scrollToTopSignal}
         />
       </div>
     </div>
@@ -96,6 +119,7 @@ function UserTimelineVirtualGrid({
   isFetchingMore,
   onListNearBottom,
   scrollAreaKey,
+  scrollToTopSignal,
 }: {
   entries: UserTimelineItem[] | undefined
   error: boolean
@@ -103,6 +127,7 @@ function UserTimelineVirtualGrid({
   isFetchingMore: boolean
   onListNearBottom: () => Promise<unknown> | void
   scrollAreaKey?: string
+  scrollToTopSignal: number
 }) {
   const rows = useMemo(() => (entries ? toTimelineRows(entries) : undefined), [entries])
   const requestMore = useCallback(() => {
@@ -131,7 +156,7 @@ function UserTimelineVirtualGrid({
         row.type === 'day' ? (
           <UserTimelineDayHeader label={row.label} />
         ) : (
-          <UserTimelineItemCard compact expanded item={row.item} surface="plain" />
+          <UserTimelineItemCard compact expanded item={row.item} surface="timeline" />
         )
       }
       appendPlaceholderCount={APPEND_SKELETON_COUNT}
@@ -143,9 +168,10 @@ function UserTimelineVirtualGrid({
       loadMoreRowThreshold={LOAD_MORE_ROW_THRESHOLD}
       onNearBottom={requestMore}
       overscan={VIRTUAL_OVERSCAN}
-      renderPlaceholder={() => <UserTimelineSkeletonItem />}
+      renderPlaceholder={() => <UserTimelineSkeletonItem surface="timeline" />}
       rootClassName="h-full"
       scrollAreaKey={scrollAreaKey}
+      scrollToTopSignal={scrollToTopSignal}
     />
   )
 }
@@ -201,7 +227,7 @@ function UserTimelineSkeletonScroll({ count }: { count: number }) {
       {Array(count)
         .fill(undefined)
         .map((_, index) => (
-          <UserTimelineSkeletonItem key={index} />
+          <UserTimelineSkeletonItem key={index} surface="timeline" />
         ))}
     </div>
   )

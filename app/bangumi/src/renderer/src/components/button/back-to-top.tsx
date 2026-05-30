@@ -10,11 +10,18 @@ const HIDDEN_CLASSES = ['pointer-events-none', 'translate-y-2', 'opacity-0']
 type BackToTopButtonProps = {
   className?: string
   onBackToTop?: () => void
+  position?: 'absolute' | 'fixed'
   style?: CSSProperties
   viewport: HTMLElement | null
 }
 
-export function BackToTopButton({ className, onBackToTop, style, viewport }: BackToTopButtonProps) {
+export function BackToTopButton({
+  className,
+  onBackToTop,
+  position = 'fixed',
+  style,
+  viewport,
+}: BackToTopButtonProps) {
   const buttonRef = useRef<HTMLButtonElement>(null)
   const updateFrameRef = useRef<number | null>(null)
 
@@ -79,7 +86,8 @@ export function BackToTopButton({ className, onBackToTop, style, viewport }: Bac
       size="icon"
       aria-label="返回顶部"
       className={cn(
-        'no-drag-region fixed right-6 bottom-6 z-30 size-11 rounded-full p-[2px] shadow-lg transition duration-200 hover:-translate-y-0.5 active:scale-95',
+        'no-drag-region z-30 size-11 rounded-full p-[2px] shadow-lg transition duration-200 hover:-translate-y-0.5 active:scale-95',
+        position === 'fixed' ? 'fixed right-6 bottom-6' : 'absolute right-4 bottom-4',
         HIDDEN_CLASSES,
         className,
       )}

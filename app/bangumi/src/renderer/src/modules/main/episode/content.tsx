@@ -361,9 +361,10 @@ function EpisodeActions({
   subjectTitle?: string
   episodeTotal?: number
 }) {
+  const subjectId = episode.subject_id.toString()
   const episodesPanel = useOpenSubjectEpisodesPanel({
-    subjectId: episode.subject_id.toString(),
-    sourceTitle: subjectTitle || `条目 ${episode.subject_id}`,
+    subjectId,
+    sourceTitle: subjectTitle || `条目 ${subjectId}`,
     episodeTotal,
     initialOffset: getEpisodeInitialOffset(episode.sort),
   })

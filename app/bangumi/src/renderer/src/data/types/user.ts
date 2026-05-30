@@ -177,6 +177,7 @@ export type UserTimelineEpisode = {
 export type UserTimelineItem = {
   id: number
   uid: number
+  user?: UserTimelineSlimUser
   cat: number
   type: number
   batch: boolean

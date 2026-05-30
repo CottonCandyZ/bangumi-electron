@@ -29,6 +29,8 @@ export const USER = {
 export const NEXT_USERS = {
   BY_USERNAME: (username: UserInfo['username']) => `/p1/users/${username}`,
   TIMELINE_BY_USERNAME: (username: UserInfo['username']) => `/p1/users/${username}/timeline`,
+  GROUPS_BY_USERNAME: (username: UserInfo['username'], limit: number, offset: number) =>
+    `/p1/users/${username}/groups?limit=${limit}&offset=${offset}`,
 }
 
 /** 条目相关 */
@@ -38,7 +40,8 @@ export const SUBJECTS = {
   PERSONS_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/persons`,
   RELATED_SUBJECT_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/subjects`,
   /** web 排行榜  exp https://bgm.tv/anime/browser/?sort=trends */
-  TRENDS: (sectionPath: SectionPath) => `/${sectionPath}/browser/?sort=trends`,
+  TRENDS: (sectionPath: SectionPath, page?: number) =>
+    `/${sectionPath}/browser/?sort=trends${page && page > 1 ? `&page=${page}` : ''}`,
 }
 
 /** Private API 条目 */
@@ -119,4 +122,52 @@ export const NEXT_COLLECTIONS = {
 export const SEARCH = {
   V0: (category: 'subjects' | 'characters' | 'persons' = 'subjects') => `/v0/search/${category}`,
   P1: (category: 'subjects' | 'characters' | 'persons' = 'subjects') => `/p1/search/${category}`,
+}
+
+/** Private API 社区 */
+export const NEXT_COMMUNITY = {
+  GROUPS: ({ sort, limit, offset }: { sort: string; limit: number; offset: number }) =>
+    `/p1/groups?sort=${sort}&limit=${limit}&offset=${offset}`,
+  GROUP_BY_NAME: (groupName: string) => `/p1/groups/${groupName}`,
+  GROUP_MEMBERS: ({
+    groupName,
+    limit,
+    offset,
+  }: {
+    groupName: string
+    limit: number
+    offset: number
+  }) => `/p1/groups/${groupName}/members?limit=${limit}&offset=${offset}`,
+  GROUP_TOPICS: ({
+    groupName,
+    limit,
+    offset,
+  }: {
+    groupName: string
+    limit: number
+    offset: number
+  }) => `/p1/groups/${groupName}/topics?limit=${limit}&offset=${offset}`,
+  RECENT_GROUP_TOPICS: ({ mode, limit, offset }: { mode: string; limit: number; offset: number }) =>
+    `/p1/groups/-/topics?mode=${mode}&limit=${limit}&offset=${offset}`,
+  RECENT_SUBJECT_TOPICS: ({ limit, offset }: { limit: number; offset: number }) =>
+    `/p1/subjects/-/topics?limit=${limit}&offset=${offset}`,
+  TRENDING_SUBJECT_TOPICS: ({ limit, offset }: { limit: number; offset: number }) =>
+    `/p1/trending/subjects/topics?limit=${limit}&offset=${offset}`,
+}
+
+/** Private API 每日放送 */
+export const NEXT_CALENDAR = {
+  ROOT: '/p1/calendar',
+}
+
+/** Private API 时间线 */
+export const NEXT_TIMELINE = {
+  ROOT: ({ mode, limit, until }: { mode?: string; limit?: number; until?: number }) => {
+    const params = new URLSearchParams()
+    if (mode) params.set('mode', mode)
+    if (limit !== undefined) params.set('limit', limit.toString())
+    if (until !== undefined) params.set('until', until.toString())
+    const query = params.toString()
+    return query ? `/p1/timeline?${query}` : '/p1/timeline'
+  },
 }

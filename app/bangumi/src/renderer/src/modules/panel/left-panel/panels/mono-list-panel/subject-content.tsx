@@ -6,7 +6,10 @@ import { useSession } from '@renderer/data/hooks/session'
 import { CollectionEpisode } from '@renderer/data/types/collection'
 import { Episode, EpisodeType } from '@renderer/data/types/episode'
 import { SubjectType } from '@renderer/data/types/subject'
-import { PageSelector } from '@renderer/modules/common/episodes/grid/page-selector'
+import {
+  PageSelector,
+  PageSelectorSkeleton,
+} from '@renderer/modules/common/episodes/grid/page-selector'
 import type { MonoListPanelTab } from '@renderer/state/panel'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
 import { useAtom } from 'jotai'
@@ -225,7 +228,7 @@ function SubjectEpisodeListPanelSkeleton() {
   return (
     <>
       <MonoListPanelFilters>
-        <Skeleton className="h-9 w-28" />
+        <PageSelectorSkeleton />
       </MonoListPanelFilters>
       <div className="flex min-h-0 flex-1 flex-col gap-2 px-2 py-2">
         {Array.from({ length: 8 }).map((_, index) => (

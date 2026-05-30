@@ -3,10 +3,15 @@ import {
   parseInfoBoxFromSubjectPage,
   parseTopListFromHTML as parseTrendsFromHTML,
 } from '@renderer/data/transformer/web'
-import { useQuery } from '@tanstack/react-query'
+import {
+  trimInfiniteQueryPagesIf,
+  trimInfiniteQueryPages,
+} from '@renderer/data/hooks/infinite-query'
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { SectionPath } from '@renderer/data/types/web'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { useSession } from '@renderer/data/hooks/session'
+import { useCallback, useMemo } from 'react'
 
 // 分离 parse 和 fetch，方便缓存整个页面的内容
 
@@ -21,6 +26,77 @@ export const useTopListQuery = (sectionPath: SectionPath) => {
     queryFn: async () => await fetchTrends({ sectionPath }),
     select: parseTrendsFromHTML,
   })
+}
+
+export const useTrendsInfiniteQuery = (sectionPath: SectionPath) => {
+  const queryClient = useQueryClient()
+  const queryKey = useMemo(() => ['SectionTrendsInfinite', sectionPath] as const, [sectionPath])
+  const query = useInfiniteQuery({
+    queryKey: ['SectionTrendsInfinite', sectionPath],
+    queryFn: async ({ pageParam }) => await fetchTrends({ sectionPath, page: pageParam }),
+    initialPageParam: 1,
+    select: (data) => ({
+      ...data,
+      pages: data.pages.map(parseTrendsFromHTML),
+    }),
+    getNextPageParam: (lastPage, pages) => {
+      const lastItems = parseTrendsFromHTML(lastPage)
+      if (lastItems.length === 0) return undefined
+
+      const previousIds = new Set(
+        pages
+          .slice(0, -1)
+          .flatMap(parseTrendsFromHTML)
+          .map((item) => item.SubjectId)
+          .filter(Boolean),
+      )
+      const hasNewItem = lastItems.some(
+        (item) => item.SubjectId && !previousIds.has(item.SubjectId),
+      )
+      return hasNewItem ? pages.length + 1 : undefined
+    },
+    refetchOnMount: (query) => {
+      trimInfiniteQueryPagesIf<string, number>({
+        queryClient,
+        queryKey,
+        shouldTrim: query.isStale(),
+      })
+      return true
+    },
+    refetchOnReconnect: (query) => {
+      trimInfiniteQueryPagesIf<string, number>({
+        queryClient,
+        queryKey,
+        shouldTrim: query.isStale(),
+      })
+      return true
+    },
+    refetchOnWindowFocus: (query) => {
+      trimInfiniteQueryPagesIf<string, number>({
+        queryClient,
+        queryKey,
+        shouldTrim: query.isStale(),
+      })
+      return true
+    },
+  })
+  const { refetch: originalRefetch } = query
+  const refetch = useCallback(
+    (...args: Parameters<typeof originalRefetch>) => {
+      trimInfiniteQueryPages<string, number>({
+        queryClient,
+        queryKey,
+      })
+
+      return originalRefetch(...args)
+    },
+    [originalRefetch, queryClient, queryKey],
+  )
+
+  return {
+    ...query,
+    refetch,
+  }
 }
 
 export const useWebInfoBoxQuery = ({

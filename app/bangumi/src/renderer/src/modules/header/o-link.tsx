@@ -8,20 +8,28 @@ export function OriginalLink() {
   const { pathname } = useLocation()
   const session = useSession()
   const episodePath = pathname.match(/^\/episode\/(\d+)/)
+  const groupTopicPath = pathname.match(/^\/group\/topic\/(\d+)/)
+  const subjectTopicPath = pathname.match(/^\/subject\/topic\/(\d+)/)
   const userPath = pathname.match(/^\/user\/([^/]+)/)
   const profileUsername = pathname === '/profile' ? session?.username : undefined
   const isOriginalLinkPath =
     /^\/(subject|person|character)\/\d+/.test(pathname) ||
     !!episodePath ||
+    !!groupTopicPath ||
+    !!subjectTopicPath ||
     !!userPath ||
     !!profileUsername
   const href = episodePath
     ? `${HOST}/ep/${episodePath[1]}`
-    : userPath
-      ? `${HOST}/user/${userPath[1]}`
-      : profileUsername
-        ? `${HOST}/user/${profileUsername}`
-        : `${HOST}${pathname}`
+    : groupTopicPath
+      ? `${HOST}/group/topic/${groupTopicPath[1]}`
+      : subjectTopicPath
+        ? `${HOST}/subject/topic/${subjectTopicPath[1]}`
+        : userPath
+          ? `${HOST}/user/${userPath[1]}`
+          : profileUsername
+            ? `${HOST}/user/${profileUsername}`
+            : `${HOST}${pathname}`
 
   return (
     isOriginalLinkPath && (

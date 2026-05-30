@@ -13,7 +13,8 @@ import { SectionPath } from '@renderer/data/types/web'
 import { useStateHook } from '@renderer/hooks/use-cache-state'
 import { cn } from '@renderer/lib/utils'
 import { activeSectionAtom } from '@renderer/state/small-carousel'
-import { useAtomValue } from 'jotai'
+import { openMonoListPanelTabAtomAction, type MonoListPanelTab } from '@renderer/state/panel'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTopListQuery } from '@renderer/data/hooks/web/subject'
@@ -27,6 +28,7 @@ export type SmallCarouselProps = {
 }
 
 export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
+  const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
   const topList = useTopListQuery(sectionPath)
   const subjectIds = topList.data
     ?.map((item) => item.SubjectId)
@@ -61,23 +63,44 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
       }}
     >
       <div className="flex justify-between">
-        <Button
-          asChild
-          variant="ghost"
-          className="group ml-1 h-min px-2 py-1 text-xl font-medium duration-100"
-        >
-          <MyLink to={href}>
-            <div
-              className={`flex -translate-x-2 items-center justify-center gap-1 transition-all duration-100 group-hover:translate-x-0 group-hover:text-red-600/70 dark:group-hover:text-red-400`}
-            >
-              <span>{name}</span>
-              <ChevronRight
-                className="mt-px h-4 w-4 text-red-600/50 group-hover:text-red-600/70 dark:text-red-600/80 dark:group-hover:text-red-400"
-                strokeWidth={4}
-              />
-            </div>
-          </MyLink>
-        </Button>
+        <div className="flex min-w-0 items-center gap-1">
+          <Button
+            asChild
+            variant="ghost"
+            className="group ml-1 h-min px-2 py-1 text-xl font-medium duration-100"
+          >
+            <MyLink to={href}>
+              <div
+                className={`flex -translate-x-2 items-center justify-center gap-1 transition-all duration-100 group-hover:translate-x-0 group-hover:text-red-600/70 dark:group-hover:text-red-400`}
+              >
+                <span>{name}</span>
+                <ChevronRight
+                  className="mt-px h-4 w-4 text-red-600/50 group-hover:text-red-600/70 dark:text-red-600/80 dark:group-hover:text-red-400"
+                  strokeWidth={4}
+                />
+              </div>
+            </MyLink>
+          </Button>
+          <Button
+            className="size-8 shrink-0"
+            onClick={() =>
+              openMonoListPanelTab({
+                id: `trending-subjects-${sectionPath}`,
+                panelTitle: `热门${name}`,
+                sectionPath,
+                sourceTitle: '首页',
+                sourceTo: '/',
+                title: `热门${name}`,
+                type: 'trendingSubjects',
+              } satisfies MonoListPanelTab)
+            }
+            size="icon"
+            title={`在侧栏打开热门${name}`}
+            variant="ghost"
+          >
+            <span className="i-mingcute-box-3-line text-base" />
+          </Button>
+        </div>
         <div className="mb-2 ml-auto flex w-min gap-2">
           <CarouselPrevious className="relative top-0 left-0 translate-y-0" />
           <CarouselNext className="relative top-0 right-0 translate-y-0" />

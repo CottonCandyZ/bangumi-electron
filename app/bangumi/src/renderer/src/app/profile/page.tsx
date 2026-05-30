@@ -143,6 +143,8 @@ export function Component() {
         items={timelineQuery.data}
         loading={timelineQuery.isPending}
         onOpenAll={() => setRightPanelOpen(true)}
+        onRefresh={() => timelineQuery.refetch()}
+        refreshing={timelineQuery.isFetching}
       />
 
       {collectionSections.length > 0 && (
@@ -268,11 +270,15 @@ function TimelinePreview({
   items,
   loading,
   onOpenAll,
+  onRefresh,
+  refreshing,
 }: {
   error: boolean
   items: UserTimelineItem[] | undefined
   loading: boolean
   onOpenAll: () => void
+  onRefresh: () => void
+  refreshing: boolean
 }) {
   const visibleItems = items?.filter(hasUserTimelineItemDetails)
 
@@ -283,22 +289,42 @@ function TimelinePreview({
           <Activity className="text-muted-foreground size-5" />
           <h2 className="text-2xl font-medium">时间线</h2>
         </div>
-        {visibleItems && visibleItems.length > 0 && (
-          <Button className="h-8 px-2 text-xs" onClick={onOpenAll} size="sm" variant="ghost">
-            全部
+        <div className="flex shrink-0 flex-row items-center gap-2">
+          <Button
+            className="size-8"
+            disabled={refreshing}
+            onClick={onRefresh}
+            size="icon"
+            title="刷新时间线"
+            variant="ghost"
+          >
+            <span
+              className={cn('i-mingcute-refresh-2-line text-base', refreshing && 'animate-spin')}
+            />
           </Button>
-        )}
+          {visibleItems && visibleItems.length > 0 && (
+            <Button
+              className="h-8 gap-1 px-2 text-xs"
+              onClick={onOpenAll}
+              size="sm"
+              variant="ghost"
+            >
+              全部
+              <span className="i-mingcute-right-line text-base" />
+            </Button>
+          )}
+        </div>
       </div>
       {error ? (
         <p className="text-muted-foreground text-sm">暂时无法读取时间线。</p>
       ) : loading || !visibleItems ? (
-        <UserTimelineSkeleton className="grid gap-3 md:grid-cols-2" count={4} />
+        <UserTimelineSkeleton count={4} surface="timeline" />
       ) : visibleItems.length === 0 ? (
         <p className="text-muted-foreground text-sm">近期没有动态。</p>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="flex max-w-3xl flex-col gap-3">
           {visibleItems.map((item) => (
-            <UserTimelineItemCard item={item} key={item.id} />
+            <UserTimelineItemCard compact item={item} key={item.id} surface="timeline" />
           ))}
         </div>
       )}

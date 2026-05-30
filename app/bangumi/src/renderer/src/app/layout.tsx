@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Header } from '@renderer/modules/header'
 import { LeftResizablePanel } from '@renderer/modules/panel/left-panel'
 import { NavBar } from '@renderer/modules/nav'
@@ -6,6 +6,7 @@ import { MainContainer } from '@renderer/modules/main'
 import { BackCover } from '@renderer/components/hover-pop-card/close'
 import { useEffect } from 'react'
 import { handlers } from '@renderer/lib/client'
+import { HomeKeepAliveOutlet } from './home-keep-alive-outlet'
 
 function RootLayout() {
   const navigate = useNavigate()
@@ -25,7 +26,7 @@ function RootLayout() {
         <div className="flex h-full w-full flex-col">
           <Header />
           <MainContainer>
-            <Outlet />
+            <HomeKeepAliveOutlet />
           </MainContainer>
         </div>
       </div>

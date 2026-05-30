@@ -1,4 +1,5 @@
 import { CharacterHeaderTitle } from '@renderer/modules/header/title/mono'
+import { CommunityTopicHeaderTitle } from '@renderer/modules/header/title/community'
 import { EpisodeHeaderTitle } from '@renderer/modules/header/title/episode'
 import { PersonHeaderTitle } from '@renderer/modules/header/title/mono'
 import { SubjectHeaderTitle } from '@renderer/modules/header/title/subject'
@@ -7,9 +8,17 @@ import { useLocation } from 'react-router-dom'
 
 export function HeaderTitle() {
   const { pathname } = useLocation()
-  const [, route, id] = pathname.split('/')
+  const [, route, id, nestedId] = pathname.split('/')
 
   if (pathname === '/profile') return <UserHeaderTitle />
+  if (pathname === '/talk') return null
+  if (route === 'group' && id === 'topic' && nestedId) {
+    return <CommunityTopicHeaderTitle kind="group" topicId={Number(nestedId)} />
+  }
+  if (route === 'group' && id) return null
+  if (route === 'subject' && id === 'topic' && nestedId) {
+    return <CommunityTopicHeaderTitle kind="subject" topicId={Number(nestedId)} />
+  }
   if (!id) return null
 
   if (route === 'subject') return <SubjectHeaderTitle subjectId={id} />
