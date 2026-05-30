@@ -1,4 +1,8 @@
-import { CommentItem, CommentSkeleton } from '@renderer/components/comment/comment-box'
+import {
+  CommentItem,
+  CommentSkeleton,
+  hasVisibleCommentContent,
+} from '@renderer/components/comment/comment-box'
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
 import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
@@ -11,6 +15,7 @@ import { Comment } from '@renderer/data/types/comment'
 import { GroupTopic, SubjectTopic, TopicReply } from '@renderer/data/types/community'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
+import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
 import { communityTopicTitleInViewAtom } from '@renderer/state/in-view'
 import { scrollViewportAtom } from '@renderer/state/scroll'
@@ -46,7 +51,14 @@ function GroupTopicDetail({ topicId }: { topicId: number }) {
   if (query.isLoading) return <TopicDetailSkeleton />
   if (query.isError || !query.data) return <TopicDetailMessage text="暂时无法读取小组话题。" />
 
-  return <TopicDetail topic={query.data} kind="group" />
+  return (
+    <TopicDetail
+      topic={query.data}
+      kind="group"
+      onRefresh={() => query.refetch()}
+      refreshing={query.isFetching}
+    />
+  )
 }
 
 function SubjectTopicDetail({ topicId }: { topicId: number }) {
@@ -55,10 +67,27 @@ function SubjectTopicDetail({ topicId }: { topicId: number }) {
   if (query.isLoading) return <TopicDetailSkeleton />
   if (query.isError || !query.data) return <TopicDetailMessage text="暂时无法读取条目讨论。" />
 
-  return <TopicDetail topic={query.data} kind="subject" />
+  return (
+    <TopicDetail
+      topic={query.data}
+      kind="subject"
+      onRefresh={() => query.refetch()}
+      refreshing={query.isFetching}
+    />
+  )
 }
 
-function TopicDetail({ topic, kind }: { topic: GroupTopic | SubjectTopic; kind: TopicKind }) {
+function TopicDetail({
+  topic,
+  kind,
+  onRefresh,
+  refreshing,
+}: {
+  topic: GroupTopic | SubjectTopic
+  kind: TopicKind
+  onRefresh: () => Promise<unknown> | unknown
+  refreshing: boolean
+}) {
   const scrollViewport = useAtomValue(scrollViewportAtom)
   const setTitleInView = useSetAtom(communityTopicTitleInViewAtom)
   const scrollRef = useRef<HTMLElement | null>(null)
@@ -107,7 +136,15 @@ function TopicDetail({ topic, kind }: { topic: GroupTopic | SubjectTopic; kind: 
         scrollRef={scrollRef}
         bufferSize={TOPIC_DETAIL_OVERSCAN * TOPIC_DETAIL_ITEM_ESTIMATE}
       >
-        {(row) => <TopicDetailRow row={row} topic={topic} kind={kind} />}
+        {(row) => (
+          <TopicDetailRow
+            row={row}
+            topic={topic}
+            kind={kind}
+            onRefresh={onRefresh}
+            refreshing={refreshing}
+          />
+        )}
       </Virtualizer>
       <MainBackToTopButton onBackToTop={scrollToTop} />
     </div>
@@ -138,19 +175,31 @@ type TopicDetailRow =
 
 function getTopicRows(topic: GroupTopic | SubjectTopic): TopicDetailRow[] {
   const [mainReply, ...replies] = topic.replies
+  const mainComment = mainReply ? toComment(mainReply) : undefined
+  const visibleReplies = replies
+    .map((reply, index) => ({
+      comment: toComment(reply),
+      floorNumber: index + 2,
+      reply,
+    }))
+    .filter(({ comment }) => hasVisibleCommentContent(comment))
   const rows: TopicDetailRow[] = [
-    { key: 'header', mainComment: mainReply ? toComment(mainReply) : undefined, type: 'header' },
-    { count: replies.length, key: 'comment-title', type: 'comment-title' },
+    {
+      key: 'header',
+      mainComment: mainComment && hasVisibleCommentContent(mainComment) ? mainComment : undefined,
+      type: 'header',
+    },
+    { count: visibleReplies.length, key: 'comment-title', type: 'comment-title' },
   ]
-  if (replies.length === 0) {
+  if (visibleReplies.length === 0) {
     rows.push({ key: 'empty', type: 'empty' })
     return rows
   }
 
   rows.push(
-    ...replies.map((reply, index) => ({
-      comment: toComment(reply),
-      floorNumber: index + 2,
+    ...visibleReplies.map(({ comment, floorNumber, reply }) => ({
+      comment,
+      floorNumber,
       key: `reply-${reply.id}`,
       type: 'comment' as const,
     })),
@@ -162,15 +211,25 @@ function TopicDetailRow({
   row,
   topic,
   kind,
+  onRefresh,
+  refreshing,
 }: {
   row: TopicDetailRow
   topic: GroupTopic | SubjectTopic
   kind: TopicKind
+  onRefresh: () => Promise<unknown> | unknown
+  refreshing: boolean
 }) {
   if (row.type === 'header') {
     return (
       <div className="mx-auto max-w-5xl px-10 pt-8 pb-6">
-        <TopicHeader topic={topic} kind={kind} mainComment={row.mainComment} />
+        <TopicHeader
+          topic={topic}
+          kind={kind}
+          mainComment={row.mainComment}
+          onRefresh={onRefresh}
+          refreshing={refreshing}
+        />
       </div>
     )
   }
@@ -207,10 +266,14 @@ function TopicHeader({
   topic,
   kind,
   mainComment,
+  onRefresh,
+  refreshing,
 }: {
   topic: GroupTopic | SubjectTopic
   kind: TopicKind
   mainComment?: Comment
+  onRefresh: () => Promise<unknown> | unknown
+  refreshing: boolean
 }) {
   const titleInView = useAtomValue(communityTopicTitleInViewAtom)
   const setTitleInView = useSetAtom(communityTopicTitleInViewAtom)
@@ -277,11 +340,19 @@ function TopicHeader({
   return (
     <section className="flex flex-col gap-5">
       <div className="flex flex-col gap-3">
-        <div className="flex flex-row flex-wrap items-center gap-2">
-          <Badge variant="outline">{kind === 'group' ? '小组' : '条目'}</Badge>
-          <Badge variant="secondary" className="shadow-none">
-            {topic.replyCount} 回复
-          </Badge>
+        <div className="flex flex-row items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-row flex-wrap items-center gap-2">
+            <Badge variant="outline">{kind === 'group' ? '小组' : '条目'}</Badge>
+            <Badge variant="secondary" className="shadow-none">
+              {topic.replyCount} 回复
+            </Badge>
+          </div>
+          <QueryRefreshButton
+            className="-mt-1"
+            label="刷新帖子"
+            onRefresh={onRefresh}
+            refreshing={refreshing}
+          />
         </div>
         <h1 className="text-3xl leading-tight font-semibold" ref={titleRef}>
           {topic.title}

@@ -1,5 +1,9 @@
 import { MyLink } from '@renderer/components/my-link'
-import { CommentItem, CommentSkeleton } from '@renderer/components/comment/comment-box'
+import {
+  CommentItem,
+  CommentSkeleton,
+  hasVisibleCommentContent,
+} from '@renderer/components/comment/comment-box'
 import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
@@ -15,6 +19,7 @@ import {
 } from '@renderer/data/hooks/api/episodes'
 import { Episode, EpisodeType } from '@renderer/data/types/episode'
 import { useOpenSubjectEpisodesPanel } from '@renderer/modules/common/episodes/use-open-subject-episodes-panel'
+import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
 import { EpisodeCollectionActions } from '@renderer/modules/main/episode/collection-actions'
 import { scrollViewportAtom } from '@renderer/state/scroll'
@@ -98,7 +103,14 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
         bufferSize={EPISODE_PAGE_VIRTUAL_OVERSCAN * EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE}
       >
         {(row) => (
-          <EpisodePageRow row={row} title={title} episode={episode} subject={subjectQuery.data} />
+          <EpisodePageRow
+            row={row}
+            title={title}
+            episode={episode}
+            subject={subjectQuery.data}
+            onRefreshComments={() => commentsQuery.refetch()}
+            refreshingComments={commentsQuery.isFetching}
+          />
         )}
       </Virtualizer>
       <MainBackToTopButton onBackToTop={scrollToTop} />
@@ -145,7 +157,10 @@ function getEpisodePageRows({
   episode: Episode
 }): EpisodePageRow[] {
   const rows: EpisodePageRow[] = [{ key: 'detail', type: 'detail' }]
-  const count = comments?.length ?? (episode.comment > 0 ? episode.comment : undefined)
+  const visibleComments = comments
+    ?.map((comment, index) => ({ comment, floorNumber: index + 1 }))
+    .filter(({ comment }) => hasVisibleCommentContent(comment))
+  const count = visibleComments?.length ?? (episode.comment > 0 ? episode.comment : undefined)
 
   rows.push({ count, key: 'comment-title', type: 'comment-title' })
 
@@ -159,15 +174,15 @@ function getEpisodePageRows({
     return rows
   }
 
-  if (comments.length === 0) {
+  if (!visibleComments || visibleComments.length === 0) {
     rows.push({ key: 'comments-empty', type: 'empty' })
     return rows
   }
 
   rows.push(
-    ...comments.map((comment, index) => ({
+    ...visibleComments.map(({ comment, floorNumber }) => ({
       comment,
-      floorNumber: index + 1,
+      floorNumber,
       key: `comment-${comment.id}`,
       type: 'comment' as const,
     })),
@@ -181,11 +196,15 @@ function EpisodePageRow({
   title,
   episode,
   subject,
+  onRefreshComments,
+  refreshingComments,
 }: {
   row: EpisodePageRow
   title: string
   episode: Episode
   subject?: NonNullable<ReturnType<typeof useSubjectInfoAPIQuery>['data']>
+  onRefreshComments: () => Promise<unknown> | unknown
+  refreshingComments: boolean
 }) {
   if (row.type === 'detail') {
     return (
@@ -198,7 +217,15 @@ function EpisodePageRow({
   if (row.type === 'comment-title') {
     return (
       <div className="mx-auto flex max-w-6xl flex-row items-center justify-between gap-4 px-10 pb-5">
-        <h2 className="text-2xl font-medium">吐槽箱</h2>
+        <div className="flex min-w-0 flex-row items-center gap-2">
+          <h2 className="text-2xl font-medium">吐槽箱</h2>
+          <QueryRefreshButton
+            className="mt-1"
+            label="刷新吐槽箱"
+            onRefresh={onRefreshComments}
+            refreshing={refreshingComments}
+          />
+        </div>
         {row.count !== undefined && (
           <span className="text-muted-foreground text-sm">{row.count}</span>
         )}

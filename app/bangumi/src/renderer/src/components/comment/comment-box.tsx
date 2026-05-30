@@ -68,6 +68,13 @@ export function CommentBox({
   userAvatarViewTransition = true,
   footer,
 }: CommentBoxProps) {
+  const visibleComments = useMemo(() => comments?.filter(hasVisibleCommentContent), [comments])
+  const visibleFloorNumbers = useMemo(() => {
+    if (!comments || !floorNumbers) return floorNumbers
+    return comments.flatMap((comment, index) =>
+      hasVisibleCommentContent(comment) ? [floorNumbers[index] ?? index + 1] : [],
+    )
+  }, [comments, floorNumbers])
   const { ref, inView } = useInView({
     rootMargin: '240px 0px',
     triggerOnce: true,
@@ -82,31 +89,30 @@ export function CommentBox({
       return <p className="text-muted-foreground text-sm">暂时无法读取吐槽箱。</p>
     }
 
-    if (comments === undefined) {
+    if (visibleComments === undefined) {
       return <CommentSkeletonList />
     }
 
-    if (comments.length === 0) {
+    if (visibleComments.length === 0) {
       return <p className="text-muted-foreground text-sm">{emptyText}</p>
     }
 
     return (
       <CommentList
-        comments={comments}
+        comments={visibleComments}
         className={listClassName}
         appendPlaceholderCount={appendPlaceholderCount}
         hasMore={hasMore}
         isFetchingMore={isFetchingMore}
         onNearBottom={onListNearBottom}
         showBackToTop={showBackToTop}
-        floorNumbers={floorNumbers}
+        floorNumbers={visibleFloorNumbers}
         scrollAreaKey={scrollAreaKey}
         userAvatarViewTransition={userAvatarViewTransition}
         virtual={virtual}
       />
     )
   }, [
-    comments,
     emptyText,
     error,
     appendPlaceholderCount,
@@ -115,9 +121,10 @@ export function CommentBox({
     listClassName,
     onListNearBottom,
     showBackToTop,
-    floorNumbers,
+    visibleFloorNumbers,
     scrollAreaKey,
     virtual,
+    visibleComments,
     userAvatarViewTransition,
   ])
 
@@ -126,8 +133,8 @@ export function CommentBox({
       {title !== null && (
         <div className="flex flex-row items-center justify-between gap-4">
           <h2 className="text-2xl font-medium">{title}</h2>
-          {comments && comments.length > 0 && (
-            <span className="text-muted-foreground text-sm">{comments.length}</span>
+          {visibleComments && visibleComments.length > 0 && (
+            <span className="text-muted-foreground text-sm">{visibleComments.length}</span>
           )}
         </div>
       )}
@@ -143,6 +150,14 @@ export function CommentBox({
       {footer}
     </section>
   )
+}
+
+export function hasVisibleCommentContent(comment: Comment) {
+  return comment.content.trim().length > 0 || comment.replies.some(hasVisibleReplyContent)
+}
+
+function hasVisibleReplyContent(reply: CommentBase) {
+  return reply.content.trim().length > 0
 }
 
 function CommentList({
@@ -249,14 +264,19 @@ export function CommentItem({
   userAvatarViewTransition: boolean
 }) {
   const [showAllReplies, setShowAllReplies] = useState(false)
-  const replyCount = comment.replies.length
+  const allVisibleReplies = useMemo(
+    () => comment.replies.filter(hasVisibleReplyContent),
+    [comment.replies],
+  )
+  const replyCount = allVisibleReplies.length
   const hasHiddenReplies = replyCount > DEFAULT_VISIBLE_REPLY_COUNT
   const visibleReplies =
     hasHiddenReplies && !showAllReplies
-      ? comment.replies.slice(0, DEFAULT_VISIBLE_REPLY_COUNT)
-      : comment.replies
+      ? allVisibleReplies.slice(0, DEFAULT_VISIBLE_REPLY_COUNT)
+      : allVisibleReplies
   const hiddenReplyCount = replyCount - DEFAULT_VISIBLE_REPLY_COUNT
   const repliesId = `comment-${comment.id}-replies`
+  const hasContent = comment.content.trim().length > 0
 
   return (
     <Card className="relative flex flex-row gap-3 p-3 pr-12 shadow-none">
@@ -277,7 +297,11 @@ export function CommentItem({
       <BBCodeImagePreviewProvider>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <CommentHeader comment={comment} />
-          <div className="bbcode text-sm whitespace-pre-line">{renderBBCode(comment.content)}</div>
+          {hasContent && (
+            <div className="bbcode text-sm whitespace-pre-line">
+              {renderBBCode(comment.content)}
+            </div>
+          )}
           <CommentReactions reactions={comment.reactions} />
           {replyCount > 0 && (
             <div

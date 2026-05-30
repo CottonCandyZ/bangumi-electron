@@ -13,6 +13,8 @@ const URL_PATTERN = /https?:\/\/[^\s<>"'，。)）\]]+/g
 const INLINE_TOKEN_PATTERN = /\((bgm\d+|musume_\d+|bmoC?[A-Za-z0-9_\-:=|.]*)\)/g
 const BANGUMI_HOSTS = new Set(['bangumi.tv', 'bgm.tv'])
 const BANGUMI_ROUTE_PATTERN = /^\/(subject|person|character|ep)\/(\d+)\/?$/
+const BANGUMI_TOPIC_ROUTE_PATTERN = /^\/(group|subject)\/topic\/(\d+)\/?$/
+const BANGUMI_USER_ROUTE_PATTERN = /^\/user\/([^/?#]+)\/?$/
 const BBCODE_LINK_CLASS =
   'text-blue-600 underline decoration-blue-500/45 underline-offset-2 transition-colors hover:text-blue-700 hover:decoration-blue-600 dark:text-blue-400 dark:decoration-blue-400/50 dark:hover:text-blue-300 dark:hover:decoration-blue-300'
 const ALLOWED_COLOR_PATTERN =
@@ -64,6 +66,11 @@ export const preset = createPreset({
     tag: 'blockquote',
     content: node.content,
   }),
+  right: (node) => ({
+    tag: 'div',
+    attrs: { className: 'text-muted-foreground text-right' },
+    content: node.content,
+  }),
   s: (node) => ({
     tag: 's',
     content: node.content,
@@ -81,6 +88,25 @@ export const preset = createPreset({
     attrs: { className: 'underline' },
     content: node.content,
   }),
+  user: (node, { render }) => {
+    const userId = sanitizeUserPathSegment(getUrlAttr(node.attrs))
+    const label = formatMentionLabel(render(node.content ?? []), userId)
+
+    if (!userId) {
+      return {
+        tag: 'span',
+        content: label,
+      }
+    }
+
+    return {
+      tag: 'a',
+      attrs: {
+        href: `https://bgm.tv/user/${encodeURIComponent(userId)}`,
+      },
+      content: label,
+    }
+  },
   url: (node, { render }) => {
     const href = normalizeUrl(getUrlAttr(node.attrs) ?? render(node.content ?? []))
 
@@ -106,7 +132,20 @@ export const preset = createPreset({
 export const renderBBCode = (content: string) => {
   return linkifyNodes(
     render(content, preset(), {
-      onlyAllowTags: ['b', 'color', 'i', 'img', 'mask', 'quote', 's', 'size', 'u', 'url'],
+      onlyAllowTags: [
+        'b',
+        'color',
+        'i',
+        'img',
+        'mask',
+        'quote',
+        'right',
+        's',
+        'size',
+        'u',
+        'url',
+        'user',
+      ],
     }),
   )
 }
@@ -143,6 +182,18 @@ function sanitizeFontSize(size: unknown) {
   if (!Number.isFinite(value)) return undefined
 
   return `${Math.min(32, Math.max(8, value))}px`
+}
+
+function sanitizeUserPathSegment(value: unknown) {
+  const text = typeof value === 'string' ? value.trim().replace(/^(['"])(.*)\1$/, '$2') : ''
+  if (!text) return undefined
+  return text
+}
+
+function formatMentionLabel(label: unknown, fallback?: string) {
+  const text = typeof label === 'string' ? label.trim() : ''
+  const display = text || fallback || ''
+  return display.startsWith('@') ? display : `@${display}`
 }
 
 function linkifyNodes(nodes: ReactNode): ReactNode {
@@ -278,6 +329,12 @@ function getBangumiRoute(href: string) {
   try {
     const url = new URL(href)
     if (!BANGUMI_HOSTS.has(url.hostname)) return undefined
+    const topicMatch = url.pathname.match(BANGUMI_TOPIC_ROUTE_PATTERN)
+    if (topicMatch) return `/${topicMatch[1]}/topic/${topicMatch[2]}`
+
+    const userMatch = url.pathname.match(BANGUMI_USER_ROUTE_PATTERN)
+    if (userMatch) return `/user/${encodeURIComponent(decodeURIComponent(userMatch[1]))}`
+
     const match = url.pathname.match(BANGUMI_ROUTE_PATTERN)
     if (!match) return undefined
     if (match[1] === 'ep') return `/episode/${match[2]}`

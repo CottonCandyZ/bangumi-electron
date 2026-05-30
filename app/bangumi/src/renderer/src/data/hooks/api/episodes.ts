@@ -7,6 +7,8 @@ import { useAuthQuery } from '@renderer/data/hooks/factory'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { useQuery } from '@tanstack/react-query'
 
+const EPISODE_COMMENTS_STALE_TIME = 1000 * 30
+
 /**
  * 使用 SubjectId 获得 Episodes
  *
@@ -62,4 +64,5 @@ export const useEpisodeCommentsByIdQuery = ({
     queryFn: () => getEpisodeCommentsById({ episodeId }),
     queryKey: ['episode-comments', episodeId],
     enabled,
+    staleTime: EPISODE_COMMENTS_STALE_TIME,
   })

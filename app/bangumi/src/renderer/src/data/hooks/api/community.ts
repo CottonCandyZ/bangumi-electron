@@ -17,6 +17,8 @@ import type { GroupSort } from '@renderer/data/types/community'
 import type { SlimGroup, SubjectTopicSource } from '@renderer/data/types/community'
 import type { UserInfo } from '@renderer/data/types/user'
 
+const COMMUNITY_TOPIC_DETAIL_STALE_TIME = 1000 * 30
+
 export const useGroupsQuery = ({
   enabled,
   limit = 12,
@@ -196,6 +198,7 @@ export const useGroupTopicQuery = ({ topicId }: { topicId: number }) =>
     queryFn: getGroupTopic,
     queryKey: ['community-group-topic'],
     queryProps: { topicId },
+    staleTime: COMMUNITY_TOPIC_DETAIL_STALE_TIME,
   })
 
 export const useSubjectTopicQuery = ({ topicId }: { topicId: number }) =>
@@ -203,4 +206,5 @@ export const useSubjectTopicQuery = ({ topicId }: { topicId: number }) =>
     queryFn: getSubjectTopic,
     queryKey: ['community-subject-topic'],
     queryProps: { topicId },
+    staleTime: COMMUNITY_TOPIC_DETAIL_STALE_TIME,
   })
