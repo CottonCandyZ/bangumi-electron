@@ -33,9 +33,13 @@ export function SubjectDiscussions({
     limit: SUBJECT_DISCUSSIONS_PREVIEW_LIMIT,
   })
   const openMonoListPanelTab = useSetAtom(openMonoListPanelTabAtomAction)
-  const topics = useMemo(
+  const fetchedTopics = useMemo(
     () => topicsQuery.data?.pages.flatMap((page) => page.data),
     [topicsQuery.data],
+  )
+  const topics = useMemo(
+    () => fetchedTopics?.slice(0, SUBJECT_DISCUSSIONS_PREVIEW_LIMIT),
+    [fetchedTopics],
   )
   const total = topicsQuery.data?.pages[0]?.total
   const hasMore = total !== undefined && topics !== undefined && topics.length < total
