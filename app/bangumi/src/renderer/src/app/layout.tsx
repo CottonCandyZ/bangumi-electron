@@ -6,7 +6,7 @@ import { MainContainer } from '@renderer/modules/main'
 import { BackCover } from '@renderer/components/hover-pop-card/close'
 import { useEffect } from 'react'
 import { handlers } from '@renderer/lib/client'
-import { HomeKeepAliveOutlet } from './home-keep-alive-outlet'
+import { MainOutlet } from './main-outlet'
 
 function RootLayout() {
   const navigate = useNavigate()
@@ -26,7 +26,7 @@ function RootLayout() {
         <div className="flex h-full w-full flex-col">
           <Header />
           <MainContainer>
-            <HomeKeepAliveOutlet />
+            <MainOutlet />
           </MainContainer>
         </div>
       </div>

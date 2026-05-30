@@ -79,6 +79,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
 
   const isTransitioning = useViewTransitionState(`/subject/${subjectId}`) // viewTransition API
   const { key } = useLocation()
+  const viewTransitionName = `cover-image-${key}`
 
   return (
     <HoverPopCard
@@ -93,13 +94,13 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
         CardContent={
           <ViewTransitionElement
             active={!isActive && isTransitioning}
-            viewTransitionName={`cover-image-${key}`}
+            viewTransitionName={viewTransitionName}
           >
             <MyLink
               to={`/subject/${subjectId}`}
               className="cursor-default"
               viewTransition
-              state={{ viewTransitionName: `cover-image-${key}` }}
+              state={{ viewTransitionName }}
             >
               <CardContent className="p-0">
                 <CoverMotionImage
@@ -146,7 +147,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
           to={`/subject/${subjectId}`}
           className="cursor-default"
           viewTransition
-          state={{ viewTransitionName: `cover-image-${key}` }}
+          state={{ viewTransitionName }}
         >
           <Card className="h-full w-full overflow-hidden">
             <CardContent className="flex h-full flex-col gap-1 p-0">
@@ -156,7 +157,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
                   <ViewTransitionElement
                     active={isTransitioning}
                     className="shrink-0 basis-1/6"
-                    viewTransitionName={`cover-image-${key}`}
+                    viewTransitionName={viewTransitionName}
                   >
                     <CoverMotionImage
                       imageSrc={subjectInfo.images.common}

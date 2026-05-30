@@ -14,5 +14,8 @@ out
 # config
 .env
 
+# local notes
+.local-doc/
+
 # IDE
 .idea
