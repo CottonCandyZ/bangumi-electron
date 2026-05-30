@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { cn } from '@renderer/lib/utils'
+import { useRef } from 'react'
 import type { ReactElement } from 'react'
 import { useLocation, useOutlet } from 'react-router-dom'
 
@@ -11,24 +12,17 @@ export function HomeKeepAliveOutlet() {
   const outlet = useOutlet()
   const isHome = isHomePath(location.pathname)
   const homeOutletRef = useRef<ReactElement | null>(isHome ? outlet : null)
-  const [, forceRender] = useState(0)
 
-  useEffect(() => {
-    if (!isHome || !outlet) return
-    if (homeOutletRef.current) return
-
+  if (isHome && outlet && !homeOutletRef.current) {
     homeOutletRef.current = outlet
-    forceRender((value) => value + 1)
-  }, [isHome, outlet])
-
-  if (isHome) {
-    return homeOutletRef.current ?? outlet
   }
 
   return (
     <>
-      {homeOutletRef.current && <div className="hidden">{homeOutletRef.current}</div>}
-      {outlet}
+      {homeOutletRef.current && (
+        <div className={cn(!isHome && 'hidden')}>{homeOutletRef.current}</div>
+      )}
+      {!isHome && outlet}
     </>
   )
 }
