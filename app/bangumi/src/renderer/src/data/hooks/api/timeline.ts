@@ -1,7 +1,6 @@
 import { getTimeline } from '@renderer/data/fetch/api/timeline'
 import {
   DEFAULT_INFINITE_REFETCH_PAGE_LIMIT,
-  trimInfiniteQueryPagesIf,
   trimInfiniteQueryPages,
 } from '@renderer/data/hooks/infinite-query'
 import type { TimelineMode } from '@renderer/data/types/timeline'
@@ -42,9 +41,9 @@ export const useTimelineQuery = ({
     queryKey: ['site-timeline-v1', userId, mode, limit],
     queryFn: () => getTimeline({ limit, mode }),
     enabled,
-    refetchOnMount: (query) => query.isStale(),
-    refetchOnReconnect: (query) => query.isStale(),
-    refetchOnWindowFocus: (query) => query.isStale(),
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
     staleTime,
   })
 }
@@ -89,36 +88,9 @@ export const useTimelineInfiniteQuery = ({
       return nextPageParam
     },
     enabled,
-    refetchOnMount: (query) => {
-      const willRefetch = query.isStale()
-      trimInfiniteQueryPagesIf<UserTimelineItem[], number | undefined>({
-        pageLimit: refetchPageLimit,
-        queryClient,
-        queryKey,
-        shouldTrim: willRefetch,
-      })
-      return willRefetch
-    },
-    refetchOnReconnect: (query) => {
-      const willRefetch = query.isStale()
-      trimInfiniteQueryPagesIf<UserTimelineItem[], number | undefined>({
-        pageLimit: refetchPageLimit,
-        queryClient,
-        queryKey,
-        shouldTrim: willRefetch,
-      })
-      return willRefetch
-    },
-    refetchOnWindowFocus: (query) => {
-      const willRefetch = query.isStale()
-      trimInfiniteQueryPagesIf<UserTimelineItem[], number | undefined>({
-        pageLimit: refetchPageLimit,
-        queryClient,
-        queryKey,
-        shouldTrim: willRefetch,
-      })
-      return willRefetch
-    },
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
     staleTime,
   })
   const { refetch: originalRefetch } = query
