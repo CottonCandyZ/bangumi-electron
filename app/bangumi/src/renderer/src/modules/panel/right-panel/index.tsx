@@ -3,6 +3,7 @@ import { RightPanel } from '@renderer/modules/panel/right-panel/panel'
 import { panelSize } from '@renderer/state/global-var'
 import {
   getRightPanelContentByPathname,
+  replyComposerAtom,
   rightPanelOpenAtom,
   rightPanelWidth,
 } from '@renderer/state/panel'
@@ -15,17 +16,23 @@ const MIN_WIDTH = 248
 
 export function RightResizablePanel() {
   const desiredOpen = useAtomValue(rightPanelOpenAtom)
+  const replyComposer = useAtomValue(replyComposerAtom)
   const { pathname } = useLocation()
-  const hasContent = getRightPanelContentByPathname(pathname) !== null
+  const content = replyComposer.open ? 'replyComposer' : getRightPanelContentByPathname(pathname)
+  const hasContent = content !== null
+  const prevContentRef = useRef<typeof content>(content)
   const prevHasContentRef = useRef(hasContent)
-  const routeContentStable = prevHasContentRef.current === hasContent
+  const isReplyComposerTransition =
+    content === 'replyComposer' || prevContentRef.current === 'replyComposer'
+  const routeContentStable = isReplyComposerTransition || prevHasContentRef.current === hasContent
   const open = desiredOpen && hasContent
   const [resizing, setResizing] = useState(false)
   const [width, setWidth] = useAtom(rightPanelWidth)
 
   useEffect(() => {
+    prevContentRef.current = content
     prevHasContentRef.current = hasContent
-  }, [hasContent])
+  }, [content, hasContent])
 
   useEffect(() => {
     panelSize.right_width = width
@@ -43,10 +50,12 @@ export function RightResizablePanel() {
       width={width}
       onWidthChange={setWidth}
       className="bg-background border-l"
-      enableAnimation={hasContent && routeContentStable}
+      enableAnimation={
+        (hasContent || prevContentRef.current === 'replyComposer') && routeContentStable
+      }
       resizeHandlePos="left"
     >
-      <RightPanel />
+      <RightPanel content={content} />
     </ResizePanel>
   )
 }

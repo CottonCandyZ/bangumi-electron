@@ -9,6 +9,7 @@ export function toCommentFromSubjectInterest(comment: SubjectInterestComment): C
     createdAt: comment.updatedAt,
     content: comment.comment,
     state: 0,
+    reactions: comment.reactions,
     user: comment.user,
     replies: [],
   }

@@ -24,10 +24,12 @@ import { useResizeObserver } from '@renderer/hooks/use-resize'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { splitRelationLabels } from '@renderer/lib/utils/relation'
 import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
+import { MainCommentFab } from '@renderer/modules/main/comment-fab'
 import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
 import { scrollCache } from '@renderer/state/global-var'
 import { monoAvatarImageInViewAtom } from '@renderer/state/in-view'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
+import type { ReplyTarget } from '@shared/reply'
 import { useAtom, useSetAtom } from 'jotai'
 import {
   Children,
@@ -100,6 +102,11 @@ export function MonoDetailView({
 
   const infobox = getDisplayInfobox(detail.infobox)
   const image = detail.images?.large || detail.images?.medium
+  const replyTarget: ReplyTarget = {
+    id: detail.id,
+    title: detail.name,
+    type: detail.type,
+  }
 
   return (
     <div className="max-w-8xl mx-auto flex w-full flex-col gap-10 px-10 pt-12 pb-10">
@@ -183,7 +190,14 @@ export function MonoDetailView({
         title={relatedTitle}
         items={relatedItems}
       />
-      <CommentBox comments={comments} error={commentsError} onInView={onCommentsInView} />
+      <CommentBox
+        comments={comments}
+        error={commentsError}
+        onInView={onCommentsInView}
+        replyTarget={replyTarget}
+        showReplyEntry={false}
+      />
+      <MainCommentFab replyTarget={replyTarget} />
       <MainBackToTopButton />
     </div>
   )

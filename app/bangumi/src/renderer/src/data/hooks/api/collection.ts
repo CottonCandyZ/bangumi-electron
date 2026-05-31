@@ -73,6 +73,7 @@ export const useCollectionEpisodesInfoBySubjectIdQuery = ({
     queryProps: { subjectId, limit, offset, episodeType },
     staleTime: 0,
     enabled,
+    needKeepPreviousData: true,
   })
 
 export const useQuerySubjectCollection = ({

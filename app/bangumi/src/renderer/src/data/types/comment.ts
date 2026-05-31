@@ -47,6 +47,7 @@ export type SubjectInterestComment = {
   rate: number
   comment: string
   updatedAt: number
+  reactions?: CommentReaction[]
 }
 
 export type SubjectInterestComments = {

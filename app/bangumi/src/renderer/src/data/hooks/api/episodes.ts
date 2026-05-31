@@ -31,6 +31,7 @@ export const useEpisodesInfoBySubjectIdQuery = ({
     queryKey: ['episodes-info'],
     queryProps: { subjectId, limit, offset, type },
     enabled,
+    needKeepPreviousData: true,
   })
 
 /**

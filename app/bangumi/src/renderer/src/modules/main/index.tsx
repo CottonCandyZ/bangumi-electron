@@ -35,7 +35,7 @@ export function MainContainer({ children }: PropsWithChildren) {
   })
   return (
     <div className="flex h-full w-full flex-row overflow-hidden">
-      <div className="h-full w-full" ref={mainContainerRef}>
+      <div className="h-full min-w-0 flex-1" ref={mainContainerRef}>
         <PageScrollWrapper className="h-full">
           <div className="h-full">{children}</div>
         </PageScrollWrapper>

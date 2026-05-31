@@ -5,6 +5,7 @@ import { utils } from '@main/tipc/utils'
 import { window } from '@main/tipc/window'
 import { command } from '@main/tipc/command'
 import { update } from '@main/tipc/update'
+import { turnstileIPC } from '@main/tipc/turnstile'
 
 export const router = {
   ...window,
@@ -12,6 +13,7 @@ export const router = {
   ...utils,
   ...command,
   ...update,
+  ...turnstileIPC,
   ...loggerIPC,
   ...dbIPC,
 }

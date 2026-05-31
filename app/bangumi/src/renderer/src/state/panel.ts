@@ -15,6 +15,8 @@ import type {
 } from '@renderer/data/types/community'
 import type { TimelineMode } from '@renderer/data/types/timeline'
 import type { SectionPath } from '@renderer/data/types/web'
+import { dialogAtomFactory } from '@renderer/state/utils'
+import type { ReplyComposerContent } from '@shared/reply'
 import { atom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
 
@@ -22,7 +24,7 @@ export type LeftPanelName = 'collection' | 'monoList'
 
 export type RightPanelName = 'subjectInfo'
 
-export type RightPanelContent = 'searchFilter' | 'subjectInfo' | 'userTimeline'
+export type RightPanelContent = 'replyComposer' | 'searchFilter' | 'subjectInfo' | 'userTimeline'
 
 export type MonoListPanelTab =
   | {
@@ -174,14 +176,16 @@ export const rightPanelOpenAtom = atom(false)
 
 export const leftPanelOpenContentAtom = atom<LeftPanelName>('collection')
 
+export const replyComposerAtom = dialogAtomFactory<ReplyComposerContent>()
+
 export const leftPanelWidth = atomWithStorage('app-sidebar-width', 248)
 
 export const rightPanelWidth = atomWithStorage('app-right-panel-width', 248)
 
 export function getRightPanelContentByPathname(pathname: string): RightPanelContent | null {
-  if (pathname.includes('profile') || pathname.includes('user')) return 'userTimeline'
-  if (pathname.includes('subject')) return 'subjectInfo'
-  if (pathname.includes('search')) return 'searchFilter'
+  if (/^\/(?:profile|user)(?:\/|$)/.test(pathname)) return 'userTimeline'
+  if (/^\/subject\/[^/]+\/?$/.test(pathname)) return 'subjectInfo'
+  if (/^\/search(?:\/|$)/.test(pathname)) return 'searchFilter'
   return null
 }
 
@@ -319,6 +323,18 @@ export const restoreMonoListPanelAtomAction = atom(
 )
 
 // right
+
+export const openReplyComposerAtomAction = atom(
+  null,
+  (_get, set, content: ReplyComposerContent) => {
+    set(replyComposerAtom, { open: true, content })
+    set(rightPanelOpenAtom, true)
+  },
+)
+
+export const closeReplyComposerAtomAction = atom(null, (_get, set) => {
+  set(replyComposerAtom, { open: false })
+})
 
 // export const rightPanelButtonAtomAction = atom(
 //   (get) => get(rightPanelOpenAtom),

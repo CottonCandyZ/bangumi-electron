@@ -1,14 +1,19 @@
 import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
 import { Button } from '@renderer/components/ui/button'
 import { cn } from '@renderer/lib/utils'
-import { getRightPanelContentByPathname, rightPanelOpenAtom } from '@renderer/state/panel'
-import { useAtom } from 'jotai'
+import {
+  getRightPanelContentByPathname,
+  replyComposerAtom,
+  rightPanelOpenAtom,
+} from '@renderer/state/panel'
+import { useAtom, useAtomValue } from 'jotai'
 import { useLocation } from 'react-router-dom'
 
 export function RightPanelButton() {
   const [open, setOpen] = useAtom(rightPanelOpenAtom)
+  const replyComposer = useAtomValue(replyComposerAtom)
   const { pathname } = useLocation()
-  const hasContent = getRightPanelContentByPathname(pathname) !== null
+  const hasContent = replyComposer.open || getRightPanelContentByPathname(pathname) !== null
   const active = open && hasContent
 
   return (

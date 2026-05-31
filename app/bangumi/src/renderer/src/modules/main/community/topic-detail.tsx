@@ -5,6 +5,10 @@ import {
   CommentUserUsername,
   hasVisibleCommentContent,
 } from '@renderer/components/comment/comment-box'
+import {
+  CommentReactionButton,
+  CommentReactions,
+} from '@renderer/components/comment/comment-reactions'
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
 import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
@@ -19,8 +23,10 @@ import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
 import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
+import { MainCommentFab } from '@renderer/modules/main/comment-fab'
 import { communityTopicTitleInViewAtom } from '@renderer/state/in-view'
 import { scrollViewportAtom } from '@renderer/state/scroll'
+import type { ReplyTarget } from '@shared/reply'
 import dayjs from 'dayjs'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useMemo, useRef } from 'react'
@@ -96,6 +102,14 @@ function TopicDetail({
   const virtualizerRef = useRef<VirtualizerHandle>(null)
   scrollRef.current = scrollViewport
   const rows = useMemo(() => getTopicRows(topic), [topic])
+  const replyTarget = useMemo<ReplyTarget>(
+    () => ({
+      id: topic.id,
+      title: topic.title,
+      type: kind === 'group' ? 'group-topic' : 'subject-topic',
+    }),
+    [kind, topic.id, topic.title],
+  )
   const virtualScrollKey = `${kind}-topic-page:${topic.id}`
   const {
     cache: restoredVirtualCache,
@@ -145,9 +159,11 @@ function TopicDetail({
             kind={kind}
             onRefresh={onRefresh}
             refreshing={refreshing}
+            replyTarget={replyTarget}
           />
         )}
       </Virtualizer>
+      <MainCommentFab replyTarget={replyTarget} />
       <MainBackToTopButton onBackToTop={scrollToTop} />
     </div>
   )
@@ -215,12 +231,14 @@ function TopicDetailRow({
   kind,
   onRefresh,
   refreshing,
+  replyTarget,
 }: {
   row: TopicDetailRow
   topic: GroupTopic | SubjectTopic
   kind: TopicKind
   onRefresh: () => Promise<unknown> | unknown
   refreshing: boolean
+  replyTarget: ReplyTarget
 }) {
   if (row.type === 'header') {
     return (
@@ -230,6 +248,7 @@ function TopicDetailRow({
           kind={kind}
           mainComment={row.mainComment}
           onRefresh={onRefresh}
+          replyTarget={replyTarget}
           refreshing={refreshing}
         />
       </div>
@@ -258,6 +277,8 @@ function TopicDetailRow({
       <CommentItem
         comment={row.comment}
         floorNumber={row.floorNumber}
+        reactionTarget={replyTarget}
+        replyTarget={replyTarget}
         userAvatarViewTransition={false}
       />
     </div>
@@ -269,12 +290,14 @@ function TopicHeader({
   kind,
   mainComment,
   onRefresh,
+  replyTarget,
   refreshing,
 }: {
   topic: GroupTopic | SubjectTopic
   kind: TopicKind
   mainComment?: Comment
   onRefresh: () => Promise<unknown> | unknown
+  replyTarget: ReplyTarget
   refreshing: boolean
 }) {
   const titleInView = useAtomValue(communityTopicTitleInViewAtom)
@@ -414,15 +437,27 @@ function TopicHeader({
           </time>
         </div>
       </div>
-      {mainComment && <TopicMainPost comment={mainComment} />}
+      {mainComment && <TopicMainPost comment={mainComment} reactionTarget={replyTarget} />}
     </section>
   )
 }
 
-function TopicMainPost({ comment }: { comment: Comment }) {
+function TopicMainPost({
+  comment,
+  reactionTarget,
+}: {
+  comment: Comment
+  reactionTarget: ReplyTarget
+}) {
   return (
-    <div className="bbcode text-sm leading-7 whitespace-pre-line">
-      {renderBBCode(comment.content)}
+    <div className="flex flex-col gap-2">
+      <div className="bbcode text-sm leading-7 whitespace-pre-line">
+        {renderBBCode(comment.content)}
+      </div>
+      <div className="flex flex-row flex-wrap items-center gap-1.5">
+        <CommentReactionButton comment={comment} target={reactionTarget} />
+        <CommentReactions comment={comment} target={reactionTarget} />
+      </div>
     </div>
   )
 }
@@ -441,9 +476,9 @@ function toComment(reply: TopicReply): Comment {
       createdAt: child.createdAt,
       creatorID: child.creatorID,
       id: child.id,
-      mainID: child.id,
+      mainID: reply.id,
       reactions: child.reactions,
-      relatedID: 0,
+      relatedID: reply.id,
       state: child.state,
       user: child.creator,
     })),

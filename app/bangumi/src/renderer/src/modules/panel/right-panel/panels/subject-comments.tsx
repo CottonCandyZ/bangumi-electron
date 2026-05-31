@@ -81,6 +81,7 @@ export function SubjectCommentsPanel({
         error={commentsQuery.isError}
         emptyText="还没有吐槽。"
         floorNumbers={floorNumbers}
+        reactionTarget={{ id: subjectId, type: 'subject-collect' }}
         scrollAreaKey={`subject-comments-${subjectId}`}
         virtual
         showBackToTop

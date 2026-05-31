@@ -1,0 +1,64 @@
+.reply-md-editor {
+  min-height: 0;
+}
+
+.reply-md-editor .cm-editor {
+  background-color: var(--background);
+  color: var(--foreground);
+  height: 100%;
+  outline: none;
+}
+
+.reply-md-editor .cm-focused {
+  outline: none;
+}
+
+.reply-md-editor .cm-scroller {
+  font-size: 0.875rem;
+  line-height: 1.65;
+  min-height: 0;
+  overflow: auto;
+}
+
+.reply-md-editor .cm-content {
+  caret-color: var(--foreground);
+  min-height: 100%;
+  padding: 0.75rem;
+}
+
+.reply-md-editor .cm-line {
+  padding: 0;
+}
+
+.reply-md-editor .cm-placeholder {
+  color: var(--muted-foreground);
+}
+
+.reply-md-editor .cm-selectionBackground,
+.reply-md-editor .cm-focused .cm-selectionBackground {
+  background-color: color-mix(in oklch, var(--primary) 22%, transparent);
+}
+
+.reply-md-editor .cm-activeLine {
+  background-color: transparent;
+}
+
+.reply-md-editor .cm-tooltip {
+  background-color: var(--popover);
+  border-color: var(--border);
+  color: var(--popover-foreground);
+}
+
+.reply-md-editor .cm-tooltip-autocomplete ul li[aria-selected] {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.reply-md-editor .cm-matchingBracket {
+  background-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.reply-md-editor .cm-editor.cm-focused .cm-cursor {
+  border-left-color: var(--foreground);
+}
