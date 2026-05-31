@@ -1,6 +1,7 @@
 import { getTimeline } from '@renderer/data/fetch/api/timeline'
 import {
   DEFAULT_INFINITE_REFETCH_PAGE_LIMIT,
+  trimInfiniteQueryPagesIf,
   trimInfiniteQueryPages,
 } from '@renderer/data/hooks/infinite-query'
 import type { TimelineMode } from '@renderer/data/types/timeline'
@@ -88,9 +89,33 @@ export const useTimelineInfiniteQuery = ({
       return nextPageParam
     },
     enabled,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
+    refetchOnMount: (query) => {
+      trimInfiniteQueryPagesIf<UserTimelineItem[], number | undefined>({
+        pageLimit: refetchPageLimit,
+        queryClient,
+        queryKey,
+        shouldTrim: query.isStale(),
+      })
+      return true
+    },
+    refetchOnReconnect: (query) => {
+      trimInfiniteQueryPagesIf<UserTimelineItem[], number | undefined>({
+        pageLimit: refetchPageLimit,
+        queryClient,
+        queryKey,
+        shouldTrim: query.isStale(),
+      })
+      return true
+    },
+    refetchOnWindowFocus: (query) => {
+      trimInfiniteQueryPagesIf<UserTimelineItem[], number | undefined>({
+        pageLimit: refetchPageLimit,
+        queryClient,
+        queryKey,
+        shouldTrim: query.isStale(),
+      })
+      return true
+    },
     staleTime,
   })
   const { refetch: originalRefetch } = query
