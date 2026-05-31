@@ -23,9 +23,11 @@ import { useCallback, useMemo } from 'react'
  */
 export const useTopListQuery = (sectionPath: SectionPath) => {
   return useQuery({
-    queryKey: ['SectionTrends', sectionPath],
-    queryFn: async () => await fetchTrends({ sectionPath }),
-    select: parseTrendsFromHTML,
+    queryKey: ['SectionTrendsV2', sectionPath],
+    queryFn: async () => {
+      const html = await fetchTrends({ sectionPath })
+      return parseTrendsFromHTML(html)
+    },
   })
 }
 
@@ -105,9 +107,11 @@ export const useWebInfoBoxQuery = ({
 }) => {
   const userInfo = useSession()
   return useQuery({
-    queryKey: ['SubjectHomePage', !!userInfo, subjectId],
-    queryFn: async () => await fetchSubjectInfoById({ subjectId }),
-    select: parseInfoBoxFromSubjectPage,
+    queryKey: ['SubjectInfoBoxV2', !!userInfo, subjectId],
+    queryFn: async () => {
+      const html = await fetchSubjectInfoById({ subjectId })
+      return parseInfoBoxFromSubjectPage(html)
+    },
     enabled: enabled,
   })
 }

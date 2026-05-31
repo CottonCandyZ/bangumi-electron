@@ -13,9 +13,11 @@ export const useWebDeleteCollectionHash = ({
 }) => {
   const userInfo = useSession()
   return useQuery({
-    queryKey: ['SubjectHomePage', !!userInfo, subjectId],
-    queryFn: async () => await fetchSubjectInfoById({ subjectId }),
-    select: parseDeleteCollectionHash,
+    queryKey: ['SubjectDeleteCollectionHashV2', !!userInfo, subjectId],
+    queryFn: async () => {
+      const html = await fetchSubjectInfoById({ subjectId })
+      return parseDeleteCollectionHash(html)
+    },
     enabled: enabled,
   })
 }
