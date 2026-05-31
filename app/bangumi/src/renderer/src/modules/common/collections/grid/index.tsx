@@ -27,6 +27,7 @@ export function CollectionsGrid({
     username,
     collectionType: collectionType,
     subjectType: subjectType,
+    limit: COLLECTION_PANEL_LIMIT,
     enabled: !!username,
     needKeepPreviousData: false,
     refetchPageLimit: 0,
