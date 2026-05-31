@@ -1,6 +1,7 @@
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
 import { Badge } from '@renderer/components/ui/badge'
+import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
@@ -10,7 +11,7 @@ import { SUBJECT_TYPE_MAP } from '@renderer/lib/utils/map'
 import { monoListPanelCenterActiveItemAtom, type MonoListPanelTab } from '@renderer/state/panel'
 import dayjs from 'dayjs'
 import { useAtomValue } from 'jotai'
-import type { ReactNode, Ref } from 'react'
+import type { Ref } from 'react'
 import { useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 
@@ -68,17 +69,6 @@ export function TrendingSubjectsListPanelContent({
       <TrendingSubjectsPanelStatus
         label={`已加载 ${subjectIds.length.toLocaleString()} 个近期热门`}
         loading={trendsQuery.isFetching}
-        action={
-          trendsQuery.isFetchNextPageError ? (
-            <button
-              className="text-primary hover:text-primary/80 disabled:text-muted-foreground no-drag-region h-4 shrink-0 rounded-sm px-1 text-xs leading-4 underline-offset-2 hover:underline disabled:no-underline"
-              disabled={trendsQuery.isFetchingNextPage}
-              onClick={() => trendsQuery.fetchNextPage()}
-            >
-              {trendsQuery.isFetchingNextPage ? '重试中' : '重试'}
-            </button>
-          ) : undefined
-        }
       />
       <SingleColumnVirtualList
         items={subjectIds}
@@ -88,6 +78,14 @@ export function TrendingSubjectsListPanelContent({
         empty={<div className="text-muted-foreground p-4 text-sm">没有近期热门条目。</div>}
         estimateSize={ESTIMATED_SUBJECT_HEIGHT}
         gap={4}
+        footer={
+          trendsQuery.isFetchNextPageError ? (
+            <TrendingSubjectsFetchMoreError
+              disabled={trendsQuery.isFetchingNextPage}
+              onRetry={() => trendsQuery.fetchNextPage()}
+            />
+          ) : undefined
+        }
         hasMore={!trendsQuery.isFetchNextPageError && !!trendsQuery.hasNextPage}
         isFetchingMore={trendsQuery.isFetchingNextPage}
         onNearBottom={() => trendsQuery.fetchNextPage()}
@@ -102,11 +100,9 @@ export function TrendingSubjectsListPanelContent({
 }
 
 function TrendingSubjectsPanelStatus({
-  action,
   label,
   loading = false,
 }: {
-  action?: ReactNode
   label: string
   loading?: boolean
 }) {
@@ -114,9 +110,34 @@ function TrendingSubjectsPanelStatus({
     <MonoListPanelFilters>
       <div className="text-muted-foreground flex w-full items-center justify-between gap-2 text-xs">
         <span>{label}</span>
-        {action ?? (loading && <span>刷新中</span>)}
+        {loading && <span>刷新中</span>}
       </div>
     </MonoListPanelFilters>
+  )
+}
+
+function TrendingSubjectsFetchMoreError({
+  disabled,
+  onRetry,
+}: {
+  disabled: boolean
+  onRetry: () => Promise<unknown> | unknown
+}) {
+  return (
+    <div className="text-muted-foreground flex min-h-14 flex-row items-center justify-between gap-3 rounded-md px-3 py-2 text-sm">
+      <span>加载更多近期热门失败</span>
+      <Button
+        className="h-8 shrink-0 px-2 text-xs"
+        disabled={disabled}
+        onClick={() => {
+          void onRetry()
+        }}
+        size="sm"
+        variant="outline"
+      >
+        {disabled ? '重试中' : '重试'}
+      </Button>
+    </div>
   )
 }
 

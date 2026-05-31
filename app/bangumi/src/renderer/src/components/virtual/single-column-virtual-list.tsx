@@ -17,6 +17,7 @@ type SingleColumnVirtualListProps<T> = {
   className?: string
   empty?: ReactNode
   estimateSize?: number
+  footer?: ReactNode
   gap?: number
   hasMore?: boolean
   isFetchingMore?: boolean
@@ -38,6 +39,10 @@ type VirtualListRow<T> =
       type: 'item'
     }
   | {
+      key: Key
+      type: 'footer'
+    }
+  | {
       index: number
       key: Key
       type: 'placeholder'
@@ -52,6 +57,7 @@ export function SingleColumnVirtualList<T>({
   className,
   empty,
   estimateSize = 84,
+  footer,
   gap = 4,
   hasMore = false,
   isFetchingMore = false,
@@ -86,8 +92,9 @@ export function SingleColumnVirtualList<T>({
             }
           })
         : []),
+      ...(footer ? [{ key: 'footer', type: 'footer' as const }] : []),
     ],
-    [appendPlaceholderCount, getKey, isFetchingMore, items],
+    [appendPlaceholderCount, footer, getKey, isFetchingMore, items],
   )
   const activeItemKey =
     activeIndex !== undefined && activeIndex >= 0 && activeIndex < items.length
@@ -208,7 +215,9 @@ export function SingleColumnVirtualList<T>({
                 <div style={{ paddingBottom: gap > 0 ? `${gap}px` : undefined }}>
                   {row.type === 'item'
                     ? renderItem(row.item, row.index)
-                    : renderPlaceholder?.(row.index)}
+                    : row.type === 'footer'
+                      ? footer
+                      : renderPlaceholder?.(row.index)}
                 </div>
               )}
             </Virtualizer>
