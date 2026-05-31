@@ -180,7 +180,7 @@ export const replyComposerAtom = dialogAtomFactory<ReplyComposerContent>()
 
 export const leftPanelWidth = atomWithStorage('app-sidebar-width', 248)
 
-export const rightPanelWidth = atomWithStorage('app-right-panel-width', 248)
+export const rightPanelWidth = atomWithStorage('app-right-panel-width', 360)
 
 export function getRightPanelContentByPathname(pathname: string): RightPanelContent | null {
   if (/^\/(?:profile|user)(?:\/|$)/.test(pathname)) return 'userTimeline'

@@ -37,6 +37,7 @@ export const appPath = () => {
   if (!pathIsInit) {
     const userDataPath = path.join(app.getPath('appData'), appFolderName)
     migrateLegacyUserDataPath(userDataPath)
+    mkdirSync(userDataPath, { recursive: true })
     app.setPath('userData', userDataPath)
     pathIsInit = true
   }

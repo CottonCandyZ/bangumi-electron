@@ -13,6 +13,7 @@ import { useLocation } from 'react-router-dom'
 
 const MAX_WIDTH = 480
 const MIN_WIDTH = 248
+const DEFAULT_WIDTH = 360
 
 export function RightResizablePanel() {
   const desiredOpen = useAtomValue(rightPanelOpenAtom)
@@ -40,6 +41,13 @@ export function RightResizablePanel() {
       panelSize.right_width = 0
     }
   }, [width, open])
+
+  useEffect(() => {
+    if (open && width <= MIN_WIDTH) {
+      setWidth(DEFAULT_WIDTH)
+    }
+  }, [open, setWidth, width])
+
   return (
     <ResizePanel
       maxWidth={MAX_WIDTH}
