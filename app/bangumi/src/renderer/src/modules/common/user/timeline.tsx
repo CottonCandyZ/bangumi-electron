@@ -1,7 +1,7 @@
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
 import { Card } from '@renderer/components/ui/card'
-import { CollectionType } from '@renderer/data/types/collection'
+import { CollectionType, EpisodeCollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import {
   UserTimelineEpisode,
@@ -14,7 +14,11 @@ import {
 import { cn } from '@renderer/lib/utils'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
-import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
+import {
+  COLLECTION_ACTION,
+  COLLECTION_TYPE_MAP,
+  EPISODE_COLLECTION_TYPE_MAP,
+} from '@renderer/lib/utils/map'
 import dayjs from 'dayjs'
 import type { ReactNode } from 'react'
 
@@ -41,6 +45,7 @@ export function UserTimelineItemCard({
   const nicknameChange = item.memo.status?.nickname
   const subjects = limitTimelineItems(item.memo.subject ?? [], previewItemLimit)
   const progress = item.memo.progress
+  const progressAction = getProgressTimelineAction(item)
   const batchProgressMeta = progress?.batch ? formatBatchProgressMeta(progress.batch) : undefined
   const hasDetails = hasUserTimelineItemDetails(item)
   const monoCharacters = limitTimelineItems(item.memo.mono?.characters ?? [], previewItemLimit)
@@ -247,6 +252,7 @@ export function UserTimelineItemCard({
       {progress?.single && (
         <TimelineEpisodeProgress
           episode={progress.single.episode}
+          meta={progressAction}
           subject={progress.single.subject}
           compact={compact}
           expanded={expanded}
@@ -360,7 +366,7 @@ function getTimelineAction(item: UserTimelineItem) {
     return { icon: 'i-mingcute-chat-3-line', label: '吐槽' }
   }
   if (item.memo.progress?.single || item.memo.progress?.batch) {
-    return { icon: 'i-mingcute-play-circle-line', label: '进度' }
+    return { icon: 'i-mingcute-play-circle-line', label: getProgressTimelineAction(item) }
   }
   if ((item.memo.subject?.length ?? 0) > 0) {
     return { icon: 'i-mingcute-star-line', label: getSubjectCollectionTimelineAction(item) }
@@ -384,6 +390,19 @@ function getTimelineAction(item: UserTimelineItem) {
     return { icon: 'i-mingcute-book-2-line', label: '维基' }
   }
   return { icon: 'i-mingcute-pulse-line', label: '动态' }
+}
+
+function getProgressTimelineAction(item: UserTimelineItem) {
+  if (item.memo.progress?.batch) return '看到'
+
+  switch (item.type) {
+    case EpisodeCollectionType.wantToWatch:
+    case EpisodeCollectionType.watched:
+    case EpisodeCollectionType.abandoned:
+      return EPISODE_COLLECTION_TYPE_MAP[item.type]
+    default:
+      return '进度'
+  }
 }
 
 function getSubjectCollectionTimelineAction(item: UserTimelineItem) {
@@ -453,13 +472,14 @@ function formatBatchProgressMeta(
   progress: NonNullable<UserTimelineItem['memo']['progress']>['batch'],
 ) {
   if (!progress) return undefined
+  const action = COLLECTION_ACTION[progress.subject.type] ?? '看'
 
   const parts = [
     formatProgressPart(progress.epsUpdate, progress.epsTotal, '话'),
     formatProgressPart(progress.volsUpdate, progress.volsTotal, '卷'),
   ].filter((part): part is string => part !== undefined)
 
-  return parts.length > 0 ? `完成了 ${parts.join(' / ')}` : undefined
+  return parts.length > 0 ? `${action}到 ${parts.join(' / ')}` : undefined
 }
 
 function formatProgressPart(update: number | undefined, total: string | undefined, unit: string) {
@@ -503,11 +523,13 @@ function TimelineEpisodeProgress({
   compact,
   episode,
   expanded,
+  meta,
   subject,
 }: {
   compact: boolean
   episode: UserTimelineEpisode
   expanded: boolean
+  meta?: string
   subject: UserTimelineSlimSubject
 }) {
   const episodeTitle = episode.nameCN || episode.name
@@ -516,6 +538,7 @@ function TimelineEpisodeProgress({
   return (
     <TimelineSubject
       subject={subject}
+      meta={meta}
       compact={compact}
       expanded={expanded}
       description={
