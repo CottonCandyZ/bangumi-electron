@@ -103,7 +103,7 @@ export const preset = createPreset({
     if (!userId) {
       return {
         tag: 'span',
-        content: label,
+        content: [label],
       }
     }
 
@@ -112,7 +112,7 @@ export const preset = createPreset({
       attrs: {
         href: `https://bgm.tv/user/${encodeURIComponent(userId)}`,
       },
-      content: label,
+      content: [label],
     }
   },
   url: (node, { render }) => {
