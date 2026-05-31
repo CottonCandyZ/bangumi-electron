@@ -9,7 +9,7 @@ const iconMap = {
 }
 const windowsIconMap = {
   prod: path.join(__dirname, '../../resources/icon-windows.png'),
-  dev: path.join(__dirname, '../../resources/icon-dev.png'),
+  dev: path.join(__dirname, '../../resources/icon-dev-windows.png'),
 }
 export const getIconPath = () => {
   const icon = isWindows ? windowsIconMap : iconMap
