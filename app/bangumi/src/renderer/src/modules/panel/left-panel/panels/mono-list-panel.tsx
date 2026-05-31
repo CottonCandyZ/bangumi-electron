@@ -1,6 +1,14 @@
+import { ScrollArea } from '@base-ui/react/scroll-area'
 import { MyLink } from '@renderer/components/my-link'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@renderer/components/ui/dropdown-menu'
 import { Label } from '@renderer/components/ui/label'
 import { Switch } from '@renderer/components/ui/switch'
+import { cn } from '@renderer/lib/utils'
 import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 import {
   MonoRelatedListPanelContent,
@@ -34,8 +42,9 @@ import {
 } from '@renderer/state/panel'
 import { isRoutePathActive } from './mono-list-panel/shared'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { XIcon } from 'lucide-react'
+import { ChevronsDownIcon, XIcon } from 'lucide-react'
 import { useEffect, useRef } from 'react'
+import type { MutableRefObject } from 'react'
 import { useLocation } from 'react-router-dom'
 
 export function MonoListPanel() {
@@ -66,7 +75,7 @@ export function MonoListPanel() {
     tabRefs.current.get(activeTab.id)?.scrollIntoView({
       behavior: 'smooth',
       block: 'nearest',
-      inline: 'nearest',
+      inline: 'center',
     })
   }, [activeTab])
 
@@ -76,39 +85,61 @@ export function MonoListPanel() {
     <div className="flex h-dvh min-w-0 flex-col">
       <div className="drag-region flex h-14 shrink-0 flex-col justify-center border-b px-2">
         <div className="flex flex-row items-center gap-1">
-          <div className="flex min-w-0 flex-1 flex-row gap-1 overflow-x-auto">
-            {tabs.map((tab) => (
-              <button
-                className="no-drag-region hover:bg-accent data-[active=true]:bg-accent flex max-w-40 min-w-16 items-center justify-between gap-2 rounded-md px-2 py-1.5 text-left text-sm"
-                data-active={tab.id === activeTab.id}
-                key={tab.id}
-                title={`${tab.title} - ${tab.sourceTitle}`}
-                ref={(element) => {
-                  if (element) tabRefs.current.set(tab.id, element)
-                  else tabRefs.current.delete(tab.id)
-                }}
-                onClick={() => setActiveTabId(tab.id)}
-              >
-                <span className="line-clamp-1 min-w-0">{tab.title}</span>
-                <span
-                  className="text-muted-foreground hover:text-foreground flex shrink-0"
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    closeTab(tab.id)
-                  }}
+          <MonoListPanelTabStrip
+            activeTabId={activeTab.id}
+            closeTab={closeTab}
+            setActiveTabId={setActiveTabId}
+            tabRefs={tabRefs}
+            tabs={tabs}
+          />
+          <div className="flex shrink-0 flex-row items-center gap-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="text-muted-foreground no-drag-region hover:bg-accent hover:text-foreground flex size-7 shrink-0 items-center justify-center rounded-md"
+                  title="标签页列表"
                 >
-                  <XIcon className="size-3.5" />
-                </span>
-              </button>
-            ))}
+                  <ChevronsDownIcon className="size-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="max-h-72 w-56">
+                {tabs.map((tab) => (
+                  <DropdownMenuItem
+                    className={cn(
+                      'min-w-0 justify-between gap-2 pr-1',
+                      tab.id === activeTab.id && 'bg-accent text-accent-foreground',
+                    )}
+                    key={tab.id}
+                    onSelect={() => setActiveTabId(tab.id)}
+                  >
+                    <span className="line-clamp-1 min-w-0">{tab.title}</span>
+                    <span className="ml-auto flex shrink-0 items-center gap-1">
+                      <span className="text-muted-foreground text-xs">
+                        {getMonoListPanelTabCount(tab) ?? ''}
+                      </span>
+                      <span
+                        className="text-muted-foreground hover:bg-accent-foreground/10 hover:text-foreground flex size-5 items-center justify-center rounded-sm"
+                        onClick={(event) => {
+                          event.preventDefault()
+                          event.stopPropagation()
+                          closeTab(tab.id)
+                        }}
+                      >
+                        <XIcon className="size-3.5" />
+                      </span>
+                    </span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <button
+              className="text-muted-foreground no-drag-region hover:bg-accent hover:text-foreground flex size-7 shrink-0 items-center justify-center rounded-md"
+              onClick={() => closeAllTabs()}
+              title="关闭全部"
+            >
+              <span className="i-mingcute-close-circle-line text-base" />
+            </button>
           </div>
-          <button
-            className="text-muted-foreground no-drag-region hover:bg-accent hover:text-foreground flex size-7 shrink-0 items-center justify-center rounded-md"
-            onClick={() => closeAllTabs()}
-            title="关闭全部"
-          >
-            <span className="i-mingcute-close-circle-line text-base" />
-          </button>
         </div>
       </div>
       <div className="flex shrink-0 flex-col gap-0.5 border-b px-3 py-2">
@@ -162,6 +193,81 @@ export function MonoListPanel() {
       <MonoListPanelContent tab={activeTab} />
     </div>
   )
+}
+
+function MonoListPanelTabStrip({
+  activeTabId,
+  closeTab,
+  setActiveTabId,
+  tabRefs,
+  tabs,
+}: {
+  activeTabId: string
+  closeTab: (id: string) => void
+  setActiveTabId: (id: string) => void
+  tabRefs: MutableRefObject<Map<string, HTMLButtonElement>>
+  tabs: MonoListPanelTab[]
+}) {
+  return (
+    <ScrollArea.Root className="group/tab-scroll relative h-11 min-w-0 flex-1 overflow-hidden">
+      <ScrollArea.Viewport
+        className="h-full w-full overflow-y-hidden focus-visible:outline-hidden"
+        onWheel={(event) => {
+          const viewport = event.currentTarget
+          const hasHorizontalOverflow = viewport.scrollWidth > viewport.clientWidth
+          const isPrimarilyVerticalWheel = Math.abs(event.deltaY) > Math.abs(event.deltaX)
+
+          if (!hasHorizontalOverflow || !isPrimarilyVerticalWheel) return
+
+          event.preventDefault()
+          viewport.scrollLeft += getWheelPixelDelta(
+            event.deltaY,
+            event.deltaMode,
+            viewport.clientWidth,
+          )
+        }}
+      >
+        <ScrollArea.Content className="flex h-full w-max min-w-full flex-row items-center gap-1">
+          {tabs.map((tab) => (
+            <button
+              className="no-drag-region hover:bg-accent data-[active=true]:bg-accent flex h-9 max-w-40 min-w-16 items-center justify-between gap-2 rounded-md px-2 text-left text-sm"
+              data-active={tab.id === activeTabId}
+              key={tab.id}
+              title={`${tab.title} - ${tab.sourceTitle}`}
+              ref={(element) => {
+                if (element) tabRefs.current.set(tab.id, element)
+                else tabRefs.current.delete(tab.id)
+              }}
+              onClick={() => setActiveTabId(tab.id)}
+            >
+              <span className="line-clamp-1 min-w-0">{tab.title}</span>
+              <span
+                className="text-muted-foreground hover:text-foreground flex shrink-0"
+                onClick={(event) => {
+                  event.stopPropagation()
+                  closeTab(tab.id)
+                }}
+              >
+                <XIcon className="size-3.5" />
+              </span>
+            </button>
+          ))}
+        </ScrollArea.Content>
+      </ScrollArea.Viewport>
+      <ScrollArea.Scrollbar
+        orientation="horizontal"
+        className="no-drag-region absolute right-1 bottom-0 left-1 z-20 flex h-1 touch-none opacity-0 transition-opacity duration-150 select-none group-hover/tab-scroll:opacity-100 data-[scrolling]:opacity-100"
+      >
+        <ScrollArea.Thumb className="no-drag-region bg-foreground/10 hover:bg-foreground/30 active:bg-foreground/40 relative h-full [width:var(--scroll-area-thumb-width)] shrink-0 rounded-full" />
+      </ScrollArea.Scrollbar>
+    </ScrollArea.Root>
+  )
+}
+
+function getWheelPixelDelta(delta: number, deltaMode: number, pageSize: number) {
+  if (deltaMode === 1) return delta * 16
+  if (deltaMode === 2) return delta * pageSize
+  return delta
 }
 
 function MonoListPanelContent({ tab }: { tab: MonoListPanelTab }) {
