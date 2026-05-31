@@ -21,8 +21,10 @@ import { Episode, EpisodeType } from '@renderer/data/types/episode'
 import { useOpenSubjectEpisodesPanel } from '@renderer/modules/common/episodes/use-open-subject-episodes-panel'
 import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
+import { MainCommentFab } from '@renderer/modules/main/comment-fab'
 import { EpisodeCollectionActions } from '@renderer/modules/main/episode/collection-actions'
 import { scrollViewportAtom } from '@renderer/state/scroll'
+import type { ReplyTarget } from '@shared/reply'
 import { useAtomValue } from 'jotai'
 import { useMemo, useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
@@ -87,6 +89,11 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
   if (episodeQuery.isLoading || !episode || !scrollViewport) return <EpisodeSkeleton />
 
   const title = getEpisodeTitle(episode)
+  const replyTarget: ReplyTarget = {
+    id: episodeId,
+    title,
+    type: 'episode',
+  }
 
   return (
     <div className="min-h-full">
@@ -109,10 +116,12 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
             episode={episode}
             subject={subjectQuery.data}
             onRefreshComments={() => commentsQuery.refetch()}
+            replyTarget={replyTarget}
             refreshingComments={commentsQuery.isFetching}
           />
         )}
       </Virtualizer>
+      <MainCommentFab replyTarget={replyTarget} />
       <MainBackToTopButton onBackToTop={scrollToTop} />
     </div>
   )
@@ -198,6 +207,7 @@ function EpisodePageRow({
   subject,
   onRefreshComments,
   refreshingComments,
+  replyTarget,
 }: {
   row: EpisodePageRow
   title: string
@@ -205,6 +215,7 @@ function EpisodePageRow({
   subject?: NonNullable<ReturnType<typeof useSubjectInfoAPIQuery>['data']>
   onRefreshComments: () => Promise<unknown> | unknown
   refreshingComments: boolean
+  replyTarget: ReplyTarget
 }) {
   if (row.type === 'detail') {
     return (
@@ -258,6 +269,8 @@ function EpisodePageRow({
       <CommentItem
         comment={row.comment}
         floorNumber={row.floorNumber}
+        reactionTarget={replyTarget}
+        replyTarget={replyTarget}
         userAvatarViewTransition={true}
       />
     </div>

@@ -3,6 +3,7 @@ import type { RouteObject } from 'react-router-dom'
 import App from './App'
 import MainErrorElement from '@renderer/error/main-error-element'
 import AppShellErrorElement from '@renderer/error/app-shell-error-element'
+import NotFoundElement from '@renderer/error/not-found-element'
 
 const pageModules = import.meta.glob('./app/**/page.tsx')
 
@@ -38,7 +39,13 @@ export const router: ReturnType<typeof createHashRouter> = createHashRouter(
           path: '',
           errorElement: <AppShellErrorElement />,
           lazy: () => import('@renderer/app/layout'),
-          children: pageRoutes,
+          children: [
+            ...pageRoutes,
+            {
+              path: '*',
+              element: <NotFoundElement />,
+            },
+          ],
         },
       ],
     },

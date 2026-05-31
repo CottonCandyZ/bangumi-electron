@@ -47,27 +47,27 @@ export function SiteTimelinePreview() {
 
   return (
     <section className="flex h-full min-w-0 flex-col gap-3">
-      <div className="flex min-w-0 items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="min-w-0">
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex min-w-0 items-center gap-3">
             <h2 className="text-xl font-semibold">时间线</h2>
-            <p className="text-muted-foreground mt-0.5 line-clamp-1 text-sm">
-              {mode === 'friends' ? '关注用户的最新动态' : '全站最新动态'}
-            </p>
-          </div>
-          <Tabs
-            className="min-h-8 shrink-0 p-0.5"
-            currentSelect={selectedTab}
-            layoutId="home-site-timeline-mode"
-            setCurrentSelect={(_, value) => {
-              const nextMode = value === '关注' ? 'friends' : 'all'
-              if (nextMode === mode) return
+            <Tabs
+              className="min-h-8 shrink-0 p-0.5"
+              currentSelect={selectedTab}
+              layoutId="home-site-timeline-mode"
+              setCurrentSelect={(_, value) => {
+                const nextMode = value === '关注' ? 'friends' : 'all'
+                if (nextMode === mode) return
 
-              refreshAfterModeChangeRef.current = true
-              setMode(nextMode)
-            }}
-            tabsContent={TIMELINE_MODE_TABS}
-          />
+                refreshAfterModeChangeRef.current = true
+                setMode(nextMode)
+              }}
+              tabsContent={TIMELINE_MODE_TABS}
+            />
+          </div>
+          <p className="text-muted-foreground mt-0.5 line-clamp-1 text-sm">
+            {mode === 'friends' ? '关注用户的最新动态' : '全站最新动态'}
+          </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           <TimelineRefreshButton

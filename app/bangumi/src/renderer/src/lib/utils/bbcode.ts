@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom'
 import {} from '@bbob/types'
 
 const URL_PATTERN = /https?:\/\/[^\s<>"'，。)）\]]+/g
-const INLINE_TOKEN_PATTERN = /\((bgm\d+|musume_\d+|bmoC?[A-Za-z0-9_\-:=|.]*)\)/g
+const INLINE_TOKEN_PATTERN = /\((bgm\d+|(?:musume|blake)_\d+|bmoC?[A-Za-z0-9_\-:=|.]*)\)/g
 const BANGUMI_HOSTS = new Set(['bangumi.tv', 'bgm.tv'])
 const BANGUMI_ROUTE_PATTERN = /^\/(subject|person|character|ep)\/(\d+)\/?$/
 const BANGUMI_TOPIC_ROUTE_PATTERN = /^\/(group|subject)\/topic\/(\d+)\/?$/
@@ -37,6 +37,14 @@ export const preset = createPreset({
       content: node.content,
     }
   },
+  code: (node) => ({
+    tag: 'code',
+    attrs: {
+      className:
+        'bg-muted text-foreground inline-block max-w-full overflow-x-auto rounded px-1.5 py-0.5 font-mono text-[0.92em] whitespace-pre-wrap',
+    },
+    content: node.content,
+  }),
   img: (node, { render }) => {
     const src = normalizeUrl(render(node.content ?? []))
 
@@ -134,6 +142,7 @@ export const renderBBCode = (content: string) => {
     render(content, preset(), {
       onlyAllowTags: [
         'b',
+        'code',
         'color',
         'i',
         'img',
@@ -276,7 +285,7 @@ function renderInlineTokens(text: string, offset = 0) {
           key: `${token}-${offset + index}`,
         }),
       )
-    } else if (token.startsWith('musume_')) {
+    } else if (token.startsWith('musume_') || token.startsWith('blake_')) {
       parts.push(
         createElement(DynamicSmile, {
           code: token,
