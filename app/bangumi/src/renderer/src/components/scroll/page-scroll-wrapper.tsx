@@ -20,6 +20,7 @@ import { useLocation } from 'react-router-dom'
 const SCROLL_RESTORE_TOLERANCE = 2
 const SCROLL_RESTORE_TIMEOUT = 1600
 const PAGE_SCROLL_CACHE_DISABLED_PATHS = [/^\/episode\//]
+const SUBJECT_DETAIL_PATH_PATTERN = /^\/subject\/[^/]+\/?$/
 
 type ScrollRestoreReadyContextValue = {
   register: (id: symbol, ready: boolean) => void
@@ -105,7 +106,7 @@ export function PageScrollWrapper({
 
   const getInitialRouteScrollTop = useCallback(
     (pathname: string, viewport: HTMLElement) => {
-      if (!pathname.startsWith('/subject')) return initScrollTo
+      if (!SUBJECT_DETAIL_PATH_PATTERN.test(pathname)) return initScrollTo
 
       const viewportInitialScroll = viewport.clientHeight * UI_CONFIG.SUBJECT_INIT_SCROLL_PERCENT
       return viewportInitialScroll > 0 ? viewportInitialScroll : subjectInitScroll.x
