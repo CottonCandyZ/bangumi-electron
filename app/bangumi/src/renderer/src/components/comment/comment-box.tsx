@@ -345,12 +345,15 @@ function CommentHeader({ comment }: { comment: Comment }) {
   return (
     <div className="flex flex-row flex-wrap items-center gap-x-2 gap-y-1">
       {comment.user ? (
-        <UserProfileLink
-          className="hover:text-primary font-medium transition-colors"
-          user={comment.user}
-        >
-          {comment.user.nickname}
-        </UserProfileLink>
+        <>
+          <UserProfileLink
+            className="hover:text-primary font-medium transition-colors"
+            user={comment.user}
+          >
+            {comment.user.nickname}
+          </UserProfileLink>
+          <CommentUserSignature sign={comment.user.sign} />
+        </>
       ) : (
         <span className="font-medium">#{comment.creatorID}</span>
       )}
@@ -389,12 +392,15 @@ function ReplyItem({
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex flex-row flex-wrap items-baseline gap-x-2 gap-y-0.5">
           {reply.user ? (
-            <UserProfileLink
-              className="hover:text-primary font-medium transition-colors"
-              user={reply.user}
-            >
-              {reply.user.nickname}
-            </UserProfileLink>
+            <>
+              <UserProfileLink
+                className="hover:text-primary font-medium transition-colors"
+                user={reply.user}
+              >
+                {reply.user.nickname}
+              </UserProfileLink>
+              <CommentUserSignature sign={reply.user.sign} />
+            </>
           ) : (
             <span className="font-medium">#{reply.creatorID}</span>
           )}
@@ -411,6 +417,17 @@ function ReplyItem({
         <CommentReactions reactions={reply.reactions} compact />
       </div>
     </div>
+  )
+}
+
+export function CommentUserSignature({ sign }: { sign?: string }) {
+  const normalizedSign = sign?.trim()
+  if (!normalizedSign) return null
+
+  return (
+    <span className="text-muted-foreground min-w-0 text-xs font-normal break-words whitespace-normal">
+      ({normalizedSign})
+    </span>
   )
 }
 

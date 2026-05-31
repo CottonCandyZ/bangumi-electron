@@ -1,6 +1,7 @@
 import {
   CommentItem,
   CommentSkeleton,
+  CommentUserSignature,
   hasVisibleCommentContent,
 } from '@renderer/components/comment/comment-box'
 import { Image } from '@renderer/components/image/image'
@@ -342,7 +343,16 @@ function TopicHeader({
       <div className="flex flex-col gap-3">
         <div className="flex flex-row items-start justify-between gap-3">
           <div className="flex min-w-0 flex-row flex-wrap items-center gap-2">
-            <Badge variant="outline">{kind === 'group' ? '小组' : '条目'}</Badge>
+            <MyLink className="inline-flex max-w-full min-w-0" to={source.to}>
+              <Badge
+                variant="outline"
+                className="hover:bg-primary/10 hover:text-primary max-w-full cursor-pointer gap-1.5 shadow-none transition-colors"
+              >
+                <span className="shrink-0">{kind === 'group' ? '小组' : '条目'}</span>
+                <span className="text-muted-foreground">·</span>
+                <span className="line-clamp-1 min-w-0">{source.title}</span>
+              </Badge>
+            </MyLink>
             <Badge variant="secondary" className="shadow-none">
               {topic.replyCount} 回复
             </Badge>
@@ -357,46 +367,54 @@ function TopicHeader({
         <h1 className="text-3xl leading-tight font-semibold" ref={titleRef}>
           {topic.title}
         </h1>
-        <div className="flex flex-row items-center gap-3">
-          {topic.creator?.avatar.medium ? (
-            <MyLink
-              className="size-10 shrink-0"
-              to={`/user/${encodeURIComponent(topic.creator.username)}`}
-            >
-              <Image
-                className="size-10 overflow-hidden rounded-full"
-                imageSrc={topic.creator.avatar.medium}
-                loading="eager"
-              />
-            </MyLink>
-          ) : (
-            <div className="bg-muted size-10 shrink-0 rounded-full" />
-          )}
-          <div className="text-muted-foreground flex min-w-0 flex-row flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-            {topic.creator ? (
+        <div className="flex flex-row items-center justify-between gap-4">
+          <div className="flex min-w-0 flex-row items-center gap-3">
+            {topic.creator?.avatar.medium ? (
               <MyLink
-                className="text-foreground hover:text-primary font-medium transition-colors"
+                className="size-10 shrink-0"
                 to={`/user/${encodeURIComponent(topic.creator.username)}`}
               >
-                {topic.creator.nickname}
+                <Image
+                  className="size-10 overflow-hidden rounded-full"
+                  imageSrc={topic.creator.avatar.medium}
+                  loading="eager"
+                />
               </MyLink>
             ) : (
-              <span className="text-foreground font-medium">#{topic.creatorID}</span>
+              <div className="bg-muted size-10 shrink-0 rounded-full" />
             )}
-            <time
-              dateTime={dayjs.unix(topic.createdAt).toISOString()}
-              title={dayjs.unix(topic.createdAt).format('YYYY-MM-DD HH:mm')}
-            >
-              {formatRecentUnixTime(topic.createdAt)}
-            </time>
-            {source.to ? (
-              <MyLink className="text-primary underline-offset-2 hover:underline" to={source.to}>
-                {source.title}
-              </MyLink>
-            ) : (
-              <span>{source.title}</span>
-            )}
+            <div className="flex min-w-0 flex-col">
+              <div className="flex min-w-0 flex-row items-center gap-1.5">
+                {topic.creator ? (
+                  <>
+                    <MyLink
+                      className="text-foreground hover:text-primary line-clamp-1 min-w-0 font-medium transition-colors"
+                      to={`/user/${encodeURIComponent(topic.creator.username)}`}
+                    >
+                      {topic.creator.nickname}
+                    </MyLink>
+                    <CommentUserSignature sign={topic.creator.sign} />
+                  </>
+                ) : (
+                  <span className="text-foreground line-clamp-1 font-medium">
+                    #{topic.creatorID}
+                  </span>
+                )}
+              </div>
+              {topic.creator?.username && (
+                <span className="text-muted-foreground line-clamp-1 text-xs">
+                  @{topic.creator.username}
+                </span>
+              )}
+            </div>
           </div>
+          <time
+            className="text-muted-foreground shrink-0 text-sm"
+            dateTime={dayjs.unix(topic.createdAt).toISOString()}
+            title={dayjs.unix(topic.createdAt).format('YYYY-MM-DD HH:mm')}
+          >
+            {formatRecentUnixTime(topic.createdAt)}
+          </time>
         </div>
       </div>
       {mainComment && <TopicMainPost comment={mainComment} />}
