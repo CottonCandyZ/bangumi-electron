@@ -1,4 +1,5 @@
 import { CollectionType } from '@renderer/data/types/collection'
+import type { CommentReaction } from '@renderer/data/types/comment'
 import { SubjectType } from '@renderer/data/types/subject'
 
 /**
@@ -181,6 +182,7 @@ export type UserTimelineItem = {
   cat: number
   type: number
   batch: boolean
+  reactions?: CommentReaction[]
   replies: number
   createdAt: number
   source: {

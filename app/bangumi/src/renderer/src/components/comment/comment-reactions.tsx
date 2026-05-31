@@ -11,16 +11,21 @@ import {
 } from '@renderer/data/fetch/api/reaction'
 import { useToggleReactionMutation } from '@renderer/data/hooks/api/reaction'
 import { useSession } from '@renderer/data/hooks/session'
-import type { CommentBase, CommentReaction } from '@renderer/data/types/comment'
+import type { CommentReaction } from '@renderer/data/types/comment'
 import { cn } from '@renderer/lib/utils'
 import { SmilePlus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 type CommentReactionsProps = {
-  comment: CommentBase
+  comment: ReactionItem
   compact?: boolean
   target?: ReactionTarget
+}
+
+export type ReactionItem = {
+  id: number
+  reactions?: CommentReaction[]
 }
 
 export function CommentReactions({ comment, compact = false, target }: CommentReactionsProps) {
@@ -51,7 +56,7 @@ export function CommentReactionButton({
   target,
 }: {
   className?: string
-  comment: CommentBase
+  comment: ReactionItem
   target?: ReactionTarget
 }) {
   const [open, setOpen] = useState(false)
@@ -146,7 +151,7 @@ function CommentReactionChip({
   reaction,
   target,
 }: {
-  comment: CommentBase
+  comment: ReactionItem
   reaction: CommentReaction
   target?: ReactionTarget
 }) {

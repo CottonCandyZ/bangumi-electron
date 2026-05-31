@@ -12,6 +12,11 @@ export type ReactionTarget =
       title?: string
       type: 'subject-collect'
     }
+  | {
+      id: number | string
+      title?: string
+      type: 'timeline-status'
+    }
 
 export type ToggleReactionInput = {
   active: boolean
@@ -44,6 +49,7 @@ export function getAvailableReactionValues(target: ReactionTarget | undefined) {
     case 'group-topic':
     case 'subject-topic':
     case 'episode':
+    case 'timeline-status':
       return COMMON_REACTION_VALUES
     case 'person':
     case 'character':
@@ -83,6 +89,8 @@ function getReactionPath(target: ReactionTarget, commentId: number) {
       return `/p1/episodes/-/comments/${commentId}/like`
     case 'subject-collect':
       return `/p1/subjects/-/collects/${commentId}/like`
+    case 'timeline-status':
+      return `/p1/timeline/${commentId}/like`
     case 'person':
     case 'character':
     case 'timeline':
