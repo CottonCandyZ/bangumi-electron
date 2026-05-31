@@ -1,6 +1,7 @@
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
 import { Card } from '@renderer/components/ui/card'
+import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import {
   UserTimelineEpisode,
@@ -13,6 +14,7 @@ import {
 import { cn } from '@renderer/lib/utils'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
+import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import dayjs from 'dayjs'
 import type { ReactNode } from 'react'
 
@@ -361,7 +363,7 @@ function getTimelineAction(item: UserTimelineItem) {
     return { icon: 'i-mingcute-play-circle-line', label: '进度' }
   }
   if ((item.memo.subject?.length ?? 0) > 0) {
-    return { icon: 'i-mingcute-star-line', label: '收藏' }
+    return { icon: 'i-mingcute-star-line', label: getSubjectCollectionTimelineAction(item) }
   }
   if (item.memo.blog) {
     return { icon: 'i-mingcute-edit-2-line', label: '日志' }
@@ -382,6 +384,24 @@ function getTimelineAction(item: UserTimelineItem) {
     return { icon: 'i-mingcute-book-2-line', label: '维基' }
   }
   return { icon: 'i-mingcute-pulse-line', label: '动态' }
+}
+
+function getSubjectCollectionTimelineAction(item: UserTimelineItem) {
+  const collectionType = getTimelineSubjectCollectionType(item.type)
+  const subjectType = item.memo.subject?.[0]?.subject.type
+
+  if (collectionType === undefined || subjectType === undefined) return '收藏'
+
+  return COLLECTION_TYPE_MAP(subjectType)[collectionType] ?? '收藏'
+}
+
+function getTimelineSubjectCollectionType(type: number) {
+  if (type >= 1 && type <= 4) return CollectionType.wantToWatch
+  if (type >= 5 && type <= 8) return CollectionType.watched
+  if (type >= 9 && type <= 12) return CollectionType.watching
+  if (type === 13) return CollectionType.aside
+  if (type === 14) return CollectionType.abandoned
+  return undefined
 }
 
 function limitTimelineItems<T>(items: T[], limit: number | undefined) {
