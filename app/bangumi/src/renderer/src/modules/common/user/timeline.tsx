@@ -823,10 +823,10 @@ function TimelineGroups({
   return (
     <div className="flex flex-col gap-2">
       {groups.map((group) => (
-        // TODO: Link to the group page once group routing is supported.
-        <div
+        <MyLink
           className="hover:bg-accent flex min-w-0 flex-row items-center gap-2 rounded-md p-1.5 transition-colors"
           key={group.id}
+          to={`/group/${group.name}`}
         >
           {group.icon?.medium ? (
             <Image
@@ -842,7 +842,7 @@ function TimelineGroups({
             <div className="text-muted-foreground line-clamp-1 text-xs">{group.name}</div>
           </div>
           <span className="text-muted-foreground shrink-0 text-xs">加入小组</span>
-        </div>
+        </MyLink>
       ))}
       <TimelineRemainingCount count={remainingCount} label="小组" />
     </div>
