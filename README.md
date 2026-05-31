@@ -4,7 +4,7 @@
 <p align='center'>icon is from <a href='https://next.bgm.tv'>next.bgm.tv</a></p>
 
 > [!NOTE]
-> 这是一个仍处在早期开发阶段的应用~
+> 这是一个仍处在早期开发阶段的应用~ 已开放 [beta release](https://github.com/CottonCandyZ/bangumi-electron/releases)
 
 ## 这是什么？
 
@@ -17,8 +17,6 @@
 ## PROGRESS
 
 [MOVE TO ISSUE](https://github.com/CottonCandyZ/bangumi-electron/issues/5)
-
-另外 beta 包已发布，请移步 [release](https://github.com/CottonCandyZ/bangumi-electron/releases) 查看。
 
 ---
 
