@@ -79,7 +79,7 @@ function updateReactionData(
   let changed = false
   let next: Record<string, unknown> = data
 
-  if (isReactableItem(data, variables.commentId)) {
+  if (isReactableItem(data, variables)) {
     next = {
       ...next,
       reactions: updateReactions(data.reactions as CommentReaction[] | undefined, variables, user),
@@ -132,12 +132,33 @@ function updateReactions(
   return [...nextReactions, { users: [user], value: variables.value }]
 }
 
-function isReactableItem(data: Record<string, unknown>, commentId: number) {
+function isReactableItem(data: Record<string, unknown>, variables: ToggleReactionInput) {
   return (
-    data.id === commentId &&
-    ('content' in data || 'comment' in data || 'reactions' in data) &&
+    (data.id === variables.commentId ||
+      isTimelineSubjectCollectItem(data, variables.commentId, variables.target)) &&
+    (variables.target.type === 'timeline-status' ||
+      'content' in data ||
+      'comment' in data ||
+      'reactions' in data ||
+      isTimelineSubjectCollectItem(data, variables.commentId, variables.target)) &&
     !('pages' in data)
   )
+}
+
+function isTimelineSubjectCollectItem(
+  data: Record<string, unknown>,
+  collectId: number,
+  target: ReactionTarget,
+) {
+  if (target.type !== 'subject-collect') return false
+
+  const memo = data.memo
+  if (!isRecord(memo)) return false
+
+  const subjects = memo.subject
+  if (!Array.isArray(subjects)) return false
+
+  return subjects.some((subject) => isRecord(subject) && subject.collectID === collectId)
 }
 
 function isRecord(data: unknown): data is Record<string, unknown> {
@@ -157,9 +178,27 @@ function getReactionInvalidationKeys(target: ReactionTarget) {
     case 'episode':
       return [['episode-comments', target.id.toString()]]
     case 'subject-collect':
-      return [['subject-comments']]
+      return [
+        ['subject-comments'],
+        ['site-timeline-v1'],
+        ['site-timeline-infinite-v1'],
+        ['user-timeline'],
+        ['user-timeline-infinite'],
+      ]
+    case 'timeline-status':
+      return [
+        ['site-timeline-v1'],
+        ['site-timeline-infinite-v1'],
+        ['user-timeline'],
+        ['user-timeline-infinite'],
+      ]
     case 'timeline':
-      return [['site-timeline-v1'], ['site-timeline-infinite-v1'], ['user-timeline']]
+      return [
+        ['site-timeline-v1'],
+        ['site-timeline-infinite-v1'],
+        ['user-timeline'],
+        ['user-timeline-infinite'],
+      ]
     case 'person':
       return [['person-comments', target.id]]
     case 'character':

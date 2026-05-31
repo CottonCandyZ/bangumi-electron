@@ -1,6 +1,12 @@
 import { Image } from '@renderer/components/image/image'
+import {
+  CommentReactionButton,
+  CommentReactions,
+  type ReactionItem,
+} from '@renderer/components/comment/comment-reactions'
 import { MyLink } from '@renderer/components/my-link'
 import { Card } from '@renderer/components/ui/card'
+import type { ReactionTarget } from '@renderer/data/fetch/api/reaction'
 import { CollectionType, EpisodeCollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import {
@@ -52,6 +58,7 @@ export function UserTimelineItemCard({
   const monoPersons = limitTimelineItems(item.memo.mono?.persons ?? [], previewItemLimit)
   const dailyUsers = limitTimelineItems(item.memo.daily?.users ?? [], previewItemLimit)
   const dailyGroups = limitTimelineItems(item.memo.daily?.groups ?? [], previewItemLimit)
+  const reaction = getTimelineReaction(item)
 
   if (!hasDetails) return null
   const action = getTimelineAction(item)
@@ -190,6 +197,7 @@ export function UserTimelineItemCard({
               />
             )}
 
+            <TimelineReactions reaction={reaction} />
             <TimelineItemMeta item={item} />
           </div>
         </div>
@@ -318,8 +326,35 @@ export function UserTimelineItemCard({
         />
       )}
 
+      <TimelineReactions reaction={reaction} />
       <TimelineItemMeta item={item} />
     </Container>
+  )
+}
+
+type TimelineReaction = {
+  item: ReactionItem
+  target: ReactionTarget
+}
+
+function TimelineReactions({
+  className,
+  reaction,
+}: {
+  className?: string
+  reaction: TimelineReaction | null
+}) {
+  if (!reaction) return null
+
+  return (
+    <div className={cn('flex flex-row flex-wrap items-center gap-1.5', className)}>
+      <CommentReactionButton
+        className="h-[25px] px-1.5"
+        comment={reaction.item}
+        target={reaction.target}
+      />
+      <CommentReactions comment={reaction.item} compact target={reaction.target} />
+    </div>
   )
 }
 
@@ -390,6 +425,35 @@ function getTimelineAction(item: UserTimelineItem) {
     return { icon: 'i-mingcute-book-2-line', label: '维基' }
   }
   return { icon: 'i-mingcute-pulse-line', label: '动态' }
+}
+
+function getTimelineReaction(item: UserTimelineItem): TimelineReaction | null {
+  if (item.memo.status) {
+    return {
+      item: {
+        id: item.id,
+        reactions: item.reactions,
+      },
+      target: {
+        id: item.id,
+        type: 'timeline-status',
+      },
+    }
+  }
+
+  const subjectItem = item.batch ? undefined : item.memo.subject?.[0]
+  if (!subjectItem?.comment || !subjectItem.collectID) return null
+
+  return {
+    item: {
+      id: subjectItem.collectID,
+      reactions: item.reactions,
+    },
+    target: {
+      id: subjectItem.subject.id,
+      type: 'subject-collect',
+    },
+  }
 }
 
 function getProgressTimelineAction(item: UserTimelineItem) {
