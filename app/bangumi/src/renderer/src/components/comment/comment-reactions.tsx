@@ -53,10 +53,12 @@ export function CommentReactions({ comment, compact = false, target }: CommentRe
 export function CommentReactionButton({
   className,
   comment,
+  onOpenChange,
   target,
 }: {
   className?: string
   comment: ReactionItem
+  onOpenChange?: (open: boolean) => void
   target?: ReactionTarget
 }) {
   const [open, setOpen] = useState(false)
@@ -69,6 +71,11 @@ export function CommentReactionButton({
   )
 
   if (!canReact(target) || values.length === 0) return null
+
+  const setPopoverOpen = (nextOpen: boolean) => {
+    setOpen(nextOpen)
+    onOpenChange?.(nextOpen)
+  }
 
   const toggle = (value: number) => {
     if (!target) return
@@ -85,13 +92,13 @@ export function CommentReactionButton({
       },
       {
         onError: (error) => toast.error(error instanceof Error ? error.message : '贴贴失败'),
-        onSuccess: () => setOpen(false),
+        onSuccess: () => setPopoverOpen(false),
       },
     )
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setPopoverOpen}>
       <PopoverTrigger asChild>
         <Button
           aria-label="贴贴"

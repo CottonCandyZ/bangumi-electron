@@ -46,6 +46,7 @@ export function CommentItem({
   userAvatarViewTransition: boolean
 }) {
   const [showAllReplies, setShowAllReplies] = useState(false)
+  const [reactionPickerOpen, setReactionPickerOpen] = useState(false)
   const allVisibleReplies = useMemo(
     () => comment.replies.filter(hasVisibleReplyContent),
     [comment.replies],
@@ -72,7 +73,7 @@ export function CommentItem({
   return (
     <Card
       className={cn(
-        'relative flex flex-row gap-3 p-3 shadow-none',
+        'group/comment relative flex flex-row gap-3 p-3 shadow-none',
         replyTarget
           ? showDelete || showEdit
             ? 'pr-52'
@@ -83,16 +84,28 @@ export function CommentItem({
       )}
     >
       <div className="absolute top-3 right-3 flex flex-row items-center gap-1.5">
-        <CommentReactionButton className="h-6 px-1.5" comment={comment} target={reactionTarget} />
-        {replyTarget && (
-          <>
-            <CommentReplyButton className="h-6 px-1.5" comment={comment} target={replyTarget} />
-            {showEdit && (
-              <CommentEditButton className="h-6 px-1.5" comment={comment} target={replyTarget} />
-            )}
-            <CommentDeleteButton className="h-6 px-1.5" comment={comment} target={replyTarget} />
-          </>
-        )}
+        <div
+          className={cn(
+            'pointer-events-none flex flex-row items-center gap-1.5 opacity-0 transition-opacity group-focus-within/comment:pointer-events-auto group-focus-within/comment:opacity-100 group-hover/comment:pointer-events-auto group-hover/comment:opacity-100',
+            reactionPickerOpen && 'pointer-events-auto opacity-100',
+          )}
+        >
+          <CommentReactionButton
+            className="h-6 px-1.5"
+            comment={comment}
+            onOpenChange={setReactionPickerOpen}
+            target={reactionTarget}
+          />
+          {replyTarget && (
+            <>
+              <CommentReplyButton className="h-6 px-1.5" comment={comment} target={replyTarget} />
+              {showEdit && (
+                <CommentEditButton className="h-6 px-1.5" comment={comment} target={replyTarget} />
+              )}
+              <CommentDeleteButton className="h-6 px-1.5" comment={comment} target={replyTarget} />
+            </>
+          )}
+        </div>
         <span className="text-muted-foreground text-xs tabular-nums">#{floorNumber}</span>
       </div>
       {comment.user?.avatar.medium ? (
@@ -197,6 +210,7 @@ function ReplyItem({
   replyTarget?: ReplyTarget
   userAvatarViewTransition: boolean
 }) {
+  const [reactionPickerOpen, setReactionPickerOpen] = useState(false)
   const session = useSession()
   const showDelete = !!replyTarget && canDeleteReply(replyTarget) && session?.id === reply.creatorID
   const showEdit = !!replyTarget && canEditReply(replyTarget) && session?.id === reply.creatorID
@@ -205,13 +219,23 @@ function ReplyItem({
   return (
     <div
       className={cn(
-        'relative flex flex-row gap-2 py-2.5 text-sm first:pt-2 last:pb-2',
+        'group/reply relative flex flex-row gap-2 py-2.5 text-sm first:pt-2 last:pb-2',
         replyTarget ? (showDelete || showEdit ? 'pr-48' : 'pr-24') : showReaction && 'pr-12',
       )}
     >
       {replyTarget && (
-        <div className="absolute top-2 right-0 flex flex-row items-center gap-1">
-          <CommentReactionButton className="h-6 px-1.5" comment={reply} target={reactionTarget} />
+        <div
+          className={cn(
+            'pointer-events-none absolute top-2 right-0 flex flex-row items-center gap-1 opacity-0 transition-opacity group-focus-within/reply:pointer-events-auto group-focus-within/reply:opacity-100 group-hover/reply:pointer-events-auto group-hover/reply:opacity-100',
+            reactionPickerOpen && 'pointer-events-auto opacity-100',
+          )}
+        >
+          <CommentReactionButton
+            className="h-6 px-1.5"
+            comment={reply}
+            onOpenChange={setReactionPickerOpen}
+            target={reactionTarget}
+          />
           <CommentReplyButton className="h-6 px-1.5" comment={reply} target={replyTarget} />
           {showEdit && (
             <CommentEditButton className="h-6 px-1.5" comment={reply} target={replyTarget} />
