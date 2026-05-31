@@ -2,6 +2,7 @@ import {
   CommentItem,
   CommentSkeleton,
   CommentUserSignature,
+  CommentUserUsername,
   hasVisibleCommentContent,
 } from '@renderer/components/comment/comment-box'
 import { Image } from '@renderer/components/image/image'
@@ -401,11 +402,7 @@ function TopicHeader({
                   </span>
                 )}
               </div>
-              {topic.creator?.username && (
-                <span className="text-muted-foreground line-clamp-1 text-xs">
-                  @{topic.creator.username}
-                </span>
-              )}
+              {topic.creator ? <CommentUserUsername username={topic.creator.username} /> : null}
             </div>
           </div>
           <time

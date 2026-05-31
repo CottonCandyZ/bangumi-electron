@@ -343,30 +343,39 @@ export function CommentItem({
 
 function CommentHeader({ comment }: { comment: Comment }) {
   return (
-    <div className="flex flex-row flex-wrap items-center gap-x-2 gap-y-1">
-      {comment.user ? (
-        <>
-          <UserProfileLink
-            className="hover:text-primary font-medium transition-colors"
-            user={comment.user}
+    <div className="flex min-w-0 flex-col gap-0.5">
+      <div className="flex min-w-0 flex-row flex-wrap items-center gap-x-2 gap-y-1">
+        {comment.user ? (
+          <>
+            <UserProfileLink
+              className="hover:text-primary font-medium transition-colors"
+              user={comment.user}
+            >
+              {comment.user.nickname}
+            </UserProfileLink>
+            <CommentUserSignature sign={comment.user.sign} />
+          </>
+        ) : (
+          <span className="font-medium">#{comment.creatorID}</span>
+        )}
+        <span className="text-muted-foreground text-xs">
+          <time
+            dateTime={dayjs.unix(comment.createdAt).toISOString()}
+            title={dayjs.unix(comment.createdAt).format('YYYY-MM-DD HH:mm')}
           >
-            {comment.user.nickname}
-          </UserProfileLink>
-          <CommentUserSignature sign={comment.user.sign} />
-        </>
-      ) : (
-        <span className="font-medium">#{comment.creatorID}</span>
-      )}
-      <span className="text-muted-foreground text-xs">
-        <time
-          dateTime={dayjs.unix(comment.createdAt).toISOString()}
-          title={dayjs.unix(comment.createdAt).format('YYYY-MM-DD HH:mm')}
-        >
-          {formatRecentUnixTime(comment.createdAt)}
-        </time>
-      </span>
+            {formatRecentUnixTime(comment.createdAt)}
+          </time>
+        </span>
+      </div>
+      {comment.user ? <CommentUserUsername username={comment.user.username} /> : null}
     </div>
   )
+}
+
+export function CommentUserUsername({ username }: { username?: string }) {
+  if (!username) return null
+
+  return <span className="text-muted-foreground line-clamp-1 text-xs">@{username}</span>
 }
 
 function ReplyItem({
@@ -390,28 +399,31 @@ function ReplyItem({
         <div className="bg-muted mt-0.5 size-7 shrink-0 rounded-full" />
       )}
       <div className="min-w-0 flex-1">
-        <div className="mb-1 flex flex-row flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          {reply.user ? (
-            <>
-              <UserProfileLink
-                className="hover:text-primary font-medium transition-colors"
-                user={reply.user}
+        <div className="mb-1 flex min-w-0 flex-col gap-0.5">
+          <div className="flex min-w-0 flex-row flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            {reply.user ? (
+              <>
+                <UserProfileLink
+                  className="hover:text-primary font-medium transition-colors"
+                  user={reply.user}
+                >
+                  {reply.user.nickname}
+                </UserProfileLink>
+                <CommentUserSignature sign={reply.user.sign} />
+              </>
+            ) : (
+              <span className="font-medium">#{reply.creatorID}</span>
+            )}
+            <span className="text-muted-foreground text-xs">
+              <time
+                dateTime={dayjs.unix(reply.createdAt).toISOString()}
+                title={dayjs.unix(reply.createdAt).format('YYYY-MM-DD HH:mm')}
               >
-                {reply.user.nickname}
-              </UserProfileLink>
-              <CommentUserSignature sign={reply.user.sign} />
-            </>
-          ) : (
-            <span className="font-medium">#{reply.creatorID}</span>
-          )}
-          <span className="text-muted-foreground text-xs">
-            <time
-              dateTime={dayjs.unix(reply.createdAt).toISOString()}
-              title={dayjs.unix(reply.createdAt).format('YYYY-MM-DD HH:mm')}
-            >
-              {formatRecentUnixTime(reply.createdAt)}
-            </time>
-          </span>
+                {formatRecentUnixTime(reply.createdAt)}
+              </time>
+            </span>
+          </div>
+          {reply.user ? <CommentUserUsername username={reply.user.username} /> : null}
         </div>
         <div className="bbcode whitespace-pre-line">{renderBBCode(reply.content)}</div>
         <CommentReactions reactions={reply.reactions} compact />
