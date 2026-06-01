@@ -1,5 +1,7 @@
 import { SearchCategory, SearchParam } from '@renderer/data/types/search'
 import { SubjectType } from '@renderer/data/types/subject'
+import { appConfigAtom } from '@renderer/state/app-config'
+import { useAtomValue } from 'jotai'
 import { useCallback, useMemo } from 'react'
 import { useSearchParams as useRouterSearchParams } from 'react-router-dom'
 
@@ -20,6 +22,8 @@ const RANGE_PARAM_KEY: Record<RangeFilterKey, string> = {
 
 export function useSearchParams(onChange?: () => void) {
   const [searchParams, setSearchParams] = useRouterSearchParams()
+  const appConfig = useAtomValue(appConfigAtom)
+  const globalNsfw = appConfig.general.enableNsfw
 
   const keyword = searchParams.get('keyword') || ''
   const categoryParam = searchParams.get('category')
@@ -51,7 +55,9 @@ export function useSearchParams(onChange?: () => void) {
     () => searchParams.getAll(RANGE_PARAM_KEY.rank).filter(Boolean),
     [searchParams],
   )
-  const nsfw = searchParams.get('nsfw') === 'true'
+  const nsfwParam = searchParams.get('nsfw')
+  const nsfw = nsfwParam === null ? globalNsfw : nsfwParam === 'true'
+  const nsfwIsExplicit = nsfwParam !== null
   const offset = parseInt(searchParams.get('offset') || '0', 10)
 
   const resetOffset = (params: URLSearchParams) => {
@@ -163,13 +169,13 @@ export function useSearchParams(onChange?: () => void) {
       onChange?.()
       setSearchParams((prev) => {
         const newParams = new URLSearchParams(prev)
-        if (value) newParams.set('nsfw', 'true')
-        else newParams.delete('nsfw')
+        if (value === globalNsfw) newParams.delete('nsfw')
+        else newParams.set('nsfw', String(value))
         resetOffset(newParams)
         return newParams
       })
     },
-    [setSearchParams, onChange],
+    [globalNsfw, setSearchParams, onChange],
   )
 
   const clearFilters = useCallback(() => {
@@ -216,7 +222,7 @@ export function useSearchParams(onChange?: () => void) {
       filter.airDate.length > 0 ||
       filter.rating.length > 0 ||
       filter.rank.length > 0 ||
-      filter.nsfw
+      (nsfwIsExplicit && filter.nsfw)
 
     if (!keyword && (category !== 'subjects' || !hasFilter)) return null
 
@@ -236,6 +242,7 @@ export function useSearchParams(onChange?: () => void) {
     ratingFilters,
     rankFilters,
     nsfw,
+    nsfwIsExplicit,
     sort,
   ])
 

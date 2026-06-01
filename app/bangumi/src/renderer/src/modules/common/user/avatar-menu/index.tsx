@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuShortcut,
 } from '@renderer/components/ui/dropdown-menu'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useLogoutMutation, useSession } from '@renderer/data/hooks/session'
@@ -20,16 +21,19 @@ import { toast } from 'sonner'
 import { useTheme } from '@renderer/modules/wrapper/theme-wrapper'
 import { useState } from 'react'
 import { cn } from '@renderer/lib/utils'
-import { useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { UpdateMenuSub, useUpdateState } from '@renderer/modules/update/menu'
 import { useNavigate } from 'react-router-dom'
+import { appConfigAtom } from '@renderer/state/app-config'
+import { formatHotkeyForDisplay, isHotkeyEnabled } from '@renderer/lib/shortcut'
 
 export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   const logoutMutation = useLogoutMutation()
   const userInfo = useSession()
   const isLogin = !!userInfo
   const { theme, setTheme } = useTheme()
+  const shortcuts = useAtomValue(appConfigAtom).shortcuts
   const navigate = useNavigate()
 
   const [dropdownOpen, setDropDownOpen] = useState(false)
@@ -91,6 +95,14 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
           {isLogin && (
             <DropdownMenuItem onClick={() => navigate('/profile')}>个人主页</DropdownMenuItem>
           )}
+          <DropdownMenuItem onClick={() => navigate('/settings')}>
+            设置
+            {isHotkeyEnabled(shortcuts.openSettings) && (
+              <DropdownMenuShortcut>
+                {formatHotkeyForDisplay(shortcuts.openSettings)}
+              </DropdownMenuShortcut>
+            )}
+          </DropdownMenuItem>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>主题</DropdownMenuSubTrigger>
             <DropdownMenuPortal>

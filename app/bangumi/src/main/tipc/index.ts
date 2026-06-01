@@ -4,6 +4,7 @@ import { loggerIPC } from '@main/tipc/logger'
 import { utils } from '@main/tipc/utils'
 import { window } from '@main/tipc/window'
 import { command } from '@main/tipc/command'
+import { configIPC } from '@main/tipc/config'
 import { update } from '@main/tipc/update'
 import { turnstileIPC } from '@main/tipc/turnstile'
 
@@ -12,6 +13,7 @@ export const router = {
   ...env,
   ...utils,
   ...command,
+  ...configIPC,
   ...update,
   ...turnstileIPC,
   ...loggerIPC,

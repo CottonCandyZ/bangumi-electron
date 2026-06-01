@@ -14,8 +14,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useNavigate } from 'react-router-dom'
 import { COMMAND_WINDOW_LIST_HEIGHT_RATIO, COMMAND_WINDOW_LIST_MAX_HEIGHT } from '@shared/constants'
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { commandPanelAtom, type CommandPanelMode } from '@renderer/state/command'
+import { appConfigAtom } from '@renderer/state/app-config'
+import { formatHotkeyForDisplay, getHotkeyForHook, isHotkeyEnabled } from '@renderer/lib/shortcut'
 
 const getSubjectItemValue = (subject: SubjectSearchItem) =>
   `${subject.id} ${subject.name_cn} ${subject.name}`
@@ -31,6 +33,7 @@ const TYPE_ICON_MAP: Record<SubjectSearchItem['type'], React.ReactNode> = {
 export function CommandPanel() {
   const navigate = useNavigate()
   const [{ open, mode }, setPanelState] = useAtom(commandPanelAtom)
+  const shortcuts = useAtomValue(appConfigAtom).shortcuts
   const [query, setQuery] = useState('')
   const [searching, setSearching] = useState(false)
   const [subjectResults, setSubjectResults] = useState<SubjectSearchItem[]>([])
@@ -122,6 +125,16 @@ export function CommandPanel() {
         onSelect: () => openMainAndNavigate('/talk'),
       },
       {
+        value: 'go-settings',
+        keywords: ['设置', '通用', 'settings', 'preferences', 'config', 'nsfw'],
+        icon: <span className="i-mingcute-settings-3-line" />,
+        label: '设置',
+        shortcut: isHotkeyEnabled(shortcuts.openSettings)
+          ? formatHotkeyForDisplay(shortcuts.openSettings)
+          : undefined,
+        onSelect: () => openMainAndNavigate('/settings'),
+      },
+      {
         value: 'go-anime',
         keywords: ['动画', 'anime'],
         icon: <span className="i-mingcute-tv-2-line" />,
@@ -170,7 +183,9 @@ export function CommandPanel() {
         value: 'open-subject-search',
         keywords: ['搜索条目', '条目', 'subject', '本地'],
         label: '搜索条目',
-        shortcut: '⌘/Ctrl K',
+        shortcut: isHotkeyEnabled(shortcuts.openSubjectSearch)
+          ? formatHotkeyForDisplay(shortcuts.openSubjectSearch)
+          : undefined,
         onSelect: () => {
           setMode('subject-search')
           setQuery('')
@@ -179,7 +194,7 @@ export function CommandPanel() {
     ]
 
     return items
-  }, [openMainAndNavigate, setMode])
+  }, [openMainAndNavigate, setMode, shortcuts.openSettings, shortcuts.openSubjectSearch])
 
   const matchedPaletteCommandValue = useMemo(() => {
     if (mode !== 'palette') return null
@@ -229,7 +244,7 @@ export function CommandPanel() {
   }, [setPanelState])
 
   useHotkeys(
-    'mod+p',
+    getHotkeyForHook(shortcuts.openCommandPanel),
     (e) => {
       e.preventDefault()
       setQuery('')
@@ -241,12 +256,12 @@ export function CommandPanel() {
         return true
       })
     },
-    { enableOnFormTags: true },
-    [mode],
+    { enableOnFormTags: true, enabled: isHotkeyEnabled(shortcuts.openCommandPanel) },
+    [mode, shortcuts.openCommandPanel],
   )
 
   useHotkeys(
-    'mod+k',
+    getHotkeyForHook(shortcuts.openSubjectSearch),
     (e) => {
       e.preventDefault()
       setQuery('')
@@ -258,8 +273,8 @@ export function CommandPanel() {
         return true
       })
     },
-    { enableOnFormTags: true },
-    [mode],
+    { enableOnFormTags: true, enabled: isHotkeyEnabled(shortcuts.openSubjectSearch) },
+    [mode, shortcuts.openSubjectSearch],
   )
 
   useEffect(() => {
@@ -380,7 +395,7 @@ export function CommandPanel() {
         {mode === 'palette' && trimmedQuery === '' && (
           <>
             <CommandGroup heading="导航">
-              {paletteCommands.slice(0, 3).map((command) => (
+              {paletteCommands.slice(0, 4).map((command) => (
                 <CommandItem
                   key={command.value}
                   value={command.value}
@@ -389,12 +404,13 @@ export function CommandPanel() {
                 >
                   {command.icon}
                   {command.label}
+                  {command.shortcut ? <CommandShortcut>{command.shortcut}</CommandShortcut> : null}
                 </CommandItem>
               ))}
             </CommandGroup>
             <CommandSeparator />
             <CommandGroup heading="分区">
-              {paletteCommands.slice(3, 8).map((command) => (
+              {paletteCommands.slice(4, 9).map((command) => (
                 <CommandItem
                   key={command.value}
                   value={command.value}
@@ -408,7 +424,7 @@ export function CommandPanel() {
             </CommandGroup>
             <CommandSeparator />
             <CommandGroup heading="快捷键">
-              {paletteCommands.slice(8).map((command) => (
+              {paletteCommands.slice(9).map((command) => (
                 <CommandItem
                   key={command.value}
                   value={command.value}

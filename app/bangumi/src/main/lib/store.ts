@@ -10,7 +10,7 @@ const db = JSONFileSyncPreset(resolve(appPath()('userData'), 'db.json'), {}) as 
 
 export const JSONStore = {
   get: (key: string) => db.data[key],
-  set: (key: string, value: Record<string, number | string>) => {
+  set: (key: string, value: unknown) => {
     db.data[key] = value
     db.write()
   },
