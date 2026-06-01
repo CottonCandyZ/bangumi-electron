@@ -23,7 +23,6 @@ import { useState } from 'react'
 import { cn } from '@renderer/lib/utils'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
-import { UpdateMenuSub, useUpdateState } from '@renderer/modules/update/menu'
 import { useNavigate } from 'react-router-dom'
 import { appConfigAtom } from '@renderer/state/app-config'
 import { formatHotkeyForDisplay, isHotkeyEnabled } from '@renderer/lib/shortcut'
@@ -38,7 +37,6 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
 
   const [dropdownOpen, setDropDownOpen] = useState(false)
   const openDialog = useSetAtom(loginDialogAtom)
-  const { state: updateState, visible: updateVisible } = useUpdateState()
 
   return (
     <DropdownMenu onOpenChange={(open) => setDropDownOpen(open)}>
@@ -86,12 +84,6 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
         )}
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          {updateVisible && updateState && (
-            <>
-              <UpdateMenuSub state={updateState} />
-              <DropdownMenuSeparator />
-            </>
-          )}
           {isLogin && (
             <DropdownMenuItem onClick={() => navigate('/profile')}>个人主页</DropdownMenuItem>
           )}

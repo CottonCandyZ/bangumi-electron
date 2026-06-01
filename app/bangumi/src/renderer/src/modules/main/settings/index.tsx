@@ -1,14 +1,17 @@
 import { Button } from '@renderer/components/ui/button'
+import { Badge } from '@renderer/components/ui/badge'
 import { cn } from '@renderer/lib/utils'
+import { AboutSettings } from '@renderer/modules/main/settings/about'
 import { GeneralSettings } from '@renderer/modules/main/settings/general'
 import { ShortcutSettings } from '@renderer/modules/main/settings/shortcuts'
+import { useUpdateState } from '@renderer/modules/update/menu'
 import { useAppConfig } from '@renderer/state/app-config'
 import { parseImportedAppConfig } from '@shared/config'
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
-type SettingsSection = 'general' | 'shortcuts'
+type SettingsSection = 'general' | 'shortcuts' | 'about'
 
 const SETTINGS_SECTIONS: {
   id: SettingsSection
@@ -16,19 +19,24 @@ const SETTINGS_SECTIONS: {
 }[] = [
   { id: 'general', label: '通用' },
   { id: 'shortcuts', label: '快捷键' },
+  { id: 'about', label: '关于' },
 ]
 
 export function Settings() {
   const navigate = useNavigate()
   const { section: sectionParam } = useParams()
   const { updateConfig } = useAppConfig()
+  const { visible: updateVisible } = useUpdateState()
   const [draggingConfigFile, setDraggingConfigFile] = useState(false)
   const dragDepthRef = useRef(0)
   const section: SettingsSection =
-    sectionParam === 'shortcuts' || sectionParam === 'general' ? sectionParam : 'general'
+    sectionParam === 'shortcuts' || sectionParam === 'general' || sectionParam === 'about'
+      ? sectionParam
+      : 'general'
 
   useEffect(() => {
-    if (sectionParam === 'shortcuts' || sectionParam === 'general') return
+    if (sectionParam === 'shortcuts' || sectionParam === 'general' || sectionParam === 'about')
+      return
 
     navigate('/settings/general', { replace: true })
   }, [navigate, sectionParam])
@@ -117,13 +125,19 @@ export function Settings() {
                 )}
                 onClick={() => setSection(item.id)}
               >
-                {item.label}
+                <span>{item.label}</span>
+                {item.id === 'about' && updateVisible && (
+                  <Badge variant="secondary" className="ml-2 px-1.5 py-0 text-[10px]">
+                    新版本
+                  </Badge>
+                )}
               </Button>
             ))}
           </aside>
 
           {section === 'general' && <GeneralSettings />}
           {section === 'shortcuts' && <ShortcutSettings />}
+          {section === 'about' && <AboutSettings />}
         </div>
       </div>
     </div>

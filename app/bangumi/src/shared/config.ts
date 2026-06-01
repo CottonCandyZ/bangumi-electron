@@ -2,6 +2,9 @@ export type AppConfig = {
   general: {
     enableNsfw: boolean
   }
+  update: {
+    channel: AppUpdateChannel
+  }
   shortcuts: {
     openSettings: string
     toggleLeftPanel: string
@@ -13,8 +16,11 @@ export type AppConfig = {
 
 export type AppConfigPatch = {
   general?: Partial<AppConfig['general']>
+  update?: Partial<AppConfig['update']>
   shortcuts?: Partial<AppConfig['shortcuts']>
 }
+
+export type AppUpdateChannel = 'beta' | 'stable'
 
 export type AppShortcutKey = keyof AppConfig['shortcuts']
 
@@ -36,6 +42,9 @@ export type AppConfigExportData = {
 export const DEFAULT_APP_CONFIG: AppConfig = {
   general: {
     enableNsfw: false,
+  },
+  update: {
+    channel: 'beta',
   },
   shortcuts: {
     openSettings: 'mod+comma',
@@ -98,6 +107,11 @@ export function mergeAppConfig(
       ...base.general,
       ...patch.general,
     },
+    update: {
+      ...DEFAULT_APP_CONFIG.update,
+      ...base.update,
+      ...patch.update,
+    },
     shortcuts: {
       ...DEFAULT_APP_CONFIG.shortcuts,
       ...base.shortcuts,
@@ -110,6 +124,7 @@ export function normalizeAppConfig(value: unknown): AppConfig {
   if (!isRecord(value)) return DEFAULT_APP_CONFIG
 
   const general = isRecord(value.general) ? value.general : {}
+  const update = isRecord(value.update) ? value.update : {}
   const shortcuts = isRecord(value.shortcuts) ? value.shortcuts : {}
   const normalizeShortcut = (key: keyof AppConfig['shortcuts']) => {
     const value = shortcuts[key]
@@ -127,6 +142,12 @@ export function normalizeAppConfig(value: unknown): AppConfig {
         typeof general.enableNsfw === 'boolean'
           ? general.enableNsfw
           : DEFAULT_APP_CONFIG.general.enableNsfw,
+    },
+    update: {
+      channel:
+        update.channel === 'stable' || update.channel === 'beta'
+          ? update.channel
+          : DEFAULT_APP_CONFIG.update.channel,
     },
     shortcuts: {
       openSettings: normalizeShortcut('openSettings'),

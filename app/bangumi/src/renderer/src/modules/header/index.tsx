@@ -7,6 +7,7 @@ import { OriginalLink } from '@renderer/modules/header/o-link'
 import { RightPanelButton } from '@renderer/modules/header/right-panel-button'
 import { HeaderTitle } from '@renderer/modules/header/subject-title'
 import { WindowsButton } from '@renderer/modules/header/windows-button'
+import { HeaderUpdateIndicator } from '@renderer/modules/update/menu'
 
 const platform = await client.platform({})
 
@@ -28,6 +29,7 @@ export function Header() {
       <div
         className={cn('flex h-full flex-row items-center gap-2', platform === 'darwin' && 'pr-2')}
       >
+        <HeaderUpdateIndicator />
         <CommandButton />
         <OriginalLink />
         <RightPanelButton />

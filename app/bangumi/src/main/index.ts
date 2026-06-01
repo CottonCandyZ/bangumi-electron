@@ -1,15 +1,19 @@
 import { app, BrowserWindow } from 'electron'
-import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import { initialize } from '@main/init'
-import { APP_PROTOCOL } from '@shared/constants'
-import { createMainWindow } from '@main/window'
-import { appPath, isMacOS } from '@main/env'
-import { setupTray } from '@main/tray'
-import { setAppQuitting } from '@main/app-flags'
-import { registerGlobalShortcuts } from '@main/shortcuts'
-import { toggleCommandWindow, warmCommandWindow } from '@main/command-window'
-import { setMainWindowGetter } from '@main/app-context'
-import { setupAutoUpdate } from '@main/update'
+import { VelopackApp } from 'velopack'
+
+VelopackApp.build().run()
+
+const { electronApp, is, optimizer } = await import('@electron-toolkit/utils')
+const { initialize } = await import('@main/init')
+const { APP_PROTOCOL } = await import('@shared/constants')
+const { createMainWindow } = await import('@main/window')
+const { appPath, isMacOS } = await import('@main/env')
+const { setupTray } = await import('@main/tray')
+const { setAppQuitting } = await import('@main/app-flags')
+const { registerGlobalShortcuts } = await import('@main/shortcuts')
+const { toggleCommandWindow, warmCommandWindow } = await import('@main/command-window')
+const { setMainWindowGetter } = await import('@main/app-context')
+const { setupAutoUpdate } = await import('@main/update')
 
 const DEV_CDP_PORT = process.env.BANGUMI_ELECTRON_CDP_PORT || '9222'
 

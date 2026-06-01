@@ -164,7 +164,7 @@ export function GeneralSettings() {
   )
 }
 
-function SettingRow({
+export function SettingRow({
   title,
   description,
   control,

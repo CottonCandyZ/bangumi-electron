@@ -18,6 +18,30 @@ pnpm install --frozen-lockfile
 pnpm typecheck
 ```
 
+Velopack 打包需要本机安装 .NET SDK 和 `vpk` CLI。先确认本机能找到 SDK：
+
+```powershell
+dotnet --list-sdks
+```
+
+如果没有 `dotnet`，Windows 可以用 winget 安装 SDK，macOS 可以用 Homebrew 安装 SDK：
+
+```powershell
+winget install Microsoft.DotNet.SDK.8
+```
+
+```bash
+brew install --cask dotnet-sdk
+```
+
+安装后重开 shell，再安装 `vpk`。`vpk` 版本应和应用依赖的 `velopack` npm 包保持一致：
+
+```powershell
+dotnet tool install -g vpk --version 1.1.1
+```
+
+如果 `vpk` 安装成功但命令找不到，确认 `~/.dotnet/tools` 或 Windows 的 `%USERPROFILE%\.dotnet\tools` 已在 `PATH` 里。
+
 构建检查：
 
 ```powershell
@@ -30,13 +54,15 @@ pnpm --filter bangumi-electron build
 pnpm build:bangumi:win:beta
 ```
 
+Windows 产物会输出到 `app/bangumi/dist/velopack/win-x64-beta`，其中包含 Velopack installer、Portable zip、`.nupkg` 和 `releases.win-x64-beta.json`。
+
 macOS 机器上试打 macOS 包：
 
 ```bash
 pnpm build:bangumi:mac:beta
 ```
 
-默认 macOS 命令会同时打 `x64` 和 `arm64`，并合并 `beta-mac.yml`。如果只需要单架构：
+默认 macOS 命令会同时打 `x64` 和 `arm64`，分别输出到 `app/bangumi/dist/velopack/osx-x64-beta` 和 `app/bangumi/dist/velopack/osx-arm64-beta`。如果只需要单架构：
 
 ```bash
 pnpm build:bangumi:mac:beta:x64
@@ -84,24 +110,16 @@ pnpm --filter bangumi-electron version 0.0.1-beta.1 --no-git-tag-version
 
 ```powershell
 git add app/bangumi/package.json pnpm-lock.yaml
-git commit -m "chore: release 0.0.1-beta.1"
+git commit -m "chore(release): release 0.0.1-beta.1"
 ```
 
-创建并推送 tag：
-
-```powershell
-git tag v0.0.1-beta.1
-git push origin main
-git push origin v0.0.1-beta.1
-```
-
-本地构建并发布到 GitHub prerelease：
+推送 release commit 后，本地构建并发布 Velopack release 到同名 GitHub prerelease：
 
 ```powershell
 pnpm publish:bangumi:win:beta
 ```
 
-macOS 机器上发布 macOS beta 包到同一个 prerelease：
+macOS 机器上发布 macOS beta 包到同一个版本号 prerelease：
 
 ```bash
 pnpm publish:bangumi:mac:beta
@@ -114,18 +132,41 @@ pnpm publish:bangumi:mac:beta:x64
 pnpm publish:bangumi:mac:beta:arm64
 ```
 
-当前 beta 发布配置在 `app/bangumi/electron-builder.beta.yml`：
+Windows beta 发布脚本在 `app/bangumi/scripts/velopack-win.mjs`；macOS beta 发布脚本在 `app/bangumi/scripts/velopack-mac.mjs`。它们会使用系统和架构生成实际 channel，例如 `win-x64-beta`、`osx-arm64-beta`：
 
-```yaml
-publish:
-  provider: github
-  owner: CottonCandyZ
-  repo: bangumi-electron
-  releaseType: prerelease
-  channel: beta
+```powershell
+pnpm publish:bangumi:win:beta
 ```
 
-这会把产物和 auto-update metadata 发布到 GitHub Release。若只想试打包，使用 `--publish never`。
+```bash
+pnpm publish:bangumi:mac:beta:arm64
+```
+
+这会把 Velopack 产物和 `releases.<channel>.json` 发布到 GitHub 的版本号 release，例如 `v0.0.1-beta.14`。Beta release 应标记为 GitHub prerelease；发布脚本会给 `vpk download/upload github` 传 `--pre=true`，使它按 prerelease 链路读取上一版并发布当前版。
+
+Agent 发布约束：
+
+- 每个版本号 release 同时作为用户下载页和 Velopack update feed。
+- beta/stable 同时通过 GitHub prerelease 状态和 Velopack channel 区分，例如 `win-x64-beta`、`osx-arm64-stable`。
+- Windows 发布产物里会同时包含安装版 `Setup.exe`、免安装版 `Portable.zip`、`.nupkg` 和 feed json。
+- 发布脚本会先尝试下载远端已有的同 channel feed，再打新包并上传；首次发布时远端 feed 不存在会继续生成 full 包。
+- 若只想试打包，使用 `pnpm build:bangumi:win:beta` 或 `pnpm build:bangumi:mac:beta:arm64`。
+
+发布脚本会自动创建或合并到版本号 release。需要手动补传资产时，上传到对应版本号 prerelease：
+
+```powershell
+$version = "0.0.1-beta.14"
+gh release upload "v$version" `
+  app/bangumi/dist/velopack/win-x64-beta/* `
+  --repo CottonCandyZ/bangumi-electron `
+  --clobber
+```
+
+如果同一个版本后补 macOS 包，上传到同一个版本号 prerelease：
+
+```bash
+pnpm publish:bangumi:mac:beta:arm64
+```
 
 ## Production 版本发布
 
@@ -135,25 +176,18 @@ publish:
 pnpm --filter bangumi-electron version 0.0.1 --no-git-tag-version
 ```
 
-正式发布使用 `app/bangumi/electron-builder.prod.yml`
+正式通道当前还没有发布包；Windows 正式通道脚本会生成 `win-x64-stable` 这样的 Velopack channel：
 
-```yaml
-publish:
-  provider: github
-  owner: CottonCandyZ
-  repo: bangumi-electron
-  releaseType: release
-  channel: latest
+```powershell
+pnpm publish:bangumi:win:prod
 ```
 
-提交、打 tag、推送：
+提交并推送：
 
 ```powershell
 git add app/bangumi/package.json pnpm-lock.yaml
-git commit -m "chore: release 0.0.1"
-git tag v0.0.1
+git commit -m "chore(release): release 0.0.1"
 git push origin main
-git push origin v0.0.1
 ```
 
 本地构建并发布：
@@ -175,13 +209,13 @@ pnpm publish:bangumi:mac:prod:x64
 pnpm publish:bangumi:mac:prod:arm64
 ```
 
-## 后补 macOS 包到同一个 tag
+## 后补 macOS 包到版本号 release
 
-如果 Windows beta 已经发布，例如 `v0.0.1-beta.1`，后续要在同一个 tag 下补 macOS 包：
+如果 Windows beta 已经发布，例如 `0.0.1-beta.1`，后续要补 macOS 包：
 
-1. 切到同一个 tag 对应的代码或同一个 release commit。
+1. 切到同一个 release commit。
 2. 确认 `app/bangumi/package.json` 版本仍是 `0.0.1-beta.1`。
-3. 在 macOS 机器上发布 macOS 产物到同一个 GitHub Release。
+3. 在 macOS 机器上发布 macOS 产物到同一个版本号 release。
 
 ```bash
 pnpm install --frozen-lockfile
@@ -201,33 +235,38 @@ pnpm publish:bangumi:mac:beta:arm64
 pnpm build:bangumi:mac:beta
 ```
 
-如果 electron-builder 发布未覆盖同名 asset，可用 `gh` 手动替换同名 asset：
-
-```bash
-gh release upload v0.0.1-beta.1 app/bangumi/dist/* --repo CottonCandyZ/bangumi-electron --clobber
-```
-
 注意：macOS 自动更新通常需要签名；未签名/未 notarize 的 beta 包可以用于手动下载测试，但不应假设自动更新在 macOS 上完整可用。
 
 ## 覆盖已发布资产
 
-GitHub Release 可以替换同名 asset，但不要直接假设发布命令会安全覆盖所有文件。推荐流程是用 `gh release upload --clobber` 明确覆盖：
+GitHub Release 可以替换同名 asset。Velopack 发布脚本会使用 `vpk upload github --merge true` 合并到当前版本号 release；如果需要手动覆盖，使用 `gh release upload --clobber`：
 
 ```powershell
-gh release upload v0.0.1-beta.1 app/bangumi/dist/bangumi-electron-0.0.1-beta.1-setup.exe --repo CottonCandyZ/bangumi-electron --clobber
-gh release upload v0.0.1-beta.1 app/bangumi/dist/bangumi-electron-0.0.1-beta.1-setup.exe.blockmap --repo CottonCandyZ/bangumi-electron --clobber
-gh release upload v0.0.1-beta.1 app/bangumi/dist/beta.yml --repo CottonCandyZ/bangumi-electron --clobber
+gh release upload v0.0.1-beta.14 app/bangumi/dist/velopack/win-x64-beta/* --repo CottonCandyZ/bangumi-electron --clobber
 ```
 
-如果需要替换整个 release，可以先删除 GitHub Release 和 tag，再重新创建。但已经下载到用户机器上的安装包无法召回；如果内容已经发给外部用户，通常更建议发一个新的 prerelease 版本号，例如 `0.0.1-beta.2`。
+如果需要替换整个 update feed，可以先删除对应版本号 release，再重新发布。但已经下载到用户机器上的安装包无法召回；如果内容已经发给外部用户，通常更建议发一个新的 prerelease 版本号，例如 `0.0.1-beta.15`。
 
 ## Auto Update Channel
 
-当前 beta 发布使用 `channel: beta`。通道建议：
+应用设置里只暴露 `beta` 和 `stable`，实际 Velopack channel 会按系统和架构展开，避免某个平台误装另一个平台的包：
 
-- `beta`：版本号包含 prerelease，例如 `0.0.1-beta.1`，GitHub Release 使用 prerelease。
-- `latest`：正式版本，例如 `0.0.1`，GitHub Release 使用 release。
+- `win-x64-beta`
+- `win-arm64-beta`
+- `osx-x64-beta`
+- `osx-arm64-beta`
+- `linux-x64-beta`
 
-通常 beta 用户可以收到 beta 和 stable 更新；stable 用户只收到 stable 更新。GitHub provider 下请显式设置 `channel`，不要只依赖版本号推断。
+正式通道使用同样格式的 `stable` 后缀，例如 `win-x64-stable`。当前还没有正式发布包，所以用户选择正式通道时可能检查不到更新。
 
-后续如果在应用内加更新检查逻辑，可以用 `electron-updater` 的 channel 能力区分 beta/latest。
+客户端默认使用 GitHub 仓库地址作为 Velopack 更新源：
+
+```text
+https://github.com/CottonCandyZ/bangumi-electron
+```
+
+本地测试可以用环境变量覆盖更新源：
+
+```powershell
+$env:BANGUMI_ELECTRON_UPDATE_URL="C:\path\to\local\velopack\feed"
+```

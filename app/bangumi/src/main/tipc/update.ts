@@ -2,12 +2,16 @@ import { t } from '@main/tipc/_init'
 import {
   checkForUpdates,
   downloadUpdate,
+  getBuildInfo,
   getUpdateState,
   ignoreUpdate,
   installUpdate,
 } from '@main/update'
 
 export const update = {
+  getBuildInfo: t.procedure.input().action(async () => {
+    return getBuildInfo()
+  }),
   getUpdateState: t.procedure.input().action(async () => {
     return getUpdateState()
   }),
