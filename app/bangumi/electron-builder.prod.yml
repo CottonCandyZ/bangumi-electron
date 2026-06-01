@@ -2,15 +2,25 @@ appId: io.github.cottoncandyz.bangumi-electron
 productName: Bangumi
 directories:
   buildResources: build
+electronLanguages:
+  - en-US
+  - zh-CN
 files:
-  - '!**/.vscode/*'
-  - '!src/*'
+  - '!**/.vscode/**'
+  - '!src/**'
+  - '!scripts/**'
+  - '!instructs/**'
+  - '!dev-server*.log'
+  - '!builder-debug.yml'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!**/*.{map,ts,tsx,d.ts,d.cts,d.mts}'
+  - '!**/{test,tests,__tests__,docs,example,examples}/**'
 asarUnpack:
   - resources/**
+afterPack: scripts/prune-after-pack.cjs
 win:
   executableName: Bangumi
   icon: build/icon-windows.png
