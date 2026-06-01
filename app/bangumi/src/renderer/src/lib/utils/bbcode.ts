@@ -11,7 +11,7 @@ import {} from '@bbob/types'
 
 const URL_PATTERN = /https?:\/\/[^\s<>"'，。)）\]]+/g
 const INLINE_TOKEN_PATTERN = /\((bgm\d+|(?:musume|blake)_\d+|bmoC?[A-Za-z0-9_\-:=|.]*)\)/g
-const BANGUMI_HOSTS = new Set(['bangumi.tv', 'bgm.tv'])
+const BANGUMI_HOSTS = new Set(['bangumi.tv', 'bgm.tv', 'chii.in'])
 const BANGUMI_ROUTE_PATTERN = /^\/(subject|person|character|ep)\/(\d+)\/?$/
 const BANGUMI_TOPIC_ROUTE_PATTERN = /^\/(group|subject)\/topic\/(\d+)\/?$/
 const BANGUMI_USER_ROUTE_PATTERN = /^\/user\/([^/?#]+)\/?$/
