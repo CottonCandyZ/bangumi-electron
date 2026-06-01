@@ -206,6 +206,14 @@ function getUpdateDescription(state: AppUpdateState | null, title: string): Reac
     return withUpdatePath(`正在下载 ${state.version}。`, '临时文件', state.downloadTempPath)
   if (state.status === 'error')
     return withUpdatePath(state.error ?? title, '下载目录', state.downloadDir)
+  if (state.status === 'unavailable') {
+    const checkedAt = state.lastCheckedAt ? `上次检查：${formatBuildTime(state.lastCheckedAt)}` : ''
+    return withUpdatePath(
+      `${state.unavailableReason ?? '当前通道暂无发布包。'}${checkedAt ? ` ${checkedAt}` : ''}`,
+      '下载目录',
+      state.downloadDir,
+    )
+  }
   if (state.status === 'idle' && state.lastCheckedAt)
     return withUpdatePath(
       `当前已是最新版本。上次检查：${formatBuildTime(state.lastCheckedAt)}`,

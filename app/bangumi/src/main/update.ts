@@ -25,6 +25,8 @@ const GITHUB_API_ACCEPT = 'application/vnd.github+json'
 
 let initialized = false
 let checkPromise: Promise<unknown> | null = null
+let checkPromiseChannel: AppUpdateChannel | null = null
+let checkRunId = 0
 let downloadPromise: Promise<unknown> | null = null
 let availableUpdateInfo: UpdateInfo | null = null
 let availableUpdateSourceUrl: string | null = null
@@ -91,9 +93,14 @@ type GitHubAssetFeed = {
   Assets?: Partial<VelopackAsset>[]
 }
 
-function createUpdateManager(sourceUrl = getUpdateSourceUrl()) {
-  const channel = readUpdateChannel()
+type ResolvedUpdateCheck = {
+  updateInfo: UpdateInfo | null
+  sourceUrl?: string
+  downloadUrl?: string
+  unavailableReason?: string
+}
 
+function createUpdateManager(sourceUrl = getUpdateSourceUrl(), channel = readUpdateChannel()) {
   return new UpdateManager(sourceUrl, {
     ExplicitChannel: getVelopackChannel(channel),
     AllowVersionDowngrade: false,
@@ -173,9 +180,9 @@ async function resolveUpdateSourceUrl(channel = readUpdateChannel()) {
   return resolved.sourceUrl
 }
 
-async function createUpdateManagerForCheck() {
-  const sourceUrl = await resolveUpdateSourceUrl()
-  return { manager: createUpdateManager(sourceUrl), sourceUrl }
+async function createUpdateManagerForCheck(channel = readUpdateChannel()) {
+  const sourceUrl = await resolveUpdateSourceUrl(channel)
+  return { manager: createUpdateManager(sourceUrl, channel), sourceUrl }
 }
 
 function getPackagesDir() {
@@ -196,9 +203,10 @@ function getPackageTempPath(asset?: VelopackAsset | null) {
   return packagePath ? `${packagePath}.partial` : undefined
 }
 
-function createBaseState(status: AppUpdateState['status']): AppUpdateState {
-  const channel = readUpdateChannel()
-
+function createBaseState(
+  status: AppUpdateState['status'],
+  channel = readUpdateChannel(),
+): AppUpdateState {
   return {
     status,
     currentVersion: app.getVersion(),
@@ -217,12 +225,12 @@ function setState(nextState: AppUpdateState) {
 function getUpdateStateFromAsset(
   status: AppUpdateState['status'],
   asset: VelopackAsset,
+  channel = readUpdateChannel(),
 ): AppUpdateState {
-  const channel = readUpdateChannel()
   const version = asset.Version
 
   return {
-    ...createBaseState(status),
+    ...createBaseState(status, channel),
     version,
     packageName: asset.FileName,
     packageSha256: asset.SHA256,
@@ -343,11 +351,14 @@ async function fetchGitHubFeed(feedUrl: string) {
   return (await response.json()) as GitHubAssetFeed
 }
 
-async function checkGitHubForUpdates(): Promise<UpdateInfo | null> {
-  const resolved = await resolveGitHubRelease()
-  if (!resolved) return null
-
-  availableUpdateSourceUrl = resolved.sourceUrl
+async function checkGitHubForUpdates(channel = readUpdateChannel()): Promise<ResolvedUpdateCheck> {
+  const resolved = await resolveGitHubRelease(channel)
+  if (!resolved) {
+    return {
+      updateInfo: null,
+      unavailableReason: `当前通道暂无发布包。通道：${getVelopackChannel(channel)}`,
+    }
+  }
 
   const feed = await fetchGitHubFeed(resolved.feedUrl)
   const target = (feed.Assets ?? [])
@@ -357,19 +368,21 @@ async function checkGitHubForUpdates(): Promise<UpdateInfo | null> {
     .filter((asset) => compareVersions(asset.Version, app.getVersion()) > 0)
     .sort((left, right) => compareVersions(right.Version, left.Version))[0]
 
-  if (!target) return null
+  if (!target) return { updateInfo: null, sourceUrl: resolved.sourceUrl }
 
   const packageAsset = resolved.release.assets.find((asset) => asset.name === target.FileName)
   if (!packageAsset) {
     throw new Error(`GitHub release is missing update package: ${target.FileName}`)
   }
 
-  availableUpdateDownloadUrl = packageAsset.browser_download_url
-
   return {
-    TargetFullRelease: target,
-    DeltasToTarget: [],
-    IsDowngrade: false,
+    updateInfo: {
+      TargetFullRelease: target,
+      DeltasToTarget: [],
+      IsDowngrade: false,
+    },
+    sourceUrl: resolved.sourceUrl,
+    downloadUrl: packageAsset.browser_download_url,
   }
 }
 
@@ -426,7 +439,11 @@ async function verifyPackage(filePath: string, asset: VelopackAsset) {
   }
 }
 
-async function downloadPackageFromGitHub(asset: VelopackAsset, downloadUrl: string) {
+async function downloadPackageFromGitHub(
+  asset: VelopackAsset,
+  downloadUrl: string,
+  channel = readUpdateChannel(),
+) {
   const packagesDir = getPackagesDir()
   const packagePath = getPackagePath(asset)
   const tempPath = getPackageTempPath(asset)
@@ -468,7 +485,7 @@ async function downloadPackageFromGitHub(asset: VelopackAsset, downloadUrl: stri
       downloaded += value.byteLength
       if (!writer.write(value)) await once(writer, 'drain')
       setState({
-        ...getUpdateStateFromAsset('downloading', asset),
+        ...getUpdateStateFromAsset('downloading', asset, channel),
         percent: Math.min(100, Math.round((downloaded / asset.Size) * 100)),
       })
     }
@@ -542,42 +559,68 @@ export function setupAutoUpdate() {
 
 export async function checkForUpdates() {
   if (!app.isPackaged) return updateState
-  if (checkPromise) return checkPromise.then(() => updateState)
+
+  const channel = readUpdateChannel()
+  if (checkPromise && checkPromiseChannel === channel) {
+    return checkPromise.then(() => updateState)
+  }
+
+  const runId = checkRunId + 1
+  checkRunId = runId
+  checkPromiseChannel = channel
 
   availableUpdateInfo = null
   availableUpdateSourceUrl = null
   availableUpdateDownloadUrl = null
   downloadedUpdateAsset = null
-  setState(createBaseState('checking'))
+  setState(createBaseState('checking', channel))
 
   checkPromise = (
     parseGitHubRepoUrl(getUpdateSourceUrl())
-      ? checkGitHubForUpdates()
-      : createUpdateManagerForCheck().then(({ manager, sourceUrl }) => {
-          availableUpdateSourceUrl = sourceUrl
-          return manager.checkForUpdatesAsync()
+      ? checkGitHubForUpdates(channel)
+      : createUpdateManagerForCheck(channel).then(({ manager, sourceUrl }) => {
+          return manager.checkForUpdatesAsync().then((updateInfo) => ({ updateInfo, sourceUrl }))
         })
   )
-    .then((updateInfo) => {
+    .then((result) => {
+      if (runId !== checkRunId || readUpdateChannel() !== channel) return
+
+      availableUpdateSourceUrl = result.sourceUrl ?? null
+      availableUpdateDownloadUrl = result.downloadUrl ?? null
+
+      const updateInfo = result.updateInfo
       if (!updateInfo) {
+        if (result.unavailableReason) {
+          setState({
+            ...createBaseState('unavailable', channel),
+            unavailableReason: result.unavailableReason,
+            lastCheckedAt: new Date().toISOString(),
+          })
+          return
+        }
+
         setState({
-          ...createBaseState('idle'),
+          ...createBaseState('idle', channel),
           lastCheckedAt: new Date().toISOString(),
         })
         return
       }
 
       availableUpdateInfo = updateInfo
-      setState(getUpdateStateFromAsset('available', updateInfo.TargetFullRelease))
+      setState(getUpdateStateFromAsset('available', updateInfo.TargetFullRelease, channel))
     })
     .catch((error) => {
+      if (runId !== checkRunId || readUpdateChannel() !== channel) return
+
       setState({
-        ...createBaseState('error'),
+        ...createBaseState('error', channel),
         error: getErrorMessage(error),
       })
     })
     .finally(() => {
+      if (runId !== checkRunId) return
       checkPromise = null
+      checkPromiseChannel = null
     })
 
   await checkPromise
@@ -589,34 +632,36 @@ export async function downloadUpdate() {
   if (updateState.status === 'downloaded') return updateState
   if (downloadPromise) return downloadPromise.then(() => updateState)
 
-  if (!availableUpdateInfo) {
+  const channel = readUpdateChannel()
+  if (!availableUpdateInfo || updateState.channel !== channel) {
     await checkForUpdates()
   }
 
-  if (!availableUpdateInfo) return updateState
+  if (!availableUpdateInfo || updateState.channel !== channel) return updateState
 
   const updateInfo = availableUpdateInfo
 
   setState({
-    ...getUpdateStateFromAsset('downloading', updateInfo.TargetFullRelease),
+    ...getUpdateStateFromAsset('downloading', updateInfo.TargetFullRelease, channel),
     percent: 0,
   })
 
   downloadPromise = (
     availableUpdateDownloadUrl
-      ? downloadPackageFromGitHub(updateInfo.TargetFullRelease, availableUpdateDownloadUrl)
+      ? downloadPackageFromGitHub(updateInfo.TargetFullRelease, availableUpdateDownloadUrl, channel)
       : createUpdateManager(
-          availableUpdateSourceUrl ?? (await resolveUpdateSourceUrl()),
+          availableUpdateSourceUrl ?? (await resolveUpdateSourceUrl(channel)),
+          channel,
         ).downloadUpdateAsync(updateInfo, (percent) => {
           setState({
-            ...getUpdateStateFromAsset('downloading', updateInfo.TargetFullRelease),
+            ...getUpdateStateFromAsset('downloading', updateInfo.TargetFullRelease, channel),
             percent,
           })
         })
   )
     .then(() => {
       downloadedUpdateAsset = updateInfo.TargetFullRelease
-      setState(getUpdateStateFromAsset('downloaded', updateInfo.TargetFullRelease))
+      setState(getUpdateStateFromAsset('downloaded', updateInfo.TargetFullRelease, channel))
     })
     .catch((error) => {
       setState({
@@ -665,9 +710,11 @@ export async function clearUpdateDownloads() {
   if (availableUpdateInfo) {
     setState(getUpdateStateFromAsset('available', availableUpdateInfo.TargetFullRelease))
   } else {
+    const status = updateState.status === 'unavailable' ? 'unavailable' : 'idle'
     setState({
-      ...createBaseState('idle'),
+      ...createBaseState(status),
       lastCheckedAt: updateState.lastCheckedAt,
+      unavailableReason: updateState.unavailableReason,
     })
   }
 

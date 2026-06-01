@@ -156,8 +156,8 @@
 }
 
 @theme {
-  --font-sans: 'Segoe UI', 'Microsoft YaHei UI', 'Microsoft YaHei', 'PingFang SC',
-    'Hiragino Sans GB', 'Noto Sans CJK SC', sans-serif;
-  --font-jp: 'Yu Gothic UI', 'Yu Gothic', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Meiryo',
-    'Noto Sans CJK JP', sans-serif;
+  --font-sans: 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans', 'Segoe UI', 'Microsoft YaHei UI',
+    'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+  --font-jp: 'Noto Sans JP', 'Noto Sans SC', 'Noto Sans', 'Yu Gothic UI', 'Yu Gothic',
+    'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
 }

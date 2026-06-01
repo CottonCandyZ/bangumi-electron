@@ -26,12 +26,19 @@ export function getUpdateTitle(state: AppUpdateState | null) {
   if (state.status === 'downloaded') return '更新已下载'
   if (state.status === 'available') return '发现新版本'
   if (state.status === 'error') return '更新检查失败'
+  if (state.status === 'unavailable') return '当前通道暂无发布包'
   if (state.status === 'unsupported') return '当前环境不支持自动更新'
   return '已是最新版本'
 }
 
 export function getUpdateActionText(state: AppUpdateState | null) {
-  if (!state || state.status === 'idle' || state.status === 'error') return '检查更新'
+  if (
+    !state ||
+    state.status === 'idle' ||
+    state.status === 'error' ||
+    state.status === 'unavailable'
+  )
+    return '检查更新'
   if (state.status === 'checking') return '正在检查'
   if (state.status === 'available') return '下载更新'
   if (state.status === 'downloading') return `下载中 ${getPercent(state)}%`

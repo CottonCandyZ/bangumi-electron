@@ -3,6 +3,7 @@ import type { AppUpdateChannel } from '@shared/config'
 export type AppUpdateStatus =
   | 'unsupported'
   | 'idle'
+  | 'unavailable'
   | 'checking'
   | 'available'
   | 'downloading'
@@ -26,6 +27,7 @@ export type AppUpdateState = {
   releaseDate?: string
   percent?: number
   error?: string
+  unavailableReason?: string
   ignored?: boolean
   lastCheckedAt?: string
 }
