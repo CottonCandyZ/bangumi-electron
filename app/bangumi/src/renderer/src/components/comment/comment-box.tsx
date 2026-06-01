@@ -17,6 +17,7 @@ export { CommentUserSignature, CommentUserUsername } from './comment-user'
 
 type CommentBoxProps = {
   title?: ReactNode
+  titleCount?: number
   comments?: Comment[]
   error?: boolean
   emptyText?: string
@@ -43,6 +44,7 @@ type CommentBoxProps = {
 
 export function CommentBox({
   title = '吐槽箱',
+  titleCount,
   comments,
   error,
   emptyText = '还没有吐槽。',
@@ -67,6 +69,7 @@ export function CommentBox({
 }: CommentBoxProps) {
   const resolvedReactionTarget = reactionTarget ?? replyTarget
   const visibleComments = useMemo(() => comments?.filter(hasVisibleCommentContent), [comments])
+  const visibleTitleCount = titleCount ?? visibleComments?.length
   const visibleFloorNumbers = useMemo(() => {
     if (!comments || !floorNumbers) return floorNumbers
     return comments.flatMap((comment, index) =>
@@ -135,8 +138,8 @@ export function CommentBox({
       {title !== null && (
         <div className="flex flex-row items-center justify-between gap-4">
           <h2 className="text-2xl font-medium">{title}</h2>
-          {visibleComments && visibleComments.length > 0 && (
-            <span className="text-muted-foreground text-sm">{visibleComments.length}</span>
+          {visibleTitleCount !== undefined && visibleTitleCount > 0 && (
+            <span className="text-muted-foreground text-sm">{visibleTitleCount}</span>
           )}
         </div>
       )}

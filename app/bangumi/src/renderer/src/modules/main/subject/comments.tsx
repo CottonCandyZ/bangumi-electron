@@ -47,6 +47,7 @@ export function SubjectComments({ subjectId }: { subjectId: SubjectId }) {
       floorNumbers={floorNumbers}
       onInView={enableComments}
       reactionTarget={{ id: subjectId, type: 'subject-collect' }}
+      titleCount={total}
       footer={
         hasMore ? (
           <div className="flex justify-center">
