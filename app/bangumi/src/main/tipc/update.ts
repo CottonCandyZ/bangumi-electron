@@ -1,6 +1,7 @@
 import { t } from '@main/tipc/_init'
 import {
   checkForUpdates,
+  clearUpdateDownloads,
   downloadUpdate,
   getBuildInfo,
   getUpdateState,
@@ -17,6 +18,9 @@ export const update = {
   }),
   checkForUpdates: t.procedure.input().action(async () => {
     return await checkForUpdates()
+  }),
+  clearUpdateDownloads: t.procedure.input().action(async () => {
+    return await clearUpdateDownloads()
   }),
   downloadUpdate: t.procedure.input().action(async () => {
     return await downloadUpdate()

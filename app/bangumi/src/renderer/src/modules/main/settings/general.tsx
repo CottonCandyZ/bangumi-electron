@@ -171,7 +171,7 @@ export function SettingRow({
   separated = false,
 }: {
   title: string
-  description: string
+  description: ReactNode
   control: ReactNode
   separated?: boolean
 }) {
@@ -184,7 +184,7 @@ export function SettingRow({
     >
       <div className="flex min-w-0 flex-col gap-1">
         <div className="text-base font-medium">{title}</div>
-        <div className="text-muted-foreground text-sm">{description}</div>
+        <div className="text-muted-foreground text-sm break-words">{description}</div>
       </div>
       <div className="shrink-0">{control}</div>
     </div>

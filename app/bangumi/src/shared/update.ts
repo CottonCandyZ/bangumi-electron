@@ -15,6 +15,9 @@ export type AppUpdateState = {
   channel: AppUpdateChannel
   packageChannel: string
   sourceUrl?: string
+  downloadDir?: string
+  downloadPath?: string
+  downloadTempPath?: string
   version?: string
   packageName?: string
   packageSha256?: string

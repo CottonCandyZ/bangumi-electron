@@ -18,8 +18,8 @@ import {
 import { useAppConfig } from '@renderer/state/app-config'
 import type { AppUpdateChannel } from '@shared/config'
 import type { AppBuildInfo, AppUpdateState } from '@shared/update'
-import { Download, FileDown, RefreshCw } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { Download, FileDown, RefreshCw, Trash2 } from 'lucide-react'
+import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 export function AboutSettings() {
@@ -29,6 +29,7 @@ export function AboutSettings() {
   const [buildInfo, setBuildInfo] = useState<AppBuildInfo | null>(null)
   const [savingChannel, setSavingChannel] = useState(false)
   const [exportingLogs, setExportingLogs] = useState(false)
+  const [clearingDownloads, setClearingDownloads] = useState(false)
   const updateTitle = useMemo(() => getUpdateTitle(state), [state])
 
   useEffect(() => {
@@ -66,6 +67,19 @@ export function AboutSettings() {
       throw error
     } finally {
       setExportingLogs(false)
+    }
+  }
+
+  const clearUpdateDownloads = async () => {
+    setClearingDownloads(true)
+    try {
+      await client.clearUpdateDownloads({})
+      toast.success('更新下载包已清理')
+    } catch (error) {
+      toast.error('清理更新下载包失败')
+      throw error
+    } finally {
+      setClearingDownloads(false)
     }
   }
 
@@ -114,9 +128,20 @@ export function AboutSettings() {
           title="更新"
           description={getUpdateDescription(state, updateTitle)}
           control={
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
               {state?.status === 'available' && <Badge variant="secondary">新版本</Badge>}
               {state?.status === 'downloaded' && <Badge>已下载</Badge>}
+              <Button
+                variant="outline"
+                className="h-9 rounded-md font-normal shadow-none"
+                disabled={
+                  clearingDownloads || state?.status === 'unsupported' || !state?.downloadDir
+                }
+                onClick={clearUpdateDownloads}
+              >
+                <Trash2 className="size-4" />
+                清理下载包
+              </Button>
               <Button
                 variant="outline"
                 className="h-9 rounded-md font-normal shadow-none"
@@ -161,16 +186,44 @@ function formatBuildTime(value?: string) {
   return date.toLocaleString()
 }
 
-function getUpdateDescription(state: AppUpdateState | null, title: string) {
+function getUpdateDescription(state: AppUpdateState | null, title: string): ReactNode {
   if (!state) return '检查当前通道是否有可安装的新版本。'
   if (state.status === 'available' && state.version) {
-    return `当前 ${state.currentVersion}，可下载 ${state.version}。通道：${state.packageChannel}`
+    return withUpdatePath(
+      `当前 ${state.currentVersion}，可下载 ${state.version}。通道：${state.packageChannel}`,
+      '下载目录',
+      state.downloadDir,
+    )
   }
   if (state.status === 'downloaded' && state.version) {
-    return `已下载 ${state.version}，点击后会重启并应用更新。`
+    return withUpdatePath(
+      `已下载 ${state.version}，点击后会重启并应用更新。`,
+      '下载包',
+      state.downloadPath,
+    )
   }
-  if (state.status === 'error') return state.error ?? title
+  if (state.status === 'downloading' && state.version)
+    return withUpdatePath(`正在下载 ${state.version}。`, '临时文件', state.downloadTempPath)
+  if (state.status === 'error')
+    return withUpdatePath(state.error ?? title, '下载目录', state.downloadDir)
   if (state.status === 'idle' && state.lastCheckedAt)
-    return `当前已是最新版本。上次检查：${formatBuildTime(state.lastCheckedAt)}`
+    return withUpdatePath(
+      `当前已是最新版本。上次检查：${formatBuildTime(state.lastCheckedAt)}`,
+      '下载目录',
+      state.downloadDir,
+    )
   return title
+}
+
+function withUpdatePath(text: string, label: string, value?: string): ReactNode {
+  if (!value) return text
+
+  return (
+    <span className="space-y-1">
+      <span>{text}</span>
+      <span className="block font-mono text-xs break-all">
+        {label}：{value}
+      </span>
+    </span>
+  )
 }
