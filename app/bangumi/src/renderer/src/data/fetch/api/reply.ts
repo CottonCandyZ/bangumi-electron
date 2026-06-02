@@ -10,6 +10,7 @@ import { FetchError } from 'ofetch'
 export type CreateReplyInput = {
   content: string
   replyTo?: number
+  replyToRoot?: number
   target: ReplyTarget
   turnstileToken: string
 }
@@ -30,9 +31,23 @@ export type UpdateReplyInput = DeleteReplyInput & {
 export async function createReply({
   content,
   replyTo = 0,
+  replyToRoot,
   target,
   turnstileToken,
 }: CreateReplyInput) {
+  const kind = target.type === 'group-topic' ? 'group' : 'subject'
+  const isTopicReply = target.type === 'group-topic' || target.type === 'subject-topic'
+  const shouldUseWebNestedTopicReply = isTopicReply && !!replyToRoot && replyToRoot !== replyTo
+
+  if (shouldUseWebNestedTopicReply) {
+    return await createWebTopicReply({
+      content,
+      kind,
+      replyTo,
+      topicId: Number(target.id),
+    })
+  }
+
   try {
     return await nextFetchWithOptionalAuth<CreateReplyResponse>(getReplyPath(target), {
       method: 'POST',
@@ -49,7 +64,7 @@ export async function createReply({
 
     return await createWebTopicReply({
       content,
-      kind: target.type === 'group-topic' ? 'group' : 'subject',
+      kind,
       replyTo,
       topicId: Number(target.id),
     })

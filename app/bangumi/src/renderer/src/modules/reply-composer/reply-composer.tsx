@@ -21,6 +21,11 @@ export function ReplyComposer() {
   const isEditing = content?.editCommentId !== undefined
   const submitting = createMutation.isPending || updateMutation.isPending
   const bbcode = useMemo(() => markdownToBBCode(draft), [draft])
+  const replyContext = content?.replyToName
+    ? ['回复', content.replyToName, content.replyToFloor].filter(Boolean).join(' · ')
+    : content
+      ? getReplyTargetLabel(content.target)
+      : ''
 
   useEffect(() => {
     if (!state.open) return
@@ -52,6 +57,7 @@ export function ReplyComposer() {
         await createMutation.mutateAsync({
           content: bbcode,
           replyTo: content.replyTo ?? 0,
+          replyToRoot: content.replyToRoot,
           target: content.target,
           turnstileToken,
         })
@@ -76,10 +82,7 @@ export function ReplyComposer() {
           <h2 id="reply-composer-title" className="text-foreground font-semibold">
             {isEditing ? '编辑' : '回复'}
           </h2>
-          <p className="text-muted-foreground mt-0.5 line-clamp-1 text-xs">
-            {getReplyTargetLabel(content.target)}
-            {content.replyToName ? ` · 回复 ${content.replyToName}` : null}
-          </p>
+          <p className="text-muted-foreground mt-0.5 line-clamp-1 text-xs">{replyContext}</p>
         </div>
         <Button
           aria-label={isEditing ? '关闭编辑' : '关闭回复'}

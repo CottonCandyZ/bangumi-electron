@@ -8,15 +8,24 @@ import { MessageCircle } from 'lucide-react'
 export function CommentReplyButton({
   className,
   comment,
+  floorLabel,
   label = '回复',
   target,
 }: {
   className?: string
   comment?: CommentBase
+  floorLabel?: string
   label?: string
   target: ReplyTarget
 }) {
   const openReplyComposer = useOpenReplyComposer()
+  const isTopicReply = target.type === 'group-topic' || target.type === 'subject-topic'
+  const replyTo = comment
+    ? isTopicReply
+      ? comment.id
+      : comment.relatedID || comment.id
+    : undefined
+  const replyToRoot = comment ? comment.relatedID || comment.id : undefined
 
   return (
     <Button
@@ -26,7 +35,9 @@ export function CommentReplyButton({
       )}
       onClick={() =>
         openReplyComposer({
-          replyTo: comment ? comment.relatedID || comment.id : undefined,
+          replyTo,
+          replyToFloor: floorLabel,
+          replyToRoot,
           replyToName: comment?.user?.nickname || comment?.user?.username,
           target,
         })

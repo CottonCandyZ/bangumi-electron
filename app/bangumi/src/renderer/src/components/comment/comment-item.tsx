@@ -21,8 +21,10 @@ import type { Comment, CommentBase } from '@renderer/data/types/comment'
 import { cn } from '@renderer/lib/utils'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
-import type { ReplyTarget } from '@shared/reply'
+import { replyComposerAtom } from '@renderer/state/panel'
+import type { ReplyComposerContent, ReplyTarget } from '@shared/reply'
 import dayjs from 'dayjs'
+import { useAtomValue } from 'jotai'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useMemo, useState } from 'react'
 
@@ -47,9 +49,16 @@ export function CommentItem({
 }) {
   const [showAllReplies, setShowAllReplies] = useState(false)
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false)
+  const replyComposer = useAtomValue(replyComposerAtom)
   const allVisibleReplies = useMemo(
-    () => comment.replies.filter(hasVisibleReplyContent),
-    [comment.replies],
+    () =>
+      comment.replies
+        .map((reply, index) => ({
+          floorLabel: `#${floorNumber}-${index + 1}`,
+          reply,
+        }))
+        .filter(({ reply }) => hasVisibleReplyContent(reply)),
+    [comment.replies, floorNumber],
   )
   const replyCount = allVisibleReplies.length
   const hasHiddenReplies = replyCount > DEFAULT_VISIBLE_REPLY_COUNT
@@ -69,11 +78,14 @@ export function CommentItem({
     session?.id === comment.creatorID &&
     comment.replies.length === 0
   const showReaction = canReact(reactionTarget)
+  const highlightedReplyId = getHighlightedReplyId(replyComposer, replyTarget)
+  const highlighted = highlightedReplyId === comment.id
 
   return (
     <Card
       className={cn(
         'group/comment relative flex flex-row gap-3 p-3 shadow-none',
+        highlighted && 'border-primary/70 bg-primary/5',
         replyTarget
           ? showDelete || showEdit
             ? 'pr-52'
@@ -82,6 +94,7 @@ export function CommentItem({
             ? 'pr-20'
             : 'pr-12',
       )}
+      data-comment-id={comment.id}
     >
       <div className="absolute top-3 right-3 flex flex-row items-center gap-1.5">
         <div
@@ -98,7 +111,12 @@ export function CommentItem({
           />
           {replyTarget && (
             <>
-              <CommentReplyButton className="h-6 px-1.5" comment={comment} target={replyTarget} />
+              <CommentReplyButton
+                className="h-6 px-1.5"
+                comment={comment}
+                floorLabel={`#${floorNumber}`}
+                target={replyTarget}
+              />
               {showEdit && (
                 <CommentEditButton className="h-6 px-1.5" comment={comment} target={replyTarget} />
               )}
@@ -133,10 +151,12 @@ export function CommentItem({
               className="border-border/60 bg-muted/25 divide-border flex flex-col divide-y rounded-md border px-2"
               id={repliesId}
             >
-              {visibleReplies.map((reply) => (
+              {visibleReplies.map(({ floorLabel, reply }) => (
                 <ReplyItem
                   reply={reply}
                   key={reply.id}
+                  floorLabel={floorLabel}
+                  highlighted={highlightedReplyId === reply.id}
                   reactionTarget={reactionTarget}
                   replyTarget={replyTarget}
                   userAvatarViewTransition={userAvatarViewTransition}
@@ -200,11 +220,15 @@ function CommentHeader({ comment }: { comment: Comment }) {
 }
 
 function ReplyItem({
+  floorLabel,
+  highlighted,
   reactionTarget,
   reply,
   replyTarget,
   userAvatarViewTransition,
 }: {
+  floorLabel: string
+  highlighted: boolean
   reactionTarget?: ReactionTarget
   reply: CommentBase
   replyTarget?: ReplyTarget
@@ -212,37 +236,16 @@ function ReplyItem({
 }) {
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false)
   const session = useSession()
-  const showDelete = !!replyTarget && canDeleteReply(replyTarget) && session?.id === reply.creatorID
   const showEdit = !!replyTarget && canEditReply(replyTarget) && session?.id === reply.creatorID
-  const showReaction = canReact(reactionTarget)
 
   return (
     <div
       className={cn(
-        'group/reply relative flex flex-row gap-2 py-2.5 text-sm first:pt-2 last:pb-2',
-        replyTarget ? (showDelete || showEdit ? 'pr-48' : 'pr-24') : showReaction && 'pr-12',
+        'group/reply -mx-1 flex flex-row gap-2 rounded-md px-1 py-2.5 text-sm first:pt-2 last:pb-2',
+        highlighted && 'bg-primary/10 ring-primary/25 ring-1',
       )}
+      data-reply-id={reply.id}
     >
-      {replyTarget && (
-        <div
-          className={cn(
-            'pointer-events-none absolute top-2 right-0 flex flex-row items-center gap-1 opacity-0 transition-opacity group-focus-within/reply:pointer-events-auto group-focus-within/reply:opacity-100 group-hover/reply:pointer-events-auto group-hover/reply:opacity-100',
-            reactionPickerOpen && 'pointer-events-auto opacity-100',
-          )}
-        >
-          <CommentReactionButton
-            className="h-6 px-1.5"
-            comment={reply}
-            onOpenChange={setReactionPickerOpen}
-            target={reactionTarget}
-          />
-          <CommentReplyButton className="h-6 px-1.5" comment={reply} target={replyTarget} />
-          {showEdit && (
-            <CommentEditButton className="h-6 px-1.5" comment={reply} target={replyTarget} />
-          )}
-          <CommentDeleteButton className="h-6 px-1.5" comment={reply} target={replyTarget} />
-        </div>
-      )}
       {reply.user?.avatar.medium ? (
         <CommentUserAvatarLink
           className="mt-0.5 size-7 shrink-0"
@@ -284,6 +287,47 @@ function ReplyItem({
         <div className="bbcode whitespace-pre-line">{renderBBCode(reply.content)}</div>
         <CommentReactions comment={reply} compact target={reactionTarget} />
       </div>
+      <div className="flex h-6 shrink-0 flex-row items-center gap-1.5">
+        {replyTarget && (
+          <div
+            className={cn(
+              'pointer-events-none flex h-6 flex-row items-center gap-1 opacity-0 transition-opacity group-focus-within/reply:pointer-events-auto group-focus-within/reply:opacity-100 group-hover/reply:pointer-events-auto group-hover/reply:opacity-100',
+              reactionPickerOpen && 'pointer-events-auto opacity-100',
+            )}
+          >
+            <CommentReactionButton
+              className="h-6 px-1.5"
+              comment={reply}
+              onOpenChange={setReactionPickerOpen}
+              target={reactionTarget}
+            />
+            <CommentReplyButton
+              className="h-6 px-1.5"
+              comment={reply}
+              floorLabel={floorLabel}
+              target={replyTarget}
+            />
+            {showEdit && (
+              <CommentEditButton className="h-6 px-1.5" comment={reply} target={replyTarget} />
+            )}
+            <CommentDeleteButton className="h-6 px-1.5" comment={reply} target={replyTarget} />
+          </div>
+        )}
+        <span className="text-muted-foreground text-xs leading-none tabular-nums">
+          {floorLabel}
+        </span>
+      </div>
     </div>
   )
+}
+
+function getHighlightedReplyId(
+  replyComposer: { content: ReplyComposerContent | null; open: boolean },
+  replyTarget?: ReplyTarget,
+) {
+  const content = replyComposer.open ? replyComposer.content : undefined
+  if (!content?.replyTo || !content.replyToFloor || !replyTarget) return null
+  if (content.target.type !== replyTarget.type) return null
+  if (String(content.target.id) !== String(replyTarget.id)) return null
+  return content.replyTo
 }

@@ -38,6 +38,16 @@ type WebTopicReplyJsonResponse = {
   }
 }
 
+type WebTopicSubReplyMeta = {
+  postId: number
+  postUid: number
+  quote?: {
+    content: string
+    name: string
+  }
+  subReplyUid: number
+}
+
 export async function createWebTopicReply({
   content,
   kind,
@@ -147,13 +157,16 @@ async function createWebTopicSubReply({
   topicId: number
 }) {
   const replyMeta = getSubReplyMeta(form.html, replyTo)
+  const postContent = replyMeta.quote
+    ? `[quote][b]${replyMeta.quote.name}[/b] 说: ${replyMeta.quote.content}[/quote]\n${content}`
+    : content
   const body = new URLSearchParams({
-    content,
+    content: postContent,
     formhash: form.formHash,
     lastview: form.lastView ?? '',
-    post_id: String(replyTo),
+    post_id: String(replyMeta.postId),
     post_uid: String(replyMeta.postUid),
-    related: String(replyTo),
+    related: String(replyMeta.postId),
     related_photo: '0',
     sub_reply_uid: String(replyMeta.subReplyUid),
     submit: 'submit',
@@ -169,7 +182,7 @@ async function createWebTopicSubReply({
   })
 
   return {
-    id: getJsonPostId(data, replyTo),
+    id: getJsonPostId(data, replyMeta.postId),
   }
 }
 
@@ -196,19 +209,52 @@ async function getTopicReplyForm({ kind, topicId }: { kind: WebTopicReplyKind; t
   }
 }
 
-function getSubReplyMeta(html: string, replyTo: number) {
-  const escapedReplyTo = escapeRegExp(String(replyTo))
-  const pattern = new RegExp(
-    `subReply\\('[^']+',\\s*\\d+,\\s*${escapedReplyTo},\\s*0,\\s*(\\d+),\\s*(\\d+),\\s*0\\)`,
+function getSubReplyMeta(html: string, replyTo: number): WebTopicSubReplyMeta {
+  const doc = domParser.parseFromString(html, 'text/html')
+  const replyCalls = Array.from(
+    html.matchAll(/subReply\('[^']+',\s*\d+,\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\)/g),
   )
-  const match = html.match(pattern)
+  const match = replyCalls.find((call) => {
+    const postId = Number(call[1])
+    const subReplyId = Number(call[2])
+    return postId === replyTo || subReplyId === replyTo
+  })
+
   if (!match) {
     throw new Error('未找到网页楼中楼回复参数')
   }
 
+  const postId = Number(match[1])
+  const subReplyId = Number(match[2])
+  const isSubReply = subReplyId === replyTo
+
   return {
-    postUid: Number(match[2]),
-    subReplyUid: Number(match[1]),
+    postId,
+    postUid: Number(match[4]),
+    quote: isSubReply ? getSubReplyQuote(doc, subReplyId) : undefined,
+    subReplyUid: Number(match[3]),
+  }
+}
+
+function getSubReplyQuote(doc: Document, subReplyId: number) {
+  const post = doc.getElementById(`post_${subReplyId}`)
+  const name = post?.querySelector<HTMLAnchorElement>(`a#${subReplyId}`)?.textContent?.trim()
+  const contentElement = post?.querySelector<HTMLElement>('div.cmt_sub_content')
+
+  if (!post || !name || !contentElement) {
+    throw new Error('未找到网页楼中楼引用内容')
+  }
+
+  const contentClone = contentElement.cloneNode(true) as HTMLElement
+  contentClone.querySelector('div.quote')?.remove()
+  contentClone.querySelectorAll('span.text_mask').forEach((mask) => mask.remove())
+
+  const content = (contentClone.textContent ?? '').replace(/\B@([^\W_]\w*)\b/g, '＠$1').trim()
+  const truncatedContent = content.length > 100 ? `${content.slice(0, 100)}...` : content
+
+  return {
+    content: truncatedContent,
+    name,
   }
 }
 
@@ -284,10 +330,6 @@ function getWebReplyErrorMessage(html: string | undefined) {
     doc.querySelector('title')?.textContent?.trim()
 
   return message || '网页回复提交失败'
-}
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 function appendAjaxQuery(path: string) {

@@ -14,6 +14,8 @@ export type ReplyComposerContent = {
   draft?: string
   editCommentId?: number
   replyTo?: number
+  replyToFloor?: string
+  replyToRoot?: number
   replyToName?: string
   target: ReplyTarget
 }
