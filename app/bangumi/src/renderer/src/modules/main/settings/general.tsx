@@ -11,10 +11,11 @@ import {
 } from '@renderer/components/ui/alert-dialog'
 import { Button } from '@renderer/components/ui/button'
 import { Switch } from '@renderer/components/ui/switch'
+import { client } from '@renderer/lib/client'
 import { cn } from '@renderer/lib/utils'
 import { useAppConfig } from '@renderer/state/app-config'
 import { DEFAULT_APP_CONFIG } from '@shared/config'
-import { Download, Upload } from 'lucide-react'
+import { Download, FolderOpen, RotateCcw, Upload } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -22,6 +23,7 @@ import { toast } from 'sonner'
 export function GeneralSettings() {
   const { config, loaded, updateConfig, exportConfig, importConfig } = useAppConfig()
   const [savingNsfw, setSavingNsfw] = useState(false)
+  const [selectingDownloadDirectory, setSelectingDownloadDirectory] = useState(false)
   const [transferring, setTransferring] = useState(false)
   const [resetting, setResetting] = useState(false)
 
@@ -63,6 +65,37 @@ export function GeneralSettings() {
     }
   }
 
+  const selectDownloadDirectory = async () => {
+    setSelectingDownloadDirectory(true)
+    try {
+      const result = await client.selectDownloadDirectory({
+        defaultPath: config.general.downloadDirectory || undefined,
+      })
+      if (result.canceled) return
+
+      await updateConfig({ general: { downloadDirectory: result.directory } })
+      toast.success('图片下载目录已更新')
+    } catch (error) {
+      toast.error('保存下载目录失败')
+      throw error
+    } finally {
+      setSelectingDownloadDirectory(false)
+    }
+  }
+
+  const resetDownloadDirectory = async () => {
+    setSelectingDownloadDirectory(true)
+    try {
+      await updateConfig({ general: { downloadDirectory: '' } })
+      toast.success('已恢复系统下载目录')
+    } catch (error) {
+      toast.error('保存下载目录失败')
+      throw error
+    } finally {
+      setSelectingDownloadDirectory(false)
+    }
+  }
+
   const resetSettings = async () => {
     setResetting(true)
     try {
@@ -88,6 +121,39 @@ export function GeneralSettings() {
               disabled={!loaded || savingNsfw}
               onCheckedChange={updateNsfw}
             />
+          }
+        />
+        <SettingRow
+          separated
+          title="图片下载目录"
+          description={
+            config.general.downloadDirectory
+              ? config.general.downloadDirectory
+              : '使用系统默认下载目录。'
+          }
+          control={
+            <div className="flex shrink-0 items-center gap-2">
+              <Button
+                variant="outline"
+                className="h-9 rounded-md font-normal shadow-none"
+                disabled={!loaded || selectingDownloadDirectory}
+                onClick={selectDownloadDirectory}
+              >
+                <FolderOpen className="size-4" />
+                选择
+              </Button>
+              <Button
+                variant="outline"
+                className="h-9 rounded-md font-normal shadow-none"
+                disabled={
+                  !loaded || selectingDownloadDirectory || !config.general.downloadDirectory
+                }
+                onClick={resetDownloadDirectory}
+              >
+                <RotateCcw className="size-4" />
+                默认
+              </Button>
+            </div>
           }
         />
         <SettingRow

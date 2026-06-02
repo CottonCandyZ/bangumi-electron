@@ -1,5 +1,6 @@
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
+import { client } from '@renderer/lib/client'
 import { cn } from '@renderer/lib/utils'
 import { ExternalLinkIcon, Maximize2Icon, RefreshCcwIcon } from 'lucide-react'
 import PhotoSwipe from 'photoswipe'
@@ -15,9 +16,10 @@ import {
 } from 'react'
 import type { ReactNode } from 'react'
 import 'photoswipe/style.css'
+import { toast } from 'sonner'
 
 type ImageStatus = 'loading' | 'loaded' | 'error'
-type BBCodeImagePreviewItem = {
+export type ImagePreviewItem = {
   alt: string
   height: number
   id: string
@@ -26,17 +28,17 @@ type BBCodeImagePreviewItem = {
 }
 
 type BBCodeImagePreviewContextValue = {
-  openImage: (id: string, fallback: BBCodeImagePreviewItem) => void
-  registerImage: (item: BBCodeImagePreviewItem) => void
+  openImage: (id: string, fallback: ImagePreviewItem) => void
+  registerImage: (item: ImagePreviewItem) => void
   unregisterImage: (id: string) => void
 }
 
 const BBCodeImagePreviewContext = createContext<BBCodeImagePreviewContextValue | null>(null)
 
 export function BBCodeImagePreviewProvider({ children }: { children: ReactNode }) {
-  const itemsRef = useRef<BBCodeImagePreviewItem[]>([])
+  const itemsRef = useRef<ImagePreviewItem[]>([])
 
-  const registerImage = useCallback((item: BBCodeImagePreviewItem) => {
+  const registerImage = useCallback((item: ImagePreviewItem) => {
     const index = itemsRef.current.findIndex((currentItem) => currentItem.id === item.id)
 
     if (index === -1) {
@@ -53,7 +55,7 @@ export function BBCodeImagePreviewProvider({ children }: { children: ReactNode }
     itemsRef.current = itemsRef.current.filter((item) => item.id !== id)
   }, [])
 
-  const openImage = useCallback((id: string, fallback: BBCodeImagePreviewItem) => {
+  const openImage = useCallback((id: string, fallback: ImagePreviewItem) => {
     const registeredItems = itemsRef.current
     const items =
       registeredItems.length > 0 && registeredItems.some((item) => item.id === id)
@@ -64,7 +66,7 @@ export function BBCodeImagePreviewProvider({ children }: { children: ReactNode }
       items.findIndex((item) => item.id === id),
     )
 
-    openPhotoSwipe(items, index)
+    openImagePreview(items, index)
   }, [])
 
   const value = useMemo(
@@ -136,7 +138,7 @@ export function BBCodeImage({ src, alt = '' }: { src: string; alt?: string }) {
       return
     }
 
-    openPhotoSwipe([item], 0)
+    openImagePreview([item], 0)
   }
 
   return (
@@ -232,7 +234,7 @@ export function BBCodeImage({ src, alt = '' }: { src: string; alt?: string }) {
   )
 }
 
-function openPhotoSwipe(items: BBCodeImagePreviewItem[], index: number) {
+export function openImagePreview(items: ImagePreviewItem[], index: number) {
   const pswp = new PhotoSwipe({
     dataSource: items.map((item) => ({
       src: item.src,
@@ -252,7 +254,69 @@ function openPhotoSwipe(items: BBCodeImagePreviewItem[], index: number) {
     arrowPrevTitle: '上一张图片',
     arrowNextTitle: '下一张图片',
     errorMsg: '图片加载失败',
+    mainClass: 'bangumi-image-preview no-drag-region',
+  })
+
+  pswp.on('uiRegister', () => {
+    pswp.ui?.registerElement({
+      name: 'download',
+      className: 'pswp__button--download',
+      title: '下载图片',
+      ariaLabel: '下载图片',
+      order: 9,
+      isButton: true,
+      html: {
+        isCustomSVG: true,
+        inner:
+          '<path d="M15 6h2v13l5-5 1.4 1.4L16 22.8l-7.4-7.4L10 14l5 5V6z" id="pswp__icn-download"/><path d="M9 25h14v2H9v-2z"/>',
+        outlineID: 'pswp__icn-download',
+        size: 32,
+      },
+      onClick: (event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        const data = pswp.currSlide?.data as { alt?: string; src?: string } | undefined
+        void downloadImage(data?.src, data?.alt)
+      },
+    })
   })
 
   pswp.init()
+}
+
+async function downloadImage(src: string | undefined, alt: string | undefined) {
+  if (!src) return
+
+  const toastId = toast.loading('正在下载图片')
+  try {
+    const result = await client.downloadImage({
+      url: src,
+      filename: getImageDownloadName(src, alt),
+    })
+    toast.success('图片已下载', {
+      id: toastId,
+      description: result.filePath,
+    })
+  } catch (error) {
+    toast.error(error instanceof Error ? error.message : '图片下载失败', {
+      id: toastId,
+    })
+  }
+}
+
+function getImageDownloadName(src: string, alt: string | undefined) {
+  const filename = getUrlFilename(src)
+  if (filename) return filename
+
+  const sanitizedAlt = alt?.trim().replace(/[\\/:*?"<>|]+/g, '_')
+  return sanitizedAlt ? `${sanitizedAlt}.jpg` : 'bangumi-image.jpg'
+}
+
+function getUrlFilename(src: string) {
+  try {
+    const url = new URL(src, window.location.href)
+    return url.pathname.split('/').pop() || undefined
+  } catch {
+    return src.split('?')[0].split('#')[0].split('/').pop() || undefined
+  }
 }

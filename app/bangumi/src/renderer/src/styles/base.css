@@ -5,6 +5,20 @@
   }
 }
 
+.bangumi-image-preview,
+.bangumi-image-preview * {
+  -webkit-app-region: no-drag;
+}
+
+.bangumi-image-preview .pswp__button {
+  cursor: pointer !important;
+}
+
+.bangumi-image-preview .pswp__button * {
+  cursor: pointer;
+  pointer-events: none;
+}
+
 ::view-transition-group(app-header),
 ::view-transition-group(app-nav) {
   z-index: 100;

@@ -1,5 +1,6 @@
 import { nextFetchWithOptionalAuth } from '@renderer/data/fetch/config'
 import {
+  createWebReply,
   createWebTopicReply,
   deleteWebTopicReply,
   updateWebTopicReply,
@@ -10,6 +11,7 @@ import { FetchError } from 'ofetch'
 export type CreateReplyInput = {
   content: string
   replyTo?: number
+  replyToHighlight?: number
   replyToRoot?: number
   target: ReplyTarget
   turnstileToken: string
@@ -31,20 +33,25 @@ export type UpdateReplyInput = DeleteReplyInput & {
 export async function createReply({
   content,
   replyTo = 0,
+  replyToHighlight,
   replyToRoot,
   target,
   turnstileToken,
 }: CreateReplyInput) {
-  const kind = target.type === 'group-topic' ? 'group' : 'subject'
   const isTopicReply = target.type === 'group-topic' || target.type === 'subject-topic'
   const shouldUseWebNestedTopicReply = isTopicReply && !!replyToRoot && replyToRoot !== replyTo
+  const shouldUseWebNestedCommentReply =
+    !isTopicReply &&
+    target.type !== 'timeline' &&
+    !!replyTo &&
+    !!replyToHighlight &&
+    replyToHighlight !== replyTo
 
-  if (shouldUseWebNestedTopicReply) {
-    return await createWebTopicReply({
+  if (shouldUseWebNestedTopicReply || shouldUseWebNestedCommentReply) {
+    return await createWebReply({
       content,
-      kind,
-      replyTo,
-      topicId: Number(target.id),
+      replyTo: replyToHighlight ?? replyTo,
+      target,
     })
   }
 
@@ -64,7 +71,7 @@ export async function createReply({
 
     return await createWebTopicReply({
       content,
-      kind,
+      kind: target.type === 'group-topic' ? 'group' : 'subject',
       replyTo,
       topicId: Number(target.id),
     })

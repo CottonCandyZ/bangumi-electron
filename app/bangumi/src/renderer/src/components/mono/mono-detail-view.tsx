@@ -4,6 +4,7 @@ import {
   ViewTransitionElement,
   ViewTransitionImage,
 } from '@renderer/components/image/view-transition-image'
+import { ImagePreviewButton } from '@renderer/components/image/image-preview-button'
 import { MyLink } from '@renderer/components/my-link'
 import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
@@ -102,6 +103,7 @@ export function MonoDetailView({
 
   const infobox = getDisplayInfobox(detail.infobox)
   const image = detail.images?.large || detail.images?.medium
+  const previewImage = detail.images?.large || image
   const replyTarget: ReplyTarget = {
     id: detail.id,
     title: detail.name,
@@ -126,7 +128,9 @@ export function MonoDetailView({
               careLoading
               onInViewChange={setAvatarInView}
               viewTransitionName={avatarViewTransitionName}
-            />
+            >
+              {previewImage && <ImagePreviewButton alt={detail.name} src={previewImage} />}
+            </ViewTransitionImage>
           ) : (
             <ViewTransitionElement
               active={!!avatarViewTransitionName}

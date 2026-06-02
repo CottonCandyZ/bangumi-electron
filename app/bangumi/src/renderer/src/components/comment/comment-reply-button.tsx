@@ -37,6 +37,7 @@ export function CommentReplyButton({
         openReplyComposer({
           replyTo,
           replyToFloor: floorLabel,
+          replyToHighlight: comment?.id,
           replyToRoot,
           replyToName: comment?.user?.nickname || comment?.user?.username,
           target,

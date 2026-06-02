@@ -15,6 +15,7 @@ export type ReplyComposerContent = {
   editCommentId?: number
   replyTo?: number
   replyToFloor?: string
+  replyToHighlight?: number
   replyToRoot?: number
   replyToName?: string
   target: ReplyTarget

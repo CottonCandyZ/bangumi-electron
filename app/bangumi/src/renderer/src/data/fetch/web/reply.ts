@@ -1,5 +1,6 @@
 import { webFetch } from '@renderer/data/fetch/config'
 import { domParser } from '@renderer/lib/utils/parser'
+import type { ReplyTarget } from '@shared/reply'
 
 type WebTopicReplyKind = 'group' | 'subject'
 
@@ -12,6 +13,12 @@ export type CreateWebTopicReplyInput = {
 
 export type CreateWebTopicReplyResponse = {
   id: number
+}
+
+export type CreateWebReplyInput = {
+  content: string
+  replyTo?: number
+  target: ReplyTarget
 }
 
 export type DeleteWebTopicReplyInput = {
@@ -48,15 +55,53 @@ type WebTopicSubReplyMeta = {
   subReplyUid: number
 }
 
+const replyFormCache = new Map<string, WebTopicReplyForm>()
+
 export async function createWebTopicReply({
   content,
   kind,
   replyTo = 0,
   topicId,
 }: CreateWebTopicReplyInput): Promise<CreateWebTopicReplyResponse> {
-  const form = await getTopicReplyForm({ kind, topicId })
+  return await createWebReply({
+    content,
+    replyTo,
+    target: {
+      id: topicId,
+      type: kind === 'group' ? 'group-topic' : 'subject-topic',
+    },
+  })
+}
+
+export async function createWebReply({
+  content,
+  replyTo = 0,
+  target,
+}: CreateWebReplyInput): Promise<CreateWebTopicReplyResponse> {
+  try {
+    return await createWebReplyOnce({ content, forceRefresh: false, replyTo, target })
+  } catch {
+    replyFormCache.delete(getReplyFormCacheKey(target))
+    return await createWebReplyOnce({ content, forceRefresh: true, replyTo, target })
+  }
+}
+
+async function createWebReplyOnce({
+  content,
+  forceRefresh,
+  replyTo,
+  target,
+}: CreateWebReplyInput & {
+  forceRefresh: boolean
+}) {
+  const form = await getReplyForm(target, { forceRefresh })
   if (replyTo) {
-    return await createWebTopicSubReply({ content, form, replyTo, topicId })
+    return await createWebSubReply({
+      content,
+      form,
+      replyTo,
+      targetId: Number(target.id),
+    })
   }
 
   const body = new URLSearchParams({
@@ -145,16 +190,16 @@ export async function updateWebTopicReply({
   return {}
 }
 
-async function createWebTopicSubReply({
+async function createWebSubReply({
   content,
   form,
   replyTo,
-  topicId,
+  targetId,
 }: {
   content: string
   form: WebTopicReplyForm
   replyTo: number
-  topicId: number
+  targetId: number
 }) {
   const replyMeta = getSubReplyMeta(form.html, replyTo)
   const postContent = replyMeta.quote
@@ -170,7 +215,7 @@ async function createWebTopicSubReply({
     related_photo: '0',
     sub_reply_uid: String(replyMeta.subReplyUid),
     submit: 'submit',
-    topic_id: String(topicId),
+    topic_id: String(targetId),
   })
   const { _data: data } = await webFetch.raw<WebTopicReplyJsonResponse>(`${form.action}?ajax=1`, {
     method: 'post',
@@ -186,8 +231,12 @@ async function createWebTopicSubReply({
   }
 }
 
-async function getTopicReplyForm({ kind, topicId }: { kind: WebTopicReplyKind; topicId: number }) {
-  const path = `/${kind}/topic/${topicId}`
+async function getReplyForm(target: ReplyTarget, options?: { forceRefresh?: boolean }) {
+  const cacheKey = getReplyFormCacheKey(target)
+  const cachedForm = options?.forceRefresh ? undefined : replyFormCache.get(cacheKey)
+  if (cachedForm) return cachedForm
+
+  const path = getWebReplyPath(target)
   const html = await webFetch<string>(path, {
     method: 'get',
     credentials: 'include',
@@ -201,12 +250,22 @@ async function getTopicReplyForm({ kind, topicId }: { kind: WebTopicReplyKind; t
     throw new Error('未找到网页回复表单')
   }
 
-  return {
-    action: form.getAttribute('action') || path + '/new_reply',
+  const replyForm = {
+    action: form.getAttribute('action') || `${path}/${getWebReplyFallbackAction(target)}`,
     formHash,
     html,
     lastView: form.querySelector<HTMLInputElement>('input[name="lastview"]')?.value,
   }
+  replyFormCache.set(cacheKey, replyForm)
+
+  return replyForm
+}
+
+async function getTopicReplyForm({ kind, topicId }: { kind: WebTopicReplyKind; topicId: number }) {
+  return await getReplyForm({
+    id: topicId,
+    type: kind === 'group' ? 'group-topic' : 'subject-topic',
+  })
 }
 
 function getSubReplyMeta(html: string, replyTo: number): WebTopicSubReplyMeta {
@@ -330,6 +389,37 @@ function getWebReplyErrorMessage(html: string | undefined) {
     doc.querySelector('title')?.textContent?.trim()
 
   return message || '网页回复提交失败'
+}
+
+function getWebReplyPath(target: ReplyTarget) {
+  switch (target.type) {
+    case 'group-topic':
+      return `/group/topic/${target.id}`
+    case 'subject-topic':
+      return `/subject/topic/${target.id}`
+    case 'episode':
+      return `/ep/${target.id}`
+    case 'person':
+      return `/person/${target.id}`
+    case 'character':
+      return `/character/${target.id}`
+    case 'blog':
+      return `/blog/${target.id}`
+    case 'index':
+      return `/index/${target.id}`
+    case 'timeline':
+      throw new Error('时间线暂不支持网页回复')
+  }
+}
+
+function getWebReplyFallbackAction(target: ReplyTarget) {
+  return target.type === 'group-topic' || target.type === 'subject-topic'
+    ? 'new_reply'
+    : 'new_comment'
+}
+
+function getReplyFormCacheKey(target: ReplyTarget) {
+  return `${target.type}:${target.id}`
 }
 
 function appendAjaxQuery(path: string) {

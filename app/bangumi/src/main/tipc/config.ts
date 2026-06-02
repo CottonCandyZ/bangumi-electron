@@ -14,7 +14,7 @@ import { updateGlobalCommandPanelShortcut } from '@main/shortcuts'
 
 const APP_CONFIG_STORE_KEY = 'appConfig'
 
-function readAppConfig() {
+export function readAppConfig() {
   return normalizeAppConfig(JSONStore.get(APP_CONFIG_STORE_KEY))
 }
 
@@ -72,4 +72,22 @@ export const configIPC = {
       filePath: result.filePaths[0],
     }
   }),
+  selectDownloadDirectory: t.procedure
+    .input<{ defaultPath?: string }>()
+    .action(async ({ input }) => {
+      const result = await dialog.showOpenDialog({
+        title: '选择图片下载目录',
+        defaultPath:
+          input.defaultPath ||
+          readAppConfig().general.downloadDirectory ||
+          app.getPath('downloads'),
+        properties: ['openDirectory', 'createDirectory'],
+      })
+
+      if (result.canceled || result.filePaths.length === 0) {
+        return { canceled: true as const }
+      }
+
+      return { canceled: false as const, directory: result.filePaths[0] }
+    }),
 }

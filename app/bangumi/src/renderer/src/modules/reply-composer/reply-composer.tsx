@@ -57,6 +57,7 @@ export function ReplyComposer() {
         await createMutation.mutateAsync({
           content: bbcode,
           replyTo: content.replyTo ?? 0,
+          replyToHighlight: content.replyToHighlight,
           replyToRoot: content.replyToRoot,
           target: content.target,
           turnstileToken,

@@ -329,5 +329,5 @@ function getHighlightedReplyId(
   if (!content?.replyTo || !content.replyToFloor || !replyTarget) return null
   if (content.target.type !== replyTarget.type) return null
   if (String(content.target.id) !== String(replyTarget.id)) return null
-  return content.replyTo
+  return content.replyToHighlight ?? content.replyTo
 }

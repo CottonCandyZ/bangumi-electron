@@ -1,5 +1,6 @@
 export type AppConfig = {
   general: {
+    downloadDirectory: string
     enableNsfw: boolean
   }
   update: {
@@ -41,6 +42,7 @@ export type AppConfigExportData = {
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
   general: {
+    downloadDirectory: '',
     enableNsfw: false,
   },
   update: {
@@ -138,6 +140,10 @@ export function normalizeAppConfig(value: unknown): AppConfig {
 
   return mergeAppConfig(DEFAULT_APP_CONFIG, {
     general: {
+      downloadDirectory:
+        typeof general.downloadDirectory === 'string'
+          ? general.downloadDirectory
+          : DEFAULT_APP_CONFIG.general.downloadDirectory,
       enableNsfw:
         typeof general.enableNsfw === 'boolean'
           ? general.enableNsfw
