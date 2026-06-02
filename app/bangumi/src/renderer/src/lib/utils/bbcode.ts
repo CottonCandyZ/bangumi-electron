@@ -9,7 +9,8 @@ import { Link } from 'react-router-dom'
 // noinspection ES6UnusedImports
 import {} from '@bbob/types'
 
-const URL_PATTERN = /https?:\/\/[^\s<>"'，。)）\]]+/g
+const URL_PATTERN = /https?:\/\/[A-Za-z0-9\-._~:/?#@!$&'()*+,;=%]+/g
+const TRAILING_URL_PUNCTUATION_PATTERN = /[.,!?;:，。！？；：、)）\]]+$/
 const INLINE_TOKEN_PATTERN = /\((bgm\d+|(?:musume|blake)_\d+|bmoC?[A-Za-z0-9_\-:=|.]*)\)/g
 const BANGUMI_HOSTS = new Set(['bangumi.tv', 'bgm.tv', 'chii.in'])
 const BANGUMI_ROUTE_PATTERN = /^\/(subject|person|character|ep)\/(\d+)\/?$/
@@ -255,14 +256,18 @@ function linkifyText(text: string) {
   let lastIndex = 0
 
   for (const match of text.matchAll(URL_PATTERN)) {
-    const href = normalizeUrl(match[0])
+    const rawUrl = match[0]
+    const urlText = rawUrl.replace(TRAILING_URL_PUNCTUATION_PATTERN, '')
+    const trailingText = rawUrl.slice(urlText.length)
+    const href = normalizeUrl(urlText)
     const index = match.index ?? 0
     if (!href) continue
 
     if (index > lastIndex)
       parts.push(...renderInlineTokens(text.slice(lastIndex, index), lastIndex))
     parts.push(renderLink(href, `${href}-${index}`))
-    lastIndex = index + match[0].length
+    if (trailingText) parts.push(...renderInlineTokens(trailingText, index + urlText.length))
+    lastIndex = index + rawUrl.length
   }
 
   if (lastIndex < text.length) parts.push(...renderInlineTokens(text.slice(lastIndex), lastIndex))
