@@ -9,6 +9,7 @@ const channel = args.channel ?? 'beta'
 const arch = args.arch ?? process.arch
 const publish = args.publish === 'always'
 const packId = 'io.github.cottoncandyz.bangumi-electron'
+const appUserModelId = packId
 const releaseTag = `v${packageJson.version}`
 const packChannel = `win-${arch}-${channel}`
 const packDir = join(projectDir, 'dist', 'win-unpacked')
@@ -44,6 +45,8 @@ runVpk([
   'Bangumi.exe',
   '--packTitle',
   'Bangumi',
+  '--aumid',
+  appUserModelId,
   '--packAuthors',
   packageJson.author ?? 'CottonCandyZ',
   '--icon',

@@ -5,7 +5,7 @@ VelopackApp.build().run()
 
 const { electronApp, is, optimizer } = await import('@electron-toolkit/utils')
 const { initialize } = await import('@main/init')
-const { APP_PROTOCOL } = await import('@shared/constants')
+const { APP_USER_MODEL_ID } = await import('@shared/constants')
 const { createMainWindow } = await import('@main/window')
 const { appPath, isMacOS } = await import('@main/env')
 const { setupTray } = await import('@main/tray')
@@ -63,7 +63,7 @@ async function boot() {
   // Some APIs can only be used after this event occurs.
   app.whenReady().then(async () => {
     // set notification
-    electronApp.setAppUserModelId(`re.${APP_PROTOCOL}`)
+    electronApp.setAppUserModelId(APP_USER_MODEL_ID)
 
     await import('./session')
 

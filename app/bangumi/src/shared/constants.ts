@@ -1,4 +1,7 @@
 export const APP_PROTOCOL = import.meta.env.DEV ? 'follow-dev' : 'follow'
+export const APP_USER_MODEL_ID = import.meta.env.DEV
+  ? 'io.github.cottoncandyz.bangumi-electron.dev'
+  : 'io.github.cottoncandyz.bangumi-electron'
 export const COMMAND_WINDOW_INPUT_HEIGHT = 48
 export const COMMAND_WINDOW_LIST_HEIGHT_RATIO = 0.6
 export const COMMAND_WINDOW_LIST_MAX_HEIGHT = 420
