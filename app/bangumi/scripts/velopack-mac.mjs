@@ -79,7 +79,12 @@ try {
       outputDir,
     ])
 
-    if (publish) upload(outputDir, packChannel)
+    buildDmg(targetArch)
+
+    if (publish) {
+      upload(outputDir, packChannel)
+      uploadDmg(targetArch)
+    }
   }
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
@@ -112,6 +117,32 @@ function findAppBundle(targetArch) {
   return appBundle
 }
 
+function findDmg(targetArch) {
+  const candidates = [
+    join(projectDir, 'dist', `${packageJson.name}-${packageJson.version}-${targetArch}.dmg`),
+    join(projectDir, 'dist', `${packageJson.name}-${packageJson.version}.dmg`),
+  ]
+
+  const dmg = candidates.find((candidate) => existsSync(candidate))
+  if (dmg == null) {
+    fail(`Expected macOS dmg was not found. Checked: ${candidates.join(', ')}`)
+  }
+
+  return dmg
+}
+
+function buildDmg(targetArch) {
+  run('pnpm', [
+    'exec',
+    'electron-builder',
+    '--mac',
+    'dmg',
+    `--${targetArch}`,
+    '--publish',
+    'never',
+  ])
+}
+
 function upload(outputDir, packChannel) {
   const uploadArgs = ['upload', publishTarget, '--outputDir', outputDir, '--channel', packChannel]
 
@@ -121,6 +152,20 @@ function upload(outputDir, packChannel) {
   else fail(`Unsupported publish target "${publishTarget}". Use github, s3, or local.`)
 
   runVpk(uploadArgs)
+}
+
+function uploadDmg(targetArch) {
+  if (publishTarget !== 'github') return
+
+  run('gh', [
+    'release',
+    'upload',
+    releaseTag,
+    findDmg(targetArch),
+    '--repo',
+    'CottonCandyZ/bangumi-electron',
+    '--clobber',
+  ])
 }
 
 function resetOutputDir(outputDir) {
