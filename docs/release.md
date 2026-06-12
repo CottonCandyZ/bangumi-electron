@@ -62,7 +62,7 @@ macOS 机器上试打 macOS 包：
 pnpm build:bangumi:mac:beta
 ```
 
-默认 macOS 命令会同时打 `x64` 和 `arm64`，分别输出到 `app/bangumi/dist/velopack/osx-x64-beta` 和 `app/bangumi/dist/velopack/osx-arm64-beta`，并在 `app/bangumi/dist` 生成对应架构的 `.dmg` 手动安装包。如果只需要单架构：
+默认 macOS 命令会同时打 `x64` 和 `arm64`，分别输出到 `app/bangumi/dist/velopack/osx-x64-beta` 和 `app/bangumi/dist/velopack/osx-arm64-beta`。每个目录会包含对应架构的 Velopack `.pkg` 手动安装包。如果只需要单架构：
 
 ```bash
 pnpm build:bangumi:mac:beta:x64
@@ -149,7 +149,7 @@ Agent 发布约束：
 - 每个版本号 release 同时作为用户下载页和 Velopack update feed。
 - beta/stable 同时通过 GitHub prerelease 状态和 Velopack channel 区分，例如 `win-x64-beta`、`osx-arm64-stable`。
 - Windows 发布产物里会同时包含安装版 `Setup.exe`、免安装版 `Portable.zip`、`.nupkg` 和 feed json。
-- macOS 发布产物里会同时包含手动安装用 `.dmg`、Velopack `Portable.zip`、`.nupkg` 和 feed json。
+- macOS 发布产物里会同时包含手动安装用 Velopack `.pkg`、`Portable.zip`、`.nupkg` 和 feed json。
 - 发布脚本会先尝试下载远端已有的同 channel feed，再打新包并上传；首次发布时远端 feed 不存在会继续生成 full 包。
 - 若只想试打包，使用 `pnpm build:bangumi:win:beta` 或 `pnpm build:bangumi:mac:beta:arm64`。
 

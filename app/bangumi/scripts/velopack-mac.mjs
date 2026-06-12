@@ -79,11 +79,9 @@ try {
       outputDir,
     ])
 
-    buildDmg(targetArch)
-
     if (publish) {
       upload(outputDir, packChannel)
-      uploadDmg(targetArch)
+      uploadPkg(outputDir, packChannel)
     }
   }
 } catch (error) {
@@ -117,32 +115,6 @@ function findAppBundle(targetArch) {
   return appBundle
 }
 
-function findDmg(targetArch) {
-  const candidates = [
-    join(projectDir, 'dist', `${packageJson.name}-${packageJson.version}-${targetArch}.dmg`),
-    join(projectDir, 'dist', `${packageJson.name}-${packageJson.version}.dmg`),
-  ]
-
-  const dmg = candidates.find((candidate) => existsSync(candidate))
-  if (dmg == null) {
-    fail(`Expected macOS dmg was not found. Checked: ${candidates.join(', ')}`)
-  }
-
-  return dmg
-}
-
-function buildDmg(targetArch) {
-  run('pnpm', [
-    'exec',
-    'electron-builder',
-    '--mac',
-    'dmg',
-    `--${targetArch}`,
-    '--publish',
-    'never',
-  ])
-}
-
 function upload(outputDir, packChannel) {
   const uploadArgs = ['upload', publishTarget, '--outputDir', outputDir, '--channel', packChannel]
 
@@ -154,14 +126,14 @@ function upload(outputDir, packChannel) {
   runVpk(uploadArgs)
 }
 
-function uploadDmg(targetArch) {
+function uploadPkg(outputDir, packChannel) {
   if (publishTarget !== 'github') return
 
   run('gh', [
     'release',
     'upload',
     releaseTag,
-    findDmg(targetArch),
+    join(outputDir, `${packId}-${packChannel}-Setup.pkg`),
     '--repo',
     'CottonCandyZ/bangumi-electron',
     '--clobber',
