@@ -1,7 +1,4 @@
-import { createHash } from 'node:crypto'
-import { once } from 'node:events'
-import { createReadStream, createWriteStream } from 'node:fs'
-import { mkdir, readdir, rename, stat, unlink } from 'node:fs/promises'
+import { readdir, unlink } from 'node:fs/promises'
 import path from 'node:path'
 import { BrowserWindow, app } from 'electron'
 import { getRendererHandlers } from '@egoist/tipc/main'
@@ -22,6 +19,7 @@ const IGNORED_UPDATE_KEY = 'ignoredUpdate'
 const STARTUP_CHECK_DELAY_MS = 3000
 const DEFAULT_UPDATE_SOURCE_URL = __APP_UPDATE_SOURCE_URL__
 const GITHUB_API_ACCEPT = 'application/vnd.github+json'
+const VELOPACK_PACKAGE_ID = 'io.github.cottoncandyz.bangumi-electron'
 
 let initialized = false
 let checkPromise: Promise<unknown> | null = null
@@ -30,7 +28,6 @@ let checkRunId = 0
 let downloadPromise: Promise<unknown> | null = null
 let availableUpdateInfo: UpdateInfo | null = null
 let availableUpdateSourceUrl: string | null = null
-let availableUpdateDownloadUrl: string | null = null
 let downloadedUpdateAsset: VelopackAsset | null = null
 
 let updateState: AppUpdateState = {
@@ -96,7 +93,6 @@ type GitHubAssetFeed = {
 type ResolvedUpdateCheck = {
   updateInfo: UpdateInfo | null
   sourceUrl?: string
-  downloadUrl?: string
   unavailableReason?: string
 }
 
@@ -185,17 +181,21 @@ async function createUpdateManagerForCheck(channel = readUpdateChannel()) {
   return { manager: createUpdateManager(sourceUrl, channel), sourceUrl }
 }
 
-function getPackagesDir() {
+function getPackagesDir(packageId = VELOPACK_PACKAGE_ID) {
   if (process.platform === 'win32') {
     return path.resolve(process.resourcesPath, '..', '..', 'packages')
   }
 
-  return path.join(app.getPath('userData'), 'packages')
+  if (process.platform === 'darwin') {
+    return path.join(app.getPath('home'), 'Library', 'Caches', 'velopack', packageId, 'packages')
+  }
+
+  return path.join(app.getPath('home'), '.cache', 'velopack', packageId, 'packages')
 }
 
 function getPackagePath(asset?: VelopackAsset | null) {
   if (!asset?.FileName) return undefined
-  return path.join(getPackagesDir(), asset.FileName)
+  return path.join(getPackagesDir(asset.PackageId), asset.FileName)
 }
 
 function getPackageTempPath(asset?: VelopackAsset | null) {
@@ -370,8 +370,7 @@ async function checkGitHubForUpdates(channel = readUpdateChannel()): Promise<Res
 
   if (!target) return { updateInfo: null, sourceUrl: resolved.sourceUrl }
 
-  const packageAsset = resolved.release.assets.find((asset) => asset.name === target.FileName)
-  if (!packageAsset) {
+  if (!resolved.release.assets.some((asset) => asset.name === target.FileName)) {
     throw new Error(`GitHub release is missing update package: ${target.FileName}`)
   }
 
@@ -382,7 +381,6 @@ async function checkGitHubForUpdates(channel = readUpdateChannel()): Promise<Res
       IsDowngrade: false,
     },
     sourceUrl: resolved.sourceUrl,
-    downloadUrl: packageAsset.browser_download_url,
   }
 }
 
@@ -417,91 +415,6 @@ async function cleanupPackageFiles(keepFileName?: string) {
     )
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
-  }
-}
-
-async function verifyPackage(filePath: string, asset: VelopackAsset) {
-  const fileStat = await stat(filePath)
-  if (fileStat.size !== asset.Size) {
-    throw new Error(
-      `Downloaded package size mismatch: expected ${asset.Size}, got ${fileStat.size}`,
-    )
-  }
-
-  const hash = createHash('sha256')
-  for await (const chunk of createReadStream(filePath)) {
-    hash.update(chunk)
-  }
-
-  const digest = hash.digest('hex')
-  if (digest.toLowerCase() !== asset.SHA256.toLowerCase()) {
-    throw new Error(`Downloaded package sha256 mismatch: expected ${asset.SHA256}, got ${digest}`)
-  }
-}
-
-async function downloadPackageFromGitHub(
-  asset: VelopackAsset,
-  downloadUrl: string,
-  channel = readUpdateChannel(),
-) {
-  const packagesDir = getPackagesDir()
-  const packagePath = getPackagePath(asset)
-  const tempPath = getPackageTempPath(asset)
-  if (!packagePath || !tempPath) return
-
-  await mkdir(packagesDir, { recursive: true })
-  await unlinkIfExists(tempPath)
-
-  const response = await fetch(downloadUrl, {
-    headers: {
-      'User-Agent': 'Bangumi-Electron-Updater',
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error(`GitHub update package request failed: ${response.status}`)
-  }
-
-  if (!response.body) {
-    throw new Error('GitHub update package response has no body')
-  }
-
-  const writer = createWriteStream(tempPath)
-  const writerError = once(writer, 'error').then(([error]) => {
-    throw error
-  })
-  const reader = response.body.getReader()
-  let downloaded = 0
-  let reading = true
-
-  try {
-    while (reading) {
-      const { done, value } = await reader.read()
-      if (done) {
-        reading = false
-        continue
-      }
-
-      downloaded += value.byteLength
-      if (!writer.write(value)) await once(writer, 'drain')
-      setState({
-        ...getUpdateStateFromAsset('downloading', asset, channel),
-        percent: Math.min(100, Math.round((downloaded / asset.Size) * 100)),
-      })
-    }
-
-    writer.end()
-    await Promise.race([once(writer, 'finish'), writerError])
-    await verifyPackage(tempPath, asset)
-    await unlinkIfExists(packagePath)
-    await rename(tempPath, packagePath)
-    await cleanupPackageFiles(asset.FileName)
-  } catch (error) {
-    writer.destroy()
-    await unlinkIfExists(tempPath)
-    throw error
-  } finally {
-    reader.releaseLock()
   }
 }
 
@@ -571,7 +484,6 @@ export async function checkForUpdates() {
 
   availableUpdateInfo = null
   availableUpdateSourceUrl = null
-  availableUpdateDownloadUrl = null
   downloadedUpdateAsset = null
   setState(createBaseState('checking', channel))
 
@@ -586,7 +498,6 @@ export async function checkForUpdates() {
       if (runId !== checkRunId || readUpdateChannel() !== channel) return
 
       availableUpdateSourceUrl = result.sourceUrl ?? null
-      availableUpdateDownloadUrl = result.downloadUrl ?? null
 
       const updateInfo = result.updateInfo
       if (!updateInfo) {
@@ -646,19 +557,16 @@ export async function downloadUpdate() {
     percent: 0,
   })
 
-  downloadPromise = (
-    availableUpdateDownloadUrl
-      ? downloadPackageFromGitHub(updateInfo.TargetFullRelease, availableUpdateDownloadUrl, channel)
-      : createUpdateManager(
-          availableUpdateSourceUrl ?? (await resolveUpdateSourceUrl(channel)),
-          channel,
-        ).downloadUpdateAsync(updateInfo, (percent) => {
-          setState({
-            ...getUpdateStateFromAsset('downloading', updateInfo.TargetFullRelease, channel),
-            percent,
-          })
-        })
+  downloadPromise = createUpdateManager(
+    availableUpdateSourceUrl ?? (await resolveUpdateSourceUrl(channel)),
+    channel,
   )
+    .downloadUpdateAsync(updateInfo, (percent) => {
+      setState({
+        ...getUpdateStateFromAsset('downloading', updateInfo.TargetFullRelease, channel),
+        percent,
+      })
+    })
     .then(() => {
       downloadedUpdateAsset = updateInfo.TargetFullRelease
       setState(getUpdateStateFromAsset('downloaded', updateInfo.TargetFullRelease, channel))
