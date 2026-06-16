@@ -26,9 +26,24 @@ import type { ReplyComposerContent, ReplyTarget } from '@shared/reply'
 import dayjs from 'dayjs'
 import { useAtomValue } from 'jotai'
 import { ChevronDown, ChevronUp } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from 'react'
 
 const DEFAULT_VISIBLE_REPLY_COUNT = 3
+const COMMENT_CONTENT_COLLAPSED_HEIGHT = 520
+const REPLY_CONTENT_COLLAPSED_HEIGHT = 360
+const CONTENT_COLLAPSE_TOLERANCE = 8
+const CONTENT_COLLAPSE_MASK = 'linear-gradient(to bottom, black calc(100% - 3rem), transparent)'
+const LONG_CONTENT_TEXT_LENGTH = 700
+const LONG_CONTENT_LINE_COUNT = 14
 
 export function hasVisibleReplyContent(reply: CommentBase) {
   return reply.content.trim().length > 0
@@ -39,6 +54,7 @@ export function CommentItem({
   floorNumber,
   reactionTarget,
   userAvatarViewTransition,
+  virtual = false,
   replyTarget,
 }: {
   comment: Comment
@@ -46,9 +62,11 @@ export function CommentItem({
   reactionTarget?: ReactionTarget
   replyTarget?: ReplyTarget
   userAvatarViewTransition: boolean
+  virtual?: boolean
 }) {
   const [showAllReplies, setShowAllReplies] = useState(false)
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false)
+  const [replyHovering, setReplyHovering] = useState(false)
   const replyComposer = useAtomValue(replyComposerAtom)
   const allVisibleReplies = useMemo(
     () =>
@@ -80,6 +98,11 @@ export function CommentItem({
   const showReaction = canReact(reactionTarget)
   const highlightedReplyId = getHighlightedReplyId(replyComposer, replyTarget)
   const highlighted = highlightedReplyId === comment.id
+  const contentState = useCommentContentState({
+    content: comment.content,
+    disableHeightTransition: virtual,
+    maxCollapsedHeight: COMMENT_CONTENT_COLLAPSED_HEIGHT,
+  })
 
   return (
     <Card
@@ -99,7 +122,9 @@ export function CommentItem({
       <div className="absolute top-3 right-3 flex flex-row items-center gap-1.5">
         <div
           className={cn(
-            'pointer-events-none flex flex-row items-center gap-1.5 opacity-0 transition-opacity group-focus-within/comment:pointer-events-auto group-focus-within/comment:opacity-100 group-hover/comment:pointer-events-auto group-hover/comment:opacity-100',
+            'pointer-events-none flex flex-row items-center gap-1.5 opacity-0 transition-opacity',
+            !replyHovering &&
+              'group-focus-within/comment:pointer-events-auto group-focus-within/comment:opacity-100 group-hover/comment:pointer-events-auto group-hover/comment:opacity-100',
             reactionPickerOpen && 'pointer-events-auto opacity-100',
           )}
         >
@@ -139,17 +164,24 @@ export function CommentItem({
       )}
       <BBCodeImagePreviewProvider>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <CommentHeader comment={comment} />
+          <CommentHeader
+            comment={comment}
+            contentToggle={
+              hasContent && contentState.collapsible ? (
+                <CommentContentToggle contentState={contentState} placement="inline" />
+              ) : null
+            }
+          />
           {hasContent && (
-            <div className="bbcode text-sm whitespace-pre-line">
-              {renderBBCode(comment.content)}
-            </div>
+            <CommentContent className="text-sm whitespace-pre-line" contentState={contentState} />
           )}
           <CommentReactions comment={comment} target={reactionTarget} />
           {replyCount > 0 && (
             <div
-              className="border-border/60 bg-muted/25 divide-border flex flex-col divide-y rounded-md border px-2"
+              className="border-border/60 bg-muted/25 flex flex-col rounded-md border px-2"
               id={repliesId}
+              onMouseEnter={() => setReplyHovering(true)}
+              onMouseLeave={() => setReplyHovering(false)}
             >
               {visibleReplies.map(({ floorLabel, reply }) => (
                 <ReplyItem
@@ -159,6 +191,7 @@ export function CommentItem({
                   highlighted={highlightedReplyId === reply.id}
                   reactionTarget={reactionTarget}
                   replyTarget={replyTarget}
+                  virtual={virtual}
                   userAvatarViewTransition={userAvatarViewTransition}
                 />
               ))}
@@ -169,6 +202,7 @@ export function CommentItem({
               aria-controls={repliesId}
               aria-expanded={showAllReplies}
               className="text-muted-foreground hover:text-foreground -ml-2 h-7 w-fit px-2 text-xs"
+              onMouseDown={(event) => event.preventDefault()}
               onClick={() => setShowAllReplies((value) => !value)}
               size="sm"
               type="button"
@@ -188,10 +222,16 @@ export function CommentItem({
   )
 }
 
-function CommentHeader({ comment }: { comment: Comment }) {
+function CommentHeader({
+  comment,
+  contentToggle,
+}: {
+  comment: Comment
+  contentToggle?: ReactNode
+}) {
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
-      <div className="flex min-w-0 flex-row flex-wrap items-center gap-x-2 gap-y-1">
+      <div className="flex min-w-0 flex-row flex-wrap items-baseline gap-x-2 gap-y-1">
         {comment.user ? (
           <>
             <UserProfileLink
@@ -213,6 +253,7 @@ function CommentHeader({ comment }: { comment: Comment }) {
             {formatRecentUnixTime(comment.createdAt)}
           </time>
         </span>
+        {contentToggle}
       </div>
       {comment.user ? <CommentUserUsername username={comment.user.username} /> : null}
     </div>
@@ -225,6 +266,7 @@ function ReplyItem({
   reactionTarget,
   reply,
   replyTarget,
+  virtual,
   userAvatarViewTransition,
 }: {
   floorLabel: string
@@ -232,17 +274,23 @@ function ReplyItem({
   reactionTarget?: ReactionTarget
   reply: CommentBase
   replyTarget?: ReplyTarget
+  virtual: boolean
   userAvatarViewTransition: boolean
 }) {
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false)
   const session = useSession()
   const showEdit = !!replyTarget && canEditReply(replyTarget) && session?.id === reply.creatorID
+  const contentState = useCommentContentState({
+    content: reply.content,
+    disableHeightTransition: virtual,
+    maxCollapsedHeight: REPLY_CONTENT_COLLAPSED_HEIGHT,
+  })
 
   return (
     <div
       className={cn(
-        'group/reply -mx-1 flex flex-row gap-2 rounded-md px-1 py-2.5 text-sm first:pt-2 last:pb-2',
-        highlighted && 'bg-primary/10 ring-primary/25 ring-1',
+        'group/reply border-border/60 -mx-2 flex flex-row gap-2 border-t px-2 py-2.5 text-sm first:border-t-0 first:pt-2 last:pb-2',
+        highlighted && 'bg-primary/10 ring-primary/25 ring-1 ring-inset',
       )}
       data-reply-id={reply.id}
     >
@@ -281,10 +329,13 @@ function ReplyItem({
                 {formatRecentUnixTime(reply.createdAt)}
               </time>
             </span>
+            {contentState.collapsible && (
+              <CommentContentToggle contentState={contentState} placement="inline" />
+            )}
           </div>
           {reply.user ? <CommentUserUsername username={reply.user.username} /> : null}
         </div>
-        <div className="bbcode whitespace-pre-line">{renderBBCode(reply.content)}</div>
+        <CommentContent className="whitespace-pre-line" contentState={contentState} />
         <CommentReactions comment={reply} compact target={reactionTarget} />
       </div>
       <div className="flex h-6 shrink-0 flex-row items-center gap-1.5">
@@ -318,6 +369,152 @@ function ReplyItem({
         </span>
       </div>
     </div>
+  )
+}
+
+function useCommentContentState({
+  content,
+  disableHeightTransition,
+  maxCollapsedHeight,
+}: {
+  content: string
+  disableHeightTransition: boolean
+  maxCollapsedHeight: number
+}) {
+  const contentId = useId()
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [expanded, setExpanded] = useState(false)
+  const [measurement, setMeasurement] = useState({ content: '', height: 0 })
+  const renderedContent = useMemo(() => renderBBCode(content), [content])
+  const measured = measurement.content === content
+  const contentHeight = measured ? measurement.height : 0
+  const shouldPreCollapse = useMemo(() => mayNeedContentCollapse(content), [content])
+  const collapsible =
+    (!measured && shouldPreCollapse) ||
+    contentHeight > maxCollapsedHeight + CONTENT_COLLAPSE_TOLERANCE
+  const collapsed = collapsible && !expanded
+  const clipStyle = useMemo<CSSProperties | undefined>(() => {
+    if (!collapsible) return undefined
+
+    return {
+      maxHeight: expanded
+        ? `${Math.max(contentHeight, maxCollapsedHeight)}px`
+        : `${maxCollapsedHeight}px`,
+      WebkitMaskImage: collapsed ? CONTENT_COLLAPSE_MASK : undefined,
+      maskImage: collapsed ? CONTENT_COLLAPSE_MASK : undefined,
+    }
+  }, [collapsed, collapsible, contentHeight, expanded, maxCollapsedHeight])
+
+  useLayoutEffect(() => {
+    const element = contentRef.current
+    if (!element) return
+
+    setExpanded(false)
+
+    const updateContentHeight = () => {
+      const nextHeight = Math.ceil(element.scrollHeight || element.getBoundingClientRect().height)
+      setMeasurement((current) => {
+        if (current.content === content && current.height === nextHeight) return current
+        return { content, height: nextHeight }
+      })
+    }
+
+    updateContentHeight()
+
+    const observer = new ResizeObserver(updateContentHeight)
+    observer.observe(element)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [content])
+
+  useEffect(() => {
+    if (!collapsible) setExpanded(false)
+  }, [collapsible])
+
+  return {
+    clipStyle,
+    collapsed,
+    collapsible,
+    contentId,
+    contentRef,
+    disableHeightTransition,
+    expanded,
+    renderedContent,
+    setExpanded,
+  }
+}
+
+function CommentContent({
+  className,
+  contentState,
+}: {
+  className?: string
+  contentState: ReturnType<typeof useCommentContentState>
+}) {
+  return (
+    <div className="flex w-full max-w-full flex-col items-stretch gap-1.5">
+      <div
+        aria-expanded={contentState.collapsible ? contentState.expanded : undefined}
+        className={cn(
+          'max-w-full',
+          !contentState.disableHeightTransition && 'transition-[max-height] duration-200 ease-out',
+          contentState.collapsed && 'overflow-hidden',
+        )}
+        id={contentState.contentId}
+        style={contentState.clipStyle}
+      >
+        <div className={cn('bbcode', className)} ref={contentState.contentRef}>
+          {contentState.renderedContent}
+        </div>
+      </div>
+      {contentState.collapsible && (
+        <CommentContentToggle contentState={contentState} placement="bottom" />
+      )}
+    </div>
+  )
+}
+
+function mayNeedContentCollapse(content: string) {
+  const lineCount = content.split(/\r\n|\r|\n/).length
+  return content.length >= LONG_CONTENT_TEXT_LENGTH || lineCount >= LONG_CONTENT_LINE_COUNT
+}
+
+function CommentContentToggle({
+  contentState,
+  placement,
+}: {
+  contentState: ReturnType<typeof useCommentContentState>
+  placement: 'bottom' | 'inline'
+}) {
+  const label = contentState.expanded ? '收起评论' : '展开评论'
+
+  return (
+    <Button
+      aria-label={label}
+      aria-controls={contentState.contentId}
+      aria-expanded={contentState.expanded}
+      className={cn(
+        'text-muted-foreground hover:text-foreground w-fit text-xs shadow-none',
+        placement === 'inline'
+          ? 'h-6 translate-y-0.5 items-center gap-1 rounded-md px-1.5 leading-none font-medium'
+          : '-ml-2 h-7 self-start px-2',
+      )}
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={() => contentState.setExpanded((value) => !value)}
+      size="sm"
+      title={label}
+      type="button"
+      variant="ghost"
+    >
+      {contentState.expanded ? (
+        <ChevronUp className={placement === 'inline' ? 'size-3' : 'size-3.5'} />
+      ) : (
+        <ChevronDown className={placement === 'inline' ? 'size-3' : 'size-3.5'} />
+      )}
+      {placement === 'inline' ? (contentState.expanded ? '收起' : '展开') : label}
+    </Button>
   )
 }
 

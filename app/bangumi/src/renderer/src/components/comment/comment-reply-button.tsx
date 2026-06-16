@@ -33,6 +33,7 @@ export function CommentReplyButton({
         'text-muted-foreground hover:text-foreground h-7 w-fit px-2 text-xs',
         className,
       )}
+      onMouseDown={(event) => event.preventDefault()}
       onClick={() =>
         openReplyComposer({
           replyTo,

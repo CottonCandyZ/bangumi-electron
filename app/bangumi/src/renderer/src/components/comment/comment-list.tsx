@@ -65,6 +65,7 @@ export function CommentList({
           reactionTarget={reactionTarget}
           replyTarget={replyTarget}
           userAvatarViewTransition={userAvatarViewTransition}
+          virtual
         />
       )}
       rootClassName="h-full"

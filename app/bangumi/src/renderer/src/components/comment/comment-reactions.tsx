@@ -14,7 +14,7 @@ import { useSession } from '@renderer/data/hooks/session'
 import type { CommentReaction } from '@renderer/data/types/comment'
 import { cn } from '@renderer/lib/utils'
 import { SmilePlus } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 type CommentReactionsProps = {
@@ -62,6 +62,7 @@ export function CommentReactionButton({
   target?: ReactionTarget
 }) {
   const [open, setOpen] = useState(false)
+  const openedByPointerRef = useRef(false)
   const session = useSession()
   const mutation = useToggleReactionMutation()
   const values = getAvailableReactionValues(target)
@@ -109,6 +110,13 @@ export function CommentReactionButton({
             className,
           )}
           disabled={mutation.isPending}
+          onKeyDown={() => {
+            openedByPointerRef.current = false
+          }}
+          onMouseDown={(event) => {
+            openedByPointerRef.current = true
+            event.preventDefault()
+          }}
           size="sm"
           title="贴贴"
           type="button"
@@ -117,7 +125,17 @@ export function CommentReactionButton({
           <SmilePlus className="size-3.5" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-auto p-2" collisionPadding={8} sideOffset={6}>
+      <PopoverContent
+        align="start"
+        className="w-auto p-2"
+        collisionPadding={8}
+        onCloseAutoFocus={(event) => {
+          if (!openedByPointerRef.current) return
+          openedByPointerRef.current = false
+          event.preventDefault()
+        }}
+        sideOffset={6}
+      >
         <div className="grid grid-cols-6 gap-1">
           {values.map((value) => {
             const smileCode = REACTION_VALUE_TO_BANGUMI_SMILE[value]

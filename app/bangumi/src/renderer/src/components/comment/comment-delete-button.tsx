@@ -45,6 +45,7 @@ export function CommentDeleteButton({
             className,
           )}
           disabled={mutation.isPending}
+          onMouseDown={(event) => event.preventDefault()}
           size="sm"
           type="button"
           variant="ghost"
