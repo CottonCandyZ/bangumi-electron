@@ -13,6 +13,7 @@ export interface ResizeHandleProps extends React.HtmlHTMLAttributes<HTMLDivEleme
   resizeHandlePos: 'left' | 'right'
   resizeHandleOffset?: number
   resizeHandleVerticalPadding?: number
+  onHoverChange?: (hovering: boolean) => void
   onResizing: (resizing: boolean) => void
   onWidthChange: (width: number) => void
 }
@@ -51,8 +52,11 @@ const ResizeHandle = ({
   maxWidth,
   resizeHandlePos,
   open,
+  onHoverChange,
   onResizing,
   onWidthChange,
+  onMouseEnter,
+  onMouseLeave,
   ...rest
 }: ResizeHandleProps) => {
   const ref = useRef<HTMLDivElement>(null)
@@ -99,15 +103,15 @@ const ResizeHandle = ({
         className,
       )}
       onMouseDown={onResizeStart}
-    >
-      <div
-        className={cn(
-          'absolute h-full w-0.5 -translate-x-[2.5px] rounded-sm bg-blue-400 transition-all duration-200',
-          resizeHandlePos === 'left' && 'translate-x-[2.5px]',
-          resizing && 'w-1',
-        )}
-      />
-    </div>
+      onMouseEnter={(event) => {
+        onHoverChange?.(true)
+        onMouseEnter?.(event)
+      }}
+      onMouseLeave={(event) => {
+        onHoverChange?.(false)
+        onMouseLeave?.(event)
+      }}
+    />
   )
 }
 
@@ -126,8 +130,10 @@ export const ResizePanel = ({
   resizeHandlePos,
   ...rest
 }: ResizePanelProps) => {
+  const [handleHover, setHandleHover] = useState(false)
   const enableAnimation = useEnableAnimation() && _enableAnimation
   const safeWidth = clamp(width, minWidth, maxWidth)
+  const showResizeIndicator = open && (handleHover || resizing)
   const [{ status }, toggle] = useTransition({
     timeout: animationTimeout,
   })
@@ -151,10 +157,19 @@ export const ResizePanel = ({
       className={cn('relative h-full', status === 'exited' && 'invisible', className)}
     >
       {!(status === 'exited' && unmountOnExit !== false) && children}
+      <div
+        className={cn(
+          'pointer-events-none absolute inset-y-0 z-30 bg-blue-400 opacity-0 transition-[opacity,width] duration-200',
+          resizeHandlePos === 'right' ? 'right-0 translate-x-1/2' : 'left-0 -translate-x-1/2',
+          resizing ? 'w-1' : 'w-0.5',
+          showResizeIndicator && 'opacity-100',
+        )}
+      />
       <ResizeHandle
         resizeHandlePos={resizeHandlePos}
         maxWidth={maxWidth}
         minWidth={minWidth}
+        onHoverChange={setHandleHover}
         onResizing={onResizing}
         onWidthChange={onWidthChange}
         open={open}
