@@ -422,6 +422,7 @@ function CollectionPreviewRow({
     initialPageParam: 0,
     enabled: !!username,
     needKeepPreviousData: false,
+    refetchPageLimit: 1,
   })
   const collections = collectionsQuery.data?.pages[0]?.data
   usePageScrollRestoreReady(!collectionsQuery.isPending || collectionsQuery.isError)

@@ -92,16 +92,19 @@ export const useCharacterIndexesQuery = ({
   enabled,
   id,
   limit = 8,
+  refetchPageLimit,
 }: {
   enabled?: boolean
   id: CharacterId
   limit?: number
+  refetchPageLimit?: number
 }) =>
   useInfinityQueryOptionalAuth({
     queryFn: getCharacterIndexesById,
     queryKey: ['character-indexes'],
     queryProps: { id },
     qFLimit: limit,
+    refetchPageLimit,
     enabled,
     needKeepPreviousData: false,
     initialPageParam: 0,

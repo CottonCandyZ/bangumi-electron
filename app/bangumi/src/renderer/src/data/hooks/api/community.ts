@@ -28,10 +28,12 @@ const COMMUNITY_TOPIC_DETAIL_STALE_TIME = 1000 * 30
 export const useGroupsQuery = ({
   enabled,
   limit = 12,
+  refetchPageLimit,
   sort = 'members',
 }: {
   enabled?: boolean
   limit?: number
+  refetchPageLimit?: number
   sort?: GroupSort
 } = {}) =>
   useInfinityQueryOptionalAuth({
@@ -39,6 +41,7 @@ export const useGroupsQuery = ({
     queryKey: ['community-groups-v1'],
     queryProps: { sort },
     qFLimit: limit,
+    refetchPageLimit,
     enabled,
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
@@ -65,16 +68,19 @@ export const useGroupMembersQuery = ({
   groupName,
   enabled,
   limit = 24,
+  refetchPageLimit,
 }: {
   groupName: string | undefined
   enabled?: boolean
   limit?: number
+  refetchPageLimit?: number
 }) =>
   useInfinityQueryOptionalAuth({
     queryFn: getGroupMembers,
     queryKey: ['community-group-members-v1'],
     queryProps: { groupName },
     qFLimit: limit,
+    refetchPageLimit,
     initialPageParam: 0,
     enabled,
     getNextPageParam: (lastPage, pages) => {
@@ -88,17 +94,20 @@ export const useGroupTopicsQuery = ({
   group,
   groupName,
   limit = 24,
+  refetchPageLimit,
 }: {
   enabled?: boolean
   group?: SlimGroup | null
   groupName: string | undefined
   limit?: number
+  refetchPageLimit?: number
 }) =>
   useInfinityQueryOptionalAuth({
     queryFn: getGroupTopics,
     queryKey: ['community-single-group-topics-v1'],
     queryProps: { groupName, group },
     qFLimit: limit,
+    refetchPageLimit,
     initialPageParam: 0,
     enabled,
     getNextPageParam: (lastPage, pages) => {
@@ -110,10 +119,12 @@ export const useGroupTopicsQuery = ({
 export const useUserGroupsQuery = ({
   enabled,
   limit = 12,
+  refetchPageLimit,
   username,
 }: {
   enabled?: boolean
   limit?: number
+  refetchPageLimit?: number
   username: UserInfo['username'] | undefined
 }) =>
   useInfinityQueryOptionalAuth({
@@ -121,6 +132,7 @@ export const useUserGroupsQuery = ({
     queryKey: ['community-user-groups-v1'],
     queryProps: { username },
     qFLimit: limit,
+    refetchPageLimit,
     initialPageParam: 0,
     enabled,
     getNextPageParam: (lastPage, pages) => {
@@ -133,16 +145,19 @@ export const useRecentGroupTopicsQuery = ({
   enabled,
   mode = 'all',
   limit = 20,
+  refetchPageLimit,
 }: {
   enabled?: boolean
   mode?: 'all' | 'joined' | 'created' | 'replied'
   limit?: number
+  refetchPageLimit?: number
 } = {}) =>
   useInfinityQueryOptionalAuth({
     queryFn: getRecentGroupTopics,
     queryKey: ['community-group-topics-v3'],
     queryProps: { mode },
     qFLimit: limit,
+    refetchPageLimit,
     enabled,
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
@@ -151,11 +166,18 @@ export const useRecentGroupTopicsQuery = ({
     },
   })
 
-export const useRecentSubjectTopicsQuery = ({ limit = 20 }: { limit?: number } = {}) =>
+export const useRecentSubjectTopicsQuery = ({
+  limit = 20,
+  refetchPageLimit,
+}: {
+  limit?: number
+  refetchPageLimit?: number
+} = {}) =>
   useInfinityQueryOptionalAuth({
     queryFn: getRecentSubjectTopics,
     queryKey: ['community-subject-topics-v3'],
     qFLimit: limit,
+    refetchPageLimit,
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
@@ -166,11 +188,13 @@ export const useRecentSubjectTopicsQuery = ({ limit = 20 }: { limit?: number } =
 export const useSubjectTopicsQuery = ({
   enabled,
   limit = 20,
+  refetchPageLimit,
   subject,
   subjectId,
 }: {
   enabled?: boolean
   limit?: number
+  refetchPageLimit?: number
   subject?: SubjectTopicSource | null
   subjectId: SubjectId | undefined
 }) =>
@@ -179,6 +203,7 @@ export const useSubjectTopicsQuery = ({
     queryKey: ['community-single-subject-topics-v1'],
     queryProps: { subjectId, subject },
     qFLimit: limit,
+    refetchPageLimit,
     initialPageParam: 0,
     enabled,
     getNextPageParam: (lastPage, pages) => {
@@ -187,11 +212,18 @@ export const useSubjectTopicsQuery = ({
     },
   })
 
-export const useTrendingSubjectTopicsQuery = ({ limit = 20 }: { limit?: number } = {}) =>
+export const useTrendingSubjectTopicsQuery = ({
+  limit = 20,
+  refetchPageLimit,
+}: {
+  limit?: number
+  refetchPageLimit?: number
+} = {}) =>
   useInfinityQueryOptionalAuth({
     queryFn: getTrendingSubjectTopics,
     queryKey: ['community-trending-subject-topics-v3'],
     qFLimit: limit,
+    refetchPageLimit,
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)

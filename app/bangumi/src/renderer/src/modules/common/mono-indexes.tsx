@@ -30,6 +30,7 @@ export function MonoIndexesSection({
 }) {
   const query = useResourceIndexesQuery({
     limit: INDEX_PREVIEW_FETCH_LIMIT,
+    refetchPageLimit: 1,
     resourceId,
     resourceType,
   })

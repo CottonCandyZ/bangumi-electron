@@ -34,6 +34,7 @@ export function SubjectDiscussions({
     subject,
     enabled: enabledSubjectId === subjectId && !subjectInfoQuery.isPending,
     limit: SUBJECT_DISCUSSIONS_PREVIEW_LIMIT,
+    refetchPageLimit: 1,
   })
   const fetchedTopics = useMemo(
     () => topicsQuery.data?.pages.flatMap((page) => page.data),

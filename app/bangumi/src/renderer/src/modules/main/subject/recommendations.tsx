@@ -25,6 +25,7 @@ export function SubjectRecommendations({ subjectId }: { subjectId: SubjectId }) 
   const query = useSubjectRecommendationsQuery({
     id: subjectId,
     limit: SUBJECT_RECOMMENDATIONS_PREVIEW_LIMIT,
+    refetchPageLimit: 1,
   })
   const loadedRecommendations = query.data?.pages.flatMap((page) => page.data) ?? []
   const recommendations = loadedRecommendations.slice(0, SUBJECT_RECOMMENDATIONS_PREVIEW_LIMIT)

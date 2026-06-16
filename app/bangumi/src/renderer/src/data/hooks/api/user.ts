@@ -17,15 +17,13 @@ import { useCallback, useMemo } from 'react'
 
 const getUserTimelineInfiniteQueryKey = ({
   limit,
-  refetchPageLimit,
   userId,
   username,
 }: {
   limit: number
-  refetchPageLimit: number
   userId: unknown
   username: UserInfo['username'] | undefined
-}) => ['user-timeline-infinite', userId, username, limit, refetchPageLimit] as const
+}) => ['user-timeline-infinite', userId, username, limit] as const
 
 export const useUserInfoByUsernameQuery = ({
   username,
@@ -85,12 +83,12 @@ export const useUserTimelineInfiniteQuery = ({
   const userId = useAtomValue(userIdAtom)
   const queryClient = useQueryClient()
   const queryKey = useMemo(
-    () => getUserTimelineInfiniteQueryKey({ userId, username, limit, refetchPageLimit }),
-    [limit, refetchPageLimit, userId, username],
+    () => getUserTimelineInfiniteQueryKey({ userId, username, limit }),
+    [limit, userId, username],
   )
 
   const query = useInfiniteQuery({
-    queryKey: ['user-timeline-infinite', userId, username, limit, refetchPageLimit],
+    queryKey: ['user-timeline-infinite', userId, username, limit],
     queryFn: ({ pageParam }) =>
       getUserTimelineByUsername({
         username,

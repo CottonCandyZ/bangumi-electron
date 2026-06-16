@@ -75,16 +75,19 @@ export const useSubjectRecommendationsQuery = ({
   enabled,
   id,
   limit = 10,
+  refetchPageLimit,
 }: {
   enabled?: boolean
   id: SubjectId
   limit?: number
+  refetchPageLimit?: number
 }) =>
   useInfinityQueryOptionalAuth({
     queryFn: getSubjectRecommendationsById,
     queryKey: ['subject-recommendations'],
     queryProps: { id },
     qFLimit: limit,
+    refetchPageLimit,
     enabled,
     needKeepPreviousData: false,
     initialPageParam: 0,
@@ -98,16 +101,19 @@ export const useSubjectIndexesQuery = ({
   enabled,
   id,
   limit = 8,
+  refetchPageLimit,
 }: {
   enabled?: boolean
   id: SubjectId
   limit?: number
+  refetchPageLimit?: number
 }) =>
   useInfinityQueryOptionalAuth({
     queryFn: getSubjectIndexesById,
     queryKey: ['subject-indexes'],
     queryProps: { id },
     qFLimit: limit,
+    refetchPageLimit,
     enabled,
     needKeepPreviousData: false,
     initialPageParam: 0,
@@ -124,16 +130,19 @@ export const useSubjectCommentsQuery = ({
   id,
   enabled,
   limit = 20,
+  refetchPageLimit,
 }: {
   id: SubjectId
   enabled?: boolean
   limit?: number
+  refetchPageLimit?: number
 }) =>
   useInfinityQueryOptionalAuth({
     queryFn: getSubjectCommentsById,
     queryKey: ['subject-comments'],
     queryProps: { id, cacheKeyLimit: limit },
     qFLimit: limit,
+    refetchPageLimit,
     enabled,
     needKeepPreviousData: false,
     initialPageParam: 0,

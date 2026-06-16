@@ -23,6 +23,7 @@ export function SubjectComments({ subjectId }: { subjectId: SubjectId }) {
     id: subjectId,
     enabled: enabledCommentsId === subjectId,
     limit: SUBJECT_COMMENTS_PREVIEW_LIMIT,
+    refetchPageLimit: 1,
   })
   const comments = useMemo(
     () => commentsQuery.data?.pages.flatMap((page) => page.data.map(toCommentFromSubjectInterest)),

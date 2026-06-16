@@ -22,6 +22,7 @@ export function GroupHome({ groupName }: { groupName: string | undefined }) {
   const membersQuery = useGroupMembersQuery({
     groupName,
     limit: GROUP_MEMBER_PREVIEW_LIMIT,
+    refetchPageLimit: 1,
     enabled: !!groupName && !!group,
   })
   const topicsQuery = useGroupTopicsQuery({
