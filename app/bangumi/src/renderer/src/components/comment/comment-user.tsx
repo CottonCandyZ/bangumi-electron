@@ -1,5 +1,5 @@
 import { ViewTransitionImage } from '@renderer/components/image/view-transition-image'
-import { MyLink } from '@renderer/components/my-link'
+import { UserHoverCardLink } from '@renderer/components/user-hover-card'
 import type { CommentBase } from '@renderer/data/types/comment'
 import type { ReactNode } from 'react'
 import { useLocation, useViewTransitionState } from 'react-router-dom'
@@ -33,14 +33,15 @@ export function UserProfileLink({
   viewTransitionName?: string
 }) {
   return (
-    <MyLink
+    <UserHoverCardLink
       className={className}
       state={viewTransitionName ? { viewTransitionName } : undefined}
       to={`/user/${encodeURIComponent(user.username)}`}
+      user={user}
       viewTransition={!!viewTransitionName}
     >
       {children}
-    </MyLink>
+    </UserHoverCardLink>
   )
 }
 

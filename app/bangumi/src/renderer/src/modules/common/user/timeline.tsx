@@ -6,6 +6,7 @@ import {
 } from '@renderer/components/comment/comment-reactions'
 import { MyLink } from '@renderer/components/my-link'
 import { Card } from '@renderer/components/ui/card'
+import { UserHoverCardLink } from '@renderer/components/user-hover-card'
 import type { ReactionTarget } from '@renderer/data/fetch/api/reaction'
 import { CollectionType, EpisodeCollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
@@ -373,9 +374,10 @@ function TimelineTimelineHeader({
 
   return (
     <div className="flex min-w-0 flex-row items-center gap-2 text-sm">
-      <MyLink
+      <UserHoverCardLink
         className="text-foreground hover:text-primary flex min-w-0 flex-row items-center gap-2 font-medium transition-colors"
         to={`/user/${encodeURIComponent(item.user.username)}`}
+        user={item.user}
       >
         {item.user.avatar?.medium ? (
           <Image
@@ -387,7 +389,7 @@ function TimelineTimelineHeader({
           <div className="bg-muted size-6 shrink-0 rounded-full" />
         )}
         <span className="line-clamp-1">{item.user.nickname || item.user.username}</span>
-      </MyLink>
+      </UserHoverCardLink>
       <span className="text-muted-foreground shrink-0 text-xs">{action}</span>
     </div>
   )
@@ -493,9 +495,10 @@ function limitTimelineItems<T>(items: T[], limit: number | undefined) {
 
 function TimelineItemUser({ user }: { user: UserTimelineSlimUser }) {
   return (
-    <MyLink
+    <UserHoverCardLink
       className="hover:text-primary flex min-w-0 flex-row items-center gap-2 transition-colors"
       to={`/user/${encodeURIComponent(user.username)}`}
+      user={user}
     >
       {user.avatar?.medium ? (
         <Image
@@ -510,7 +513,7 @@ function TimelineItemUser({ user }: { user: UserTimelineSlimUser }) {
         <div className="line-clamp-1 text-sm font-medium">{user.nickname || user.username}</div>
         <div className="text-muted-foreground line-clamp-1 text-xs">@{user.username}</div>
       </div>
-    </MyLink>
+    </UserHoverCardLink>
   )
 }
 
@@ -787,10 +790,11 @@ function TimelineUsers({
   return (
     <div className="flex flex-col gap-2">
       {users.map((user) => (
-        <MyLink
+        <UserHoverCardLink
           className="hover:bg-accent flex min-w-0 flex-row items-center gap-2 rounded-md p-1.5 transition-colors"
           key={user.id}
           to={`/user/${encodeURIComponent(user.username)}`}
+          user={user}
         >
           {user.avatar?.medium ? (
             <Image
@@ -806,7 +810,7 @@ function TimelineUsers({
             <div className="text-muted-foreground line-clamp-1 text-xs">@{user.username}</div>
           </div>
           <span className="text-muted-foreground shrink-0 text-xs">添加为好友</span>
-        </MyLink>
+        </UserHoverCardLink>
       ))}
       <TimelineRemainingCount count={remainingCount} label="用户" />
     </div>

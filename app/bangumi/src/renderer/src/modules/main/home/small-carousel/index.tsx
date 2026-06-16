@@ -12,7 +12,7 @@ import {
 import { SectionPath } from '@renderer/data/types/web'
 import { useStateHook } from '@renderer/hooks/use-cache-state'
 import { cn } from '@renderer/lib/utils'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { OpenMonoListPanelButton } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { activeSectionAtom } from '@renderer/state/small-carousel'
 import { type MonoListPanelTab } from '@renderer/state/panel'
 import { useAtomValue } from 'jotai'
@@ -29,7 +29,6 @@ export type SmallCarouselProps = {
 }
 
 export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const topList = useTopListQuery(sectionPath)
   const subjectIds = topList.data
     ?.map((item) => item.SubjectId)
@@ -53,6 +52,15 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
       api.off('select', cacheState)
     }
   }, [api, setIndex, sectionPath])
+  const trendingPanelTab = {
+    id: `trending-subjects-${sectionPath}`,
+    panelTitle: `热门${name}`,
+    sectionPath,
+    sourceTitle: '首页',
+    sourceTo: '/',
+    title: `热门${name}`,
+    type: 'trendingSubjects',
+  } satisfies MonoListPanelTab
 
   return (
     <Carousel
@@ -82,25 +90,12 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
               </div>
             </MyLink>
           </Button>
-          <Button
+          <OpenMonoListPanelButton
             className="size-8 shrink-0"
-            onClick={() =>
-              openMonoListPanelTab({
-                id: `trending-subjects-${sectionPath}`,
-                panelTitle: `热门${name}`,
-                sectionPath,
-                sourceTitle: '首页',
-                sourceTo: '/',
-                title: `热门${name}`,
-                type: 'trendingSubjects',
-              } satisfies MonoListPanelTab)
-            }
-            size="icon"
+            iconClassName="text-base"
+            tab={trendingPanelTab}
             title={`在侧栏打开热门${name}`}
-            variant="ghost"
-          >
-            <span className="i-mingcute-box-3-line text-base" />
-          </Button>
+          />
         </div>
         <div className="mb-2 ml-auto flex w-min gap-2">
           <CarouselPrevious className="relative top-0 left-0 translate-y-0" />

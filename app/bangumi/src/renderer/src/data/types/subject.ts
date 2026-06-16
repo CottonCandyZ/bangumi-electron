@@ -46,6 +46,39 @@ export type RelatedSubject = {
   id: number
 }
 
+export type P1SlimSubject = {
+  id: number
+  images?: Partial<CoverImages>
+  info: string
+  interest?: {
+    comment: string
+    private: boolean
+    rate: number
+    tags: string[]
+    type: number
+    updatedAt: number
+  }
+  locked: boolean
+  name: string
+  nameCN: string
+  nsfw: boolean
+  rating?: Rating & {
+    count?: number[]
+  }
+  type: SubjectType
+}
+
+export type SubjectRecommendation = {
+  count: number
+  sim: number
+  subject: P1SlimSubject
+}
+
+export type P1Page<T> = {
+  data: T[]
+  total: number
+}
+
 export type SlimSubject = Pick<
   Subject,
   'date' | 'images' | 'name' | 'name_cn' | 'tags' | 'type' | 'id' | 'eps' | 'volumes'

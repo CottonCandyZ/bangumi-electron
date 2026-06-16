@@ -9,6 +9,8 @@ import { SubjectCoverImage } from '@renderer/modules/main/subject/cover-image'
 import { SubjectDiscussions } from '@renderer/modules/main/subject/discussions'
 import { SubjectEpisodes } from '@renderer/modules/main/subject/episode'
 import { SubjectHeaderInfo } from '@renderer/modules/main/subject/header-info'
+import { SubjectIndexes } from '@renderer/modules/main/subject/indexes'
+import { SubjectRecommendations } from '@renderer/modules/main/subject/recommendations'
 import { RelatedSubjects } from '@renderer/modules/main/subject/related'
 import { SubjectScore } from '@renderer/modules/main/subject/score'
 import { SubjectTags } from '@renderer/modules/main/subject/tags'
@@ -57,6 +59,8 @@ export const SubjectContent = ({
         </section>
         <SubjectCharacters subjectId={subjectId} />
         <RelatedSubjects subjectId={subjectId} />
+        <SubjectRecommendations subjectId={subjectId} />
+        <SubjectIndexes subjectId={subjectId} />
         <section className="grid grid-cols-1 gap-8 @5xl:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">
           <SubjectComments subjectId={subjectId} />
           <SubjectDiscussions subjectId={subjectId} />

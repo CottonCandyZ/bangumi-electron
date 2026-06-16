@@ -12,6 +12,11 @@ import { Card } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import {
+  useCharacterCollectionQuery,
+  usePersonCollectionQuery,
+} from '@renderer/data/hooks/api/collection'
+import { useSession } from '@renderer/data/hooks/session'
+import {
   MonoComment,
   MonoDetail,
   MonoInfoBox,
@@ -26,9 +31,15 @@ import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { splitRelationLabels } from '@renderer/lib/utils/relation'
 import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
 import { MainCommentFab } from '@renderer/modules/main/comment-fab'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { ResourceCollectionButton } from '@renderer/modules/common/collections/resource-collection-button'
+import { MonoIndexesSection } from '@renderer/modules/common/mono-indexes'
+import {
+  OpenMonoListPanelButton,
+  useMonoListPanelOpenHandler,
+} from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { scrollCache } from '@renderer/state/global-var'
 import { monoAvatarImageInViewAtom } from '@renderer/state/in-view'
+import type { MonoListPanelTab } from '@renderer/state/panel'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
 import type { ReplyTarget } from '@shared/reply'
 import { useAtom, useSetAtom } from 'jotai'
@@ -157,6 +168,7 @@ export function MonoDetailView({
               </Badge>
             ))}
           </div>
+          <MonoResourceCollectionButton detail={detail} />
         </div>
 
         <div className="flex min-w-0 flex-col gap-5">
@@ -194,6 +206,12 @@ export function MonoDetailView({
         title={relatedTitle}
         items={relatedItems}
       />
+      <MonoIndexesSection
+        resourceId={detail.id}
+        resourceType={detail.type}
+        sourceTitle={detail.name}
+        sourceTo={`/${detail.type}/${detail.id}`}
+      />
       <CommentBox
         comments={comments}
         error={commentsError}
@@ -204,6 +222,34 @@ export function MonoDetailView({
       <MainCommentFab replyTarget={replyTarget} />
       <MainBackToTopButton />
     </div>
+  )
+}
+
+function MonoResourceCollectionButton({ detail }: { detail: MonoDetail }) {
+  const session = useSession()
+  const resourceId = Number(detail.id)
+  const characterCollectionQuery = useCharacterCollectionQuery({
+    characterId: detail.id,
+    enabled: !!session && detail.type === 'character',
+    username: session?.username,
+  })
+  const personCollectionQuery = usePersonCollectionQuery({
+    enabled: !!session && detail.type === 'person',
+    personId: detail.id,
+    username: session?.username,
+  })
+  const collectionQuery =
+    detail.type === 'character' ? characterCollectionQuery : personCollectionQuery
+
+  return (
+    <ResourceCollectionButton
+      className="w-full"
+      collected={!!collectionQuery.data}
+      disabled={collectionQuery.isError}
+      loading={collectionQuery.isPending && !!session}
+      resourceId={resourceId}
+      resourceType={detail.type}
+    />
   )
 }
 
@@ -270,7 +316,6 @@ function MonoSubjectsSection({
   subjects?: MonoSubjectItem[]
 }) {
   const [filterMap, setFilter] = useAtom(tabFilerAtom)
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const typeFilterId = `mono-subjects-type-${monoType}-${monoId}`
   const relationFilterId = `mono-subjects-relation-${monoType}-${monoId}`
   const typeFilter = filterMap.get(typeFilterId) ?? ALL_SUBJECT_TYPES
@@ -348,10 +393,10 @@ function MonoSubjectsSection({
       />
     </SectionFilters>
   )
-  if (subjects === undefined) return <CardGridSkeleton title="参与作品" variant="subject" />
-  if (subjects.length === 0) return null
-  const openInSidePanel = () =>
-    openMonoListPanelTab({
+  const panelTab = useCallback(() => {
+    if (!subjects) return
+
+    return {
       id: `mono-subjects-${monoType}-${monoId}`,
       type: 'subjects',
       title: '参与作品',
@@ -359,13 +404,24 @@ function MonoSubjectsSection({
       monoId,
       monoType,
       subjects,
-    })
+    } satisfies MonoListPanelTab
+  }, [monoId, monoType, sourceTitle, subjects])
+  const openInSidePanel = useMonoListPanelOpenHandler(panelTab)
+
+  if (subjects === undefined) return <CardGridSkeleton title="参与作品" variant="subject" />
+  if (subjects.length === 0) return null
 
   return (
     <>
       <FoldableSection
         title="参与作品"
-        titleAction={<OpenInSidePanelButton onClick={openInSidePanel} />}
+        titleAction={
+          <OpenMonoListPanelButton
+            className="mt-1 size-8"
+            tab={panelTab}
+            title="在侧栏打开参与作品"
+          />
+        }
         tabs={pageFilters}
         total={filteredSubjects.length}
         onShowMore={openInSidePanel}
@@ -535,7 +591,6 @@ function MonoRelatedSection({
   items?: MonoRelatedItem[]
 }) {
   const [filterMap, setFilter] = useAtom(tabFilerAtom)
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const filterId = `mono-related-${monoType}-${monoId}`
   const filter = filterMap.get(filterId) ?? '全部'
   const filters = useMemo(
@@ -569,10 +624,10 @@ function MonoRelatedSection({
         layoutId={filterId}
       />
     ) : undefined
-  if (items === undefined) return <CardGridSkeleton title={title} variant="related" />
-  if (items.length === 0) return null
-  const openInSidePanel = () =>
-    openMonoListPanelTab({
+  const panelTab = useCallback(() => {
+    if (!items) return
+
+    return {
       id: `mono-related-${monoType}-${monoId}`,
       type: 'related',
       title,
@@ -580,13 +635,24 @@ function MonoRelatedSection({
       monoId,
       monoType,
       relatedItems: items,
-    })
+    } satisfies MonoListPanelTab
+  }, [items, monoId, monoType, sourceTitle, title])
+  const openInSidePanel = useMonoListPanelOpenHandler(panelTab)
+
+  if (items === undefined) return <CardGridSkeleton title={title} variant="related" />
+  if (items.length === 0) return null
 
   return (
     <>
       <FoldableSection
         title={title}
-        titleAction={<OpenInSidePanelButton onClick={openInSidePanel} />}
+        titleAction={
+          <OpenMonoListPanelButton
+            className="mt-1 size-8"
+            tab={panelTab}
+            title={`在侧栏打开${title}`}
+          />
+        }
         tabs={pageFilters}
         total={filteredItems.length}
         onShowMore={openInSidePanel}
@@ -688,14 +754,6 @@ function MonoRelatedCard({ item }: { item: MonoRelatedItem }) {
         </div>
       </div>
     </Card>
-  )
-}
-
-function OpenInSidePanelButton({ onClick }: { onClick: () => void }) {
-  return (
-    <Button variant="ghost" size="icon" className="mt-1 size-8" onClick={onClick}>
-      <span className="i-mingcute-box-3-line text-lg" />
-    </Button>
   )
 }
 

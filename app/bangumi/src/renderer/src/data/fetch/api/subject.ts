@@ -6,7 +6,14 @@ import {
 } from '@renderer/data/fetch/config/'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { SubjectInterestComments } from '@renderer/data/types/comment'
-import { RelatedSubject, Subject, SubjectAPI } from '@renderer/data/types/subject'
+import type { SlimIndex } from '@renderer/data/types/index'
+import {
+  P1Page,
+  RelatedSubject,
+  Subject,
+  SubjectAPI,
+  SubjectRecommendation,
+} from '@renderer/data/types/subject'
 import { FetchParamError } from '@renderer/lib/utils/error'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -54,6 +61,42 @@ export async function getSubjectCommentsById({
   cacheKeyLimit?: number
 }) {
   return await nextFetch<SubjectInterestComments>(NEXT_SUBJECTS.COMMENTS_BY_ID(id.toString()), {
+    query: {
+      limit,
+      offset,
+    },
+  })
+}
+
+/** 从 private p1 API 获得条目推荐 */
+export async function getSubjectRecommendationsById({
+  id,
+  limit,
+  offset,
+}: {
+  id: SubjectId
+  limit?: number
+  offset: number
+}) {
+  return await nextFetch<P1Page<SubjectRecommendation>>(NEXT_SUBJECTS.RECS_BY_ID(id.toString()), {
+    query: {
+      limit,
+      offset,
+    },
+  })
+}
+
+/** 从 private p1 API 获得条目关联目录 */
+export async function getSubjectIndexesById({
+  id,
+  limit,
+  offset,
+}: {
+  id: SubjectId
+  limit?: number
+  offset: number
+}) {
+  return await nextFetch<P1Page<SlimIndex>>(NEXT_SUBJECTS.INDEXES_BY_ID(id.toString()), {
     query: {
       limit,
       offset,

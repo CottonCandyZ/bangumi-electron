@@ -148,7 +148,7 @@ export function SubjectEpisodeListPanelContent({
     subjectId: tab.subjectId,
     offset,
     limit,
-    enabled: !userInfo,
+    enabled: userInfo === null,
   })
   const collectionEpisodesQuery = useCollectionEpisodesInfoBySubjectIdQuery({
     subjectId: tab.subjectId,

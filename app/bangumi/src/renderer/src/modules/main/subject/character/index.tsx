@@ -1,13 +1,13 @@
 import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Tabs } from '@renderer/components/tabs'
-import { Button } from '@renderer/components/ui/button'
 import { Card } from '@renderer/components/ui/card'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectCharacters } from '@renderer/data/hooks/api/character'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CharactersGrid } from '@renderer/modules/main/subject/character/gird'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { OpenMonoListPanelButton } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
+import type { MonoListPanelTab } from '@renderer/state/panel'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
 import { useAtom } from 'jotai'
 
@@ -21,24 +21,23 @@ export function SubjectCharacters({ subjectId }: Props) {
   usePageScrollRestoreReady(!charactersQuery.isPending && !subjectInfoQuery.isPending)
   const id = `subject-characters-tab-${subjectId}`
   const [filterMap, setFilter] = useAtom(tabFilerAtom)
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const filter = filterMap.get(id) ?? '全部'
   const characters = charactersQuery.data
   const relations = new Set<string>(['全部', ...(characters?.keys() || [])])
   const allCharacters = characters ? [...characters.values()].flat() : []
   const sourceTitle =
     subjectInfoQuery.data?.name_cn || subjectInfoQuery.data?.name || `条目 ${subjectId}`
-  const openInSidePanel = () => {
+  const panelTab = () => {
     if (!characters) return
 
-    openMonoListPanelTab({
+    return {
       id: `subject-characters-${subjectId}`,
       type: 'subjectCharacters',
       title: '角色',
       sourceTitle,
       subjectId,
       characters: allCharacters,
-    })
+    } satisfies MonoListPanelTab
   }
 
   if (!characters) {
@@ -47,9 +46,12 @@ export function SubjectCharacters({ subjectId }: Props) {
         <div className="flex flex-row items-center justify-between">
           <div className="flex flex-row items-center gap-2">
             <h2 className="text-2xl font-medium">角色</h2>
-            <Button variant="ghost" size="icon" className="mt-1 size-8" onClick={openInSidePanel}>
-              <span className="i-mingcute-box-3-line text-lg" />
-            </Button>
+            <OpenMonoListPanelButton
+              className="mt-1 size-8"
+              disabled
+              tab={panelTab}
+              title="在侧栏打开角色"
+            />
           </div>
           <Skeleton className="h-9 w-40" />
         </div>
@@ -70,9 +72,7 @@ export function SubjectCharacters({ subjectId }: Props) {
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center gap-2">
           <h2 className="text-2xl font-medium">角色</h2>
-          <Button variant="ghost" size="icon" className="mt-1 size-8" onClick={openInSidePanel}>
-            <span className="i-mingcute-box-3-line text-lg" />
-          </Button>
+          <OpenMonoListPanelButton className="mt-1 size-8" tab={panelTab} title="在侧栏打开角色" />
         </div>
         {characters ? (
           <Tabs

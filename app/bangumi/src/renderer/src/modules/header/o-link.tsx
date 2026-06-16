@@ -13,7 +13,7 @@ export function OriginalLink() {
   const userPath = pathname.match(/^\/user\/([^/]+)/)
   const profileUsername = pathname === '/profile' ? session?.username : undefined
   const isOriginalLinkPath =
-    /^\/(subject|person|character)\/\d+/.test(pathname) ||
+    /^\/(subject|person|character|index)\/\d+/.test(pathname) ||
     !!episodePath ||
     !!groupTopicPath ||
     !!subjectTopicPath ||

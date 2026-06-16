@@ -5,7 +5,7 @@ import { formatRecentUnixTime } from '@renderer/lib/utils/date'
 import { CommunityTopicLeadingImage } from '@renderer/modules/common/community/community-topic-leading'
 import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 import { LoginInlineAction } from '@renderer/modules/common/user/login/login-inline-action'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { useMonoListPanelOpenHandler } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { type MonoListPanelTab } from '@renderer/state/panel'
 import type { ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -111,7 +111,18 @@ function OpenCommunityPanelButton({
   section: CommunityOverviewSection
   topics: CommunityTopic[]
 }) {
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
+  const panelTab = {
+    groupMode: section.groupMode,
+    id: section.id,
+    panelTitle: section.panelTitle,
+    sourceTitle: '讨论',
+    sourceTo: '/talk',
+    title: section.title,
+    topicKind: section.topicKind,
+    topics,
+    type: 'communityTopics',
+  } satisfies MonoListPanelTab
+  const openPanel = useMonoListPanelOpenHandler(panelTab)
 
   return (
     <div className="flex shrink-0 items-center gap-1">
@@ -121,19 +132,7 @@ function OpenCommunityPanelButton({
         size="sm"
         className="no-drag-region text-muted-foreground hover:text-foreground h-8 shrink-0 gap-1 px-2"
         disabled={disabled}
-        onClick={() =>
-          openMonoListPanelTab({
-            groupMode: section.groupMode,
-            id: section.id,
-            panelTitle: section.panelTitle,
-            sourceTitle: '讨论',
-            sourceTo: '/talk',
-            title: section.title,
-            topicKind: section.topicKind,
-            topics,
-            type: 'communityTopics',
-          } satisfies MonoListPanelTab)
-        }
+        onClick={openPanel}
         title="在侧栏查看更多"
       >
         <span>查看更多</span>

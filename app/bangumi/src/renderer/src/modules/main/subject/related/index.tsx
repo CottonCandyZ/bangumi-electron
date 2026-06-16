@@ -1,13 +1,13 @@
 import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Tabs } from '@renderer/components/tabs'
-import { Button } from '@renderer/components/ui/button'
 import { Card } from '@renderer/components/ui/card'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useRelatedSubjectsQuery } from '@renderer/data/hooks/api/subject'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { RelatedSubjectsGrid } from '@renderer/modules/main/subject/related/content'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { OpenMonoListPanelButton } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
+import type { MonoListPanelTab } from '@renderer/state/panel'
 import { tabFilerAtom } from '@renderer/state/simple-tab'
 import { useAtom } from 'jotai'
 import { useMemo } from 'react'
@@ -18,7 +18,6 @@ interface Props {
 
 export function RelatedSubjects({ subjectId }: Props) {
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const relatedSubjectsQuery = useRelatedSubjectsQuery({
     id: subjectId,
     needKeepPreviousData: false,
@@ -41,17 +40,17 @@ export function RelatedSubjects({ subjectId }: Props) {
   const allRelatedSubjects = relatedSubjects ? [...relatedSubjects.values()].flat() : []
   const sourceTitle =
     subjectInfoQuery.data?.name_cn || subjectInfoQuery.data?.name || `条目 ${subjectId}`
-  const openInSidePanel = () => {
+  const panelTab = () => {
     if (!relatedSubjects) return
 
-    openMonoListPanelTab({
+    return {
       id: `subject-related-${subjectId}`,
       type: 'subjectRelated',
       title: '关联条目',
       sourceTitle,
       subjectId,
       relatedSubjects: allRelatedSubjects,
-    })
+    } satisfies MonoListPanelTab
   }
 
   if (relatedSubjects?.size === 0) return null
@@ -60,9 +59,12 @@ export function RelatedSubjects({ subjectId }: Props) {
       <div className="flex flex-row items-start justify-between gap-10">
         <div className="flex shrink-0 flex-row items-center gap-2">
           <h2 className="text-2xl font-medium">关联条目</h2>
-          <Button variant="ghost" size="icon" className="mt-1 size-8" onClick={openInSidePanel}>
-            <span className="i-mingcute-box-3-line text-lg" />
-          </Button>
+          <OpenMonoListPanelButton
+            className="mt-1 size-8"
+            disabled={!relatedSubjects}
+            tab={panelTab}
+            title="在侧栏打开关联条目"
+          />
         </div>
         {relatedSubjects ? (
           <Tabs

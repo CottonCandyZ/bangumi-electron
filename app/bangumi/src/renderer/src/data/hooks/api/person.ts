@@ -1,11 +1,12 @@
 import {
   getPersonCommentsById,
   getPersonDetailById,
+  getPersonIndexesById,
   getPersonRelatedCharactersById,
   getPersonRelatedSubjectsById,
   getSubjectPersonsById,
 } from '@renderer/data/fetch/api/person'
-import { useAuthQuery } from '@renderer/data/hooks/factory'
+import { useAuthQuery, useInfinityQueryOptionalAuth } from '@renderer/data/hooks/factory'
 import { PersonId, SubjectId } from '@renderer/data/types/bgm'
 import { useQuery } from '@tanstack/react-query'
 
@@ -91,4 +92,30 @@ export const useQueryPersonComments = ({
     queryFn: () => getPersonCommentsById({ id }),
     queryKey: ['person-comments', id],
     enabled,
+  })
+
+/**
+ * 使用 id 获得人物关联目录。p1 indexes 支持 limit/offset 分页。
+ */
+export const usePersonIndexesQuery = ({
+  enabled,
+  id,
+  limit = 8,
+}: {
+  enabled?: boolean
+  id: PersonId | undefined
+  limit?: number
+}) =>
+  useInfinityQueryOptionalAuth({
+    queryFn: getPersonIndexesById,
+    queryKey: ['person-indexes'],
+    queryProps: { id },
+    qFLimit: limit,
+    enabled,
+    needKeepPreviousData: false,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
+    },
   })

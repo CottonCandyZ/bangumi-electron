@@ -11,8 +11,9 @@ import { useEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/api/episod
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionEpisode, CollectionType } from '@renderer/data/types/collection'
 import { Episode, EpisodeType } from '@renderer/data/types/episode'
-import { useOpenSubjectEpisodesPanel } from '@renderer/modules/common/episodes/use-open-subject-episodes-panel'
 import { cn } from '@renderer/lib/utils'
+import { useOpenSubjectEpisodesPanel } from '@renderer/modules/common/episodes/use-open-subject-episodes-panel'
+import { OpenMonoListPanelButton } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { ListRestart } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useSession } from '@renderer/data/hooks/session'
@@ -59,10 +60,10 @@ export function EpisodesGrid({
 
   const episode = userInfo ? collectionEpisodesQuery : episodesQuery
   const episodesPanel = useOpenSubjectEpisodesPanel({
-    subjectId,
-    sourceTitle: sourceTitle || `条目 ${subjectId}`,
     episodeTotal: episode.data?.total,
     initialOffset: offset,
+    sourceTitle: sourceTitle || `条目 ${subjectId}`,
+    subjectId,
   })
   const episodeSortStart = getMainEpisodeSortStart(episode.data?.data, offset)
   const canUseOneBasedEpisodeSort = episodeSortStart !== null && episodeSortStart !== 1
@@ -118,15 +119,12 @@ export function EpisodesGrid({
               <TooltipContent>{oneBasedSortButtonLabel}</TooltipContent>
             </Tooltip>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
+          <OpenMonoListPanelButton
             className="mt-1 size-8"
             disabled={!episodesPanel.canOpen}
-            onClick={episodesPanel.open}
-          >
-            <span className="i-mingcute-box-3-line text-lg" />
-          </Button>
+            tab={episodesPanel.tab}
+            title="在侧栏打开章节"
+          />
         </div>
       )}
       <div className={cn('flex flex-col gap-4')}>

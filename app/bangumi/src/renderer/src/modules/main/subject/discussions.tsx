@@ -9,9 +9,12 @@ import type { SubjectId } from '@renderer/data/types/bgm'
 import type { CommunityTopic } from '@renderer/data/types/community'
 import { cn } from '@renderer/lib/utils'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import {
+  OpenMonoListPanelButton,
+  useMonoListPanelOpenHandler,
+} from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { type MonoListPanelTab } from '@renderer/state/panel'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useInView } from 'react-intersection-observer'
 
 const SUBJECT_DISCUSSIONS_PREVIEW_LIMIT = 6
@@ -32,7 +35,6 @@ export function SubjectDiscussions({
     enabled: enabledSubjectId === subjectId && !subjectInfoQuery.isPending,
     limit: SUBJECT_DISCUSSIONS_PREVIEW_LIMIT,
   })
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const fetchedTopics = useMemo(
     () => topicsQuery.data?.pages.flatMap((page) => page.data),
     [topicsQuery.data],
@@ -44,19 +46,22 @@ export function SubjectDiscussions({
   const total = topicsQuery.data?.pages[0]?.total
   const hasMore = total !== undefined && topics !== undefined && topics.length < total
   const sourceTitle = subject?.name_cn || subject?.name || `条目 ${subjectId}`
-  const openInSidePanel = useCallback(() => {
-    openMonoListPanelTab({
-      id: `subject-topics-${subjectId}`,
-      panelTitle: '条目讨论',
-      sourceTitle,
-      sourceTo: `/subject/${subjectId}`,
-      subject,
-      subjectId,
-      title: '讨论',
-      topics: topics ?? [],
-      type: 'communitySubjectTopics',
-    } satisfies MonoListPanelTab)
-  }, [openMonoListPanelTab, sourceTitle, subject, subjectId, topics])
+  const panelTab = useMemo(
+    () =>
+      ({
+        id: `subject-topics-${subjectId}`,
+        panelTitle: '条目讨论',
+        sourceTitle,
+        sourceTo: `/subject/${subjectId}`,
+        subject,
+        subjectId,
+        title: '讨论',
+        topics: topics ?? [],
+        type: 'communitySubjectTopics',
+      }) satisfies MonoListPanelTab,
+    [sourceTitle, subject, subjectId, topics],
+  )
+  const openInSidePanel = useMonoListPanelOpenHandler(panelTab)
   const { ref, inView } = useInView({
     rootMargin: '240px 0px',
     triggerOnce: true,
@@ -71,15 +76,7 @@ export function SubjectDiscussions({
       <div className="flex flex-row items-center justify-between gap-3">
         <div className="flex min-w-0 flex-row items-center gap-2">
           <h2 className="text-2xl font-medium">讨论</h2>
-          <Button
-            className="mt-1 size-8"
-            onClick={openInSidePanel}
-            size="icon"
-            title="在侧栏打开讨论"
-            variant="ghost"
-          >
-            <span className="i-mingcute-box-3-line text-lg" />
-          </Button>
+          <OpenMonoListPanelButton className="mt-1 size-8" tab={panelTab} title="在侧栏打开讨论" />
         </div>
         {total !== undefined && <span className="text-muted-foreground text-sm">{total}</span>}
       </div>

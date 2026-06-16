@@ -1,11 +1,12 @@
 import {
   getCharacterCommentsById,
   getCharacterDetailById,
+  getCharacterIndexesById,
   getCharacterRelatedPersonsById,
   getCharacterRelatedSubjectsById,
   getSubjectCharactersById,
 } from '@renderer/data/fetch/api/character'
-import { useAuthQuery } from '@renderer/data/hooks/factory'
+import { useAuthQuery, useInfinityQueryOptionalAuth } from '@renderer/data/hooks/factory'
 import { sortCharacterByRelation } from '@renderer/data/transformer/api'
 import { CharacterId, SubjectId } from '@renderer/data/types/bgm'
 import { useQuery } from '@tanstack/react-query'
@@ -82,4 +83,30 @@ export const useQueryCharacterComments = ({
     queryFn: () => getCharacterCommentsById({ id }),
     queryKey: ['character-comments', id],
     enabled,
+  })
+
+/**
+ * 使用 id 获得角色关联目录。p1 indexes 支持 limit/offset 分页。
+ */
+export const useCharacterIndexesQuery = ({
+  enabled,
+  id,
+  limit = 8,
+}: {
+  enabled?: boolean
+  id: CharacterId
+  limit?: number
+}) =>
+  useInfinityQueryOptionalAuth({
+    queryFn: getCharacterIndexesById,
+    queryKey: ['character-indexes'],
+    queryProps: { id },
+    qFLimit: limit,
+    enabled,
+    needKeepPreviousData: false,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
+    },
   })

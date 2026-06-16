@@ -14,6 +14,7 @@ import { MyLink } from '@renderer/components/my-link'
 import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Badge } from '@renderer/components/ui/badge'
 import { Skeleton } from '@renderer/components/ui/skeleton'
+import { UserHoverCardLink } from '@renderer/components/user-hover-card'
 import { useNativeSmoothVirtualizerScrollToTop } from '@renderer/components/virtual/use-native-smooth-virtualizer-scroll-to-top'
 import { useVirtualScrollMemory } from '@renderer/components/virtual/use-virtual-scroll-memory'
 import { useGroupTopicQuery, useSubjectTopicQuery } from '@renderer/data/hooks/api/community'
@@ -394,16 +395,17 @@ function TopicHeader({
         <div className="flex flex-row items-center justify-between gap-4">
           <div className="flex min-w-0 flex-row items-center gap-3">
             {topic.creator?.avatar.medium ? (
-              <MyLink
+              <UserHoverCardLink
                 className="size-10 shrink-0"
                 to={`/user/${encodeURIComponent(topic.creator.username)}`}
+                user={topic.creator}
               >
                 <Image
                   className="size-10 overflow-hidden rounded-full"
                   imageSrc={topic.creator.avatar.medium}
                   loading="eager"
                 />
-              </MyLink>
+              </UserHoverCardLink>
             ) : (
               <div className="bg-muted size-10 shrink-0 rounded-full" />
             )}
@@ -411,12 +413,13 @@ function TopicHeader({
               <div className="flex min-w-0 flex-row items-center gap-1.5">
                 {topic.creator ? (
                   <>
-                    <MyLink
+                    <UserHoverCardLink
                       className="text-foreground hover:text-primary line-clamp-1 min-w-0 font-medium transition-colors"
                       to={`/user/${encodeURIComponent(topic.creator.username)}`}
+                      user={topic.creator}
                     >
                       {topic.creator.nickname}
-                    </MyLink>
+                    </UserHoverCardLink>
                     <CommentUserSignature sign={topic.creator.sign} />
                   </>
                 ) : (
