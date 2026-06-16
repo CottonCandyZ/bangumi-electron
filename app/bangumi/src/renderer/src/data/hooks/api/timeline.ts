@@ -16,14 +16,12 @@ export const SITE_TIMELINE_STALE_TIME = 2 * 60 * 1000
 const getSiteTimelineInfiniteQueryKey = ({
   limit,
   mode,
-  refetchPageLimit,
   userId,
 }: {
   limit: number
   mode?: TimelineMode
-  refetchPageLimit: number
   userId: unknown
-}) => ['site-timeline-infinite-v1', userId, mode, limit, refetchPageLimit] as const
+}) => ['site-timeline-infinite-v1', userId, mode, limit] as const
 
 export const useTimelineQuery = ({
   enabled = true,
@@ -65,12 +63,12 @@ export const useTimelineInfiniteQuery = ({
   const userId = useAtomValue(userIdAtom)
   const queryClient = useQueryClient()
   const queryKey = useMemo(
-    () => getSiteTimelineInfiniteQueryKey({ userId, mode, limit, refetchPageLimit }),
-    [limit, mode, refetchPageLimit, userId],
+    () => getSiteTimelineInfiniteQueryKey({ userId, mode, limit }),
+    [limit, mode, userId],
   )
 
   const query = useInfiniteQuery({
-    queryKey: ['site-timeline-infinite-v1', userId, mode, limit, refetchPageLimit],
+    queryKey: ['site-timeline-infinite-v1', userId, mode, limit],
     queryFn: ({ pageParam }) => getTimeline({ limit, mode, until: pageParam }),
     initialPageParam: undefined as number | undefined,
     getNextPageParam: (lastPage, allPages) => {

@@ -53,11 +53,13 @@ export const useIndexRelatedQuery = ({
 export const useResourceIndexesQuery = ({
   enabled = true,
   limit = 8,
+  refetchPageLimit,
   resourceId,
   resourceType,
 }: {
   enabled?: boolean
   limit?: number
+  refetchPageLimit?: number
   resourceId: string | undefined
   resourceType: IndexResourceType
 }) => {
@@ -65,16 +67,19 @@ export const useResourceIndexesQuery = ({
     enabled: enabled && resourceType === 'subject' && !!resourceId,
     id: resourceId ?? '',
     limit,
+    refetchPageLimit,
   })
   const characterQuery = useCharacterIndexesQuery({
     enabled: enabled && resourceType === 'character' && !!resourceId,
     id: resourceId ?? '',
     limit,
+    refetchPageLimit,
   })
   const personQuery = usePersonIndexesQuery({
     enabled: enabled && resourceType === 'person' && !!resourceId,
     id: resourceId,
     limit,
+    refetchPageLimit,
   })
 
   if (resourceType === 'character') return characterQuery

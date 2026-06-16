@@ -14,18 +14,24 @@ import { CommunityTopicSection } from './topic-preview-section'
 
 export function Community() {
   const session = useSession()
-  const groupTopicsQuery = useRecentGroupTopicsQuery({ mode: 'all', limit: 24 })
+  const groupTopicsQuery = useRecentGroupTopicsQuery({
+    mode: 'all',
+    limit: 24,
+    refetchPageLimit: 1,
+  })
   const joinedGroupTopicsQuery = useRecentGroupTopicsQuery({
     mode: 'joined',
     limit: 24,
+    refetchPageLimit: 1,
     enabled: !!session?.username,
   })
-  const subjectTopicsQuery = useRecentSubjectTopicsQuery({ limit: 24 })
-  const trendingTopicsQuery = useTrendingSubjectTopicsQuery({ limit: 24 })
-  const popularGroupsQuery = useGroupsQuery({ sort: 'members', limit: 15 })
+  const subjectTopicsQuery = useRecentSubjectTopicsQuery({ limit: 24, refetchPageLimit: 1 })
+  const trendingTopicsQuery = useTrendingSubjectTopicsQuery({ limit: 24, refetchPageLimit: 1 })
+  const popularGroupsQuery = useGroupsQuery({ sort: 'members', limit: 15, refetchPageLimit: 1 })
   const joinedGroupsQuery = useUserGroupsQuery({
     username: session?.username,
     limit: 18,
+    refetchPageLimit: 1,
     enabled: !!session?.username,
   })
 

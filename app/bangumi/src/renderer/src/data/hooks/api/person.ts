@@ -101,16 +101,19 @@ export const usePersonIndexesQuery = ({
   enabled,
   id,
   limit = 8,
+  refetchPageLimit,
 }: {
   enabled?: boolean
   id: PersonId | undefined
   limit?: number
+  refetchPageLimit?: number
 }) =>
   useInfinityQueryOptionalAuth({
     queryFn: getPersonIndexesById,
     queryKey: ['person-indexes'],
     queryProps: { id },
     qFLimit: limit,
+    refetchPageLimit,
     enabled,
     needKeepPreviousData: false,
     initialPageParam: 0,

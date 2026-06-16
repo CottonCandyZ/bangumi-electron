@@ -30,6 +30,7 @@ export function HomeJoinedGroupsPreview() {
   const joinedTopicsQuery = useRecentGroupTopicsQuery({
     mode: 'joined',
     limit: 12,
+    refetchPageLimit: 1,
     enabled: !!session,
   })
 
@@ -57,7 +58,7 @@ export function HomeJoinedGroupsPreview() {
 }
 
 export function HomeTrendingSubjectTopicsPreview() {
-  const trendingTopicsQuery = useTrendingSubjectTopicsQuery({ limit: 12 })
+  const trendingTopicsQuery = useTrendingSubjectTopicsQuery({ limit: 12, refetchPageLimit: 1 })
 
   return (
     <HomeTopicSection

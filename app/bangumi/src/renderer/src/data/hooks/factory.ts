@@ -348,15 +348,15 @@ export const useInfinityQueryOptionalAuth = <QP, QR, TPageParam>({
   const userId = useAtomValue(userIdAtom)
   const queryClient = useQueryClient()
   const queryKeyWithUserId = useMemo(
-    () => createQueryKeyWithUserId(queryKey, userId, queryProps, qFLimit, refetchPageLimit),
-    [qFLimit, queryKey, queryProps, refetchPageLimit, userId],
+    () => createQueryKeyWithUserId(queryKey, userId, queryProps, qFLimit),
+    [qFLimit, queryKey, queryProps, userId],
   )
   const { refetchOnMount, refetchOnReconnect, refetchOnWindowFocus, ...queryOptions } = props
   const refetchOnMountValue = refetchOnMount as boolean | 'always' | undefined
   const refetchOnReconnectValue = refetchOnReconnect as boolean | 'always' | undefined
   const refetchOnWindowFocusValue = refetchOnWindowFocus as boolean | 'always' | undefined
   const query = useInfiniteQuery({
-    queryKey: [...queryKey, userId, queryProps, qFLimit, refetchPageLimit],
+    queryKey: [...queryKey, userId, queryProps, qFLimit],
     queryFn: async ({ pageParam }) => {
       try {
         return await queryFn({
