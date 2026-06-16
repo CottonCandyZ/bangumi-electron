@@ -28,6 +28,11 @@ import {
   SubjectRelatedListPanelContent,
   SubjectTankobonListPanelContent,
 } from './mono-list-panel/subject-content'
+import { SubjectRecommendationsListPanelContent } from './mono-list-panel/subject-recommendation-content'
+import {
+  IndexRelatedListPanelContent,
+  MonoIndexesListPanelContent,
+} from './mono-list-panel/index-content'
 import { SiteTimelineListPanelContent } from './mono-list-panel/site-timeline-content'
 import { TrendingSubjectsListPanelContent } from './mono-list-panel/trending-subjects-content'
 import { UserCollectionsListPanelContent } from './mono-list-panel/user-collections-content'
@@ -277,6 +282,11 @@ function MonoListPanelContent({ tab }: { tab: MonoListPanelTab }) {
   if (tab.type === 'subjectRelated') return <SubjectRelatedListPanelContent tab={tab} />
   if (tab.type === 'subjectTankobon') return <SubjectTankobonListPanelContent tab={tab} />
   if (tab.type === 'subjectEpisodes') return <SubjectEpisodeListPanelContent tab={tab} />
+  if (tab.type === 'monoIndexes') return <MonoIndexesListPanelContent tab={tab} />
+  if (tab.type === 'indexRelated') return <IndexRelatedListPanelContent tab={tab} />
+  if (tab.type === 'subjectRecommendations') {
+    return <SubjectRecommendationsListPanelContent tab={tab} />
+  }
   if (tab.type === 'searchSubjects') return <SearchSubjectsListPanelContent tab={tab} />
   if (tab.type === 'searchMonos') return <SearchMonosListPanelContent tab={tab} />
   if (tab.type === 'communityTopics') return <CommunityTopicsListPanelContent tab={tab} />
@@ -295,6 +305,9 @@ function getMonoListPanelTabCount(tab: MonoListPanelTab) {
   if (tab.type === 'related') return tab.relatedItems.length
   if (tab.type === 'subjectCharacters') return tab.characters.length
   if (tab.type === 'subjectEpisodes') return tab.episodeTotal ?? tab.episodes?.length ?? null
+  if (tab.type === 'monoIndexes') return null
+  if (tab.type === 'indexRelated') return null
+  if (tab.type === 'subjectRecommendations') return null
   if (tab.type === 'subjectTankobon') return tab.relatedSubjects.length
   if (tab.type === 'searchSubjects') return null
   if (tab.type === 'searchMonos') return null
@@ -315,7 +328,10 @@ function getMonoListPanelTabDisplayTitle(tab: MonoListPanelTab) {
     tab.type === 'communitySubjectTopics' ||
     tab.type === 'communityGroups' ||
     tab.type === 'siteTimeline' ||
-    tab.type === 'trendingSubjects'
+    tab.type === 'trendingSubjects' ||
+    tab.type === 'monoIndexes' ||
+    tab.type === 'indexRelated' ||
+    tab.type === 'subjectRecommendations'
   ) {
     return tab.panelTitle
   }
@@ -330,6 +346,9 @@ function getMonoListPanelTabSourceTo(tab: MonoListPanelTab) {
   if (tab.type === 'communityGroups') return tab.sourceTo
   if (tab.type === 'siteTimeline') return tab.sourceTo
   if (tab.type === 'trendingSubjects') return tab.sourceTo
+  if (tab.type === 'monoIndexes') return tab.sourceTo
+  if (tab.type === 'indexRelated') return tab.sourceTo
+  if (tab.type === 'subjectRecommendations') return tab.sourceTo
 
   if (tab.type === 'subjects' || tab.type === 'related') {
     return `/${tab.monoType}/${tab.monoId}`

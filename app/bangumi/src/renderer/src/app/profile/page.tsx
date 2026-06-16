@@ -28,7 +28,7 @@ import {
   UserTimelineItemCard,
   UserTimelineSkeleton,
 } from '@renderer/modules/common/user/timeline'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { useOpenMonoListPanel } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { useSetAtom } from 'jotai'
 import { Activity, CalendarDays, UserRound } from 'lucide-react'
 import dayjs from 'dayjs'
@@ -457,7 +457,7 @@ function useOpenCollectionPanel({
 }) {
   const openCollectionPanel = useSetAtom(nvaCollectionButtonAtomAction)
   const setCollectionTypeFilter = useSetAtom(sidePanelCollectionTypeFilterAtom)
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
+  const openMonoListPanel = useOpenMonoListPanel()
 
   return (collectionType: CollectionType) => {
     if (ownProfile) {
@@ -466,7 +466,7 @@ function useOpenCollectionPanel({
       return
     }
 
-    openMonoListPanelTab({
+    openMonoListPanel({
       id: `user-${username}-${subjectType}-${collectionType}`,
       type: 'userCollections',
       title: `${COLLECTION_TYPE_MAP(subjectType)[collectionType]} · ${SUBJECT_TYPE_MAP[subjectType]}`,

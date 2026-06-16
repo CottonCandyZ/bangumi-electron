@@ -1,4 +1,4 @@
-import { PanelButton } from '@renderer/modules/nav/panel/button'
+import { CollectionResourceMenuButton, PanelButton } from '@renderer/modules/nav/panel/button'
 import { MonoListPanelButton } from '@renderer/modules/nav/panel/mono-list-button'
 
 export const route = [
@@ -42,6 +42,9 @@ export function PanelNav() {
           <PanelButton {...item} />
         </li>
       ))}
+      <li>
+        <CollectionResourceMenuButton />
+      </li>
       <li>
         <MonoListPanelButton />
       </li>

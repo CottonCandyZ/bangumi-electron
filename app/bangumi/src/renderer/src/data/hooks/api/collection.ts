@@ -1,19 +1,23 @@
 import {
   AddOrModifySubjectCollectionById,
+  getCharacterCollectionByIdAndUsername,
   getEpisodesCollectionBySubjectId,
+  getP1Collections,
+  getPersonCollectionByIdAndUsername,
   getSubjectCollectionBySubjectIdAndUsername,
   getSubjectCollectionsByUsernameMustAuth,
   ModifyEpisodeCollectionBySubjectId,
+  setResourceCollection,
 } from '@renderer/data/fetch/api/collection'
 import {
   useAuthQuery,
   useInfinityQueryOptionalAuth,
   useMutationMustAuth,
 } from '@renderer/data/hooks/factory'
-import { SubjectId } from '@renderer/data/types/bgm'
+import { CharacterId, PersonId, SubjectId } from '@renderer/data/types/bgm'
 import { EpisodeType } from '@renderer/data/types/episode'
 import { UserInfo } from '@renderer/data/types/user'
-import { UseMutationOptions } from '@tanstack/react-query'
+import { useQueryClient, UseMutationOptions } from '@tanstack/react-query'
 
 type OmitInfinityQFP<P> = Omit<P, 'offset'>
 
@@ -52,6 +56,92 @@ export const useInfinityQueryCollectionsByUsername = ({
     needKeepPreviousData,
     refetchPageLimit,
   })
+
+export const useInfinityQueryP1Collections = ({
+  collectionType,
+  enabled,
+  initialPageParam = 0,
+  limit = 20,
+  needKeepPreviousData,
+  refetchPageLimit,
+  resourceType,
+  subjectType,
+  username,
+}: OmitInfinityQFP<Parameters<typeof getP1Collections>[0]> & {
+  initialPageParam?: number
+  enabled?: boolean
+  needKeepPreviousData?: boolean
+  refetchPageLimit?: number
+}) =>
+  useInfinityQueryOptionalAuth({
+    queryFn: getP1Collections,
+    queryKey: ['p1-collections'],
+    queryProps: { username, resourceType, subjectType, collectionType },
+    qFLimit: limit,
+    getNextPageParam: (lastPage, pages) => {
+      const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
+    },
+    initialPageParam,
+    enabled,
+    needKeepPreviousData,
+    refetchPageLimit,
+  })
+
+export const useCharacterCollectionQuery = ({
+  characterId,
+  enabled,
+  username,
+}: {
+  characterId: CharacterId | undefined
+  enabled?: boolean
+  username: UserInfo['username'] | undefined
+}) =>
+  useAuthQuery({
+    queryFn: getCharacterCollectionByIdAndUsername,
+    queryKey: ['collection-character'],
+    queryProps: { characterId, username },
+    enabled,
+    needKeepPreviousData: false,
+  })
+
+export const usePersonCollectionQuery = ({
+  enabled,
+  personId,
+  username,
+}: {
+  enabled?: boolean
+  personId: PersonId | undefined
+  username: UserInfo['username'] | undefined
+}) =>
+  useAuthQuery({
+    queryFn: getPersonCollectionByIdAndUsername,
+    queryKey: ['collection-person'],
+    queryProps: { personId, username },
+    enabled,
+    needKeepPreviousData: false,
+  })
+
+export const useResourceCollectionMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutationMustAuth({
+    mutationFn: setResourceCollection,
+    mutationKey: ['resource-collection'],
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['p1-collections'] })
+      if (variables.resourceType === 'character') {
+        queryClient.invalidateQueries({ queryKey: ['collection-character'] })
+        queryClient.invalidateQueries({ queryKey: ['characterDetail'] })
+      } else if (variables.resourceType === 'person') {
+        queryClient.invalidateQueries({ queryKey: ['collection-person'] })
+        queryClient.invalidateQueries({ queryKey: ['person-detail'] })
+      } else {
+        queryClient.invalidateQueries({ queryKey: ['index-detail'] })
+      }
+    },
+  })
+}
 
 /** 用条目 ID 获得 章节收藏, must auth */
 export const useCollectionEpisodesInfoBySubjectIdQuery = ({

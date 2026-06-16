@@ -1,4 +1,5 @@
 import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
+import { MyLink } from '@renderer/components/my-link'
 import { Button } from '@renderer/components/ui/button'
 import {
   useGroupByNameQuery,
@@ -70,10 +71,18 @@ export function GroupHome({ groupName }: { groupName: string | undefined }) {
               <h2 className="text-xl font-medium">小组话题</h2>
               {group && <OpenGroupTopicsPanelButton group={group} />}
             </div>
-            <QueryRefreshButton
-              onRefresh={() => topicsQuery.refetch()}
-              refreshing={topicsQuery.isFetching && !topicsQuery.isFetchingNextPage}
-            />
+            <div className="flex shrink-0 flex-row items-center gap-2">
+              <QueryRefreshButton
+                onRefresh={() => topicsQuery.refetch()}
+                refreshing={topicsQuery.isFetching && !topicsQuery.isFetchingNextPage}
+              />
+              <Button asChild size="sm">
+                <MyLink to={`/group/${encodeURIComponent(groupName)}/topic/new`}>
+                  <span className="i-mingcute-add-line text-base" />
+                  发帖
+                </MyLink>
+              </Button>
+            </div>
           </div>
           <GroupTopicsVirtualList
             error={topicsQuery.isError}

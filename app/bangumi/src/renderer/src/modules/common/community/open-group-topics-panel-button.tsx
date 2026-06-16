@@ -1,9 +1,7 @@
-import { Button } from '@renderer/components/ui/button'
 import type { SlimGroup } from '@renderer/data/types/community'
 import { cn } from '@renderer/lib/utils'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { OpenMonoListPanelButton } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { type MonoListPanelTab } from '@renderer/state/panel'
-import type { MouseEvent } from 'react'
 
 export function OpenGroupTopicsPanelButton({
   className,
@@ -12,33 +10,26 @@ export function OpenGroupTopicsPanelButton({
   className?: string
   group: SlimGroup
 }) {
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
-
-  const open = (event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault()
-    event.stopPropagation()
-    openMonoListPanelTab({
-      group,
-      groupName: group.name,
-      id: `group-topics-${group.name}`,
-      panelTitle: group.title || group.name,
-      sourceTitle: '小组',
-      sourceTo: `/group/${group.name}`,
-      title: '话题',
-      topics: [],
-      type: 'communityGroupTopics',
-    } satisfies MonoListPanelTab)
-  }
+  const panelTab = {
+    group,
+    groupName: group.name,
+    id: `group-topics-${group.name}`,
+    panelTitle: group.title || group.name,
+    sourceTitle: '小组',
+    sourceTo: `/group/${group.name}`,
+    title: '话题',
+    topics: [],
+    type: 'communityGroupTopics',
+  } satisfies MonoListPanelTab
 
   return (
-    <Button
+    <OpenMonoListPanelButton
       className={cn('size-8 shrink-0', className)}
-      onClick={open}
-      size="icon"
+      iconClassName="text-base"
+      preventDefault
+      stopPropagation
+      tab={panelTab}
       title="在侧栏打开话题"
-      variant="ghost"
-    >
-      <span className="i-mingcute-box-3-line text-base" />
-    </Button>
+    />
   )
 }

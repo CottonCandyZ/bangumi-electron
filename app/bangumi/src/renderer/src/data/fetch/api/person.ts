@@ -14,6 +14,8 @@ import {
   PersonRelatedCharacter,
   PersonRelatedSubject,
 } from '@renderer/data/types/person'
+import type { SlimIndex } from '@renderer/data/types/index'
+import type { P1Page } from '@renderer/data/types/subject'
 import { FetchParamError } from '@renderer/lib/utils/error'
 
 /**
@@ -65,4 +67,26 @@ export async function getPersonCommentsById({ id }: { id?: PersonId }) {
   if (!id) throw new FetchParamError('未获得 id')
 
   return await nextFetch<PersonComment[]>(NEXT_PERSONS.COMMENTS_BY_ID(id.toString()))
+}
+
+/**
+ * 从 private p1 API 获得人物关联目录
+ */
+export async function getPersonIndexesById({
+  id,
+  limit,
+  offset,
+}: {
+  id?: PersonId
+  limit?: number
+  offset: number
+}) {
+  if (!id) throw new FetchParamError('未获得 id')
+
+  return await nextFetch<P1Page<SlimIndex>>(NEXT_PERSONS.INDEXES_BY_ID(id.toString()), {
+    query: {
+      limit,
+      offset,
+    },
+  })
 }

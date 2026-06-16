@@ -103,6 +103,26 @@ export type UserTimelineSlimUser = {
   joinedAt: number
 }
 
+export type Friend = {
+  createdAt: number
+  description: string
+  grade: number
+  user: UserTimelineSlimUser
+}
+
+export type Friendlist = {
+  friendlist: number[]
+}
+
+export type Blocklist = {
+  blocklist: number[]
+}
+
+export type UserPage<T> = {
+  data: T[]
+  total: number
+}
+
 export type UserTimelineSlimGroup = {
   id: number
   name: string

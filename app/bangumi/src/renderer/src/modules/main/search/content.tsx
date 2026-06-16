@@ -6,9 +6,9 @@ import { SearchParam } from '@renderer/data/types/search'
 import { useSearchParams } from '@renderer/hooks/use-search-params'
 import { PinSearchButton, SearchItemCard } from '@renderer/modules/main/search/item-card'
 import { createSearchPanelId, createSearchPanelTitle } from '@renderer/modules/main/search/utils'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
 import { scrollViewportAtom, setScrollPositionAction } from '@renderer/state/scroll'
 import { searchSummaryAtom } from '@renderer/state/search'
+import type { MonoListPanelTab } from '@renderer/state/panel'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
@@ -99,21 +99,18 @@ export function SearchSummaryAction() {
   const { getSearchParam } = useSearchParams()
   const searchParam = getSearchParam()
   const location = useLocation()
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const searchSummary = useAtomValue(searchSummaryAtom)
 
   if (!searchParam) return null
 
-  const pinSearchResult = () => {
-    openMonoListPanelTab({
-      id: createSearchPanelId(searchParam),
-      type: searchParam.category === 'subjects' ? 'searchSubjects' : 'searchMonos',
-      title: createSearchPanelTitle(searchParam),
-      sourceTitle: `${getSearchCategoryLabel(searchParam.category)}搜索结果`,
-      sourceTo: `${location.pathname}${location.search}`,
-      searchParam,
-    })
-  }
+  const panelTab = {
+    id: createSearchPanelId(searchParam),
+    type: searchParam.category === 'subjects' ? 'searchSubjects' : 'searchMonos',
+    title: createSearchPanelTitle(searchParam),
+    sourceTitle: `${getSearchCategoryLabel(searchParam.category)}搜索结果`,
+    sourceTo: `${location.pathname}${location.search}`,
+    searchParam,
+  } satisfies MonoListPanelTab
 
   return (
     <div className="flex shrink-0 flex-row items-center gap-3">
@@ -124,7 +121,7 @@ export function SearchSummaryAction() {
             ? '搜索中'
             : '没有结果'}
       </div>
-      <PinSearchButton onClick={pinSearchResult} />
+      <PinSearchButton tab={panelTab} />
     </div>
   )
 }

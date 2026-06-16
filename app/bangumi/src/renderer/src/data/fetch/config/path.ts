@@ -31,6 +31,17 @@ export const NEXT_USERS = {
   TIMELINE_BY_USERNAME: (username: UserInfo['username']) => `/p1/users/${username}/timeline`,
   GROUPS_BY_USERNAME: (username: UserInfo['username'], limit: number, offset: number) =>
     `/p1/users/${username}/groups?limit=${limit}&offset=${offset}`,
+  COLLECTION_SUBJECTS_BY_USERNAME: (username: UserInfo['username']) =>
+    `/p1/users/${username}/collections/subjects`,
+  COLLECTION_CHARACTERS_BY_USERNAME: (username: UserInfo['username']) =>
+    `/p1/users/${username}/collections/characters`,
+  COLLECTION_PERSONS_BY_USERNAME: (username: UserInfo['username']) =>
+    `/p1/users/${username}/collections/persons`,
+  COLLECTION_INDEXES_BY_USERNAME: (username: UserInfo['username']) =>
+    `/p1/users/${username}/collections/indexes`,
+  BLOGS_BY_USERNAME: (username: UserInfo['username']) => `/p1/users/${username}/blogs`,
+  FRIENDS_BY_USERNAME: (username: UserInfo['username']) => `/p1/users/${username}/friends`,
+  FOLLOWERS_BY_USERNAME: (username: UserInfo['username']) => `/p1/users/${username}/followers`,
 }
 
 /** 条目相关 */
@@ -48,6 +59,10 @@ export const SUBJECTS = {
 export const NEXT_SUBJECTS = {
   /** p1 条目吐槽箱 */
   COMMENTS_BY_ID: (id: SubjectId) => `/p1/subjects/${id}/comments`,
+  /** p1 条目推荐 */
+  RECS_BY_ID: (id: SubjectId) => `/p1/subjects/${id}/recs`,
+  /** p1 条目关联目录 */
+  INDEXES_BY_ID: (id: SubjectId) => `/p1/subjects/${id}/indexes`,
 }
 
 export const HTML_SUBJECTS = {
@@ -70,6 +85,8 @@ export const NEXT_EPISODES = {
 export const CHARACTERS = {
   /** v0 角色详情 */
   BY_ID: (id: CharacterId) => `/v0/characters/${id}`,
+  /** v0 角色收藏 */
+  COLLECT_BY_ID: (id: CharacterId) => `/v0/characters/${id}/collect`,
   /** v0 角色出场作品 */
   SUBJECTS_BY_ID: (id: CharacterId) => `/v0/characters/${id}/subjects`,
   /** v0 角色关联人物 */
@@ -80,12 +97,16 @@ export const CHARACTERS = {
 export const NEXT_CHARACTERS = {
   /** p1 角色吐槽箱 */
   COMMENTS_BY_ID: (id: CharacterId) => `/p1/characters/${id}/comments`,
+  /** p1 角色关联目录 */
+  INDEXES_BY_ID: (id: CharacterId) => `/p1/characters/${id}/indexes`,
 }
 
 /** 人物 */
 export const PERSONS = {
   /** v0 人物详情 */
   BY_ID: (id: PersonId) => `/v0/persons/${id}`,
+  /** v0 人物收藏 */
+  COLLECT_BY_ID: (id: PersonId) => `/v0/persons/${id}/collect`,
   /** v0 人物参与作品 */
   SUBJECTS_BY_ID: (id: PersonId) => `/v0/persons/${id}/subjects`,
   /** v0 人物出场角色 */
@@ -96,6 +117,8 @@ export const PERSONS = {
 export const NEXT_PERSONS = {
   /** p1 人物吐槽箱 */
   COMMENTS_BY_ID: (id: PersonId) => `/p1/persons/${id}/comments`,
+  /** p1 人物关联目录 */
+  INDEXES_BY_ID: (id: PersonId) => `/p1/persons/${id}/indexes`,
 }
 
 /** 收藏 */
@@ -103,6 +126,10 @@ export const COLLECTIONS = {
   BY_USERNAME: (username: UserInfo['username']) => `/v0/users/${username}/collections`,
   BY_USERNAME_AND_SUBJECT_ID: (username: UserInfo['username'], subjectId: SubjectId) =>
     `/v0/users/${username}/collections/${subjectId}`,
+  CHARACTER_BY_USERNAME_AND_ID: (username: UserInfo['username'], characterId: CharacterId) =>
+    `/v0/users/${username}/collections/-/characters/${characterId}`,
+  PERSON_BY_USERNAME_AND_ID: (username: UserInfo['username'], personId: PersonId) =>
+    `/v0/users/${username}/collections/-/persons/${personId}`,
   EPISODES_BY_SUBJECT_ID: (subjectId: SubjectId) => `/v0/users/-/collections/${subjectId}/episodes`,
   ADD_OR_MODIFY_SUBJECT_BY_ID: (subjectId: SubjectId) => `/v0/users/-/collections/${subjectId}`,
   MODIFY_EPISODE_BY_SUBJECT_ID: (subjectId: SubjectId) =>
@@ -112,10 +139,33 @@ export const COLLECTIONS = {
   DELETE_SUBJECT_BY_ID: (subjectId: SubjectId) => `/subject/${subjectId}/remove`,
 }
 
-/** Private API 测试 */
+/** Private API 收藏 */
 export const NEXT_COLLECTIONS = {
-  LIST: (limit: number, offset: number) =>
-    `/p1/collections/subjects?limit=${limit}&offset=${offset}`,
+  SUBJECTS: '/p1/collections/subjects',
+  CHARACTERS: '/p1/collections/characters',
+  PERSONS: '/p1/collections/persons',
+  INDEXES: '/p1/collections/indexes',
+  CHARACTER_BY_ID: (characterId: number) => `/p1/collections/characters/${characterId}`,
+  PERSON_BY_ID: (personId: number) => `/p1/collections/persons/${personId}`,
+  INDEX_BY_ID: (indexId: number) => `/p1/collections/indexes/${indexId}`,
+}
+
+/** 目录 */
+export const INDICES = {
+  /** web 目录详情 */
+  BY_ID: (id: number) => `/index/${id}`,
+  /** web 收藏目录 */
+  COLLECT_WEB_BY_ID: (id: number) => `/index/${id}/collect`,
+  /** web 取消收藏目录 */
+  ERASE_COLLECT_WEB_BY_ID: (id: number) => `/index/${id}/erase_collect`,
+  /** v0 目录收藏 */
+  COLLECT_BY_ID: (id: number) => `/v0/indices/${id}/collect`,
+}
+
+/** Private API 目录 */
+export const NEXT_INDEXES = {
+  BY_ID: (indexId: number) => `/p1/indexes/${indexId}`,
+  RELATED_BY_ID: (indexId: number) => `/p1/indexes/${indexId}/related`,
 }
 
 /** 搜索 */
@@ -147,6 +197,7 @@ export const NEXT_COMMUNITY = {
     limit: number
     offset: number
   }) => `/p1/groups/${groupName}/topics?limit=${limit}&offset=${offset}`,
+  CREATE_GROUP_TOPIC: (groupName: string) => `/p1/groups/${groupName}/topics`,
   RECENT_GROUP_TOPICS: ({ mode, limit, offset }: { mode: string; limit: number; offset: number }) =>
     `/p1/groups/-/topics?mode=${mode}&limit=${limit}&offset=${offset}`,
   RECENT_SUBJECT_TOPICS: ({ limit, offset }: { limit: number; offset: number }) =>
@@ -162,6 +213,22 @@ export const NEXT_COMMUNITY = {
   }) => `/p1/subjects/${subjectId}/topics?limit=${limit}&offset=${offset}`,
   TRENDING_SUBJECT_TOPICS: ({ limit, offset }: { limit: number; offset: number }) =>
     `/p1/trending/subjects/topics?limit=${limit}&offset=${offset}`,
+}
+
+/** Private API 好友/关系 */
+export const NEXT_RELATIONSHIP = {
+  FRIENDLIST: '/p1/friendlist',
+  FRIENDS: '/p1/friends',
+  FOLLOWERS: '/p1/followers',
+  FRIEND_BY_USERNAME: (username: UserInfo['username']) => `/p1/friends/${username}`,
+  BLOCKLIST: '/p1/blocklist',
+  BLOCK_BY_USERNAME: (username: UserInfo['username']) => `/p1/blocklist/${username}`,
+}
+
+/** Private API 通知 */
+export const NEXT_NOTIFY = {
+  LIST: '/p1/notify',
+  CLEAR: '/p1/clear-notify',
 }
 
 /** Private API 每日放送 */

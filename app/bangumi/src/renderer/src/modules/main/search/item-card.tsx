@@ -1,7 +1,6 @@
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
 import { Badge } from '@renderer/components/ui/badge'
-import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import type { SearchData, SearchMonoData, SearchSubjectData } from '@renderer/data/types/search'
@@ -12,6 +11,8 @@ import {
   getSearchSubjectSubtitle,
   getSearchSubjectTitle,
 } from '@renderer/modules/main/search/utils'
+import { OpenMonoListPanelButton } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
+import type { MonoListPanelTab } from '@renderer/state/panel'
 
 export function SearchItemCard({ searchItem }: { searchItem: SearchData }) {
   if ('rating' in searchItem) return <SearchSubjectRow searchItem={searchItem} />
@@ -178,18 +179,16 @@ export function SearchSubjectRow({
   )
 }
 
-export function PinSearchButton({ onClick }: { onClick: () => void }) {
+export function PinSearchButton({ tab }: { tab: MonoListPanelTab }) {
   return (
     <Tooltip delayDuration={300}>
       <TooltipTrigger asChild>
-        <Button
+        <OpenMonoListPanelButton
           variant="outline"
-          size="icon"
           className="size-9 shrink-0 shadow-none"
-          onClick={onClick}
-        >
-          <span className="i-mingcute-box-3-line text-lg" />
-        </Button>
+          tab={tab}
+          title="固定到左侧列表"
+        />
       </TooltipTrigger>
       <TooltipContent side="bottom">固定到左侧列表</TooltipContent>
     </Tooltip>

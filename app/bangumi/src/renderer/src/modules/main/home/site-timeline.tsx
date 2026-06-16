@@ -7,7 +7,7 @@ import {
   UserTimelineSkeleton,
 } from '@renderer/modules/common/user/timeline'
 import { homeSiteTimelineModeAtom, type MonoListPanelTab } from '@renderer/state/panel'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { useMonoListPanelOpenHandler } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { useAtom } from 'jotai'
 import { useEffect, useRef, useState } from 'react'
 
@@ -18,13 +18,22 @@ const TIMELINE_PREVIEW_ITEM_LIMIT = 3
 
 export function SiteTimelinePreview() {
   const [mode, setMode] = useAtom(homeSiteTimelineModeAtom)
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const selectedTab = mode === 'friends' ? '关注' : '全站'
   const query = useTimelineQuery({ mode, limit: 8 })
   const refetchTimelineRef = useRef(query.refetch)
   const refreshAfterModeChangeRef = useRef(false)
   const [now, setNow] = useState(() => Date.now())
   const visibleItems = query.data?.filter(hasUserTimelineItemDetails).slice(0, 6)
+  const panelTab = {
+    id: 'site-timeline',
+    mode,
+    panelTitle: '时间线',
+    sourceTitle: '首页',
+    sourceTo: '/',
+    title: '时间线',
+    type: 'siteTimeline',
+  } satisfies MonoListPanelTab
+  const openPanel = useMonoListPanelOpenHandler(panelTab)
 
   useEffect(() => {
     refetchTimelineRef.current = query.refetch
@@ -81,17 +90,7 @@ export function SiteTimelinePreview() {
           />
           <Button
             className="h-8 shrink-0 gap-1 px-2 text-xs"
-            onClick={() =>
-              openMonoListPanelTab({
-                id: 'site-timeline',
-                mode,
-                panelTitle: '时间线',
-                sourceTitle: '首页',
-                sourceTo: '/',
-                title: '时间线',
-                type: 'siteTimeline',
-              } satisfies MonoListPanelTab)
-            }
+            onClick={openPanel}
             size="sm"
             title="在侧栏打开"
             variant="ghost"

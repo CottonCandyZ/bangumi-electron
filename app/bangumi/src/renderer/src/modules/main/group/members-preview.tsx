@@ -1,6 +1,6 @@
 import { Image } from '@renderer/components/image/image'
-import { MyLink } from '@renderer/components/my-link'
 import { Skeleton } from '@renderer/components/ui/skeleton'
+import { UserHoverCardLink } from '@renderer/components/user-hover-card'
 import type { GroupMember } from '@renderer/data/types/community'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
 import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
@@ -65,9 +65,10 @@ function GroupMemberItem({ member }: { member: GroupMember }) {
   }
 
   return (
-    <MyLink
+    <UserHoverCardLink
       className="hover:bg-accent flex min-w-0 items-center gap-2 rounded-md p-2 transition-colors"
       to={`/user/${encodeURIComponent(user.username)}`}
+      user={user}
     >
       {user.avatar?.medium ? (
         <Image
@@ -84,7 +85,7 @@ function GroupMemberItem({ member }: { member: GroupMember }) {
           {formatRecentUnixTime(member.joinedAt)}
         </div>
       </div>
-    </MyLink>
+    </UserHoverCardLink>
   )
 }
 

@@ -24,6 +24,17 @@ type GroupResponse = {
   total: number
 }
 
+export type CreateGroupTopicInput = {
+  content: string
+  groupName: string | undefined
+  title: string
+  turnstileToken: string
+}
+
+export type CreateGroupTopicResponse = {
+  id: number
+}
+
 export async function getGroups({
   sort = 'members',
   limit,
@@ -91,6 +102,27 @@ export async function getGroupTopics({
     ...response,
     data: response.data.map((topic) => toCommunityGroupTopicFromList(topic, group)),
   }
+}
+
+export async function createGroupTopic({
+  content,
+  groupName,
+  title,
+  turnstileToken,
+}: CreateGroupTopicInput) {
+  if (!groupName) throw new Error('未获得小组名')
+
+  return nextFetchWithOptionalAuth<CreateGroupTopicResponse>(
+    NEXT_COMMUNITY.CREATE_GROUP_TOPIC(groupName),
+    {
+      method: 'POST',
+      body: {
+        content,
+        title,
+        turnstileToken,
+      },
+    },
+  )
 }
 
 export async function getRecentGroupTopics({

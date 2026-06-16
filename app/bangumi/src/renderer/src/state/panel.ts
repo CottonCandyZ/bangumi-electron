@@ -4,6 +4,7 @@ import type { SubjectId } from '@renderer/data/types/bgm'
 import type { CollectionEpisode, CollectionType } from '@renderer/data/types/collection'
 import type { Episode } from '@renderer/data/types/episode'
 import type { RelatedSubject } from '@renderer/data/types/subject'
+import type { IndexResourceType } from '@renderer/data/types/index'
 import type { MonoRelatedItem, MonoSubjectItem, MonoType } from '@renderer/data/types/mono'
 import type { SearchParam } from '@renderer/data/types/search'
 import type {
@@ -15,6 +16,10 @@ import type {
 } from '@renderer/data/types/community'
 import type { TimelineMode } from '@renderer/data/types/timeline'
 import type { SectionPath } from '@renderer/data/types/web'
+import {
+  collectionPanelResourceTypeAtom,
+  type CollectionPanelResourceType,
+} from '@renderer/state/collection'
 import { dialogAtomFactory } from '@renderer/state/utils'
 import type { ReplyComposerContent } from '@shared/reply'
 import { atom } from 'jotai'
@@ -78,6 +83,34 @@ export type MonoListPanelTab =
       episodes?: Episode[] | CollectionEpisode[]
       episodeTotal?: number
       initialOffset?: number
+    }
+  | {
+      id: string
+      type: 'monoIndexes'
+      title: string
+      panelTitle: string
+      sourceTitle: string
+      sourceTo: string
+      resourceType: IndexResourceType
+      resourceId: string
+    }
+  | {
+      id: string
+      type: 'indexRelated'
+      title: string
+      panelTitle: string
+      sourceTitle: string
+      sourceTo: string
+      indexId: number
+    }
+  | {
+      id: string
+      type: 'subjectRecommendations'
+      title: string
+      panelTitle: string
+      sourceTitle: string
+      sourceTo: string
+      subjectId: SubjectId
     }
   | {
       id: string
@@ -234,8 +267,16 @@ export const nvaCollectionButtonAtomAction = atom(
     openContent: get(leftPanelOpenContentAtom),
     subjectType: get(collectionPanelSubjectTypeAtom),
     username: get(collectionPanelUsernameAtom),
+    resourceType: get(collectionPanelResourceTypeAtom),
   }),
-  (_get, set, subjectType: keyof typeof SubjectType, open: boolean, username?: string) => {
+  (
+    _get,
+    set,
+    subjectType: keyof typeof SubjectType,
+    open: boolean,
+    username?: string,
+    resourceType: CollectionPanelResourceType = 'subject',
+  ) => {
     if (!open) {
       set(leftPanelOpenAtom, false)
       set(collectionPanelUsernameAtom, undefined)
@@ -244,6 +285,7 @@ export const nvaCollectionButtonAtomAction = atom(
       set(leftPanelOpenContentAtom, 'collection')
       set(collectionPanelSubjectTypeAtom, subjectType)
       set(collectionPanelUsernameAtom, username)
+      set(collectionPanelResourceTypeAtom, resourceType)
     }
   },
 )

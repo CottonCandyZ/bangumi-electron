@@ -15,7 +15,7 @@ export function StaticHeaderTitle({
 }: {
   image?: string
   imageOverlay?: ReactNode
-  imageFallback?: string
+  imageFallback?: ReactNode
   name: string
   nameCn?: string
   presenceKey?: string | number

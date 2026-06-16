@@ -1,9 +1,9 @@
 import { SearchParam } from '@renderer/data/types/search'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { useOpenMonoListPanel } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { useCallback } from 'react'
 
 export function useOpenTagSearchPanel() {
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
+  const openMonoListPanel = useOpenMonoListPanel()
 
   return useCallback(
     (tag: string) => {
@@ -20,7 +20,7 @@ export function useOpenTagSearchPanel() {
       searchParams.append('tag', normalizedTag)
       searchParams.set('sort', 'heat')
 
-      openMonoListPanelTab({
+      openMonoListPanel({
         id: `search-tag-${normalizedTag}`,
         type: 'searchSubjects',
         title: `标签 · ${normalizedTag}`,
@@ -29,6 +29,6 @@ export function useOpenTagSearchPanel() {
         searchParam,
       })
     },
-    [openMonoListPanelTab],
+    [openMonoListPanel],
   )
 }

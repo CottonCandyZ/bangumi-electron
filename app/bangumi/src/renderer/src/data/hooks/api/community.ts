@@ -1,4 +1,5 @@
 import {
+  createGroupTopic,
   getGroupByName,
   getGroupMembers,
   getGroups,
@@ -11,11 +12,16 @@ import {
   getTrendingSubjectTopics,
   getUserGroups,
 } from '@renderer/data/fetch/api/community'
-import { useAuthQuery, useInfinityQueryOptionalAuth } from '@renderer/data/hooks/factory'
+import {
+  useAuthQuery,
+  useInfinityQueryOptionalAuth,
+  useMutationMustAuth,
+} from '@renderer/data/hooks/factory'
 import type { SubjectId } from '@renderer/data/types/bgm'
 import type { GroupSort } from '@renderer/data/types/community'
 import type { SlimGroup, SubjectTopicSource } from '@renderer/data/types/community'
 import type { UserInfo } from '@renderer/data/types/user'
+import { useQueryClient } from '@tanstack/react-query'
 
 const COMMUNITY_TOPIC_DETAIL_STALE_TIME = 1000 * 30
 
@@ -37,7 +43,7 @@ export const useGroupsQuery = ({
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
-      return nextOffset < lastPage.total ? nextOffset : undefined
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
     },
   })
 
@@ -73,7 +79,7 @@ export const useGroupMembersQuery = ({
     enabled,
     getNextPageParam: (lastPage, pages) => {
       const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
-      return nextOffset < lastPage.total ? nextOffset : undefined
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
     },
   })
 
@@ -97,7 +103,7 @@ export const useGroupTopicsQuery = ({
     enabled,
     getNextPageParam: (lastPage, pages) => {
       const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
-      return nextOffset < lastPage.total ? nextOffset : undefined
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
     },
   })
 
@@ -119,7 +125,7 @@ export const useUserGroupsQuery = ({
     enabled,
     getNextPageParam: (lastPage, pages) => {
       const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
-      return nextOffset < lastPage.total ? nextOffset : undefined
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
     },
   })
 
@@ -141,7 +147,7 @@ export const useRecentGroupTopicsQuery = ({
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
-      return nextOffset < lastPage.total ? nextOffset : undefined
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
     },
   })
 
@@ -153,7 +159,7 @@ export const useRecentSubjectTopicsQuery = ({ limit = 20 }: { limit?: number } =
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
-      return nextOffset < lastPage.total ? nextOffset : undefined
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
     },
   })
 
@@ -177,7 +183,7 @@ export const useSubjectTopicsQuery = ({
     enabled,
     getNextPageParam: (lastPage, pages) => {
       const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
-      return nextOffset < lastPage.total ? nextOffset : undefined
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
     },
   })
 
@@ -189,7 +195,7 @@ export const useTrendingSubjectTopicsQuery = ({ limit = 20 }: { limit?: number }
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
-      return nextOffset < lastPage.total ? nextOffset : undefined
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
     },
   })
 
@@ -208,3 +214,16 @@ export const useSubjectTopicQuery = ({ topicId }: { topicId: number }) =>
     queryProps: { topicId },
     staleTime: COMMUNITY_TOPIC_DETAIL_STALE_TIME,
   })
+
+export const useCreateGroupTopicMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutationMustAuth({
+    mutationFn: createGroupTopic,
+    mutationKey: ['create-group-topic'],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['community-single-group-topics-v1'] })
+      queryClient.invalidateQueries({ queryKey: ['community-group-topics-v3'] })
+    },
+  })
+}

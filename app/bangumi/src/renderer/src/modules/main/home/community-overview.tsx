@@ -10,7 +10,7 @@ import { formatRecentUnixTime } from '@renderer/lib/utils/date'
 import { CommunityTopicLeadingImage } from '@renderer/modules/common/community/community-topic-leading'
 import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 import { LoginInlineAction } from '@renderer/modules/common/user/login/login-inline-action'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { useMonoListPanelOpenHandler } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { type MonoListPanelTab } from '@renderer/state/panel'
 import { Link, useNavigate } from 'react-router-dom'
 
@@ -101,8 +101,19 @@ function HomeTopicSection({
   section: HomeTopicSectionConfig
   topics: CommunityTopic[]
 }) {
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const previewTopics = topics.slice(0, PREVIEW_LIMIT)
+  const panelTab = {
+    groupMode: section.groupMode,
+    id: section.id,
+    panelTitle: section.panelTitle,
+    sourceTitle: '首页',
+    sourceTo: '/',
+    title: section.title,
+    topicKind: section.topicKind,
+    topics,
+    type: 'communityTopics',
+  } satisfies MonoListPanelTab
+  const openPanel = useMonoListPanelOpenHandler(panelTab)
 
   return (
     <section className="flex min-h-72 min-w-0 flex-col">
@@ -120,19 +131,7 @@ function HomeTopicSection({
           <Button
             className="h-8 shrink-0 gap-1 px-2 text-xs"
             disabled={topics.length === 0}
-            onClick={() =>
-              openMonoListPanelTab({
-                groupMode: section.groupMode,
-                id: section.id,
-                panelTitle: section.panelTitle,
-                sourceTitle: '首页',
-                sourceTo: '/',
-                title: section.title,
-                topicKind: section.topicKind,
-                topics,
-                type: 'communityTopics',
-              } satisfies MonoListPanelTab)
-            }
+            onClick={openPanel}
             size="sm"
             variant="ghost"
           >

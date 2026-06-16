@@ -2,6 +2,8 @@ import {
   getRelatedSubjects,
   getSubjectById,
   getSubjectCommentsById,
+  getSubjectIndexesById,
+  getSubjectRecommendationsById,
 } from '@renderer/data/fetch/api/subject'
 import {
   useAuthQuery,
@@ -69,6 +71,52 @@ export const useRelatedSubjectsQuery = ({
     needKeepPreviousData,
   })
 
+export const useSubjectRecommendationsQuery = ({
+  enabled,
+  id,
+  limit = 10,
+}: {
+  enabled?: boolean
+  id: SubjectId
+  limit?: number
+}) =>
+  useInfinityQueryOptionalAuth({
+    queryFn: getSubjectRecommendationsById,
+    queryKey: ['subject-recommendations'],
+    queryProps: { id },
+    qFLimit: limit,
+    enabled,
+    needKeepPreviousData: false,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
+    },
+  })
+
+export const useSubjectIndexesQuery = ({
+  enabled,
+  id,
+  limit = 8,
+}: {
+  enabled?: boolean
+  id: SubjectId
+  limit?: number
+}) =>
+  useInfinityQueryOptionalAuth({
+    queryFn: getSubjectIndexesById,
+    queryKey: ['subject-indexes'],
+    queryProps: { id },
+    qFLimit: limit,
+    enabled,
+    needKeepPreviousData: false,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
+    },
+  })
+
 /**
  * 使用 id 获得条目吐槽箱。p1 subject comments 支持 limit/offset 分页。
  */
@@ -91,6 +139,6 @@ export const useSubjectCommentsQuery = ({
     initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
-      return nextOffset < lastPage.total ? nextOffset : undefined
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
     },
   })

@@ -1,5 +1,5 @@
 import { SubjectId } from '@renderer/data/types/bgm'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { useMonoListPanelOpenHandler } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { useCallback } from 'react'
 
 export function useOpenSubjectEpisodesPanel({
@@ -13,12 +13,10 @@ export function useOpenSubjectEpisodesPanel({
   episodeTotal?: number
   initialOffset?: number
 }) {
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
-
-  const open = useCallback(() => {
+  const tab = useCallback(() => {
     if (!subjectId) return
 
-    openMonoListPanelTab({
+    return {
       id: `subject-episodes-${subjectId}`,
       type: 'subjectEpisodes',
       title: '章节',
@@ -26,11 +24,13 @@ export function useOpenSubjectEpisodesPanel({
       subjectId,
       episodeTotal,
       initialOffset,
-    })
-  }, [episodeTotal, initialOffset, openMonoListPanelTab, sourceTitle, subjectId])
+    } as const
+  }, [episodeTotal, initialOffset, sourceTitle, subjectId])
+  const open = useMonoListPanelOpenHandler(tab)
 
   return {
     canOpen: !!subjectId,
     open,
+    tab,
   }
 }

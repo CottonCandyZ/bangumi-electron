@@ -1,10 +1,10 @@
 import { MyLink } from '@renderer/components/my-link'
-import { Button } from '@renderer/components/ui/button'
 import { useEpisodeInfoByIdQuery } from '@renderer/data/hooks/api/episodes'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { EpId } from '@renderer/data/types/bgm'
 import { useOpenSubjectEpisodesPanel } from '@renderer/modules/common/episodes/use-open-subject-episodes-panel'
 import { StaticHeaderTitle } from '@renderer/modules/header/title/static'
+import { OpenMonoListPanelButton } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { CornerUpLeft } from 'lucide-react'
 
 export function EpisodeHeaderTitle({ episodeId }: { episodeId: EpId }) {
@@ -46,14 +46,11 @@ export function EpisodeHeaderTitle({ episodeId }: { episodeId: EpId }) {
         nameCn={episode.name_cn || `ep.${episode.sort}`}
       />
       {episodesPanel.canOpen && (
-        <Button
-          variant="ghost"
-          size="icon"
+        <OpenMonoListPanelButton
           className="no-drag-region size-8 shrink-0"
-          onClick={episodesPanel.open}
-        >
-          <span className="i-mingcute-box-3-line text-lg" />
-        </Button>
+          tab={episodesPanel.tab}
+          title="在侧栏打开章节"
+        />
       )}
     </div>
   )

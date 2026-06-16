@@ -5,7 +5,7 @@ import type { SlimGroup } from '@renderer/data/types/community'
 import { OpenGroupTopicsPanelButton } from '@renderer/modules/common/community/open-group-topics-panel-button'
 import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 import { LoginInlineAction } from '@renderer/modules/common/user/login/login-inline-action'
-import { useOpenMonoListPanelTab } from '@renderer/modules/panel/left-panel/use-open-mono-list-panel-tab'
+import { useMonoListPanelOpenHandler } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { type MonoListPanelTab } from '@renderer/state/panel'
 import { Link } from 'react-router-dom'
 
@@ -44,8 +44,20 @@ export function GroupsSection({
   title: string
   username?: string
 }) {
-  const openMonoListPanelTab = useOpenMonoListPanelTab()
   const previewGroups = previewLimit ? groups.slice(0, previewLimit) : groups
+  const panelTab = {
+    groups,
+    id: listKind === 'user' ? `groups-user-${username}` : `groups-${sort ?? 'members'}`,
+    listKind,
+    panelTitle,
+    sort,
+    sourceTitle,
+    sourceTo,
+    title,
+    type: 'communityGroups',
+    username,
+  } satisfies MonoListPanelTab
+  const openPanel = useMonoListPanelOpenHandler(panelTab)
 
   return (
     <section className="flex min-w-0 flex-col gap-3">
@@ -65,20 +77,7 @@ export function GroupsSection({
           <Button
             className="h-8 shrink-0 gap-1 px-2 text-xs"
             disabled={groups.length === 0}
-            onClick={() =>
-              openMonoListPanelTab({
-                groups,
-                id: listKind === 'user' ? `groups-user-${username}` : `groups-${sort ?? 'members'}`,
-                listKind,
-                panelTitle,
-                sort,
-                sourceTitle,
-                sourceTo,
-                title,
-                type: 'communityGroups',
-                username,
-              } satisfies MonoListPanelTab)
-            }
+            onClick={openPanel}
             size="sm"
             variant="ghost"
           >
