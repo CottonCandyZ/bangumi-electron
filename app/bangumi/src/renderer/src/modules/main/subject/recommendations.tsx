@@ -26,8 +26,9 @@ export function SubjectRecommendations({ subjectId }: { subjectId: SubjectId }) 
     id: subjectId,
     limit: SUBJECT_RECOMMENDATIONS_PREVIEW_LIMIT,
   })
-  const recommendations = query.data?.pages.flatMap((page) => page.data) ?? []
-  const total = query.data?.pages[0]?.total ?? recommendations.length
+  const loadedRecommendations = query.data?.pages.flatMap((page) => page.data) ?? []
+  const recommendations = loadedRecommendations.slice(0, SUBJECT_RECOMMENDATIONS_PREVIEW_LIMIT)
+  const total = query.data?.pages[0]?.total ?? loadedRecommendations.length
   const hasMore = total > recommendations.length
   const panelTab = {
     id: `subject-recommendations-${subjectId}`,
