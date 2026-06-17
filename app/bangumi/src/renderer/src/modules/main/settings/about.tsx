@@ -161,7 +161,7 @@ export function AboutSettings() {
         <SettingRow
           separated
           title="Log"
-          description="导出 renderer 日志，便于定位接口、登录和更新问题。"
+          description="导出 renderer 日志，便于定位接口和更新问题。"
           control={
             <Button
               variant="outline"

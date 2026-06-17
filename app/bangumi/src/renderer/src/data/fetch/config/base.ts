@@ -4,7 +4,6 @@ import {
   safeRecoverAccessTokenAfterUnauthorized,
 } from '@renderer/data/fetch/session'
 import { safeLogout } from '@renderer/data/hooks/session'
-import { logger } from '@renderer/lib/logger'
 import { FetchError, FetchOptions, ofetch } from 'ofetch'
 
 type JsonFetchOptions = FetchOptions<'json'>
@@ -51,29 +50,9 @@ async function appendAuthHeader(options: { headers?: HeadersInit }) {
   options.headers.set('Authorization', AuthorizationHeader(token.access_token))
 }
 
-async function handleUnauthorizedResponse(error: FetchError) {
-  const token = await getAccessToken()
-  const createTime = token?.create_time ? new Date(token.create_time) : null
-  const expiresAt =
-    token?.expires_in && createTime
-      ? new Date(createTime.getTime() + token.expires_in * 1000)
-      : null
-
-  await logger.error('auth-fetch', 'API 401 Unauthorized', {
-    status: error.statusCode,
-    url: error.request,
-  })
-  await logger.error('auth-fetch', 'Access token status', {
-    has_token: !!token,
-    user_id: token?.user_id ?? null,
-    expires_in: token?.expires_in ?? null,
-    create_time: createTime ? createTime.toISOString() : null,
-    expires_at: expiresAt ? expiresAt.toISOString() : null,
-  })
-
+async function handleUnauthorizedResponse() {
   const recovered = await safeRecoverAccessTokenAfterUnauthorized()
   if (recovered) {
-    await logger.warn('auth-fetch', '401 handled by token recovery, retry request')
     return true
   }
 
@@ -93,7 +72,7 @@ async function retryAfterTokenRecovery<T>(
       throw error
     }
 
-    const recovered = await handleUnauthorizedResponse(error)
+    const recovered = await handleUnauthorizedResponse()
     if (!recovered) {
       throw error
     }

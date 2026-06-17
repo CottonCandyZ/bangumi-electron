@@ -28,6 +28,7 @@ let checkRunId = 0
 let downloadPromise: Promise<unknown> | null = null
 let availableUpdateInfo: UpdateInfo | null = null
 let availableUpdateSourceUrl: string | null = null
+let downloadedUpdateSourceUrl: string | null = null
 let downloadedUpdateAsset: VelopackAsset | null = null
 
 let updateState: AppUpdateState = {
@@ -484,6 +485,7 @@ export async function checkForUpdates() {
 
   availableUpdateInfo = null
   availableUpdateSourceUrl = null
+  downloadedUpdateSourceUrl = null
   downloadedUpdateAsset = null
   setState(createBaseState('checking', channel))
 
@@ -557,10 +559,9 @@ export async function downloadUpdate() {
     percent: 0,
   })
 
-  downloadPromise = createUpdateManager(
-    availableUpdateSourceUrl ?? (await resolveUpdateSourceUrl(channel)),
-    channel,
-  )
+  const sourceUrl = availableUpdateSourceUrl ?? (await resolveUpdateSourceUrl(channel))
+
+  downloadPromise = createUpdateManager(sourceUrl, channel)
     .downloadUpdateAsync(updateInfo, (percent) => {
       setState({
         ...getUpdateStateFromAsset('downloading', updateInfo.TargetFullRelease, channel),
@@ -569,6 +570,7 @@ export async function downloadUpdate() {
     })
     .then(() => {
       downloadedUpdateAsset = updateInfo.TargetFullRelease
+      downloadedUpdateSourceUrl = sourceUrl
       setState(getUpdateStateFromAsset('downloaded', updateInfo.TargetFullRelease, channel))
     })
     .catch((error) => {
@@ -586,14 +588,18 @@ export async function downloadUpdate() {
   return updateState
 }
 
-export function installUpdate() {
+export async function installUpdate() {
   if (!app.isPackaged || updateState.status !== 'downloaded') return updateState
 
   const updateToApply = downloadedUpdateAsset ?? createUpdateManager().getUpdatePendingRestart()
   if (!updateToApply) return updateState
 
+  const channel = updateState.channel
+  const sourceUrl =
+    downloadedUpdateSourceUrl ?? availableUpdateSourceUrl ?? (await resolveUpdateSourceUrl(channel))
+
   setAppQuitting(true)
-  createUpdateManager().waitExitThenApplyUpdate(updateToApply, false, true)
+  createUpdateManager(sourceUrl, channel).waitExitThenApplyUpdate(updateToApply, false, true)
   app.quit()
 
   return updateState
@@ -614,6 +620,7 @@ export async function clearUpdateDownloads() {
 
   await cleanupPackageFiles()
   downloadedUpdateAsset = null
+  downloadedUpdateSourceUrl = null
 
   if (availableUpdateInfo) {
     setState(getUpdateStateFromAsset('available', availableUpdateInfo.TargetFullRelease))

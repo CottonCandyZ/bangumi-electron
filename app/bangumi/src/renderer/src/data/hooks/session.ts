@@ -1,6 +1,5 @@
 import { getUserInfoWithAuth } from '@renderer/data/fetch/api/user'
 import { logout, getAccessToken } from '@renderer/data/fetch/session'
-import { logger } from '@renderer/lib/logger'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { userIdAtom } from '@renderer/state/session'
 import { store } from '@renderer/state/utils'
@@ -33,10 +32,6 @@ export async function safeLogout(options?: { showLoginDialog?: boolean }) {
   if (!currentUserId) return
 
   const firstCaller = !logoutSingleton.isRunning()
-  if (firstCaller) {
-    await logger.error('auth-session', 'Authentication error, logging out user')
-  }
-
   if (options?.showLoginDialog && firstCaller) {
     store.set(loginDialogAtom, {
       open: true,

@@ -5,7 +5,6 @@ import { readAccessToken } from './db/user'
 import { refreshToken } from '@renderer/data/fetch/web/login'
 import { createPromiseCache, createSingletonPromise } from '@renderer/lib/utils/promise'
 import { safeLogout } from '@renderer/data/hooks/session'
-import { logger } from '@renderer/lib/logger'
 import { store } from '@renderer/state/utils'
 import { userIdAtom } from '@renderer/state/session'
 
@@ -37,8 +36,7 @@ export async function isAccessTokenValid(token: Token) {
         access_token: token.access_token,
       }),
     })) as Token & { user_id: string }
-  } catch (e) {
-    await logger.error('auth-session', 'isAccessTokenValid failed', e)
+  } catch {
     return false
   }
   return !!json.user_id
@@ -96,21 +94,12 @@ export async function recoverAccessTokenAfterUnauthorized(
   if (!userId) return false
   const token = await readAccessToken({ user_id: Number(userId) })
   if (!token) {
-    await logger.warn('auth-session', 'recover token skipped: no db token', {
-      user_id: Number(userId),
-    })
     return false
   }
   try {
     accessTokenCache = await safeRefreshToken(token)
-    await logger.warn('auth-session', 'recover token success after 401', {
-      user_id: accessTokenCache.user_id,
-      expires_in: accessTokenCache.expires_in,
-      create_time: accessTokenCache.create_time.toISOString(),
-    })
     return true
-  } catch (error) {
-    await logger.error('auth-session', 'recover token failed after 401', error)
+  } catch {
     return false
   }
 }
@@ -131,14 +120,6 @@ export async function getAccessToken(userId: string | null = store.get(userIdAto
   if (!userId) return null
   const nowTime = Date.now()
 
-  void logger.debug('auth-session', 'isExpired check', {
-    isExpired:
-      accessTokenCache &&
-      accessTokenCache.expires_in * 1000 + accessTokenCache.create_time.getTime() < nowTime,
-    user_id: Number(userId),
-    cache_user_id: accessTokenCache?.user_id ?? null,
-  })
-
   if (accessTokenCache?.user_id === Number(userId) && !isTokenExpired(accessTokenCache, nowTime)) {
     return accessTokenCache
   }
@@ -147,15 +128,9 @@ export async function getAccessToken(userId: string | null = store.get(userIdAto
   // 判断过期
   if (token && isTokenExpired(token, nowTime)) {
     // refresh token using the safe refresh function
-    await logger.info('auth-session', 'start refreshing token', {
-      user_id: token.user_id,
-      create_time: token.create_time?.toISOString?.() ?? token.create_time,
-      expires_in: token.expires_in,
-    })
     try {
       accessTokenCache = await safeRefreshToken(token)
-    } catch (e) {
-      await logger.error('auth-session', 'refresh token failed, logging out', e)
+    } catch {
       await safeLogout({ showLoginDialog: true })
       return null
     }
