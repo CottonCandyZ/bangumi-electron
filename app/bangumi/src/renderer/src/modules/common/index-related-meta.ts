@@ -1,5 +1,6 @@
 import { HOST } from '@renderer/data/fetch/config'
 import type { IndexRelated, IndexRelatedCategory } from '@renderer/data/types/index'
+import { getMonoPreviewImage } from '@renderer/modules/common/mono-image'
 
 export const INDEX_RELATED_CATEGORY_LABELS: Record<IndexRelatedCategory, string> = {
   0: '条目',
@@ -14,12 +15,15 @@ export const INDEX_RELATED_CATEGORY_LABELS: Record<IndexRelatedCategory, string>
 export type IndexRelatedMeta = {
   href?: string
   image?: string
+  imageClassName?: string
   imageContain: boolean
   kind: string
   subtitle?: string
   title: string
   to?: string
 }
+
+const MONO_RELATED_IMAGE_CLASS = 'object-cover object-top'
 
 export function getIndexRelatedMeta(item: IndexRelated): IndexRelatedMeta {
   if (item.subject) {
@@ -35,8 +39,9 @@ export function getIndexRelatedMeta(item: IndexRelated): IndexRelatedMeta {
 
   if (item.character) {
     return {
-      image: item.character.images?.grid || item.character.images?.medium,
-      imageContain: true,
+      image: getMonoPreviewImage(item.character),
+      imageClassName: MONO_RELATED_IMAGE_CLASS,
+      imageContain: false,
       kind: INDEX_RELATED_CATEGORY_LABELS[1],
       subtitle: item.character.nameCN ? item.character.name : item.character.info,
       title: item.character.nameCN || item.character.name,
@@ -46,8 +51,9 @@ export function getIndexRelatedMeta(item: IndexRelated): IndexRelatedMeta {
 
   if (item.person) {
     return {
-      image: item.person.images?.grid || item.person.images?.medium,
-      imageContain: true,
+      image: getMonoPreviewImage(item.person),
+      imageClassName: MONO_RELATED_IMAGE_CLASS,
+      imageContain: false,
       kind: INDEX_RELATED_CATEGORY_LABELS[2],
       subtitle: item.person.nameCN ? item.person.name : item.person.info,
       title: item.person.nameCN || item.person.name,

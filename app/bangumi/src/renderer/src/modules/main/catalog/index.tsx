@@ -339,7 +339,9 @@ function IndexRelatedItem({ item }: { item: IndexRelated }) {
         {meta.image ? (
           <Image
             className="size-14 shrink-0 overflow-hidden rounded-md border"
-            imageClassName={meta.imageContain ? 'object-contain' : undefined}
+            imageClassName={
+              meta.imageClassName ?? (meta.imageContain ? 'object-contain' : undefined)
+            }
             imageSrc={meta.image}
           />
         ) : (

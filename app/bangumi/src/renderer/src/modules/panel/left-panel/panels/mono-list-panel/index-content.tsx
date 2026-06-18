@@ -318,7 +318,7 @@ function IndexRelatedPanelItem({ item }: { item: IndexRelated }) {
   const active = meta.to ? isRoutePathActive(pathname, meta.to) : false
   const content = (
     <>
-      <PanelItemImage image={meta.image} />
+      <PanelItemImage image={meta.image} imageClassName={meta.imageClassName} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex min-w-0 flex-row items-center gap-2">
           <Badge variant="outline" className="shrink-0 text-xs shadow-none">

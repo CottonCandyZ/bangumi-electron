@@ -8,6 +8,7 @@ import type { P1CollectionItemMap, P1CollectionResourceType } from '@renderer/da
 import type { P1SlimMono, SlimIndex } from '@renderer/data/types/index'
 import { cn } from '@renderer/lib/utils'
 import { getIndexDisplayTitle } from '@renderer/modules/common/index-title'
+import { getMonoPreviewImage } from '@renderer/modules/common/mono-image'
 import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
 import { useSetAtom } from 'jotai'
 import { useEffect, useMemo } from 'react'
@@ -164,7 +165,7 @@ function getP1CollectionItemMeta(item: P1PanelCollectionItem, resourceType: P1Pa
       resourceType === 'character'
         ? 'i-mingcute-user-3-line text-lg'
         : 'i-mingcute-idcard-line text-lg',
-    image: mono.images?.grid || mono.images?.medium || mono.images?.small,
+    image: getMonoPreviewImage(mono),
     imageContain: true,
     kind: resourceType === 'character' ? '角色' : '人物',
     subtitle: title === mono.name ? mono.info : mono.name,

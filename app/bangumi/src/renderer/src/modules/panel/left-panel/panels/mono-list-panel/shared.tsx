@@ -95,12 +95,18 @@ function getReactNodeKey(item: ReactNode): Key | null {
   return isValidElement(item) ? item.key : null
 }
 
-export function PanelItemImage({ image }: { image?: string }) {
+export function PanelItemImage({
+  image,
+  imageClassName = 'object-contain',
+}: {
+  image?: string
+  imageClassName?: string
+}) {
   return image ? (
     <Image
       imageSrc={image}
       className="flex aspect-square h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md"
-      imageClassName="h-full w-full object-contain"
+      imageClassName={`h-full w-full ${imageClassName}`}
       loadingClassName="aspect-square h-16 w-16"
       careLoading
     />
