@@ -1,4 +1,5 @@
-import { readdir, unlink } from 'node:fs/promises'
+import { createHash } from 'node:crypto'
+import { mkdir, open as openFile, readdir, rename, unlink } from 'node:fs/promises'
 import path from 'node:path'
 import { BrowserWindow, app } from 'electron'
 import { getRendererHandlers } from '@egoist/tipc/main'
@@ -27,6 +28,7 @@ let checkPromiseChannel: AppUpdateChannel | null = null
 let checkRunId = 0
 let downloadPromise: Promise<unknown> | null = null
 let availableUpdateInfo: UpdateInfo | null = null
+let availableUpdateDownloadUrl: string | null = null
 let availableUpdateSourceUrl: string | null = null
 let downloadedUpdateSourceUrl: string | null = null
 let downloadedUpdateAsset: VelopackAsset | null = null
@@ -78,13 +80,17 @@ type GitHubRelease = {
   tag_name: string
   draft: boolean
   prerelease: boolean
-  assets: Array<{ name: string; browser_download_url: string }>
+  assets: GitHubReleaseAsset[]
+}
+
+type GitHubReleaseAsset = {
+  name: string
+  browser_download_url: string
 }
 
 type ResolvedGitHubRelease = {
   release: GitHubRelease
   feedUrl: string
-  sourceUrl: string
 }
 
 type GitHubAssetFeed = {
@@ -92,6 +98,7 @@ type GitHubAssetFeed = {
 }
 
 type ResolvedUpdateCheck = {
+  downloadUrl?: string
   updateInfo: UpdateInfo | null
   sourceUrl?: string
   unavailableReason?: string
@@ -117,13 +124,6 @@ function parseGitHubRepoUrl(sourceUrl: string) {
   } catch {
     return undefined
   }
-}
-
-function getGitHubReleaseDownloadUrl(sourceUrl: string, tagName: string) {
-  const repo = parseGitHubRepoUrl(sourceUrl)
-  if (!repo) return sourceUrl
-
-  return `https://github.com/${repo.owner}/${repo.repo}/releases/download/${tagName}`
 }
 
 async function resolveGitHubRelease(
@@ -163,22 +163,19 @@ async function resolveGitHubRelease(
   return {
     release,
     feedUrl: feed.browser_download_url,
-    sourceUrl: getGitHubReleaseDownloadUrl(sourceUrl, release.tag_name),
   }
 }
 
-async function resolveUpdateSourceUrl(channel = readUpdateChannel()) {
+async function resolveUpdateSourceUrl() {
   const sourceUrl = getUpdateSourceUrl()
   const repo = parseGitHubRepoUrl(sourceUrl)
   if (!repo) return sourceUrl
 
-  const resolved = await resolveGitHubRelease(channel)
-  if (!resolved) return sourceUrl
-  return resolved.sourceUrl
+  return sourceUrl
 }
 
 async function createUpdateManagerForCheck(channel = readUpdateChannel()) {
-  const sourceUrl = await resolveUpdateSourceUrl(channel)
+  const sourceUrl = await resolveUpdateSourceUrl()
   return { manager: createUpdateManager(sourceUrl, channel), sourceUrl }
 }
 
@@ -369,19 +366,131 @@ async function checkGitHubForUpdates(channel = readUpdateChannel()): Promise<Res
     .filter((asset) => compareVersions(asset.Version, app.getVersion()) > 0)
     .sort((left, right) => compareVersions(right.Version, left.Version))[0]
 
-  if (!target) return { updateInfo: null, sourceUrl: resolved.sourceUrl }
+  if (!target) return { updateInfo: null, sourceUrl: getUpdateSourceUrl() }
 
-  if (!resolved.release.assets.some((asset) => asset.name === target.FileName)) {
+  const releaseAsset = resolved.release.assets.find((asset) => asset.name === target.FileName)
+  if (!releaseAsset) {
     throw new Error(`GitHub release is missing update package: ${target.FileName}`)
   }
 
   return {
+    downloadUrl: releaseAsset.browser_download_url,
     updateInfo: {
       TargetFullRelease: target,
       DeltasToTarget: [],
       IsDowngrade: false,
     },
-    sourceUrl: resolved.sourceUrl,
+    sourceUrl: getUpdateSourceUrl(),
+  }
+}
+
+async function getFileSha256(filePath: string) {
+  const file = await openFile(filePath, 'r')
+  const hash = createHash('sha256')
+  const buffer = Buffer.alloc(1024 * 1024)
+
+  try {
+    let bytesRead = 0
+    do {
+      const result = await file.read(buffer, 0, buffer.length, null)
+      bytesRead = result.bytesRead
+      if (bytesRead === 0) continue
+      hash.update(buffer.subarray(0, bytesRead))
+    } while (bytesRead > 0)
+  } finally {
+    await file.close()
+  }
+
+  return hash.digest('hex').toUpperCase()
+}
+
+async function fileMatchesSha256(filePath: string, sha256: string) {
+  try {
+    return (await getFileSha256(filePath)) === sha256.toUpperCase()
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false
+    throw error
+  }
+}
+
+async function downloadGitHubUpdatePackage(
+  asset: VelopackAsset,
+  downloadUrl: string,
+  onProgress: (percent: number) => void,
+) {
+  const packagePath = getPackagePath(asset)
+  const tempPath = getPackageTempPath(asset)
+  if (!packagePath || !tempPath) throw new Error('更新包路径无效')
+
+  await mkdir(path.dirname(packagePath), { recursive: true })
+  await unlinkIfExists(tempPath)
+
+  if (await fileMatchesSha256(packagePath, asset.SHA256)) {
+    onProgress(100)
+    return
+  }
+
+  await unlinkIfExists(packagePath)
+
+  try {
+    const response = await fetch(downloadUrl, {
+      headers: {
+        Accept: 'application/octet-stream',
+        'User-Agent': 'Bangumi-Electron-Updater',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`GitHub update package request failed: ${response.status}`)
+    }
+
+    if (!response.body) {
+      throw new Error('GitHub update package response body is empty')
+    }
+
+    const contentLength = Number(response.headers.get('content-length'))
+    const total = Number.isFinite(contentLength) && contentLength > 0 ? contentLength : asset.Size
+    const reader = response.body.getReader()
+    const file = await openFile(tempPath, 'w')
+    const hash = createHash('sha256')
+    let downloaded = 0
+
+    try {
+      let done = false
+      while (!done) {
+        const readResult = await reader.read()
+        if (readResult.done) {
+          done = true
+          continue
+        }
+        const { value } = readResult
+        if (!value) continue
+
+        const chunk = Buffer.from(value)
+        await file.write(chunk)
+        hash.update(chunk)
+        downloaded += chunk.byteLength
+
+        if (total > 0) {
+          onProgress(Math.min(99, (downloaded / total) * 100))
+        }
+      }
+    } finally {
+      reader.releaseLock()
+      await file.close()
+    }
+
+    const actualSha256 = hash.digest('hex').toUpperCase()
+    const expectedSha256 = asset.SHA256.toUpperCase()
+    if (actualSha256 !== expectedSha256) {
+      throw new Error(`更新包校验失败：expected ${expectedSha256}, got ${actualSha256}`)
+    }
+
+    await rename(tempPath, packagePath)
+    onProgress(100)
+  } catch (error) {
+    await unlinkIfExists(tempPath)
+    throw error
   }
 }
 
@@ -484,6 +593,7 @@ export async function checkForUpdates() {
   checkPromiseChannel = channel
 
   availableUpdateInfo = null
+  availableUpdateDownloadUrl = null
   availableUpdateSourceUrl = null
   downloadedUpdateSourceUrl = null
   downloadedUpdateAsset = null
@@ -499,6 +609,7 @@ export async function checkForUpdates() {
     .then((result) => {
       if (runId !== checkRunId || readUpdateChannel() !== channel) return
 
+      availableUpdateDownloadUrl = result.downloadUrl ?? null
       availableUpdateSourceUrl = result.sourceUrl ?? null
 
       const updateInfo = result.updateInfo
@@ -559,15 +670,23 @@ export async function downloadUpdate() {
     percent: 0,
   })
 
-  const sourceUrl = availableUpdateSourceUrl ?? (await resolveUpdateSourceUrl(channel))
-
-  downloadPromise = createUpdateManager(sourceUrl, channel)
-    .downloadUpdateAsync(updateInfo, (percent) => {
-      setState({
-        ...getUpdateStateFromAsset('downloading', updateInfo.TargetFullRelease, channel),
-        percent,
-      })
+  const sourceUrl = availableUpdateSourceUrl ?? (await resolveUpdateSourceUrl())
+  const progress = (percent: number) => {
+    setState({
+      ...getUpdateStateFromAsset('downloading', updateInfo.TargetFullRelease, channel),
+      percent,
     })
+  }
+
+  downloadPromise = (
+    availableUpdateDownloadUrl
+      ? downloadGitHubUpdatePackage(
+          updateInfo.TargetFullRelease,
+          availableUpdateDownloadUrl,
+          progress,
+        )
+      : createUpdateManager(sourceUrl, channel).downloadUpdateAsync(updateInfo, progress)
+  )
     .then(() => {
       downloadedUpdateAsset = updateInfo.TargetFullRelease
       downloadedUpdateSourceUrl = sourceUrl
@@ -596,7 +715,7 @@ export async function installUpdate() {
 
   const channel = updateState.channel
   const sourceUrl =
-    downloadedUpdateSourceUrl ?? availableUpdateSourceUrl ?? (await resolveUpdateSourceUrl(channel))
+    downloadedUpdateSourceUrl ?? availableUpdateSourceUrl ?? (await resolveUpdateSourceUrl())
 
   setAppQuitting(true)
   createUpdateManager(sourceUrl, channel).waitExitThenApplyUpdate(updateToApply, false, true)
