@@ -17,7 +17,7 @@ export function CommentList({
   onNearBottom,
   showBackToTop,
   floorNumbers,
-  scrollAreaKey,
+  scrollMemoryKey,
   userAvatarViewTransition,
   virtual,
   reactionTarget,
@@ -31,7 +31,7 @@ export function CommentList({
   onNearBottom?: () => Promise<unknown> | void
   showBackToTop?: boolean
   floorNumbers?: number[]
-  scrollAreaKey?: string
+  scrollMemoryKey?: string
   userAvatarViewTransition: boolean
   virtual: boolean
   reactionTarget?: ReactionTarget
@@ -77,7 +77,7 @@ export function CommentList({
       appendPlaceholderCount={appendPlaceholderCount}
       renderPlaceholder={() => <CommentSkeleton />}
       onNearBottom={onNearBottom}
-      scrollAreaKey={scrollAreaKey}
+      scrollMemoryKey={scrollMemoryKey}
       showBackToTop={showBackToTop}
     />
   )

@@ -114,7 +114,7 @@ export function SiteTimelineListPanelContent({
         hasMore={!!timelineQuery.hasNextPage}
         isFetchingMore={timelineQuery.isFetchingNextPage}
         onListNearBottom={loadMore}
-        scrollAreaKey={`mono-list:${tab.id}:${mode}`}
+        scrollMemoryKey={`mono-list:${tab.id}:${mode}`}
         scrollToTopSignal={scrollToTopSignal}
       />
     </div>
@@ -127,7 +127,7 @@ function SiteTimelineVirtualList({
   hasMore,
   isFetchingMore,
   onListNearBottom,
-  scrollAreaKey,
+  scrollMemoryKey,
   scrollToTopSignal,
 }: {
   entries: UserTimelineItem[] | undefined
@@ -135,7 +135,7 @@ function SiteTimelineVirtualList({
   hasMore: boolean
   isFetchingMore: boolean
   onListNearBottom: () => Promise<unknown> | void
-  scrollAreaKey: string
+  scrollMemoryKey: string
   scrollToTopSignal: number
 }) {
   const rows = useMemo(() => (entries ? toTimelineRows(entries) : undefined), [entries])
@@ -178,7 +178,7 @@ function SiteTimelineVirtualList({
       onNearBottom={requestMore}
       renderPlaceholder={() => <UserTimelineSkeletonItem showUser surface="timeline" />}
       rootClassName="min-h-0 flex-1"
-      scrollAreaKey={scrollAreaKey}
+      scrollMemoryKey={scrollMemoryKey}
       scrollToTopSignal={scrollToTopSignal}
       showBackToTop
     />

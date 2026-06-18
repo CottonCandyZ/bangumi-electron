@@ -262,7 +262,7 @@ export function IndexDetail({ indexId }: { indexId: number }) {
             renderItem={(item) => <IndexRelatedItem item={item} />}
             renderPlaceholder={() => <IndexRelatedSkeleton />}
             rootClassName="min-h-80"
-            scrollAreaKey={`index-related:${indexId}:category:${categoryFilter}:subject-type:${subjectTypeFilter}`}
+            scrollMemoryKey={`index-related:${indexId}:category:${categoryFilter}:subject-type:${subjectTypeFilter}`}
             showBackToTop
           />
         )}

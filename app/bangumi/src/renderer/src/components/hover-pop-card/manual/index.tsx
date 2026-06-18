@@ -3,6 +3,7 @@ import { cn } from '@renderer/lib/utils'
 import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
 import { animate } from 'motion/react'
 import { useAtomValue, useSetAtom } from 'jotai'
+import { flushSync } from 'react-dom'
 import {
   createContext,
   CSSProperties,
@@ -11,6 +12,7 @@ import {
   PropsWithChildren,
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react'
@@ -90,6 +92,8 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
   const hoverSizeRef = useRef<DOMRect | null>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const hoverRef = useRef<HTMLDivElement>(null)
+  const animationIdRef = useRef(0)
+  const [clipOverflow, setClipOverflow] = useState(false)
   const [hoverBox, setHoverBox] = useState<Record<'height' | 'width', string | 'auto'>>({
     height: 'auto',
     width: 'auto',
@@ -105,13 +109,15 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
     }
   }, [setActiveId])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!wrapperRef.current) return
     let ob: ResizeObserver | undefined
     // 展开
     if (!preActive.current && isActive && hoverSizeRef.current && popRef.current) {
       ob = new ResizeObserver(() => {
         if (!wrapperRef.current || !hoverSizeRef.current || !popRef.current) return
+        const animationId = ++animationIdRef.current
+        setClipOverflow(true)
         animate(
           wrapperRef.current,
           {
@@ -126,13 +132,16 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
             ease: [0.25, 1, 0.5, 1],
             duration: 0.4,
           },
-        )
+        ).then(() => {
+          if (animationIdRef.current === animationId) setClipOverflow(false)
+        })
       })
       ob.observe(popRef.current)
     }
     // 收起
     if (preActive.current && !isActive) {
-      ob?.disconnect()
+      const animationId = ++animationIdRef.current
+      setClipOverflow(true)
       animate(
         wrapperRef.current,
         {
@@ -147,13 +156,23 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
           duration: 0.4,
         },
       ).then(() => {
+        if (animationIdRef.current !== animationId) return
+        setClipOverflow(false)
         setIsAnimate(false)
         setBox({ height: 'auto', width: 'auto' })
         setHoverBox({ height: 'auto', width: 'auto' })
       })
     }
     preActive.current = isActive
+
+    return () => {
+      ob?.disconnect()
+    }
   }, [isActive, setBox, setIsAnimate])
+
+  const entering = isAnimate && isActive && !preActive.current
+  const exiting = isAnimate && !isActive && preActive.current
+  const shouldClipOverflow = clipOverflow || entering || exiting
 
   return (
     <div
@@ -163,7 +182,7 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
           ? 'absolute'
           : 'h-full hover:-translate-y-0.5 hover:shadow-xl! hover:duration-700',
         'inset-0',
-        isAnimate && 'overflow-hidden',
+        shouldClipOverflow && 'overflow-hidden',
         isActive && 'z-10',
         className,
       )}
@@ -193,10 +212,14 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
               const { width: hoverWidth, height: hoverHeight } =
                 hoverRef.current.getBoundingClientRect()
               hoverSizeRef.current = new DOMRect(x, y, width, height)
-              setHoverBox({ height: `${hoverHeight}px`, width: `${hoverWidth}px` })
 
               // 开始动画
-              setIsAnimate(true)
+              flushSync(() => {
+                setClipOverflow(true)
+                setBox({ height: `${height}px`, width: `${width}px` })
+                setHoverBox({ height: `${hoverHeight}px`, width: `${hoverWidth}px` })
+                setIsAnimate(true)
+              })
               setActiveId(layoutId)
             }, delay)
           }}

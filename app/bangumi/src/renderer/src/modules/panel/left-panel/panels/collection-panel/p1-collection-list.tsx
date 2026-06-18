@@ -83,7 +83,7 @@ export function P1CollectionList({
       renderItem={(item) => <P1CollectionItem item={item.item} resourceType={item.resourceType} />}
       renderPlaceholder={() => <P1CollectionSkeleton />}
       rootClassName="flex-1"
-      scrollAreaKey={`collection-panel:p1:${username ?? 'me'}:${resourceType}`}
+      scrollMemoryKey={`collection-panel:p1:${username ?? 'me'}:${resourceType}`}
       showBackToTop
     />
   )

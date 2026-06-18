@@ -92,7 +92,7 @@ export function MonoIndexesListPanelContent({
         renderItem={(item) => <SubjectIndexPanelItem index={item} />}
         renderPlaceholder={() => <IndexPanelSkeletonItem />}
         rootClassName="flex-1"
-        scrollAreaKey={`mono-list:${tab.id}`}
+        scrollMemoryKey={`mono-list:${tab.id}`}
         showBackToTop
       />
     </>
@@ -219,7 +219,7 @@ export function IndexRelatedListPanelContent({
         renderItem={(item) => <IndexRelatedPanelItem item={item} />}
         renderPlaceholder={() => <IndexPanelSkeletonItem />}
         rootClassName="flex-1"
-        scrollAreaKey={`mono-list:${tab.id}:category:${categoryFilter}:subject-type:${subjectTypeFilter}`}
+        scrollMemoryKey={`mono-list:${tab.id}:category:${categoryFilter}:subject-type:${subjectTypeFilter}`}
         showBackToTop
       />
     </>

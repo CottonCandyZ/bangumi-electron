@@ -99,7 +99,7 @@ export function UserCollectionsListPanelContent({
       appendPlaceholderCount={COLLECTION_PANEL_LIMIT}
       renderPlaceholder={() => <UserCollectionListItemSkeleton />}
       onNearBottom={() => collectionsQuery.fetchNextPage()}
-      scrollAreaKey={`mono-list:${tab.id}`}
+      scrollMemoryKey={`mono-list:${tab.id}`}
     />
   )
 }

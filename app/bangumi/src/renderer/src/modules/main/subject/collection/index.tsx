@@ -9,7 +9,6 @@ import { useEffect, useRef } from 'react'
 import { useSession } from '@renderer/data/hooks/session'
 import { useSetAtom } from 'jotai'
 import { collectionBoxInViewAtom } from '@renderer/state/in-view'
-import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { Button } from '@renderer/components/ui/button'
 import { PrivateSwitch } from '@renderer/modules/main/subject/collection/private-switch'
@@ -73,9 +72,9 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
             <QuickRate subjectCollection={subjectCollection} />
           )}
           {subjectCollection.comment && !isEmpty(subjectCollection.comment) && (
-            <ScrollWrapper className="border-border max-h-40 max-w-56 rounded-md border p-2 text-sm">
+            <div className="border-border max-h-40 max-w-56 overflow-auto rounded-md border p-2 text-sm">
               <p className="">{subjectCollection.comment}</p>
-            </ScrollWrapper>
+            </div>
           )}
         </div>
       ) : (

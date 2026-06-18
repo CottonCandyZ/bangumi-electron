@@ -12,8 +12,8 @@ type UseVirtualScrollMemoryOptions = {
   canSave?: boolean
   itemCount: number
   mountKeyParts?: Array<number | string | boolean | undefined>
+  memoryKey?: string
   ready?: boolean
-  scrollKey?: string
   viewport?: HTMLElement | null
   viewportRef?: RefObject<HTMLElement | null>
   virtualizerRef: RefObject<VirtualizerHandle | null>
@@ -25,19 +25,19 @@ export function useVirtualScrollMemory({
   canSave = true,
   itemCount,
   mountKeyParts = [],
+  memoryKey,
   ready = true,
-  scrollKey,
   viewport,
   viewportRef,
   virtualizerRef,
 }: UseVirtualScrollMemoryOptions) {
   const restoredKeyRef = useRef<string | undefined>(undefined)
-  const cachedEntry = scrollKey ? virtualScrollMemoryCache.get(scrollKey) : undefined
+  const cachedEntry = memoryKey ? virtualScrollMemoryCache.get(memoryKey) : undefined
   const canUseCachedEntry = ready && cachedEntry?.itemCount === itemCount
   const cache = canUseCachedEntry ? cachedEntry.cache : undefined
   const restoreOffset = canUseCachedEntry ? cachedEntry.scrollOffset : undefined
-  const mountKey = scrollKey
-    ? [scrollKey, ready ? 'ready' : 'pending', ...mountKeyParts]
+  const mountKey = memoryKey
+    ? [memoryKey, ready ? 'ready' : 'pending', ...mountKeyParts]
         .filter((part) => part !== undefined)
         .join(':')
     : undefined
@@ -45,30 +45,30 @@ export function useVirtualScrollMemory({
   const saveScrollState = useCallback(
     (scrollOffset?: number) => {
       const virtualizer = virtualizerRef.current
-      if (!scrollKey || !ready || !canSave || itemCount === 0) return
+      if (!memoryKey || !ready || !canSave || itemCount === 0) return
 
-      const previousEntry = virtualScrollMemoryCache.get(scrollKey)
+      const previousEntry = virtualScrollMemoryCache.get(memoryKey)
       const currentViewport = viewport ?? viewportRef?.current
       const nextScrollOffset =
         scrollOffset ?? currentViewport?.scrollTop ?? virtualizer?.scrollOffset ?? 0
 
-      virtualScrollMemoryCache.set(scrollKey, {
+      virtualScrollMemoryCache.set(memoryKey, {
         cache: virtualizer?.cache ?? previousEntry?.cache,
         itemCount,
         scrollOffset: nextScrollOffset,
       })
     },
-    [canSave, itemCount, ready, scrollKey, viewport, viewportRef, virtualizerRef],
+    [canSave, itemCount, memoryKey, ready, viewport, viewportRef, virtualizerRef],
   )
 
   useEffect(() => {
     restoredKeyRef.current = undefined
-  }, [scrollKey])
+  }, [memoryKey])
 
   useEffect(() => {
-    if (!scrollKey || !ready || itemCount === 0) return
+    if (!memoryKey || !ready || itemCount === 0) return
 
-    const restoreKey = `${scrollKey}:${itemCount}`
+    const restoreKey = `${memoryKey}:${itemCount}`
     if (restoredKeyRef.current === restoreKey) return
 
     if (!restoreOffset || restoreOffset <= 0) {
@@ -88,10 +88,10 @@ export function useVirtualScrollMemory({
     return () => cancelAnimationFrame(frame)
   }, [
     itemCount,
+    memoryKey,
     ready,
     restoreOffset,
     saveScrollState,
-    scrollKey,
     viewport,
     viewportRef,
     virtualizerRef,

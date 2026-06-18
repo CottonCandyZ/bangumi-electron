@@ -1,4 +1,3 @@
-import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { AddOrModifySubjectCollectionForm } from '@renderer/modules/common/collections/modify/form/subject-form'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@renderer/components/ui/sheet'
 import { useAtom } from 'jotai'
@@ -27,9 +26,9 @@ function Content(props: {
       <SheetHeader className="pl-6">
         <SheetTitle>{sheetTitle}</SheetTitle>
       </SheetHeader>
-      <ScrollWrapper className="pt-2 pr-4 pl-6">
+      <div className="overflow-auto pt-2 pr-4 pl-6">
         <AddOrModifySubjectCollectionForm {...formProps} success={() => props.setOpen(false)} />
-      </ScrollWrapper>
+      </div>
     </SheetContent>
   )
 }

@@ -33,7 +33,7 @@ type CommentBoxProps = {
   isFetchingMore?: boolean
   appendPlaceholderCount?: number
   floorNumbers?: number[]
-  scrollAreaKey?: string
+  scrollMemoryKey?: string
   showBackToTop?: boolean
   userAvatarViewTransition?: boolean
   footer?: ReactNode
@@ -59,7 +59,7 @@ export function CommentBox({
   isFetchingMore = false,
   appendPlaceholderCount = DEFAULT_COMMENT_PLACEHOLDER_COUNT,
   floorNumbers,
-  scrollAreaKey,
+  scrollMemoryKey,
   showBackToTop = false,
   userAvatarViewTransition = true,
   footer,
@@ -109,7 +109,7 @@ export function CommentBox({
         onNearBottom={onListNearBottom}
         reactionTarget={resolvedReactionTarget}
         replyTarget={replyTarget}
-        scrollAreaKey={scrollAreaKey}
+        scrollMemoryKey={scrollMemoryKey}
         showBackToTop={showBackToTop}
         userAvatarViewTransition={userAvatarViewTransition}
         virtual={virtual}
@@ -125,7 +125,7 @@ export function CommentBox({
     onListNearBottom,
     replyTarget,
     resolvedReactionTarget,
-    scrollAreaKey,
+    scrollMemoryKey,
     showBackToTop,
     userAvatarViewTransition,
     virtual,

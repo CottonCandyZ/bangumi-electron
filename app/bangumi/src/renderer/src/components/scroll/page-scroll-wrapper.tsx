@@ -1,8 +1,8 @@
 import { scrollCache, subjectInitScroll } from '@renderer/state/global-var'
 import { mainPanelScrollPositionAtom, scrollViewportAtom } from '@renderer/state/scroll'
 import { UI_CONFIG } from '@renderer/config'
+import { NativeScrollViewport } from '@renderer/components/scroll/native-scroll-viewport'
 import { cn } from '@renderer/lib/utils'
-import { ScrollArea } from '@base-ui/react/scroll-area'
 import { useSetAtom } from 'jotai'
 import {
   createContext,
@@ -239,32 +239,17 @@ export function PageScrollWrapper({
     }
   }, [updateViewportState])
 
-  return (
-    <ScrollArea.Root
-      className={cn('group/scroll relative h-full w-full overflow-hidden', className)}
-    >
-      <ScrollArea.Viewport
-        ref={viewportRef}
-        className="h-full w-full overflow-x-hidden focus-visible:outline-hidden"
-      >
-        <ScrollArea.Content className="h-full min-h-full w-full">
-          <ScrollRestoreReadyContext.Provider value={restoreReadyContextValue}>
-            {children}
-          </ScrollRestoreReadyContext.Provider>
-        </ScrollArea.Content>
-      </ScrollArea.Viewport>
+  const content = (
+    <ScrollRestoreReadyContext.Provider value={restoreReadyContextValue}>
+      {children}
+    </ScrollRestoreReadyContext.Provider>
+  )
 
-      <ScrollArea.Scrollbar
-        orientation="vertical"
-        className="absolute top-0 right-0 z-20 flex h-full w-2.5 touch-none p-0.5 opacity-0 transition-opacity duration-150 select-none group-hover/scroll:opacity-100"
-      >
-        <ScrollArea.Thumb
-          className={cn(
-            'bg-foreground/10 hover:bg-foreground/30 active:bg-foreground/40 relative flex-1 rounded-full',
-            '[height:var(--scroll-area-thumb-height)] w-full',
-          )}
-        />
-      </ScrollArea.Scrollbar>
-    </ScrollArea.Root>
+  return (
+    <div className={cn('relative h-full w-full overflow-hidden', className)}>
+      <NativeScrollViewport ref={viewportRef}>
+        <div className="h-full min-h-full w-full">{content}</div>
+      </NativeScrollViewport>
+    </div>
   )
 }

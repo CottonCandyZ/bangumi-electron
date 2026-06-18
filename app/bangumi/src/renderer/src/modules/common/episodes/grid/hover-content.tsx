@@ -1,6 +1,5 @@
 import { MediumHeader } from '@renderer/components/headers'
 import { HoverCardContent } from '@renderer/components/hover-card/content'
-import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { EpisodeCollectionButton } from '@renderer/modules/common/collections/episode-collection-button'
 import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
@@ -80,9 +79,9 @@ export function HoverEpisodeDetail({ content }: { content: HoverEpisodeDetailTyp
         </div>
         {!isEmpty(episode.desc) && (
           <>
-            <ScrollWrapper className="max-h-32 pr-2">
+            <div className="max-h-32 overflow-auto pr-2">
               <p className="whitespace-pre-wrap">{episode.desc}</p>
-            </ScrollWrapper>
+            </div>
             <Separator />
           </>
         )}

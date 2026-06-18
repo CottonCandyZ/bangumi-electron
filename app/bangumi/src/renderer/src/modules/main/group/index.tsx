@@ -92,7 +92,7 @@ export function GroupHome({ groupName }: { groupName: string | undefined }) {
             loading={topicsQuery.isLoading}
             onNearBottom={() => topicsQuery.fetchNextPage()}
             topics={topics}
-            scrollAreaKey={`group-topics:${groupName}`}
+            scrollMemoryKey={`group-topics:${groupName}`}
           />
         </section>
         <GroupMembersPreview

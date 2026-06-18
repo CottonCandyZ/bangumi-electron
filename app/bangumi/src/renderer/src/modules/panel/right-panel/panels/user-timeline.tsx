@@ -104,7 +104,7 @@ export function UserTimelinePanel() {
           hasMore={!!timelineQuery.hasNextPage}
           isFetchingMore={timelineQuery.isFetchingNextPage}
           onListNearBottom={loadMore}
-          scrollAreaKey={username ? `user-timeline-${username}` : undefined}
+          scrollMemoryKey={username ? `user-timeline-${username}` : undefined}
           scrollToTopSignal={scrollToTopSignal}
         />
       </div>
@@ -118,7 +118,7 @@ function UserTimelineVirtualGrid({
   hasMore,
   isFetchingMore,
   onListNearBottom,
-  scrollAreaKey,
+  scrollMemoryKey,
   scrollToTopSignal,
 }: {
   entries: UserTimelineItem[] | undefined
@@ -126,7 +126,7 @@ function UserTimelineVirtualGrid({
   hasMore: boolean
   isFetchingMore: boolean
   onListNearBottom: () => Promise<unknown> | void
-  scrollAreaKey?: string
+  scrollMemoryKey?: string
   scrollToTopSignal: number
 }) {
   const rows = useMemo(() => (entries ? toTimelineRows(entries) : undefined), [entries])
@@ -170,7 +170,7 @@ function UserTimelineVirtualGrid({
       overscan={VIRTUAL_OVERSCAN}
       renderPlaceholder={() => <UserTimelineSkeletonItem surface="timeline" />}
       rootClassName="h-full"
-      scrollAreaKey={scrollAreaKey}
+      scrollMemoryKey={scrollMemoryKey}
       scrollToTopSignal={scrollToTopSignal}
     />
   )

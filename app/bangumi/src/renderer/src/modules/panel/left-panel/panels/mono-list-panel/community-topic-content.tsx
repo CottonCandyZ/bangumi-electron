@@ -146,7 +146,7 @@ function CommunityTopicsVirtualList({
       isFetchingMore={query.isFetchingNextPage}
       onNearBottom={() => query.fetchNextPage()}
       renderPlaceholder={() => <CommunityTopicPanelItemSkeleton />}
-      scrollAreaKey={`mono-list:${tab.id}`}
+      scrollMemoryKey={`mono-list:${tab.id}`}
       showBackToTop
     />
   )

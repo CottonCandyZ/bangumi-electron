@@ -92,7 +92,7 @@ export function TrendingSubjectsListPanelContent({
         renderPlaceholder={() => <TrendingSubjectPanelItemSkeleton />}
         rootClassName="flex-1"
         className="px-2 py-2"
-        scrollAreaKey={`mono-list:${tab.id}`}
+        scrollMemoryKey={`mono-list:${tab.id}`}
         showBackToTop
       />
     </>

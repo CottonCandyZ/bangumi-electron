@@ -177,7 +177,7 @@ export function MarkdownReplyEditor({
               </TabsList>
               {BANGUMI_SMILE_GROUPS.map((group) => (
                 <TabsContent value={group.value} className="min-h-0" key={group.value}>
-                  <div className="grid max-h-72 grid-cols-8 gap-1 overflow-x-hidden overflow-y-auto pr-1">
+                  <div className="grid max-h-72 grid-cols-8 gap-1 overflow-x-hidden overflow-y-auto">
                     {group.codes.map((code) => (
                       <EmojiButton
                         code={code}
@@ -193,7 +193,7 @@ export function MarkdownReplyEditor({
               ))}
               {DYNAMIC_SMILE_GROUPS.map((group) => (
                 <TabsContent value={group.value} className="min-h-0" key={group.value}>
-                  <div className="max-h-80 overflow-x-hidden overflow-y-auto pr-1">
+                  <div className="max-h-80 overflow-x-hidden overflow-y-auto">
                     {group.sections.map((section, index) => (
                       <section className={cn(index > 0 && 'mt-2')} key={section.label}>
                         <div className="text-muted-foreground mb-1 px-0.5 text-xs font-medium">

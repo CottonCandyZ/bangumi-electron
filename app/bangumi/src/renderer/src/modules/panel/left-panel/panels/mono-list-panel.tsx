@@ -1,4 +1,3 @@
-import { ScrollArea } from '@base-ui/react/scroll-area'
 import { MyLink } from '@renderer/components/my-link'
 import {
   DropdownMenu,
@@ -214,9 +213,9 @@ function MonoListPanelTabStrip({
   tabs: MonoListPanelTab[]
 }) {
   return (
-    <ScrollArea.Root className="group/tab-scroll relative h-11 min-w-0 flex-1 overflow-hidden">
-      <ScrollArea.Viewport
-        className="h-full w-full overflow-y-hidden focus-visible:outline-hidden"
+    <div className="relative h-11 min-w-0 flex-1 overflow-hidden">
+      <div
+        className="h-full w-full overflow-x-auto overflow-y-hidden focus-visible:outline-hidden"
         onWheel={(event) => {
           const viewport = event.currentTarget
           const hasHorizontalOverflow = viewport.scrollWidth > viewport.clientWidth
@@ -232,7 +231,7 @@ function MonoListPanelTabStrip({
           )
         }}
       >
-        <ScrollArea.Content className="flex h-full w-max min-w-full flex-row items-center gap-1">
+        <div className="flex h-full w-max min-w-full flex-row items-center gap-1">
           {tabs.map((tab) => (
             <button
               className="no-drag-region hover:bg-accent data-[active=true]:bg-accent flex h-9 max-w-40 min-w-16 items-center justify-between gap-2 rounded-md px-2 text-left text-sm"
@@ -257,15 +256,9 @@ function MonoListPanelTabStrip({
               </span>
             </button>
           ))}
-        </ScrollArea.Content>
-      </ScrollArea.Viewport>
-      <ScrollArea.Scrollbar
-        orientation="horizontal"
-        className="no-drag-region absolute right-1 bottom-0 left-1 z-20 flex h-1 touch-none opacity-0 transition-opacity duration-150 select-none group-hover/tab-scroll:opacity-100 data-[scrolling]:opacity-100"
-      >
-        <ScrollArea.Thumb className="no-drag-region bg-foreground/10 hover:bg-foreground/30 active:bg-foreground/40 relative h-full [width:var(--scroll-area-thumb-width)] shrink-0 rounded-full" />
-      </ScrollArea.Scrollbar>
-    </ScrollArea.Root>
+        </div>
+      </div>
+    </div>
   )
 }
 

@@ -118,8 +118,8 @@ function TopicDetail({
     saveScrollState: saveVirtualScrollState,
   } = useVirtualScrollMemory({
     itemCount: rows.length,
+    memoryKey: virtualScrollKey,
     ready: true,
-    scrollKey: virtualScrollKey,
     viewport: scrollViewport,
     viewportRef: scrollRef,
     virtualizerRef,

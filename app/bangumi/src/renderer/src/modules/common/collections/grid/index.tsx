@@ -107,7 +107,7 @@ export function CollectionsGrid({
       onNearBottom={() => fetchNextPage()}
       renderPlaceholder={() => <CollectionSkeleton />}
       rootClassName="flex-1"
-      scrollAreaKey={`collection-panel:${username}:${subjectType}:${collectionType}:${showEpisodeList}:${useOneBasedEpisodeSort}`}
+      scrollMemoryKey={`collection-panel:${username}:${subjectType}:${collectionType}:${showEpisodeList}:${useOneBasedEpisodeSort}`}
       showBackToTop
     />
   )

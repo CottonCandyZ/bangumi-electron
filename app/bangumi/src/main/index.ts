@@ -17,6 +17,13 @@ const { setupAutoUpdate } = await import('@main/update')
 
 const DEV_CDP_PORT = process.env.BANGUMI_ELECTRON_CDP_PORT || '9222'
 
+if (process.platform === 'win32') {
+  app.commandLine.appendSwitch(
+    'enable-features',
+    ['OverlayScrollbar', 'FluentScrollbar', 'FluentOverlayScrollbar'].join(','),
+  )
+}
+
 if (is.dev) {
   app.commandLine.appendSwitch('remote-debugging-address', '127.0.0.1')
   app.commandLine.appendSwitch('remote-debugging-port', DEV_CDP_PORT)

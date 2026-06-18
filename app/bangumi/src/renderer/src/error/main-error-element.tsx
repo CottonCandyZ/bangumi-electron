@@ -2,7 +2,6 @@ import { useEffect } from 'react'
 import { useNavigate, useRouteError, useLocation } from 'react-router-dom'
 import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@renderer/components/ui/card'
-import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { ERROR_CONSTANTS } from '@renderer/constants'
 import { useSession } from '@renderer/data/hooks/session'
 import { useCopyToClipboard } from '@renderer/hooks/use-copy-to-clipboard'
@@ -68,11 +67,11 @@ export default function MainErrorElement() {
                   </Button>
                 </div>
               </div>
-              <ScrollWrapper className="border-border bg-background max-h-60 rounded-md border">
+              <div className="border-border bg-background max-h-60 overflow-auto rounded-md border">
                 <pre className="text-muted-foreground p-3 font-mono text-xs break-words whitespace-pre-wrap">
                   {error.stack}
                 </pre>
-              </ScrollWrapper>
+              </div>
             </div>
           )}
 

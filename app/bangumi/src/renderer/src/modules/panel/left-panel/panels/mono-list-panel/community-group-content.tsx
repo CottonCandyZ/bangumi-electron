@@ -89,7 +89,7 @@ function CommunityGroupsVirtualList({
       isFetchingMore={query.isFetchingNextPage}
       onNearBottom={() => query.fetchNextPage()}
       renderPlaceholder={() => <CommunityGroupPanelItemSkeleton />}
-      scrollAreaKey={`mono-list:${tab.id}`}
+      scrollMemoryKey={`mono-list:${tab.id}`}
       showBackToTop
     />
   )

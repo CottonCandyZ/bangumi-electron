@@ -1,5 +1,5 @@
-import { ScrollArea } from '@base-ui/react/scroll-area'
 import { BackToTopButton } from '@renderer/components/button/back-to-top'
+import { NativeScrollViewport } from '@renderer/components/scroll/native-scroll-viewport'
 import { useNativeSmoothVirtualizerScrollToTop } from '@renderer/components/virtual/use-native-smooth-virtualizer-scroll-to-top'
 import { useVirtualScrollMemory } from '@renderer/components/virtual/use-virtual-scroll-memory'
 import { cn } from '@renderer/lib/utils'
@@ -26,7 +26,7 @@ type SingleColumnVirtualListProps<T> = {
   overscan?: number
   renderPlaceholder?: (index: number) => ReactNode
   rootClassName?: string
-  scrollAreaKey?: string
+  scrollMemoryKey?: string
   scrollToTopSignal?: number
   showBackToTop?: boolean
 }
@@ -66,7 +66,7 @@ export function SingleColumnVirtualList<T>({
   overscan = 6,
   renderPlaceholder,
   rootClassName,
-  scrollAreaKey,
+  scrollMemoryKey,
   scrollToTopSignal,
   showBackToTop = false,
 }: SingleColumnVirtualListProps<T>) {
@@ -107,7 +107,7 @@ export function SingleColumnVirtualList<T>({
   } = useVirtualScrollMemory({
     canSave: !isFetchingMore,
     itemCount: items.length,
-    scrollKey: scrollAreaKey,
+    memoryKey: scrollMemoryKey,
     viewport,
     viewportRef,
     virtualizerRef,
@@ -181,59 +181,58 @@ export function SingleColumnVirtualList<T>({
 
   if (items.length === 0 && empty) return empty
 
-  return (
-    <ScrollArea.Root
-      className={cn('group/scroll relative min-h-0 w-full overflow-hidden', rootClassName)}
-      key={scrollAreaKey}
-    >
-      <ScrollArea.Viewport
-        className={cn('h-full w-full overflow-x-hidden focus-visible:outline-hidden', className)}
-        onScroll={(event) => {
-          saveScrollState(event.currentTarget.scrollTop)
-          handleScroll()
-        }}
-        ref={(node) => {
-          viewportRef.current = node
-          setViewport((prev) => (prev === node ? prev : node))
-        }}
-      >
-        <ScrollArea.Content className="relative w-full">
-          {viewport && (
-            <Virtualizer
-              cache={restoredVirtualCache}
-              data={rows}
-              item={VirtualListItem}
-              itemSize={estimateSize}
-              key={mountKey}
-              onScroll={handleScroll}
-              onScrollEnd={saveScrollState}
-              ref={virtualizerRef}
-              scrollRef={viewportRef}
-              bufferSize={overscan * estimateSize}
-            >
-              {(row) => (
-                <div style={{ paddingBottom: gap > 0 ? `${gap}px` : undefined }}>
-                  {row.type === 'item'
-                    ? renderItem(row.item, row.index)
-                    : row.type === 'footer'
-                      ? footer
-                      : renderPlaceholder?.(row.index)}
-                </div>
-              )}
-            </Virtualizer>
+  const virtualContent = (
+    <div className="relative w-full">
+      {viewport && (
+        <Virtualizer
+          cache={restoredVirtualCache}
+          data={rows}
+          item={VirtualListItem}
+          itemSize={estimateSize}
+          key={mountKey}
+          onScroll={handleScroll}
+          onScrollEnd={saveScrollState}
+          ref={virtualizerRef}
+          scrollRef={viewportRef}
+          bufferSize={overscan * estimateSize}
+        >
+          {(row) => (
+            <div style={{ paddingBottom: gap > 0 ? `${gap}px` : undefined }}>
+              {row.type === 'item'
+                ? renderItem(row.item, row.index)
+                : row.type === 'footer'
+                  ? footer
+                  : renderPlaceholder?.(row.index)}
+            </div>
           )}
-        </ScrollArea.Content>
-      </ScrollArea.Viewport>
+        </Virtualizer>
+      )}
+    </div>
+  )
+
+  const viewportProps = {
+    onScroll: (event: React.UIEvent<HTMLDivElement>) => {
+      saveScrollState(event.currentTarget.scrollTop)
+      handleScroll()
+    },
+    ref: (node: HTMLDivElement | null) => {
+      viewportRef.current = node
+      setViewport((prev) => (prev === node ? prev : node))
+    },
+  }
+
+  return (
+    <div
+      className={cn('relative min-h-0 w-full overflow-hidden', rootClassName)}
+      key={scrollMemoryKey}
+    >
+      <NativeScrollViewport {...viewportProps} className={className}>
+        {virtualContent}
+      </NativeScrollViewport>
       {showBackToTop && (
         <BackToTopButton onBackToTop={scrollToTop} position="absolute" viewport={viewport} />
       )}
-      <ScrollArea.Scrollbar
-        orientation="vertical"
-        className="absolute top-0 right-0 z-20 flex h-full w-2.5 touch-none p-0.5 opacity-0 transition-opacity duration-150 select-none group-hover/scroll:opacity-100"
-      >
-        <ScrollArea.Thumb className="bg-foreground/10 hover:bg-foreground/30 active:bg-foreground/40 relative [height:var(--scroll-area-thumb-height)] w-full flex-1 rounded-full" />
-      </ScrollArea.Scrollbar>
-    </ScrollArea.Root>
+    </div>
   )
 }
 

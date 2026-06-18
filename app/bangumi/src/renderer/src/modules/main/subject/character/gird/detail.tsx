@@ -1,4 +1,3 @@
-import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQueryCharacterDetailByID } from '@renderer/data/hooks/api/character'
 import { CharacterId } from '@renderer/data/types/bgm'
@@ -12,9 +11,12 @@ export function Detail({ characterId }: { characterId: CharacterId }) {
   }
   const renderSummery = renderBBCode(characterDetailData.summary)
   return characterDetailData.summary !== '' ? (
-    <ScrollWrapper className="bbcode max-h-56 min-h-8 py-0.5 whitespace-pre-line">
+    <div
+      className="bbcode max-h-56 min-h-8 overflow-x-hidden overflow-y-auto py-0.5 pr-2 whitespace-pre-line"
+      onClick={(event) => event.stopPropagation()}
+    >
       {renderSummery}
-    </ScrollWrapper>
+    </div>
   ) : (
     <p className="min-h-8">暂时还没有说明哦～</p>
   )

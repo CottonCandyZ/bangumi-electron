@@ -1,6 +1,5 @@
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
-import { ScrollWrapper } from '@renderer/components/scroll/scroll-wrapper'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQueryPersonsById } from '@renderer/data/hooks/api/person'
 import { PersonId } from '@renderer/data/types/bgm'
@@ -52,9 +51,7 @@ export function Detail({ personId }: { personId: PersonId }) {
       </div>
       <section>
         {personDetail.summary !== '' ? (
-          <ScrollWrapper className="bbcode max-h-40 whitespace-pre-line">
-            {renderSummery}
-          </ScrollWrapper>
+          <div className="bbcode max-h-40 overflow-auto whitespace-pre-line">{renderSummery}</div>
         ) : (
           <p>暂时还没有说明哦～</p>
         )}

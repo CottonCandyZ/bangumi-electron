@@ -69,7 +69,7 @@ export function SubjectCharacterListPanelContent({
       </MonoListPanelFilters>
       <MonoPanelInfiniteList
         activeIndex={activeIndex}
-        scrollAreaKey={`mono-list:${tab.id}:relation:${filter}`}
+        scrollMemoryKey={`mono-list:${tab.id}:relation:${filter}`}
       >
         {items.map((item) => (
           <div key={item.id}>
@@ -123,7 +123,7 @@ export function SubjectRelatedListPanelContent({
       </MonoListPanelFilters>
       <MonoPanelInfiniteList
         activeIndex={activeIndex}
-        scrollAreaKey={`mono-list:${tab.id}:relation:${filter}`}
+        scrollMemoryKey={`mono-list:${tab.id}:relation:${filter}`}
       >
         {items.map((item) => (
           <div key={`${item.id}-${item.relation}`}>
@@ -189,7 +189,7 @@ export function SubjectEpisodeListPanelContent({
       )}
       <MonoPanelInfiniteList
         activeIndex={activeIndex}
-        scrollAreaKey={`mono-list:${tab.id}:offset:${offset}`}
+        scrollMemoryKey={`mono-list:${tab.id}:offset:${offset}`}
       >
         {episodeQuery.data.data.map((item) => (
           <div key={getPanelEpisode(item).id}>
@@ -214,7 +214,7 @@ export function SubjectTankobonListPanelContent({
   )
 
   return (
-    <MonoPanelInfiniteList activeIndex={activeIndex} scrollAreaKey={`mono-list:${tab.id}`}>
+    <MonoPanelInfiniteList activeIndex={activeIndex} scrollMemoryKey={`mono-list:${tab.id}`}>
       {tab.relatedSubjects.map((item) => (
         <div key={item.id}>
           <SubjectRelatedListItem item={item} />

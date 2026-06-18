@@ -11,7 +11,7 @@ export function GroupTopicsVirtualList({
   isFetchingMore,
   loading,
   onNearBottom,
-  scrollAreaKey,
+  scrollMemoryKey,
   topics,
 }: {
   error: boolean
@@ -19,7 +19,7 @@ export function GroupTopicsVirtualList({
   isFetchingMore: boolean
   loading: boolean
   onNearBottom: () => Promise<unknown> | void
-  scrollAreaKey: string
+  scrollMemoryKey: string
   topics: CommunityTopic[]
 }) {
   if (loading && topics.length === 0) {
@@ -50,7 +50,7 @@ export function GroupTopicsVirtualList({
       renderItem={(topic) => <GroupTopicItem topic={topic} />}
       renderPlaceholder={() => <GroupTopicSkeleton />}
       rootClassName="flex-1"
-      scrollAreaKey={scrollAreaKey}
+      scrollMemoryKey={scrollMemoryKey}
       showBackToTop
     />
   )

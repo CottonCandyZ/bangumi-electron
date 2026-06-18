@@ -69,8 +69,8 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
     saveScrollState: saveVirtualScrollState,
   } = useVirtualScrollMemory({
     itemCount: rows.length,
+    memoryKey: virtualScrollKey,
     ready: !commentsQuery.isPending,
-    scrollKey: virtualScrollKey,
     viewport: scrollViewport,
     viewportRef: scrollRef,
     virtualizerRef,

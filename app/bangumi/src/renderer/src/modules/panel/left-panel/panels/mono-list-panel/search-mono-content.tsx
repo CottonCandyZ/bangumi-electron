@@ -58,7 +58,7 @@ export function SearchMonosListPanelContent({
         renderPlaceholder={(index) => <Skeleton key={index} className="h-24 w-full rounded-md" />}
         rootClassName="flex-1"
         className="px-2 py-2"
-        scrollAreaKey={`mono-list:${tab.id}`}
+        scrollMemoryKey={`mono-list:${tab.id}`}
         showBackToTop
       />
     </>

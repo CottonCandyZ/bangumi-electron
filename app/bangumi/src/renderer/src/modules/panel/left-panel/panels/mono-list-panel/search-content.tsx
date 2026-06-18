@@ -83,7 +83,7 @@ export function SearchSubjectsListPanelContent({
         renderPlaceholder={(index) => <Skeleton key={index} className="h-24 w-full rounded-md" />}
         rootClassName="flex-1"
         className="px-2 py-2"
-        scrollAreaKey={`${tab.id}-${sort}`}
+        scrollMemoryKey={`${tab.id}-${sort}`}
         showBackToTop
       />
     </>

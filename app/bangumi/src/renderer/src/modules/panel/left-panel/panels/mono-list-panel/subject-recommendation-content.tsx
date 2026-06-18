@@ -86,7 +86,7 @@ export function SubjectRecommendationsListPanelContent({
         renderItem={(item) => <SubjectRecommendationPanelItem item={item} />}
         renderPlaceholder={() => <SubjectRecommendationPanelSkeletonItem />}
         rootClassName="flex-1"
-        scrollAreaKey={`mono-list:${tab.id}`}
+        scrollMemoryKey={`mono-list:${tab.id}`}
         showBackToTop
       />
     </>
