@@ -306,6 +306,10 @@ importers:
       zod:
         specifier: ^3.23.8
         version: 3.23.8
+    optionalDependencies:
+      bangumi-macos-traffic-lights:
+        specifier: file:./native/macos-traffic-lights
+        version: file:app/bangumi/native/macos-traffic-lights
 
   demo/private-api-turnstile:
     devDependencies:
@@ -2886,6 +2890,10 @@ packages:
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
+
+  bangumi-macos-traffic-lights@file:app/bangumi/native/macos-traffic-lights:
+    resolution: {directory: app/bangumi/native/macos-traffic-lights, type: directory}
+    os: [darwin]
 
   base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
@@ -8607,6 +8615,9 @@ snapshots:
       possible-typed-array-names: 1.0.0
 
   balanced-match@1.0.2: {}
+
+  bangumi-macos-traffic-lights@file:app/bangumi/native/macos-traffic-lights:
+    optional: true
 
   base64-js@1.5.1: {}
 

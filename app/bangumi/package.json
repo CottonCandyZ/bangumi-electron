@@ -1,6 +1,6 @@
 {
   "name": "bangumi-electron",
-  "version": "0.0.1-beta.18",
+  "version": "0.0.1-beta.19",
   "type": "module",
   "description": "An Electron application for bangumi",
   "main": "./out/main/index.js",
@@ -19,8 +19,8 @@
     "build": "pnpm run typecheck && node scripts/with-electron-node-path.mjs electron-vite build",
     "postinstall": "electron-builder install-app-deps",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
-    "rebuild:mac:arm64": "electron-rebuild -f -w better-sqlite3 -a arm64",
-    "rebuild:mac:x64": "electron-rebuild -f -w better-sqlite3 -a x64",
+    "rebuild:mac:arm64": "electron-rebuild -f -w better-sqlite3,bangumi-macos-traffic-lights -a arm64",
+    "rebuild:mac:x64": "electron-rebuild -f -w better-sqlite3,bangumi-macos-traffic-lights -a x64",
     "build:unpack": "pnpm run build && electron-builder --dir",
     "build:win": "pnpm run build && electron-builder --win",
     "build:win:beta": "pnpm run build && node scripts/velopack-win.mjs --channel beta --publish never",
@@ -58,6 +58,9 @@
     "koffi": "^2.16.2",
     "lowdb": "^7.0.1",
     "velopack": "^1.1.1"
+  },
+  "optionalDependencies": {
+    "bangumi-macos-traffic-lights": "file:./native/macos-traffic-lights"
   },
   "devDependencies": {
     "@bbob/core": "^4.0.3",

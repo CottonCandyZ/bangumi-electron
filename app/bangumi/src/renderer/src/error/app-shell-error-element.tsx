@@ -9,7 +9,7 @@ export default function AppShellErrorElement() {
   return (
     <>
       <NavBar />
-      <div className="ml-16 flex h-dvh flex-row">
+      <div className="flex h-dvh flex-row" style={{ marginLeft: UI_CONFIG.NAV_WIDTH }}>
         <div className="flex h-full w-full flex-col">
           <header
             className={cn(

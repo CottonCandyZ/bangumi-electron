@@ -28,7 +28,7 @@ export function NavBar() {
       >
         <div
           className={cn(
-            'flex h-14 w-full shrink-0 items-center border-b p-3',
+            'flex h-14 w-full shrink-0 items-center border-b p-2',
             platform === 'darwin' && 'pt-6',
           )}
         >
@@ -43,7 +43,7 @@ export function NavBar() {
             <span className="i-mingcute-menu-line flex text-[1.4rem]" />
           </Button>
         </div>
-        <div className="flex h-full w-full flex-col justify-between overflow-x-hidden p-3">
+        <div className="flex h-full w-full flex-col justify-between overflow-x-hidden p-2">
           <div className="flex w-full flex-col gap-2">
             <LinkNav />
             <Separator />
@@ -55,7 +55,8 @@ export function NavBar() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 left-16 z-40 bg-black"
+            className="fixed inset-0 z-40 bg-black"
+            style={{ left: UI_CONFIG.NAV_WIDTH }}
             onClick={() => setOpen(false)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.8 }}

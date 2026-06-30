@@ -12,6 +12,7 @@ module.exports = async function pruneAfterPack(context) {
 
   await Promise.all([
     pruneBetterSqlite3(unpackedRoot),
+    pruneMacOSTrafficLights(unpackedRoot),
     pruneKoffi(unpackedRoot, platform, context.arch),
     pruneVelopack(unpackedRoot, platform, context.arch),
   ])
@@ -32,6 +33,11 @@ async function pruneBetterSqlite3(unpackedRoot) {
     join(root, 'build', 'Release', 'sqlite3.lib'),
     join(root, 'build', 'Release', 'test_extension.node'),
   ])
+}
+
+async function pruneMacOSTrafficLights(unpackedRoot) {
+  const root = join(unpackedRoot, 'bangumi-macos-traffic-lights')
+  await removeAll([join(root, 'src'), join(root, 'build', 'Release', 'obj')])
 }
 
 async function pruneKoffi(unpackedRoot, platform, contextArch) {

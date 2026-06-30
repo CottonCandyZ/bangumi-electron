@@ -12,14 +12,30 @@ const packId = 'io.github.cottoncandyz.bangumi-electron'
 const releaseTag = `v${packageJson.version}`
 const hostArch = process.arch === 'arm64' ? 'arm64' : 'x64'
 const archs = arch === 'all' ? ['x64', 'arm64'] : [arch]
-const nativeModule = join(
-  projectDir,
-  'node_modules',
-  'better-sqlite3',
-  'build',
-  'Release',
-  'better_sqlite3.node',
-)
+const nativeModules = [
+  {
+    name: 'better-sqlite3',
+    binaryPath: join(
+      projectDir,
+      'node_modules',
+      'better-sqlite3',
+      'build',
+      'Release',
+      'better_sqlite3.node',
+    ),
+  },
+  {
+    name: 'bangumi-macos-traffic-lights',
+    binaryPath: join(
+      projectDir,
+      'node_modules',
+      'bangumi-macos-traffic-lights',
+      'build',
+      'Release',
+      'bangumi_macos_traffic_lights.node',
+    ),
+  },
+]
 const vpkCommand = process.env.VPK_COMMAND || 'vpk'
 const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN
 const repoUrl = 'https://github.com/CottonCandyZ/bangumi-electron'
@@ -88,9 +104,12 @@ try {
   console.error(error instanceof Error ? error.message : error)
   exitCode = 1
 } finally {
-  if (!isNativeModuleArch(nativeModule, hostArch)) {
+  const modulesToRebuild = nativeModules.filter(
+    (module) => !isNativeModuleArch(module.binaryPath, hostArch),
+  )
+  if (modulesToRebuild.length > 0) {
     try {
-      rebuildNative(hostArch)
+      rebuildNative(hostArch, modulesToRebuild)
     } catch (error) {
       console.error(error instanceof Error ? error.message : error)
       exitCode = 1
@@ -145,7 +164,14 @@ function resetOutputDir(outputDir) {
 }
 
 function downloadExistingRelease(outputDir, packChannel) {
-  const downloadArgs = ['download', publishTarget, '--outputDir', outputDir, '--channel', packChannel]
+  const downloadArgs = [
+    'download',
+    publishTarget,
+    '--outputDir',
+    outputDir,
+    '--channel',
+    packChannel,
+  ]
 
   if (publishTarget === 'github') appendGitHubArgs(downloadArgs, { forDownload: true })
   else if (publishTarget === 's3') appendS3Args(downloadArgs)
@@ -187,9 +213,17 @@ function appendS3Args(commandArgs, options = {}) {
   appendOptionalArg(commandArgs, '--secret', process.env.BANGUMI_VELOPACK_S3_SECRET)
   appendOptionalArg(commandArgs, '--session', process.env.BANGUMI_VELOPACK_S3_SESSION)
   appendOptionalArg(commandArgs, '--prefix', process.env.BANGUMI_VELOPACK_S3_PREFIX)
-  appendOptionalArg(commandArgs, '--disablePathStyle', process.env.BANGUMI_VELOPACK_S3_DISABLE_PATH_STYLE)
+  appendOptionalArg(
+    commandArgs,
+    '--disablePathStyle',
+    process.env.BANGUMI_VELOPACK_S3_DISABLE_PATH_STYLE,
+  )
   if (options.forUpload) {
-    appendOptionalArg(commandArgs, '--keepMaxReleases', process.env.BANGUMI_VELOPACK_KEEP_MAX_RELEASES)
+    appendOptionalArg(
+      commandArgs,
+      '--keepMaxReleases',
+      process.env.BANGUMI_VELOPACK_KEEP_MAX_RELEASES,
+    )
   }
 }
 
@@ -200,7 +234,11 @@ function appendLocalArgs(commandArgs, options = {}) {
   commandArgs.push('--path', localPath)
   if (options.forUpload) {
     commandArgs.push('--regenerate=true')
-    appendOptionalArg(commandArgs, '--keepMaxReleases', process.env.BANGUMI_VELOPACK_KEEP_MAX_RELEASES)
+    appendOptionalArg(
+      commandArgs,
+      '--keepMaxReleases',
+      process.env.BANGUMI_VELOPACK_KEEP_MAX_RELEASES,
+    )
   }
 }
 
@@ -209,13 +247,13 @@ function appendOptionalArg(commandArgs, name, value) {
   commandArgs.push(name, value)
 }
 
-function rebuildNative(targetArch) {
+function rebuildNative(targetArch, modules = nativeModules) {
   run('pnpm', [
     'exec',
     'electron-rebuild',
     '-f',
     '-w',
-    'better-sqlite3',
+    modules.map((module) => module.name).join(','),
     '-a',
     targetArch,
     '-v',

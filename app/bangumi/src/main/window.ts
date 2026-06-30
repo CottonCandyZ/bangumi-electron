@@ -7,6 +7,7 @@ import { getRendererHandlers } from '@egoist/tipc/main'
 import { RendererHandlers } from '@main/tipc/renderer-handlers'
 import { isMacOS, isWindows, isWindows11 } from '@main/env'
 import { isAppQuitting } from '@main/app-flags'
+import { setupMacOSTrafficLightSpacing } from '@main/macos-traffic-lights'
 
 const DEFAULT_WINDOW_SIZE = {
   width: 1100,
@@ -75,6 +76,8 @@ export function createWindow(
   })
 
   const handlers = getRendererHandlers<RendererHandlers>(window.webContents)
+  setupMacOSTrafficLightSpacing(window)
+
   window.addListener('maximize', () => {
     handlers.isMaximize.send(true)
   })

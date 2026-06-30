@@ -20,6 +20,7 @@ files:
   - '!**/{test,tests,__tests__,docs,example,examples}/**'
 asarUnpack:
   - resources/**
+  - node_modules/**/*.node
 afterPack: scripts/prune-after-pack.cjs
 win:
   executableName: Bangumi

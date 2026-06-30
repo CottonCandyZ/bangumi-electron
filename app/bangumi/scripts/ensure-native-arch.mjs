@@ -9,26 +9,47 @@ if (process.platform !== 'darwin') {
 const projectDir = process.cwd()
 const packageJson = JSON.parse(readFileSync(join(projectDir, 'package.json'), 'utf8'))
 const hostArch = process.arch === 'arm64' ? 'arm64' : 'x64'
-const nativeModule = join(
-  projectDir,
-  'node_modules',
-  'better-sqlite3',
-  'build',
-  'Release',
-  'better_sqlite3.node',
-)
+const nativeModules = [
+  {
+    name: 'better-sqlite3',
+    binaryPath: join(
+      projectDir,
+      'node_modules',
+      'better-sqlite3',
+      'build',
+      'Release',
+      'better_sqlite3.node',
+    ),
+  },
+  {
+    name: 'bangumi-macos-traffic-lights',
+    binaryPath: join(
+      projectDir,
+      'node_modules',
+      'bangumi-macos-traffic-lights',
+      'build',
+      'Release',
+      'bangumi_macos_traffic_lights.node',
+    ),
+  },
+]
 
-if (isNativeModuleArch(nativeModule, hostArch)) {
+const modulesToRebuild = nativeModules.filter(
+  (module) => !isNativeModuleArch(module.binaryPath, hostArch),
+)
+if (modulesToRebuild.length === 0) {
   process.exit(0)
 }
 
-console.log(`Rebuilding better-sqlite3 for local macOS ${hostArch} dev runtime...`)
+console.log(
+  `Rebuilding native modules for local macOS ${hostArch} dev runtime: ${modulesToRebuild.map((module) => module.name).join(', ')}`,
+)
 run('pnpm', [
   'exec',
   'electron-rebuild',
   '-f',
   '-w',
-  'better-sqlite3',
+  modulesToRebuild.map((module) => module.name).join(','),
   '-a',
   hostArch,
   '-v',
