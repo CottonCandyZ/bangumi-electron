@@ -3,9 +3,22 @@
   word-break: break-word;
 
   .mask {
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
     text-shadow: #555 0 0 20px;
+    text-decoration-color: #555;
     border-radius: 2px;
     @apply border border-[#555] bg-[#555] text-[#555] transition-all duration-500 ease-linear hover:text-white;
+  }
+
+  .mask a {
+    color: inherit !important;
+    text-decoration-color: currentColor !important;
+  }
+
+  .mask a:hover {
+    color: inherit !important;
+    text-decoration-color: currentColor !important;
   }
 
   a {
