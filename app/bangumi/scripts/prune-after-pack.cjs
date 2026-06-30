@@ -2,17 +2,12 @@ const { rm } = require('node:fs/promises')
 const { join } = require('node:path')
 
 module.exports = async function pruneAfterPack(context) {
-  const unpackedRoot = join(
-    context.appOutDir,
-    'resources',
-    'app.asar.unpacked',
-    'node_modules',
-  )
+  const unpackedRoot = join(context.appOutDir, 'resources', 'app.asar.unpacked', 'node_modules')
   const platform = context.electronPlatformName
 
   await Promise.all([
     pruneBetterSqlite3(unpackedRoot),
-    pruneMacOSTrafficLights(unpackedRoot),
+    pruneMacOSTrafficLights(unpackedRoot, platform),
     pruneKoffi(unpackedRoot, platform, context.arch),
     pruneVelopack(unpackedRoot, platform, context.arch),
   ])
@@ -35,8 +30,14 @@ async function pruneBetterSqlite3(unpackedRoot) {
   ])
 }
 
-async function pruneMacOSTrafficLights(unpackedRoot) {
+async function pruneMacOSTrafficLights(unpackedRoot, platform) {
   const root = join(unpackedRoot, 'bangumi-macos-traffic-lights')
+
+  if (platform !== 'darwin') {
+    await remove(root)
+    return
+  }
+
   await removeAll([join(root, 'src'), join(root, 'build', 'Release', 'obj')])
 }
 

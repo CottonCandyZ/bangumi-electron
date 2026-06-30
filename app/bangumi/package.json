@@ -17,7 +17,7 @@
     "dev": "node scripts/ensure-native-arch.mjs && node scripts/with-electron-node-path.mjs electron-vite dev",
     "dev:codex": "node scripts/dev-codex.mjs",
     "build": "pnpm run typecheck && node scripts/with-electron-node-path.mjs electron-vite build",
-    "postinstall": "electron-builder install-app-deps",
+    "postinstall": "node scripts/install-app-deps.mjs",
     "rebuild": "electron-rebuild -f -w better-sqlite3",
     "rebuild:mac:arm64": "electron-rebuild -f -w better-sqlite3,bangumi-macos-traffic-lights -a arm64",
     "rebuild:mac:x64": "electron-rebuild -f -w better-sqlite3,bangumi-macos-traffic-lights -a x64",
