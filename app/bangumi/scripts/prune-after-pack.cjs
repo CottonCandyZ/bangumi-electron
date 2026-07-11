@@ -1,5 +1,6 @@
 const { rm } = require('node:fs/promises')
 const { join } = require('node:path')
+const { buildVelopackBridge } = require('./build-velopack-bridge.cjs')
 
 module.exports = async function pruneAfterPack(context) {
   const unpackedRoot = join(context.appOutDir, 'resources', 'app.asar.unpacked', 'node_modules')
@@ -11,6 +12,10 @@ module.exports = async function pruneAfterPack(context) {
     pruneKoffi(unpackedRoot, platform, context.arch),
     pruneVelopack(unpackedRoot, platform, context.arch),
   ])
+
+  // The helper is copied after Electron's app files are packed but before signing/notarization,
+  // so the native executable is included in the final platform signature.
+  await buildVelopackBridge(context)
 }
 
 async function pruneBetterSqlite3(unpackedRoot) {

@@ -1,5 +1,6 @@
-import { createHash } from 'node:crypto'
-import { mkdir, open as openFile, readdir, rename, unlink } from 'node:fs/promises'
+import { existsSync } from 'node:fs'
+import { readdir, unlink } from 'node:fs/promises'
+import { spawn } from 'node:child_process'
 import path from 'node:path'
 import { BrowserWindow, app } from 'electron'
 import { getRendererHandlers } from '@egoist/tipc/main'
@@ -19,7 +20,6 @@ const APP_CONFIG_STORE_KEY = 'appConfig'
 const IGNORED_UPDATE_KEY = 'ignoredUpdate'
 const STARTUP_CHECK_DELAY_MS = 3000
 const DEFAULT_UPDATE_SOURCE_URL = __APP_UPDATE_SOURCE_URL__
-const GITHUB_API_ACCEPT = 'application/vnd.github+json'
 const VELOPACK_PACKAGE_ID = 'io.github.cottoncandyz.bangumi-electron'
 
 let initialized = false
@@ -28,7 +28,6 @@ let checkPromiseChannel: AppUpdateChannel | null = null
 let checkRunId = 0
 let downloadPromise: Promise<unknown> | null = null
 let availableUpdateInfo: UpdateInfo | null = null
-let availableUpdateDownloadUrl: string | null = null
 let availableUpdateSourceUrl: string | null = null
 let downloadedUpdateSourceUrl: string | null = null
 let downloadedUpdateAsset: VelopackAsset | null = null
@@ -76,32 +75,23 @@ function getIgnoredVersion(channel = readUpdateChannel()) {
   return ignored.channel === channel ? ignored.version : undefined
 }
 
-type GitHubRelease = {
-  tag_name: string
-  draft: boolean
-  prerelease: boolean
-  assets: GitHubReleaseAsset[]
-}
-
-type GitHubReleaseAsset = {
-  name: string
-  browser_download_url: string
-}
-
-type ResolvedGitHubRelease = {
-  release: GitHubRelease
-  feedUrl: string
-}
-
-type GitHubAssetFeed = {
-  Assets?: Partial<VelopackAsset>[]
-}
-
 type ResolvedUpdateCheck = {
-  downloadUrl?: string
   updateInfo: UpdateInfo | null
   sourceUrl?: string
   unavailableReason?: string
+}
+
+type VelopackBridgeEvent =
+  | { event: 'progress'; percent: number }
+  | { event: 'result'; update?: UpdateInfo | null }
+
+type VelopackLocatorConfig = {
+  RootAppDir: string
+  UpdateExePath: string
+  PackagesDir: string
+  ManifestPath: string
+  CurrentBinaryDir: string
+  IsPortable: boolean
 }
 
 function createUpdateManager(sourceUrl = getUpdateSourceUrl(), channel = readUpdateChannel()) {
@@ -126,52 +116,8 @@ function parseGitHubRepoUrl(sourceUrl: string) {
   }
 }
 
-async function resolveGitHubRelease(
-  channel = readUpdateChannel(),
-): Promise<ResolvedGitHubRelease | null> {
-  const sourceUrl = getUpdateSourceUrl()
-  const repo = parseGitHubRepoUrl(sourceUrl)
-  if (!repo) return null
-
-  const packageChannel = getVelopackChannel(channel)
-  const response = await fetch(`https://api.github.com/repos/${repo.owner}/${repo.repo}/releases`, {
-    headers: {
-      Accept: GITHUB_API_ACCEPT,
-      'User-Agent': 'Bangumi-Electron-Updater',
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error(`GitHub releases request failed: ${response.status}`)
-  }
-
-  const releases = (await response.json()) as GitHubRelease[]
-  const release = releases.find(
-    (candidate) =>
-      !candidate.draft &&
-      candidate.prerelease === (channel === 'beta') &&
-      candidate.assets.some((asset) => asset.name === `releases.${packageChannel}.json`),
-  )
-
-  if (!release) {
-    return null
-  }
-
-  const feed = release.assets.find((asset) => asset.name === `releases.${packageChannel}.json`)
-  if (!feed) return null
-
-  return {
-    release,
-    feedUrl: feed.browser_download_url,
-  }
-}
-
 async function resolveUpdateSourceUrl() {
-  const sourceUrl = getUpdateSourceUrl()
-  const repo = parseGitHubRepoUrl(sourceUrl)
-  if (!repo) return sourceUrl
-
-  return sourceUrl
+  return getUpdateSourceUrl()
 }
 
 async function createUpdateManagerForCheck(channel = readUpdateChannel()) {
@@ -189,6 +135,53 @@ function getPackagesDir(packageId = VELOPACK_PACKAGE_ID) {
   }
 
   return path.join(app.getPath('home'), '.cache', 'velopack', packageId, 'packages')
+}
+
+function getVelopackLocatorConfig(): VelopackLocatorConfig {
+  const currentBinaryDir = path.dirname(app.getPath('exe'))
+
+  if (process.platform === 'win32') {
+    const rootAppDir = path.resolve(currentBinaryDir, '..')
+    return {
+      RootAppDir: rootAppDir,
+      UpdateExePath: path.join(rootAppDir, 'Update.exe'),
+      PackagesDir: getPackagesDir(),
+      ManifestPath: path.join(currentBinaryDir, 'sq.version'),
+      CurrentBinaryDir: currentBinaryDir,
+      IsPortable: existsSync(path.join(rootAppDir, '.portable')),
+    }
+  }
+
+  if (process.platform === 'darwin') {
+    // TODO(release): Verify these locator paths with an installed and a portable package on both
+    // Intel and Apple Silicon macOS before enabling delta updates for the macOS release channel.
+    return {
+      RootAppDir: path.resolve(currentBinaryDir, '..', '..'),
+      UpdateExePath: path.join(currentBinaryDir, 'UpdateMac'),
+      PackagesDir: getPackagesDir(),
+      ManifestPath: path.join(currentBinaryDir, 'sq.version'),
+      CurrentBinaryDir: currentBinaryDir,
+      IsPortable: true,
+    }
+  }
+
+  // TODO(release): Build and test the bridge on each supported Linux packaging target. The current
+  // electron-builder AppImage/deb/snap flow has not yet been migrated to a Velopack Linux package,
+  // so its actual APPIMAGE, UpdateNix and sq.version layout must be verified before updates ship.
+  return {
+    RootAppDir: process.env.APPIMAGE || app.getPath('exe'),
+    UpdateExePath: path.join(currentBinaryDir, 'UpdateNix'),
+    PackagesDir: getPackagesDir(),
+    ManifestPath: path.join(currentBinaryDir, 'sq.version'),
+    CurrentBinaryDir: currentBinaryDir,
+    IsPortable: true,
+  }
+}
+
+function getVelopackBridgePath() {
+  const executable =
+    process.platform === 'win32' ? 'bangumi-velopack-bridge.exe' : 'bangumi-velopack-bridge'
+  return path.join(process.resourcesPath, 'velopack-bridge', executable)
 }
 
 function getPackagePath(asset?: VelopackAsset | null) {
@@ -254,243 +247,85 @@ function getErrorMessage(error: unknown) {
   return String(error)
 }
 
-function normalizeVelopackAsset(value: Partial<VelopackAsset>): VelopackAsset | null {
-  if (
-    typeof value.PackageId !== 'string' ||
-    typeof value.Version !== 'string' ||
-    typeof value.Type !== 'string' ||
-    typeof value.FileName !== 'string' ||
-    typeof value.SHA1 !== 'string' ||
-    typeof value.SHA256 !== 'string' ||
-    typeof value.Size !== 'number'
-  ) {
-    return null
-  }
+function runVelopackBridge(
+  command: 'check' | 'download',
+  channel: AppUpdateChannel,
+  update?: UpdateInfo,
+  onProgress?: (percent: number) => void,
+) {
+  return new Promise<UpdateInfo | null>((resolve, reject) => {
+    const child = spawn(getVelopackBridgePath(), [], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      windowsHide: true,
+    })
+    let stdoutBuffer = ''
+    let stderr = ''
+    let result: UpdateInfo | null = null
 
-  return {
-    PackageId: value.PackageId,
-    Version: value.Version,
-    Type: value.Type,
-    FileName: value.FileName,
-    SHA1: value.SHA1,
-    SHA256: value.SHA256,
-    Size: value.Size,
-    NotesMarkdown: value.NotesMarkdown ?? '',
-    NotesHtml: value.NotesHtml ?? '',
-  }
-}
-
-function parseVersion(value: string) {
-  const match = value.match(/^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/)
-  if (!match) return undefined
-
-  return {
-    major: Number(match[1]),
-    minor: Number(match[2]),
-    patch: Number(match[3]),
-    prerelease: match[4]?.split('.') ?? [],
-  }
-}
-
-function comparePrerelease(left: string[], right: string[]) {
-  if (left.length === 0 && right.length === 0) return 0
-  if (left.length === 0) return 1
-  if (right.length === 0) return -1
-
-  const length = Math.max(left.length, right.length)
-  for (let index = 0; index < length; index += 1) {
-    const leftPart = left[index]
-    const rightPart = right[index]
-    if (leftPart === undefined) return -1
-    if (rightPart === undefined) return 1
-
-    const leftNumber = /^\d+$/.test(leftPart) ? Number(leftPart) : undefined
-    const rightNumber = /^\d+$/.test(rightPart) ? Number(rightPart) : undefined
-
-    if (leftNumber !== undefined && rightNumber !== undefined) {
-      if (leftNumber !== rightNumber) return leftNumber - rightNumber
-      continue
+    const consumeLine = (line: string) => {
+      if (!line.trim()) return
+      const event = JSON.parse(line) as VelopackBridgeEvent
+      if (event.event === 'progress') onProgress?.(event.percent)
+      if (event.event === 'result') result = event.update ?? null
     }
 
-    if (leftNumber !== undefined) return -1
-    if (rightNumber !== undefined) return 1
+    child.stdout.setEncoding('utf8')
+    child.stdout.on('data', (chunk: string) => {
+      stdoutBuffer += chunk
+      const lines = stdoutBuffer.split(/\r?\n/)
+      stdoutBuffer = lines.pop() ?? ''
+      try {
+        lines.forEach(consumeLine)
+      } catch (error) {
+        child.kill()
+        reject(error)
+      }
+    })
 
-    const compared = leftPart.localeCompare(rightPart)
-    if (compared !== 0) return compared
-  }
+    child.stderr.setEncoding('utf8')
+    child.stderr.on('data', (chunk: string) => {
+      stderr += chunk
+    })
+    child.once('error', reject)
+    child.once('close', (code) => {
+      try {
+        consumeLine(stdoutBuffer)
+      } catch (error) {
+        reject(error)
+        return
+      }
 
-  return 0
-}
+      if (code !== 0) {
+        reject(new Error(stderr.trim() || `Velopack bridge exited with code ${code}`))
+        return
+      }
+      resolve(result)
+    })
 
-function compareVersions(leftValue: string, rightValue: string) {
-  const left = parseVersion(leftValue)
-  const right = parseVersion(rightValue)
-  if (!left || !right) return leftValue.localeCompare(rightValue)
-
-  if (left.major !== right.major) return left.major - right.major
-  if (left.minor !== right.minor) return left.minor - right.minor
-  if (left.patch !== right.patch) return left.patch - right.patch
-
-  return comparePrerelease(left.prerelease, right.prerelease)
-}
-
-async function fetchGitHubFeed(feedUrl: string) {
-  const response = await fetch(feedUrl, {
-    headers: {
-      Accept: 'application/json',
-      'User-Agent': 'Bangumi-Electron-Updater',
-    },
+    child.stdin.end(
+      JSON.stringify({
+        command,
+        sourceUrl: getUpdateSourceUrl(),
+        prerelease: channel === 'beta',
+        options: {
+          ExplicitChannel: getVelopackChannel(channel),
+          AllowVersionDowngrade: false,
+          MaximumDeltasBeforeFallback: 10,
+        },
+        locator: getVelopackLocatorConfig(),
+        update,
+      }),
+    )
   })
-
-  if (!response.ok) {
-    throw new Error(`GitHub release feed request failed: ${response.status}`)
-  }
-
-  return (await response.json()) as GitHubAssetFeed
 }
 
 async function checkGitHubForUpdates(channel = readUpdateChannel()): Promise<ResolvedUpdateCheck> {
-  const resolved = await resolveGitHubRelease(channel)
-  if (!resolved) {
-    return {
-      updateInfo: null,
-      unavailableReason: `当前通道暂无发布包。通道：${getVelopackChannel(channel)}`,
-    }
-  }
-
-  const feed = await fetchGitHubFeed(resolved.feedUrl)
-  const target = (feed.Assets ?? [])
-    .map(normalizeVelopackAsset)
-    .filter((asset): asset is VelopackAsset => asset !== null)
-    .filter((asset) => asset.Type.toLowerCase() === 'full')
-    .filter((asset) => compareVersions(asset.Version, app.getVersion()) > 0)
-    .sort((left, right) => compareVersions(right.Version, left.Version))[0]
-
-  if (!target) return { updateInfo: null, sourceUrl: getUpdateSourceUrl() }
-
-  const releaseAsset = resolved.release.assets.find((asset) => asset.name === target.FileName)
-  if (!releaseAsset) {
-    throw new Error(`GitHub release is missing update package: ${target.FileName}`)
-  }
-
+  // The Rust bridge exposes GithubSource's prerelease flag that the Node SDK currently hides.
+  // The returned UpdateInfo retains BaseRelease and DeltasToTarget, unlike the previous manual
+  // GitHub feed parser which deliberately produced a full-package-only update plan.
   return {
-    downloadUrl: releaseAsset.browser_download_url,
-    updateInfo: {
-      TargetFullRelease: target,
-      DeltasToTarget: [],
-      IsDowngrade: false,
-    },
+    updateInfo: await runVelopackBridge('check', channel),
     sourceUrl: getUpdateSourceUrl(),
-  }
-}
-
-async function getFileSha256(filePath: string) {
-  const file = await openFile(filePath, 'r')
-  const hash = createHash('sha256')
-  const buffer = Buffer.alloc(1024 * 1024)
-
-  try {
-    let bytesRead = 0
-    do {
-      const result = await file.read(buffer, 0, buffer.length, null)
-      bytesRead = result.bytesRead
-      if (bytesRead === 0) continue
-      hash.update(buffer.subarray(0, bytesRead))
-    } while (bytesRead > 0)
-  } finally {
-    await file.close()
-  }
-
-  return hash.digest('hex').toUpperCase()
-}
-
-async function fileMatchesSha256(filePath: string, sha256: string) {
-  try {
-    return (await getFileSha256(filePath)) === sha256.toUpperCase()
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false
-    throw error
-  }
-}
-
-async function downloadGitHubUpdatePackage(
-  asset: VelopackAsset,
-  downloadUrl: string,
-  onProgress: (percent: number) => void,
-) {
-  const packagePath = getPackagePath(asset)
-  const tempPath = getPackageTempPath(asset)
-  if (!packagePath || !tempPath) throw new Error('更新包路径无效')
-
-  await mkdir(path.dirname(packagePath), { recursive: true })
-  await unlinkIfExists(tempPath)
-
-  if (await fileMatchesSha256(packagePath, asset.SHA256)) {
-    onProgress(100)
-    return
-  }
-
-  await unlinkIfExists(packagePath)
-
-  try {
-    const response = await fetch(downloadUrl, {
-      headers: {
-        Accept: 'application/octet-stream',
-        'User-Agent': 'Bangumi-Electron-Updater',
-      },
-    })
-
-    if (!response.ok) {
-      throw new Error(`GitHub update package request failed: ${response.status}`)
-    }
-
-    if (!response.body) {
-      throw new Error('GitHub update package response body is empty')
-    }
-
-    const contentLength = Number(response.headers.get('content-length'))
-    const total = Number.isFinite(contentLength) && contentLength > 0 ? contentLength : asset.Size
-    const reader = response.body.getReader()
-    const file = await openFile(tempPath, 'w')
-    const hash = createHash('sha256')
-    let downloaded = 0
-
-    try {
-      let done = false
-      while (!done) {
-        const readResult = await reader.read()
-        if (readResult.done) {
-          done = true
-          continue
-        }
-        const { value } = readResult
-        if (!value) continue
-
-        const chunk = Buffer.from(value)
-        await file.write(chunk)
-        hash.update(chunk)
-        downloaded += chunk.byteLength
-
-        if (total > 0) {
-          onProgress(Math.min(99, (downloaded / total) * 100))
-        }
-      }
-    } finally {
-      reader.releaseLock()
-      await file.close()
-    }
-
-    const actualSha256 = hash.digest('hex').toUpperCase()
-    const expectedSha256 = asset.SHA256.toUpperCase()
-    if (actualSha256 !== expectedSha256) {
-      throw new Error(`更新包校验失败：expected ${expectedSha256}, got ${actualSha256}`)
-    }
-
-    await rename(tempPath, packagePath)
-    onProgress(100)
-  } catch (error) {
-    await unlinkIfExists(tempPath)
-    throw error
   }
 }
 
@@ -593,7 +428,6 @@ export async function checkForUpdates() {
   checkPromiseChannel = channel
 
   availableUpdateInfo = null
-  availableUpdateDownloadUrl = null
   availableUpdateSourceUrl = null
   downloadedUpdateSourceUrl = null
   downloadedUpdateAsset = null
@@ -609,7 +443,6 @@ export async function checkForUpdates() {
     .then((result) => {
       if (runId !== checkRunId || readUpdateChannel() !== channel) return
 
-      availableUpdateDownloadUrl = result.downloadUrl ?? null
       availableUpdateSourceUrl = result.sourceUrl ?? null
 
       const updateInfo = result.updateInfo
@@ -679,12 +512,8 @@ export async function downloadUpdate() {
   }
 
   downloadPromise = (
-    availableUpdateDownloadUrl
-      ? downloadGitHubUpdatePackage(
-          updateInfo.TargetFullRelease,
-          availableUpdateDownloadUrl,
-          progress,
-        )
+    parseGitHubRepoUrl(sourceUrl)
+      ? runVelopackBridge('download', channel, updateInfo, progress).then(() => undefined)
       : createUpdateManager(sourceUrl, channel).downloadUpdateAsync(updateInfo, progress)
   )
     .then(() => {
