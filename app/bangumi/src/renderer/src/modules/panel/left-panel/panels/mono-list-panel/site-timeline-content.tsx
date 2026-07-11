@@ -193,12 +193,15 @@ function toTimelineRows(entries: UserTimelineItem[]) {
     const day = dayjs.unix(item.createdAt)
     const dayKey = day.format('YYYY-MM-DD')
 
-    if (dayKey !== lastDayKey) {
+    if (lastDayKey !== undefined && dayKey !== lastDayKey) {
       rows.push({
         type: 'day',
         key: `day-${dayKey}`,
         label: formatTimelineDayLabel(day),
       })
+    }
+
+    if (dayKey !== lastDayKey) {
       lastDayKey = dayKey
     }
 

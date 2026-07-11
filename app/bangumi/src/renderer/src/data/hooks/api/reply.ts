@@ -63,10 +63,18 @@ export function getReplyInvalidationKeys(target: ReplyTarget) {
     case 'character':
       return [['character-comments', target.id]]
     case 'timeline':
-      return [['site-timeline-v1'], ['site-timeline-infinite-v1'], ['user-timeline']]
+      return [
+        ['timeline-replies', Number(target.id)],
+        ['site-timeline-v1'],
+        ['site-timeline-infinite-v1'],
+        ['user-timeline'],
+      ]
     case 'blog':
       return [['blog-comments', target.id]]
     case 'index':
       return [['index-comments', target.id]]
+    case 'person-photo':
+    case 'character-photo':
+      return [['mono-photo-comments', target.type.replace('-photo', ''), target.monoId, target.id]]
   }
 }

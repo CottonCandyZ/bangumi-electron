@@ -28,6 +28,7 @@ import {
   SubjectTankobonListPanelContent,
 } from './mono-list-panel/subject-content'
 import { SubjectRecommendationsListPanelContent } from './mono-list-panel/subject-recommendation-content'
+import { SubjectReviewsListPanelContent } from './mono-list-panel/subject-review-content'
 import {
   IndexRelatedListPanelContent,
   MonoIndexesListPanelContent,
@@ -35,6 +36,7 @@ import {
 import { SiteTimelineListPanelContent } from './mono-list-panel/site-timeline-content'
 import { TrendingSubjectsListPanelContent } from './mono-list-panel/trending-subjects-content'
 import { UserCollectionsListPanelContent } from './mono-list-panel/user-collections-content'
+import { UserFriendsListPanelContent } from './mono-list-panel/user-friends-content'
 import type { MonoListPanelTab } from '@renderer/state/panel'
 import {
   closeAllMonoListPanelTabsAtomAction,
@@ -280,6 +282,7 @@ function MonoListPanelContent({ tab }: { tab: MonoListPanelTab }) {
   if (tab.type === 'subjectRecommendations') {
     return <SubjectRecommendationsListPanelContent tab={tab} />
   }
+  if (tab.type === 'subjectReviews') return <SubjectReviewsListPanelContent tab={tab} />
   if (tab.type === 'searchSubjects') return <SearchSubjectsListPanelContent tab={tab} />
   if (tab.type === 'searchMonos') return <SearchMonosListPanelContent tab={tab} />
   if (tab.type === 'communityTopics') return <CommunityTopicsListPanelContent tab={tab} />
@@ -290,6 +293,7 @@ function MonoListPanelContent({ tab }: { tab: MonoListPanelTab }) {
   if (tab.type === 'communityGroups') return <CommunityGroupsListPanelContent tab={tab} />
   if (tab.type === 'siteTimeline') return <SiteTimelineListPanelContent tab={tab} />
   if (tab.type === 'trendingSubjects') return <TrendingSubjectsListPanelContent tab={tab} />
+  if (tab.type === 'userFriends') return <UserFriendsListPanelContent tab={tab} />
   return <UserCollectionsListPanelContent tab={tab} />
 }
 
@@ -301,6 +305,7 @@ function getMonoListPanelTabCount(tab: MonoListPanelTab) {
   if (tab.type === 'monoIndexes') return null
   if (tab.type === 'indexRelated') return null
   if (tab.type === 'subjectRecommendations') return null
+  if (tab.type === 'subjectReviews') return tab.total
   if (tab.type === 'subjectTankobon') return tab.relatedSubjects.length
   if (tab.type === 'searchSubjects') return null
   if (tab.type === 'searchMonos') return null
@@ -311,6 +316,7 @@ function getMonoListPanelTabCount(tab: MonoListPanelTab) {
   if (tab.type === 'siteTimeline') return null
   if (tab.type === 'trendingSubjects') return null
   if (tab.type === 'userCollections') return null
+  if (tab.type === 'userFriends') return tab.total
   return tab.relatedSubjects.length
 }
 
@@ -324,7 +330,9 @@ function getMonoListPanelTabDisplayTitle(tab: MonoListPanelTab) {
     tab.type === 'trendingSubjects' ||
     tab.type === 'monoIndexes' ||
     tab.type === 'indexRelated' ||
-    tab.type === 'subjectRecommendations'
+    tab.type === 'subjectRecommendations' ||
+    tab.type === 'subjectReviews' ||
+    tab.type === 'userFriends'
   ) {
     return tab.panelTitle
   }
@@ -342,6 +350,8 @@ function getMonoListPanelTabSourceTo(tab: MonoListPanelTab) {
   if (tab.type === 'monoIndexes') return tab.sourceTo
   if (tab.type === 'indexRelated') return tab.sourceTo
   if (tab.type === 'subjectRecommendations') return tab.sourceTo
+  if (tab.type === 'subjectReviews') return tab.sourceTo
+  if (tab.type === 'userFriends') return tab.sourceTo
 
   if (tab.type === 'subjects' || tab.type === 'related') {
     return `/${tab.monoType}/${tab.monoId}`

@@ -11,7 +11,7 @@ export const AuthorizationHeader = (token: string) => `Bearer ${token}`
 /** 登录相关 */
 export const LOGIN = {
   FORM_URL: `/login`,
-  CAPTCHA: `/signup/captcha?${getTimestamp()}`,
+  CAPTCHA: () => `/signup/captcha?${getTimestamp()}`,
   POST_URL: `/FollowTheRabbit`,
   POST_CONTENT_TYPE: 'application/x-www-form-urlencoded',
   OAUTH_FORM_ULR: `/oauth/authorize?client_id=${APP_ID}&response_type=code&redirect_uri=${URL_OAUTH_REDIRECT}`,
@@ -63,6 +63,15 @@ export const NEXT_SUBJECTS = {
   RECS_BY_ID: (id: SubjectId) => `/p1/subjects/${id}/recs`,
   /** p1 条目关联目录 */
   INDEXES_BY_ID: (id: SubjectId) => `/p1/subjects/${id}/indexes`,
+  REVIEWS_BY_ID: (id: SubjectId) => `/p1/subjects/${id}/reviews`,
+}
+
+/** Private API 日志 */
+export const NEXT_BLOGS = {
+  BY_ID: (entryId: number) => `/p1/blogs/${entryId}`,
+  PHOTOS_BY_ID: (entryId: number) => `/p1/blogs/${entryId}/photos`,
+  SUBJECTS_BY_ID: (entryId: number) => `/p1/blogs/${entryId}/subjects`,
+  COMMENTS_BY_ID: (entryId: number) => `/p1/blogs/${entryId}/comments`,
 }
 
 export const HTML_SUBJECTS = {
@@ -99,6 +108,11 @@ export const NEXT_CHARACTERS = {
   COMMENTS_BY_ID: (id: CharacterId) => `/p1/characters/${id}/comments`,
   /** p1 角色关联目录 */
   INDEXES_BY_ID: (id: CharacterId) => `/p1/characters/${id}/indexes`,
+  PHOTO_PREVIEW_BY_ID: (id: CharacterId) => `/p1/characters/${id}/photos/preview`,
+  PHOTOS_BY_ID: (id: CharacterId) => `/p1/characters/${id}/photos`,
+  PHOTO_BY_ID: (id: CharacterId, photoId: number) => `/p1/characters/${id}/photos/${photoId}`,
+  PHOTO_COMMENTS_BY_ID: (id: CharacterId, photoId: number) =>
+    `/p1/characters/${id}/photos/${photoId}/comments`,
 }
 
 /** 人物 */
@@ -119,6 +133,11 @@ export const NEXT_PERSONS = {
   COMMENTS_BY_ID: (id: PersonId) => `/p1/persons/${id}/comments`,
   /** p1 人物关联目录 */
   INDEXES_BY_ID: (id: PersonId) => `/p1/persons/${id}/indexes`,
+  PHOTO_PREVIEW_BY_ID: (id: PersonId) => `/p1/persons/${id}/photos/preview`,
+  PHOTOS_BY_ID: (id: PersonId) => `/p1/persons/${id}/photos`,
+  PHOTO_BY_ID: (id: PersonId, photoId: number) => `/p1/persons/${id}/photos/${photoId}`,
+  PHOTO_COMMENTS_BY_ID: (id: PersonId, photoId: number) =>
+    `/p1/persons/${id}/photos/${photoId}/comments`,
 }
 
 /** 收藏 */
@@ -164,8 +183,12 @@ export const INDICES = {
 
 /** Private API 目录 */
 export const NEXT_INDEXES = {
+  ROOT: '/p1/indexes',
   BY_ID: (indexId: number) => `/p1/indexes/${indexId}`,
   RELATED_BY_ID: (indexId: number) => `/p1/indexes/${indexId}/related`,
+  RELATED_ITEM_BY_ID: (indexId: number, relatedId: number) =>
+    `/p1/indexes/${indexId}/related/${relatedId}`,
+  COMMENTS_BY_ID: (indexId: number) => `/p1/indexes/${indexId}/comments`,
 }
 
 /** 搜索 */
@@ -198,6 +221,9 @@ export const NEXT_COMMUNITY = {
     offset: number
   }) => `/p1/groups/${groupName}/topics?limit=${limit}&offset=${offset}`,
   CREATE_GROUP_TOPIC: (groupName: string) => `/p1/groups/${groupName}/topics`,
+  CREATE_SUBJECT_TOPIC: (subjectId: SubjectId) => `/p1/subjects/${subjectId}/topics`,
+  GROUP_TOPIC_BY_ID: (topicId: number) => `/p1/groups/-/topics/${topicId}`,
+  SUBJECT_TOPIC_BY_ID: (topicId: number) => `/p1/subjects/-/topics/${topicId}`,
   RECENT_GROUP_TOPICS: ({ mode, limit, offset }: { mode: string; limit: number; offset: number }) =>
     `/p1/groups/-/topics?mode=${mode}&limit=${limit}&offset=${offset}`,
   RECENT_SUBJECT_TOPICS: ({ limit, offset }: { limit: number; offset: number }) =>
@@ -231,6 +257,8 @@ export const NEXT_NOTIFY = {
   CLEAR: '/p1/clear-notify',
 }
 
+export const NEXT_REPORT = '/p1/report'
+
 /** Private API 每日放送 */
 export const NEXT_CALENDAR = {
   ROOT: '/p1/calendar',
@@ -246,4 +274,6 @@ export const NEXT_TIMELINE = {
     const query = params.toString()
     return query ? `/p1/timeline?${query}` : '/p1/timeline'
   },
+  BY_ID: (timelineId: number) => `/p1/timeline/${timelineId}`,
+  REPLIES_BY_ID: (timelineId: number) => `/p1/timeline/${timelineId}/replies`,
 }

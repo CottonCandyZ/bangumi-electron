@@ -37,7 +37,7 @@ function CommandDialog({
   hideOverlay = false,
   disableAnimation = false,
   ...props
-}: React.ComponentProps<typeof Dialog> & {
+}: Omit<React.ComponentProps<typeof Dialog>, "children"> & {
   title?: string
   description?: string
   className?: string
@@ -45,6 +45,7 @@ function CommandDialog({
   commandProps?: React.ComponentProps<typeof CommandPrimitive>
   hideOverlay?: boolean
   disableAnimation?: boolean
+  children: React.ReactNode
 }) {
   const { className: commandClassName, ...restCommandProps } = commandProps ?? {}
   return (

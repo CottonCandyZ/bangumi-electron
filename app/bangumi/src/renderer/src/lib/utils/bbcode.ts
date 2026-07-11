@@ -7,7 +7,7 @@ import { DynamicSmile } from '@renderer/components/comment/dynamic-smile'
 import { cloneElement, createElement, Fragment, isValidElement, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 // noinspection ES6UnusedImports
-import {} from '@bbob/types'
+import type {} from '@bbob/types'
 
 const URL_PATTERN = /https?:\/\/[A-Za-z0-9\-._~:/?#@!$&'()*+,;=%]+/g
 const TRAILING_URL_PUNCTUATION_PATTERN = /[.,!?;:，。！？；：、)）\]]+$/

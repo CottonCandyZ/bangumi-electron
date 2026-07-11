@@ -18,6 +18,7 @@ import { UserHoverCardLink } from '@renderer/components/user-hover-card'
 import { useNativeSmoothVirtualizerScrollToTop } from '@renderer/components/virtual/use-native-smooth-virtualizer-scroll-to-top'
 import { useVirtualScrollMemory } from '@renderer/components/virtual/use-virtual-scroll-memory'
 import { useGroupTopicQuery, useSubjectTopicQuery } from '@renderer/data/hooks/api/community'
+import { useSession } from '@renderer/data/hooks/session'
 import { Comment } from '@renderer/data/types/comment'
 import { GroupTopic, SubjectTopic, TopicReply } from '@renderer/data/types/community'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
@@ -33,6 +34,8 @@ import { useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useMemo, useRef } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { Virtualizer } from 'virtua'
+import { Button } from '@renderer/components/ui/button'
+import { Pencil } from 'lucide-react'
 import type { VirtualizerHandle } from 'virtua'
 
 type TopicKind = 'group' | 'subject'
@@ -99,9 +102,8 @@ function TopicDetail({
 }) {
   const scrollViewport = useAtomValue(scrollViewportAtom)
   const setTitleInView = useSetAtom(communityTopicTitleInViewAtom)
-  const scrollRef = useRef<HTMLElement | null>(null)
+  const scrollRef = useMemo(() => ({ current: scrollViewport }), [scrollViewport])
   const virtualizerRef = useRef<VirtualizerHandle>(null)
-  scrollRef.current = scrollViewport
   const rows = useMemo(() => getTopicRows(topic), [topic])
   const replyTarget = useMemo<ReplyTarget>(
     () => ({
@@ -301,6 +303,7 @@ function TopicHeader({
   replyTarget: ReplyTarget
   refreshing: boolean
 }) {
+  const session = useSession()
   const titleInView = useAtomValue(communityTopicTitleInViewAtom)
   const setTitleInView = useSetAtom(communityTopicTitleInViewAtom)
   const scrollViewport = useAtomValue(scrollViewportAtom)
@@ -388,6 +391,14 @@ function TopicHeader({
             onRefresh={onRefresh}
             refreshing={refreshing}
           />
+          {session?.id === topic.creatorID && (
+            <Button asChild className="-mt-1" size="sm" variant="outline">
+              <MyLink to={`/${kind}/topic/${topic.id}/edit`}>
+                <Pencil className="size-3.5" />
+                编辑
+              </MyLink>
+            </Button>
+          )}
         </div>
         <h1 className="text-3xl leading-tight font-semibold" ref={titleRef}>
           {topic.title}

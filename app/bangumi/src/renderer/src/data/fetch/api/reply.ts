@@ -43,6 +43,8 @@ export async function createReply({
   const shouldUseWebNestedCommentReply =
     !isTopicReply &&
     target.type !== 'timeline' &&
+    target.type !== 'person-photo' &&
+    target.type !== 'character-photo' &&
     !!replyTo &&
     !!replyToHighlight &&
     replyToHighlight !== replyTo
@@ -150,6 +152,10 @@ function getReplyPath(target: ReplyTarget) {
       return `/p1/blogs/${target.id}/comments`
     case 'index':
       return `/p1/indexes/${target.id}/comments`
+    case 'person-photo':
+      return `/p1/persons/${target.monoId}/photos/${target.id}/comments`
+    case 'character-photo':
+      return `/p1/characters/${target.monoId}/photos/${target.id}/comments`
   }
 }
 
@@ -171,6 +177,9 @@ function getDeleteReplyPath(target: ReplyTarget, commentId: number) {
       return `/p1/blogs/-/comments/${commentId}`
     case 'index':
       return `/p1/indexes/-/comments/${commentId}`
+    case 'person-photo':
+    case 'character-photo':
+      return null
   }
 }
 
@@ -192,6 +201,9 @@ function getUpdateReplyPath(target: ReplyTarget, commentId: number) {
       return `/p1/blogs/-/comments/${commentId}`
     case 'index':
       return `/p1/indexes/-/comments/${commentId}`
+    case 'person-photo':
+    case 'character-photo':
+      return null
   }
 }
 

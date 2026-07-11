@@ -28,6 +28,7 @@ import {
 } from '@renderer/lib/utils/map'
 import dayjs from 'dayjs'
 import type { ReactNode } from 'react'
+import { TimelineStatusActions } from './timeline-status-actions'
 
 export { UserTimelineSkeleton, UserTimelineSkeletonItem } from './timeline-skeleton'
 
@@ -200,6 +201,7 @@ export function UserTimelineItemCard({
 
             <TimelineReactions reaction={reaction} />
             <TimelineItemMeta item={item} />
+            {item.memo.status && <TimelineStatusActions item={item} />}
           </div>
         </div>
       </div>
@@ -329,6 +331,7 @@ export function UserTimelineItemCard({
 
       <TimelineReactions reaction={reaction} />
       <TimelineItemMeta item={item} />
+      {item.memo.status && <TimelineStatusActions item={item} />}
     </Container>
   )
 }

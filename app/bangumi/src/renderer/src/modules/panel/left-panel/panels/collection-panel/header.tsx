@@ -10,6 +10,7 @@ import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/sele
 import { useSession } from '@renderer/data/hooks/session'
 import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
+import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import type { CollectionPanelResourceType } from '@renderer/state/collection'
 import {
   collectionPanelResourceTypeAtom,
@@ -25,6 +26,7 @@ import {
 } from '@renderer/state/panel'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { SettingsIcon, XIcon } from 'lucide-react'
+import { useState } from 'react'
 
 const COLLECTION_RESOURCE_LABELS: Record<CollectionPanelResourceType, string> = {
   subject: '条目收藏',
@@ -46,21 +48,29 @@ export function CollectionPanelHeader() {
   const setLeftPanelOpen = useSetAtom(leftPanelOpenAtom)
   const currentSelect = filterMap.get(subjectType.toString()) ?? CollectionType['watching']
   const isRefetching = useAtomValue(collectionPanelIsRefetchingAtom)
+  const [selectOpen, setSelectOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const popupOpen = selectOpen || settingsOpen
 
   return (
-    <div className="drag-region flex h-14 shrink-0 flex-row items-center justify-between gap-5 border-b px-2">
+    <div
+      data-slot="collection-panel-header"
+      className={`${popupOpen ? 'no-drag-region' : 'drag-region'} flex h-14 shrink-0 flex-row items-center justify-between gap-5 border-b px-2`}
+    >
       {(!!userInfo || !!panelUsername) && (
         <>
           <div className="flex min-w-0 flex-row items-center gap-2">
             {resourceType === 'subject' ? (
               <Select
+                open={selectOpen}
+                onOpenChange={setSelectOpen}
                 onValueChange={(value) =>
                   setCurrentTypeFilter(subjectType.toString(), Number(value) as CollectionType)
                 }
                 value={currentSelect.toString()}
               >
                 <SelectTrigger className="no-drag-region w-fit justify-start">
-                  <SelectValue />
+                  <SelectValue>{COLLECTION_TYPE_MAP(subjectType)[currentSelect]}</SelectValue>
                 </SelectTrigger>
                 <SubjectCollectionSelectorContent subjectType={subjectType} />
               </Select>
@@ -72,7 +82,7 @@ export function CollectionPanelHeader() {
             {isRefetching && <span className="i-mingcute-loading-line animate-spin text-2xl" />}
           </div>
           {resourceType === 'subject' ? (
-            <DropdownMenu>
+            <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen}>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="no-drag-region size-8">
                   <SettingsIcon className="size-4" />

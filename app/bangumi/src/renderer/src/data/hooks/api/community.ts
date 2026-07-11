@@ -1,5 +1,6 @@
 import {
   createGroupTopic,
+  createSubjectTopic,
   getGroupByName,
   getGroupMembers,
   getGroups,
@@ -11,6 +12,7 @@ import {
   getSubjectTopics,
   getTrendingSubjectTopics,
   getUserGroups,
+  updateTopic,
 } from '@renderer/data/fetch/api/community'
 import {
   useAuthQuery,
@@ -256,6 +258,39 @@ export const useCreateGroupTopicMutation = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['community-single-group-topics-v1'] })
       queryClient.invalidateQueries({ queryKey: ['community-group-topics-v3'] })
+    },
+  })
+}
+
+export const useCreateSubjectTopicMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutationMustAuth({
+    mutationFn: createSubjectTopic,
+    mutationKey: ['create-subject-topic'],
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['community-single-subject-topics-v1'] })
+      queryClient.invalidateQueries({ queryKey: ['community-subject-topics-v3'] })
+      queryClient.invalidateQueries({ queryKey: ['community-trending-subject-topics-v3'] })
+    },
+  })
+}
+
+export const useUpdateTopicMutation = () => {
+  const queryClient = useQueryClient()
+
+  return useMutationMustAuth({
+    mutationFn: updateTopic,
+    mutationKey: ['update-community-topic'],
+    onSuccess: (_, { kind }) => {
+      queryClient.invalidateQueries({
+        queryKey: [kind === 'group' ? 'community-group-topic' : 'community-subject-topic'],
+      })
+      queryClient.invalidateQueries({ queryKey: ['community-single-group-topics-v1'] })
+      queryClient.invalidateQueries({ queryKey: ['community-group-topics-v3'] })
+      queryClient.invalidateQueries({ queryKey: ['community-single-subject-topics-v1'] })
+      queryClient.invalidateQueries({ queryKey: ['community-subject-topics-v3'] })
+      queryClient.invalidateQueries({ queryKey: ['community-trending-subject-topics-v3'] })
     },
   })
 }

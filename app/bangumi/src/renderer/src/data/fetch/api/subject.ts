@@ -7,6 +7,7 @@ import {
 import { SubjectId } from '@renderer/data/types/bgm'
 import { SubjectInterestComments } from '@renderer/data/types/comment'
 import type { SlimIndex } from '@renderer/data/types/index'
+import type { SubjectReviewPage } from '@renderer/data/types/blog'
 import {
   P1Page,
   RelatedSubject,
@@ -101,5 +102,19 @@ export async function getSubjectIndexesById({
       limit,
       offset,
     },
+  })
+}
+
+export async function getSubjectReviewsById({
+  id,
+  limit,
+  offset,
+}: {
+  id: SubjectId
+  limit?: number
+  offset: number
+}) {
+  return nextFetch<SubjectReviewPage>(NEXT_SUBJECTS.REVIEWS_BY_ID(id), {
+    query: { limit, offset },
   })
 }

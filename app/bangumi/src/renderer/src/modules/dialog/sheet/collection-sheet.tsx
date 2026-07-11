@@ -3,12 +3,36 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@renderer/componen
 import { useAtom } from 'jotai'
 import {
   subjectCollectionSheetFormAtom,
-  SubjectCollectionSheetProps,
+  type SubjectCollectionSheetProps,
 } from '@renderer/state/dialog/sheet'
+import { useCallback, useEffect, useRef } from 'react'
 
 export function SubjectCollectionSheet() {
   const [sheetProps, setSheetProps] = useAtom(subjectCollectionSheetFormAtom)
-  const setOpen = (open: boolean) => setSheetProps({ open })
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const setOpen = useCallback(
+    (open: boolean) => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+      closeTimerRef.current = null
+      setSheetProps({ open })
+
+      if (!open) {
+        closeTimerRef.current = setTimeout(() => {
+          setSheetProps({ open: false, content: null })
+          closeTimerRef.current = null
+        }, 240)
+      }
+    },
+    [setSheetProps],
+  )
+
+  useEffect(
+    () => () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
+    },
+    [],
+  )
+
   return (
     <Sheet open={sheetProps.open} onOpenChange={setOpen}>
       {sheetProps.content && <Content content={sheetProps.content} setOpen={setOpen} />}
@@ -16,18 +40,22 @@ export function SubjectCollectionSheet() {
   )
 }
 
-function Content(props: {
+function Content({
+  content,
+  setOpen,
+}: {
   content: SubjectCollectionSheetProps
   setOpen: (open: boolean) => void
 }) {
-  const { sheetTitle, ...formProps } = props.content
+  const { sheetTitle, ...formProps } = content
+
   return (
-    <SheetContent className="flex w-1/3 flex-col pr-2 pl-0 sm:max-w-none">
-      <SheetHeader className="pl-6">
-        <SheetTitle>{sheetTitle}</SheetTitle>
+    <SheetContent className="gap-0 p-0" style={{ width: 'min(92vw, 38rem)', maxWidth: '38rem' }}>
+      <SheetHeader className="border-border/70 border-b px-5 py-4 pr-12 text-left">
+        <SheetTitle className="text-base">{sheetTitle}</SheetTitle>
       </SheetHeader>
-      <div className="overflow-auto pt-2 pr-4 pl-6">
-        <AddOrModifySubjectCollectionForm {...formProps} success={() => props.setOpen(false)} />
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+        <AddOrModifySubjectCollectionForm {...formProps} success={() => setOpen(false)} />
       </div>
     </SheetContent>
   )

@@ -48,7 +48,7 @@ function InfoBoxLink({ item }: { item: InfoBoxWebValueLinkItem }) {
   if (route?.type === 'person') {
     return (
       <HoverCard openDelay={300} closeDelay={200}>
-        <HoverCardTrigger className="inline-block">
+        <HoverCardTrigger asChild className="inline-block">
           <MyLink
             to={route.to}
             className="decoration-primary/40 hover:decoration-primary cursor-pointer underline underline-offset-2"

@@ -4,6 +4,7 @@ import {
   getSubjectCommentsById,
   getSubjectIndexesById,
   getSubjectRecommendationsById,
+  getSubjectReviewsById,
 } from '@renderer/data/fetch/api/subject'
 import {
   useAuthQuery,
@@ -114,6 +115,29 @@ export const useSubjectIndexesQuery = ({
     queryProps: { id },
     qFLimit: limit,
     refetchPageLimit,
+    enabled,
+    needKeepPreviousData: false,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, pages) => {
+      const nextOffset = pages.reduce((sum, page) => sum + page.data.length, 0)
+      return lastPage.data.length > 0 && nextOffset < lastPage.total ? nextOffset : undefined
+    },
+  })
+
+export const useSubjectReviewsQuery = ({
+  enabled,
+  id,
+  limit = 5,
+}: {
+  enabled?: boolean
+  id: SubjectId
+  limit?: number
+}) =>
+  useInfinityQueryOptionalAuth({
+    queryFn: getSubjectReviewsById,
+    queryKey: ['subject-reviews'],
+    queryProps: { id },
+    qFLimit: limit,
     enabled,
     needKeepPreviousData: false,
     initialPageParam: 0,

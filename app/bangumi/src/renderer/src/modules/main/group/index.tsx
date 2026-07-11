@@ -77,10 +77,13 @@ export function GroupHome({ groupName }: { groupName: string | undefined }) {
                 onRefresh={() => topicsQuery.refetch()}
                 refreshing={topicsQuery.isFetching && !topicsQuery.isFetchingNextPage}
               />
-              <Button asChild size="sm">
-                <MyLink to={`/group/${encodeURIComponent(groupName)}/topic/new`}>
+              <Button asChild className="size-8" size="icon" variant="ghost">
+                <MyLink
+                  aria-label="发布小组话题"
+                  title="发帖"
+                  to={`/group/${encodeURIComponent(groupName)}/topic/new`}
+                >
                   <span className="i-mingcute-add-line text-base" />
-                  发帖
                 </MyLink>
               </Button>
             </div>

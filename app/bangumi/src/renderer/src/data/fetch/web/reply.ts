@@ -409,6 +409,9 @@ function getWebReplyPath(target: ReplyTarget) {
       return `/index/${target.id}`
     case 'timeline':
       throw new Error('时间线暂不支持网页回复')
+    case 'person-photo':
+    case 'character-photo':
+      throw new Error('照片评论暂不支持网页回复')
   }
 }
 

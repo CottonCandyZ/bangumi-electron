@@ -9,6 +9,12 @@ export type ReplyTarget =
       title?: string
       type: 'episode' | 'person' | 'character' | 'timeline' | 'blog' | 'index'
     }
+  | {
+      id: number
+      monoId: number | string
+      title?: string
+      type: 'person-photo' | 'character-photo'
+    }
 
 export type ReplyComposerContent = {
   draft?: string
@@ -39,5 +45,9 @@ export function getReplyTargetLabel(target: ReplyTarget) {
       return target.title ? `日志评论 · ${target.title}` : '日志评论'
     case 'index':
       return target.title ? `目录评论 · ${target.title}` : '目录评论'
+    case 'person-photo':
+      return target.title ? `人物照片 · ${target.title}` : '人物照片'
+    case 'character-photo':
+      return target.title ? `角色照片 · ${target.title}` : '角色照片'
   }
 }

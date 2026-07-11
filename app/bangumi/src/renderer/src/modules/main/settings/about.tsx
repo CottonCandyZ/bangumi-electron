@@ -114,7 +114,7 @@ export function AboutSettings() {
               onValueChange={(value) => updateChannel(value as AppUpdateChannel)}
             >
               <SelectTrigger className="w-32 shadow-none">
-                <SelectValue />
+                <SelectValue>{config.update.channel === 'stable' ? '正式' : 'Beta'}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="beta">Beta</SelectItem>

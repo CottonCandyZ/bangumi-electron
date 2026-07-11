@@ -52,6 +52,7 @@ export function hasVisibleReplyContent(reply: CommentBase) {
 export function CommentItem({
   comment,
   floorNumber,
+  itemVariant = 'card',
   reactionTarget,
   userAvatarViewTransition,
   virtual = false,
@@ -59,6 +60,7 @@ export function CommentItem({
 }: {
   comment: Comment
   floorNumber: number
+  itemVariant?: 'card' | 'inline'
   reactionTarget?: ReactionTarget
   replyTarget?: ReplyTarget
   userAvatarViewTransition: boolean
@@ -108,6 +110,7 @@ export function CommentItem({
     <Card
       className={cn(
         'group/comment relative flex flex-row gap-3 p-3 shadow-none',
+        itemVariant === 'inline' && 'gap-2 rounded-none border-0 bg-transparent px-0 py-2.5',
         highlighted && 'border-primary/70 bg-primary/5',
         replyTarget
           ? showDelete || showEdit
@@ -119,7 +122,12 @@ export function CommentItem({
       )}
       data-comment-id={comment.id}
     >
-      <div className="absolute top-3 right-3 flex flex-row items-center gap-1.5">
+      <div
+        className={cn(
+          'absolute top-3 right-3 flex flex-row items-center gap-1.5',
+          itemVariant === 'inline' && 'top-2.5 right-0',
+        )}
+      >
         <div
           className={cn(
             'pointer-events-none flex flex-row items-center gap-1.5 opacity-0 transition-opacity',
@@ -153,19 +161,28 @@ export function CommentItem({
       </div>
       {comment.user?.avatar.medium ? (
         <CommentUserAvatarLink
-          className="size-10 shrink-0"
-          imageClassName="size-10 overflow-hidden rounded-full"
+          className={cn('size-10 shrink-0', itemVariant === 'inline' && 'size-8')}
+          imageClassName={cn(
+            'size-10 overflow-hidden rounded-full',
+            itemVariant === 'inline' && 'size-8',
+          )}
           transitionKey={`comment-${comment.id}`}
           user={comment.user}
           viewTransition={userAvatarViewTransition}
         />
       ) : (
-        <div className="bg-muted size-10 shrink-0 rounded-full" />
+        <div
+          className={cn(
+            'bg-muted size-10 shrink-0 rounded-full',
+            itemVariant === 'inline' && 'size-8',
+          )}
+        />
       )}
       <BBCodeImagePreviewProvider>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <CommentHeader
             comment={comment}
+            compact={itemVariant === 'inline'}
             contentToggle={
               hasContent && contentState.collapsible ? (
                 <CommentContentToggle contentState={contentState} placement="inline" />
@@ -178,7 +195,7 @@ export function CommentItem({
           <CommentReactions comment={comment} target={reactionTarget} />
           {replyCount > 0 && (
             <div
-              className="border-border/60 bg-muted/25 flex flex-col rounded-md border px-2"
+              className="border-border/70 ml-1 flex flex-col border-l pl-3"
               id={repliesId}
               onMouseEnter={() => setReplyHovering(true)}
               onMouseLeave={() => setReplyHovering(false)}
@@ -224,9 +241,11 @@ export function CommentItem({
 
 function CommentHeader({
   comment,
+  compact = false,
   contentToggle,
 }: {
   comment: Comment
+  compact?: boolean
   contentToggle?: ReactNode
 }) {
   return (
@@ -235,7 +254,10 @@ function CommentHeader({
         {comment.user ? (
           <>
             <UserProfileLink
-              className="hover:text-primary font-medium transition-colors"
+              className={cn(
+                'hover:text-primary font-medium transition-colors',
+                compact && 'text-sm',
+              )}
               user={comment.user}
             >
               {comment.user.nickname}
@@ -255,7 +277,12 @@ function CommentHeader({
         </span>
         {contentToggle}
       </div>
-      {comment.user ? <CommentUserUsername username={comment.user.username} /> : null}
+      {comment.user ? (
+        <CommentUserUsername
+          className={compact ? 'text-[0.65rem] leading-4' : undefined}
+          username={comment.user.username}
+        />
+      ) : null}
     </div>
   )
 }
@@ -289,8 +316,8 @@ function ReplyItem({
   return (
     <div
       className={cn(
-        'group/reply border-border/60 -mx-2 flex flex-row gap-2 border-t px-2 py-2.5 text-sm first:border-t-0 first:pt-2 last:pb-2',
-        highlighted && 'bg-primary/10 ring-primary/25 ring-1 ring-inset',
+        'group/reply before:bg-border/70 relative flex flex-row gap-2 py-2.5 text-sm before:absolute before:top-6 before:-left-3 before:h-px before:w-2',
+        highlighted && 'bg-primary/5 before:bg-primary',
       )}
       data-reply-id={reply.id}
     >
@@ -333,7 +360,12 @@ function ReplyItem({
               <CommentContentToggle contentState={contentState} placement="inline" />
             )}
           </div>
-          {reply.user ? <CommentUserUsername username={reply.user.username} /> : null}
+          {reply.user ? (
+            <CommentUserUsername
+              className="text-[0.65rem] leading-4"
+              username={reply.user.username}
+            />
+          ) : null}
         </div>
         <CommentContent className="whitespace-pre-line" contentState={contentState} />
         <CommentReactions comment={reply} compact target={reactionTarget} />

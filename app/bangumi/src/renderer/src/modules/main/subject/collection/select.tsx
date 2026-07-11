@@ -38,7 +38,9 @@ export function SubjectCollectionSelector({
       }}
     >
       <SelectTrigger className="bg-background w-fit font-medium">
-        <SelectValue />
+        <SelectValue>
+          {COLLECTION_TYPE_MAP(subjectCollection.subject_type)[subjectCollection.type]}
+        </SelectValue>
       </SelectTrigger>
       <SubjectCollectionSelectorContent subjectType={subjectCollection.subject_type} />
     </Select>

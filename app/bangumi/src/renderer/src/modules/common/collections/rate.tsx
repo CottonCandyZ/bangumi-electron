@@ -2,7 +2,7 @@ import { TooltipContent, TooltipTrigger, Tooltip } from '@renderer/components/ui
 import { CollectionData } from '@renderer/data/types/collection'
 import { cn } from '@renderer/lib/utils'
 import { RATING_MAP } from '@renderer/lib/utils/map'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 export function RateButtons({
   rate,
@@ -15,20 +15,18 @@ export function RateButtons({
   disabled?: boolean
   form?: boolean
 }) {
-  const [hoverValue, setHoverValue] = useState(rate)
-  useEffect(() => {
-    setHoverValue(rate)
-  }, [rate])
-  const [isHover, setIsHover] = useState(false)
+  const [hoverValue, setHoverValue] = useState<CollectionData['rate'] | null>(null)
+  const displayedRate = hoverValue ?? rate
+  const isHover = hoverValue !== null
   const noNeedCaution =
-    (hoverValue !== 10 && hoverValue !== 1) || (!form && (rate === 10 || rate === 1))
+    (displayedRate !== 10 && displayedRate !== 1) || (!form && (rate === 10 || rate === 1))
   return (
     <div className={cn('flex flex-col gap-1', disabled && 'opacity-50')}>
-      {hoverValue !== 0 ? (
+      {displayedRate !== 0 ? (
         <div className="text-sm font-medium">
           我的评价：
-          <span style={{ color: `hsl(var(--chart-score-${hoverValue}))` }}>
-            {RATING_MAP[hoverValue]} {(isHover || form) && hoverValue}
+          <span style={{ color: `hsl(var(--chart-score-${displayedRate}))` }}>
+            {RATING_MAP[displayedRate]} {(isHover || form) && displayedRate}
             {!noNeedCaution && '（谨慎哦！）'}
           </span>
         </div>
@@ -37,21 +35,24 @@ export function RateButtons({
       )}
       <div className="flex flex-row items-center gap-1 text-xl">
         <div
+          aria-label="评分"
           onMouseLeave={() => {
-            setHoverValue(rate)
-            setIsHover(false)
+            setHoverValue(null)
           }}
+          role="group"
         >
           {Object.keys(RATING_MAP).map((key) => (
             <button
+              aria-label={`${key} 分：${RATING_MAP[Number(key) as keyof typeof RATING_MAP]}`}
+              aria-pressed={rate === Number(key)}
               type="button"
               key={key}
               className={cn(
-                Number(key) > hoverValue ? 'i-mingcute-star-line' : 'i-mingcute-star-fill',
+                Number(key) > displayedRate ? 'i-mingcute-star-line' : 'i-mingcute-star-fill',
               )}
               style={
-                Number(key) <= hoverValue
-                  ? { color: `hsl(var(--chart-score-${hoverValue}))` }
+                Number(key) <= displayedRate
+                  ? { color: `hsl(var(--chart-score-${displayedRate}))` }
                   : { color: `hsl(var(--chart-score-${key}))` }
               }
               onClick={() =>
@@ -59,7 +60,6 @@ export function RateButtons({
               }
               onMouseEnter={() => {
                 setHoverValue(Number(key) as CollectionData['rate'])
-                setIsHover(true)
               }}
               disabled={disabled}
             />
@@ -69,6 +69,7 @@ export function RateButtons({
           <Tooltip delayDuration={0}>
             <TooltipTrigger asChild>
               <button
+                aria-label="清除评分"
                 type="button"
                 onClick={() => onRateChanged(0)}
                 disabled={disabled}

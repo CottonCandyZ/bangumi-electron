@@ -32,7 +32,9 @@ export function PageSelector({
         <SelectTrigger className={cn('w-min', episodes.isFetching && 'text-muted-foreground')}>
           <div className="flex items-center gap-2">
             {episodes.isFetching && <span className="i-mingcute-loading-line animate-spin" />}
-            <SelectValue />
+            <SelectValue>
+              {offset + 1} - {offset + limit}
+            </SelectValue>
           </div>
         </SelectTrigger>
         <SelectContent>

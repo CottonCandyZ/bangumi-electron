@@ -233,7 +233,11 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
                             同步中
                           </span>
                         ) : (
-                          <SelectValue placeholder="标记为" />
+                          <SelectValue placeholder="标记为">
+                            {subjectCollection
+                              ? COLLECTION_TYPE_MAP(subjectInfo.type)[subjectCollection.type]
+                              : '标记为'}
+                          </SelectValue>
                         )}
                       </SelectTrigger>
                       <SubjectCollectionSelectorContent subjectType={subjectInfo.type} />

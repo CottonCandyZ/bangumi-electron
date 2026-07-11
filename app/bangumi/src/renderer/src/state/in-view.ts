@@ -11,3 +11,5 @@ export const indexTitleInViewAtom = atom(true)
 export const userProfileAvatarInViewAtom = atom(true)
 
 export const communityTopicTitleInViewAtom = atom(true)
+
+export const blogTitleInViewAtom = atom(true)
