@@ -1,7 +1,7 @@
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
 import { Subject, SubjectType } from '@renderer/data/types/subject'
-import { dialogAtomFactory } from '@renderer/state/utils'
+import { atom } from 'jotai'
 
 /** 条目收藏 */
 export type SubjectCollectionSheetProps = {
@@ -17,4 +17,17 @@ export type SubjectCollectionSheetProps = {
   modify?: boolean
 }
 
-export const subjectCollectionSheetFormAtom = dialogAtomFactory<SubjectCollectionSheetProps>()
+const subjectCollectionSheetContentAtom = atom<SubjectCollectionSheetProps | null>(null)
+const subjectCollectionSheetOpenAtom = atom(false)
+
+export const subjectCollectionSheetFormAtom = atom(
+  (get) => ({
+    content: get(subjectCollectionSheetContentAtom),
+    open: get(subjectCollectionSheetOpenAtom),
+  }),
+  (_get, set, props: { open: boolean; content?: SubjectCollectionSheetProps | null }) => {
+    if (props.content !== undefined) set(subjectCollectionSheetContentAtom, props.content)
+
+    set(subjectCollectionSheetOpenAtom, props.open)
+  },
+)

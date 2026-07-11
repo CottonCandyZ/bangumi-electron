@@ -49,6 +49,21 @@ export default defineConfig({
         '@db': resolve('src/db'),
       },
     },
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react({
+        babel: {
+          plugins: [
+            [
+              'babel-plugin-react-compiler',
+              {
+                target: '19',
+                panicThreshold: 'none',
+              },
+            ],
+          ],
+        },
+      }),
+      tailwindcss(),
+    ],
   },
 })

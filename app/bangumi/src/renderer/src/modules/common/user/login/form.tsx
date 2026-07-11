@@ -14,12 +14,11 @@ import { Button } from '@renderer/components/ui/button'
 import { TEXT_CONFIG } from '@renderer/config/text'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  getCaptcha,
-  getLoginFormHash,
   getOAuthAccessToken,
   getOAuthCode,
   getOAuthFormHash,
   save,
+  prepareWebLoginChallenge,
   webLogin,
   webLoginProps,
 } from '@renderer/data/fetch/web/login'
@@ -52,6 +51,16 @@ const {
   BUTTON_LOGIN,
 } = TEXT_CONFIG
 
+const formSchema = z.object({
+  email: z
+    .string()
+    .min(1, { message: LOGIN_FORM_MESSAGE.REQUIRED })
+    .email(LOGIN_FORM_MESSAGE.MAIL_FORMAT_ERROR),
+  password: z.string().min(1, { message: LOGIN_FORM_MESSAGE.REQUIRED }),
+  captcha: z.string().length(5, { message: LOGIN_FORM_MESSAGE.CAPTCHA_LENGTH_ERROR }),
+  savePassword: z.boolean(),
+})
+
 export function LoginForm({ success = () => {} }: { success?: () => void }) {
   const queryClient = useQueryClient()
   // init data
@@ -59,15 +68,6 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
   const deleteAlertDialog = useSetAtom(deleteLoginAccountDialogAtom)
   const firstTime = useRef(true)
 
-  const formSchema = z.object({
-    email: z
-      .string()
-      .min(1, { message: LOGIN_FORM_MESSAGE.REQUIRED })
-      .email(LOGIN_FORM_MESSAGE.MAIL_FORMAT_ERROR),
-    password: z.string().min(1, { message: LOGIN_FORM_MESSAGE.REQUIRED }),
-    captcha: z.string().length(5, { message: LOGIN_FORM_MESSAGE.CAPTCHA_LENGTH_ERROR }),
-    savePassword: z.boolean(),
-  })
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -115,11 +115,14 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
     queryKey: ['captcha'],
     staleTime: 0,
     refetchOnWindowFocus: false,
-    queryFn: async () => {
-      await getLoginFormHash()
-      return await getCaptcha()
-    },
+    queryFn: prepareWebLoginChallenge,
   })
+  useEffect(
+    () => () => {
+      if (captcha.data) URL.revokeObjectURL(captcha.data)
+    },
+    [captcha.data],
+  )
 
   const mutation = useMutation({
     mutationKey: ['session'],
@@ -257,11 +260,14 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
               <AlertDescription>{FORM_ERROR.CAPTCHA_LOAD_RETRY_ERROR}</AlertDescription>
             </Alert>
           ) : (
-            <img
-              src={captcha.data}
-              className="cursor-pointer rounded-md"
+            <button
+              aria-label="刷新验证码"
+              className="cursor-pointer overflow-hidden rounded-md"
+              type="button"
               onClick={() => captcha.refetch()}
-            />
+            >
+              <img alt="验证码" src={captcha.data} />
+            </button>
           )}
         </div>
         <FormField

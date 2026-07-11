@@ -35,6 +35,20 @@ export type CreateGroupTopicResponse = {
   id: number
 }
 
+export type CreateSubjectTopicInput = {
+  content: string
+  subjectId: SubjectId | undefined
+  title: string
+  turnstileToken: string
+}
+
+export type UpdateTopicInput = {
+  content: string
+  kind: 'group' | 'subject'
+  title: string
+  topicId: number
+}
+
 export async function getGroups({
   sort = 'members',
   limit,
@@ -125,6 +139,35 @@ export async function createGroupTopic({
   )
 }
 
+export async function createSubjectTopic({
+  content,
+  subjectId,
+  title,
+  turnstileToken,
+}: CreateSubjectTopicInput) {
+  if (!subjectId) throw new Error('未获得条目 ID')
+
+  return nextFetchWithOptionalAuth<CreateGroupTopicResponse>(
+    NEXT_COMMUNITY.CREATE_SUBJECT_TOPIC(subjectId),
+    {
+      method: 'POST',
+      body: { content, title, turnstileToken },
+    },
+  )
+}
+
+export async function updateTopic({ content, kind, title, topicId }: UpdateTopicInput) {
+  const path =
+    kind === 'group'
+      ? NEXT_COMMUNITY.GROUP_TOPIC_BY_ID(topicId)
+      : NEXT_COMMUNITY.SUBJECT_TOPIC_BY_ID(topicId)
+
+  return nextFetchWithOptionalAuth<Record<string, never>>(path, {
+    method: 'PUT',
+    body: { content, title },
+  })
+}
+
 export async function getRecentGroupTopics({
   mode = 'all',
   limit,
@@ -195,11 +238,11 @@ export async function getTrendingSubjectTopics({
 }
 
 export async function getGroupTopic({ topicId }: { topicId: number }) {
-  return nextFetchWithOptionalAuth<GroupTopic>(`/p1/groups/-/topics/${topicId}`)
+  return nextFetchWithOptionalAuth<GroupTopic>(NEXT_COMMUNITY.GROUP_TOPIC_BY_ID(topicId))
 }
 
 export async function getSubjectTopic({ topicId }: { topicId: number }) {
-  return nextFetchWithOptionalAuth<SubjectTopic>(`/p1/subjects/-/topics/${topicId}`)
+  return nextFetchWithOptionalAuth<SubjectTopic>(NEXT_COMMUNITY.SUBJECT_TOPIC_BY_ID(topicId))
 }
 
 function toCommunityGroupTopic(topic: GroupTopic): CommunityTopic {

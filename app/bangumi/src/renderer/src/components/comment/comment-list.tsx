@@ -22,6 +22,7 @@ export function CommentList({
   virtual,
   reactionTarget,
   replyTarget,
+  itemVariant = 'card',
 }: {
   comments: Comment[]
   className?: string
@@ -36,6 +37,7 @@ export function CommentList({
   virtual: boolean
   reactionTarget?: ReactionTarget
   replyTarget?: ReplyTarget
+  itemVariant?: 'card' | 'inline'
 }) {
   if (!virtual) {
     return (
@@ -44,6 +46,7 @@ export function CommentList({
           <CommentItem
             comment={comment}
             floorNumber={floorNumbers?.[index] ?? index + 1}
+            itemVariant={itemVariant}
             key={comment.id}
             reactionTarget={reactionTarget}
             replyTarget={replyTarget}
@@ -62,6 +65,7 @@ export function CommentList({
         <CommentItem
           comment={comment}
           floorNumber={floorNumbers?.[index] ?? index + 1}
+          itemVariant={itemVariant}
           reactionTarget={reactionTarget}
           replyTarget={replyTarget}
           userAvatarViewTransition={userAvatarViewTransition}

@@ -12,6 +12,7 @@ import { useAtom } from 'jotai'
 import { useEffect, useRef, useState } from 'react'
 
 import { TimelineRefreshButton } from './timeline-refresh-button'
+import { TimelineComposer } from './timeline-composer'
 
 const TIMELINE_MODE_TABS = new Set(['全站', '关注'])
 const TIMELINE_PREVIEW_ITEM_LIMIT = 3
@@ -100,6 +101,7 @@ export function SiteTimelinePreview() {
           </Button>
         </div>
       </div>
+      <TimelineComposer />
       {query.isError ? (
         <p className="text-muted-foreground text-sm">暂时无法读取时间线。</p>
       ) : query.isLoading || !visibleItems ? (

@@ -1,4 +1,5 @@
 import { CharacterHeaderTitle } from '@renderer/modules/header/title/mono'
+import { BlogHeaderTitle } from '@renderer/modules/header/title/blog'
 import { CommunityTopicHeaderTitle } from '@renderer/modules/header/title/community'
 import { EpisodeHeaderTitle } from '@renderer/modules/header/title/episode'
 import { IndexHeaderTitle } from '@renderer/modules/header/title/index'
@@ -23,6 +24,7 @@ export function HeaderTitle() {
   if (!id) return null
 
   if (route === 'subject') return <SubjectHeaderTitle subjectId={id} />
+  if (route === 'blog') return <BlogHeaderTitle entryId={Number(id)} />
   if (route === 'episode') return <EpisodeHeaderTitle episodeId={id} />
   if (route === 'index') return <IndexHeaderTitle indexId={Number(id)} />
   if (route === 'person') return <PersonHeaderTitle personId={id} />

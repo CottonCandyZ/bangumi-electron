@@ -25,19 +25,21 @@ export function FormTags({
   const exceed = tags.size > 10
   return (
     <div className="flex flex-col gap-2">
-      <Tags
-        subjectTags={subjectTags}
-        collectionTags={collectionTags}
-        onTagClicked={(value) => {
-          updateTags((next) => {
-            if (next.has(value)) next.delete(value)
-            else next.add(value)
-          })
-        }}
-        selectedTags={tags}
-        edit
-      />
-      <div className="border-input flex w-full flex-col items-start gap-2 rounded-md border bg-transparent p-2 text-sm shadow-xs transition-colors">
+      <div className="max-h-36 overflow-y-auto pr-1">
+        <Tags
+          subjectTags={subjectTags}
+          collectionTags={collectionTags}
+          onTagClicked={(value) => {
+            updateTags((next) => {
+              if (next.has(value)) next.delete(value)
+              else next.add(value)
+            })
+          }}
+          selectedTags={tags}
+          edit
+        />
+      </div>
+      <div className="border-border/70 flex w-full flex-col items-start gap-2 rounded-md border p-2.5 text-sm transition-colors">
         <TagInput
           tags={[...tags]}
           add={(value) =>
@@ -50,17 +52,28 @@ export function FormTags({
             updateTags((next) => next.delete(value))
           }}
         />
-        <div className="flex flex-row items-center gap-2">
-          <Button type="button" variant="secondary" onClick={() => onTagsChanges(new Set())}>
-            清除
-          </Button>
-          <div>
+        <div className="flex w-full flex-row items-center justify-between gap-2">
+          <div className="text-muted-foreground">
             已选{' '}
-            <span className={cn('font-bold text-blue-500', exceed && 'text-destructive')}>
+            <span
+              className={cn(
+                'text-foreground font-medium tabular-nums',
+                exceed && 'text-destructive',
+              )}
+            >
               {tags.size}
             </span>{' '}
             个
           </div>
+          <Button
+            className="h-8 px-2 text-xs"
+            disabled={tags.size === 0}
+            onClick={() => onTagsChanges(new Set())}
+            type="button"
+            variant="ghost"
+          >
+            清除
+          </Button>
         </div>
       </div>
     </div>

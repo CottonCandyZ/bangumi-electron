@@ -135,6 +135,21 @@ export function Component() {
         username={username}
       />
 
+      {isOwnProfile && (
+        <div className="-mt-4 flex justify-end gap-2">
+          <MyLink to={`/user/${encodeURIComponent(username)}/followers`}>
+            <Button size="sm" variant="ghost">
+              查看粉丝
+            </Button>
+          </MyLink>
+          <MyLink to="/index/new">
+            <Button size="sm" variant="outline">
+              创建目录
+            </Button>
+          </MyLink>
+        </div>
+      )}
+
       <TimelinePreview
         error={timelineQuery.isError}
         items={timelineQuery.data}
@@ -185,6 +200,8 @@ function ProfileHeader({
   user: UserInfo | UserProfile | null | undefined
   username: string
 }) {
+  const openMonoListPanel = useOpenMonoListPanel()
+
   if (loading || !user) {
     return (
       <section className="flex flex-row gap-5">
@@ -240,9 +257,33 @@ function ProfileHeader({
 
         {profile && (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-            <Stat label="好友" value={profile.stats.friend} />
+            <button
+              className="cursor-default text-left"
+              onClick={() =>
+                openMonoListPanel({
+                  id: `user-friends-${username}`,
+                  panelTitle: '好友',
+                  sourceTitle: user.nickname || username,
+                  sourceTo: `/user/${encodeURIComponent(username)}`,
+                  title: '好友',
+                  total: profile.stats.friend,
+                  type: 'userFriends',
+                  username,
+                })
+              }
+              title="在侧栏查看好友"
+              type="button"
+            >
+              <Stat
+                className="hover:bg-accent transition-colors"
+                label="好友"
+                value={profile.stats.friend}
+              />
+            </button>
             <Stat label="小组" value={profile.stats.group} />
-            <Stat label="日志" value={profile.stats.blog} />
+            <MyLink to={`/user/${encodeURIComponent(username)}/blogs`}>
+              <Stat label="日志" value={profile.stats.blog} />
+            </MyLink>
             <Stat label="目录" value={profile.stats.index.create + profile.stats.index.collect} />
             <Stat label="人物" value={profile.stats.mono.person} />
             <Stat label="角色" value={profile.stats.mono.character} />
@@ -253,9 +294,9 @@ function ProfileHeader({
   )
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ className, label, value }: { className?: string; label: string; value: number }) {
   return (
-    <div className="rounded-md border px-3 py-2">
+    <div className={cn('rounded-md border px-3 py-2', className)}>
       <div className="text-lg font-semibold tabular-nums">{value}</div>
       <div className="text-muted-foreground text-xs">{label}</div>
     </div>

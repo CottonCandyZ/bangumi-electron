@@ -1,13 +1,22 @@
 import { ViewTransitionImage } from '@renderer/components/image/view-transition-image'
 import { UserHoverCardLink } from '@renderer/components/user-hover-card'
 import type { CommentBase } from '@renderer/data/types/comment'
+import { cn } from '@renderer/lib/utils'
 import type { ReactNode } from 'react'
 import { useLocation, useViewTransitionState } from 'react-router-dom'
 
-export function CommentUserUsername({ username }: { username?: string }) {
+export function CommentUserUsername({
+  className,
+  username,
+}: {
+  className?: string
+  username?: string
+}) {
   if (!username) return null
 
-  return <span className="text-muted-foreground line-clamp-1 text-xs">@{username}</span>
+  return (
+    <span className={cn('text-muted-foreground line-clamp-1 text-xs', className)}>@{username}</span>
+  )
 }
 
 export function CommentUserSignature({ sign }: { sign?: string }) {

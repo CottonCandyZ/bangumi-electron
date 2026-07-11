@@ -207,5 +207,8 @@ function getReactionInvalidationKeys(target: ReactionTarget) {
       return [['blog-comments', target.id]]
     case 'index':
       return [['index-comments', target.id]]
+    case 'person-photo':
+    case 'character-photo':
+      return [['mono-photo-comments', target.type.replace('-photo', ''), target.monoId, target.id]]
   }
 }

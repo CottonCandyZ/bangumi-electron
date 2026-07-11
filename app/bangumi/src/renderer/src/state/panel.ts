@@ -114,12 +114,32 @@ export type MonoListPanelTab =
     }
   | {
       id: string
+      type: 'subjectReviews'
+      title: string
+      panelTitle: string
+      sourceTitle: string
+      sourceTo: string
+      subjectId: SubjectId
+      total: number
+    }
+  | {
+      id: string
       type: 'userCollections'
       title: string
       sourceTitle: string
       username: string
       subjectType: SubjectType
       collectionType: CollectionType
+    }
+  | {
+      id: string
+      type: 'userFriends'
+      title: string
+      panelTitle: string
+      sourceTitle: string
+      sourceTo: string
+      username: string
+      total: number
     }
   | {
       id: string

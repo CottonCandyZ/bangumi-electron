@@ -24,7 +24,9 @@ export function SearchCategorySelect({ onOpenChange }: { onOpenChange?: (open: b
       onOpenChange={onOpenChange}
     >
       <SelectTrigger className="h-8 w-16 shrink-0 gap-1 border-0 bg-transparent px-1.5 shadow-none focus-visible:ring-0 [&_svg]:size-3.5">
-        <SelectValue />
+        <SelectValue>
+          {SEARCH_CATEGORY_OPTIONS.find((option) => option.value === category)?.label}
+        </SelectValue>
       </SelectTrigger>
       <SelectContent align="start">
         {SEARCH_CATEGORY_OPTIONS.map((option) => (

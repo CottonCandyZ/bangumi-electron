@@ -31,6 +31,7 @@ import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { splitRelationLabels } from '@renderer/lib/utils/relation'
 import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
 import { MainCommentFab } from '@renderer/modules/main/comment-fab'
+import { MonoPhotoPreview } from '@renderer/modules/main/mono/photo-preview'
 import { ResourceCollectionButton } from '@renderer/modules/common/collections/resource-collection-button'
 import { MonoIndexesSection } from '@renderer/modules/common/mono-indexes'
 import {
@@ -172,7 +173,7 @@ export function MonoDetailView({
         </div>
 
         <div className="flex min-w-0 flex-col gap-5">
-          <header className="flex flex-col gap-2">
+          <header>
             <h1 className="text-4xl font-semibold tracking-normal break-words">{detail.name}</h1>
           </header>
 
@@ -212,6 +213,7 @@ export function MonoDetailView({
         sourceTitle={detail.name}
         sourceTo={`/${detail.type}/${detail.id}`}
       />
+      <MonoPhotoPreview monoId={detail.id} monoType={detail.type} sourceTitle={detail.name} />
       <CommentBox
         comments={comments}
         error={commentsError}

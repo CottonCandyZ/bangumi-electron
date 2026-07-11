@@ -63,7 +63,7 @@ export function Tags({
       {setEdit && collectionTags !== undefined && !edit && (
         <Button
           type="button"
-          className="h-auto flex-auto gap-1 py-1.5 text-sm"
+          className="h-auto flex-auto gap-1 py-1.5 text-sm shadow-none"
           variant="outline"
           onClick={() => setEdit(true)}
         >

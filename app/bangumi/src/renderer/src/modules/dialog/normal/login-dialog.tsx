@@ -14,8 +14,8 @@ export function LoginDialog() {
   const showExpiredAlert = open.content?.reason === 'session-expired'
 
   return (
-    <Dialog open={open.open} onOpenChange={(open) => setOpen({ open })}>
-      <DialogContent onPointerDownOutside={(e) => e.preventDefault()}>
+    <Dialog open={open.open} disablePointerDismissal onOpenChange={(open) => setOpen({ open })}>
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>
             {LOGIN_DIALOG.TITLE}{' '}
@@ -41,7 +41,13 @@ export function LoginDialog() {
             <AlertDescription>{LOGIN_DIALOG.SESSION_EXPIRED.DESCRIPTION}</AlertDescription>
           </Alert>
         ) : null}
-        <LoginForm success={() => setOpen({ open: false })} />
+        <LoginForm
+          success={() => {
+            const onSuccess = open.content?.onSuccess
+            setOpen({ open: false })
+            onSuccess?.()
+          }}
+        />
       </DialogContent>
     </Dialog>
   )

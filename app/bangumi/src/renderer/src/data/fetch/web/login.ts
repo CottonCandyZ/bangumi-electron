@@ -11,6 +11,7 @@ import { LoginError, LoginErrorCode } from '@renderer/lib/utils/error'
 import { domParser } from '@renderer/lib/utils/parser'
 import { LoginInfo, Token } from '@renderer/data/types/login'
 import { MakeOptional } from '@shared/utils/type'
+import { client } from '@renderer/lib/client'
 
 // 所以这里就是用 web 登录网页啦，非常感谢下面链接里前人的工作给与的参考！
 
@@ -30,6 +31,8 @@ const store: {
   loginInfo?: MakeOptional<LoginInfo, 'id'>
   accessToken?: Token
 } = {}
+
+const WEB_LOGIN_COOKIE_NAMES = ['chii_sid', 'chii_sec_id', 'chii_cookietime', 'chii_auth']
 
 // TYPES
 export interface webLoginProps {
@@ -56,6 +59,22 @@ export async function getLoginFormHash() {
 }
 
 /**
+ * 开始密码登录前重置网页会话。已登录的 chii_auth 会让 /login 重定向到首页，
+ * 导致拿不到 formHash，后续验证码请求也不会发生。
+ */
+export async function prepareWebLoginChallenge() {
+  await Promise.all(
+    WEB_LOGIN_COOKIE_NAMES.map((name) => client.removeCookie({ url: 'https://bgm.tv', name })),
+  )
+  store.formHash = undefined
+  store.code = undefined
+  store.loginInfo = undefined
+  store.accessToken = undefined
+  await getLoginFormHash()
+  return getCaptcha()
+}
+
+/**
  * LOGIN INIT 2
  *
  * 在获得表单 Hash 的同时，访问 /login 可以获得 cookie。
@@ -64,7 +83,7 @@ export async function getLoginFormHash() {
  * @returns 由 `URL.createObjectURL` encode `blob` 后的图片地址
  */
 export async function getCaptcha() {
-  const data = await webFetch(LOGIN.CAPTCHA, {
+  const data = await webFetch(LOGIN.CAPTCHA(), {
     method: 'get',
     credentials: 'include',
     responseType: 'blob',

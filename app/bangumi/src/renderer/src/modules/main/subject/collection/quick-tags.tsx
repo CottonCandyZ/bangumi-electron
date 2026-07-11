@@ -96,7 +96,7 @@ export function QuickTags({
         setEdit={setEdit}
       />
       {edit && (
-        <div className="border-input flex w-full flex-col items-start gap-2 rounded-md border bg-transparent p-2 text-sm shadow-xs transition-colors">
+        <div className="border-input flex w-full flex-col items-start gap-2 rounded-md border bg-transparent p-2 text-sm transition-colors">
           <TagInput
             tags={[...tags]}
             add={(value) => setTags((tags) => new Set(tags).add(value.trim()))}
@@ -125,7 +125,7 @@ export function QuickTags({
             <Button variant="outline" onClick={() => setEdit(false)}>
               取消
             </Button>
-            <Button variant="secondary" onClick={() => setTags(new Set())}>
+            <Button className="shadow-none" variant="ghost" onClick={() => setTags(new Set())}>
               清除
             </Button>
             <div>

@@ -1,4 +1,6 @@
 import { Image } from '@renderer/components/image/image'
+import { CommentBox } from '@renderer/components/comment/comment-box'
+import { ReportButton } from '@renderer/components/report-button'
 import { MyLink } from '@renderer/components/my-link'
 import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Tabs } from '@renderer/components/tabs'
@@ -8,7 +10,12 @@ import { Card, CardContent } from '@renderer/components/ui/card'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { UserHoverCardLink } from '@renderer/components/user-hover-card'
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
-import { useIndexQuery, useIndexRelatedQuery } from '@renderer/data/hooks/api/index'
+import {
+  useIndexCommentsQuery,
+  useIndexQuery,
+  useIndexRelatedQuery,
+} from '@renderer/data/hooks/api/index'
+import { useSession } from '@renderer/data/hooks/session'
 import type { IndexRelated } from '@renderer/data/types/index'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
@@ -46,6 +53,8 @@ export function IndexDetail({ indexId }: { indexId: number }) {
   const titleRef = useRef<HTMLHeadingElement | null>(null)
   const titleInViewRef = useRef(true)
   const indexQuery = useIndexQuery({ indexId, enabled: Number.isFinite(indexId) })
+  const commentsQuery = useIndexCommentsQuery({ indexId, enabled: Number.isFinite(indexId) })
+  const session = useSession()
   const categoryFilterId = `index-related-${indexId}-category`
   const subjectTypeFilterId = `index-related-${indexId}-subject-type`
   const categoryFilters = getIndexRelatedCategoryFilters(indexQuery.data?.stats)
@@ -176,12 +185,21 @@ export function IndexDetail({ indexId }: { indexId: number }) {
             <h1 className="min-w-0 text-3xl leading-tight font-semibold" ref={titleRef}>
               {indexTitle}
             </h1>
-            <ResourceCollectionButton
-              className="shrink-0"
-              collected={!!index.collectedAt}
-              resourceId={index.id}
-              resourceType="index"
-            />
+            <div className="flex shrink-0 items-center gap-2">
+              {session?.id === index.uid && (
+                <MyLink to={`/index/${index.id}/edit`}>
+                  <Button size="sm" variant="outline">
+                    编辑
+                  </Button>
+                </MyLink>
+              )}
+              <ResourceCollectionButton
+                collected={!!index.collectedAt}
+                resourceId={index.id}
+                resourceType="index"
+              />
+              <ReportButton id={index.id} type={18} />
+            </div>
           </div>
           <div className="text-muted-foreground flex flex-row flex-wrap gap-x-3 gap-y-1 text-sm">
             <span>{index.total} 项</span>
@@ -267,6 +285,14 @@ export function IndexDetail({ indexId }: { indexId: number }) {
           />
         )}
       </section>
+      <CommentBox
+        comments={commentsQuery.data}
+        error={commentsQuery.isError}
+        replyTarget={{ id: indexId, type: 'index' }}
+        title="评论"
+        titleCount={index.replies}
+        virtual={false}
+      />
     </div>
   )
 }

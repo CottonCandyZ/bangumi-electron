@@ -40,6 +40,7 @@ type CommentBoxProps = {
   reactionTarget?: ReactionTarget
   replyTarget?: ReplyTarget
   showReplyEntry?: boolean
+  itemVariant?: 'card' | 'inline'
 }
 
 export function CommentBox({
@@ -66,6 +67,7 @@ export function CommentBox({
   reactionTarget,
   replyTarget,
   showReplyEntry = true,
+  itemVariant = 'card',
 }: CommentBoxProps) {
   const resolvedReactionTarget = reactionTarget ?? replyTarget
   const visibleComments = useMemo(() => comments?.filter(hasVisibleCommentContent), [comments])
@@ -106,6 +108,7 @@ export function CommentBox({
         floorNumbers={visibleFloorNumbers}
         hasMore={hasMore}
         isFetchingMore={isFetchingMore}
+        itemVariant={itemVariant}
         onNearBottom={onListNearBottom}
         reactionTarget={resolvedReactionTarget}
         replyTarget={replyTarget}
@@ -121,6 +124,7 @@ export function CommentBox({
     error,
     hasMore,
     isFetchingMore,
+    itemVariant,
     listClassName,
     onListNearBottom,
     replyTarget,

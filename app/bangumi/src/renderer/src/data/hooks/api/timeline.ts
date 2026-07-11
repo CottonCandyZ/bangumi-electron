@@ -1,4 +1,10 @@
-import { getTimeline } from '@renderer/data/fetch/api/timeline'
+import {
+  createTimeline,
+  deleteTimeline,
+  getTimeline,
+  getTimelineReplies,
+} from '@renderer/data/fetch/api/timeline'
+import { useAuthQuery, useMutationMustAuth } from '@renderer/data/hooks/factory'
 import {
   DEFAULT_INFINITE_REFETCH_PAGE_LIMIT,
   trimInfiniteQueryPagesIf,
@@ -10,6 +16,59 @@ import { userIdAtom } from '@renderer/state/session'
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai'
 import { useCallback, useMemo } from 'react'
+
+const TIMELINE_QUERY_ROOTS = [
+  ['site-timeline-v1'],
+  ['site-timeline-infinite-v1'],
+  ['user-timeline'],
+] as const
+
+function useInvalidateTimelines() {
+  const queryClient = useQueryClient()
+
+  return useCallback(() => {
+    for (const queryKey of TIMELINE_QUERY_ROOTS) {
+      queryClient.invalidateQueries({ queryKey })
+    }
+  }, [queryClient])
+}
+
+export const useCreateTimelineMutation = () => {
+  const invalidateTimelines = useInvalidateTimelines()
+  return useMutationMustAuth({
+    mutationFn: createTimeline,
+    mutationKey: ['create-timeline'],
+    onSuccess: invalidateTimelines,
+  })
+}
+
+export const useDeleteTimelineMutation = () => {
+  const invalidateTimelines = useInvalidateTimelines()
+  const queryClient = useQueryClient()
+  return useMutationMustAuth({
+    mutationFn: deleteTimeline,
+    mutationKey: ['delete-timeline'],
+    onSuccess: (_, variables: { timelineId: number }) => {
+      queryClient.removeQueries({ queryKey: ['timeline-replies', variables.timelineId] })
+      invalidateTimelines()
+    },
+  })
+}
+
+export const useTimelineRepliesQuery = ({
+  enabled,
+  timelineId,
+}: {
+  enabled: boolean
+  timelineId: number
+}) =>
+  useAuthQuery({
+    queryKey: ['timeline-replies', timelineId],
+    queryFn: getTimelineReplies,
+    queryProps: { timelineId },
+    enabled,
+    staleTime: 30 * 1000,
+  })
 
 export const SITE_TIMELINE_STALE_TIME = 2 * 60 * 1000
 

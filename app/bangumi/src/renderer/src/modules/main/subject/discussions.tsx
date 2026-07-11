@@ -14,7 +14,7 @@ import {
   useMonoListPanelOpenHandler,
 } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { type MonoListPanelTab } from '@renderer/state/panel'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useInView } from 'react-intersection-observer'
 
 const SUBJECT_DISCUSSIONS_PREVIEW_LIMIT = 6
@@ -26,13 +26,16 @@ export function SubjectDiscussions({
   className?: string
   subjectId: SubjectId
 }) {
-  const [enabledSubjectId, setEnabledSubjectId] = useState<SubjectId | null>(null)
   const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
   const subject = subjectInfoQuery.data
+  const { ref, inView } = useInView({
+    rootMargin: '240px 0px',
+    triggerOnce: true,
+  })
   const topicsQuery = useSubjectTopicsQuery({
     subjectId,
     subject,
-    enabled: enabledSubjectId === subjectId && !subjectInfoQuery.isPending,
+    enabled: inView && !subjectInfoQuery.isPending,
     limit: SUBJECT_DISCUSSIONS_PREVIEW_LIMIT,
     refetchPageLimit: 1,
   })
@@ -63,14 +66,6 @@ export function SubjectDiscussions({
     [sourceTitle, subject, subjectId, topics],
   )
   const openInSidePanel = useMonoListPanelOpenHandler(panelTab)
-  const { ref, inView } = useInView({
-    rootMargin: '240px 0px',
-    triggerOnce: true,
-  })
-
-  useEffect(() => {
-    if (inView) setEnabledSubjectId(subjectId)
-  }, [inView, subjectId])
 
   return (
     <section className={cn('flex min-w-0 flex-col gap-5', className)} ref={ref}>
@@ -79,7 +74,14 @@ export function SubjectDiscussions({
           <h2 className="text-2xl font-medium">讨论</h2>
           <OpenMonoListPanelButton className="mt-1 size-8" tab={panelTab} title="在侧栏打开讨论" />
         </div>
-        {total !== undefined && <span className="text-muted-foreground text-sm">{total}</span>}
+        <div className="flex shrink-0 items-center gap-2">
+          {total !== undefined && <span className="text-muted-foreground text-sm">{total}</span>}
+          <Button asChild className="size-8" size="icon" variant="ghost">
+            <MyLink aria-label="发布条目讨论" title="发帖" to={`/subject/${subjectId}/topic/new`}>
+              <span className="i-mingcute-add-line text-base" />
+            </MyLink>
+          </Button>
+        </div>
       </div>
 
       {topicsQuery.isError ? (

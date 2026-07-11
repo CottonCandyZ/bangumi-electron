@@ -56,6 +56,8 @@ export function getAvailableReactionValues(target: ReactionTarget | undefined) {
     case 'timeline':
     case 'blog':
     case 'index':
+    case 'person-photo':
+    case 'character-photo':
       return []
   }
 }
@@ -96,6 +98,8 @@ function getReactionPath(target: ReactionTarget, commentId: number) {
     case 'timeline':
     case 'blog':
     case 'index':
+    case 'person-photo':
+    case 'character-photo':
       return null
   }
 }

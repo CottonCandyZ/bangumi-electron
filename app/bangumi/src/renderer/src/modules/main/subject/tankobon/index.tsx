@@ -60,7 +60,7 @@ function Item({ item }: { item: RelatedSubject }) {
   const isTransitioning = useViewTransitionState(`/subject/${item.id}`)
   return (
     <Tooltip key={item.id} delayDuration={0}>
-      <TooltipTrigger>
+      <TooltipTrigger asChild>
         <Link
           to={`/subject/${item.id}`}
           state={{ viewTransitionName: `cover-image-${key}` }}
