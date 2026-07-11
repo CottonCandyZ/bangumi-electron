@@ -42,6 +42,23 @@ dotnet tool install -g vpk --version 1.1.1
 
 如果 `vpk` 安装成功但命令找不到，确认 `~/.dotnet/tools` 或 Windows 的 `%USERPROFILE%\.dotnet\tools` 已在 `PATH` 里。
 
+自动更新的 GitHub prerelease 支持由仓库内的 Rust Velopack bridge 提供。发布机需要安装 Rust stable；bridge 依赖已由 `Cargo.lock` 锁定，打包时会自动编译并放进应用资源目录：
+
+```powershell
+rustup update stable
+rustc --version
+```
+
+macOS 默认同时构建 `x64` 和 `arm64`，首次发布前需要安装两个 Rust target：
+
+```bash
+rustup target add x86_64-apple-darwin aarch64-apple-darwin
+```
+
+bridge 只补充 Velopack Node SDK 尚未暴露的 GitHub `prerelease` 选项。版本选择、delta 链规划、校验、重建与完整包回退仍由 Velopack Rust SDK 处理。
+
+> TODO：bridge 应在目标系统上完成编译和安装包验收。Windows 当前已验证；macOS 需要分别验证 Intel/Apple Silicon 的安装版与 Portable 路径、签名和 delta 应用；Linux 需要先把现有 AppImage/deb/snap 发布流程迁移到 Velopack，再确认 `APPIMAGE`、`UpdateNix` 和 `sq.version` 的实际布局。不要仅凭交叉编译成功视为平台支持完成。
+
 构建检查：
 
 ```powershell
