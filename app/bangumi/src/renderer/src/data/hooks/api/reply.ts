@@ -68,6 +68,7 @@ export function getReplyInvalidationKeys(target: ReplyTarget) {
         ['site-timeline-v1'],
         ['site-timeline-infinite-v1'],
         ['user-timeline'],
+        ['user-timeline-infinite'],
       ]
     case 'blog':
       return [['blog-comments', target.id]]
