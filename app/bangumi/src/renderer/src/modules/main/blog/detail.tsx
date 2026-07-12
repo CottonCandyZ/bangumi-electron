@@ -13,6 +13,7 @@ import {
   useBlogSubjectsQuery,
 } from '@renderer/data/hooks/api/blog'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
+import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
 import { MainCommentFab } from '@renderer/modules/main/comment-fab'
 import { blogTitleInViewAtom } from '@renderer/state/in-view'
 import dayjs from 'dayjs'
@@ -126,6 +127,7 @@ export function BlogDetail({ entryId }: { entryId: number }) {
         />
       </article>
       <MainCommentFab replyTarget={replyTarget} />
+      <MainBackToTopButton />
     </>
   )
 }
