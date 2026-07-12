@@ -1,4 +1,3 @@
-import { TooltipArrow } from '@radix-ui/react-tooltip'
 import {
   ViewTransitionElement,
   ViewTransitionImage,
@@ -84,7 +83,6 @@ function Item({ item }: { item: RelatedSubject }) {
       </TooltipTrigger>
       <TooltipContent sideOffset={7}>
         <span>{item.name}</span>
-        <TooltipArrow className="fill-primary" />
       </TooltipContent>
     </Tooltip>
   )
