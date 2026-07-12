@@ -71,22 +71,22 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
         }}
       >
         {isLogin && (
-          <DropdownMenuLabel>
-            {userInfo?.nickname ? (
-              <span>Hi! {userInfo?.nickname}</span>
-            ) : (
-              <Skeleton className="h-5" />
-            )}
-          </DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>
+              {userInfo?.nickname ? (
+                <span>Hi! {userInfo?.nickname}</span>
+              ) : (
+                <Skeleton className="h-5" />
+              )}
+            </DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => navigate('/profile')}>个人主页</DropdownMenuItem>
+          </DropdownMenuGroup>
         )}
         {!isLogin && (
           <DropdownMenuItem onClick={() => openDialog({ open: true })}>登录</DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          {isLogin && (
-            <DropdownMenuItem onClick={() => navigate('/profile')}>个人主页</DropdownMenuItem>
-          )}
           <DropdownMenuItem onClick={() => navigate('/settings')}>
             设置
             {isHotkeyEnabled(shortcuts.openSettings) && (
