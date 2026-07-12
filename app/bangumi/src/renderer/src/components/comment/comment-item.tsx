@@ -195,7 +195,12 @@ export function CommentItem({
           <CommentReactions comment={comment} target={reactionTarget} />
           {replyCount > 0 && (
             <div
-              className="border-border/70 ml-1 flex flex-col border-l pl-3"
+              className={cn(
+                'flex flex-col',
+                itemVariant === 'inline'
+                  ? 'border-border/70 ml-1 border-l pl-3'
+                  : 'border-border/60 bg-muted/25 rounded-md border px-2',
+              )}
               id={repliesId}
               onMouseEnter={() => setReplyHovering(true)}
               onMouseLeave={() => setReplyHovering(false)}
@@ -206,6 +211,7 @@ export function CommentItem({
                   key={reply.id}
                   floorLabel={floorLabel}
                   highlighted={highlightedReplyId === reply.id}
+                  itemVariant={itemVariant}
                   reactionTarget={reactionTarget}
                   replyTarget={replyTarget}
                   virtual={virtual}
@@ -290,6 +296,7 @@ function CommentHeader({
 function ReplyItem({
   floorLabel,
   highlighted,
+  itemVariant,
   reactionTarget,
   reply,
   replyTarget,
@@ -298,6 +305,7 @@ function ReplyItem({
 }: {
   floorLabel: string
   highlighted: boolean
+  itemVariant: 'card' | 'inline'
   reactionTarget?: ReactionTarget
   reply: CommentBase
   replyTarget?: ReplyTarget
@@ -316,8 +324,13 @@ function ReplyItem({
   return (
     <div
       className={cn(
-        'group/reply before:bg-border/70 relative flex flex-row gap-2 py-2.5 text-sm before:absolute before:top-6 before:-left-3 before:h-px before:w-2',
-        highlighted && 'bg-primary/5 before:bg-primary',
+        itemVariant === 'inline'
+          ? 'group/reply before:bg-border/70 relative flex flex-row gap-2 py-2.5 text-sm before:absolute before:top-6 before:-left-3 before:h-px before:w-2'
+          : 'group/reply border-border/60 -mx-2 flex flex-row gap-2 border-t px-2 py-2.5 text-sm first:border-t-0 first:pt-2 last:pb-2',
+        highlighted &&
+          (itemVariant === 'inline'
+            ? 'bg-primary/5 before:bg-primary'
+            : 'bg-primary/10 ring-primary/25 ring-1 ring-inset'),
       )}
       data-reply-id={reply.id}
     >
@@ -362,7 +375,7 @@ function ReplyItem({
           </div>
           {reply.user ? (
             <CommentUserUsername
-              className="text-[0.65rem] leading-4"
+              className={itemVariant === 'inline' ? 'text-[0.65rem] leading-4' : undefined}
               username={reply.user.username}
             />
           ) : null}
