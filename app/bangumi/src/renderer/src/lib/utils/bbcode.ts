@@ -14,6 +14,7 @@ const TRAILING_URL_PUNCTUATION_PATTERN = /[.,!?;:，。！？；：、)）\]]+$/
 const INLINE_TOKEN_PATTERN = /\((bgm\d+|(?:musume|blake)_\d+|bmoC?[A-Za-z0-9_\-:=|.]*)\)/g
 const BANGUMI_HOSTS = new Set(['bangumi.tv', 'bgm.tv', 'chii.in'])
 const BANGUMI_ROUTE_PATTERN = /^\/(subject|person|character|ep)\/(\d+)\/?$/
+const BANGUMI_BLOG_ROUTE_PATTERN = /^\/blog\/(\d+)\/?$/
 const BANGUMI_TOPIC_ROUTE_PATTERN = /^\/(group|subject)\/topic\/(\d+)\/?$/
 const BANGUMI_USER_ROUTE_PATTERN = /^\/user\/([^/?#]+)\/?$/
 const BBCODE_LINK_CLASS =
@@ -343,6 +344,9 @@ function getBangumiRoute(href: string) {
   try {
     const url = new URL(href)
     if (!BANGUMI_HOSTS.has(url.hostname)) return undefined
+    const blogMatch = url.pathname.match(BANGUMI_BLOG_ROUTE_PATTERN)
+    if (blogMatch) return `/blog/${blogMatch[1]}`
+
     const topicMatch = url.pathname.match(BANGUMI_TOPIC_ROUTE_PATTERN)
     if (topicMatch) return `/${topicMatch[1]}/topic/${topicMatch[2]}`
 
