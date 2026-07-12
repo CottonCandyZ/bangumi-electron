@@ -19,13 +19,26 @@ async function buildVelopackBridge(context) {
   await run('cargo', ['build', '--locked', '--release', '--target', target], BRIDGE_DIR)
 
   const source = join(BRIDGE_DIR, 'target', target, 'release', executableName)
-  const destinationDir = join(context.appOutDir, 'resources', 'velopack-bridge')
+  const destinationDir = join(getPackagedResourcesDir(context), 'velopack-bridge')
   const destination = join(destinationDir, executableName)
 
   await rm(destinationDir, { recursive: true, force: true })
   await mkdir(destinationDir, { recursive: true })
   await copyFile(source, destination)
   if (context.electronPlatformName !== 'win32') await chmod(destination, 0o755)
+}
+
+function getPackagedResourcesDir(context) {
+  if (context.electronPlatformName === 'darwin') {
+    return join(
+      context.appOutDir,
+      `${context.packager.appInfo.productFilename}.app`,
+      'Contents',
+      'Resources',
+    )
+  }
+
+  return join(context.appOutDir, 'resources')
 }
 
 function getRustTarget(platform, arch) {
@@ -71,4 +84,4 @@ function run(command, args, cwd) {
   })
 }
 
-module.exports = { buildVelopackBridge }
+module.exports = { buildVelopackBridge, getPackagedResourcesDir }
