@@ -21,6 +21,7 @@ const TIMELINE_QUERY_ROOTS = [
   ['site-timeline-v1'],
   ['site-timeline-infinite-v1'],
   ['user-timeline'],
+  ['user-timeline-infinite'],
 ] as const
 
 function useInvalidateTimelines() {
