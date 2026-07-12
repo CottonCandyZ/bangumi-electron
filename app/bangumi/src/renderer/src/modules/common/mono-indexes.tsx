@@ -58,7 +58,7 @@ export function MonoIndexesSection({
   if (query.isError || indexes.length === 0) return null
 
   return (
-    <section className="flex flex-col gap-5">
+    <section className="@container flex flex-col gap-5">
       <div className="flex flex-row items-center justify-between gap-3">
         <div className="flex min-w-0 flex-row items-center gap-2">
           <h2 className="text-2xl font-medium">关联目录</h2>
@@ -118,7 +118,7 @@ function MonoIndexCard({ index }: { index: SlimIndex }) {
 
 function MonoIndexesSkeleton() {
   return (
-    <section className="flex flex-col gap-5">
+    <section className="@container flex flex-col gap-5">
       <Skeleton className="h-8 w-28" />
       <div className="grid grid-cols-1 gap-3 @3xl:grid-cols-2">
         {Array.from({ length: 4 }).map((_, index) => (
