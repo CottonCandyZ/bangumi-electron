@@ -15,7 +15,7 @@ import {
 import { Button } from '@renderer/components/ui/button'
 import { Card } from '@renderer/components/ui/card'
 import { canReact, type ReactionTarget } from '@renderer/data/fetch/api/reaction'
-import { canDeleteReply, canEditReply } from '@renderer/data/fetch/api/reply'
+import { canEditReply } from '@renderer/data/fetch/api/reply'
 import { useSession } from '@renderer/data/hooks/session'
 import type { Comment, CommentBase } from '@renderer/data/types/comment'
 import { cn } from '@renderer/lib/utils'
@@ -51,6 +51,7 @@ export function hasVisibleReplyContent(reply: CommentBase) {
 
 export function CommentItem({
   comment,
+  compact = false,
   floorNumber,
   itemVariant = 'card',
   reactionTarget,
@@ -59,6 +60,7 @@ export function CommentItem({
   replyTarget,
 }: {
   comment: Comment
+  compact?: boolean
   floorNumber: number
   itemVariant?: 'card' | 'inline'
   reactionTarget?: ReactionTarget
@@ -90,14 +92,15 @@ export function CommentItem({
   const repliesId = `comment-${comment.id}-replies`
   const hasContent = comment.content.trim().length > 0
   const session = useSession()
-  const showDelete =
-    !!replyTarget && canDeleteReply(replyTarget) && session?.id === comment.creatorID
   const showEdit =
     !!replyTarget &&
     canEditReply(replyTarget) &&
     session?.id === comment.creatorID &&
     comment.replies.length === 0
   const showReaction = canReact(reactionTarget)
+  const showRate = comment.rate !== undefined && comment.rate > 0
+  const isSubjectInterest = comment.collectionType !== undefined
+  const compactUser = compact || itemVariant === 'inline'
   const highlightedReplyId = getHighlightedReplyId(replyComposer, replyTarget)
   const highlighted = highlightedReplyId === comment.id
   const contentState = useCommentContentState({
@@ -105,6 +108,38 @@ export function CommentItem({
     disableHeightTransition: virtual,
     maxCollapsedHeight: COMMENT_CONTENT_COLLAPSED_HEIGHT,
   })
+  const commentActions =
+    showReaction || replyTarget ? (
+      <div
+        className={cn(
+          'pointer-events-none flex flex-row items-center gap-1.5 opacity-0 transition-opacity',
+          !replyHovering &&
+            'group-focus-within/comment:pointer-events-auto group-focus-within/comment:opacity-100 group-hover/comment:pointer-events-auto group-hover/comment:opacity-100',
+          reactionPickerOpen && 'pointer-events-auto opacity-100',
+        )}
+      >
+        <CommentReactionButton
+          className="h-6 px-1.5"
+          comment={comment}
+          onOpenChange={setReactionPickerOpen}
+          target={reactionTarget}
+        />
+        {replyTarget && (
+          <>
+            <CommentReplyButton
+              className="h-6 px-1.5"
+              comment={comment}
+              floorLabel={`#${floorNumber}`}
+              target={replyTarget}
+            />
+            {showEdit && (
+              <CommentEditButton className="h-6 px-1.5" comment={comment} target={replyTarget} />
+            )}
+            <CommentDeleteButton className="h-6 px-1.5" comment={comment} target={replyTarget} />
+          </>
+        )}
+      </div>
+    ) : null
 
   return (
     <Card
@@ -112,83 +147,80 @@ export function CommentItem({
         'group/comment relative flex flex-row gap-3 p-3 shadow-none',
         itemVariant === 'inline' && 'gap-2 rounded-none border-0 bg-transparent px-0 py-2.5',
         highlighted && 'border-primary/70 bg-primary/5',
-        replyTarget
-          ? showDelete || showEdit
-            ? 'pr-52'
-            : 'pr-32'
-          : showReaction
-            ? 'pr-20'
-            : 'pr-12',
       )}
       data-comment-id={comment.id}
     >
-      <div
-        className={cn(
-          'absolute top-3 right-3 flex flex-row items-center gap-1.5',
-          itemVariant === 'inline' && 'top-2.5 right-0',
-        )}
-      >
-        <div
-          className={cn(
-            'pointer-events-none flex flex-row items-center gap-1.5 opacity-0 transition-opacity',
-            !replyHovering &&
-              'group-focus-within/comment:pointer-events-auto group-focus-within/comment:opacity-100 group-hover/comment:pointer-events-auto group-hover/comment:opacity-100',
-            reactionPickerOpen && 'pointer-events-auto opacity-100',
-          )}
-        >
-          <CommentReactionButton
-            className="h-6 px-1.5"
-            comment={comment}
-            onOpenChange={setReactionPickerOpen}
-            target={reactionTarget}
-          />
-          {replyTarget && (
-            <>
-              <CommentReplyButton
-                className="h-6 px-1.5"
-                comment={comment}
-                floorLabel={`#${floorNumber}`}
-                target={replyTarget}
-              />
-              {showEdit && (
-                <CommentEditButton className="h-6 px-1.5" comment={comment} target={replyTarget} />
-              )}
-              <CommentDeleteButton className="h-6 px-1.5" comment={comment} target={replyTarget} />
-            </>
-          )}
-        </div>
-        <span className="text-muted-foreground text-xs tabular-nums">#{floorNumber}</span>
-      </div>
       {comment.user?.avatar.medium ? (
         <CommentUserAvatarLink
-          className={cn('size-10 shrink-0', itemVariant === 'inline' && 'size-8')}
-          imageClassName={cn(
-            'size-10 overflow-hidden rounded-full',
-            itemVariant === 'inline' && 'size-8',
-          )}
+          className={cn('size-10 shrink-0', compactUser && 'size-8')}
+          imageClassName={cn('size-10 overflow-hidden rounded-full', compactUser && 'size-8')}
           transitionKey={`comment-${comment.id}`}
           user={comment.user}
           viewTransition={userAvatarViewTransition}
         />
       ) : (
-        <div
-          className={cn(
-            'bg-muted size-10 shrink-0 rounded-full',
-            itemVariant === 'inline' && 'size-8',
-          )}
-        />
+        <div className={cn('bg-muted size-10 shrink-0 rounded-full', compactUser && 'size-8')} />
       )}
       <BBCodeImagePreviewProvider>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <CommentHeader
-            comment={comment}
-            compact={itemVariant === 'inline'}
-            contentToggle={
-              hasContent && contentState.collapsible ? (
-                <CommentContentToggle contentState={contentState} placement="inline" />
-              ) : null
-            }
-          />
+          <div className="flex min-w-0 items-start justify-between gap-3">
+            <CommentHeader
+              comment={comment}
+              compact={compactUser}
+              contentToggle={
+                hasContent && contentState.collapsible ? (
+                  <CommentContentToggle contentState={contentState} placement="inline" />
+                ) : null
+              }
+            />
+            {isSubjectInterest ? (
+              <div className="grid shrink-0 grid-rows-[1.5rem_1rem]">
+                <div className="flex h-6 items-center justify-end gap-2">
+                  {commentActions}
+                  {comment.collectionLabel ? (
+                    <span className="text-muted-foreground text-xs leading-none font-medium">
+                      {comment.collectionLabel}
+                    </span>
+                  ) : null}
+                  {showRate ? (
+                    <span
+                      aria-label={`评分 ${comment.rate}`}
+                      className="inline-flex items-center gap-0.5 text-sm leading-none font-medium tabular-nums"
+                      style={{ color: `hsl(var(--chart-score-${comment.rate}))` }}
+                    >
+                      {comment.rate}
+                      <span aria-hidden="true" className="i-mingcute-star-fill text-xs" />
+                    </span>
+                  ) : null}
+                </div>
+                <div className="flex h-4 items-center justify-end">
+                  <CommentTimestamp createdAt={comment.createdAt} />
+                </div>
+              </div>
+            ) : (
+              <div className="flex shrink-0 flex-row items-start gap-2">
+                {commentActions}
+                <div className="flex h-6 items-center gap-0.5">
+                  {showRate ? (
+                    <>
+                      <span
+                        aria-label={`评分 ${comment.rate}`}
+                        className="inline-flex items-center gap-0.5 text-sm leading-none font-medium tabular-nums"
+                        style={{ color: `hsl(var(--chart-score-${comment.rate}))` }}
+                      >
+                        {comment.rate}
+                        <span aria-hidden="true" className="i-mingcute-star-fill text-xs" />
+                      </span>
+                      <CommentMetaSeparator />
+                    </>
+                  ) : null}
+                  <span className="text-muted-foreground text-xs tabular-nums">#{floorNumber}</span>
+                  <CommentMetaSeparator />
+                  <CommentTimestamp createdAt={comment.createdAt} />
+                </div>
+              </div>
+            )}
+          </div>
           {hasContent && (
             <CommentContent className="text-sm whitespace-pre-line" contentState={contentState} />
           )}
@@ -255,41 +287,58 @@ function CommentHeader({
   contentToggle?: ReactNode
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-0.5">
+    <div className="flex min-w-0 flex-1 flex-col">
       <div className="flex min-w-0 flex-row flex-wrap items-baseline gap-x-2 gap-y-1">
         {comment.user ? (
           <>
-            <UserProfileLink
-              className={cn(
-                'hover:text-primary font-medium transition-colors',
-                compact && 'text-sm',
-              )}
-              user={comment.user}
-            >
-              {comment.user.nickname}
-            </UserProfileLink>
-            <CommentUserSignature sign={comment.user.sign} />
+            <div className="inline-grid max-w-full min-w-0 grid-rows-[1.5rem_1rem]">
+              <div className="flex h-6 min-w-0 items-baseline gap-2">
+                <UserProfileLink
+                  className={cn(
+                    'hover:text-primary max-w-full shrink-0 truncate font-medium transition-colors',
+                    compact && 'text-sm',
+                  )}
+                  user={comment.user}
+                >
+                  {comment.user.nickname}
+                </UserProfileLink>
+                <div className="min-w-0 flex-1 truncate leading-6 [&>span]:whitespace-nowrap">
+                  <CommentUserSignature sign={comment.user.sign} />
+                </div>
+              </div>
+              <CommentUserUsername
+                className={cn('min-w-0 leading-4', compact && 'text-[0.65rem]')}
+                username={comment.user.username}
+              />
+            </div>
           </>
         ) : (
           <span className="font-medium">#{comment.creatorID}</span>
         )}
-        <span className="text-muted-foreground text-xs">
-          <time
-            dateTime={dayjs.unix(comment.createdAt).toISOString()}
-            title={dayjs.unix(comment.createdAt).format('YYYY-MM-DD HH:mm')}
-          >
-            {formatRecentUnixTime(comment.createdAt)}
-          </time>
-        </span>
         {contentToggle}
       </div>
-      {comment.user ? (
-        <CommentUserUsername
-          className={compact ? 'text-[0.65rem] leading-4' : undefined}
-          username={comment.user.username}
-        />
-      ) : null}
     </div>
+  )
+}
+
+function CommentTimestamp({ createdAt }: { createdAt: number }) {
+  return (
+    <span className="text-muted-foreground shrink-0 text-xs">
+      <time
+        dateTime={dayjs.unix(createdAt).toISOString()}
+        title={dayjs.unix(createdAt).format('YYYY-MM-DD HH:mm')}
+      >
+        {formatRecentUnixTime(createdAt)}
+      </time>
+    </span>
+  )
+}
+
+function CommentMetaSeparator() {
+  return (
+    <span aria-hidden="true" className="text-muted-foreground/50 shrink-0 text-[0.6rem] leading-4">
+      ·
+    </span>
   )
 }
 
@@ -346,72 +395,73 @@ function ReplyItem({
         <div className="bg-muted mt-0.5 size-7 shrink-0 rounded-full" />
       )}
       <div className="min-w-0 flex-1">
-        <div className="mb-1 flex min-w-0 flex-col gap-0.5">
+        <div className="mb-1 flex min-w-0 items-start justify-between gap-2">
           <div className="flex min-w-0 flex-row flex-wrap items-baseline gap-x-2 gap-y-0.5">
             {reply.user ? (
               <>
-                <UserProfileLink
-                  className="hover:text-primary font-medium transition-colors"
-                  user={reply.user}
-                >
-                  {reply.user.nickname}
-                </UserProfileLink>
-                <CommentUserSignature sign={reply.user.sign} />
+                <div className="inline-flex max-w-full min-w-0 flex-col">
+                  <div className="flex min-w-0 items-baseline gap-2">
+                    <UserProfileLink
+                      className="hover:text-primary max-w-full shrink-0 truncate font-medium transition-colors"
+                      user={reply.user}
+                    >
+                      {reply.user.nickname}
+                    </UserProfileLink>
+                    <div className="min-w-0 flex-1 truncate [&>span]:whitespace-nowrap">
+                      <CommentUserSignature sign={reply.user.sign} />
+                    </div>
+                  </div>
+                  <CommentUserUsername
+                    className={cn(
+                      'min-w-0',
+                      itemVariant === 'inline' && 'text-[0.65rem] leading-4',
+                    )}
+                    username={reply.user.username}
+                  />
+                </div>
               </>
             ) : (
               <span className="font-medium">#{reply.creatorID}</span>
             )}
-            <span className="text-muted-foreground text-xs">
-              <time
-                dateTime={dayjs.unix(reply.createdAt).toISOString()}
-                title={dayjs.unix(reply.createdAt).format('YYYY-MM-DD HH:mm')}
-              >
-                {formatRecentUnixTime(reply.createdAt)}
-              </time>
-            </span>
             {contentState.collapsible && (
               <CommentContentToggle contentState={contentState} placement="inline" />
             )}
           </div>
-          {reply.user ? (
-            <CommentUserUsername
-              className={itemVariant === 'inline' ? 'text-[0.65rem] leading-4' : undefined}
-              username={reply.user.username}
-            />
-          ) : null}
+          <div className="flex h-6 shrink-0 flex-row items-center gap-0.5">
+            {replyTarget && (
+              <div
+                className={cn(
+                  'pointer-events-none flex h-6 flex-row items-center gap-1 opacity-0 transition-opacity group-focus-within/reply:pointer-events-auto group-focus-within/reply:opacity-100 group-hover/reply:pointer-events-auto group-hover/reply:opacity-100',
+                  reactionPickerOpen && 'pointer-events-auto opacity-100',
+                )}
+              >
+                <CommentReactionButton
+                  className="h-6 px-1.5"
+                  comment={reply}
+                  onOpenChange={setReactionPickerOpen}
+                  target={reactionTarget}
+                />
+                <CommentReplyButton
+                  className="h-6 px-1.5"
+                  comment={reply}
+                  floorLabel={floorLabel}
+                  target={replyTarget}
+                />
+                {showEdit && (
+                  <CommentEditButton className="h-6 px-1.5" comment={reply} target={replyTarget} />
+                )}
+                <CommentDeleteButton className="h-6 px-1.5" comment={reply} target={replyTarget} />
+              </div>
+            )}
+            <span className="text-muted-foreground text-xs leading-none tabular-nums">
+              {floorLabel}
+            </span>
+            <CommentMetaSeparator />
+            <CommentTimestamp createdAt={reply.createdAt} />
+          </div>
         </div>
         <CommentContent className="whitespace-pre-line" contentState={contentState} />
         <CommentReactions comment={reply} compact target={reactionTarget} />
-      </div>
-      <div className="flex h-6 shrink-0 flex-row items-center gap-1.5">
-        {replyTarget && (
-          <div
-            className={cn(
-              'pointer-events-none flex h-6 flex-row items-center gap-1 opacity-0 transition-opacity group-focus-within/reply:pointer-events-auto group-focus-within/reply:opacity-100 group-hover/reply:pointer-events-auto group-hover/reply:opacity-100',
-              reactionPickerOpen && 'pointer-events-auto opacity-100',
-            )}
-          >
-            <CommentReactionButton
-              className="h-6 px-1.5"
-              comment={reply}
-              onOpenChange={setReactionPickerOpen}
-              target={reactionTarget}
-            />
-            <CommentReplyButton
-              className="h-6 px-1.5"
-              comment={reply}
-              floorLabel={floorLabel}
-              target={replyTarget}
-            />
-            {showEdit && (
-              <CommentEditButton className="h-6 px-1.5" comment={reply} target={replyTarget} />
-            )}
-            <CommentDeleteButton className="h-6 px-1.5" comment={reply} target={replyTarget} />
-          </div>
-        )}
-        <span className="text-muted-foreground text-xs leading-none tabular-nums">
-          {floorLabel}
-        </span>
       </div>
     </div>
   )

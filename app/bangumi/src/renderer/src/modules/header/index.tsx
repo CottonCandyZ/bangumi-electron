@@ -16,19 +16,22 @@ export function Header() {
   return (
     <header
       className={cn(
-        'bg-background drag-region relative z-10 flex shrink-0 flex-row items-center justify-between gap-10 border-b pl-2',
+        'bg-background drag-region @container/header relative z-10 flex shrink-0 flex-row items-center justify-between gap-4 border-b pl-2',
       )}
       style={{
         height: UI_CONFIG.HEADER_HEIGHT,
         viewTransitionName: 'app-header',
       }}
     >
-      <div className="flex h-full flex-row items-center gap-3">
+      <div className="flex h-full min-w-0 flex-1 flex-row items-center gap-3 overflow-hidden">
         <NavButton />
         <HeaderTitle />
       </div>
       <div
-        className={cn('flex h-full flex-row items-center gap-2', platform === 'darwin' && 'pr-2')}
+        className={cn(
+          'flex h-full shrink-0 flex-row items-center gap-2',
+          platform === 'darwin' && 'pr-2',
+        )}
       >
         <HeaderUpdateIndicator />
         <NotificationButton />

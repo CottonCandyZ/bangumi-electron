@@ -23,6 +23,7 @@ export function CommentList({
   reactionTarget,
   replyTarget,
   itemVariant = 'card',
+  compact = false,
 }: {
   comments: Comment[]
   className?: string
@@ -38,6 +39,7 @@ export function CommentList({
   reactionTarget?: ReactionTarget
   replyTarget?: ReplyTarget
   itemVariant?: 'card' | 'inline'
+  compact?: boolean
 }) {
   if (!virtual) {
     return (
@@ -45,6 +47,7 @@ export function CommentList({
         {comments.map((comment, index) => (
           <CommentItem
             comment={comment}
+            compact={compact}
             floorNumber={floorNumbers?.[index] ?? index + 1}
             itemVariant={itemVariant}
             key={comment.id}
@@ -64,6 +67,7 @@ export function CommentList({
       renderItem={(comment, index) => (
         <CommentItem
           comment={comment}
+          compact={compact}
           floorNumber={floorNumbers?.[index] ?? index + 1}
           itemVariant={itemVariant}
           reactionTarget={reactionTarget}
@@ -79,7 +83,7 @@ export function CommentList({
       hasMore={hasMore}
       isFetchingMore={isFetchingMore}
       appendPlaceholderCount={appendPlaceholderCount}
-      renderPlaceholder={() => <CommentSkeleton />}
+      renderPlaceholder={() => <CommentSkeleton compact={compact} />}
       onNearBottom={onNearBottom}
       scrollMemoryKey={scrollMemoryKey}
       showBackToTop={showBackToTop}
@@ -99,13 +103,13 @@ export function CommentSkeletonList({ count = 4 }: { count?: number }) {
   )
 }
 
-export function CommentSkeleton() {
+export function CommentSkeleton({ compact = false }: { compact?: boolean }) {
   return (
     <div className="flex w-full flex-row gap-3 p-2">
-      <Skeleton className="size-10 shrink-0 rounded-full" />
+      <Skeleton className={cn('size-10 shrink-0 rounded-full', compact && 'size-8')} />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex flex-row items-center gap-2">
-          <Skeleton className="h-4 w-28" />
+          <Skeleton className={cn('h-4 w-28', compact && 'h-3.5 w-24')} />
           <Skeleton className="h-3 w-20" />
         </div>
         <Skeleton className="h-4 w-full" />

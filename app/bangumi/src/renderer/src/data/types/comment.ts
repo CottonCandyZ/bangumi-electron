@@ -1,3 +1,5 @@
+import type { CollectionType } from '@renderer/data/types/collection'
+
 export type CommentUser = {
   id: number
   username: string
@@ -34,6 +36,9 @@ export type CommentBase = {
   state: number
   user?: CommentUser
   reactions?: CommentReaction[]
+  rate?: number
+  collectionType?: CollectionType
+  collectionLabel?: string
 }
 
 export type Comment = CommentBase & {
@@ -43,7 +48,7 @@ export type Comment = CommentBase & {
 export type SubjectInterestComment = {
   id: number
   user: CommentUser
-  type: number
+  type: CollectionType
   rate: number
   comment: string
   updatedAt: number

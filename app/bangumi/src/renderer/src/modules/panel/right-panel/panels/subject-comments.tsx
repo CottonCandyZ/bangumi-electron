@@ -1,5 +1,6 @@
 import { CommentBox, CommentSkeleton } from '@renderer/components/comment/comment-box'
 import { useSubjectCommentsQuery } from '@renderer/data/hooks/api/subject'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { toCommentFromSubjectInterest } from '@renderer/data/transformer/comment'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { useCallback, useMemo } from 'react'
@@ -18,15 +19,17 @@ export function SubjectCommentsPanel({
     enabled,
     limit: SUBJECT_COMMENTS_PAGE_LIMIT,
   })
+  const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
+  const subjectType = subjectInfoQuery.data?.type
   const commentList = useMemo(
     () =>
       commentsQuery.data?.pages.flatMap((page, pageIndex) =>
         page.data.map((comment) => ({
-          comment: toCommentFromSubjectInterest(comment),
+          comment: toCommentFromSubjectInterest(comment, subjectType),
           groupKey: pageIndex,
         })),
       ),
-    [commentsQuery.data],
+    [commentsQuery.data, subjectType],
   )
   const comments = useMemo(() => commentList?.map((item) => item.comment), [commentList])
   const total = commentsQuery.data?.pages[0]?.total
@@ -52,7 +55,7 @@ export function SubjectCommentsPanel({
             {Array(8)
               .fill(undefined)
               .map((_, index) => (
-                <CommentSkeleton key={index} />
+                <CommentSkeleton compact key={index} />
               ))}
           </div>
         </div>
@@ -68,6 +71,7 @@ export function SubjectCommentsPanel({
         contentClassName="min-h-0 flex-1"
         listClassName="h-full max-h-none px-3 py-3"
         comments={comments}
+        compact
         error={commentsQuery.isError}
         emptyText="还没有吐槽。"
         floorNumbers={floorNumbers}

@@ -41,6 +41,7 @@ type CommentBoxProps = {
   replyTarget?: ReplyTarget
   showReplyEntry?: boolean
   itemVariant?: 'card' | 'inline'
+  compact?: boolean
 }
 
 export function CommentBox({
@@ -68,6 +69,7 @@ export function CommentBox({
   replyTarget,
   showReplyEntry = true,
   itemVariant = 'card',
+  compact = false,
 }: CommentBoxProps) {
   const resolvedReactionTarget = reactionTarget ?? replyTarget
   const visibleComments = useMemo(() => comments?.filter(hasVisibleCommentContent), [comments])
@@ -104,6 +106,7 @@ export function CommentBox({
       <CommentList
         appendPlaceholderCount={appendPlaceholderCount}
         className={listClassName}
+        compact={compact}
         comments={visibleComments}
         floorNumbers={visibleFloorNumbers}
         hasMore={hasMore}
@@ -120,6 +123,7 @@ export function CommentBox({
     )
   }, [
     appendPlaceholderCount,
+    compact,
     emptyText,
     error,
     hasMore,

@@ -1,6 +1,11 @@
 import { Comment, SubjectInterestComment } from '@renderer/data/types/comment'
+import type { SubjectType } from '@renderer/data/types/subject'
+import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 
-export function toCommentFromSubjectInterest(comment: SubjectInterestComment): Comment {
+export function toCommentFromSubjectInterest(
+  comment: SubjectInterestComment,
+  subjectType?: SubjectType,
+): Comment {
   return {
     id: comment.id,
     mainID: comment.id,
@@ -10,6 +15,9 @@ export function toCommentFromSubjectInterest(comment: SubjectInterestComment): C
     content: comment.comment,
     state: 0,
     reactions: comment.reactions,
+    rate: comment.rate,
+    collectionType: comment.type,
+    collectionLabel: subjectType ? COLLECTION_TYPE_MAP(subjectType)[comment.type] : undefined,
     user: comment.user,
     replies: [],
   }

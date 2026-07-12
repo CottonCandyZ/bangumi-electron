@@ -43,7 +43,7 @@ export function RightResizablePanel() {
   }, [width, open])
 
   useEffect(() => {
-    if (open && width <= MIN_WIDTH) {
+    if (open && width < MIN_WIDTH) {
       setWidth(DEFAULT_WIDTH)
     }
   }, [open, setWidth, width])

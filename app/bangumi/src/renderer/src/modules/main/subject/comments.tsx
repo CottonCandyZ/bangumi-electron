@@ -1,6 +1,7 @@
 import { CommentBox } from '@renderer/components/comment/comment-box'
 import { Button } from '@renderer/components/ui/button'
 import { useSubjectCommentsQuery } from '@renderer/data/hooks/api/subject'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { toCommentFromSubjectInterest } from '@renderer/data/transformer/comment'
 import { SubjectId } from '@renderer/data/types/bgm'
 import {
@@ -25,9 +26,14 @@ export function SubjectComments({ subjectId }: { subjectId: SubjectId }) {
     limit: SUBJECT_COMMENTS_PREVIEW_LIMIT,
     refetchPageLimit: 1,
   })
+  const subjectInfoQuery = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
+  const subjectType = subjectInfoQuery.data?.type
   const comments = useMemo(
-    () => commentsQuery.data?.pages.flatMap((page) => page.data.map(toCommentFromSubjectInterest)),
-    [commentsQuery.data],
+    () =>
+      commentsQuery.data?.pages.flatMap((page) =>
+        page.data.map((comment) => toCommentFromSubjectInterest(comment, subjectType)),
+      ),
+    [commentsQuery.data, subjectType],
   )
   const total = commentsQuery.data?.pages[0]?.total
   const floorNumbers = useMemo(

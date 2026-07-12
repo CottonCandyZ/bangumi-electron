@@ -16,7 +16,7 @@ export function WindowsButton() {
   }, [])
   return (
     platform === 'win32' && (
-      <div className="flex h-full">
+      <div className="flex h-full shrink-0">
         <div className="no-drag-region flex h-full flex-row items-center">
           <Button
             className="h-full w-fit cursor-default rounded-none px-3"

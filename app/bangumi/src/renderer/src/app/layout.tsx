@@ -22,9 +22,9 @@ function RootLayout() {
   return (
     <>
       <NavBar />
-      <div className="flex h-dvh flex-row" style={{ marginLeft: UI_CONFIG.NAV_WIDTH }}>
+      <div className="flex h-dvh min-w-0 flex-row" style={{ marginLeft: UI_CONFIG.NAV_WIDTH }}>
         <LeftResizablePanel />
-        <div className="flex h-full w-full flex-col">
+        <div className="flex h-full min-w-0 flex-1 flex-col">
           <Header />
           <MainContainer>
             <MainOutlet />
