@@ -57,20 +57,28 @@ export function SubjectReviews({ subjectId }: { subjectId: SubjectId }) {
       </div>
       <div className="grid gap-3 @4xl:grid-cols-2">
         {reviews.map(({ entry, user }) => (
-          <MyLink className="cursor-default" key={entry.id} to={`/blog/${entry.id}`}>
-            <Card className="hover:bg-accent/60 flex h-full flex-col gap-2 p-4 shadow-none transition-colors">
-              <h3 className="line-clamp-2 font-semibold">{entry.title}</h3>
-              {entry.summary && (
-                <div className="bbcode text-muted-foreground line-clamp-3 text-sm leading-6">
-                  {renderBBCode(entry.summary)}
-                </div>
-              )}
-              <div className="text-muted-foreground mt-auto flex justify-between gap-3 text-xs">
-                <span>{user.nickname || user.username}</span>
-                <span>{entry.replies} 回复</span>
+          <Card
+            className="hover:bg-accent/60 relative flex h-full flex-col gap-2 p-4 shadow-none transition-colors"
+            key={entry.id}
+          >
+            <MyLink
+              aria-label={`查看评论：${entry.title}`}
+              className="focus-visible:ring-ring absolute inset-0 rounded-xl focus-visible:ring-2 focus-visible:outline-none"
+              to={`/blog/${entry.id}`}
+            />
+            <h3 className="pointer-events-none relative line-clamp-2 font-semibold">
+              {entry.title}
+            </h3>
+            {entry.summary && (
+              <div className="bbcode text-muted-foreground pointer-events-none relative line-clamp-3 text-sm leading-6 [&_a]:pointer-events-auto [&_a]:relative">
+                {renderBBCode(entry.summary)}
               </div>
-            </Card>
-          </MyLink>
+            )}
+            <div className="text-muted-foreground pointer-events-none relative mt-auto flex justify-between gap-3 text-xs">
+              <span>{user.nickname || user.username}</span>
+              <span>{entry.replies} 回复</span>
+            </div>
+          </Card>
         ))}
       </div>
       {total > reviews.length && (
