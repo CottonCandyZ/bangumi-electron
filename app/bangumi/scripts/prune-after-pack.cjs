@@ -1,9 +1,9 @@
 const { rm } = require('node:fs/promises')
 const { join } = require('node:path')
-const { buildVelopackBridge } = require('./build-velopack-bridge.cjs')
+const { buildVelopackBridge, getPackagedResourcesDir } = require('./build-velopack-bridge.cjs')
 
 module.exports = async function pruneAfterPack(context) {
-  const unpackedRoot = join(context.appOutDir, 'resources', 'app.asar.unpacked', 'node_modules')
+  const unpackedRoot = join(getPackagedResourcesDir(context), 'app.asar.unpacked', 'node_modules')
   const platform = context.electronPlatformName
 
   await Promise.all([
