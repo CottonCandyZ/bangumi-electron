@@ -233,7 +233,7 @@ function CommentReactionChip({
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="max-h-56 w-auto max-w-72 overflow-y-auto p-2 text-left text-xs leading-5 [text-wrap:wrap] break-words whitespace-normal"
+        className="block max-h-56 w-auto max-w-72 overflow-y-auto p-2 text-left text-xs leading-5 [text-wrap:wrap] break-words whitespace-normal"
         collisionPadding={8}
         onOpenAutoFocus={(event) => event.preventDefault()}
         onPointerEnter={() => setUserPopoverOpen(true)}
