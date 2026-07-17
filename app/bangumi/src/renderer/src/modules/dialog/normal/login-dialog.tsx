@@ -15,7 +15,7 @@ export function LoginDialog() {
 
   return (
     <Dialog open={open.open} disablePointerDismissal onOpenChange={(open) => setOpen({ open })}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             {LOGIN_DIALOG.TITLE}{' '}
