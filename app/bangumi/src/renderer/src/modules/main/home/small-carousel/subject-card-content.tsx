@@ -247,7 +247,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
               </section>
               {/* 标签 */}
               <motion.div
-                className="mr-1 mb-4 ml-4 flex min-h-0 flex-1 flex-wrap gap-2 overflow-x-hidden overflow-y-auto py-2 pr-3"
+                className="mr-1 mb-4 ml-4 flex min-h-0 flex-1 flex-wrap content-start items-start gap-2 overflow-x-hidden overflow-y-auto py-2 pr-3"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
