@@ -7,6 +7,7 @@ import { command } from '@main/tipc/command'
 import { configIPC } from '@main/tipc/config'
 import { update } from '@main/tipc/update'
 import { turnstileIPC } from '@main/tipc/turnstile'
+import { webVerificationIPC } from '@main/tipc/web-verification'
 
 export const router = {
   ...window,
@@ -16,6 +17,7 @@ export const router = {
   ...configIPC,
   ...update,
   ...turnstileIPC,
+  ...webVerificationIPC,
   ...loggerIPC,
   ...dbIPC,
 }

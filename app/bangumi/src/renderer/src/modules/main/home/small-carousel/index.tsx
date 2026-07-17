@@ -21,6 +21,8 @@ import { useEffect, useState } from 'react'
 import { useTopListQuery } from '@renderer/data/hooks/web/subject'
 import { useSubjectsInfoQuery } from '@renderer/data/hooks/db/subject'
 import { Skeleton } from '@renderer/components/ui/skeleton'
+import { BangumiWebVerificationButton } from '@renderer/modules/common/bangumi-web-verification'
+import { FetchError } from 'ofetch'
 
 export type SmallCarouselProps = {
   href: string
@@ -34,6 +36,8 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
     ?.map((item) => item.SubjectId)
     .filter((item) => item !== undefined)
   const subjectsInfo = useSubjectsInfoQuery({ subjectIds: subjectIds, enabled: !!subjectIds }).data
+  const requiresWebVerification =
+    topList.error instanceof FetchError && topList.error.statusCode === 403
 
   const currentSectionPath = useAtomValue(activeSectionAtom)
   const [api, setApi] = useState<CarouselApi>()
@@ -103,33 +107,57 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
         </div>
       </div>
       <div className={cn('@container relative', currentSectionPath === sectionPath && 'z-40')}>
-        <CarouselContentNoFlow className="-ml-3">
-          {subjectsInfo
-            ? subjectsInfo.map((subject, index) => (
-                <CarouselItem
-                  key={index}
-                  className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @7xl:basis-[10%]"
-                >
-                  <div className="p-0.5">
-                    {subject ? (
-                      <SubjectCard subjectInfo={subject} sectionPath={sectionPath} />
-                    ) : (
+        {topList.isError ? (
+          <div className="text-muted-foreground flex min-h-48 flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-4 text-center text-sm">
+            <p>
+              {requiresWebVerification
+                ? `Bangumi 需要网页验证才能加载热门${name}。`
+                : `暂时无法加载热门${name}。`}
+            </p>
+            {requiresWebVerification ? (
+              <BangumiWebVerificationButton />
+            ) : (
+              <Button
+                className="h-8 px-2 text-xs"
+                disabled={topList.isFetching}
+                onClick={() => void topList.refetch()}
+                size="sm"
+                type="button"
+                variant="outline"
+              >
+                {topList.isFetching ? '重试中' : '重试'}
+              </Button>
+            )}
+          </div>
+        ) : (
+          <CarouselContentNoFlow className="-ml-3">
+            {subjectsInfo
+              ? subjectsInfo.map((subject, index) => (
+                  <CarouselItem
+                    key={index}
+                    className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @7xl:basis-[10%]"
+                  >
+                    <div className="p-0.5">
+                      {subject ? (
+                        <SubjectCard subjectInfo={subject} sectionPath={sectionPath} />
+                      ) : (
+                        <Skeleton className="aspect-2/3 w-full" />
+                      )}
+                    </div>
+                  </CarouselItem>
+                ))
+              : Array.from({ length: 10 }).map((_, index) => (
+                  <CarouselItem
+                    key={index}
+                    className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @7xl:basis-[10%]"
+                  >
+                    <div className="p-0.5">
                       <Skeleton className="aspect-2/3 w-full" />
-                    )}
-                  </div>
-                </CarouselItem>
-              ))
-            : Array.from({ length: 10 }).map((_, index) => (
-                <CarouselItem
-                  key={index}
-                  className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @7xl:basis-[10%]"
-                >
-                  <div className="p-0.5">
-                    <Skeleton className="aspect-2/3 w-full" />
-                  </div>
-                </CarouselItem>
-              ))}
-        </CarouselContentNoFlow>
+                    </div>
+                  </CarouselItem>
+                ))}
+          </CarouselContentNoFlow>
+        )}
       </div>
     </Carousel>
   )

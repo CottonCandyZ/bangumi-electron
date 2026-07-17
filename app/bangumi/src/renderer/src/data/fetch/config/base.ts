@@ -38,7 +38,7 @@ export const APP_SECRET = import.meta.env.VITE_APP_SECRET
 export const URL_OAUTH_REDIRECT = `${HOST}/dev/app`
 
 /** ofetch web config */
-export const webFetch = ofetch.create({ baseURL: HOST })
+export const webFetch = ofetch.create({ baseURL: HOST, credentials: 'include' })
 
 /** ofetch api config  */
 export const apiFetch = ofetch.create({ baseURL: API_HOST, credentials: 'omit' })

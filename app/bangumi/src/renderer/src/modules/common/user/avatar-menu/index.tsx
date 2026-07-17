@@ -26,6 +26,7 @@ import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { useNavigate } from 'react-router-dom'
 import { appConfigAtom } from '@renderer/state/app-config'
 import { formatHotkeyForDisplay, isHotkeyEnabled } from '@renderer/lib/shortcut'
+import { useBangumiWebVerification } from '@renderer/modules/common/bangumi-web-verification'
 
 export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   const logoutMutation = useLogoutMutation()
@@ -34,6 +35,7 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
   const { theme, setTheme } = useTheme()
   const shortcuts = useAtomValue(appConfigAtom).shortcuts
   const navigate = useNavigate()
+  const webVerification = useBangumiWebVerification()
 
   const [dropdownOpen, setDropDownOpen] = useState(false)
   const openDialog = useSetAtom(loginDialogAtom)
@@ -94,6 +96,12 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
                 {formatHotkeyForDisplay(shortcuts.openSettings)}
               </DropdownMenuShortcut>
             )}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            disabled={webVerification.isPending}
+            onClick={() => webVerification.mutate()}
+          >
+            {webVerification.isPending ? '正在进行网页验证…' : '网页验证'}
           </DropdownMenuItem>
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>主题</DropdownMenuSubTrigger>
