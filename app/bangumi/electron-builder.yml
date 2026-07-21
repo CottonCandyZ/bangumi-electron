@@ -10,6 +10,7 @@ files:
   - '!src/**'
   - '!scripts/**'
   - '!instructs/**'
+  - '!native/**'
   - '!dev-server*.log'
   - '!builder-debug.yml'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
