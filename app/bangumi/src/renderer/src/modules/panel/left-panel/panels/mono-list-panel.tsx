@@ -116,7 +116,7 @@ export function MonoListPanel() {
                       tab.id === activeTab.id && 'bg-accent text-accent-foreground',
                     )}
                     key={tab.id}
-                    onSelect={() => setActiveTabId(tab.id)}
+                    onClick={() => setActiveTabId(tab.id)}
                   >
                     <span className="line-clamp-1 min-w-0">{tab.title}</span>
                     <span className="ml-auto flex shrink-0 items-center gap-1">
