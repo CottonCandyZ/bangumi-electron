@@ -1,7 +1,6 @@
 import { MediumHeader } from '@renderer/components/headers'
 import { HoverCardContent } from '@renderer/components/hover-card/content'
 import { EpisodeCollectionButton } from '@renderer/modules/common/collections/episode-collection-button'
-import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useSessionUsername } from '@renderer/data/hooks/session'
 import { useQuerySubjectCollection } from '@renderer/data/hooks/api/collection'
@@ -11,7 +10,75 @@ import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { cn } from '@renderer/lib/utils'
 import { getDurationFromSeconds } from '@renderer/lib/utils/data-trans'
 import { isEmpty } from '@renderer/lib/utils/string'
-import { useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+
+const TOP_SCROLL_FADE = [
+  'transparent 0',
+  'rgb(0 0 0 / 17%) 3px',
+  'rgb(0 0 0 / 38%) 6px',
+  'rgb(0 0 0 / 62%) 10px',
+  'rgb(0 0 0 / 82%) 14px',
+  'rgb(0 0 0 / 93%) 18px',
+  'rgb(0 0 0 / 98%) 21px',
+  'black 24px',
+]
+
+const BOTTOM_SCROLL_FADE = [
+  'black calc(100% - 24px)',
+  'rgb(0 0 0 / 98%) calc(100% - 21px)',
+  'rgb(0 0 0 / 93%) calc(100% - 18px)',
+  'rgb(0 0 0 / 82%) calc(100% - 14px)',
+  'rgb(0 0 0 / 62%) calc(100% - 10px)',
+  'rgb(0 0 0 / 38%) calc(100% - 6px)',
+  'rgb(0 0 0 / 17%) calc(100% - 3px)',
+  'transparent 100%',
+]
+
+function ScrollableEpisodeDescription({ children }: { children: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [overflow, setOverflow] = useState({ top: false, bottom: false })
+
+  const updateOverflow = useCallback(() => {
+    const element = ref.current
+    if (!element) return
+
+    const top = element.scrollTop > 1
+    const bottom = element.scrollTop + element.clientHeight < element.scrollHeight - 1
+    setOverflow((current) =>
+      current.top === top && current.bottom === bottom ? current : { top, bottom },
+    )
+  }, [])
+
+  useLayoutEffect(() => {
+    const element = ref.current
+    if (!element) return
+
+    updateOverflow()
+    const observer = new ResizeObserver(updateOverflow)
+    observer.observe(element)
+    if (element.firstElementChild) observer.observe(element.firstElementChild)
+
+    return () => observer.disconnect()
+  }, [updateOverflow])
+
+  const maskImage =
+    overflow.top || overflow.bottom
+      ? `linear-gradient(to bottom, ${overflow.top ? TOP_SCROLL_FADE.join(', ') : 'black 0'}, ${
+          overflow.bottom ? BOTTOM_SCROLL_FADE.join(', ') : 'black 100%'
+        })`
+      : undefined
+
+  return (
+    <div
+      ref={ref}
+      className="max-h-32 overflow-auto pr-2"
+      style={{ maskImage, WebkitMaskImage: maskImage }}
+      onScroll={updateOverflow}
+    >
+      <p className="whitespace-pre-wrap">{children}</p>
+    </div>
+  )
+}
 
 function isCollectionEpisode(
   episodes: Episode[] | CollectionEpisode[],
@@ -45,7 +112,7 @@ export function HoverEpisodeDetail({ content }: { content: HoverEpisodeDetailTyp
     <HoverCardContent align="start" isBottom={(value) => setBottom(value)}>
       <div
         className={cn(
-          'flex max-w-96 min-w-64 flex-col gap-2 px-4',
+          'flex max-w-96 min-w-64 flex-col gap-1.5 px-4',
           isCollectionEpisode(episodes) &&
             (subjectCollection === undefined || subjectCollectionType === CollectionType.watching)
             ? bottom
@@ -78,12 +145,7 @@ export function HoverEpisodeDetail({ content }: { content: HoverEpisodeDetailTyp
           {!isEmpty(episode.name) && <MediumHeader {...episode} />}
         </div>
         {!isEmpty(episode.desc) && (
-          <>
-            <div className="max-h-32 overflow-auto pr-2">
-              <p className="whitespace-pre-wrap">{episode.desc}</p>
-            </div>
-            <Separator />
-          </>
+          <ScrollableEpisodeDescription>{episode.desc}</ScrollableEpisodeDescription>
         )}
         {!isEmpty(episode.airdate) && <span className="text-sm">首播：{episode.airdate}</span>}
         {!isEmpty(episode.duration) && (

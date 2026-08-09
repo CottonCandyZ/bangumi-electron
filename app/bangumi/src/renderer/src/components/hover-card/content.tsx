@@ -89,7 +89,7 @@ export function HoverCardContent({
       className={cn(
         'bg-popover text-popover-foreground fixed z-50 rounded-md border shadow-xl',
         isCollision && 'w-max',
-        'overflow-visible',
+        'overflow-hidden',
       )}
       transition={{
         duration: instantClosing ? 0 : 0.15,
