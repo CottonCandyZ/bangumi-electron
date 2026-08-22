@@ -1,3 +1,5 @@
+
+
 <p align='center'>
   <img width="120"  height="120" src="app/bangumi/build/icon.png">
 </p>
@@ -33,6 +35,8 @@
 ## 如果可以帮助的话
 
 非常欢迎，由于我也在摸索，如果你有任何的建议（无论是功能还是代码结构问题），可以到[讨论区](https://github.com/CottonCandyZ/bangumi-electron/discussions)讨论。
+
+本地开发可执行 `pnpm dev`。
 
 ### 使用了哪些常见库
 
