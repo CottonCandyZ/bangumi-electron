@@ -115,7 +115,7 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
                 : `暂时无法加载热门${name}。`}
             </p>
             {requiresWebVerification ? (
-              <BangumiWebVerificationButton />
+              <BangumiWebVerificationButton sectionPath={sectionPath} />
             ) : (
               <Button
                 className="h-8 px-2 text-xs"
