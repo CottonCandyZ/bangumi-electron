@@ -1,4 +1,5 @@
-import { existsSync, readFileSync, rmSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 
@@ -91,13 +92,17 @@ try {
       `osx-${targetArch}`,
       '--channel',
       packChannel,
+      '--noInst',
+      'true',
       '--outputDir',
       outputDir,
     ])
+    const dmgPath = buildDmgFromPortablePackage(outputDir, packChannel, targetArch)
+    removeVelopackPortable(outputDir, packChannel)
 
     if (publish) {
       upload(outputDir, packChannel)
-      uploadPkg(outputDir, packChannel)
+      uploadDmg(dmgPath)
     }
   }
 } catch (error) {
@@ -145,18 +150,71 @@ function upload(outputDir, packChannel) {
   runVpk(uploadArgs)
 }
 
-function uploadPkg(outputDir, packChannel) {
+function uploadDmg(dmgPath) {
   if (publishTarget !== 'github') return
 
   run('gh', [
     'release',
     'upload',
     releaseTag,
-    join(outputDir, `${packId}-${packChannel}-Setup.pkg`),
+    dmgPath,
     '--repo',
     'CottonCandyZ/bangumi-electron',
     '--clobber',
   ])
+}
+
+function removeVelopackPortable(outputDir, packChannel) {
+  const portablePath = join(outputDir, `${packId}-${packChannel}-Portable.zip`)
+  const assetsPath = join(outputDir, `assets.${packChannel}.json`)
+  if (!existsSync(assetsPath)) fail(`Expected Velopack asset manifest was not found: ${assetsPath}`)
+
+  const assets = JSON.parse(readFileSync(assetsPath, 'utf8'))
+  const retainedAssets = assets.filter((asset) => asset.Type !== 'Portable')
+  if (retainedAssets.length === assets.length) {
+    fail(`Expected Velopack portable entry was not found in: ${assetsPath}`)
+  }
+
+  rmSync(portablePath, { force: true })
+  writeFileSync(assetsPath, JSON.stringify(retainedAssets))
+}
+
+function buildDmgFromPortablePackage(outputDir, packChannel, targetArch) {
+  const portablePath = join(outputDir, `${packId}-${packChannel}-Portable.zip`)
+  if (!existsSync(portablePath)) {
+    fail(`Expected Velopack portable package was not found: ${portablePath}`)
+  }
+
+  const temporaryDir = mkdtempSync(join(tmpdir(), 'bangumi-velopack-dmg-'))
+  const appBundle = join(temporaryDir, 'Bangumi.app')
+  const dmgPath = join(
+    projectDir,
+    'dist',
+    `${packageJson.name}-${packageJson.version}-${targetArch}.dmg`,
+  )
+
+  try {
+    run('unzip', ['-q', portablePath, '-d', temporaryDir])
+    rmSync(dmgPath, { force: true })
+    run('pnpm', [
+      'exec',
+      'electron-builder',
+      '--mac',
+      'dmg',
+      `--${targetArch}`,
+      '--prepackaged',
+      appBundle,
+      '--publish',
+      'never',
+      '--config',
+      channel === 'beta' ? 'electron-builder.beta.yml' : 'electron-builder.prod.yml',
+    ])
+
+    if (!existsSync(dmgPath)) fail(`Expected DMG was not found: ${dmgPath}`)
+    return dmgPath
+  } finally {
+    rmSync(temporaryDir, { recursive: true, force: true })
+  }
 }
 
 function resetOutputDir(outputDir) {

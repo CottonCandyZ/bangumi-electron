@@ -57,7 +57,7 @@ rustup target add x86_64-apple-darwin aarch64-apple-darwin
 
 bridge 只补充 Velopack Node SDK 尚未暴露的 GitHub `prerelease` 选项。版本选择、delta 链规划、校验、重建与完整包回退仍由 Velopack Rust SDK 处理。
 
-> TODO：bridge 应在目标系统上完成编译和安装包验收。Windows 当前已验证；macOS 需要分别验证 Intel/Apple Silicon 的安装版与 Portable 路径、签名和 delta 应用；Linux 需要先把现有 AppImage/deb/snap 发布流程迁移到 Velopack，再确认 `APPIMAGE`、`UpdateNix` 和 `sq.version` 的实际布局。不要仅凭交叉编译成功视为平台支持完成。
+> TODO：bridge 应在目标系统上完成编译和安装包验收。Windows 当前已验证；macOS 需要分别验证 Intel/Apple Silicon 的 DMG 安装路径、签名和 delta 应用；Linux 需要先把现有 AppImage/deb/snap 发布流程迁移到 Velopack，再确认 `APPIMAGE`、`UpdateNix` 和 `sq.version` 的实际布局。不要仅凭交叉编译成功视为平台支持完成。
 
 构建检查：
 
@@ -79,7 +79,7 @@ macOS 机器上试打 macOS 包：
 pnpm build:bangumi:mac:beta
 ```
 
-默认 macOS 命令会同时打 `x64` 和 `arm64`，分别输出到 `app/bangumi/dist/velopack/osx-x64-beta` 和 `app/bangumi/dist/velopack/osx-arm64-beta`。每个目录会包含对应架构的 Velopack `.pkg` 手动安装包。如果只需要单架构：
+默认 macOS 命令会同时打 `x64` 和 `arm64`。Velopack full/delta `.nupkg` 与 feed 分别输出到 `app/bangumi/dist/velopack/osx-x64-beta` 和 `app/bangumi/dist/velopack/osx-arm64-beta`；用户手动安装用的 DMG 输出到 `app/bangumi/dist/bangumi-electron-<version>-<arch>.dmg`。脚本会从 Velopack 的 Portable zip 还原带更新能力的 `.app` 并封装 DMG，随后删除 Portable zip；`.pkg` 不会生成。最终不会上传 `Portable.zip` 或 `.pkg`。如果只需要单架构：
 
 ```bash
 pnpm build:bangumi:mac:beta:x64
@@ -166,7 +166,7 @@ Agent 发布约束：
 - 每个版本号 release 同时作为用户下载页和 Velopack update feed。
 - beta/stable 同时通过 GitHub prerelease 状态和 Velopack channel 区分，例如 `win-x64-beta`、`osx-arm64-stable`。
 - Windows 发布产物里会同时包含安装版 `Setup.exe`、免安装版 `Portable.zip`、`.nupkg` 和 feed json。
-- macOS 发布产物里会同时包含手动安装用 Velopack `.pkg`、`Portable.zip`、`.nupkg` 和 feed json。
+- macOS 发布产物里会包含手动安装用 `.dmg`、Velopack full/delta `.nupkg` 和 feed json；不会上传 `Portable.zip` 或 Velopack `.pkg`。
 - 发布脚本会先尝试下载远端已有的同 channel feed，再打新包并上传；首次发布时远端 feed 不存在会继续生成 full 包。
 - 若只想试打包，使用 `pnpm build:bangumi:win:beta` 或 `pnpm build:bangumi:mac:beta:arm64`。
 
@@ -253,7 +253,7 @@ pnpm publish:bangumi:mac:beta:arm64
 pnpm build:bangumi:mac:beta
 ```
 
-注意：macOS 自动更新通常需要签名；未签名/未 notarize 的 beta 包可以用于手动下载测试，但不应假设自动更新在 macOS 上完整可用。
+注意：macOS 自动更新通常需要签名；未签名/未 notarize 的 beta DMG 可以用于手动下载测试，但不应假设自动更新在 macOS 上完整可用。
 
 ## 覆盖已发布资产
 
