@@ -1,3 +1,4 @@
+import { CollectionSyncButton } from '@renderer/modules/common/collections/sync-dialog'
 import { SubjectCollectionSelectorContent } from '@renderer/modules/common/collections/subject-select-content'
 import { Button } from '@renderer/components/ui/button'
 import {
@@ -18,7 +19,6 @@ import {
   sidePanelOneBasedEpisodeSortAtom,
   sidePanelShowEpisodeListAtom,
 } from '@renderer/state/collection'
-import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
 import {
   collectionPanelSubjectTypeAtom,
   collectionPanelUsernameAtom,
@@ -47,7 +47,6 @@ export function CollectionPanelHeader() {
   const panelUsername = useAtomValue(collectionPanelUsernameAtom)
   const setLeftPanelOpen = useSetAtom(leftPanelOpenAtom)
   const currentSelect = filterMap.get(subjectType.toString()) ?? CollectionType['watching']
-  const isRefetching = useAtomValue(collectionPanelIsRefetchingAtom)
   const [selectOpen, setSelectOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const popupOpen = selectOpen || settingsOpen
@@ -79,47 +78,51 @@ export function CollectionPanelHeader() {
                 {getCollectionResourceLabel(resourceType)}
               </div>
             )}
-            {isRefetching && <span className="i-mingcute-loading-line animate-spin text-2xl" />}
           </div>
-          {resourceType === 'subject' ? (
-            <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-muted-foreground no-drag-region hover:text-foreground size-8"
-                >
-                  <SettingsIcon className="size-4.5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-44">
-                <DropdownMenuCheckboxItem
-                  checked={showEpisodeList}
-                  onCheckedChange={(value) => setShowEpisodeList(value === true)}
-                  onSelect={(event) => event.preventDefault()}
-                >
-                  显示章节列表
-                </DropdownMenuCheckboxItem>
-                <DropdownMenuCheckboxItem
-                  checked={useOneBasedEpisodeSort}
-                  onCheckedChange={(value) => setUseOneBasedEpisodeSort(value === true)}
-                  onSelect={(event) => event.preventDefault()}
-                >
-                  章节从 1 计数
-                </DropdownMenuCheckboxItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <Button
-              className="text-muted-foreground no-drag-region hover:text-foreground size-8"
-              onClick={() => setLeftPanelOpen(false)}
-              size="icon"
-              title="关闭收藏侧栏"
-              variant="ghost"
-            >
-              <XIcon className="size-4.5" />
-            </Button>
-          )}
+          <div className="flex items-center gap-1">
+            {userInfo &&
+              (!panelUsername || panelUsername === userInfo.username) &&
+              resourceType === 'subject' && <CollectionSyncButton />}
+            {resourceType === 'subject' ? (
+              <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground no-drag-region hover:text-foreground size-8"
+                  >
+                    <SettingsIcon className="size-4.5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-44">
+                  <DropdownMenuCheckboxItem
+                    checked={showEpisodeList}
+                    onCheckedChange={(value) => setShowEpisodeList(value === true)}
+                    onSelect={(event) => event.preventDefault()}
+                  >
+                    显示章节列表
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={useOneBasedEpisodeSort}
+                    onCheckedChange={(value) => setUseOneBasedEpisodeSort(value === true)}
+                    onSelect={(event) => event.preventDefault()}
+                  >
+                    章节从 1 计数
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button
+                className="text-muted-foreground no-drag-region hover:text-foreground size-8"
+                onClick={() => setLeftPanelOpen(false)}
+                size="icon"
+                title="关闭收藏侧栏"
+                variant="ghost"
+              >
+                <XIcon className="size-4.5" />
+              </Button>
+            )}
+          </div>
         </>
       )}
     </div>

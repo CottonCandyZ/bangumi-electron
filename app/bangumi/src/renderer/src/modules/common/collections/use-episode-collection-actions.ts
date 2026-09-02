@@ -1,11 +1,8 @@
 import { EpisodeCollectionAction } from '@renderer/constant/collection'
 import { useMutationEpisodesCollectionBySubjectId } from '@renderer/data/hooks/api/collection'
-import { useQueryKeyWithUserId } from '@renderer/data/hooks/factory'
-import { useSessionUsername } from '@renderer/data/hooks/session'
 import { SubjectId } from '@renderer/data/types/bgm'
 import {
   CollectionEpisode,
-  CollectionEpisodes,
   CollectionType,
   EpisodeCollectionType,
 } from '@renderer/data/types/collection'
@@ -13,7 +10,6 @@ import { ModifyEpisodeCollectionOptType } from '@renderer/data/types/modify'
 import { EPISODE_COLLECTION_ACTION_MAP, EPISODE_COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { checkEpisodeFinished } from '@renderer/modules/common/collections/check-episode-finished'
 import { subjectCollectionSheetFormAtom } from '@renderer/state/dialog/sheet'
-import { useQueryClient } from '@tanstack/react-query'
 import { useSetAtom } from 'jotai'
 import { toast } from 'sonner'
 
@@ -23,46 +19,19 @@ type Props = {
   episodes: CollectionEpisode[] | undefined
 } & ModifyEpisodeCollectionOptType
 
-export function useEpisodeCollectionActions({
-  index,
-  subjectId,
-  episodes,
-  modifyEpisodeCollectionOpt,
-}: Props) {
-  const username = useSessionUsername()
+export function useEpisodeCollectionActions({ index, subjectId, episodes }: Props) {
   const openCollectionSheet = useSetAtom(subjectCollectionSheetFormAtom)
-  const queryClient = useQueryClient()
   const episodeCollectionType = episodes?.[index]?.type
   const currentAction =
     episodeCollectionType === undefined
       ? null
       : (EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null)
-  const queryKey = useQueryKeyWithUserId(['collection-episodes'], {
-    subjectId,
-    limit: modifyEpisodeCollectionOpt.limit,
-    offset: modifyEpisodeCollectionOpt.offset,
-    episodeType: undefined,
-  })
-  const subjectCollectionQueryKey = useQueryKeyWithUserId(['collection-subject'], {
-    subjectId,
-    username,
-  })
-  const subjectInfoQueryKey = useQueryKeyWithUserId(['subject-info'], { id: Number(subjectId) })
-  const collectionSubjectsQueryKey = useQueryKeyWithUserId(['collection-subjects'])
-
   const episodeCollectionMutation = useMutationEpisodesCollectionBySubjectId({
     mutationKey: ['subject-collection'],
     async onSuccess() {
-      toast.success('修改成功')
+      toast.success('已保存到本地')
       try {
-        const checkResult = await checkEpisodeFinished({
-          queryClient,
-          subjectId,
-          username,
-          episodesQueryKey: queryKey,
-          subjectCollectionQueryKey,
-          subjectInfoQueryKey,
-        })
+        const checkResult = await checkEpisodeFinished({ subjectId })
         if (!checkResult) return
         toast('观察到你已经看完了', {
           action: {
@@ -90,43 +59,8 @@ export function useEpisodeCollectionActions({
         // 检查仅用于提示，不影响章节收藏主流程。
       }
     },
-    onError(_error, _variable, context) {
-      toast.error('呀，出了点错误...')
-      const pre = (context as { pre: CollectionEpisodes }).pre
-      queryClient.setQueryData<CollectionEpisodes>(queryKey, pre)
-    },
-    onMutate(variable) {
-      queryClient.cancelQueries({
-        queryKey,
-      })
-      const { episodesId, episodeCollectionType } = variable
-      const pre = queryClient.getQueryData<CollectionEpisodes>(queryKey)
-      if (episodes) {
-        queryClient.setQueryData<CollectionEpisodes>(queryKey, (previousData) => {
-          if (!previousData) return
-          return {
-            ...previousData,
-            data: episodes.map((item) => {
-              if (episodesId.includes(item.episode.id)) {
-                return { ...item, type: episodeCollectionType }
-              }
-              return item
-            }),
-          }
-        })
-      }
-      return { pre }
-    },
-    onSettled() {
-      queryClient.invalidateQueries({
-        queryKey,
-      })
-      queryClient.invalidateQueries({
-        queryKey: collectionSubjectsQueryKey,
-      })
-      queryClient.invalidateQueries({
-        queryKey: subjectCollectionQueryKey,
-      })
+    onError(error) {
+      toast.error(error.message || '保存到本地失败')
     },
   })
 

@@ -47,6 +47,8 @@ export const useEpisodeInfoByIdQuery = ({
   useAuthQuery({
     queryFn: getEpisodeById,
     queryKey: ['episode-info'],
+    networkMode: 'always',
+    persister: undefined,
     queryProps: { episodeId },
     enabled,
   })

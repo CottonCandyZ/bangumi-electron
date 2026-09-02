@@ -35,7 +35,8 @@ export async function deleteLoginInfo({ email }: { email: string }) {
 // accessToken
 
 export async function insertAccessToken(sessionInfo: Token) {
-  await db.insert(userSession).values(sessionInfo)
+  await db.insert(userSession).values({ ...sessionInfo, create_time: new Date() })
+  await client.collectionCredentialsChanged({ userId: sessionInfo.user_id })
 }
 
 export async function readAccessToken({ user_id }: { user_id: number }) {

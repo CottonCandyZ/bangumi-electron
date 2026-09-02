@@ -4,8 +4,6 @@ import { useInfinityQueryCollectionsByUsername } from '@renderer/data/hooks/api/
 import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import { CollectionItem } from '@renderer/modules/common/collections/grid/item'
-import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
-import { useSetAtom } from 'jotai'
 import { useEffect, useMemo, useRef } from 'react'
 
 const COLLECTION_PANEL_LIMIT = 10
@@ -42,7 +40,6 @@ export function CollectionsGrid({
     refetch,
   } = collectionsQuery
   const handledDuplicateSignatureRef = useRef<string | null>(null)
-  const setIsRefetching = useSetAtom(collectionPanelIsRefetchingAtom)
   const collections = collectionsQuery.data
   const items = useMemo(
     () =>
@@ -71,9 +68,6 @@ export function CollectionsGrid({
     handledDuplicateSignatureRef.current = duplicateSignature
     refetch()
   }, [isFetching, isRefetching, items, refetch])
-  useEffect(() => {
-    setIsRefetching(isRefetching)
-  }, [isRefetching, setIsRefetching])
   if (!collections)
     return (
       <div className="flex min-h-0 flex-1 flex-col gap-1 px-1 py-1">

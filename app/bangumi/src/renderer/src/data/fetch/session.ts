@@ -1,10 +1,11 @@
+import { loginDialogAtom } from '@renderer/state/dialog/normal'
+import { FetchError } from 'ofetch'
 import { LOGIN, webFetch } from '@renderer/data/fetch/config/'
 import { Token } from '@renderer/data/types/login'
 import { client } from '@renderer/lib/client'
 import { readAccessToken } from './db/user'
 import { refreshToken } from '@renderer/data/fetch/web/login'
 import { createPromiseCache, createSingletonPromise } from '@renderer/lib/utils/promise'
-import { safeLogout } from '@renderer/data/hooks/session'
 import { store } from '@renderer/state/utils'
 import { userIdAtom } from '@renderer/state/session'
 
@@ -46,6 +47,7 @@ export async function isAccessTokenValid(token: Token) {
  * 登出时清除相关内容
  */
 export async function logout() {
+  await client.collectionActivate({ userId: null })
   cleanAccessTokenCache()
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_sid' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_sec_id' })
@@ -130,9 +132,11 @@ export async function getAccessToken(userId: string | null = store.get(userIdAto
     // refresh token using the safe refresh function
     try {
       accessTokenCache = await safeRefreshToken(token)
-    } catch {
-      await safeLogout({ showLoginDialog: true })
-      return null
+    } catch (error) {
+      if (error instanceof FetchError && [400, 401, 403].includes(error.statusCode ?? 0)) {
+        store.set(loginDialogAtom, { open: true, content: { reason: 'session-expired' } })
+      }
+      throw error
     }
     return accessTokenCache
   }

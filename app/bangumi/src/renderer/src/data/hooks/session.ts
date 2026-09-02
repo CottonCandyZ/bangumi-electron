@@ -1,3 +1,5 @@
+import { client } from '@renderer/lib/client'
+import { queryClient } from '@renderer/modules/wrapper/query'
 import { getUserInfoWithAuth } from '@renderer/data/fetch/api/user'
 import { logout, getAccessToken } from '@renderer/data/fetch/session'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
@@ -44,14 +46,44 @@ export async function safeLogout(options?: { showLoginDialog?: boolean }) {
   return logoutSingleton.runOrAwait(() => logout())
 }
 
+const profileRefreshes = new Map<
+  string,
+  { at: number; promise: Promise<Awaited<ReturnType<typeof getUserInfoWithAuth>> | null> }
+>()
+function refreshLocalProfile(userId: string) {
+  const existing = profileRefreshes.get(userId)
+  if (existing && Date.now() - existing.at < 60000) return existing.promise
+  const promise = (async () => {
+    if (!navigator.onLine || store.get(userIdAtom) !== userId) return null
+    const token = await getAccessToken(userId)
+    if (!token || store.get(userIdAtom) !== userId) return null
+    const profile = await getUserInfoWithAuth()
+    if (profile.id !== Number(userId) || store.get(userIdAtom) !== userId) return null
+    await client.collectionSaveAccount(profile)
+    queryClient.setQueryData(['userSession', userId], profile)
+    return profile
+  })()
+  profileRefreshes.set(userId, { at: Date.now(), promise })
+  return promise
+}
 function useSessionQuery() {
   const userId = useAtomValue(userIdAtom)
   return useQuery({
     queryKey: ['userSession', userId],
+    networkMode: 'always',
+    persister: undefined,
     queryFn: async () => {
-      const accessToken = await getAccessToken(userId)
-      if (!accessToken) return null
-      return await getUserInfoWithAuth()
+      if (!userId) return null
+      const local = await client.collectionAccount({ userId: Number(userId) })
+      if (local) {
+        void refreshLocalProfile(userId).catch(() => {})
+        return local
+      }
+      try {
+        return await refreshLocalProfile(userId)
+      } catch {
+        return null
+      }
     },
   })
 }

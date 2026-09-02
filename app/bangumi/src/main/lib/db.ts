@@ -4,7 +4,7 @@ import { drizzle } from 'drizzle-orm/better-sqlite3'
 import path, { resolve } from 'node:path'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
 
-const sqlite: BetterSqlite3.Database = new BetterSqlite3(
+export const sqlite: BetterSqlite3.Database = new BetterSqlite3(
   resolve(appPath()('userData'), 'store.sqlite'),
   {
     verbose: isDev ? console.log : undefined,
@@ -36,9 +36,8 @@ export const executeBatch = async ({ queries }: ExecuteBatchType) => {
     pres[index] = sqlite.prepare(item.sql)
   })
   const batch = sqlite.transaction((params: unknown[]) => {
-    params.forEach((param, index) => pres[index].run(param))
+    params.forEach((param, index) => pres[index].run(...(param as unknown[])))
   })
-  // FIXME: NO TEST HERE, USE WITH CAUTION
   batch(queries.map((item) => item.params))
 }
 
