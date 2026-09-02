@@ -159,7 +159,7 @@ pnpm publish:bangumi:win:beta
 pnpm publish:bangumi:mac:beta:arm64
 ```
 
-这会把 Velopack 产物和 `releases.<channel>.json` 发布到 GitHub 的版本号 release，例如 `v0.0.1-beta.14`。Beta release 应标记为 GitHub prerelease；发布脚本会给 `vpk download/upload github` 传 `--pre=true`，使它按 prerelease 链路读取上一版并发布当前版。
+这会把 Velopack 产物和 `releases.<channel>.json` 发布到 GitHub 的版本号 release，例如 `v0.0.1-beta.14`。Beta release 应标记为 GitHub prerelease；macOS 发布脚本会让 `vpk download github` 按 prerelease 链路读取上一版，再通过 GitHub CLI 逐个上传更新包、feed 和 DMG。两个架构全部上传成功后才会发布 draft。
 
 Agent 发布约束：
 

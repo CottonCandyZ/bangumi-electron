@@ -51,6 +51,7 @@ if (!['all', 'x64', 'arm64'].includes(arch)) {
 }
 
 let exitCode = 0
+let githubReleasePrepared = false
 
 try {
   for (const targetArch of archs) {
@@ -101,10 +102,12 @@ try {
     removeVelopackPortable(outputDir, packChannel)
 
     if (publish) {
-      upload(outputDir, packChannel)
-      uploadDmg(dmgPath)
+      if (publishTarget === 'github') uploadGitHubReleaseAssets(outputDir, packChannel, dmgPath)
+      else upload(outputDir, packChannel)
     }
   }
+
+  if (publish && publishTarget === 'github') publishGitHubRelease()
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)
   exitCode = 1
@@ -150,17 +153,68 @@ function upload(outputDir, packChannel) {
   runVpk(uploadArgs)
 }
 
-function uploadDmg(dmgPath) {
-  if (publishTarget !== 'github') return
+function uploadGitHubReleaseAssets(outputDir, packChannel, dmgPath) {
+  prepareGitHubRelease()
+  const assetsPath = join(outputDir, `assets.${packChannel}.json`)
+  const assets = JSON.parse(readFileSync(assetsPath, 'utf8'))
+  const uploadPaths = [
+    ...assets.map((asset) => join(outputDir, asset.RelativeFileName)),
+    join(outputDir, `releases.${packChannel}.json`),
+    dmgPath,
+  ]
 
+  for (const uploadPath of uploadPaths) {
+    if (!existsSync(uploadPath)) fail(`Expected release asset was not found: ${uploadPath}`)
+    run('gh', [
+      'release',
+      'upload',
+      releaseTag,
+      uploadPath,
+      '--repo',
+      'CottonCandyZ/bangumi-electron',
+      '--clobber',
+    ])
+  }
+}
+
+function prepareGitHubRelease() {
+  if (githubReleasePrepared) return
+
+  const viewResult = run(
+    'gh',
+    ['release', 'view', releaseTag, '--repo', 'CottonCandyZ/bangumi-electron'],
+    { allowFailure: true },
+  )
+  if (viewResult.status !== 0) {
+    run('gh', [
+      'release',
+      'create',
+      releaseTag,
+      '--repo',
+      'CottonCandyZ/bangumi-electron',
+      '--title',
+      `Bangumi-${packageJson.version}`,
+      '--target',
+      'main',
+      '--draft',
+      '--prerelease',
+    ])
+  }
+
+  githubReleasePrepared = true
+}
+
+function publishGitHubRelease() {
   run('gh', [
     'release',
-    'upload',
+    'edit',
     releaseTag,
-    dmgPath,
     '--repo',
     'CottonCandyZ/bangumi-electron',
-    '--clobber',
+    '--title',
+    `Bangumi-${packageJson.version}`,
+    '--draft=false',
+    ...(channel === 'beta' ? ['--prerelease'] : ['--prerelease=false']),
   ])
 }
 
@@ -268,7 +322,6 @@ function appendGitHubArgs(commandArgs, options = {}) {
   }
 
   if (channel === 'beta') commandArgs.push('--pre=true')
-  if (token) commandArgs.push(`--token=${token}`)
 }
 
 function appendS3Args(commandArgs, options = {}) {
@@ -361,7 +414,9 @@ function parseArgs(values) {
 
 function runVpk(commandArgs, options = {}) {
   const [command, ...commandPrefix] = vpkCommand.split(' ').filter(Boolean)
-  return run(command, [...commandPrefix, ...commandArgs], options)
+  const environment = { ...process.env, ...(options.env ?? {}) }
+  if (token) environment.VPK_TOKEN = token
+  return run(command, [...commandPrefix, ...commandArgs], { ...options, env: environment })
 }
 
 function run(command, commandArgs, options = {}) {
