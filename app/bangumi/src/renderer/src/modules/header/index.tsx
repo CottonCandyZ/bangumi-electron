@@ -29,7 +29,7 @@ export function Header() {
       </div>
       <div
         className={cn(
-          'flex h-full shrink-0 flex-row items-center gap-2',
+          'flex h-full shrink-0 flex-row items-center gap-1',
           platform === 'darwin' && 'pr-2',
         )}
       >

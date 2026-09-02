@@ -7,6 +7,7 @@ import {
   PopoverTrigger,
 } from '@renderer/components/ui/popover'
 import { Button } from '@renderer/components/ui/button'
+import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import {
   useClearNotificationsMutation,
@@ -34,21 +35,25 @@ export function NotificationButton() {
         if (open && notificationsQuery.isStale) void notificationsQuery.refetch()
       }}
     >
-      <PopoverTrigger asChild>
-        <Button
-          aria-label={unreadCount > 0 ? `通知，${unreadCount} 条未读` : '通知'}
-          className="no-drag-region text-muted-foreground relative cursor-auto p-2 text-[1.4rem]"
-          title="通知"
-          variant="ghost"
-        >
-          <span className="i-mingcute-notification-line" />
-          {unreadCount > 0 && (
-            <span className="bg-destructive text-destructive-foreground absolute -top-0.5 -right-1 flex min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-4 font-semibold tabular-nums">
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </span>
-          )}
-        </Button>
-      </PopoverTrigger>
+      <HeaderButton
+        Button={
+          <PopoverTrigger asChild>
+            <Button
+              aria-label={unreadCount > 0 ? `通知，${unreadCount} 条未读` : '通知'}
+              className="no-drag-region text-muted-foreground relative size-8 cursor-auto p-1 text-[1.4rem]"
+              variant="ghost"
+            >
+              <span className="i-mingcute-notification-line" />
+              {unreadCount > 0 && (
+                <span className="bg-destructive text-destructive-foreground absolute -top-0.5 -right-1 flex min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-4 font-semibold tabular-nums">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+        }
+        Content={<p>通知</p>}
+      />
       <PopoverContent align="end" className="no-drag-region w-96 p-0" sideOffset={8}>
         <PopoverHeader className="border-b px-4 py-3">
           <div className="flex items-center justify-between gap-4">

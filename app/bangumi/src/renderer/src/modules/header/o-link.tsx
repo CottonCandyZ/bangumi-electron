@@ -42,7 +42,7 @@ export function OriginalLink() {
           <Button
             asChild
             variant="ghost"
-            className="no-drag-region text-muted-foreground cursor-auto p-2 text-[1.4rem]"
+            className="no-drag-region text-muted-foreground size-8 cursor-auto p-1 text-[1.4rem]"
           >
             <a href={href} target="_blank" rel="noreferrer">
               <span className="i-mingcute-world-2-line" />
