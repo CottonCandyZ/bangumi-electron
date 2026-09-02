@@ -23,8 +23,10 @@ import {
 } from './shared'
 
 export function MonoSubjectListPanelContent({
+  filtersOpen,
   tab,
 }: {
+  filtersOpen: boolean
   tab: Extract<MonoListPanelTab, { type: 'subjects' }>
 }) {
   const { pathname } = useLocation()
@@ -103,22 +105,24 @@ export function MonoSubjectListPanelContent({
 
   return (
     <>
-      <MonoListPanelFilters>
-        <PanelFilterTabs
-          label="类型"
-          currentSelect={typeFilter}
-          setCurrentSelect={setFilter}
-          tabsContent={typeFilters}
-          layoutId={typeFilterId}
-        />
-        <PanelFilterTabs
-          label="职能"
-          currentSelect={relationFilter}
-          setCurrentSelect={setFilter}
-          tabsContent={relationFilters}
-          layoutId={relationFilterId}
-        />
-      </MonoListPanelFilters>
+      {filtersOpen && (
+        <MonoListPanelFilters>
+          <PanelFilterTabs
+            label="类型"
+            currentSelect={typeFilter}
+            setCurrentSelect={setFilter}
+            tabsContent={typeFilters}
+            layoutId={typeFilterId}
+          />
+          <PanelFilterTabs
+            label="职能"
+            currentSelect={relationFilter}
+            setCurrentSelect={setFilter}
+            tabsContent={relationFilters}
+            layoutId={relationFilterId}
+          />
+        </MonoListPanelFilters>
+      )}
       <MonoPanelInfiniteList
         activeIndex={activeIndex}
         scrollMemoryKey={`mono-list:${tab.id}:type:${typeFilter}:relation:${relationFilter}`}
@@ -134,8 +138,10 @@ export function MonoSubjectListPanelContent({
 }
 
 export function MonoRelatedListPanelContent({
+  filtersOpen,
   tab,
 }: {
+  filtersOpen: boolean
   tab: Extract<MonoListPanelTab, { type: 'related' }>
 }) {
   const { pathname } = useLocation()
@@ -171,15 +177,17 @@ export function MonoRelatedListPanelContent({
 
   return (
     <>
-      <MonoListPanelFilters>
-        <PanelFilterTabs
-          label="类型"
-          currentSelect={filter}
-          setCurrentSelect={setFilter}
-          tabsContent={filters}
-          layoutId={filterId}
-        />
-      </MonoListPanelFilters>
+      {filtersOpen && (
+        <MonoListPanelFilters>
+          <PanelFilterTabs
+            label="类型"
+            currentSelect={filter}
+            setCurrentSelect={setFilter}
+            tabsContent={filters}
+            layoutId={filterId}
+          />
+        </MonoListPanelFilters>
+      )}
       <MonoPanelInfiniteList
         activeIndex={activeIndex}
         scrollMemoryKey={`mono-list:${tab.id}:${filter}`}

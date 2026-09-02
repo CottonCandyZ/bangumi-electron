@@ -100,8 +100,10 @@ export function MonoIndexesListPanelContent({
 }
 
 export function IndexRelatedListPanelContent({
+  filtersOpen,
   tab,
 }: {
+  filtersOpen: boolean
   tab: Extract<MonoListPanelTab, { type: 'indexRelated' }>
 }) {
   const { pathname } = useLocation()
@@ -171,6 +173,7 @@ export function IndexRelatedListPanelContent({
           categoryFilter={categoryFilter}
           categoryFilterId={categoryFilterId}
           categoryOptions={categoryOptions}
+          filtersOpen={filtersOpen}
           setFilter={setFilter}
           showCategoryFilter={showCategoryFilter}
           showSubjectTypeFilter={showSubjectTypeFilter}
@@ -193,6 +196,7 @@ export function IndexRelatedListPanelContent({
         categoryFilter={categoryFilter}
         categoryFilterId={categoryFilterId}
         categoryOptions={categoryOptions}
+        filtersOpen={filtersOpen}
         setFilter={setFilter}
         showCategoryFilter={showCategoryFilter}
         showSubjectTypeFilter={showSubjectTypeFilter}
@@ -230,6 +234,7 @@ function IndexRelatedPanelFilters({
   categoryFilter,
   categoryFilterId,
   categoryOptions,
+  filtersOpen,
   setFilter,
   showCategoryFilter,
   showSubjectTypeFilter,
@@ -240,6 +245,7 @@ function IndexRelatedPanelFilters({
   categoryFilter: string
   categoryFilterId: string
   categoryOptions: string[]
+  filtersOpen: boolean
   setFilter: (id: string, value: string) => void
   showCategoryFilter: boolean
   showSubjectTypeFilter: boolean
@@ -247,7 +253,7 @@ function IndexRelatedPanelFilters({
   subjectTypeFilterId: string
   subjectTypeOptions: string[]
 }) {
-  if (!showCategoryFilter && !showSubjectTypeFilter) return null
+  if (!filtersOpen || (!showCategoryFilter && !showSubjectTypeFilter)) return null
 
   return (
     <MonoListPanelFilters>

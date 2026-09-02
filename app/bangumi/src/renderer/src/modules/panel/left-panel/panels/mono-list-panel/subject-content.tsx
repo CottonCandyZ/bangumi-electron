@@ -28,8 +28,10 @@ import {
 import { useLocation } from 'react-router-dom'
 
 export function SubjectCharacterListPanelContent({
+  filtersOpen,
   tab,
 }: {
+  filtersOpen: boolean
   tab: Extract<MonoListPanelTab, { type: 'subjectCharacters' }>
 }) {
   const { pathname } = useLocation()
@@ -58,15 +60,17 @@ export function SubjectCharacterListPanelContent({
 
   return (
     <>
-      <MonoListPanelFilters>
-        <PanelFilterTabs
-          label="角色类型"
-          currentSelect={filter}
-          setCurrentSelect={setFilter}
-          tabsContent={filters}
-          layoutId={filterId}
-        />
-      </MonoListPanelFilters>
+      {filtersOpen && (
+        <MonoListPanelFilters>
+          <PanelFilterTabs
+            label="角色类型"
+            currentSelect={filter}
+            setCurrentSelect={setFilter}
+            tabsContent={filters}
+            layoutId={filterId}
+          />
+        </MonoListPanelFilters>
+      )}
       <MonoPanelInfiniteList
         activeIndex={activeIndex}
         scrollMemoryKey={`mono-list:${tab.id}:relation:${filter}`}
@@ -82,8 +86,10 @@ export function SubjectCharacterListPanelContent({
 }
 
 export function SubjectRelatedListPanelContent({
+  filtersOpen,
   tab,
 }: {
+  filtersOpen: boolean
   tab: Extract<MonoListPanelTab, { type: 'subjectRelated' }>
 }) {
   const { pathname } = useLocation()
@@ -112,15 +118,17 @@ export function SubjectRelatedListPanelContent({
 
   return (
     <>
-      <MonoListPanelFilters>
-        <PanelFilterTabs
-          label="关系"
-          currentSelect={filter}
-          setCurrentSelect={setFilter}
-          tabsContent={filters}
-          layoutId={filterId}
-        />
-      </MonoListPanelFilters>
+      {filtersOpen && (
+        <MonoListPanelFilters>
+          <PanelFilterTabs
+            label="关系"
+            currentSelect={filter}
+            setCurrentSelect={setFilter}
+            tabsContent={filters}
+            layoutId={filterId}
+          />
+        </MonoListPanelFilters>
+      )}
       <MonoPanelInfiniteList
         activeIndex={activeIndex}
         scrollMemoryKey={`mono-list:${tab.id}:relation:${filter}`}
