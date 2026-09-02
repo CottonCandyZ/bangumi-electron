@@ -196,19 +196,23 @@ function buildDmgFromPortablePackage(outputDir, packChannel, targetArch) {
   try {
     run('unzip', ['-q', portablePath, '-d', temporaryDir])
     rmSync(dmgPath, { force: true })
-    run('pnpm', [
-      'exec',
-      'electron-builder',
-      '--mac',
-      'dmg',
-      `--${targetArch}`,
-      '--prepackaged',
-      appBundle,
-      '--publish',
-      'never',
-      '--config',
-      channel === 'beta' ? 'electron-builder.beta.yml' : 'electron-builder.prod.yml',
-    ])
+    run(
+      'pnpm',
+      [
+        'exec',
+        'electron-builder',
+        '--mac',
+        'dmg',
+        `--${targetArch}`,
+        '--prepackaged',
+        appBundle,
+        '--publish',
+        'never',
+        '--config',
+        channel === 'beta' ? 'electron-builder.beta.yml' : 'electron-builder.prod.yml',
+      ],
+      { env: withoutGitHubTokens() },
+    )
 
     if (!existsSync(dmgPath)) fail(`Expected DMG was not found: ${dmgPath}`)
     return dmgPath
@@ -219,6 +223,13 @@ function buildDmgFromPortablePackage(outputDir, packChannel, targetArch) {
 
 function resetOutputDir(outputDir) {
   rmSync(outputDir, { recursive: true, force: true })
+}
+
+function withoutGitHubTokens() {
+  const environment = { ...process.env }
+  delete environment.GH_TOKEN
+  delete environment.GITHUB_TOKEN
+  return environment
 }
 
 function downloadExistingRelease(outputDir, packChannel) {
@@ -356,7 +367,7 @@ function runVpk(commandArgs, options = {}) {
 function run(command, commandArgs, options = {}) {
   const result = spawnSync(command, commandArgs, {
     cwd: projectDir,
-    env: process.env,
+    env: options.env ?? process.env,
     stdio: 'inherit',
   })
 
