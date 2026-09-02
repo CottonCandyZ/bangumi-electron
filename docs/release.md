@@ -120,7 +120,7 @@ gh auth login
 Beta 版本使用 prerelease 版本号，例如：
 
 ```powershell
-pnpm --filter bangumi-electron version 0.0.1-beta.1 --no-git-tag-version
+pnpm --filter bangumi-electron exec npm pkg set version=0.0.1-beta.1
 ```
 
 提交版本号：
@@ -191,7 +191,7 @@ pnpm publish:bangumi:mac:beta:arm64
 正式版本使用普通 semver，例如：
 
 ```powershell
-pnpm --filter bangumi-electron version 0.0.1 --no-git-tag-version
+pnpm --filter bangumi-electron exec npm pkg set version=0.0.1
 ```
 
 正式通道当前还没有发布包；Windows 正式通道脚本会生成 `win-x64-stable` 这样的 Velopack channel：
