@@ -84,8 +84,12 @@ export function CollectionPanelHeader() {
           {resourceType === 'subject' ? (
             <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen}>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="no-drag-region size-8">
-                  <SettingsIcon className="size-4" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-muted-foreground no-drag-region hover:text-foreground size-8"
+                >
+                  <SettingsIcon className="size-4.5" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-44">
@@ -107,13 +111,13 @@ export function CollectionPanelHeader() {
             </DropdownMenu>
           ) : (
             <Button
-              className="no-drag-region size-8"
+              className="text-muted-foreground no-drag-region hover:text-foreground size-8"
               onClick={() => setLeftPanelOpen(false)}
               size="icon"
               title="关闭收藏侧栏"
               variant="ghost"
             >
-              <XIcon className="size-4" />
+              <XIcon className="size-4.5" />
             </Button>
           )}
         </>
