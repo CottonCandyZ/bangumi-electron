@@ -63,7 +63,8 @@ export async function getLoginFormHash() {
  * 导致拿不到 formHash，后续验证码请求也不会发生。
  */
 export async function prepareWebLoginChallenge() {
-  await client.collectionActivate({ userId: null })
+  // Opening or cancelling this challenge does not change the active API account.
+  // Switch collection synchronization only after a successful login in save().
   await Promise.all(
     WEB_LOGIN_COOKIE_NAMES.map((name) => client.removeCookie({ url: 'https://bgm.tv', name })),
   )
