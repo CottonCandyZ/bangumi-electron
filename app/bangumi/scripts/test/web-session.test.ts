@@ -93,6 +93,21 @@ function fixture(oauthStatus = 200, captchaStatus = 200) {
   }
 }
 
+test('opening or failing a login challenge keeps the previous collection account active', async () => {
+  fixture()
+  mocks.fetch.mockImplementation(async (input: RequestInfo | URL) =>
+    String(input).includes('/signup/captcha')
+      ? new Response('image', { headers: { 'Content-Type': 'image/png' } })
+      : new Response('<input type="hidden" name="formhash" value="test-hash">'),
+  )
+  const captcha = await login.prepareWebLoginChallenge()
+  URL.revokeObjectURL(captcha)
+  expect(mocks.collectionActivate).not.toHaveBeenCalled()
+  mocks.fetch.mockResolvedValue(new Response('login unavailable'))
+  await expect(login.prepareWebLoginChallenge()).rejects.toThrow('formHash')
+  expect(mocks.collectionActivate).not.toHaveBeenCalled()
+})
+
 test('a webpage challenge cannot log out an expired session with a valid refresh token', async () => {
   const f = fixture()
   await expect(f.config.webFetch('/anime/browser')).rejects.toThrow(
