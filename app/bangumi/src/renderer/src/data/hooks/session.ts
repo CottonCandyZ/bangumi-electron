@@ -51,6 +51,8 @@ const profileRefreshes = new Map<
   { at: number; promise: Promise<Awaited<ReturnType<typeof getUserInfoWithAuth>> | null> }
 >()
 function refreshLocalProfile(userId: string) {
+  // An offline miss is not a completed refresh and must not suppress reconnect.
+  if (!navigator.onLine || store.get(userIdAtom) !== userId) return Promise.resolve(null)
   const existing = profileRefreshes.get(userId)
   if (existing && Date.now() - existing.at < 60000) return existing.promise
   const promise = (async () => {
@@ -64,6 +66,12 @@ function refreshLocalProfile(userId: string) {
     return profile
   })()
   profileRefreshes.set(userId, { at: Date.now(), promise })
+  const discard = () => {
+    if (profileRefreshes.get(userId)?.promise === promise) profileRefreshes.delete(userId)
+  }
+  void promise.then((profile) => {
+    if (!profile) discard()
+  }, discard)
   return promise
 }
 function useSessionQuery() {

@@ -163,7 +163,7 @@ export function mergeCollection(
   const changed = (a: CollectionSnapshot, b: CollectionSnapshot) =>
     collectionFields.some((key) => !equalValue(a.collection?.[key], b.collection?.[key], key)) ||
     Object.keys({ ...a.episodes, ...b.episodes }).some(
-      (id) => !equalValue(a.episodes[id], b.episodes[id]),
+      (id) => !equalValue(a.episodes[id] ?? 0, b.episodes[id] ?? 0),
     )
   const localRemoved = local.collection === null && base.collection !== null
   const remoteRemoved = remote.collection === null && base.collection != null
