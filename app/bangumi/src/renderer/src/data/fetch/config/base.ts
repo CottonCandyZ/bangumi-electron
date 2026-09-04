@@ -6,6 +6,7 @@ import {
 import { safeLogout } from '@renderer/data/hooks/session'
 import {
   assertWebVerificationNotRequired,
+  isCloudflareChallenge,
   markWebVerificationRequired,
   WebVerificationRequiredError,
 } from '@renderer/data/fetch/config/web-access'
@@ -49,8 +50,8 @@ export const webFetch = ofetch.create({
   onRequest() {
     assertWebVerificationNotRequired()
   },
-  onResponseError({ response }) {
-    if (response.status !== 403) return
+  async onResponseError({ response }) {
+    if (response.status !== 403 || !(await isCloudflareChallenge(response))) return
     markWebVerificationRequired()
     throw new WebVerificationRequiredError()
   },

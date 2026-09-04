@@ -40,7 +40,10 @@ function fixture(t: TestContext, oauthStatus = 200) {
         )
       }
       if (url.endsWith('/oauth/token_status')) return Response.json({ user_id: '1' })
-      return new Response('Cloudflare challenge', { status: 403 })
+      return new Response('Cloudflare challenge', {
+        status: 403,
+        headers: { 'cf-mitigated': 'challenge' },
+      })
     },
   })
   const modules: Record<string, unknown> = {
