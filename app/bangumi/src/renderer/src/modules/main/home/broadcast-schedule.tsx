@@ -4,7 +4,8 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useCalendarQuery } from '@renderer/data/hooks/api/calendar'
 import type { CalendarItem } from '@renderer/data/types/calendar'
 import dayjs from 'dayjs'
-import { useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import './broadcast-schedule.css'
 import { Button } from '@renderer/components/ui/button'
 import {
   Carousel,
@@ -31,10 +32,29 @@ export function BroadcastSchedule() {
   const query = useCalendarQuery()
   const todayId = getBangumiWeekdayId()
   const [api, setApi] = useState<CarouselApi>()
+  const [edges, setEdges] = useState({ start: 0, end: 0 })
   const online = useOnline()
   const weekStart = dayjs()
     .startOf('day')
     .subtract(Number(todayId) - 1, 'day')
+
+  useEffect(() => {
+    if (!api) return
+    const update = () => {
+      const progress = api.scrollProgress()
+      setEdges((previous) => {
+        const distance = Math.max(0, api.containerNode().scrollWidth - api.rootNode().clientWidth)
+        const start = edgeStrength(progress * distance)
+        const end = edgeStrength((1 - progress) * distance)
+        return previous.start === start && previous.end === end ? previous : { start, end }
+      })
+    }
+    update()
+    api.on('scroll', update).on('reInit', update)
+    return () => {
+      api.off('scroll', update).off('reInit', update)
+    }
+  }, [api])
 
   return (
     <Carousel
@@ -68,22 +88,27 @@ export function BroadcastSchedule() {
         {query.data === undefined && (query.isError || !online) ? (
           <QueryFallback label="每日放送" error={query.error} onRetry={query.refetch} />
         ) : (
-          <CarouselContent className="ml-0">
-            {WEEKDAYS.map((weekday) => {
-              const items = query.data?.[weekday.id]
-              return (
-                <CarouselItem key={weekday.id} className="max-w-56 basis-56 pl-0">
-                  <BroadcastDayColumn
-                    current={weekday.id === todayId}
-                    items={items}
-                    label={weekday.label}
-                    date={weekStart.add(Number(weekday.id) - 1, 'day').format('YYYY-MM-DD')}
-                    loading={query.isLoading}
-                  />
-                </CarouselItem>
-              )
-            })}
-          </CarouselContent>
+          <div
+            className="broadcast-scroll-fade"
+            style={scrollEdgeMask('right', edges.start, edges.end)}
+          >
+            <CarouselContent className="ml-0">
+              {WEEKDAYS.map((weekday) => {
+                const items = query.data?.[weekday.id]
+                return (
+                  <CarouselItem key={weekday.id} className="max-w-56 basis-56 pl-0">
+                    <BroadcastDayColumn
+                      current={weekday.id === todayId}
+                      items={items}
+                      label={weekday.label}
+                      date={weekStart.add(Number(weekday.id) - 1, 'day').format('YYYY-MM-DD')}
+                      loading={query.isLoading}
+                    />
+                  </CarouselItem>
+                )
+              })}
+            </CarouselContent>
+          </div>
         )}
       </section>
     </Carousel>
@@ -103,6 +128,28 @@ function BroadcastDayColumn({
   date: string
   loading: boolean
 }) {
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const [edges, setEdges] = useState({ start: 0, end: 0 })
+  useEffect(() => {
+    const element = scrollRef.current
+    if (!element) return
+    const update = () => {
+      const start = edgeStrength(element.scrollTop)
+      const end = edgeStrength(element.scrollHeight - element.clientHeight - element.scrollTop)
+      setEdges((previous) =>
+        previous.start === start && previous.end === end ? previous : { start, end },
+      )
+    }
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(element)
+    element.addEventListener('scroll', update, { passive: true })
+    return () => {
+      observer.disconnect()
+      element.removeEventListener('scroll', update)
+    }
+  }, [items, loading])
+
   return (
     <div className="flex h-72 min-w-0 flex-col">
       <div className="border-border/60 relative flex items-end justify-between border-b pr-5 pb-3">
@@ -121,7 +168,9 @@ function BroadcastDayColumn({
         )}
       </div>
       <div
-        className="mt-3 flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-y-auto pr-5 [scrollbar-width:none]"
+        ref={scrollRef}
+        style={scrollEdgeMask('bottom', edges.start, edges.end)}
+        className="broadcast-scroll-fade flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-y-auto py-3 pr-5 [scrollbar-width:none]"
         tabIndex={0}
         aria-label={`${label}放送条目`}
       >
@@ -135,6 +184,18 @@ function BroadcastDayColumn({
       </div>
     </div>
   )
+}
+
+function edgeStrength(distance: number) {
+  return Math.min(1, Math.max(0, distance / 24))
+}
+
+function scrollEdgeMask(direction: 'right' | 'bottom', start: number, end: number): CSSProperties {
+  return {
+    '--broadcast-fade-start': start,
+    '--broadcast-fade-end': end,
+    maskImage: `linear-gradient(to ${direction}, rgb(0 0 0 / calc(1 - var(--broadcast-fade-start))), black 24px, black calc(100% - 24px), rgb(0 0 0 / calc(1 - var(--broadcast-fade-end))))`,
+  } as CSSProperties
 }
 
 function BroadcastItem({ item }: { item: CalendarItem }) {
