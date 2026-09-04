@@ -1,4 +1,5 @@
 import { client } from '@renderer/lib/client'
+import { FetchError } from 'ofetch'
 import {
   apiFetchWithOptionalAuth,
   EPISODES,
@@ -47,6 +48,13 @@ export async function getEpisodeById({ episodeId }: { episodeId: string }) {
   try {
     return await apiFetchWithOptionalAuth<Episode>(EPISODES.BY_ID(episodeId))
   } catch (error) {
+    if (
+      error instanceof FetchError &&
+      error.statusCode &&
+      error.statusCode < 500 &&
+      ![408, 429].includes(error.statusCode)
+    )
+      throw error
     const local = await client.collectionEpisodeResource({ episodeId: Number(episodeId) })
     if (local) return local
     throw error

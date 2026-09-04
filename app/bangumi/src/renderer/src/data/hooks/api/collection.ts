@@ -221,15 +221,19 @@ function localOrRemoteList(
 ) {
   return props.own ? client.collectionList(props) : getSubjectCollectionsByUsernameMustAuth(props)
 }
-function localOrRemoteSubject(props: {
+async function localOrRemoteSubject(props: {
   own: boolean
   userId: number
   subjectId: string | undefined
   username: string | undefined
 }) {
-  return props.own
-    ? client.collectionRead({ userId: props.userId, subjectId: Number(props.subjectId) })
-    : getSubjectCollectionBySubjectIdAndUsername(props)
+  if (!props.own) return getSubjectCollectionBySubjectIdAndUsername(props)
+  const collection = await client.collectionRead({
+    userId: props.userId,
+    subjectId: Number(props.subjectId),
+  })
+  if (collection === undefined) throw new Error('尚未取得收藏状态，请联网同步后再试')
+  return collection
 }
 function localEpisodes(props: {
   userId: number
