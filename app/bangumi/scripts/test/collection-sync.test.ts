@@ -652,6 +652,28 @@ test('recent removals exclude never-collected reads and retain actual removals',
   expect(f.repo.removed(2)).toEqual([])
 })
 
+test('choosing remote deletion discards rejected episode edits when restored', async (t) => {
+  const f = fixture(t, true)
+  f.command({ kind: 'episodes', episodes: { 101: 2 } })
+  f.state = { collection: null, episodes: {}, episodesComplete: true }
+  await f.engine().sync(1, 42, f.transport)
+  const record = f.repo.get(1, 42)!
+  expect(record.status).toBe('conflict')
+  await f
+    .engine()
+    .resolve(
+      { userId: 1, subjectId: 42, revision: record.revision, choices: { collection: 'remote' } },
+      f.transport,
+    )
+  f.reopen()
+  expect(f.repo.get(1, 42)?.local.episodes).toEqual({})
+  await f.engine().sync(1, 42, f.transport)
+  f.command({ kind: 'edit', patch: { type: 3 } })
+  await f.engine().sync(1, 42, f.transport)
+  expect(f.state.collection?.type).toBe(3)
+  expect(f.state.episodes).toEqual({})
+})
+
 test('an aborted first read keeps durable edits pending for reactivation', async (t) => {
   const f = fixture(t, true)
   f.command({ kind: 'edit', patch: { rate: 9 } })
