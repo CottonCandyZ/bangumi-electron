@@ -44,7 +44,13 @@ export async function getEpisodeById({ episodeId }: { episodeId: string }) {
     if (local) return local
     throw new Error('这个章节尚未缓存，请联网后再试')
   }
-  return apiFetchWithOptionalAuth<Episode>(EPISODES.BY_ID(episodeId))
+  try {
+    return await apiFetchWithOptionalAuth<Episode>(EPISODES.BY_ID(episodeId))
+  } catch (error) {
+    const local = await client.collectionEpisodeResource({ episodeId: Number(episodeId) })
+    if (local) return local
+    throw error
+  }
 }
 
 /**
