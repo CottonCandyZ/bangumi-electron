@@ -60,6 +60,14 @@ renderer 的收藏查询读取本地投影；所有已覆盖的写入口使用 `
 
 UI 验证使用隔离目录和虚构账号，不操作真实收藏。可用 `scripts/test/create-offline-fixture.ts` 创建全新的临时数据目录，再以 `BANGUMI_ELECTRON_USER_DATA` 指定目录启动开发版；默认数据库位置保持原样。
 
+fixture 同时生成 `activate-offline-fixture.js`。数据库中的账号不会自动成为当前账号，必须在这个隔离实例的主窗口执行激活脚本，让 renderer localStorage 的 `current_user_id` 与测试账号一致。先通过 CDP 的 `tab`、`get url` 确认选中隔离实例主页面（不要选 `/#/command`），然后在仓库根目录执行：
+
+```powershell
+Get-Content -Raw (Join-Path $env:BANGUMI_ELECTRON_USER_DATA 'activate-offline-fixture.js') | node app/bangumi/scripts/agent-browser.mjs --cdp 9222 eval --stdin
+```
+
+页面重新加载后测试账号为 `999999991`，收藏条目为 `999999990`。只对新建的隔离 profile 执行；不要对日常使用的窗口执行。fixture 没有真实 token，网络同步需要在测试中模拟。
+
 Drizzle 升级为 `drizzle-orm 0.45.2` 和 `drizzle-kit 0.31.10`；选择 npm stable，不引入 1.0 RC。
 
 仍需使用指定测试账号验证真实网站的删除/恢复和写后可见性。当前自动化测试使用可控 transport；没有对真实账号发出收藏写入。
