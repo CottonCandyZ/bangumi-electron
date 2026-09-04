@@ -651,3 +651,55 @@ test('recent removals exclude never-collected reads and retain actual removals',
   expect(f.repo.removed(1).map((r) => r.subjectId)).toEqual([42])
   expect(f.repo.removed(2)).toEqual([])
 })
+
+test('an aborted first read keeps durable edits pending for reactivation', async (t) => {
+  const f = fixture(t, true)
+  f.command({ kind: 'edit', patch: { rate: 9 } })
+  const read = f.transport.read
+  f.transport.read = async () => {
+    throw new DOMException('account switched', 'AbortError')
+  }
+  await expect(f.engine().sync(1, 42, f.transport)).rejects.toThrow('account switched')
+  f.reopen()
+  expect(f.repo.get(1, 42)?.status).toBe('pending')
+  expect(f.repo.get(1, 42)?.error).toBe(null)
+  expect(f.repo.actions(1, 42)).toHaveLength(1)
+  f.transport.read = read
+  await f.engine().sync(1, 42, f.transport)
+  expect(f.state.collection?.rate).toBe(9)
+  expect(f.repo.get(1, 42)?.status).toBe('clean')
+})
+
+for (const mode of ['confirmed', 'uncertain'])
+  test(`choosing local removal preserves the backup after ${mode} deletion`, async (t) => {
+    const f = fixture(t, true)
+    f.command({ kind: 'edit', patch: { rate: 9, tags: ['local'] } })
+    f.command({ kind: 'episodes', episodes: { 101: 2 } })
+    f.command({ kind: 'remove' })
+    f.state.collection!.rate = 4
+    f.state.episodes[102] = 3
+    await f.engine().sync(1, 42, f.transport)
+    const record = f.repo.get(1, 42)!
+    await f
+      .engine()
+      .resolve(
+        { userId: 1, subjectId: 42, revision: record.revision, choices: { collection: 'local' } },
+        f.transport,
+      )
+    f.reopen()
+    expect(f.repo.get(1, 42)?.retained?.rate).toBe(9)
+    expect(f.repo.get(1, 42)?.local.episodes).toEqual({ 101: 2, 102: 0 })
+    if (mode === 'uncertain') {
+      const write = f.transport.write
+      f.transport.write = async () => {
+        f.transport.write = write
+        throw new SyncError('response lost', 'network')
+      }
+      await expect(f.engine().sync(1, 42, f.transport)).rejects.toThrow('response lost')
+    } else await f.engine().sync(1, 42, f.transport)
+    f.command({ kind: 'edit', patch: { type: 3 } })
+    await f.engine().sync(1, 42, f.transport)
+    expect(f.state.collection?.rate).toBe(9)
+    expect(f.state.collection?.tags).toEqual(['local'])
+    expect(f.state.episodes).toEqual({ 101: 2, 102: 0 })
+  })
