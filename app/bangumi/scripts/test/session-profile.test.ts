@@ -7,7 +7,9 @@ const mocks = vi.hoisted(() => ({
   profile: vi.fn(),
   token: vi.fn(),
   setQueryData: vi.fn(),
+  legacy: vi.fn(),
 }))
+vi.mock('idb-keyval', () => ({ createStore: vi.fn(), get: mocks.legacy }))
 vi.mock('@renderer/lib/client', () => ({
   client: { collectionAccount: mocks.account, collectionSaveAccount: mocks.save },
 }))
@@ -31,6 +33,7 @@ beforeEach(async () => {
   vi.resetModules()
   vi.clearAllMocks()
   mocks.account.mockResolvedValue(null)
+  mocks.legacy.mockResolvedValue(undefined)
   mocks.token.mockResolvedValue({ access_token: 'test' })
   mocks.profile.mockResolvedValue({ id: 1, username: 'test-user' })
   const { useSession } = await import('../../src/renderer/src/data/hooks/session')
@@ -52,4 +55,21 @@ test('a missing token is not retained in the profile refresh cache', async () =>
   mocks.token.mockResolvedValueOnce(null)
   await expect(mocks.queryFn!()).resolves.toBe(null)
   await expect(mocks.queryFn!()).resolves.toEqual({ id: 1, username: 'test-user' })
+})
+
+test('offline upgrade migrates the active cached profile without making a network request', async () => {
+  vi.stubGlobal('navigator', { onLine: false })
+  const profile = { id: 1, username: 'existing-user' }
+  mocks.legacy.mockResolvedValue({ state: { data: profile } })
+  await expect(mocks.queryFn!()).resolves.toEqual(profile)
+  expect(mocks.save).toHaveBeenCalledWith(profile)
+  expect(mocks.profile).not.toHaveBeenCalled()
+  expect(mocks.legacy.mock.calls[0][0]).toBe('tanstack-query-["userSession","1"]')
+})
+
+test('offline upgrade never adopts a different cached account', async () => {
+  vi.stubGlobal('navigator', { onLine: false })
+  mocks.legacy.mockResolvedValue({ state: { data: { id: 2, username: 'other-user' } } })
+  await expect(mocks.queryFn!()).resolves.toBeNull()
+  expect(mocks.save).not.toHaveBeenCalled()
 })
