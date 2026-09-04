@@ -189,6 +189,8 @@ export class CollectionSyncEngine {
         target.episodes = structuredClone(
           choice === 'local' ? current.local.episodes : remote.snapshot.episodes,
         )
+        target.episodesComplete =
+          choice === 'local' ? current.local.episodesComplete : remote.snapshot.episodesComplete
       } else if (field.path.startsWith('episodes.')) {
         const id = field.path.slice(9)
         if (value === undefined) delete target.episodes[id]
@@ -205,17 +207,15 @@ export class CollectionSyncEngine {
           subjectId: input.subjectId,
           kind: 'remove',
         })
-        if (preserveRemovalBackup) {
-          this.repository.put({
-            ...removed,
-            retained: current.retained,
-            local: {
-              ...removed.local,
-              episodes: structuredClone(target.episodes),
-              episodesComplete: current.local.episodesComplete,
-            },
-          })
-        }
+        this.repository.put({
+          ...removed,
+          retained: preserveRemovalBackup ? current.retained : removed.retained,
+          local: {
+            ...removed.local,
+            episodes: structuredClone(target.episodes),
+            episodesComplete: target.episodesComplete,
+          },
+        })
       } else if (target.collection) {
         this.repository.command({
           actionId: randomUUID(),
