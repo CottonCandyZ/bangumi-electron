@@ -58,9 +58,15 @@ export function createCollectionTransport(
       )
     return response
   }
+  function readJson<T>(response: Response): Promise<T> {
+    return retryableNetworkOperation(
+      () => response.json(),
+      '暂时无法读取 Bangumi 响应，本地更改已保留',
+    )
+  }
   function identify() {
     identity ??= request('/v0/me')
-      .then((response) => response.json())
+      .then((response) => readJson<LocalAccount>(response))
       .then((profile: LocalAccount) => {
         if (profile.id !== userId)
           throw new SyncError('登录账号与本地收藏账号不一致', 'auth-required')
@@ -72,11 +78,11 @@ export function createCollectionTransport(
   return {
     async list(offset) {
       const profile = await identify()
-      return (
+      return readJson<Collections>(
         await request(
-          `/v0/users/${encodeURIComponent(profile.username)}/collections?limit=100&offset=${offset}`,
-        )
-      ).json() as Promise<Collections>
+          `/v0/users/${encodeURIComponent(profile.username)}/collections?limit=50&offset=${offset}`,
+        ),
+      )
     },
     async read(subjectId) {
       const profile = await identify()
@@ -86,7 +92,7 @@ export function createCollectionTransport(
         true,
       )
       const collection: CollectionData | null =
-        response.status === 404 ? null : await response.json()
+        response.status === 404 ? null : await readJson<CollectionData>(response)
       if (!collection) {
         // A collection 404 alone is ambiguous. Verify the subject is still accessible.
         await request(`/v0/subjects/${subjectId}`)
@@ -96,9 +102,11 @@ export function createCollectionTransport(
       let offset = 0
       let total = Infinity
       while (offset < total) {
-        const page = (await (
-          await request(`/v0/users/-/collections/${subjectId}/episodes?limit=1000&offset=${offset}`)
-        ).json()) as CollectionEpisodes
+        const page = await readJson<CollectionEpisodes>(
+          await request(
+            `/v0/users/-/collections/${subjectId}/episodes?limit=1000&offset=${offset}`,
+          ),
+        )
         total = page.total
         for (const item of page.data ?? []) {
           episodes.push(item.episode)
