@@ -128,6 +128,7 @@ export function createCollectionTransport(
       return {
         snapshot: { collection: fields, episodes: states, episodesComplete: true },
         subject: collection?.subject,
+        updatedAt: collection ? Date.parse(collection.updated_at) : undefined,
         episodes,
         epStatus: collection?.ep_status ?? 0,
         volStatus: collection?.vol_status ?? 0,

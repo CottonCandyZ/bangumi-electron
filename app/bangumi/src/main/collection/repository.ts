@@ -225,6 +225,10 @@ export class CollectionRepository {
         attempt: null,
         error: null,
         syncedAt: Date.now(),
+        updatedAt:
+          !remaining.length && Number.isFinite(remote.updatedAt)
+            ? remote.updatedAt!
+            : current.updatedAt,
       })
       return this.get(userId, subjectId)!
     })
