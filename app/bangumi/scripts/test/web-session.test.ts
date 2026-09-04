@@ -70,9 +70,15 @@ function fixture(oauthStatus = 200, captchaStatus = 200) {
     if (url.includes('/signup/captcha'))
       return new Response('test-image', {
         status: captchaStatus,
-        headers: { 'Content-Type': 'image/png' },
+        headers:
+          captchaStatus === 403
+            ? { 'cf-mitigated': 'challenge', 'Content-Type': 'text/html' }
+            : { 'Content-Type': 'image/png' },
       })
-    return new Response('Cloudflare challenge', { status: 403 })
+    return new Response('Cloudflare challenge', {
+      status: 403,
+      headers: { 'cf-mitigated': 'challenge' },
+    })
   })
   return {
     config,
@@ -136,4 +142,28 @@ test('OAuth rejection remains an OAuth error and does not activate the webpage g
   )
   expect(webAccess.isWebVerificationRequired()).toBe(false)
   expect(f.requests.length).toBe(1)
+})
+
+test('ordinary permission 403 does not activate the global verification gate', async () => {
+  fixture()
+  mocks.fetch.mockResolvedValue(new Response('permission denied', { status: 403 }))
+  await expect(config.webFetch('/subject/42/interest/update', { method: 'POST' })).rejects.toThrow(
+    FetchError,
+  )
+  expect(webAccess.isWebVerificationRequired()).toBe(false)
+  mocks.fetch.mockResolvedValue(new Response('ok'))
+  await expect(config.webFetch('/anime/browser')).resolves.toBe('ok')
+})
+
+test('challenge HTML without exposed headers is recognized for text and captcha blobs', async () => {
+  fixture()
+  const html = '<script>window._cf_chl_opt = {}</script>'
+  mocks.fetch.mockImplementation(
+    async () => new Response(html, { status: 403, headers: { 'content-type': 'text/html' } }),
+  )
+  await expect(config.webFetch('/anime/browser')).rejects.toThrow(
+    webAccess.WebVerificationRequiredError,
+  )
+  webAccess.markWebVerificationComplete()
+  await expect(login.getCaptcha()).rejects.toThrow(webAccess.WebVerificationRequiredError)
 })

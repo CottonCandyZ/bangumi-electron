@@ -621,3 +621,18 @@ test('sidebar counts remaining stage work and restores attention after completio
   expect(collectionSyncIndicator(overview).badge).toBe(null)
   expect(collectionSyncIndicator(overview).title).toBe('正在同步收藏')
 })
+
+test('new unmarked episodes do not turn offline removal into a lifecycle conflict', () => {
+  const base = snapshot(),
+    local = snapshot(),
+    remote = snapshot()
+  local.collection = null
+  remote.episodes[103] = 0
+  const plan = mergeCollection(base, local, remote, new Set(['collection']))
+  expect(plan.conflicts).toEqual([])
+  expect(plan.target.collection).toBe(null)
+  remote.episodes[103] = 2
+  expect(mergeCollection(base, local, remote, new Set(['collection'])).conflicts[0]?.path).toBe(
+    'collection',
+  )
+})
