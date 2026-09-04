@@ -65,10 +65,7 @@ export const collectionIPC = {
   collectionResolve: t.procedure
     .input<ConflictResolution>()
     .action(async ({ input }) => resolveCollection(input)),
-  collectionRemoved: t.procedure.input<{ userId: number }>().action(async ({ input }) =>
-    collectionRepository
-      .all(input.userId)
-      .filter((r) => r.local.collection === null)
-      .slice(0, 30),
-  ),
+  collectionRemoved: t.procedure
+    .input<{ userId: number }>()
+    .action(async ({ input }) => collectionRepository.removed(input.userId)),
 }

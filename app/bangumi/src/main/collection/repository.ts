@@ -42,6 +42,11 @@ export class CollectionRepository {
       .orderBy(desc(localCollections.updatedAt), asc(localCollections.subjectId))
       .all()
   }
+  removed(userId: number) {
+    return this.all(userId)
+      .filter((record) => record.local.collection === null && record.retained !== null)
+      .slice(0, 30)
+  }
   put(record: LocalCollectionRecord) {
     this.db
       .insert(localCollections)

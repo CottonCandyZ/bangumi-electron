@@ -26,7 +26,7 @@ let failures = 0
 let pausedForAuth = false
 let lastError: string | null = null
 const requested = new Set<number>()
-let scanRequested = false
+let scanRequested = 0
 
 export function activateCollections(id: number | null) {
   if (userId === id) return
@@ -34,7 +34,7 @@ export function activateCollections(id: number | null) {
   controller = new AbortController()
   userId = id
   requested.clear()
-  scanRequested = false
+  scanRequested = 0
   failures = 0
   pausedForAuth = false
   lastError = null
@@ -70,7 +70,7 @@ export function syncCollections(id: number, full = false) {
     if (record.status === 'error' || record.status === 'auth-required')
       collectionRepository.put({ ...record, status: 'pending', error: null })
   }
-  if (full) scanRequested = true
+  if (full) scanRequested += 1
   failures = 0
   pausedForAuth = false
   scheduleCollections(0)
@@ -121,7 +121,7 @@ async function runCollections() {
       activity.stage('changes', ids.size)
       await syncSubjects(id, ids, transport, signal, activity)
       if (scanRequested || !collectionRepository.account(id)?.listComplete) {
-        scanRequested = false
+        const scanRequests = scanRequested
         activity.stage('list', null)
         let offset = 0
         let total = Infinity
@@ -160,6 +160,8 @@ async function runCollections() {
         )
         signal.throwIfAborted()
         collectionRepository.completeList(id)
+        // Keep failed scans and requests made during this scan eligible for retry.
+        scanRequested -= scanRequests
       }
       failures = 0
       pausedForAuth = false
