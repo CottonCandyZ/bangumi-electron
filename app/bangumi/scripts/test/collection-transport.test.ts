@@ -26,6 +26,17 @@ function transport(fetch: (url: string) => Promise<Response>) {
 const profile = { id: 1, username: 'test-user' }
 const collection = { ...snapshots.defaultCollection(), subject_id: 42 }
 
+test('subject refresh carries the server collection timestamp', async () => {
+  const updated_at = '2026-09-04T12:00:00Z'
+  const client = transport(async (url) => {
+    const { pathname } = new URL(url)
+    if (pathname === '/v0/me') return Response.json(profile)
+    if (pathname.endsWith('/episodes')) return Response.json({ data: [], total: 0 })
+    return Response.json({ ...collection, updated_at })
+  })
+  expect((await client.read(42)).updatedAt).toBe(Date.parse(updated_at))
+})
+
 test('collection pages respect the 50 item limit and preserve subsequent offsets', async () => {
   const offsets: number[] = []
   const client = transport(async (url) => {

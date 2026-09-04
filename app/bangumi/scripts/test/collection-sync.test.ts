@@ -674,6 +674,20 @@ test('choosing remote deletion discards rejected episode edits when restored', a
   expect(f.state.episodes).toEqual({})
 })
 
+test('remote timestamps update clean records without replacing newer local edit times', (t) => {
+  const f = fixture(t)
+  const updatedAt = Date.parse('2026-09-04T12:00:00Z')
+  f.repo.acknowledge(1, 42, 0, { ...f.remote(), updatedAt })
+  expect(f.repo.get(1, 42)?.updatedAt).toBe(updatedAt)
+  f.command({ kind: 'edit', patch: { rate: 9 } })
+  const localTime = f.repo.get(1, 42)!.updatedAt
+  f.repo.acknowledge(1, 42, 0, { ...f.remote(), updatedAt })
+  expect(f.repo.get(1, 42)?.updatedAt).toBe(localTime)
+  const revision = f.repo.get(1, 42)!.revision
+  f.repo.acknowledge(1, 42, revision, { ...f.remote(), updatedAt: NaN })
+  expect(f.repo.get(1, 42)?.updatedAt).toBe(localTime)
+})
+
 test('an aborted first read keeps durable edits pending for reactivation', async (t) => {
   const f = fixture(t, true)
   f.command({ kind: 'edit', patch: { rate: 9 } })
