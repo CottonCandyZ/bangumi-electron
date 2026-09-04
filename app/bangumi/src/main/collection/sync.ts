@@ -111,15 +111,17 @@ export class CollectionSyncEngine {
       this.repository.acknowledge(userId, subjectId, record.revision, verified)
     } catch (error) {
       record = this.repository.get(userId, subjectId)!
+      const cancelled = error instanceof Error && error.name === 'AbortError'
       this.repository.put({
         ...record,
-        status:
-          error instanceof SyncError && error.kind === 'auth-required'
+        status: cancelled
+          ? 'pending'
+          : error instanceof SyncError && error.kind === 'auth-required'
             ? 'auth-required'
             : error instanceof SyncError && error.kind === 'network'
               ? 'pending'
               : 'error',
-        error: error instanceof Error ? error.message : '同步失败',
+        error: cancelled ? null : error instanceof Error ? error.message : '同步失败',
       })
       throw error
     } finally {
@@ -176,12 +178,14 @@ export class CollectionSyncEngine {
     }
     const plan = this.plan(current, remote.snapshot)
     const target = plan.target
+    let preserveRemovalBackup = false
     for (const field of plan.conflicts) {
       const choice = input.choices[field.path]
       if (choice !== 'local' && choice !== 'remote') throw new Error('请为每一项冲突选择保留的版本')
       const value = choice === 'local' ? field.local : field.remote
       if (field.path === 'collection') {
         target.collection = value as CollectionFields | null
+        preserveRemovalBackup = choice === 'local' && value === null
         target.episodes = structuredClone(
           choice === 'local' ? current.local.episodes : remote.snapshot.episodes,
         )
@@ -194,14 +198,25 @@ export class CollectionSyncEngine {
     this.repository.transaction(() => {
       // Resolution is a new durable intent against the freshly checked remote baseline.
       this.repository.acknowledge(input.userId, input.subjectId, current.revision, remote)
-      if (target.collection === null)
-        this.repository.command({
+      if (target.collection === null) {
+        const removed = this.repository.command({
           actionId: randomUUID(),
           userId: input.userId,
           subjectId: input.subjectId,
           kind: 'remove',
         })
-      else if (target.collection) {
+        if (preserveRemovalBackup) {
+          this.repository.put({
+            ...removed,
+            retained: current.retained,
+            local: {
+              ...removed.local,
+              episodes: structuredClone(target.episodes),
+              episodesComplete: current.local.episodesComplete,
+            },
+          })
+        }
+      } else if (target.collection) {
         this.repository.command({
           actionId: randomUUID(),
           userId: input.userId,
