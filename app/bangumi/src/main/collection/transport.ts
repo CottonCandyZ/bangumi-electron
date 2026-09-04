@@ -13,7 +13,7 @@ import {
 } from '../../shared/collection-sync'
 import type { CollectionData, CollectionEpisodes, Collections } from '../../shared/types/collection'
 import type { Episode } from '../../shared/types/episode'
-import { SyncError, type CollectionTransport } from './sync'
+import { retryableNetworkOperation, SyncError, type CollectionTransport } from './sync'
 
 const agent = 'CottonCandyZ/bangumi-electron (https://github.com/CottonCandyZ/bangumi-electron)'
 export function createCollectionTransport(
@@ -31,22 +31,21 @@ export function createCollectionTransport(
   async function request(path: string, init?: RequestInit, allow404 = false): Promise<Response> {
     signal.throwIfAborted()
     if (!token) throw new SyncError('请登录后同步；本地更改已保留', 'auth-required')
-    let response: Response
-    try {
-      response = await session.defaultSession.fetch(`https://api.bgm.tv${path}`, {
-        credentials: 'omit',
-        ...init,
-        signal: AbortSignal.any([signal, AbortSignal.timeout(25000)]),
-        headers: {
-          'User-Agent': agent,
-          Authorization: `Bearer ${token.access_token}`,
-          'Content-Type': 'application/json',
-          ...init?.headers,
-        },
-      })
-    } catch {
-      throw new SyncError('暂时无法连接 Bangumi，本地更改已保留', 'network')
-    }
+    const response = await retryableNetworkOperation(
+      () =>
+        session.defaultSession.fetch(`https://api.bgm.tv${path}`, {
+          credentials: 'omit',
+          ...init,
+          signal: AbortSignal.any([signal, AbortSignal.timeout(25000)]),
+          headers: {
+            'User-Agent': agent,
+            Authorization: `Bearer ${token.access_token}`,
+            'Content-Type': 'application/json',
+            ...init?.headers,
+          },
+        }),
+      '暂时无法连接 Bangumi，本地更改已保留',
+    )
     signal.throwIfAborted()
     if (response.status === 401 || response.status === 403)
       throw new SyncError('授权已失效或没有写入权限，请重新登录', 'auth-required')
@@ -165,19 +164,21 @@ async function removeWebCollection(subjectId: number, profile: LocalAccount, sig
   const cookie = cookies.map((item) => `${item.name}=${item.value}`).join('; ')
   const web = async (path: string) => {
     signal.throwIfAborted()
-    const response = await session.defaultSession.fetch(`https://bgm.tv${path}`, {
-      credentials: 'omit',
-      signal: AbortSignal.any([signal, AbortSignal.timeout(25000)]),
-      headers: {
-        Cookie: cookie,
-        'User-Agent': agent,
-        Referer: 'https://bgm.tv/',
-        Origin: 'https://bgm.tv',
-      },
-    })
-    signal.throwIfAborted()
-    if (!response.ok) throw new SyncError(`网页请求失败（${response.status}）`, 'network')
-    return response.text()
+    return retryableNetworkOperation(async () => {
+      const response = await session.defaultSession.fetch(`https://bgm.tv${path}`, {
+        credentials: 'omit',
+        signal: AbortSignal.any([signal, AbortSignal.timeout(25000)]),
+        headers: {
+          Cookie: cookie,
+          'User-Agent': agent,
+          Referer: 'https://bgm.tv/',
+          Origin: 'https://bgm.tv',
+        },
+      })
+      signal.throwIfAborted()
+      if (!response.ok) throw new SyncError(`网页请求失败（${response.status}）`, 'network')
+      return response.text()
+    }, '暂时无法连接 Bangumi 网页，稍后将重试')
   }
   const html = await web(`/subject/${subjectId}`)
   const dock = html.match(/id=["']dock["'][\s\S]*?<\/ul>/)?.[0]

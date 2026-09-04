@@ -13,6 +13,7 @@ import { CollectionSyncProgress } from '../../src/main/collection/progress'
 import { CollectionRepository } from '../../src/main/collection/repository'
 import {
   CollectionSyncEngine,
+  retryableNetworkOperation,
   SyncError,
   type CollectionTransport,
 } from '../../src/main/collection/sync'
@@ -30,6 +31,26 @@ const snapshot = (): CollectionSnapshot => ({
   collection: { ...defaultCollection(), rate: 7, tags: ['旧标签'] },
   episodes: { 101: 0, 102: 0 },
   episodesComplete: true,
+})
+test('network operation classifies request and response-body failures as retryable', async () => {
+  for (const failure of [new TypeError('fetch failed'), new Error('response body aborted')]) {
+    await assert.rejects(
+      retryableNetworkOperation(async () => {
+        throw failure
+      }, '网络失败'),
+      (error: unknown) =>
+        error instanceof SyncError && error.kind === 'network' && error.message === '网络失败',
+    )
+  }
+})
+test('network operation preserves classified sync errors', async () => {
+  const failure = new SyncError('需要登录', 'auth-required')
+  await assert.rejects(
+    retryableNetworkOperation(async () => {
+      throw failure
+    }, '网络失败'),
+    (error: unknown) => error === failure,
+  )
 })
 function fixture(t: TestContext, disk = false) {
   const directory = mkdtempSync(join(tmpdir(), 'bangumi-sync-test-'))

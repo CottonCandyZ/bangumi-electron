@@ -24,6 +24,17 @@ export class SyncError extends Error {
     super(message)
   }
 }
+export async function retryableNetworkOperation<T>(
+  operation: () => Promise<T>,
+  message: string,
+): Promise<T> {
+  try {
+    return await operation()
+  } catch (error) {
+    if (error instanceof SyncError) throw error
+    throw new SyncError(message, 'network')
+  }
+}
 export interface CollectionTransport {
   read(subjectId: number): Promise<RemoteCollection>
   write(subjectId: number, before: CollectionSnapshot, target: CollectionSnapshot): Promise<void>
