@@ -3,6 +3,7 @@ import {
   APP_SECRET,
   LOGIN,
   URL_OAUTH_REDIRECT,
+  oauthFetch,
   webFetch,
 } from '@renderer/data/fetch/config/'
 import { insertAccessToken, insertLoginInfo } from '@renderer/data/fetch/db/user'
@@ -183,7 +184,7 @@ export async function getOAuthCode() {
  */
 export async function getOAuthAccessToken() {
   if (!store.code) throw new LoginError('获取授权 code 失败')
-  const token = await webFetch<Token>(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
+  const token = await oauthFetch<Token>(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
     method: 'post',
     headers: {
       'Content-Type': LOGIN.POST_CONTENT_TYPE,
@@ -228,7 +229,7 @@ export async function refreshToken({
   refresh_token: string
   user_id: number
 }) {
-  const token = await webFetch<Omit<Token, 'user_id'>>(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
+  const token = await oauthFetch<Omit<Token, 'user_id'>>(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
     method: 'post',
     headers: {
       'Content-Type': LOGIN.POST_CONTENT_TYPE,

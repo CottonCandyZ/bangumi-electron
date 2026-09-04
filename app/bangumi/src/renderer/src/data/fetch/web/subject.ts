@@ -1,4 +1,5 @@
 import { HTML_SUBJECTS, SUBJECTS, webFetch } from '@renderer/data/fetch/config/'
+import { queueWebTrends } from '@renderer/data/fetch/config/web-access'
 import { SubjectId } from '@renderer/data/types/bgm'
 import type { SectionPath } from '@renderer/data/types/web'
 import { AuthError } from '@renderer/lib/utils/error'
@@ -21,9 +22,11 @@ export async function fetchTrends({
   page?: number
   sectionPath: SectionPath
 }) {
-  return await webFetch<string>(SUBJECTS.TRENDS(sectionPath, page), {
-    parseResponse: (text) => text,
-  })
+  return queueWebTrends(() =>
+    webFetch<string>(SUBJECTS.TRENDS(sectionPath, page), {
+      parseResponse: (text) => text,
+    }),
+  )
 }
 
 export async function fetchSubjectInfoById({ subjectId }: { subjectId: SubjectId }) {

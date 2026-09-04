@@ -56,6 +56,9 @@ export const webFetch = ofetch.create({
   },
 })
 
+/** OAuth JSON endpoints must remain reachable while webpage verification is pending. */
+export const oauthFetch = ofetch.create({ baseURL: HOST, credentials: 'include' })
+
 /** ofetch api config  */
 export const apiFetch = ofetch.create({ baseURL: API_HOST, credentials: 'omit' })
 

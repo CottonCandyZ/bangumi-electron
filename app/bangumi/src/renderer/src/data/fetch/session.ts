@@ -1,4 +1,4 @@
-import { LOGIN, webFetch } from '@renderer/data/fetch/config/'
+import { LOGIN, oauthFetch, webFetch } from '@renderer/data/fetch/config/'
 import { Token } from '@renderer/data/types/login'
 import { client } from '@renderer/lib/client'
 import { readAccessToken } from './db/user'
@@ -27,7 +27,7 @@ export async function isWebLogin() {
 export async function isAccessTokenValid(token: Token) {
   let json: Token & { user_id: string }
   try {
-    json = (await webFetch(LOGIN.OAUTH_ACCESS_TOKEN_STATUS, {
+    json = (await oauthFetch(LOGIN.OAUTH_ACCESS_TOKEN_STATUS, {
       method: 'post',
       headers: {
         'Content-Type': LOGIN.POST_CONTENT_TYPE,

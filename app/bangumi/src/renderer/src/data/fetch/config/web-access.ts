@@ -9,6 +9,18 @@ export class WebVerificationRequiredError extends Error {
 
 let verificationRequired = false
 const listeners = new Set<() => void>()
+let trendsQueue: Promise<unknown> = Promise.resolve()
+
+/** Home categories and list panels share one request slot, including body parsing. */
+export function queueWebTrends<T>(request: () => Promise<T>): Promise<T> {
+  const result = trendsQueue.then(() => {
+    assertWebVerificationNotRequired()
+    return request()
+  })
+  // A failed request must not prevent later refreshes after verification succeeds.
+  trendsQueue = result.catch(() => {})
+  return result
+}
 
 export function isWebVerificationRequired() {
   return verificationRequired

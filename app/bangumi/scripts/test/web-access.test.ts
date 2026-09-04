@@ -6,6 +6,7 @@ import {
   isWebVerificationRequiredError,
   markWebVerificationComplete,
   markWebVerificationRequired,
+  queueWebTrends,
   subscribeWebVerificationRequired,
   WebVerificationRequiredError,
 } from '../../src/renderer/src/data/fetch/config/web-access'
@@ -43,4 +44,55 @@ test('web verification errors can be recognized across error boundaries', () => 
   reconstructed.name = 'WebVerificationRequiredError'
   assert.equal(isWebVerificationRequiredError(reconstructed), true)
   assert.equal(isWebVerificationRequiredError(new Error('403')), false)
+})
+
+test('home and list refreshes share a single request slot through body completion', async () => {
+  markWebVerificationComplete()
+  let active = 0
+  let maximum = 0
+  const results = await Promise.all(
+    Array.from({ length: 6 }, (_, index) =>
+      queueWebTrends(async () => {
+        active++
+        maximum = Math.max(maximum, active)
+        await new Promise((resolve) => setTimeout(resolve, 5))
+        active--
+        return index
+      }),
+    ),
+  )
+  assert.equal(maximum, 1)
+  assert.deepEqual(results, [0, 1, 2, 3, 4, 5])
+})
+
+test('queued requests stop after a challenge and resume after verification', async () => {
+  markWebVerificationComplete()
+  let requests = 0
+  const results = await Promise.allSettled(
+    Array.from({ length: 5 }, () =>
+      queueWebTrends(async () => {
+        requests++
+        markWebVerificationRequired()
+        throw new WebVerificationRequiredError()
+      }),
+    ),
+  )
+  assert.equal(requests, 1)
+  assert.ok(
+    results.every(
+      (result) => result.status === 'rejected' && isWebVerificationRequiredError(result.reason),
+    ),
+  )
+  markWebVerificationComplete()
+  assert.equal(await queueWebTrends(async () => 'recovered'), 'recovered')
+})
+
+test('network failures release the trends queue for the next request', async () => {
+  markWebVerificationComplete()
+  await assert.rejects(
+    queueWebTrends(async () => {
+      throw new Error('network failure')
+    }),
+  )
+  assert.equal(await queueWebTrends(async () => 'next request'), 'next request')
 })
