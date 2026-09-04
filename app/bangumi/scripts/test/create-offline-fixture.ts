@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator'
-import { existsSync, mkdirSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { CollectionRepository } from '../../src/main/collection/repository'
 import { defaultCollection } from '../../src/shared/collection-sync'
@@ -103,4 +103,16 @@ repo.acknowledge(999999991, 999999990, 0, {
 })
 repo.completeList(999999991)
 sqlite.close()
+// Run in the isolated renderer after startup: Jotai stores the account ID as a JSON string.
+const activation = join(directory, 'activate-offline-fixture.js')
+writeFileSync(
+  activation,
+  `if (!['localhost', '127.0.0.1'].includes(location.hostname)) throw new Error('Use the isolated development renderer');
+localStorage.setItem('current_user_id', JSON.stringify('999999991'));
+location.reload();
+`,
+)
 console.log(directory)
+console.log(
+  `Activate the fixture account through CDP using ${activation}; see docs/local-sync-design.md.`,
+)
