@@ -8,6 +8,9 @@ import { store } from '@renderer/state/utils'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai'
 import { createSingletonPromise } from '@renderer/lib/utils/promise'
+import { createStore, get } from 'idb-keyval'
+import type { PersistedQuery } from '@tanstack/react-query-persist-client'
+import type { LocalAccount } from '@shared/collection-sync'
 
 /**
  * Logout 的 Mutate
@@ -86,6 +89,26 @@ function useSessionQuery() {
       if (local) {
         void refreshLocalProfile(userId).catch(() => {})
         return local
+      }
+      // Older versions persisted this profile in IndexedDB instead of LocalAccount.
+      // Bootstrap only the active account; cache age does not invalidate offline identity.
+      try {
+        const cached = await get<PersistedQuery>(
+          `tanstack-query-${JSON.stringify(['userSession', userId])}`,
+          createStore('cache', 'query_persister'),
+        )
+        const profile = cached?.state.data as LocalAccount | undefined
+        if (
+          profile?.id === Number(userId) &&
+          typeof profile.username === 'string' &&
+          store.get(userIdAtom) === userId
+        ) {
+          await client.collectionSaveAccount(profile)
+          void refreshLocalProfile(userId).catch(() => {})
+          return profile
+        }
+      } catch {
+        // An unavailable legacy cache must not prevent a normal online login.
       }
       try {
         return await refreshLocalProfile(userId)
