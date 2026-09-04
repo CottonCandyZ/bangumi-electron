@@ -28,3 +28,12 @@ test('offline episode detail uses its local resource and reports missing data', 
   await expect(getEpisodeById({ episodeId: '43' })).rejects.toThrow('尚未缓存')
   expect(mocks.fetch).not.toHaveBeenCalled()
 })
+
+test('an unreachable API falls back to SQLite while preserving uncached request errors', async () => {
+  vi.stubGlobal('navigator', { onLine: true })
+  const failure = new TypeError('fetch failed')
+  mocks.fetch.mockRejectedValue(failure)
+  mocks.local.mockResolvedValueOnce({ id: 42, name: 'cached' }).mockResolvedValueOnce(null)
+  expect(await getEpisodeById({ episodeId: '42' })).toEqual({ id: 42, name: 'cached' })
+  await expect(getEpisodeById({ episodeId: '43' })).rejects.toBe(failure)
+})
