@@ -201,6 +201,8 @@ export function mergeCollection(
   }
   if (local.collection === null && touched.has('collection')) {
     target.collection = null
+    target.episodes = structuredClone(local.episodes)
+    target.episodesComplete = local.episodesComplete
     return { target, conflicts }
   }
   if (remoteRemoved && !changed(base, local)) return { target, conflicts }
