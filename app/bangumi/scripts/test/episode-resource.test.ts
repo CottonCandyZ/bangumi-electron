@@ -1,4 +1,5 @@
 import { afterEach, expect, test, vi } from 'vitest'
+import { FetchError } from 'ofetch'
 import { getEpisodeById } from '../../src/renderer/src/data/fetch/api/episodes'
 
 const mocks = vi.hoisted(() => ({ local: vi.fn(), fetch: vi.fn() }))
@@ -36,4 +37,14 @@ test('an unreachable API falls back to SQLite while preserving uncached request 
   mocks.local.mockResolvedValueOnce({ id: 42, name: 'cached' }).mockResolvedValueOnce(null)
   expect(await getEpisodeById({ episodeId: '42' })).toEqual({ id: 42, name: 'cached' })
   await expect(getEpisodeById({ episodeId: '43' })).rejects.toBe(failure)
+})
+
+test('authoritative episode 404 bypasses cached resources', async () => {
+  vi.stubGlobal('navigator', { onLine: true })
+  const failure = new FetchError('not found')
+  Object.defineProperty(failure, 'statusCode', { value: 404 })
+  mocks.fetch.mockRejectedValue(failure)
+  mocks.local.mockResolvedValue({ id: 42, name: 'deleted' })
+  await expect(getEpisodeById({ episodeId: '42' })).rejects.toBe(failure)
+  expect(mocks.local).not.toHaveBeenCalled()
 })
