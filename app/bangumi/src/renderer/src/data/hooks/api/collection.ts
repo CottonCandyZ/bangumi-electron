@@ -174,7 +174,7 @@ export const useCollectionEpisodesInfoBySubjectIdQuery = ({
     enabled: !!userId && (enabled ?? true),
     networkMode: 'always',
     persister: undefined,
-    staleTime: Infinity,
+    staleTime: 5 * 60 * 1000,
     needKeepPreviousData: false,
   })
 }
