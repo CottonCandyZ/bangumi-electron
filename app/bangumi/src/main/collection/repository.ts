@@ -261,9 +261,9 @@ export class CollectionRepository {
       })
     })
   }
-  collection(userId: number, subjectId: number): CollectionData | null {
+  collection(userId: number, subjectId: number): CollectionData | null | undefined {
     const record = this.get(userId, subjectId)
-    return record ? toCollectionData(record) : null
+    return record ? toCollectionData(record) : undefined
   }
   list({
     userId,
@@ -338,8 +338,8 @@ export class CollectionRepository {
     }
   }
 }
-function toCollectionData(record: LocalCollectionRecord): CollectionData | null {
-  if (!record.local.collection) return null
+function toCollectionData(record: LocalCollectionRecord): CollectionData | null | undefined {
+  if (!record.local.collection) return record.local.collection
   const delta = Object.entries(record.local.episodes).reduce(
     // Bangumi's ep_status counts all marked episodes, including wish and dropped.
     (sum, [id, state]) => sum + Number(state !== 0) - Number(!!record.base.episodes[id]),
