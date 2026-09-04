@@ -13,7 +13,7 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
-    "test:web-access": "node scripts/test.mjs run scripts/test/web-access.test.ts scripts/test/web-session.test.ts scripts/test/offline-experience.test.ts",
+    "test:web-access": "node scripts/test.mjs run scripts/test/web-access.test.ts scripts/test/web-session.test.ts scripts/test/offline-experience.test.ts scripts/test/session-profile.test.ts",
     "test:electron:offline": "node scripts/test.mjs run --config vitest.electron.config.ts",
     "start": "node scripts/with-electron-node-path.mjs electron-vite preview",
     "dev": "node scripts/ensure-native-arch.mjs && node scripts/with-electron-node-path.mjs electron-vite dev",
@@ -50,7 +50,7 @@
     "db:drizzle": "tsx -r tsconfig-paths/register node_modules/drizzle-kit/bin.cjs --config drizzle.config.ts",
     "db:generate": "pnpm db:drizzle generate",
     "db:migrate": "pnpm db:drizzle migrate",
-    "test:collections": "node scripts/test.mjs run scripts/test/collection-sync.test.ts scripts/test/collection-transport.test.ts",
+    "test:collections": "node scripts/test.mjs run scripts/test/collection-",
     "test": "node scripts/test.mjs run",
     "test:watch": "node scripts/test.mjs"
   },

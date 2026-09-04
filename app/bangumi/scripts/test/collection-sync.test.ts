@@ -636,3 +636,18 @@ test('new unmarked episodes do not turn offline removal into a lifecycle conflic
     'collection',
   )
 })
+
+test('recent removals exclude never-collected reads and retain actual removals', (t) => {
+  const f = fixture(t)
+  f.repo.ensure(1, 99)
+  f.repo.acknowledge(1, 99, 0, {
+    snapshot: { collection: null, episodes: {}, episodesComplete: true },
+    episodes: [],
+    epStatus: 0,
+    volStatus: 0,
+  })
+  expect(f.repo.removed(1)).toEqual([])
+  f.command({ kind: 'remove' })
+  expect(f.repo.removed(1).map((r) => r.subjectId)).toEqual([42])
+  expect(f.repo.removed(2)).toEqual([])
+})
