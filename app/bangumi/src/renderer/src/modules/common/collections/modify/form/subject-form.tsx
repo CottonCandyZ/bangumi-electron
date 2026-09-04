@@ -14,16 +14,13 @@ import {
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { Switch } from '@renderer/components/ui/switch'
 import { Textarea } from '@renderer/components/ui/textarea'
-import { useSessionUsername } from '@renderer/data/hooks/session'
 import { INPUT_LIMIT_CONFIG } from '@renderer/config'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
 import { Subject, SubjectType } from '@renderer/data/types/subject'
-import { useQueryKeyWithUserId } from '@renderer/data/hooks/factory'
 import { cn } from '@renderer/lib/utils'
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
-import { useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -70,8 +67,6 @@ export function AddOrModifySubjectCollectionForm({
   modify?: boolean
   success?: () => void
 }) {
-  const queryClient = useQueryClient()
-  const username = useSessionUsername()
   const form = useForm<SubjectCollectionFormValues>({
     resolver: zodResolver(subjectCollectionFormSchema),
     defaultValues: {
@@ -83,53 +78,30 @@ export function AddOrModifySubjectCollectionForm({
     },
   })
 
-  const queryKey = useQueryKeyWithUserId(['collection-subject'], { subjectId, username })
-  const collectionSubjectsQueryKey = useQueryKeyWithUserId(['collection-subjects'])
-
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
     onSuccess() {
       success()
-      toast.success(modify ? '修改成功！' : '添加成功！')
+      toast.success('已保存到本地')
     },
-    onError(_error, _variable, context) {
-      toast.error('呀，出了点错误...')
-      if (!modify) return
-      queryClient.setQueryData(queryKey, (context as { pre: CollectionData }).pre)
-    },
-    onMutate(variable) {
-      queryClient.cancelQueries({
-        queryKey,
-      })
-      if (!modify) return
-      const pre = queryClient.getQueryData<CollectionData>(queryKey)
-      if (!pre) return { pre }
-      queryClient.setQueryData<CollectionData>(queryKey, {
-        ...pre,
-        type: variable.collectionType!,
-        rate: variable.rate!,
-        private: variable.isPrivate!,
-        tags: variable.tags!,
-        comment: variable.comment!,
-      })
-      return { pre }
-    },
-    onSettled() {
-      queryClient.invalidateQueries({
-        queryKey,
-      })
-      queryClient.invalidateQueries({
-        queryKey: collectionSubjectsQueryKey,
-      })
+    onError(error) {
+      toast.error(error.message || '保存到本地失败')
     },
   })
 
   function onSubmit(values: SubjectCollectionFormValues) {
+    const originalTags = new Set(tags)
+    const tagsChanged =
+      values.tags.size !== originalTags.size ||
+      [...values.tags].some((tag) => !originalTags.has(tag))
     subjectCollectionMutation.mutate({
-      subjectId: subjectId,
-      ...values,
-      tags: [...values.tags],
-      modify: modify,
+      subjectId,
+      collectionType: values.collectionType,
+      ...(values.rate !== rate ? { rate: values.rate } : {}),
+      ...(values.comment !== comment ? { comment: values.comment } : {}),
+      ...(tagsChanged ? { tags: [...values.tags] } : {}),
+      ...(values.isPrivate !== isPrivate ? { isPrivate: values.isPrivate } : {}),
+      modify,
     })
   }
   return (

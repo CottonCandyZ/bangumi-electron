@@ -48,14 +48,15 @@
     "build:linux:prod": "pnpm run build && electron-builder --linux --config electron-builder.prod.yml --publish never",
     "db:drizzle": "tsx -r tsconfig-paths/register node_modules/drizzle-kit/bin.cjs --config drizzle.config.ts",
     "db:generate": "pnpm db:drizzle generate",
-    "db:migrate": "pnpm db:drizzle migrate"
+    "db:migrate": "pnpm db:drizzle migrate",
+    "test:collections": "node scripts/test-collections.mjs"
   },
   "dependencies": {
     "@egoist/tipc": "^0.3.2",
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",
     "better-sqlite3": "^12.5.0",
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "^0.45.2",
     "koffi": "^2.16.2",
     "lowdb": "^7.0.1",
     "velopack": "^1.1.1"
@@ -115,7 +116,7 @@
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.11",
-    "drizzle-kit": "^0.31.8",
+    "drizzle-kit": "^0.31.10",
     "electron": "^39.2.7",
     "electron-builder": "^26.4.0",
     "electron-vite": "^5.0.0",

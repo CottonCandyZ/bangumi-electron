@@ -64,6 +64,7 @@ export async function getLoginFormHash() {
  * 导致拿不到 formHash，后续验证码请求也不会发生。
  */
 export async function prepareWebLoginChallenge() {
+  await client.collectionActivate({ userId: null })
   await Promise.all(
     WEB_LOGIN_COOKIE_NAMES.map((name) => client.removeCookie({ url: 'https://bgm.tv', name })),
   )
@@ -215,6 +216,8 @@ export async function save() {
   if (!store.loginInfo || !store.loginInfo.id) throw new LoginError('尚未获得账户密码')
   const info = store.loginInfo as LoginInfo
   await insertLoginInfo(info)
+  await client.collectionActivate({ userId: store.accessToken.user_id })
+  await client.collectionSync({ userId: store.accessToken.user_id })
   return store.accessToken.user_id
 }
 

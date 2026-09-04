@@ -12,7 +12,7 @@ import { Separator } from '@renderer/components/ui/separator'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useNativeSmoothVirtualizerScrollToTop } from '@renderer/components/virtual/use-native-smooth-virtualizer-scroll-to-top'
 import { useVirtualScrollMemory } from '@renderer/components/virtual/use-virtual-scroll-memory'
-import { useSubjectInfoAPIQuery } from '@renderer/data/hooks/api/subject'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import {
   useEpisodeCommentsByIdQuery,
   useEpisodeInfoByIdQuery,
@@ -43,7 +43,7 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
   const episodeQuery = useEpisodeInfoByIdQuery({ episodeId })
   const episode = episodeQuery.data
   const subjectId = episode?.subject_id.toString()
-  const subjectQuery = useSubjectInfoAPIQuery({
+  const subjectQuery = useSubjectInfoQuery({
     subjectId,
     enabled: !!subjectId,
     needKeepPreviousData: false,
@@ -212,7 +212,7 @@ function EpisodePageRow({
   row: EpisodePageRow
   title: string
   episode: Episode
-  subject?: NonNullable<ReturnType<typeof useSubjectInfoAPIQuery>['data']>
+  subject?: NonNullable<ReturnType<typeof useSubjectInfoQuery>['data']>
   onRefreshComments: () => Promise<unknown> | unknown
   refreshingComments: boolean
   replyTarget: ReplyTarget
@@ -283,7 +283,7 @@ function EpisodeDetailSection({
   title,
 }: {
   episode: Episode
-  subject?: NonNullable<ReturnType<typeof useSubjectInfoAPIQuery>['data']>
+  subject?: NonNullable<ReturnType<typeof useSubjectInfoQuery>['data']>
   title: string
 }) {
   return (

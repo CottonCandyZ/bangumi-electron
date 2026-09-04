@@ -9,9 +9,7 @@ import type { P1SlimMono, SlimIndex } from '@renderer/data/types/index'
 import { cn } from '@renderer/lib/utils'
 import { getIndexDisplayTitle } from '@renderer/modules/common/index-title'
 import { getMonoPreviewImage } from '@renderer/modules/common/mono-image'
-import { collectionPanelIsRefetchingAtom } from '@renderer/state/loading'
-import { useSetAtom } from 'jotai'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const P1_COLLECTION_PANEL_LIMIT = 20
@@ -33,7 +31,6 @@ export function P1CollectionList({
     needKeepPreviousData: false,
     refetchPageLimit: 0,
   })
-  const setIsRefetching = useSetAtom(collectionPanelIsRefetchingAtom)
   const items = useMemo(
     () =>
       query.data
@@ -46,10 +43,6 @@ export function P1CollectionList({
         : [],
     [query.data, resourceType],
   )
-
-  useEffect(() => {
-    setIsRefetching(query.isRefetching)
-  }, [query.isRefetching, setIsRefetching])
 
   if (query.isError && !query.data) {
     return <div className="text-destructive p-4 text-sm">加载收藏失败。</div>

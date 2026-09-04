@@ -3,12 +3,13 @@ import {
   getAccessToken,
   safeRecoverAccessTokenAfterUnauthorized,
 } from '@renderer/data/fetch/session'
-import { safeLogout } from '@renderer/data/hooks/session'
 import {
   assertWebVerificationNotRequired,
   markWebVerificationRequired,
   WebVerificationRequiredError,
 } from '@renderer/data/fetch/config/web-access'
+import { store } from '@renderer/state/utils'
+import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { FetchError, FetchOptions, ofetch } from 'ofetch'
 
 type JsonFetchOptions = FetchOptions<'json'>
@@ -70,12 +71,13 @@ async function appendAuthHeader(options: { headers?: HeadersInit }) {
 }
 
 async function handleUnauthorizedResponse() {
+  if (!navigator.onLine) return false
   const recovered = await safeRecoverAccessTokenAfterUnauthorized()
   if (recovered) {
     return true
   }
 
-  await safeLogout({ showLoginDialog: true })
+  store.set(loginDialogAtom, { open: true, content: { reason: 'session-expired' } })
   return false
 }
 

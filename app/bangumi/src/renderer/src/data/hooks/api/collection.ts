@@ -1,12 +1,15 @@
+import { client } from '@renderer/lib/client'
+import { useSession } from '@renderer/data/hooks/session'
+import { userIdAtom } from '@renderer/state/session'
+import { useAtomValue } from 'jotai'
+import { useMutation } from '@tanstack/react-query'
+import { editLocalCollection, editLocalEpisodes } from '@renderer/data/collection/client'
 import {
-  AddOrModifySubjectCollectionById,
   getCharacterCollectionByIdAndUsername,
-  getEpisodesCollectionBySubjectId,
   getP1Collections,
   getPersonCollectionByIdAndUsername,
   getSubjectCollectionBySubjectIdAndUsername,
   getSubjectCollectionsByUsernameMustAuth,
-  ModifyEpisodeCollectionBySubjectId,
   setResourceCollection,
 } from '@renderer/data/fetch/api/collection'
 import {
@@ -40,11 +43,16 @@ export const useInfinityQueryCollectionsByUsername = ({
   enabled?: boolean
   needKeepPreviousData?: boolean
   refetchPageLimit?: number
-}) =>
-  useInfinityQueryOptionalAuth({
-    queryFn: getSubjectCollectionsByUsernameMustAuth,
+}) => {
+  const userId = Number(useAtomValue(userIdAtom))
+  const profile = useSession()
+  const own = !!userId && (username === profile?.username || username === String(userId))
+  return useInfinityQueryOptionalAuth({
+    queryFn: localOrRemoteList,
+    networkMode: own ? 'always' : 'offlineFirst',
+    persister: undefined,
     queryKey: ['collection-subjects'],
-    queryProps: { username, collectionType, subjectType },
+    queryProps: { username, collectionType, subjectType, own, userId },
     qFLimit: limit,
     getNextPageParam: (lastPage) => {
       const next = lastPage.offset + lastPage.limit
@@ -56,6 +64,7 @@ export const useInfinityQueryCollectionsByUsername = ({
     needKeepPreviousData,
     refetchPageLimit,
   })
+}
 
 export const useInfinityQueryP1Collections = ({
   collectionType,
@@ -156,15 +165,19 @@ export const useCollectionEpisodesInfoBySubjectIdQuery = ({
   offset?: number
   episodeType?: EpisodeType
   enabled?: boolean
-}) =>
-  useAuthQuery({
-    queryFn: getEpisodesCollectionBySubjectId,
+}) => {
+  const userId = Number(useAtomValue(userIdAtom))
+  return useAuthQuery({
+    queryFn: localEpisodes,
     queryKey: ['collection-episodes'],
-    queryProps: { subjectId, limit, offset, episodeType },
-    staleTime: 0,
-    enabled,
-    needKeepPreviousData: true,
+    queryProps: { subjectId, limit, offset, episodeType, userId },
+    enabled: !!userId && (enabled ?? true),
+    networkMode: 'always',
+    persister: undefined,
+    staleTime: Infinity,
+    needKeepPreviousData: false,
   })
+}
 
 export const useQuerySubjectCollection = ({
   subjectId,
@@ -176,43 +189,54 @@ export const useQuerySubjectCollection = ({
   username: UserInfo['username'] | undefined
   enabled?: boolean
   needKeepPreviousData?: boolean
-}) =>
-  useAuthQuery({
-    queryFn: getSubjectCollectionBySubjectIdAndUsername,
+}) => {
+  const userId = Number(useAtomValue(userIdAtom))
+  const profile = useSession()
+  const own = !!userId && (username === profile?.username || username === String(userId))
+  return useAuthQuery({
+    queryFn: localOrRemoteSubject,
     queryKey: ['collection-subject'],
-    queryProps: { subjectId, username },
-    enabled: enabled,
-    needKeepPreviousData,
+    queryProps: { subjectId, username, own, userId },
+    enabled: !!subjectId && !!username && (enabled ?? true),
+    networkMode: own ? 'always' : 'offlineFirst',
+    persister: undefined,
+    needKeepPreviousData: own ? false : needKeepPreviousData,
   })
+}
 
-export const useMutationSubjectCollection = ({
-  mutationKey,
-  onSuccess,
-  onMutate,
-  onSettled,
-  onError,
-}: ApiMutationOptionsWithoutToken<typeof AddOrModifySubjectCollectionById>) =>
-  useMutationMustAuth({
-    mutationKey,
-    mutationFn: AddOrModifySubjectCollectionById,
-    onSuccess,
-    onMutate,
-    onSettled,
-    onError,
-  })
+export const useMutationSubjectCollection = (
+  options: ApiMutationOptionsWithoutToken<typeof editLocalCollection>,
+) =>
+  useMutation({ ...options, mutationFn: editLocalCollection, networkMode: 'always', retry: false })
 
-export const useMutationEpisodesCollectionBySubjectId = ({
-  mutationKey,
-  onSuccess,
-  onMutate,
-  onSettled,
-  onError,
-}: ApiMutationOptionsWithoutToken<typeof ModifyEpisodeCollectionBySubjectId>) =>
-  useMutationMustAuth({
-    mutationKey,
-    mutationFn: ModifyEpisodeCollectionBySubjectId,
-    onSuccess,
-    onMutate,
-    onSettled,
-    onError,
-  })
+export const useMutationEpisodesCollectionBySubjectId = (
+  options: ApiMutationOptionsWithoutToken<typeof editLocalEpisodes>,
+) => useMutation({ ...options, mutationFn: editLocalEpisodes, networkMode: 'always', retry: false })
+
+function localOrRemoteList(
+  props: Parameters<typeof getSubjectCollectionsByUsernameMustAuth>[0] & {
+    own: boolean
+    userId: number
+  },
+) {
+  return props.own ? client.collectionList(props) : getSubjectCollectionsByUsernameMustAuth(props)
+}
+function localOrRemoteSubject(props: {
+  own: boolean
+  userId: number
+  subjectId: string | undefined
+  username: string | undefined
+}) {
+  return props.own
+    ? client.collectionRead({ userId: props.userId, subjectId: Number(props.subjectId) })
+    : getSubjectCollectionBySubjectIdAndUsername(props)
+}
+function localEpisodes(props: {
+  userId: number
+  subjectId: string
+  limit: number
+  offset: number
+  episodeType: EpisodeType | undefined
+}) {
+  return client.collectionReadEpisodes({ ...props, subjectId: Number(props.subjectId) })
+}

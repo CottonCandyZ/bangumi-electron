@@ -35,7 +35,9 @@ function migrateLegacyUserDataPath(nextUserDataPath: string) {
 // to solve the order problem
 export const appPath = () => {
   if (!pathIsInit) {
-    const userDataPath = path.join(app.getPath('appData'), appFolderName)
+    const userDataPath = process.env.BANGUMI_ELECTRON_USER_DATA
+      ? path.resolve(process.env.BANGUMI_ELECTRON_USER_DATA)
+      : path.join(app.getPath('appData'), appFolderName)
     migrateLegacyUserDataPath(userDataPath)
     mkdirSync(userDataPath, { recursive: true })
     app.setPath('userData', userDataPath)

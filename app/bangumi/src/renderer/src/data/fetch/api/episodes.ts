@@ -1,3 +1,4 @@
+import { client } from '@renderer/lib/client'
 import {
   apiFetchWithOptionalAuth,
   EPISODES,
@@ -37,7 +38,10 @@ export async function getEpisodesBySubjectId({
 /**
  * 用 episodeId 获得章节详情，optional auth
  */
-export function getEpisodeById({ episodeId }: { episodeId: string }) {
+export async function getEpisodeById({ episodeId }: { episodeId: string }) {
+  const local = await client.collectionEpisodeResource({ episodeId: Number(episodeId) })
+  if (local) return local
+  if (!navigator.onLine) throw new Error('这个章节尚未缓存，请联网后再试')
   return apiFetchWithOptionalAuth<Episode>(EPISODES.BY_ID(episodeId))
 }
 
