@@ -5,6 +5,7 @@ import {
 } from '@renderer/data/fetch/session'
 import {
   assertWebVerificationNotRequired,
+  isCloudflareChallenge,
   markWebVerificationRequired,
   WebVerificationRequiredError,
 } from '@renderer/data/fetch/config/web-access'
@@ -50,8 +51,8 @@ export const webFetch = ofetch.create({
   onRequest() {
     assertWebVerificationNotRequired()
   },
-  onResponseError({ response }) {
-    if (response.status !== 403) return
+  async onResponseError({ response }) {
+    if (response.status !== 403 || !(await isCloudflareChallenge(response))) return
     markWebVerificationRequired()
     throw new WebVerificationRequiredError()
   },
@@ -64,8 +65,8 @@ export const oauthFetch = ofetch.create({ baseURL: HOST, credentials: 'include' 
 export const sessionFetch = ofetch.create({
   baseURL: HOST,
   credentials: 'include',
-  onResponseError({ response }) {
-    if (response.status !== 403) return
+  async onResponseError({ response }) {
+    if (response.status !== 403 || !(await isCloudflareChallenge(response))) return
     markWebVerificationRequired()
     throw new WebVerificationRequiredError()
   },
