@@ -62,6 +62,7 @@ export type LocalCollectionRecord = {
 }
 export type RemoteCollection = {
   snapshot: CollectionSnapshot
+  updatedAt?: number
   subject?: SlimSubject
   episodes: Episode[]
   epStatus: number
