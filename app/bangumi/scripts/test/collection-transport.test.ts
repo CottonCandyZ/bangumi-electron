@@ -1,45 +1,27 @@
-import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
-import { test } from 'node:test'
-import { runInNewContext } from 'node:vm'
-import ts from 'typescript'
-import { desc, eq } from 'drizzle-orm'
-import { userSession } from '../../src/db/schema/user'
+import { expect, test, vi } from 'vitest'
 import * as snapshots from '../../src/shared/collection-sync'
 import * as sync from '../../src/main/collection/sync'
+import { createCollectionTransport } from '../../src/main/collection/transport'
 
-// Execute the real transport with only Electron and its session database replaced.
-const source = ts.transpileModule(
-  readFileSync(new URL('../../src/main/collection/transport.ts', import.meta.url), 'utf8'),
-  { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } },
-).outputText
+const mocks = vi.hoisted(() => ({ fetch: vi.fn() }))
+vi.mock('electron', () => ({ session: { defaultSession: { fetch: mocks.fetch } } }))
+vi.mock('../../src/main/lib/db', () => ({ sqlite: {} }))
+vi.mock('drizzle-orm/better-sqlite3', () => ({
+  drizzle: () => {
+    const query = {
+      select: () => query,
+      from: () => query,
+      where: () => query,
+      orderBy: () => query,
+      get: () => ({ access_token: 'test-token' }),
+    }
+    return query
+  },
+}))
+
 function transport(fetch: (url: string) => Promise<Response>) {
-  const query = {
-    select: () => query,
-    from: () => query,
-    where: () => query,
-    orderBy: () => query,
-    get: () => ({ access_token: 'test-token' }),
-  }
-  const modules = {
-    electron: { session: { defaultSession: { fetch } } },
-    'drizzle-orm': { desc, eq },
-    'drizzle-orm/better-sqlite3': { drizzle: () => query },
-    '../../db/schema/user': { userSession },
-    '../lib/db': { sqlite: {} },
-    '../../shared/collection-sync': snapshots,
-    './sync': sync,
-  }
-  const exports = {} as typeof import('../../src/main/collection/transport')
-  runInNewContext(source, {
-    exports,
-    AbortSignal,
-    require: (name: keyof typeof modules) => {
-      assert.ok(name in modules, `Unexpected dependency: ${name}`)
-      return modules[name]
-    },
-  })
-  return exports.createCollectionTransport(1, new AbortController().signal)
+  mocks.fetch.mockImplementation(fetch)
+  return createCollectionTransport(1, new AbortController().signal)
 }
 const profile = { id: 1, username: 'test-user' }
 const collection = { ...snapshots.defaultCollection(), subject_id: 42 }
@@ -68,8 +50,8 @@ test('collection pages respect the 50 item limit and preserve subsequent offsets
     total = page.total
     ids.push(...page.data.map((item) => item.subject_id))
   }
-  assert.deepEqual(offsets, [0, 50, 100])
-  assert.equal(new Set(ids).size, 121)
+  expect(offsets).toEqual([0, 50, 100])
+  expect(new Set(ids).size).toBe(121)
 })
 
 test('episode pages follow the documented 1000 item limit without truncating progress', async () => {
@@ -91,10 +73,10 @@ test('episode pages follow the documented 1000 item limit without truncating pro
     })
   })
   const result = await client.read(42)
-  assert.deepEqual(offsets, [0, 1000])
-  assert.equal(result.episodes.length, 1001)
-  assert.equal(Object.keys(result.snapshot.episodes).length, 1001)
-  assert.equal(result.snapshot.episodesComplete, true)
+  expect(offsets).toEqual([0, 1000])
+  expect(result.episodes.length).toBe(1001)
+  expect(Object.keys(result.snapshot.episodes).length).toBe(1001)
+  expect(result.snapshot.episodesComplete).toBe(true)
 })
 
 for (const endpoint of ['/v0/me', '/collections?', '/collections/42', '/episodes?']) {
@@ -111,8 +93,7 @@ for (const endpoint of ['/v0/me', '/collections?', '/collections/42', '/episodes
       }
       return Response.json(url.endsWith('/v0/me') ? profile : collection)
     })
-    await assert.rejects(
-      endpoint === '/collections?' ? client.list(0) : client.read(42),
+    await expect(endpoint === '/collections?' ? client.list(0) : client.read(42)).rejects.toSatisfy(
       (error: unknown) => error instanceof sync.SyncError && error.kind === 'network',
     )
   })
@@ -125,8 +106,7 @@ for (const [status, kind] of [
 ] as const) {
   test(`HTTP ${status} keeps its ${kind} classification`, async () => {
     const client = transport(async () => new Response(null, { status }))
-    await assert.rejects(
-      client.list(0),
+    await expect(client.list(0)).rejects.toSatisfy(
       (error: unknown) => error instanceof sync.SyncError && error.kind === kind,
     )
   })

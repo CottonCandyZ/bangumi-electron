@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict'
-import { test, type TestContext } from 'node:test'
+import { expect, test, type TestContext } from 'vitest'
 import { readFileSync, mkdtempSync, rmSync, mkdirSync, writeFileSync, copyFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
@@ -34,10 +33,11 @@ const snapshot = (): CollectionSnapshot => ({
 })
 test('network operation classifies request and response-body failures as retryable', async () => {
   for (const failure of [new TypeError('fetch failed'), new Error('response body aborted')]) {
-    await assert.rejects(
+    await expect(
       retryableNetworkOperation(async () => {
         throw failure
       }, '网络失败'),
+    ).rejects.toSatisfy(
       (error: unknown) =>
         error instanceof SyncError && error.kind === 'network' && error.message === '网络失败',
     )
@@ -45,12 +45,11 @@ test('network operation classifies request and response-body failures as retryab
 })
 test('network operation preserves classified sync errors', async () => {
   const failure = new SyncError('需要登录', 'auth-required')
-  await assert.rejects(
+  await expect(
     retryableNetworkOperation(async () => {
       throw failure
     }, '网络失败'),
-    (error: unknown) => error === failure,
-  )
+  ).rejects.toSatisfy((error: unknown) => error === failure)
 })
 function fixture(t: TestContext, disk = false) {
   const directory = mkdtempSync(join(tmpdir(), 'bangumi-sync-test-'))
@@ -78,7 +77,7 @@ function fixture(t: TestContext, disk = false) {
   }
   repository.ensure(1, 42)
   repository.acknowledge(1, 42, 0, remote())
-  t.after(() => {
+  t.onTestFinished(() => {
     sqlite.close()
     rmSync(directory, { recursive: true, force: true })
   })
@@ -131,15 +130,15 @@ test('merge disjoint rating, comment, tags, privacy and episode changes', () => 
   remote.collection!.comment = '远端短评'
   remote.episodes[102] = 2
   const result = mergeCollection(base, local, remote, new Set(['rate', 'private', 'episodes.101']))
-  assert.deepEqual(result.conflicts, [])
-  assert.deepEqual(result.target.collection, {
+  expect(result.conflicts).toEqual([])
+  expect(result.target.collection).toEqual({
     type: 3,
     rate: 8,
     tags: ['远端标签'],
     comment: '远端短评',
     private: true,
   })
-  assert.deepEqual(result.target.episodes, { 101: 2, 102: 2 })
+  expect(result.target.episodes).toEqual({ 101: 2, 102: 2 })
 })
 for (const [name, l, r] of [
   ['rate', 8, 9],
@@ -153,10 +152,9 @@ for (const [name, l, r] of [
       remote = snapshot()
     Object.assign(local.collection!, { [name]: l })
     Object.assign(remote.collection!, { [name]: r })
-    assert.deepEqual(
+    expect(
       mergeCollection(base, local, remote, new Set([name])).conflicts.map((f) => f.path),
-      [name],
-    )
+    ).toEqual([name])
   })
 }
 test('same values and tag reordering do not conflict', () => {
@@ -165,7 +163,7 @@ test('same values and tag reordering do not conflict', () => {
     remote = snapshot()
   local.collection!.tags = ['a', 'b']
   remote.collection!.tags = ['b', 'a']
-  assert.equal(mergeCollection(base, local, remote, new Set(['tags'])).conflicts.length, 0)
+  expect(mergeCollection(base, local, remote, new Set(['tags'])).conflicts.length).toBe(0)
 })
 test('same episode changed differently conflicts', () => {
   const base = snapshot(),
@@ -173,8 +171,7 @@ test('same episode changed differently conflicts', () => {
     remote = snapshot()
   local.episodes[101] = 2
   remote.episodes[101] = 3
-  assert.equal(
-    mergeCollection(base, local, remote, new Set(['episodes.101'])).conflicts[0].path,
+  expect(mergeCollection(base, local, remote, new Set(['episodes.101'])).conflicts[0].path).toBe(
     'episodes.101',
   )
 })
@@ -184,8 +181,7 @@ test('deletion conflicts with remote comment or episode modifications', () => {
     remote = snapshot()
   local.collection = null
   remote.episodes[102] = 2
-  assert.equal(
-    mergeCollection(base, local, remote, new Set(['collection'])).conflicts[0].path,
+  expect(mergeCollection(base, local, remote, new Set(['collection'])).conflicts[0].path).toBe(
     'collection',
   )
 })
@@ -195,8 +191,7 @@ test('remote deletion conflicts with local episode edits', () => {
     remote = snapshot()
   local.episodes[101] = 2
   remote.collection = null
-  assert.equal(
-    mergeCollection(base, local, remote, new Set(['episodes.101'])).conflicts[0].path,
+  expect(mergeCollection(base, local, remote, new Set(['episodes.101'])).conflicts[0].path).toBe(
     'collection',
   )
 })
@@ -206,11 +201,8 @@ test('unknown baseline does not overwrite unedited fields with defaults', () => 
   const remote = snapshot()
   remote.collection!.comment = '远端保留'
   const result = mergeCollection(emptySnapshot(), local, remote, new Set(['collection', 'rate']))
-  assert.deepEqual(
-    result.conflicts.map((f) => f.path),
-    ['rate'],
-  )
-  assert.equal(result.target.collection!.comment, '远端保留')
+  expect(result.conflicts.map((f) => f.path)).toEqual(['rate'])
+  expect(result.target.collection!.comment).toBe('远端保留')
 })
 test('local transaction saves every field before any network write', (t) => {
   const f = fixture(t)
@@ -218,11 +210,11 @@ test('local transaction saves every field before any network write', (t) => {
     kind: 'edit',
     patch: { type: 2, rate: 9, tags: ['离线'], comment: '本地短评', private: true },
   })
-  assert.equal(f.writes, 0)
-  assert.deepEqual(f.repo.collection(1, 42)?.tags, ['离线'])
-  assert.equal(f.repo.collection(1, 42)?.comment, '本地短评')
-  assert.equal(f.repo.actions(1, 42).length, 1)
-  assert.equal(f.repo.get(1, 42)?.base.collection?.rate, 7)
+  expect(f.writes).toBe(0)
+  expect(f.repo.collection(1, 42)?.tags).toEqual(['离线'])
+  expect(f.repo.collection(1, 42)?.comment).toBe('本地短评')
+  expect(f.repo.actions(1, 42).length).toBe(1)
+  expect(f.repo.get(1, 42)?.base.collection?.rate).toBe(7)
 })
 test('transaction failure rolls back action and projection together', (t) => {
   const f = fixture(t)
@@ -230,10 +222,10 @@ test('transaction failure rolls back action and projection together', (t) => {
   f.repo.put = () => {
     throw new Error('disk failure')
   }
-  assert.throws(() => f.command({ kind: 'edit', patch: { rate: 8 } }), /disk failure/)
+  expect(() => f.command({ kind: 'edit', patch: { rate: 8 } })).toThrow(/disk failure/)
   f.repo.put = put
-  assert.equal(f.repo.actions(1, 42).length, 0)
-  assert.equal(f.repo.collection(1, 42)?.rate, 7)
+  expect(f.repo.actions(1, 42).length).toBe(0)
+  expect(f.repo.collection(1, 42)?.rate).toBe(7)
 })
 test('action IDs deduplicate IPC retries and reject reuse', (t) => {
   const f = fixture(t)
@@ -246,8 +238,8 @@ test('action IDs deduplicate IPC retries and reject reuse', (t) => {
   }
   f.repo.command(command)
   f.repo.command(command)
-  assert.equal(f.repo.actions(1, 42).length, 1)
-  assert.throws(() => f.repo.command({ ...command, patch: { rate: 9 } }))
+  expect(f.repo.actions(1, 42).length).toBe(1)
+  expect(() => f.repo.command({ ...command, patch: { rate: 9 } })).toThrow()
 })
 test('delete and restore survive restart with tags, comment, rating and episodes', (t) => {
   const f = fixture(t, true)
@@ -255,40 +247,40 @@ test('delete and restore survive restart with tags, comment, rating and episodes
   f.command({ kind: 'episodes', episodes: { 101: 2 } })
   f.command({ kind: 'remove' })
   f.reopen()
-  assert.equal(f.repo.collection(1, 42), null)
+  expect(f.repo.collection(1, 42)).toBe(null)
   f.command({ kind: 'edit', patch: { type: 3 } })
-  assert.equal(f.repo.collection(1, 42)?.rate, 9)
-  assert.deepEqual(f.repo.collection(1, 42)?.tags, ['保存'])
-  assert.equal(f.repo.get(1, 42)?.local.episodes[101], 2)
+  expect(f.repo.collection(1, 42)?.rate).toBe(9)
+  expect(f.repo.collection(1, 42)?.tags).toEqual(['保存'])
+  expect(f.repo.get(1, 42)?.local.episodes[101]).toBe(2)
 })
 test('remove then restore before sending does not replay intermediate operations', async (t) => {
   const f = fixture(t)
   f.command({ kind: 'remove' })
   f.command({ kind: 'edit', patch: { type: 3 } })
   await f.engine().sync(1, 42, f.transport)
-  assert.equal(f.writes, 0)
-  assert.equal(f.repo.actions(1, 42).length, 0)
+  expect(f.writes).toBe(0)
+  expect(f.repo.actions(1, 42).length).toBe(0)
 })
 test('sync merges independent fields and advances the baseline', async (t) => {
   const f = fixture(t)
   f.command({ kind: 'edit', patch: { rate: 8 } })
   f.state.collection!.tags = ['网页']
   await f.engine().sync(1, 42, f.transport)
-  assert.equal(f.state.collection!.rate, 8)
-  assert.deepEqual(f.repo.collection(1, 42)?.tags, ['网页'])
-  assert.equal(f.repo.get(1, 42)?.status, 'clean')
+  expect(f.state.collection!.rate).toBe(8)
+  expect(f.repo.collection(1, 42)?.tags).toEqual(['网页'])
+  expect(f.repo.get(1, 42)?.status).toBe('clean')
 })
 test('new actions during upload are not acknowledged or overwritten', async (t) => {
   const f = fixture(t)
   f.command({ kind: 'edit', patch: { rate: 8 } })
   f.hook = () => f.command({ kind: 'edit', patch: { rate: 9 } })
   await f.engine().sync(1, 42, f.transport)
-  assert.equal(f.repo.collection(1, 42)?.rate, 9)
-  assert.equal(f.repo.get(1, 42)?.base.collection?.rate, 8)
-  assert.equal(f.repo.actions(1, 42).length, 1)
+  expect(f.repo.collection(1, 42)?.rate).toBe(9)
+  expect(f.repo.get(1, 42)?.base.collection?.rate).toBe(8)
+  expect(f.repo.actions(1, 42).length).toBe(1)
   f.hook = undefined
   await f.engine().sync(1, 42, f.transport)
-  assert.equal(f.state.collection!.rate, 9)
+  expect(f.state.collection!.rate).toBe(9)
 })
 test('write success followed by lost response is confirmed without resending after restart', async (t) => {
   const f = fixture(t, true)
@@ -296,12 +288,12 @@ test('write success followed by lost response is confirmed without resending aft
   f.hook = () => {
     throw new SyncError('lost response', 'network')
   }
-  await assert.rejects(f.engine().sync(1, 42, f.transport))
+  await expect(f.engine().sync(1, 42, f.transport)).rejects.toThrow()
   f.reopen()
   f.hook = undefined
   await f.engine().sync(1, 42, f.transport)
-  assert.equal(f.writes, 1)
-  assert.equal(f.repo.actions(1, 42).length, 0)
+  expect(f.writes).toBe(1)
+  expect(f.repo.actions(1, 42).length).toBe(0)
 })
 test('partially applied batch and newer edits reconcile after an uncertain response', async (t) => {
   const f = fixture(t)
@@ -310,22 +302,22 @@ test('partially applied batch and newer edits reconcile after an uncertain respo
     f.state.collection!.tags = ['旧标签']
     throw new SyncError('partial', 'network')
   }
-  await assert.rejects(f.engine().sync(1, 42, f.transport))
+  await expect(f.engine().sync(1, 42, f.transport)).rejects.toThrow()
   f.command({ kind: 'edit', patch: { rate: 9 } })
   f.hook = undefined
   await f.engine().sync(1, 42, f.transport)
-  assert.equal(f.state.collection!.rate, 9)
-  assert.deepEqual(f.state.collection!.tags, ['本地'])
-  assert.equal(f.repo.get(1, 42)?.status, 'clean')
+  expect(f.state.collection!.rate).toBe(9)
+  expect(f.state.collection!.tags).toEqual(['本地'])
+  expect(f.repo.get(1, 42)?.status).toBe('clean')
 })
 test('content conflict preserves both versions and blocks writes', async (t) => {
   const f = fixture(t)
   f.command({ kind: 'edit', patch: { rate: 8 } })
   f.state.collection!.rate = 9
   await f.engine().sync(1, 42, f.transport)
-  assert.equal(f.writes, 0)
-  assert.equal(f.repo.get(1, 42)?.conflict?.fields[0].remote, 9)
-  assert.equal(f.repo.collection(1, 42)?.rate, 8)
+  expect(f.writes).toBe(0)
+  expect(f.repo.get(1, 42)?.conflict?.fields[0].remote).toBe(9)
+  expect(f.repo.collection(1, 42)?.rate).toBe(8)
 })
 test('conflict resolution is durable, per field and verified again', async (t) => {
   const f = fixture(t)
@@ -343,10 +335,10 @@ test('conflict resolution is durable, per field and verified again', async (t) =
     },
     f.transport,
   )
-  assert.equal(f.writes, 0)
+  expect(f.writes).toBe(0)
   await engine.sync(1, 42, f.transport)
-  assert.equal(f.state.collection!.rate, 8)
-  assert.equal(f.state.collection!.comment, '网页')
+  expect(f.state.collection!.rate).toBe(8)
+  expect(f.state.collection!.comment).toBe('网页')
 })
 test('stale dialog rejects changed remote or local state', async (t) => {
   const f = fixture(t)
@@ -356,16 +348,14 @@ test('stale dialog rejects changed remote or local state', async (t) => {
   await engine.sync(1, 42, f.transport)
   const revision = f.repo.get(1, 42)!.revision
   f.state.collection!.rate = 10
-  await assert.rejects(
+  await expect(
     engine.resolve({ userId: 1, subjectId: 42, revision, choices: { rate: 'local' } }, f.transport),
-    /远端状态已改变/,
-  )
+  ).rejects.toThrow(/远端状态已改变/)
   f.command({ kind: 'edit', patch: { tags: ['后来'] } })
-  await assert.rejects(
+  await expect(
     engine.resolve({ userId: 1, subjectId: 42, revision, choices: { rate: 'local' } }, f.transport),
-    /本地状态已改变/,
-  )
-  assert.equal(f.writes, 0)
+  ).rejects.toThrow(/本地状态已改变/)
+  expect(f.writes).toBe(0)
 })
 test('accounts never share collection projections or actions', (t) => {
   const f = fixture(t)
@@ -377,9 +367,9 @@ test('accounts never share collection projections or actions', (t) => {
     kind: 'edit',
     patch: { rate: 3 },
   })
-  assert.equal(f.repo.collection(1, 42)?.rate, 8)
-  assert.equal(f.repo.collection(2, 42)?.rate, 3)
-  assert.equal(f.repo.actions(2, 42).length, 1)
+  expect(f.repo.collection(1, 42)?.rate).toBe(8)
+  expect(f.repo.collection(2, 42)?.rate).toBe(3)
+  expect(f.repo.actions(2, 42).length).toBe(1)
 })
 test('confirmed deletion ignores server-cleared episode state but retains local backup', async (t) => {
   const f = fixture(t)
@@ -390,15 +380,14 @@ test('confirmed deletion ignores server-cleared episode state but retains local 
     f.state.episodes[101] = 0
   }
   await f.engine().sync(1, 42, f.transport)
-  assert.equal(f.repo.get(1, 42)?.status, 'clean')
-  assert.equal(f.repo.get(1, 42)?.local.episodes[101], 2)
-  assert.equal(snapshotMatches({ ...snapshot(), collection: null }, f.state), true)
+  expect(f.repo.get(1, 42)?.status).toBe('clean')
+  expect(f.repo.get(1, 42)?.local.episodes[101]).toBe(2)
+  expect(snapshotMatches({ ...snapshot(), collection: null }, f.state)).toBe(true)
 })
 test('migration adds sync tables without replacing the existing Subject cache', (t) => {
   const f = fixture(t)
-  assert.ok(f.db.prepare("SELECT name FROM sqlite_master WHERE name = 'Subject'").get())
-  assert.match(
-    readFileSync('./drizzle/0006_colorful_mongoose.sql', 'utf8'),
+  expect(f.db.prepare("SELECT name FROM sqlite_master WHERE name = 'Subject'").get()).toBeTruthy()
+  expect(readFileSync('./drizzle/0006_colorful_mongoose.sql', 'utf8')).toMatch(
     /CREATE TABLE `LocalCollection`/,
   )
 })
@@ -414,9 +403,9 @@ test('restore after confirmed deletion restores episodes omitted by the server',
   f.hook = undefined
   f.command({ kind: 'edit', patch: { type: 3 } })
   await f.engine().sync(1, 42, f.transport)
-  assert.equal(f.state.episodes[101], 2)
-  assert.equal(f.state.collection?.rate, 7)
-  assert.equal(f.repo.get(1, 42)?.status, 'clean')
+  expect(f.state.episodes[101]).toBe(2)
+  expect(f.state.collection?.rate).toBe(7)
+  expect(f.repo.get(1, 42)?.status).toBe('clean')
 })
 test('concurrent recreation with different episodes is a lifecycle conflict', () => {
   const base = { ...snapshot(), collection: null }
@@ -424,21 +413,21 @@ test('concurrent recreation with different episodes is a lifecycle conflict', ()
     remote = snapshot()
   local.episodes[101] = 2
   const plan = mergeCollection(base, local, remote, new Set(['collection']))
-  assert.equal(plan.conflicts[0]?.path, 'collection')
+  expect(plan.conflicts[0]?.path).toBe('collection')
 })
 test('offline add then remove does not delete a new remote collection', () => {
   const base = { ...snapshot(), collection: null }
   const plan = mergeCollection(base, base, snapshot(), new Set(['collection']))
-  assert.equal(plan.conflicts.length, 0)
-  assert.deepEqual(plan.target, snapshot())
+  expect(plan.conflicts.length).toBe(0)
+  expect(plan.target).toEqual(snapshot())
 })
 test('list refresh cannot overwrite a dirty baseline or local metadata', (t) => {
   const f = fixture(t)
   f.command({ kind: 'edit', patch: { rate: 8, tags: ['本地'] } })
   f.repo.seed(1, { ...f.repo.collection(1, 42)!, rate: 10, tags: ['网页'] })
-  assert.equal(f.repo.get(1, 42)?.base.collection?.rate, 7)
-  assert.equal(f.repo.collection(1, 42)?.rate, 8)
-  assert.deepEqual(f.repo.collection(1, 42)?.tags, ['本地'])
+  expect(f.repo.get(1, 42)?.base.collection?.rate).toBe(7)
+  expect(f.repo.collection(1, 42)?.rate).toBe(8)
+  expect(f.repo.collection(1, 42)?.tags).toEqual(['本地'])
 })
 test('actions made during the first remote read survive its acknowledgement', async (t) => {
   const f = fixture(t)
@@ -448,22 +437,22 @@ test('actions made during the first remote read survive its acknowledgement', as
     return f.remote()
   }
   await f.engine().sync(1, 42, f.transport)
-  assert.equal(f.repo.collection(1, 42)?.comment, '拉取期间的编辑')
-  assert.equal(f.repo.actions(1, 42).length, 1)
+  expect(f.repo.collection(1, 42)?.comment).toBe('拉取期间的编辑')
+  expect(f.repo.actions(1, 42).length).toBe(1)
 })
 test('local derived progress matches the server count of all marked episodes', (t) => {
   const f = fixture(t)
   f.command({ kind: 'episodes', episodes: { 101: 1, 102: 3 } })
-  assert.equal(f.repo.collection(1, 42)?.ep_status, 2)
+  expect(f.repo.collection(1, 42)?.ep_status).toBe(2)
   f.command({ kind: 'episodes', episodes: { 101: 2 } })
-  assert.equal(f.repo.collection(1, 42)?.ep_status, 2)
+  expect(f.repo.collection(1, 42)?.ep_status).toBe(2)
   f.command({ kind: 'episodes', episodes: { 102: 0 } })
-  assert.equal(f.repo.collection(1, 42)?.ep_status, 1)
+  expect(f.repo.collection(1, 42)?.ep_status).toBe(1)
 })
 test('upgrade normalizes legacy token timestamps without hiding a newer token', (t) => {
   const directory = mkdtempSync(join(tmpdir(), 'bangumi-session-migration-'))
   const sqlite = new Database(':memory:')
-  t.after(() => {
+  t.onTestFinished(() => {
     sqlite.close()
     rmSync(directory, { recursive: true, force: true })
   })
@@ -484,7 +473,7 @@ test('upgrade normalizes legacy token timestamps without hiding a newer token', 
   const rows = sqlite
     .prepare('SELECT access_token, create_time FROM UserSession ORDER BY create_time DESC')
     .all()
-  assert.deepEqual(rows, [
+  expect(rows).toEqual([
     { access_token: 'new', create_time: fresh },
     { access_token: 'old', create_time: Date.parse('2025-01-01T00:00:00Z') },
   ])
@@ -496,7 +485,7 @@ test('upgrade normalizes legacy token timestamps without hiding a newer token', 
   const generated = sqlite
     .prepare('SELECT create_time FROM UserSession WHERE user_id = 2')
     .get() as { create_time: number }
-  assert.ok(Math.abs(generated.create_time - Date.now()) < 2000)
+  expect(Math.abs(generated.create_time - Date.now()) < 2000).toBeTruthy()
 })
 
 test('sync progress reports the actual read, upload and verification boundaries', async (t) => {
@@ -519,22 +508,22 @@ test('sync progress reports the actual read, upload and verification boundaries'
     },
     (phase) => events.push(phase),
   )
-  assert.deepEqual(events, ['reading', 'read', 'uploading', 'write', 'verifying', 'read'])
-  assert.equal(f.repo.get(1, 42)?.status, 'clean')
+  expect(events).toEqual(['reading', 'read', 'uploading', 'write', 'verifying', 'read'])
+  expect(f.repo.get(1, 42)?.status).toBe('clean')
 })
 
 test('read-only sync and conflicts never report an upload', async (t) => {
   const f = fixture(t)
   const phases: string[] = []
   await f.engine().sync(1, 42, f.transport, (phase) => phases.push(phase))
-  assert.deepEqual(phases, ['reading'])
+  expect(phases).toEqual(['reading'])
   phases.length = 0
   f.command({ kind: 'edit', patch: { rate: 8 } })
   f.state.collection!.rate = 9
   await f.engine().sync(1, 42, f.transport, (phase) => phases.push(phase))
-  assert.deepEqual(phases, ['reading'])
-  assert.equal(f.repo.get(1, 42)?.status, 'conflict')
-  assert.equal(f.writes, 0)
+  expect(phases).toEqual(['reading'])
+  expect(f.repo.get(1, 42)?.status).toBe('conflict')
+  expect(f.writes).toBe(0)
 })
 
 test('failed uploads remain visible as unfinished results, not successes', async (t) => {
@@ -543,7 +532,7 @@ test('failed uploads remain visible as unfinished results, not successes', async
   const progress = new CollectionSyncProgress(() => {})
   progress.stage('changes', 1)
   const phases: string[] = []
-  await assert.rejects(
+  await expect(
     f.engine().sync(
       1,
       42,
@@ -558,42 +547,43 @@ test('failed uploads remain visible as unfinished results, not successes', async
         progress.subject(f.repo.get(1, 42)!, phase)
       },
     ),
-  )
+  ).rejects.toThrow()
   progress.settled(f.repo.get(1, 42)!, true)
   progress.finish()
-  assert.deepEqual(phases, ['reading', 'uploading'])
-  assert.equal(progress.value.completed, 1)
-  assert.equal(progress.value.current, null)
-  assert.equal(progress.value.recent[0].status, 'error')
-  assert.equal(progress.value.recent[0].error, '连接中断')
-  assert.ok(progress.value.finishedAt)
+  expect(phases).toEqual(['reading', 'uploading'])
+  expect(progress.value.completed).toBe(1)
+  expect(progress.value.current).toBe(null)
+  expect(progress.value.recent[0].status).toBe('error')
+  expect(progress.value.recent[0].error).toBe('连接中断')
+  expect(progress.value.finishedAt).toBeTruthy()
 })
 
 test('progress counts are stage-specific and keep conflicts and newer edits distinct', (t) => {
   const f = fixture(t)
   const progress = new CollectionSyncProgress(() => {})
   progress.stage('list', null)
-  assert.equal(progress.value.total, null)
+  expect(progress.value.total).toBe(null)
   progress.downloaded(100, 785)
-  assert.equal(progress.value.completed, 100)
+  expect(progress.value.completed).toBe(100)
   progress.stage('episodes', 3)
-  assert.equal(progress.value.completed, 0)
-  assert.equal(progress.value.total, 3)
+  expect(progress.value.completed).toBe(0)
+  expect(progress.value.total).toBe(3)
   const record = f.repo.get(1, 42)!
   progress.subject(record, 'reading')
-  assert.equal(progress.value.current?.subject.id, 42)
+  expect(progress.value.current?.subject.id).toBe(42)
   progress.settled(record, false)
-  assert.equal(progress.value.recent[0].status, 'synced')
+  expect(progress.value.recent[0].status).toBe('synced')
   progress.settled({ ...record, subjectId: 43, status: 'conflict' }, false)
   progress.settled({ ...record, subjectId: 44, status: 'pending' }, false)
-  assert.equal(progress.value.completed, 3)
-  assert.deepEqual(
-    progress.value.recent.map((item) => item.status),
-    ['pending', 'conflict', 'synced'],
-  )
+  expect(progress.value.completed).toBe(3)
+  expect(progress.value.recent.map((item) => item.status)).toEqual([
+    'pending',
+    'conflict',
+    'synced',
+  ])
   const nextAccount = new CollectionSyncProgress(() => {})
-  assert.deepEqual(nextAccount.value.recent, [])
-  assert.equal(nextAccount.value.current, null)
+  expect(nextAccount.value.recent).toEqual([])
+  expect(nextAccount.value.current).toBe(null)
 })
 
 test('sidebar counts remaining stage work and restores attention after completion', () => {
@@ -615,19 +605,19 @@ test('sidebar counts remaining stage work and restores attention after completio
       finishedAt: null,
     },
   }
-  assert.equal(collectionSyncIndicator(overview).badge, 61)
-  assert.match(collectionSyncIndicator(overview).title, /剩余 61 项/)
+  expect(collectionSyncIndicator(overview).badge).toBe(61)
+  expect(collectionSyncIndicator(overview).title).toMatch(/剩余 61 项/)
   overview.progress!.completed = 162
-  assert.equal(collectionSyncIndicator(overview).badge, null)
+  expect(collectionSyncIndicator(overview).badge).toBe(null)
   overview.running = false
-  assert.equal(collectionSyncIndicator(overview).badge, null)
+  expect(collectionSyncIndicator(overview).badge).toBe(null)
   overview.error = '连接中断'
-  assert.equal(collectionSyncIndicator(overview).badge, '!')
+  expect(collectionSyncIndicator(overview).badge).toBe('!')
   overview.error = null
   overview.pending = 2
-  assert.equal(collectionSyncIndicator(overview).badge, 2)
+  expect(collectionSyncIndicator(overview).badge).toBe(2)
   overview.running = true
   overview.progress!.total = null
-  assert.equal(collectionSyncIndicator(overview).badge, null)
-  assert.equal(collectionSyncIndicator(overview).title, '正在同步收藏')
+  expect(collectionSyncIndicator(overview).badge).toBe(null)
+  expect(collectionSyncIndicator(overview).title).toBe('正在同步收藏')
 })
