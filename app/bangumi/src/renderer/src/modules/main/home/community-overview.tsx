@@ -13,6 +13,8 @@ import { LoginInlineAction } from '@renderer/modules/common/user/login/login-inl
 import { useMonoListPanelOpenHandler } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { type MonoListPanelTab } from '@renderer/state/panel'
 import { Link, useNavigate } from 'react-router-dom'
+import { QueryFallback } from '@renderer/components/query-fallback'
+import { useOnline } from '@renderer/hooks/use-online'
 
 const PREVIEW_LIMIT = 5
 
@@ -103,6 +105,7 @@ function HomeTopicSection({
   topics: CommunityTopic[]
 }) {
   const previewTopics = topics.slice(0, PREVIEW_LIMIT)
+  const online = useOnline()
   const panelTab = {
     groupMode: section.groupMode,
     id: section.id,
@@ -142,13 +145,13 @@ function HomeTopicSection({
         </div>
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        {queryError ? (
-          <p className="text-muted-foreground p-2 text-sm">加载失败</p>
-        ) : loginRequired ? (
+        {loginRequired ? (
           <p className="text-muted-foreground p-2 text-sm">
             <LoginInlineAction />
             {loginText}
           </p>
+        ) : !previewTopics.length && (queryError || !online) ? (
+          <QueryFallback label={section.title} onRetry={onRefresh} />
         ) : queryLoading && previewTopics.length === 0 ? (
           Array.from({ length: PREVIEW_LIMIT }).map((_, index) => <HomeTopicSkeleton key={index} />)
         ) : previewTopics.length === 0 ? (

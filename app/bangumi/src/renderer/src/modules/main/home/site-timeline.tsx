@@ -13,11 +13,14 @@ import { useEffect, useRef, useState } from 'react'
 
 import { TimelineRefreshButton } from './timeline-refresh-button'
 import { TimelineComposer } from './timeline-composer'
+import { QueryFallback } from '@renderer/components/query-fallback'
+import { useOnline } from '@renderer/hooks/use-online'
 
 const TIMELINE_MODE_TABS = new Set(['全站', '关注'])
 const TIMELINE_PREVIEW_ITEM_LIMIT = 3
 
 export function SiteTimelinePreview() {
+  const online = useOnline()
   const [mode, setMode] = useAtom(homeSiteTimelineModeAtom)
   const selectedTab = mode === 'friends' ? '关注' : '全站'
   const query = useTimelineQuery({ mode, limit: 8 })
@@ -102,8 +105,8 @@ export function SiteTimelinePreview() {
         </div>
       </div>
       <TimelineComposer />
-      {query.isError ? (
-        <p className="text-muted-foreground text-sm">暂时无法读取时间线。</p>
+      {query.data === undefined && (query.isError || !online) ? (
+        <QueryFallback label="时间线" error={query.error} onRetry={query.refetch} />
       ) : query.isLoading || !visibleItems ? (
         <UserTimelineSkeleton count={6} showUser surface="timeline" />
       ) : visibleItems.length === 0 ? (

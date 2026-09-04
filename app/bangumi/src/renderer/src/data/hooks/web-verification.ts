@@ -1,6 +1,5 @@
 import {
   isWebVerificationRequired,
-  markWebVerificationComplete,
   subscribeWebVerificationRequired,
 } from '@renderer/data/fetch/config/web-access'
 import { parseTopListFromHTML } from '@renderer/data/transformer/web'
@@ -9,6 +8,7 @@ import { client } from '@renderer/lib/client'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useSyncExternalStore } from 'react'
 import { toast } from 'sonner'
+import { restoreQueriesAfterWebVerification } from './web-verification-cache'
 
 export function useWebVerificationRequired() {
   return useSyncExternalStore(
@@ -23,15 +23,10 @@ export function useBangumiWebVerification(sectionPath: SectionPath = 'anime') {
 
   return useMutation({
     mutationFn: () => client.requestBangumiWebVerification({ sectionPath }),
-    onSuccess: (html) => {
+    onSuccess: async (html) => {
       const topList = parseTopListFromHTML(html)
-      markWebVerificationComplete()
-      queryClient.setQueryData(['SectionTrendsV2', sectionPath], topList)
-      queryClient.setQueryData(['SectionTrendsInfiniteV2', sectionPath], {
-        pages: [topList],
-        pageParams: [1],
-      })
-      toast.success('网页验证完成，已更新 Bangumi 数据')
+      await restoreQueriesAfterWebVerification(queryClient, sectionPath, topList)
+      if (!isWebVerificationRequired()) toast.success('网页验证完成，已恢复各分类刷新')
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : '网页验证失败'
@@ -52,6 +47,7 @@ export function useBangumiWebRefresh({
   const { isPending: verificationPending, mutateAsync: verify } =
     useBangumiWebVerification(sectionPath)
   const refresh = useCallback(() => {
+    if (!navigator.onLine) return Promise.resolve()
     if (!verificationRequired) return onRefresh()
     return verify().catch(() => undefined)
   }, [onRefresh, verificationRequired, verify])

@@ -15,6 +15,8 @@ import { SubjectReviews } from '@renderer/modules/main/subject/reviews'
 import { RelatedSubjects } from '@renderer/modules/main/subject/related'
 import { SubjectScore } from '@renderer/modules/main/subject/score'
 import { SubjectTags } from '@renderer/modules/main/subject/tags'
+import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
+import { QueryFallback } from '@renderer/components/query-fallback'
 
 export const SubjectContent = ({
   subjectId,
@@ -25,6 +27,14 @@ export const SubjectContent = ({
   className?: string
   style?: React.CSSProperties
 }) => {
+  const subject = useSubjectInfoQuery({ subjectId, needKeepPreviousData: false })
+  if (!subject.data && subject.isError) {
+    return (
+      <div className="p-8">
+        <QueryFallback label="条目详情" error={subject.error} onRetry={subject.refetch} />
+      </div>
+    )
+  }
   return (
     <div
       className={cn('max-w-8xl @container mx-auto flex flex-col gap-10 px-10', className)}

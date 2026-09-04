@@ -1,4 +1,4 @@
-import { LOGIN, oauthFetch, webFetch } from '@renderer/data/fetch/config/'
+import { LOGIN, oauthFetch, sessionFetch } from '@renderer/data/fetch/config/'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { FetchError } from 'ofetch'
 import { Token } from '@renderer/data/types/login'
@@ -15,7 +15,7 @@ import { userIdAtom } from '@renderer/state/session'
  * 直接用访问主页，看看是不是 guest 来验证 web 登陆，实际上也可以用 /login redirect
  */
 export async function isWebLogin() {
-  const data = (await webFetch('/', {
+  const data = (await sessionFetch('/', {
     credentials: 'include',
     parseResponse: (text) => text,
   })) as string

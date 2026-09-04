@@ -10,6 +10,7 @@ import {
 } from '@tanstack/react-query-persist-client'
 import { createStore } from 'idb-keyval'
 import { toast } from 'sonner'
+import { isNetworkUnavailableError } from '@renderer/lib/utils/network'
 
 const persister = experimental_createQueryPersister<PersistedQuery>({
   storage: newIdbStorage(createStore('cache', 'query_persister')),
@@ -30,6 +31,22 @@ function openLoginDialogForAuthError(error: AuthError) {
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
+      // Blob URLs and one-time login challenges must never reuse a failed cached image.
+      if (query.queryKey[0] === 'captcha') return
+      if (isNetworkUnavailableError(error)) {
+        if (query.state.data !== undefined) {
+          queryClient.setQueryData(query.queryKey, query.state.data, {
+            updatedAt: query.state.dataUpdatedAt,
+          })
+          // Keep the original freshness and retry on reconnect, without another request now.
+          void queryClient.invalidateQueries({
+            queryKey: query.queryKey,
+            exact: true,
+            refetchType: 'none',
+          })
+        }
+        return
+      }
       if (isWebVerificationRequiredError(error)) {
         if (query.state.data !== undefined) {
           queryClient.setQueryData(query.queryKey, query.state.data)

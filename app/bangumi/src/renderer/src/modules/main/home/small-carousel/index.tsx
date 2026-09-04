@@ -22,6 +22,9 @@ import { useTopListQuery } from '@renderer/data/hooks/web/subject'
 import { useSubjectsInfoQuery } from '@renderer/data/hooks/db/subject'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
+import { QueryFallback } from '@renderer/components/query-fallback'
+import { useOnline } from '@renderer/hooks/use-online'
+import { userIdAtom } from '@renderer/state/session'
 
 export type SmallCarouselProps = {
   href: string
@@ -34,7 +37,10 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
   const subjectIds = topList.data
     ?.map((item) => item.SubjectId)
     .filter((item) => item !== undefined)
-  const subjectsInfo = useSubjectsInfoQuery({ subjectIds: subjectIds, enabled: !!subjectIds }).data
+  const subjectsQuery = useSubjectsInfoQuery({ subjectIds: subjectIds, enabled: !!subjectIds })
+  const userId = useAtomValue(userIdAtom)
+  const subjectsInfo = subjectsQuery.data?.filter((subject) => subject && (userId || !subject.nsfw))
+  const online = useOnline()
   const currentSectionPath = useAtomValue(activeSectionAtom)
   const [api, setApi] = useState<CarouselApi>()
   const { init: initIndex, setter: setIndex } = useStateHook({
@@ -111,14 +117,19 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
         </div>
       </div>
       <div className={cn('@container relative', currentSectionPath === sectionPath && 'z-40')}>
-        {topList.data === undefined && topList.isError ? (
-          <div className="text-muted-foreground flex min-h-48 flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-4 text-center text-sm">
-            <p>
-              {topList.requiresWebVerification
-                ? `Bangumi 需要网页验证才能加载热门${name}。`
-                : `暂时无法加载热门${name}。`}
-            </p>
-            <p className="text-xs">点击标题旁的刷新按钮重试。</p>
+        {!subjectsInfo?.length &&
+        ((topList.data === undefined && (topList.isError || !online)) || subjectsQuery.isError) ? (
+          <QueryFallback
+            label={`热门${name}`}
+            error={topList.error ?? subjectsQuery.error}
+            onRetry={() => {
+              void subjectsQuery.refetch()
+              return topList.refetch()
+            }}
+          />
+        ) : subjectsInfo?.length === 0 ? (
+          <div className="text-muted-foreground flex min-h-32 items-center justify-center text-sm">
+            暂无可展示的条目。
           </div>
         ) : (
           <CarouselContentNoFlow className="-ml-3">

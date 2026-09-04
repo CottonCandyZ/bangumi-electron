@@ -8,7 +8,8 @@ import {
 import { useAtomValue } from 'jotai'
 import { userIdAtom } from '@renderer/state/session'
 import { DB_CONFIG } from '@renderer/config'
-import { FetchError } from 'ofetch'
+import { OfflineResourceError } from '@renderer/lib/utils/network'
+import { refreshResourceBatch } from './resource-refresh'
 
 type Resource = { last_update_at: Date }
 type Options<T> = Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryFn'>
@@ -69,7 +70,7 @@ export function useLocalResource<P, D, T extends Resource>({
         }
         return local
       }
-      if (!navigator.onLine) throw new Error('这个条目尚未保存到本地，请联网后打开一次')
+      if (!navigator.onLine) throw new OfflineResourceError()
       return refresh()
     },
   })
@@ -118,26 +119,20 @@ export function useLocalResources<
         (id) => !data.has(id) || Date.now() - data.get(id)!.last_update_at.getTime() > dbStaleTime,
       )
       const refresh = async () => {
-        const results = await Promise.allSettled(
-          stale.map((id) => apiQueryFn({ ...apiParams, id } as P)),
-        )
-        const fresh: T[] = []
-        for (const result of results) {
-          if (result.status === 'fulfilled') fresh.push(result.value)
-          else if (!(result.reason instanceof FetchError && result.reason.statusCode === 404))
-            throw result.reason
-        }
-        await updateDB(fresh)
-        for (const item of fresh) {
-          data.set(item.id, item)
-          queryClient.setQueryData([...queryKey, userId, { id: item.id }], item)
-        }
+        await refreshResourceBatch({
+          ids: stale,
+          data,
+          fetch: (id) => apiQueryFn({ ...apiParams, id } as P),
+          save: updateDB,
+          publish: (item) => queryClient.setQueryData([...queryKey, userId, { id: item.id }], item),
+        })
         return ordered()
       }
       if (stale.length && navigator.onLine) {
         if (!local.length) return refresh()
         refreshLater(key, refresh, (value) => queryClient.setQueryData(key, value))
       }
+      if (ids.length && !local.length && !navigator.onLine) throw new OfflineResourceError()
       return ordered()
     },
   })
