@@ -4,6 +4,11 @@ import {
   safeRecoverAccessTokenAfterUnauthorized,
 } from '@renderer/data/fetch/session'
 import { safeLogout } from '@renderer/data/hooks/session'
+import {
+  assertWebVerificationNotRequired,
+  markWebVerificationRequired,
+  WebVerificationRequiredError,
+} from '@renderer/data/fetch/config/web-access'
 import { FetchError, FetchOptions, ofetch } from 'ofetch'
 
 type JsonFetchOptions = FetchOptions<'json'>
@@ -38,7 +43,18 @@ export const APP_SECRET = import.meta.env.VITE_APP_SECRET
 export const URL_OAUTH_REDIRECT = `${HOST}/dev/app`
 
 /** ofetch web config */
-export const webFetch = ofetch.create({ baseURL: HOST, credentials: 'include' })
+export const webFetch = ofetch.create({
+  baseURL: HOST,
+  credentials: 'include',
+  onRequest() {
+    assertWebVerificationNotRequired()
+  },
+  onResponseError({ response }) {
+    if (response.status !== 403) return
+    markWebVerificationRequired()
+    throw new WebVerificationRequiredError()
+  },
+})
 
 /** ofetch api config  */
 export const apiFetch = ofetch.create({ baseURL: API_HOST, credentials: 'omit' })

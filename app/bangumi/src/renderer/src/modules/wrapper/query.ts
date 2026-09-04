@@ -1,5 +1,6 @@
 import { newIdbStorage } from '@renderer/lib/persister'
 import { AuthCode, AuthError } from '@renderer/lib/utils/error'
+import { isWebVerificationRequiredError } from '@renderer/data/fetch/config/web-access'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { store } from '@renderer/state/utils'
 import { QueryCache, QueryClient } from '@tanstack/react-query'
@@ -29,6 +30,13 @@ function openLoginDialogForAuthError(error: AuthError) {
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
+      if (isWebVerificationRequiredError(error)) {
+        if (query.state.data !== undefined) {
+          queryClient.setQueryData(query.queryKey, query.state.data)
+        }
+        return
+      }
+
       if (error instanceof AuthError) {
         if (query.state.data !== undefined) {
           queryClient.setQueryData(query.queryKey, query.state.data)

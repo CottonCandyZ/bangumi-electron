@@ -21,8 +21,7 @@ import { useEffect, useState } from 'react'
 import { useTopListQuery } from '@renderer/data/hooks/web/subject'
 import { useSubjectsInfoQuery } from '@renderer/data/hooks/db/subject'
 import { Skeleton } from '@renderer/components/ui/skeleton'
-import { BangumiWebVerificationButton } from '@renderer/modules/common/bangumi-web-verification'
-import { FetchError } from 'ofetch'
+import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
 
 export type SmallCarouselProps = {
   href: string
@@ -36,9 +35,6 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
     ?.map((item) => item.SubjectId)
     .filter((item) => item !== undefined)
   const subjectsInfo = useSubjectsInfoQuery({ subjectIds: subjectIds, enabled: !!subjectIds }).data
-  const requiresWebVerification =
-    topList.error instanceof FetchError && topList.error.statusCode === 403
-
   const currentSectionPath = useAtomValue(activeSectionAtom)
   const [api, setApi] = useState<CarouselApi>()
   const { init: initIndex, setter: setIndex } = useStateHook({
@@ -100,6 +96,14 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
             tab={trendingPanelTab}
             title={`在侧栏打开热门${name}`}
           />
+          <QueryRefreshButton
+            className="text-muted-foreground hover:text-foreground"
+            label={
+              topList.requiresWebVerification ? `网页验证并刷新热门${name}` : `刷新热门${name}`
+            }
+            onRefresh={topList.refetch}
+            refreshing={topList.isRefreshing}
+          />
         </div>
         <div className="mb-2 ml-auto flex w-min gap-2">
           <CarouselPrevious className="relative top-0 left-0 translate-y-0" />
@@ -107,27 +111,14 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
         </div>
       </div>
       <div className={cn('@container relative', currentSectionPath === sectionPath && 'z-40')}>
-        {topList.isError ? (
+        {topList.data === undefined && topList.isError ? (
           <div className="text-muted-foreground flex min-h-48 flex-col items-center justify-center gap-3 rounded-xl border border-dashed px-4 text-center text-sm">
             <p>
-              {requiresWebVerification
+              {topList.requiresWebVerification
                 ? `Bangumi 需要网页验证才能加载热门${name}。`
                 : `暂时无法加载热门${name}。`}
             </p>
-            {requiresWebVerification ? (
-              <BangumiWebVerificationButton sectionPath={sectionPath} />
-            ) : (
-              <Button
-                className="h-8 px-2 text-xs"
-                disabled={topList.isFetching}
-                onClick={() => void topList.refetch()}
-                size="sm"
-                type="button"
-                variant="outline"
-              >
-                {topList.isFetching ? '重试中' : '重试'}
-              </Button>
-            )}
+            <p className="text-xs">点击标题旁的刷新按钮重试。</p>
           </div>
         ) : (
           <CarouselContentNoFlow className="-ml-3">

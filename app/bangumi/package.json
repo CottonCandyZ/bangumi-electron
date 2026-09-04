@@ -13,6 +13,7 @@
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
+    "test:web-access": "node --import tsx --test scripts/test/web-access.test.ts",
     "start": "node scripts/with-electron-node-path.mjs electron-vite preview",
     "dev": "node scripts/ensure-native-arch.mjs && node scripts/with-electron-node-path.mjs electron-vite dev",
     "dev:codex": "node scripts/dev-codex.mjs",

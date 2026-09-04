@@ -31,7 +31,7 @@ export function TrendingSubjectsListPanelContent({
   const trendsQuery = useTrendsInfiniteQuery(tab.sectionPath)
   useMonoListPanelRefreshAction({
     onRefresh: () => trendsQuery.refetch(),
-    refreshing: trendsQuery.isFetching && !trendsQuery.isFetchingNextPage,
+    refreshing: trendsQuery.isRefreshing && !trendsQuery.isFetchingNextPage,
     tabId: tab.id,
   })
   const subjectIds = useMemo(() => {
@@ -61,7 +61,13 @@ export function TrendingSubjectsListPanelContent({
   }
 
   if (trendsQuery.isError && subjectIds.length === 0) {
-    return <div className="text-muted-foreground p-4 text-sm">暂时无法读取近期热门。</div>
+    return (
+      <div className="text-muted-foreground p-4 text-sm">
+        {trendsQuery.requiresWebVerification
+          ? 'Bangumi 网页验证已过期，点击面板上方的刷新按钮继续。'
+          : '暂时无法读取近期热门，点击面板上方的刷新按钮重试。'}
+      </div>
+    )
   }
 
   return (
