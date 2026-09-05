@@ -46,6 +46,7 @@ export function BroadcastSchedule() {
   const query = useCalendarQuery()
   const todayId = getBangumiWeekdayId()
   const [api, setApi] = useState<CarouselApi>()
+  const [todayVisible, setTodayVisible] = useState(true)
   const [edges, setEdges] = useState({ start: 0, end: 0 })
   const online = useOnline()
   const [watchingOnly, setWatchingOnly] = useAtom(watchingOnlyAtom)
@@ -56,6 +57,9 @@ export function BroadcastSchedule() {
   const openLogin = useSetAtom(loginDialogAtom)
   const watchingIds = new Set(watching.data ?? [])
   const needsSync = watchingOnly && !!userId && sync.data && !sync.data.listComplete
+  const canNavigate =
+    query.data !== undefined &&
+    (!watchingOnly || (!!userId && sync.data?.listComplete && !watching.isError))
   const weekStart = dayjs()
     .startOf('day')
     .subtract(Number(todayId) - 1, 'day')
@@ -64,6 +68,7 @@ export function BroadcastSchedule() {
     if (!api) return
     const update = () => {
       const progress = api.scrollProgress()
+      setTodayVisible(api.slidesInView().includes(Number(todayId) - 1))
       setEdges((previous) => {
         const distance = Math.max(0, api.containerNode().scrollWidth - api.rootNode().clientWidth)
         const start = edgeStrength(progress * distance)
@@ -72,43 +77,62 @@ export function BroadcastSchedule() {
       })
     }
     update()
-    api.on('scroll', update).on('reInit', update)
+    api.on('scroll', update).on('reInit', update).on('slidesInView', update)
     return () => {
-      api.off('scroll', update).off('reInit', update)
+      api.off('scroll', update).off('reInit', update).off('slidesInView', update)
     }
-  }, [api])
+  }, [api, todayId])
 
   return (
     <Carousel
       setApi={setApi}
-      opts={{ align: 'start', startIndex: Number(todayId) - 1 }}
+      opts={{ align: 'start', startIndex: Number(todayId) - 1, inViewThreshold: 0.8 }}
       className="@container min-w-0"
       aria-label="每日放送"
     >
       <section className="flex min-w-0 flex-col gap-3">
-        <div className="flex min-w-0 flex-wrap items-baseline justify-between gap-3">
+        <div className="flex min-w-0 flex-wrap items-end justify-between gap-x-4 gap-y-2">
           <div className="min-w-0">
             <h2 className="text-xl font-semibold">每日放送</h2>
             <p className="text-muted-foreground mt-1 text-xs tabular-nums">
               {weekStart.format('M月D日')} — {weekStart.add(6, 'day').format('M月D日')}
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <label className="text-muted-foreground mr-1 flex cursor-pointer items-center gap-2 text-xs">
+          <div className="flex min-h-8 items-center gap-3">
+            <label className="text-muted-foreground hover:text-foreground flex cursor-pointer items-center gap-2 text-xs transition-colors">
               <Switch size="sm" checked={watchingOnly} onCheckedChange={setWatchingOnly} />
               只看在追
             </label>
-            <Button size="sm" variant="ghost" onClick={() => api?.scrollTo(Number(todayId) - 1)}>
-              今天
-            </Button>
-            <CarouselPrevious
-              aria-label="前一天放送"
-              className="relative top-auto left-auto translate-y-0"
-            />
-            <CarouselNext
-              aria-label="后一天放送"
-              className="relative top-auto right-auto translate-y-0"
-            />
+            {canNavigate && (
+              <>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className={`text-muted-foreground order-first h-8 px-2 text-xs font-normal ${todayVisible ? 'invisible' : ''}`}
+                  tabIndex={todayVisible ? -1 : undefined}
+                  aria-hidden={todayVisible}
+                  onClick={() => api?.scrollTo(Number(todayId) - 1)}
+                >
+                  回到今天
+                </Button>
+                <div
+                  className="border-border/60 flex items-center rounded-md border p-0.5"
+                  role="group"
+                  aria-label="浏览放送日期"
+                >
+                  <CarouselPrevious
+                    variant="ghost"
+                    aria-label="向前浏览放送"
+                    className="text-muted-foreground relative top-auto left-auto size-7 translate-y-0 rounded-sm shadow-none disabled:opacity-25 [&_svg]:size-3.5"
+                  />
+                  <CarouselNext
+                    variant="ghost"
+                    aria-label="向后浏览放送"
+                    className="text-muted-foreground relative top-auto right-auto size-7 translate-y-0 rounded-sm shadow-none disabled:opacity-25 [&_svg]:size-3.5"
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
         {watchingOnly && !userId ? (
@@ -218,7 +242,7 @@ function BroadcastDayColumn({
             {dayjs(date).format('DD')}
           </time>
           <span className="text-muted-foreground text-xs">{label}</span>
-          {current && <span className="text-xs text-rose-500">今天</span>}
+          {current && <span className="sr-only">今天</span>}
         </h3>
         {items && (
           <span className="text-muted-foreground pb-0.5 text-[10px]">{items.length} 部</span>
