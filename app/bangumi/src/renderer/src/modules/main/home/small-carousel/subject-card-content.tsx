@@ -83,6 +83,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
 
   return (
     <HoverPopCard
+      portal
       layoutId={layoutId}
       isActive={(isActive) => {
         setActionSection(isActive ? sectionPath : null)
@@ -131,14 +132,18 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
         }
         Description={
           <div className="mt-2 w-full p-0.5">
-            <motion.h1
-              className="font-jp h-6 truncate font-medium"
+            <motion.h3
+              className="h-5 truncate text-sm font-medium"
               layoutId={`${layoutId}-header`}
               layoutDependency={isActive}
             >
-              {subjectInfo.name}
-            </motion.h1>
-            <motion.h2 className="mt-1 h-4 truncate text-xs">{subjectInfo.name_cn}</motion.h2>
+              {subjectInfo.name_cn || subjectInfo.name}
+            </motion.h3>
+            <p className="text-muted-foreground mt-0.5 h-4 truncate text-[11px]">
+              {subjectInfo.name_cn && subjectInfo.name_cn !== subjectInfo.name
+                ? subjectInfo.name
+                : ''}
+            </p>
           </div>
         }
       />

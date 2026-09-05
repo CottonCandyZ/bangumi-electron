@@ -4,19 +4,19 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useCalendarQuery } from '@renderer/data/hooks/api/calendar'
 import type { CalendarItem } from '@renderer/data/types/calendar'
 import dayjs from 'dayjs'
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { edgeStrength, scrollEdgeMask } from './carousel-edge-fade'
 import './broadcast-schedule.css'
 import { Button } from '@renderer/components/ui/button'
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
   type CarouselApi,
 } from '@renderer/components/ui/carousel'
 import { QueryFallback } from '@renderer/components/query-fallback'
 import { useOnline } from '@renderer/hooks/use-online'
+import { CarouselNavigation } from './carousel-navigation'
 import { Switch } from '@renderer/components/ui/switch'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { atomWithStorage } from 'jotai/utils'
@@ -98,7 +98,7 @@ export function BroadcastSchedule() {
               {weekStart.format('M月D日')} — {weekStart.add(6, 'day').format('M月D日')}
             </p>
           </div>
-          <div className="flex min-h-8 items-center gap-3">
+          <div className="flex min-h-8 min-w-0 flex-wrap items-center gap-3">
             <label className="text-muted-foreground hover:text-foreground flex cursor-pointer items-center gap-2 text-xs transition-colors">
               <Switch size="sm" checked={watchingOnly} onCheckedChange={setWatchingOnly} />
               只看在追
@@ -108,29 +108,14 @@ export function BroadcastSchedule() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  className={`text-muted-foreground order-first h-8 px-2 text-xs font-normal ${todayVisible ? 'invisible' : ''}`}
+                  className={`text-muted-foreground order-first h-8 px-2 text-xs font-normal ${todayVisible ? 'hidden @md:invisible @md:inline-flex' : ''}`}
                   tabIndex={todayVisible ? -1 : undefined}
                   aria-hidden={todayVisible}
                   onClick={() => api?.scrollTo(Number(todayId) - 1)}
                 >
                   回到今天
                 </Button>
-                <div
-                  className="border-border/60 flex items-center rounded-md border p-0.5"
-                  role="group"
-                  aria-label="浏览放送日期"
-                >
-                  <CarouselPrevious
-                    variant="ghost"
-                    aria-label="向前浏览放送"
-                    className="text-muted-foreground relative top-auto left-auto size-7 translate-y-0 rounded-sm shadow-none disabled:opacity-25 [&_svg]:size-3.5"
-                  />
-                  <CarouselNext
-                    variant="ghost"
-                    aria-label="向后浏览放送"
-                    className="text-muted-foreground relative top-auto right-auto size-7 translate-y-0 rounded-sm shadow-none disabled:opacity-25 [&_svg]:size-3.5"
-                  />
-                </div>
+                <CarouselNavigation label="放送" />
               </>
             )}
           </div>
@@ -270,18 +255,6 @@ function BroadcastDayColumn({
       </div>
     </div>
   )
-}
-
-function edgeStrength(distance: number) {
-  return Math.min(1, Math.max(0, distance / 24))
-}
-
-function scrollEdgeMask(direction: 'right' | 'bottom', start: number, end: number): CSSProperties {
-  return {
-    '--broadcast-fade-start': start,
-    '--broadcast-fade-end': end,
-    maskImage: `linear-gradient(to ${direction}, rgb(0 0 0 / calc(1 - var(--broadcast-fade-start))), black 24px, black calc(100% - 24px), rgb(0 0 0 / calc(1 - var(--broadcast-fade-end))))`,
-  } as CSSProperties
 }
 
 function BroadcastItem({ item }: { item: CalendarItem }) {

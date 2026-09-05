@@ -4,10 +4,8 @@ import { Button } from '@renderer/components/ui/button'
 import {
   Carousel,
   CarouselApi,
-  CarouselContentNoFlow,
+  CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from '@renderer/components/ui/carousel'
 import { SectionPath } from '@renderer/data/types/web'
 import { useStateHook } from '@renderer/hooks/use-cache-state'
@@ -25,6 +23,8 @@ import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-butto
 import { QueryFallback } from '@renderer/components/query-fallback'
 import { useOnline } from '@renderer/hooks/use-online'
 import { userIdAtom } from '@renderer/state/session'
+import { CarouselNavigation } from '../carousel-navigation'
+import { useCarouselEdgeFade } from '../carousel-edge-fade'
 
 export type SmallCarouselProps = {
   href: string
@@ -43,6 +43,7 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
   const online = useOnline()
   const currentSectionPath = useAtomValue(activeSectionAtom)
   const [api, setApi] = useState<CarouselApi>()
+  const edgeFade = useCarouselEdgeFade(api)
   const { init: initIndex, setter: setIndex } = useStateHook({
     key: `Home-Small-Carousel-${sectionPath}`,
   })
@@ -77,46 +78,46 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
         startIndex: (initIndex as number | undefined) ?? 0,
       }}
     >
-      <div className="flex justify-between">
-        <div className="flex min-w-0 items-center gap-1">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div className="min-w-0">
           <Button
             asChild
             variant="ghost"
-            className="group ml-1 h-min px-2 py-1 text-xl font-medium duration-100"
+            className="group h-8 px-1 py-1 text-base font-semibold duration-100"
           >
             <MyLink to={href}>
-              <div
-                className={`flex -translate-x-2 items-center justify-center gap-1 transition-all duration-100 group-hover:translate-x-0 group-hover:text-red-600/70 dark:group-hover:text-red-400`}
-              >
+              <div className="flex items-center justify-center gap-1 transition-colors group-hover:text-rose-500">
                 <span>{name}</span>
-                <ChevronRight
-                  className="mt-px h-4 w-4 text-red-600/50 group-hover:text-red-600/70 dark:text-red-600/80 dark:group-hover:text-red-400"
-                  strokeWidth={4}
-                />
+                <ChevronRight className="text-muted-foreground size-3.5" strokeWidth={1.5} />
               </div>
             </MyLink>
           </Button>
+        </div>
+        <div className="text-muted-foreground ml-auto flex shrink-0 items-center gap-1">
           <OpenMonoListPanelButton
-            className="size-8 shrink-0"
-            iconClassName="text-base"
+            className="size-7 shrink-0"
+            iconClassName="text-sm"
             tab={trendingPanelTab}
             title={`在侧栏打开热门${name}`}
           />
           <QueryRefreshButton
-            className="text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground size-7 [&_span]:text-sm"
             label={
               topList.requiresWebVerification ? `网页验证并刷新热门${name}` : `刷新热门${name}`
             }
             onRefresh={topList.refetch}
             refreshing={topList.isRefreshing}
           />
-        </div>
-        <div className="mb-2 ml-auto flex w-min gap-2">
-          <CarouselPrevious className="relative top-0 left-0 translate-y-0" />
-          <CarouselNext className="relative top-0 right-0 translate-y-0" />
+          <CarouselNavigation label={name} className="ml-1" />
         </div>
       </div>
-      <div className={cn('@container relative', currentSectionPath === sectionPath && 'z-40')}>
+      <div
+        className={cn(
+          'broadcast-scroll-fade @container relative',
+          currentSectionPath === sectionPath && 'z-40',
+        )}
+        style={edgeFade}
+      >
         {!subjectsInfo?.length &&
         ((topList.data === undefined && (topList.isError || !online)) || subjectsQuery.isError) ? (
           <QueryFallback
@@ -132,13 +133,10 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
             暂无可展示的条目。
           </div>
         ) : (
-          <CarouselContentNoFlow className="-ml-3">
+          <CarouselContent className="-ml-3 py-1">
             {subjectsInfo
               ? subjectsInfo.map((subject, index) => (
-                  <CarouselItem
-                    key={index}
-                    className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @7xl:basis-[10%]"
-                  >
+                  <CarouselItem key={index} className="basis-[clamp(7.5rem,18cqi,10rem)] pl-3">
                     <div className="p-0.5">
                       {subject ? (
                         <SubjectCard subjectInfo={subject} sectionPath={sectionPath} />
@@ -149,16 +147,13 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
                   </CarouselItem>
                 ))
               : Array.from({ length: 10 }).map((_, index) => (
-                  <CarouselItem
-                    key={index}
-                    className="basis-1/5 pl-3 @4xl:basis-1/6 @5xl:basis-[14.285714%] @7xl:basis-[10%]"
-                  >
+                  <CarouselItem key={index} className="basis-[clamp(7.5rem,18cqi,10rem)] pl-3">
                     <div className="p-0.5">
                       <Skeleton className="aspect-2/3 w-full" />
                     </div>
                   </CarouselItem>
                 ))}
-          </CarouselContentNoFlow>
+          </CarouselContent>
         )}
       </div>
     </Carousel>

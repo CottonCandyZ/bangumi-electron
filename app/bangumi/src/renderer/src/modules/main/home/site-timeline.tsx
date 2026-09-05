@@ -27,7 +27,7 @@ export function SiteTimelinePreview() {
   const refetchTimelineRef = useRef(query.refetch)
   const refreshAfterModeChangeRef = useRef(false)
   const [now, setNow] = useState(() => Date.now())
-  const visibleItems = query.data?.filter(hasUserTimelineItemDetails).slice(0, 6)
+  const visibleItems = query.data?.filter(hasUserTimelineItemDetails).slice(0, 4)
   const panelTab = {
     id: 'site-timeline',
     mode,
@@ -60,10 +60,10 @@ export function SiteTimelinePreview() {
 
   return (
     <section className="flex h-full min-w-0 flex-col gap-3">
-      <div className="flex min-w-0 items-start justify-between gap-3">
+      <div className="flex min-w-0 flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-3">
-            <h2 className="text-xl font-semibold">时间线</h2>
+            <h3 className="text-sm font-semibold">时间线</h3>
             <Tabs
               className="min-h-8 shrink-0 p-0.5"
               currentSelect={selectedTab}
@@ -78,7 +78,7 @@ export function SiteTimelinePreview() {
               tabsContent={TIMELINE_MODE_TABS}
             />
           </div>
-          <p className="text-muted-foreground mt-0.5 line-clamp-1 text-sm">
+          <p className="text-muted-foreground mt-1 line-clamp-1 text-xs">
             {mode === 'friends' ? '关注用户的最新动态' : '全站最新动态'}
           </p>
         </div>
@@ -108,7 +108,7 @@ export function SiteTimelinePreview() {
       {query.data === undefined && (query.isError || !online) ? (
         <QueryFallback label="时间线" error={query.error} onRetry={query.refetch} />
       ) : query.isLoading || !visibleItems ? (
-        <UserTimelineSkeleton count={6} showUser surface="timeline" />
+        <UserTimelineSkeleton count={4} showUser surface="timeline" />
       ) : visibleItems.length === 0 ? (
         <p className="text-muted-foreground text-sm">近期没有动态。</p>
       ) : (

@@ -1,18 +1,17 @@
-// import { BigCarousel } from '@renderer/components/carousel/big-carousel'
 import { BroadcastSchedule } from '@renderer/modules/main/home/broadcast-schedule'
 import {
   HomeJoinedGroupsPreview,
   HomeTrendingSubjectTopicsPreview,
 } from '@renderer/modules/main/home/community-overview'
 import { SiteTimelinePreview } from '@renderer/modules/main/home/site-timeline'
-import { SmallCarousel, SmallCarouselProps } from '@renderer/modules/main/home/small-carousel'
+import { SmallCarousel, type SmallCarouselProps } from '@renderer/modules/main/home/small-carousel'
+import './home.css'
 
 const primaryCarousel = {
   href: '/anime',
   name: '动画',
   sectionPath: 'anime',
 } satisfies SmallCarouselProps
-
 const secondaryCarousels = [
   { href: '/game', name: '游戏', sectionPath: 'game' },
   { href: '/book', name: '书', sectionPath: 'book' },
@@ -22,30 +21,44 @@ const secondaryCarousels = [
 
 export function Component() {
   return (
-    <div className="flex flex-col gap-8 px-8 pt-6 pb-20">
-      {/* <section>
-        <BigCarousel />
-      </section> */}
-
-      <section>
-        <SmallCarousel {...primaryCarousel} />
-      </section>
-
-      <BroadcastSchedule />
-
-      <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(520px,760px)_minmax(360px,1fr)] 2xl:grid-cols-[minmax(560px,820px)_minmax(420px,1fr)]">
-        <SiteTimelinePreview />
-        <div className="flex min-w-0 flex-col gap-6">
-          <HomeJoinedGroupsPreview />
-          <HomeTrendingSubjectTopicsPreview />
+    <div className="home-page">
+      <div className="home-content">
+        <div className="home-schedule">
+          <BroadcastSchedule />
         </div>
-      </div>
 
-      {secondaryCarousels.map((item) => (
-        <section key={item.sectionPath}>
-          <SmallCarousel {...item} />
+        <section className="home-section" aria-label="热门条目">
+          <div className="home-discovery-grid">
+            <div className="home-discovery-primary min-w-0">
+              <SmallCarousel {...primaryCarousel} />
+            </div>
+            {secondaryCarousels.map((item) => (
+              <div className="min-w-0" key={item.sectionPath}>
+                <SmallCarousel {...item} />
+              </div>
+            ))}
+          </div>
         </section>
-      ))}
+
+        <section className="home-section" aria-labelledby="home-community-title">
+          <div className="home-section-heading">
+            <h2 id="home-community-title">社区动态</h2>
+          </div>
+          <div className="home-community-grid">
+            <div className="home-community-panel">
+              <SiteTimelinePreview />
+            </div>
+            <div className="home-community-aside">
+              <div className="home-community-panel">
+                <HomeJoinedGroupsPreview />
+              </div>
+              <div className="home-community-panel">
+                <HomeTrendingSubjectTopicsPreview />
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </div>
   )
 }

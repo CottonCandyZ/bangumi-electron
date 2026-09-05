@@ -3,6 +3,7 @@ import { Card } from '@renderer/components/ui/card'
 import { cn } from '@renderer/lib/utils'
 import { activeHoverPopCardAtom } from '@renderer/state/hover-pop-card'
 import { AnimatePresence, HTMLMotionProps, motion } from 'motion/react'
+import { createPortal } from 'react-dom'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { createContext, MutableRefObject, ReactNode, useContext, useEffect, useRef } from 'react'
 
@@ -14,6 +15,7 @@ const HoverPopCardContext = createContext<{
   heightRatio: number
   minHeight: number
   minWidth: number
+  portal: boolean
   hoverInset: MutableRefObject<{
     left: number
     top: number
@@ -32,6 +34,7 @@ type HoverPopCardProps = {
   heightRatio?: number
   minHeight?: number
   minWidth?: number
+  portal?: boolean
   isActive?: (isActive: boolean) => void
 }
 
@@ -43,6 +46,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverPopCardProps>> = ({
   heightRatio = 1.05,
   minHeight = 270,
   minWidth = 150,
+  portal = false,
   isActive = () => {},
 }) => {
   const activeId = useAtomValue(activeHoverPopCardAtom)
@@ -58,6 +62,7 @@ export const HoverPopCard: FC<PropsWithChildren<HoverPopCardProps>> = ({
         heightRatio,
         minHeight,
         minWidth,
+        portal,
         hoverInset,
         isActive,
       }}
@@ -82,6 +87,7 @@ export const HoverCardContent: FC<
     hoverInset,
     isActive,
     activeId,
+    portal,
   } = hoverCardContext
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const setActiveId = useSetAtom(activeHoverPopCardAtom)
@@ -104,12 +110,17 @@ export const HoverCardContent: FC<
           timeoutRef.current = setTimeout(() => {
             if (!hoverRef.current) return
             const bounding = hoverRef.current.getBoundingClientRect()
-            hoverInset.current = calculatePopCardPosition(bounding, {
-              widthRatio,
-              heightRatio,
-              minHeight,
-              minWidth,
-            })
+            hoverInset.current = calculatePopCardPosition(
+              bounding,
+              {
+                widthRatio,
+                heightRatio,
+                minHeight,
+                minWidth,
+              },
+              undefined,
+              portal,
+            )
             isActive(true)
             setActiveId(layoutId)
           }, delay)
@@ -130,14 +141,33 @@ export const PopCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = ({
 }) => {
   const hoverCardContext = useContext(HoverPopCardContext)
   if (!hoverCardContext) throw Error('HoverCardContent need to be wrapped in HoverPopCard')
-  const { layoutId, activeId, hoverInset, isActive } = hoverCardContext
-  return (
+  const { layoutId, activeId, hoverInset, isActive, portal } = hoverCardContext
+  const setActiveId = useSetAtom(activeHoverPopCardAtom)
+  const popRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!portal || activeId !== layoutId) return
+    const dismiss = (event: Event) => {
+      if (event.target instanceof Node && popRef.current?.contains(event.target)) return
+      setActiveId(null)
+    }
+    window.addEventListener('scroll', dismiss, true)
+    window.addEventListener('resize', dismiss)
+    return () => {
+      window.removeEventListener('scroll', dismiss, true)
+      window.removeEventListener('resize', dismiss)
+    }
+  }, [portal, activeId, layoutId, setActiveId])
+  const content = (
     <AnimatePresence onExitComplete={() => isActive(false)}>
       {activeId === layoutId && (
         <motion.div
+          ref={popRef}
           key={layoutId}
           layoutId={layoutId}
-          className={cn('absolute z-10 cursor-default', className)}
+          className={cn(
+            portal ? 'fixed z-40 cursor-default' : 'absolute z-10 cursor-default',
+            className,
+          )}
           style={{
             left: `${hoverInset.current.left}px`,
             top: `${hoverInset.current.top}px`,
@@ -151,4 +181,5 @@ export const PopCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = ({
       )}
     </AnimatePresence>
   )
+  return portal ? createPortal(content, document.body) : content
 }

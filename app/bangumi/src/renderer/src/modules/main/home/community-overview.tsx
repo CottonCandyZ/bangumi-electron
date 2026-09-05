@@ -120,11 +120,11 @@ function HomeTopicSection({
   const openPanel = useMonoListPanelOpenHandler(panelTab)
 
   return (
-    <section className="flex min-h-72 min-w-0 flex-col">
-      <div className="mb-2 flex min-w-0 items-center justify-between gap-3">
+    <section className="flex min-w-0 flex-col">
+      <div className="mb-3 flex min-w-0 flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
-          <h2 className="line-clamp-1 text-xl font-semibold">{section.title}</h2>
-          <p className="text-muted-foreground mt-0.5 line-clamp-1 text-sm">{section.description}</p>
+          <h3 className="line-clamp-1 text-sm font-semibold">{section.title}</h3>
+          <p className="text-muted-foreground mt-1 line-clamp-1 text-xs">{section.description}</p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <QueryRefreshButton
