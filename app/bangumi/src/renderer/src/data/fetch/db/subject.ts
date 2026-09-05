@@ -3,7 +3,7 @@ import { Subject } from '@renderer/data/types/subject'
 import { db } from '@renderer/lib/db/bridge'
 import { returnFirstOrUndefined } from '@renderer/lib/utils/data-trans'
 import { FetchParamError } from '@renderer/lib/utils/error'
-import { and, desc, eq, inArray, like, or } from 'drizzle-orm'
+import { and, desc, eq, like, or } from 'drizzle-orm'
 import { BatchItem } from 'drizzle-orm/batch'
 import pinyin from 'pinyin'
 
@@ -80,12 +80,6 @@ export async function readSubjectInfoById({ id }: { id?: number }) {
       limit: 1,
     }),
   ) as Subject | undefined
-}
-
-export async function removeSubjectsInfo(ids: number[]) {
-  if (!ids.length) return
-  // Only public resource metadata is removed; durable user collections are separate tables.
-  await db.delete(subject).where(inArray(subject.id, ids))
 }
 
 export async function readSubjectsInfoByIds({ ids }: { ids?: number[] }) {

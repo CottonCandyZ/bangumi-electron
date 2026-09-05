@@ -4,7 +4,6 @@ import {
   insertSubjectsInfo,
   readSubjectInfoById,
   readSubjectsInfoByIds,
-  removeSubjectsInfo,
 } from '@renderer/data/fetch/db/subject'
 import { useDBQueries, useDBQuery } from '@renderer/data/hooks/factory'
 import { SubjectId } from '@renderer/data/types/bgm'
@@ -68,7 +67,6 @@ export const useSubjectsInfoQuery = ({
     dbParams: { ids: ids?.map((id) => Number(id)) },
     queryKey: ['subject-info'],
     updateDB: insertSubjectsInfo,
-    removeDB: removeSubjectsInfo,
     dbStaleTime,
     enabled,
     needKeepPreviousData,
