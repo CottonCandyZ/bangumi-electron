@@ -6,7 +6,11 @@ import { is } from '@electron-toolkit/utils'
 import { isMacOS, isWindows, isWindows11 } from '@main/env'
 import { isAppQuitting } from '@main/app-flags'
 import { setupMacOSTrafficLightSpacing } from '@main/macos-traffic-lights'
-import { restoreWindowTheme } from './window-theme'
+import {
+  getWindowTitleBarOverlay,
+  restoreWindowTheme,
+  syncWindowTitleBarTheme,
+} from './window-theme'
 
 const DEFAULT_WINDOW_SIZE = {
   width: 1100,
@@ -60,7 +64,7 @@ export function createWindow(
       Object.assign(baseWindowConfig, {
         icon: getIconPath(),
         titleBarStyle: 'hidden',
-        titleBarOverlay: { height: 32 },
+        titleBarOverlay: getWindowTitleBarOverlay(),
         backgroundMaterial: isWindows11 ? 'mica' : 'none',
         frame: true,
       } as BrowserWindowConstructorOptions)
@@ -78,6 +82,7 @@ export function createWindow(
   })
 
   setupMacOSTrafficLightSpacing(window)
+  syncWindowTitleBarTheme(window)
 
   window.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
