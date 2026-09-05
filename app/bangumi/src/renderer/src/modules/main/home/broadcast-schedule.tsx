@@ -208,7 +208,7 @@ function BroadcastItem({ item }: { item: CalendarItem }) {
 
   return (
     <MyLink
-      className="hover:bg-accent/60 flex min-w-0 shrink-0 items-center gap-2.5 rounded-md py-1 pr-1 transition-colors"
+      className="hover:bg-accent/60 flex min-w-0 shrink-0 items-center gap-2.5 rounded-md pr-1 transition-colors"
       title={fullTitle}
       to={`/subject/${subject.id}`}
     >
@@ -221,10 +221,10 @@ function BroadcastItem({ item }: { item: CalendarItem }) {
         <div className="bg-muted h-12 w-9 shrink-0 rounded-sm" />
       )}
       <div className="min-w-0 flex-1">
-        <div className="line-clamp-2 text-xs leading-relaxed font-medium" title={fullTitle}>
+        <div className="line-clamp-2 text-xs leading-4 font-medium" title={fullTitle}>
           {title}
         </div>
-        <div className="text-muted-foreground mt-0.5 flex items-center gap-1 text-[0.68rem]">
+        <div className="text-muted-foreground mt-0.5 flex items-center gap-1 text-[0.68rem] leading-3.5">
           <span className="tabular-nums">{item.watchers}</span>
           <span>在看</span>
         </div>
@@ -235,7 +235,7 @@ function BroadcastItem({ item }: { item: CalendarItem }) {
 
 function BroadcastSkeletonItem() {
   return (
-    <div className="flex min-w-0 items-center gap-2 p-1">
+    <div className="flex min-w-0 items-center gap-2 pr-1">
       <Skeleton className="h-12 w-9 shrink-0 rounded-sm" />
       <div className="min-w-0 flex-1 space-y-1.5">
         <Skeleton className="h-3 w-4/5" />
