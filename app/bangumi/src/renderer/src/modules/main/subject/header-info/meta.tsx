@@ -14,7 +14,7 @@ export function Meta({
 }: Pick<Subject, 'date' | 'eps' | 'platform' | 'infobox' | 'rating'>) {
   const week_day = extractInfoBox(infobox, '放送星期')?.value as string | undefined
   return (
-    <div className="flex flex-col gap-1.5 select-none">
+    <div className="flex flex-col gap-1.5">
       <section className="flex flex-row items-center gap-1.5">
         {rating.score !== 0 && (
           <>

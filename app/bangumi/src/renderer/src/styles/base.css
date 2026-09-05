@@ -1,3 +1,39 @@
+@layer base {
+  /* Desktop controls and draggable slides should not start a text selection. */
+  :where(
+      button,
+      [data-slot='button'],
+      label,
+      summary,
+      nav,
+      [role='button'],
+      [role='tab'],
+      [role='menuitem'],
+      [role='menuitemcheckbox'],
+      [role='menuitemradio'],
+      [role='option'],
+      [role='switch'],
+      [role='slider'],
+      [role='checkbox'],
+      [role='radio'],
+      [data-slot='carousel-item'],
+      .drag-region
+    ) {
+    user-select: none;
+  }
+
+  /* Editors remain selectable even when embedded in navigation or a draggable header. */
+  :where(
+      input,
+      textarea,
+      [contenteditable='true'],
+      [contenteditable=''],
+      [contenteditable='plaintext-only']
+    ) {
+    user-select: text;
+  }
+}
+
 :where([data-sonner-toaster]) {
   @apply font-sans!;
   & :where([data-title]) {
