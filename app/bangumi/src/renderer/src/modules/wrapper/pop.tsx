@@ -1,3 +1,4 @@
+import { CollectionSyncProvider } from './collection-sync'
 import { AlertDialog } from '@renderer/components/dialog/alert'
 import { NormalDialog } from '@renderer/components/dialog/normal'
 import { SheetDialog } from '@renderer/components/dialog/sheet'
@@ -15,6 +16,7 @@ export function Pop({ children }: PropsWithChildren) {
         <HoverCard />
         <CommandPanel />
         <NormalDialog />
+        <CollectionSyncProvider />
         <SheetDialog />
         <AlertDialog />
         <Toaster richColors className="pointer-events-auto" />

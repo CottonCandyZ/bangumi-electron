@@ -53,7 +53,9 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
           <PrivateSwitch subjectCollection={subjectCollection} />
         )}
       </div>
-      {loading ? (
+      {subjectCollectionQuery.isError && subjectCollection === undefined ? (
+        <p className="text-muted-foreground text-sm">尚未取得收藏状态，请联网同步后再试</p>
+      ) : loading ? (
         <div className="flex flex-col gap-2">
           <Skeleton className="h-9 w-full" />
           <Skeleton className="h-12 w-full" />

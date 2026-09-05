@@ -1,48 +1,18 @@
 import { Label } from '@renderer/components/ui/label'
 import { Switch } from '@renderer/components/ui/switch'
-import { useSessionUsername } from '@renderer/data/hooks/session'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'
-import { useQueryKeyWithUserId } from '@renderer/data/hooks/factory'
 import { cn } from '@renderer/lib/utils'
-import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 export function PrivateSwitch({ subjectCollection }: { subjectCollection: CollectionData }) {
-  const queryClient = useQueryClient()
-  const username = useSessionUsername()
-  const queryKey = useQueryKeyWithUserId(['collection-subject'], {
-    subjectId: subjectCollection.subject_id.toString(),
-    username,
-  })
-  const collectionSubjectsQueryKey = useQueryKeyWithUserId(['collection-subjects'])
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
     onSuccess() {
-      toast.success(subjectCollection.private ? '已设为私密' : '已设为公开')
+      toast.success('私密设置已保存到本地')
     },
-    onError(_error, _variable, context) {
-      toast.error('呀，出了点错误...')
-      queryClient.setQueryData(queryKey, (context as { pre: CollectionData }).pre)
-    },
-    onMutate(variable) {
-      queryClient.cancelQueries({
-        queryKey,
-      })
-      const pre = queryClient.getQueryData<CollectionData>(queryKey)
-      queryClient.setQueryData<CollectionData>(queryKey, {
-        ...subjectCollection,
-        private: variable.isPrivate!,
-      })
-      return { pre }
-    },
-    onSettled() {
-      queryClient.invalidateQueries({
-        queryKey,
-      })
-      queryClient.invalidateQueries({
-        queryKey: collectionSubjectsQueryKey,
-      })
+    onError(error) {
+      toast.error(error.message || '保存到本地失败')
     },
   })
 

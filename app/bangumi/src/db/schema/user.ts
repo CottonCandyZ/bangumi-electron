@@ -15,6 +15,6 @@ export const userSession = sqliteTable('UserSession', {
   expires_in: t.integer().notNull(),
   create_time: t
     .integer({ mode: 'timestamp_ms' })
-    .default(sql`(CURRENT_TIMESTAMP)`)
+    .default(sql`(unixepoch() * 1000)`)
     .notNull(),
 })

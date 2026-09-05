@@ -22,6 +22,7 @@ export function TagInput({
           {value}
           <button
             type="button"
+            aria-label={`移除标签 ${value}`}
             onClick={() => remove(value)}
             className="focus-visible:ring-ring inline-flex h-full items-center justify-center rounded-md px-1.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-1 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
           >
@@ -41,6 +42,19 @@ export function TagInput({
             add(value)
             event.target.value = ''
           }
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== 'Enter') return
+          event.preventDefault()
+          if (onComposition.current || event.nativeEvent.isComposing) return
+          const value = event.currentTarget.value.trim()
+          if (value) add(value)
+          event.currentTarget.value = ''
+        }}
+        onBlur={(event) => {
+          const value = event.currentTarget.value.trim()
+          if (value && !onComposition.current) add(value)
+          event.currentTarget.value = ''
         }}
         onCompositionStart={() => (onComposition.current = true)}
         onCompositionEnd={() => (onComposition.current = false)}

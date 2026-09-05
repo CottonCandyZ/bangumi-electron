@@ -19,7 +19,7 @@ const persister = experimental_createQueryPersister<PersistedQuery>({
 })
 
 function openLoginDialogForAuthError(error: AuthError) {
-  if (error.code === AuthCode.NOT_FOND) return
+  if (!navigator.onLine || error.code === AuthCode.NOT_FOND) return
   const reason =
     error.code === AuthCode.EXPIRE || error.code === AuthCode.WEB_COOKIE_EXPIRE
       ? 'session-expired'
@@ -77,7 +77,7 @@ export const queryClient = new QueryClient({
       gcTime: import.meta.env.DEV ? Number.POSITIVE_INFINITY : 60 * 1000 * 60 * 24,
       retry: 0,
       persister: persister.persisterFn,
-      networkMode: 'online',
+      networkMode: 'offlineFirst',
     },
   },
 })

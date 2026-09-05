@@ -42,7 +42,7 @@ export function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
       </section>
     )
 
-  if (subjectInfo?.tags.length === 0)
+  if (subjectInfo?.tags.length === 0 && !subjectCollection)
     return (
       <section className="flex flex-col gap-5">
         <h2 className="text-2xl font-medium">标签</h2>
@@ -52,7 +52,11 @@ export function SubjectTags({ subjectId }: { subjectId: SubjectId }) {
   return (
     <section className="flex flex-col gap-5">
       <h2 className="text-2xl font-medium">标签</h2>
-      <QuickTags subjectTags={subjectInfo.tags} subjectCollection={subjectCollection} />
+      <QuickTags
+        key={`${userInfo?.id}:${subjectInfo.id}`}
+        subjectTags={subjectInfo.tags}
+        subjectCollection={subjectCollection}
+      />
     </section>
   )
 }
