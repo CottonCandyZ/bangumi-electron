@@ -127,6 +127,8 @@ export function useLocalResources<
           fetch: (id) => apiQueryFn({ ...apiParams, id } as P),
           save: updateDB,
           remove: removeDB,
+          evict: (id) =>
+            queryClient.resetQueries({ queryKey: [...queryKey, userId, { id }], exact: true }),
           publish: (item) => queryClient.setQueryData([...queryKey, userId, { id: item.id }], item),
         })
         return ordered()

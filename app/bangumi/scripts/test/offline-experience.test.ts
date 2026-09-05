@@ -60,6 +60,28 @@ test('uncached network failures do not become a successful empty list', async ()
   ).rejects.toThrow(error)
 })
 
+test('a bulk 404 clears an existing individual detail query', async () => {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  const key = ['subject-info', '1', { id: 1 }]
+  client.setQueryData(key, { id: 1 })
+  client.setQueryData(['subject-info', '1', { id: 2 }], { id: 2 })
+  const missing = new FetchError('not found')
+  Object.defineProperty(missing, 'statusCode', { value: 404 })
+  await refreshResourceBatch({
+    ids: [1],
+    data: new Map([[1, { id: 1 }]]),
+    fetch: async () => {
+      throw missing
+    },
+    save: async () => {},
+    evict: (id) => client.resetQueries({ queryKey: ['subject-info', '1', { id }], exact: true }),
+    publish: () => {},
+  })
+  expect(client.getQueryData(key)).toBeUndefined()
+  expect(client.getQueryData(['subject-info', '1', { id: 2 }])).toEqual({ id: 2 })
+  client.clear()
+})
+
 test('batch reads are sequential and successful items survive a different 404', async () => {
   let active = 0,
     maximum = 0

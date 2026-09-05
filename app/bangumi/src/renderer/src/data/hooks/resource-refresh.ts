@@ -7,6 +7,7 @@ export async function refreshResourceBatch<T extends { id: number }>({
   fetch,
   save,
   remove,
+  evict,
   publish,
 }: {
   ids: number[]
@@ -14,6 +15,7 @@ export async function refreshResourceBatch<T extends { id: number }>({
   fetch: (id: number) => Promise<T>
   save: (items: T[]) => Promise<void>
   remove?: (ids: number[]) => Promise<void>
+  evict?: (id: number) => void | Promise<void>
   publish: (item: T) => void
 }) {
   const fresh: T[] = []
@@ -29,7 +31,10 @@ export async function refreshResourceBatch<T extends { id: number }>({
   }
   if (fresh.length) await save(fresh)
   if (missing.length) await remove?.(missing)
-  for (const id of missing) data.delete(id)
+  for (const id of missing) {
+    data.delete(id)
+    await evict?.(id)
+  }
   for (const item of fresh) {
     data.set(item.id, item)
     publish(item)
