@@ -19,7 +19,7 @@ import type { CollectionData } from '../../shared/types/collection'
 export class SyncError extends Error {
   constructor(
     message: string,
-    public kind: 'network' | 'auth-required' | 'error' = 'error',
+    public kind: 'network' | 'auth-required' | 'web-auth-required' | 'error' = 'error',
   ) {
     super(message)
   }
@@ -116,7 +116,8 @@ export class CollectionSyncEngine {
         ...record,
         status: cancelled
           ? 'pending'
-          : error instanceof SyncError && error.kind === 'auth-required'
+          : error instanceof SyncError &&
+              ['auth-required', 'web-auth-required'].includes(error.kind)
             ? 'auth-required'
             : error instanceof SyncError && error.kind === 'network'
               ? 'pending'

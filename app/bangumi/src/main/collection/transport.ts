@@ -193,8 +193,8 @@ async function removeWebCollection(subjectId: number, profile: LocalAccount, sig
   const dock = html.match(/id=["']dock["'][\s\S]*?<\/ul>/)?.[0]
   const username = dock?.match(/href=["'](?:https:\/\/bgm\.tv)?\/user\/([^"'/?]+)/)?.[1]
   if (!username || decodeURIComponent(username) !== profile.username)
-    throw new SyncError('网页登录账号无法确认，请重新登录后同步取消收藏', 'auth-required')
+    throw new SyncError('网页登录账号无法确认，请重新登录后同步取消收藏', 'web-auth-required')
   const hash = html.match(new RegExp(`eraseSubjectCollect\\(${subjectId},\\s*'([^']+)'\\)`))?.[1]
-  if (!hash) throw new SyncError('未取得取消收藏凭据，请重新登录', 'auth-required')
+  if (!hash) throw new SyncError('未取得取消收藏凭据，请重新登录', 'web-auth-required')
   await web(`/subject/${subjectId}/remove?gh=${encodeURIComponent(hash)}`)
 }
