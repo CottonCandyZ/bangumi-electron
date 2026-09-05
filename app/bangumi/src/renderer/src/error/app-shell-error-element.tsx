@@ -2,7 +2,6 @@ import MainErrorElement from '@renderer/error/main-error-element'
 import { UI_CONFIG } from '@renderer/config'
 import { cn } from '@renderer/lib/utils'
 import { BackCover } from '@renderer/components/hover-pop-card/close'
-import { WindowsButton } from '@renderer/modules/header/windows-button'
 import { NavBar } from '@renderer/modules/nav'
 
 export default function AppShellErrorElement() {
@@ -19,9 +18,7 @@ export default function AppShellErrorElement() {
               height: UI_CONFIG.HEADER_HEIGHT,
               viewTransitionName: 'app-header',
             }}
-          >
-            <WindowsButton />
-          </header>
+          />
           <main className="min-h-0 flex-1 overflow-hidden">
             <MainErrorElement />
           </main>

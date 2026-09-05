@@ -5,7 +5,7 @@ import { useCalendarQuery } from '@renderer/data/hooks/api/calendar'
 import type { CalendarItem } from '@renderer/data/types/calendar'
 import dayjs from 'dayjs'
 import { useEffect, useRef, useState } from 'react'
-import { edgeStrength, scrollEdgeMask } from './carousel-edge-fade'
+import { carouselEdgeDistances, edgeStrength, scrollEdgeMask } from './carousel-edge-fade'
 import './broadcast-schedule.css'
 import { Button } from '@renderer/components/ui/button'
 import {
@@ -60,12 +60,11 @@ export function BroadcastSchedule() {
   useEffect(() => {
     if (!api) return
     const update = () => {
-      const progress = api.scrollProgress()
       setTodayVisible(api.slidesInView().includes(Number(todayId) - 1))
       setEdges((previous) => {
-        const distance = Math.max(0, api.containerNode().scrollWidth - api.rootNode().clientWidth)
-        const start = edgeStrength(progress * distance)
-        const end = edgeStrength((1 - progress) * distance)
+        const distance = carouselEdgeDistances(api)
+        const start = edgeStrength(distance.start)
+        const end = edgeStrength(distance.end)
         return previous.start === start && previous.end === end ? previous : { start, end }
       })
     }

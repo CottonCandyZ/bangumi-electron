@@ -6,7 +6,6 @@ import { NavButton } from '@renderer/modules/header/nav-button'
 import { OriginalLink } from '@renderer/modules/header/o-link'
 import { RightPanelButton } from '@renderer/modules/header/right-panel-button'
 import { HeaderTitle } from '@renderer/modules/header/subject-title'
-import { WindowsButton } from '@renderer/modules/header/windows-button'
 import { HeaderUpdateIndicator } from '@renderer/modules/update/menu'
 import { NotificationButton } from '@renderer/modules/header/notification-button'
 
@@ -30,7 +29,7 @@ export function Header() {
       <div
         className={cn(
           'flex h-full shrink-0 flex-row items-center gap-1',
-          platform === 'darwin' && 'pr-2',
+          (platform === 'darwin' || platform === 'win32') && 'pr-2',
         )}
       >
         <HeaderUpdateIndicator />
@@ -38,7 +37,6 @@ export function Header() {
         <CommandButton />
         <OriginalLink />
         <RightPanelButton />
-        <WindowsButton />
       </div>
     </header>
   )

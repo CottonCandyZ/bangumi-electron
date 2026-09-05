@@ -6,10 +6,9 @@ export function useCarouselEdgeFade(api: CarouselApi) {
   useEffect(() => {
     if (!api) return
     const update = () => {
-      const distance = Math.max(0, api.containerNode().scrollWidth - api.rootNode().clientWidth)
-      const progress = api.scrollProgress()
-      const start = edgeStrength(progress * distance)
-      const end = edgeStrength((1 - progress) * distance)
+      const distance = carouselEdgeDistances(api)
+      const start = edgeStrength(distance.start)
+      const end = edgeStrength(distance.end)
       setEdges((previous) =>
         previous.start === start && previous.end === end ? previous : { start, end },
       )
@@ -23,10 +22,17 @@ export function useCarouselEdgeFade(api: CarouselApi) {
   return scrollEdgeMask('right', edges.start, edges.end)
 }
 
+export function carouselEdgeDistances(api: NonNullable<CarouselApi>) {
+  // DOM scrollWidth includes slide gutters and overflow; it is not Embla's travel range.
+  const { location, limit } = api.internalEngine()
+  const position = Math.min(limit.max, Math.max(limit.min, location.get()))
+  return { start: limit.max - position, end: position - limit.min }
+}
+
 export function edgeStrength(distance: number) {
   // Keep the spatial S-curve, but let its strength visibly fall as soon as the edge approaches.
   const progress = Math.min(1, Math.max(0, distance / 200))
-  return progress * progress
+  return progress ** 1.5
 }
 
 // Flat slopes at both ends avoid a visible seam against fully opaque content.

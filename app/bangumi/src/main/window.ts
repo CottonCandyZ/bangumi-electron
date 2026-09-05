@@ -6,7 +6,6 @@ import { is } from '@electron-toolkit/utils'
 import { isMacOS, isWindows, isWindows11 } from '@main/env'
 import { isAppQuitting } from '@main/app-flags'
 import { setupMacOSTrafficLightSpacing } from '@main/macos-traffic-lights'
-import { registerWindowsControls, windowsControlStyle } from './windows-controls'
 
 const DEFAULT_WINDOW_SIZE = {
   width: 1100,
@@ -58,8 +57,7 @@ export function createWindow(
     case 'win32': {
       Object.assign(baseWindowConfig, {
         icon: getIconPath(),
-        titleBarStyle: 'hidden',
-        titleBarOverlay: windowsControlStyle(),
+        titleBarStyle: 'default',
         frame: true,
       } as BrowserWindowConstructorOptions)
       break
@@ -75,7 +73,6 @@ export function createWindow(
     ...config,
   })
 
-  if (isWindows) registerWindowsControls(window)
   setupMacOSTrafficLightSpacing(window)
 
   window.webContents.setWindowOpenHandler((details) => {
