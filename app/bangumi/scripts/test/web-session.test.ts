@@ -59,7 +59,8 @@ function fixture(t: TestContext, oauthStatus = 200) {
       },
     },
     '@renderer/lib/client': { client: {} },
-    '@renderer/state/utils': { store: { get: () => '1' } },
+    '@renderer/state/utils': { store: { get: () => '1', set: () => {} } },
+    '@renderer/state/dialog/normal': { loginDialogAtom: {} },
     '@renderer/state/session': { userIdAtom: {} },
     '@renderer/lib/utils/parser': { domParser: {} },
     '@renderer/lib/utils/date': { getTimestamp: () => 0 },
@@ -91,6 +92,7 @@ function fixture(t: TestContext, oauthStatus = 200) {
       Headers,
       URLSearchParams,
       Date,
+      navigator: { onLine: true },
     })
     return exports
   }
