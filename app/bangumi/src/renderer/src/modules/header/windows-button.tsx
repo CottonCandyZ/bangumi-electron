@@ -1,50 +1,25 @@
-import { MaximizeIcon } from '@renderer/assets/svg-icons'
-import { Button } from '@renderer/components/ui/button'
-import { client, handlers } from '@renderer/lib/client'
-import { Minus, Square, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { client } from '@renderer/lib/client'
+import { useTheme } from '@renderer/modules/wrapper/theme-wrapper'
+import { useEffect } from 'react'
 
 const platform = await client.platform({})
 
 export function WindowsButton() {
-  const [isMaximize, setIsMaximize] = useState(false)
+  const { currentColor } = useTheme()
   useEffect(() => {
-    const unlisten = handlers.isMaximize.listen((maximize) => {
-      setIsMaximize(maximize)
-    })
-    return unlisten
-  }, [])
-  return (
-    platform === 'win32' && (
-      <div className="flex h-full shrink-0">
-        <div className="no-drag-region flex h-full flex-row items-center">
-          <Button
-            className="h-full w-fit cursor-default rounded-none px-3"
-            variant="ghost"
-            onClick={() => client.minimizeCurrentWindow({})}
-          >
-            <Minus strokeWidth={1} className="w-4" />
-          </Button>
-          <Button
-            className="relative h-full w-fit cursor-default rounded-none px-3"
-            variant="ghost"
-            onClick={() => client.toggleMaximizeCurrentWindow({})}
-          >
-            {isMaximize ? (
-              <MaximizeIcon className="w-[15px]" />
-            ) : (
-              <Square strokeWidth={1.2} className="w-[15px]" />
-            )}
-          </Button>
-          <Button
-            className="h-full w-fit cursor-default rounded-none px-3 pr-4 hover:bg-red-600 hover:text-white"
-            variant="ghost"
-            onClick={() => client.closeCurrentWindow({})}
-          >
-            <X strokeWidth={1} className="w-[20px]" />
-          </Button>
-        </div>
-      </div>
-    )
-  )
+    if (platform === 'win32') {
+      void client.setWindowControlsTheme({ dark: currentColor === 'dark' }).catch(console.error)
+    }
+  }, [currentColor])
+  // Reserve the native overlay's actual width, including Windows DPI/fullscreen changes.
+  return platform === 'win32' ? (
+    <div
+      aria-hidden="true"
+      className="h-full shrink-0"
+      style={{
+        width:
+          'max(0px, calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, calc(100vw - 138px))))',
+      }}
+    />
+  ) : null
 }
