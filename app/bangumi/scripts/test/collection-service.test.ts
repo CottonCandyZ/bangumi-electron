@@ -58,6 +58,39 @@ test('a failed manual full scan retries even when the previous list was complete
   expect(mocks.repository.completeList).toHaveBeenCalledTimes(1)
 })
 
+test('unprocessed refresh requests survive an earlier network failure', async () => {
+  mocks.repository.get.mockImplementation((_user, subjectId) => ({
+    subjectId,
+    subject: { name: 'test' },
+    status: 'clean',
+    local: {},
+  }))
+  mocks.sync.mockRejectedValueOnce(new SyncError('offline', 'network'))
+  service.requestCollection(42, 1)
+  service.requestCollection(43, 1)
+  await vi.advanceTimersByTimeAsync(300)
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42])
+  await vi.advanceTimersByTimeAsync(10000)
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42, 43])
+})
+
+test('web authorization failure does not pause other OAuth-capable subjects', async () => {
+  mocks.repository.get.mockImplementation((_user, subjectId) => ({
+    subjectId,
+    subject: { name: 'test' },
+    status: 'clean',
+    local: {},
+  }))
+  mocks.sync.mockRejectedValueOnce(new SyncError('web login required', 'web-auth-required'))
+  service.requestCollection(42, 1)
+  service.requestCollection(43, 1)
+  await vi.advanceTimersByTimeAsync(300)
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42, 43])
+  service.requestCollection(44, 1)
+  await vi.advanceTimersByTimeAsync(300)
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42, 43, 44])
+})
+
 test('a per-subject failure also keeps the requested full scan pending', async () => {
   const record = { subjectId: 42, subject: { name: 'test' }, status: 'clean', local: {} }
   mocks.repository.all.mockReturnValue([record])
