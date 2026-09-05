@@ -35,7 +35,10 @@ export async function deleteLoginInfo({ email }: { email: string }) {
 // accessToken
 
 export async function insertAccessToken(sessionInfo: Token) {
-  await db.insert(userSession).values(sessionInfo)
+  await db.insert(userSession).values({ ...sessionInfo, create_time: new Date() })
+  // The sync service may wait for a long scan using the previous token.
+  // Token consumers can use the persisted credentials immediately.
+  void client.collectionCredentialsChanged({ userId: sessionInfo.user_id }).catch(() => {})
 }
 
 export async function readAccessToken({ user_id }: { user_id: number }) {

@@ -1,3 +1,5 @@
+import { client } from '@renderer/lib/client'
+import { FetchError } from 'ofetch'
 import {
   apiFetchWithOptionalAuth,
   EPISODES,
@@ -37,8 +39,26 @@ export async function getEpisodesBySubjectId({
 /**
  * 用 episodeId 获得章节详情，optional auth
  */
-export function getEpisodeById({ episodeId }: { episodeId: string }) {
-  return apiFetchWithOptionalAuth<Episode>(EPISODES.BY_ID(episodeId))
+export async function getEpisodeById({ episodeId }: { episodeId: string }) {
+  if (!navigator.onLine) {
+    const local = await client.collectionEpisodeResource({ episodeId: Number(episodeId) })
+    if (local) return local
+    throw new Error('这个章节尚未缓存，请联网后再试')
+  }
+  try {
+    return await apiFetchWithOptionalAuth<Episode>(EPISODES.BY_ID(episodeId))
+  } catch (error) {
+    if (
+      error instanceof FetchError &&
+      error.statusCode &&
+      error.statusCode < 500 &&
+      ![408, 429].includes(error.statusCode)
+    )
+      throw error
+    const local = await client.collectionEpisodeResource({ episodeId: Number(episodeId) })
+    if (local) return local
+    throw error
+  }
 }
 
 /**

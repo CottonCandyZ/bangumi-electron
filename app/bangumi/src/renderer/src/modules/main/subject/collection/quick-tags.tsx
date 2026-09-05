@@ -4,12 +4,9 @@ import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collectio
 import { CollectionData } from '@renderer/data/types/collection'
 import { Subject } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
-import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Tags } from '@renderer/modules/main/subject/tags/tags'
-import { useSession } from '@renderer/data/hooks/session'
-import { useQueryKeyWithUserId } from '@renderer/data/hooks/factory'
 import { useOpenTagSearchPanel } from '@renderer/modules/main/search/use-open-tag-search-panel'
 
 export function QuickTags({
@@ -20,56 +17,17 @@ export function QuickTags({
   subjectCollection: CollectionData | undefined | null
 }) {
   const [tags, setTags] = useState(new Set<string>())
-  const queryClient = useQueryClient()
   const [edit, setEdit] = useState(false)
-  const userInfo = useSession()
   const openTagSearchPanel = useOpenTagSearchPanel()
-
-  const queryKey = useQueryKeyWithUserId(['collection-subject'], {
-    subjectId: subjectCollection?.subject_id.toString(),
-    username: userInfo?.username,
-  })
-  const collectionSubjectsQueryKey = useQueryKeyWithUserId(['collection-subjects'])
-
-  useEffect(() => {
-    setEdit(false)
-  }, [subjectTags])
-
-  useEffect(() => {
-    if (subjectCollection) {
-      setTags(new Set(subjectCollection.tags))
-    }
-  }, [edit, subjectCollection])
 
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['collection-subject'],
     onSuccess() {
-      toast.success(subjectCollection && '修改成功')
+      toast.success('标签已保存到本地')
       setEdit(false)
     },
-    onError(_error, _variable, context) {
-      toast.error('呀，出了点错误...')
-      if (subjectCollection && userInfo) {
-        queryClient.setQueryData(queryKey, (context as { pre: CollectionData }).pre)
-      }
-    },
-    onMutate(variable) {
-      if (subjectCollection && userInfo) {
-        queryClient.cancelQueries({ queryKey })
-        const pre = queryClient.getQueryData<CollectionData>(queryKey)
-        queryClient.setQueryData<CollectionData>(queryKey, {
-          ...subjectCollection,
-          tags: variable.tags!,
-        })
-        return { pre }
-      }
-      return { pre: null }
-    },
-    onSettled() {
-      if (subjectCollection && userInfo) queryClient.invalidateQueries({ queryKey })
-      queryClient.invalidateQueries({
-        queryKey: collectionSubjectsQueryKey,
-      })
+    onError(error) {
+      toast.error(error.message || '保存到本地失败')
     },
   })
   const exceed = tags.size > 10
@@ -93,7 +51,10 @@ export function QuickTags({
         }}
         selectedTags={tags}
         edit={edit}
-        setEdit={setEdit}
+        setEdit={(editing) => {
+          if (editing) setTags(new Set(subjectCollection?.tags ?? []))
+          setEdit(editing)
+        }}
       />
       {edit && (
         <div className="border-input flex w-full flex-col items-start gap-2 rounded-md border bg-transparent p-2 text-sm transition-colors">

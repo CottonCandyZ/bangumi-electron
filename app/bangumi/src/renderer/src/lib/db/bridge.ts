@@ -8,11 +8,8 @@ export const db = drizzle(
       const rows = await client.db({ sql, params, method })
       return { rows: rows }
     } catch (e: unknown) {
-      console.error(
-        'Error from sqlite proxy server: ',
-        (e as { response: { data: string } }).response.data,
-      )
-      return { rows: [] }
+      console.error('SQLite query failed', e)
+      throw e
     }
   },
   async (
@@ -22,10 +19,7 @@ export const db = drizzle(
       await client.dbBatch({ queries })
       return [{ rows: [] }]
     } catch (e: unknown) {
-      console.error(
-        'Error from sqlite proxy server:',
-        (e as { response: { data: string } }).response.data,
-      )
+      console.error('SQLite batch failed', e)
       throw e
     }
   },
