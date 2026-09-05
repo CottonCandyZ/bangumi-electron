@@ -3,12 +3,13 @@ import { UI_CONFIG } from '@renderer/config'
 import { cn } from '@renderer/lib/utils'
 import { BackCover } from '@renderer/components/hover-pop-card/close'
 import { NavBar } from '@renderer/modules/nav'
+import { WindowFrame } from '@renderer/modules/header/window-frame'
 
 export default function AppShellErrorElement() {
   return (
-    <>
+    <WindowFrame>
       <NavBar />
-      <div className="flex h-dvh flex-row" style={{ marginLeft: UI_CONFIG.NAV_WIDTH }}>
+      <div className="app-client-area flex flex-row" style={{ marginLeft: UI_CONFIG.NAV_WIDTH }}>
         <div className="flex h-full w-full flex-col">
           <header
             className={cn(
@@ -25,6 +26,6 @@ export default function AppShellErrorElement() {
         </div>
       </div>
       <BackCover />
-    </>
+    </WindowFrame>
   )
 }

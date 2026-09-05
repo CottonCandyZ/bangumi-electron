@@ -1,0 +1,29 @@
+body:has(.windows-frame) {
+  background: transparent;
+}
+
+.windows-frame {
+  --window-titlebar-height: 32px;
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+
+.window-titlebar {
+  height: var(--window-titlebar-height);
+  padding-right: calc(100vw - env(titlebar-area-width, calc(100vw - 138px)));
+}
+
+.app-client-area {
+  height: calc(100dvh - var(--window-titlebar-height, 0px));
+  background: var(--background);
+}
+
+.app-sidebar {
+  top: var(--window-titlebar-height, 0px);
+  height: calc(100dvh - var(--window-titlebar-height, 0px));
+}
+
+.app-sidebar-backdrop {
+  top: var(--window-titlebar-height, 0px);
+}

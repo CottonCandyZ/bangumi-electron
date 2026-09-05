@@ -18,7 +18,7 @@ export function NavBar() {
     <div>
       <nav
         className={cn(
-          'bg-background fixed z-50 flex h-dvh flex-col border-r transition-[width]',
+          'app-sidebar bg-background fixed z-50 flex flex-col border-r transition-[width]',
           open && 'z-50',
         )}
         style={{
@@ -55,7 +55,7 @@ export function NavBar() {
       <AnimatePresence>
         {open && (
           <motion.div
-            className="fixed inset-0 z-40 bg-black"
+            className="app-sidebar-backdrop fixed inset-0 z-40 bg-black"
             style={{ left: UI_CONFIG.NAV_WIDTH }}
             onClick={() => setOpen(false)}
             initial={{ opacity: 0 }}

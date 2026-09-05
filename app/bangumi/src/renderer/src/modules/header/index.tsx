@@ -23,7 +23,7 @@ export function Header() {
       }}
     >
       <div className="flex h-full min-w-0 flex-1 flex-row items-center gap-3 overflow-hidden">
-        <NavButton />
+        {platform !== 'win32' && <NavButton />}
         <HeaderTitle />
       </div>
       <div
