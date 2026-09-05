@@ -12,8 +12,8 @@
 
 .broadcast-scroll-fade {
   transition:
-    --broadcast-fade-start 180ms ease-out,
-    --broadcast-fade-end 180ms ease-out;
+    --broadcast-fade-start 80ms ease-out,
+    --broadcast-fade-end 80ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {

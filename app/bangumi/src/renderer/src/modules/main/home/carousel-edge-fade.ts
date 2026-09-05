@@ -24,7 +24,8 @@ export function useCarouselEdgeFade(api: CarouselApi) {
 }
 
 export function edgeStrength(distance: number) {
-  return smootherStep(Math.min(1, Math.max(0, distance / 40)))
+  // Start withdrawing the mask before the last card reaches the visual fade zone.
+  return smootherStep(Math.min(1, Math.max(0, distance / 120)))
 }
 
 // Flat slopes at both ends avoid a visible seam against fully opaque content.
