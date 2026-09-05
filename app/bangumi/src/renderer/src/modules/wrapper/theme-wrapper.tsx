@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { client } from '@renderer/lib/client'
 
 type Theme = 'dark' | 'light' | 'system'
 type Color = 'dark' | 'light'
@@ -81,6 +82,20 @@ export function ThemeProvider({
     },
     currentColor,
   }
+
+  useEffect(() => {
+    void client.setWindowTheme({ source: theme }).catch(console.error)
+  }, [theme])
+
+  useEffect(() => {
+    const syncTheme = (event: StorageEvent) => {
+      if (event.key !== storageKey) return
+      const source = event.newValue
+      if (source === 'light' || source === 'dark' || source === 'system') setTheme(source)
+    }
+    window.addEventListener('storage', syncTheme)
+    return () => window.removeEventListener('storage', syncTheme)
+  }, [storageKey])
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>

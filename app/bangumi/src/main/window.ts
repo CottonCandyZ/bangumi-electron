@@ -6,6 +6,8 @@ import { is } from '@electron-toolkit/utils'
 import { isMacOS, isWindows, isWindows11 } from '@main/env'
 import { isAppQuitting } from '@main/app-flags'
 import { setupMacOSTrafficLightSpacing } from '@main/macos-traffic-lights'
+import { restoreWindowTheme } from './window-theme'
+import { hideWindowsCaptionIcon } from './windows-caption'
 
 const DEFAULT_WINDOW_SIZE = {
   width: 1100,
@@ -29,6 +31,7 @@ export function createWindow(
   } & BrowserWindowConstructorOptions,
 ) {
   const { height, width, ...config } = options
+  restoreWindowTheme()
 
   const baseWindowConfig: BrowserWindowConstructorOptions = {
     width,
@@ -58,6 +61,7 @@ export function createWindow(
       Object.assign(baseWindowConfig, {
         icon: getIconPath(),
         titleBarStyle: 'default',
+        backgroundMaterial: isWindows11 ? 'mica' : 'none',
         frame: true,
       } as BrowserWindowConstructorOptions)
       break
@@ -81,6 +85,7 @@ export function createWindow(
   })
 
   window.on('ready-to-show', () => {
+    hideWindowsCaptionIcon(window)
     window.show()
   })
 
