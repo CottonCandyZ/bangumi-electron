@@ -90,3 +90,27 @@ test('both stores failing retains session decisions without exposing unknown con
   expect(await visibility.isResourceHidden(['subject'], null, 2)).toBe(true)
   expect(await visibility.isResourceHidden(['subject'], null, 3)).toBe(true)
 })
+
+test('a successful fetch stays visible after restart when the IndexedDB update fails', async () => {
+  let visibility = await import('../../src/renderer/src/data/hooks/resource-visibility')
+  await visibility.setResourceHidden(['subject'], null, 1, true)
+  state.failWrite = true
+  await visibility.setResourceHidden(['subject'], null, 1, false)
+  vi.resetModules()
+  visibility = await import('../../src/renderer/src/data/hooks/resource-visibility')
+  expect(await visibility.isResourceHidden(['subject'], null, 1)).toBe(false)
+})
+
+test('a newer IndexedDB tombstone wins when the mirror write fails', async () => {
+  let visibility = await import('../../src/renderer/src/data/hooks/resource-visibility')
+  await visibility.setResourceHidden(['subject'], null, 1, false)
+  const original = localStorage.setItem
+  localStorage.setItem = () => {
+    throw new Error('quota')
+  }
+  await visibility.setResourceHidden(['subject'], null, 1, true)
+  localStorage.setItem = original
+  vi.resetModules()
+  visibility = await import('../../src/renderer/src/data/hooks/resource-visibility')
+  expect(await visibility.isResourceHidden(['subject'], null, 1)).toBe(true)
+})
