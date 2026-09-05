@@ -12,6 +12,7 @@ import type { SectionPath } from '@renderer/data/types/web'
 import type { TopList } from '@renderer/data/types/web'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { useSession } from '@renderer/data/hooks/session'
+import { useBangumiWebRefresh } from '@renderer/data/hooks/web-verification'
 import { useCallback, useMemo } from 'react'
 
 // 分离 parse 和 fetch，方便缓存整个页面的内容
@@ -22,13 +23,21 @@ import { useCallback, useMemo } from 'react'
  * @returns 关注的 SubjectId 和 关注人数 数组
  */
 export const useTopListQuery = (sectionPath: SectionPath) => {
-  return useQuery({
+  const query = useQuery({
     queryKey: ['SectionTrendsV2', sectionPath],
     queryFn: async () => {
       const html = await fetchTrends({ sectionPath })
       return parseTrendsFromHTML(html)
     },
   })
+  const { refetch } = query
+  const webRefresh = useBangumiWebRefresh({ onRefresh: refetch, sectionPath })
+  return {
+    ...query,
+    refetch: webRefresh.refresh,
+    requiresWebVerification: webRefresh.verificationRequired,
+    isRefreshing: query.isFetching || webRefresh.verificationPending,
+  }
 }
 
 export const useTrendsInfiniteQuery = (sectionPath: SectionPath) => {
@@ -91,10 +100,13 @@ export const useTrendsInfiniteQuery = (sectionPath: SectionPath) => {
     },
     [originalRefetch, queryClient, queryKey],
   )
+  const webRefresh = useBangumiWebRefresh({ onRefresh: refetch, sectionPath })
 
   return {
     ...query,
-    refetch,
+    refetch: webRefresh.refresh,
+    requiresWebVerification: webRefresh.verificationRequired,
+    isRefreshing: query.isFetching || webRefresh.verificationPending,
   }
 }
 

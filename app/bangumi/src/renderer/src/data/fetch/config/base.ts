@@ -3,6 +3,12 @@ import {
   getAccessToken,
   safeRecoverAccessTokenAfterUnauthorized,
 } from '@renderer/data/fetch/session'
+import {
+  assertWebVerificationNotRequired,
+  isCloudflareChallenge,
+  markWebVerificationRequired,
+  WebVerificationRequiredError,
+} from '@renderer/data/fetch/config/web-access'
 import { store } from '@renderer/state/utils'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { FetchError, FetchOptions, ofetch } from 'ofetch'
@@ -39,7 +45,21 @@ export const APP_SECRET = import.meta.env.VITE_APP_SECRET
 export const URL_OAUTH_REDIRECT = `${HOST}/dev/app`
 
 /** ofetch web config */
-export const webFetch = ofetch.create({ baseURL: HOST, credentials: 'include' })
+export const webFetch = ofetch.create({
+  baseURL: HOST,
+  credentials: 'include',
+  onRequest() {
+    assertWebVerificationNotRequired()
+  },
+  async onResponseError({ response }) {
+    if (response.status !== 403 || !(await isCloudflareChallenge(response))) return
+    markWebVerificationRequired()
+    throw new WebVerificationRequiredError()
+  },
+})
+
+/** OAuth JSON endpoints must remain reachable while webpage verification is pending. */
+export const oauthFetch = ofetch.create({ baseURL: HOST, credentials: 'include' })
 
 /** ofetch api config  */
 export const apiFetch = ofetch.create({ baseURL: API_HOST, credentials: 'omit' })
