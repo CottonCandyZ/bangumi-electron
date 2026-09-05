@@ -15,6 +15,8 @@ body:has(.windows-frame) {
 }
 
 .app-client-area {
+  /* Keep negative-z page artwork above this surface, inside the client area. */
+  isolation: isolate;
   height: calc(100dvh - var(--window-titlebar-height, 0px));
   background: var(--background);
 }
