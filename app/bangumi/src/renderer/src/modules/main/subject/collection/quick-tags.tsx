@@ -23,11 +23,11 @@ export function QuickTags({
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['collection-subject'],
     onSuccess() {
-      toast.success('标签已保存到本地')
+      toast.success('标签已更新')
       setEdit(false)
     },
     onError(error) {
-      toast.error(error.message || '保存到本地失败')
+      toast.error(error.message || '标签更新失败，请重试')
     },
   })
   const exceed = tags.size > 10

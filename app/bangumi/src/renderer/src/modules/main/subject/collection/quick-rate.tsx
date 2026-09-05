@@ -6,16 +6,14 @@ import { toast } from 'sonner'
 export function QuickRate({ subjectCollection }: { subjectCollection: CollectionData }) {
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
-    onSuccess() {
-      toast.success('评分已保存到本地')
-    },
     onError(error) {
-      toast.error(error.message || '保存到本地失败')
+      toast.error(error.message || '评分更新失败，请重试')
     },
   })
   return (
     <RateButtons
       rate={subjectCollection.rate}
+      disabled={subjectCollectionMutation.isPending}
       onRateChanged={(value) => {
         subjectCollectionMutation.mutate({
           subjectId: subjectCollection.subject_id.toString(),

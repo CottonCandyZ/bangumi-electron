@@ -8,11 +8,8 @@ import { toast } from 'sonner'
 export function PrivateSwitch({ subjectCollection }: { subjectCollection: CollectionData }) {
   const subjectCollectionMutation = useMutationSubjectCollection({
     mutationKey: ['subject-collection'],
-    onSuccess() {
-      toast.success('私密设置已保存到本地')
-    },
     onError(error) {
-      toast.error(error.message || '保存到本地失败')
+      toast.error(error.message || '私密设置更新失败，请重试')
     },
   })
 
@@ -27,6 +24,7 @@ export function PrivateSwitch({ subjectCollection }: { subjectCollection: Collec
       <Switch
         id="private-switch"
         checked={subjectCollection.private}
+        disabled={subjectCollectionMutation.isPending}
         onCheckedChange={(checked) => {
           subjectCollectionMutation.mutate({
             subjectId: subjectCollection.subject_id.toString(),

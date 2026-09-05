@@ -3,12 +3,12 @@ import { Image } from '@renderer/components/image/image'
 import type { SyncOverview, SyncPhase, SyncProgress, SyncResult } from '@shared/collection-sync'
 
 const phaseLabels: Record<SyncPhase, string> = {
-  reading: '读取远端收藏与章节',
-  uploading: '上传本地更改',
-  verifying: '确认远端结果',
+  reading: '获取收藏与章节进度',
+  uploading: '同步修改',
+  verifying: '确认同步结果',
 }
 const stageLabels: Record<SyncProgress['stage'], string> = {
-  changes: '同步本地更改与已打开的条目',
+  changes: '更新收藏与进度',
   list: '下载收藏清单',
   episodes: '核对收藏与章节',
 }
@@ -123,9 +123,11 @@ function idleMessage(overview: SyncOverview) {
   if (overview.pending)
     return {
       title: '有更改等待同步',
-      detail: '可以点击下方按钮开始同步。',
+      detail: '连接恢复后会继续同步，你也可以稍后重试。',
       attention: false,
     }
+  if (!overview.listComplete)
+    return { title: '还未同步全部收藏', detail: '准备好后，点击下方按钮开始。', attention: false }
   if (overview.progress?.finishedAt)
     return {
       title: '本轮同步已完成',

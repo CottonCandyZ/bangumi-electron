@@ -20,7 +20,7 @@ export function DeleteSubjectCollectionAlert() {
     mutationFn: (subjectId: number) => submitCollection({ kind: 'remove', subjectId }),
     onSuccess() {
       setDialog({ open: false })
-      toast.success('已在本地取消收藏，联网后同步')
+      toast.success('已取消收藏')
     },
     onError(error) {
       toast.error(error.message)
@@ -32,7 +32,7 @@ export function DeleteSubjectCollectionAlert() {
         <AlertDialogHeader>
           <AlertDialogTitle>取消这个条目的收藏？</AlertDialogTitle>
           <AlertDialogDescription>
-            会先保存到本地，联网后同步。已保存的资料和章节记录会保留，你可以再次收藏。
+            取消后会保留评分、短评和章节记录，方便你以后再次收藏。
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
