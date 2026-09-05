@@ -88,7 +88,10 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
             <MyLink to={href}>
               <div className="flex items-center justify-center gap-1 transition-colors group-hover:text-rose-500">
                 <span>{name}</span>
-                <ChevronRight className="text-muted-foreground size-3.5" strokeWidth={1.5} />
+                <ChevronRight
+                  className="mt-px h-4 w-4 text-red-600/50 group-hover:text-red-600/70 dark:text-red-600/80 dark:group-hover:text-red-400"
+                  strokeWidth={4}
+                />
               </div>
             </MyLink>
           </Button>
