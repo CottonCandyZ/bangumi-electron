@@ -45,16 +45,18 @@
   gap: 1.75rem;
 }
 
+.home-community {
+  padding-top: 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
+}
+
 .home-community-panel {
   min-width: 0;
-  padding: 1rem;
-  border: 1px solid color-mix(in srgb, var(--border) 65%, transparent);
-  border-radius: 0.875rem;
 }
 
 .home-community-aside {
   align-content: start;
-  gap: 1rem;
+  gap: 2rem;
 }
 
 @container home (min-width: 960px) {
@@ -71,12 +73,6 @@
   }
   .home-community-grid {
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-    gap: 1.5rem;
-  }
-}
-
-@container home (max-width: 420px) {
-  .home-community-panel {
-    padding: 0.75rem;
+    gap: 2rem;
   }
 }

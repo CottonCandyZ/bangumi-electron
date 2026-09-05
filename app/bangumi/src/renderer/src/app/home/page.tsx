@@ -40,7 +40,7 @@ export function Component() {
           </div>
         </section>
 
-        <section className="home-section" aria-labelledby="home-community-title">
+        <section className="home-section home-community" aria-labelledby="home-community-title">
           <div className="home-section-heading">
             <h2 id="home-community-title">社区动态</h2>
           </div>
