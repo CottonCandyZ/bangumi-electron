@@ -8,6 +8,7 @@ import { collectionPanelResourceTypeAtom } from '@renderer/state/collection'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { collectionPanelUsernameAtom } from '@renderer/state/panel'
 import { useAtomValue, useSetAtom } from 'jotai'
+import { DelayedLoading } from '@renderer/components/delayed-loading'
 
 export function CollectionPanel() {
   const userInfo = useSession()
@@ -20,7 +21,9 @@ export function CollectionPanel() {
     <div className="flex h-dvh flex-col">
       <CollectionPanelHeader />
       {userInfo === undefined && !panelUsername ? (
-        <CollectionPanelLoading />
+        <DelayedLoading>
+          <CollectionPanelLoading />
+        </DelayedLoading>
       ) : !username ? (
         <CollectionPanelLoginPrompt onLogin={() => openLoginDialog({ open: true })} />
       ) : resourceType === 'subject' ? (

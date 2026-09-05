@@ -17,5 +17,15 @@ export function isNetworkUnavailableError(error: unknown) {
 }
 
 export function isNotFoundError(error: unknown) {
-  return error instanceof FetchError && error.statusCode === 404
+  return (
+    error instanceof ResourceNotFoundError ||
+    (error instanceof FetchError && error.statusCode === 404)
+  )
+}
+
+export class ResourceNotFoundError extends Error {
+  constructor() {
+    super('此条目不存在或暂时无法访问')
+    this.name = 'ResourceNotFoundError'
+  }
 }

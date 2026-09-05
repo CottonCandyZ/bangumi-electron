@@ -75,8 +75,10 @@ export const sessionFetch = ofetch.create({
 /** ofetch api config  */
 export const apiFetch = ofetch.create({ baseURL: API_HOST, credentials: 'omit' })
 
-async function appendAuthHeader(options: { headers?: HeadersInit }) {
+async function appendAuthHeader(options: { headers?: HeadersInit; signal?: AbortSignal | null }) {
+  options.signal?.throwIfAborted()
   const token = await getAccessToken()
+  options.signal?.throwIfAborted()
   if (!token) return
   options.headers = new Headers(options.headers)
   options.headers.set('Authorization', AuthorizationHeader(token.access_token))
@@ -101,11 +103,13 @@ async function retryAfterTokenRecovery<T>(
   try {
     return await fetcher<T>(request, options)
   } catch (error) {
+    options?.signal?.throwIfAborted()
     if (!(error instanceof FetchError) || error.statusCode !== 401) {
       throw error
     }
 
     const recovered = await handleUnauthorizedResponse()
+    options?.signal?.throwIfAborted()
     if (!recovered) {
       throw error
     }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@renderer/components/ui/dialog'
@@ -44,15 +44,6 @@ export function CollectionSyncDialog() {
   const overview = useCollectionSyncOverview().data
   const hasConflicts = !!overview?.conflicts.length
   const login = useSetAtom(loginDialogAtom)
-  const presented = useRef('')
-  const signature =
-    overview?.conflicts.map((r) => `${userId}:${r.subjectId}:${r.revision}`).join(',') ?? ''
-  useEffect(() => {
-    if (signature && signature !== presented.current) {
-      setOpen(true)
-      presented.current = signature
-    }
-  }, [signature, setOpen])
   const removed = useQuery({
     queryKey: ['collection-removed', userId],
     queryFn: () => client.collectionRemoved({ userId }),
@@ -79,7 +70,7 @@ export function CollectionSyncDialog() {
           {overview ? (
             <SyncDetails overview={overview} />
           ) : (
-            <p className="text-muted-foreground text-sm">正在读取本地同步状态…</p>
+            <p className="text-muted-foreground text-sm">正在查看同步进度…</p>
           )}
           {!!removed.data?.length && (
             <details className="rounded-lg border p-3">
@@ -94,6 +85,11 @@ export function CollectionSyncDialog() {
             </details>
           )}
           {overview && <SyncCoverage overview={overview} />}
+          {overview && !overview.listComplete && !overview.running && (
+            <p className="text-muted-foreground text-sm">
+              点击“开始首次同步”，将你的收藏和章节进度带到这台设备。
+            </p>
+          )}
         </div>
         <div className="bg-muted/30 flex flex-wrap items-center justify-end gap-2 border-t px-5 py-3">
           {(overview?.authRequired ||
@@ -110,7 +106,11 @@ export function CollectionSyncDialog() {
             disabled={!overview || sync.isPending || overview.running}
             onClick={() => sync.mutate()}
           >
-            {overview?.running ? '正在同步…' : '同步全部收藏'}
+            {overview?.running
+              ? '正在同步…'
+              : overview?.listComplete
+                ? '同步全部收藏'
+                : '开始首次同步'}
           </Button>
         </div>
       </DialogContent>
@@ -198,10 +198,10 @@ function ConflictCard({ record }: { record: LocalCollectionRecord }) {
       <div className="font-medium">{record.subject.name_cn || record.subject.name}</div>
       <div className="flex gap-2">
         <Button size="sm" variant="outline" onClick={() => chooseAll('local')}>
-          全部使用本地
+          保留这台设备的修改
         </Button>
         <Button size="sm" variant="outline" onClick={() => chooseAll('remote')}>
-          全部使用远端
+          使用 Bangumi 上的版本
         </Button>
       </div>
       {conflict.fields.map((field) => (
@@ -219,7 +219,9 @@ function ConflictCard({ record }: { record: LocalCollectionRecord }) {
                 onClick={() => setChoices({ ...choices, [field.path]: side })}
                 className={`rounded-md border p-3 text-left break-words whitespace-pre-wrap ${choices[field.path] === side ? 'border-primary bg-primary/10' : 'hover:bg-accent'}`}
               >
-                <span className="mb-1 block font-medium">{side === 'local' ? '本地' : '远端'}</span>
+                <span className="mb-1 block font-medium">
+                  {side === 'local' ? '这台设备' : 'Bangumi'}
+                </span>
                 {displayValue(field[side], field.path)}
               </button>
             ))}
@@ -289,8 +291,8 @@ function LifecycleEpisodes({ record }: { record: LocalCollectionRecord }) {
       <ul className="text-muted-foreground mt-2 space-y-1">
         {ids.map((id) => (
           <li key={id}>
-            章节 #{id}：上次 {displayValue(record.base.episodes[id], `episodes.${id}`)} · 本地{' '}
-            {displayValue(record.local.episodes[id], `episodes.${id}`)} · 远端{' '}
+            章节 #{id}：上次 {displayValue(record.base.episodes[id], `episodes.${id}`)} · 这台设备{' '}
+            {displayValue(record.local.episodes[id], `episodes.${id}`)} · Bangumi{' '}
             {displayValue(remote.episodes[id], `episodes.${id}`)}
           </li>
         ))}

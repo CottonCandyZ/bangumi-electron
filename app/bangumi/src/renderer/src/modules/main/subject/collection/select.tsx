@@ -22,7 +22,7 @@ export function SubjectCollectionSelector({
       )
     },
     onError() {
-      toast.error('呀，出了点错误...')
+      toast.error('收藏状态更新失败，请重试')
     },
   })
 

@@ -82,10 +82,10 @@ export function AddOrModifySubjectCollectionForm({
     mutationKey: ['subject-collection'],
     onSuccess() {
       success()
-      toast.success('已保存到本地')
+      toast.success('收藏已更新')
     },
     onError(error) {
-      toast.error(error.message || '保存到本地失败')
+      toast.error(error.message || '收藏更新失败，请重试')
     },
   })
 

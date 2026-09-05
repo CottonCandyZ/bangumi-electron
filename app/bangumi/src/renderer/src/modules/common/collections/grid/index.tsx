@@ -4,7 +4,9 @@ import { useInfinityQueryCollectionsByUsername } from '@renderer/data/hooks/api/
 import { CollectionType } from '@renderer/data/types/collection'
 import { SubjectType } from '@renderer/data/types/subject'
 import { CollectionItem } from '@renderer/modules/common/collections/grid/item'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, type ReactNode } from 'react'
+import { DelayedLoading } from '@renderer/components/delayed-loading'
+import { QueryFallback } from '@renderer/components/query-fallback'
 
 const COLLECTION_PANEL_LIMIT = 10
 
@@ -14,12 +16,14 @@ export function CollectionsGrid({
   showEpisodeList,
   useOneBasedEpisodeSort,
   username,
+  emptyContent,
 }: {
   collectionType: CollectionType
   subjectType: SubjectType
   showEpisodeList: boolean
   useOneBasedEpisodeSort: boolean
   username: string
+  emptyContent?: ReactNode
 }) {
   const collectionsQuery = useInfinityQueryCollectionsByUsername({
     username,
@@ -68,16 +72,21 @@ export function CollectionsGrid({
     handledDuplicateSignatureRef.current = duplicateSignature
     refetch()
   }, [isFetching, isRefetching, items, refetch])
+  if (!collections && isError)
+    return <QueryFallback label="收藏" error={collectionsQuery.error} onRetry={refetch} />
   if (!collections)
     return (
-      <div className="flex min-h-0 flex-1 flex-col gap-1 px-1 py-1">
-        {Array.from({ length: 8 }).map((_, index) => (
-          <CollectionSkeleton key={index} />
-        ))}
-      </div>
+      <DelayedLoading>
+        <div className="flex min-h-0 flex-1 flex-col gap-1 px-1 py-1">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <CollectionSkeleton key={index} />
+          ))}
+        </div>
+      </DelayedLoading>
     )
 
   if (items.length === 0) {
+    if (emptyContent !== undefined) return emptyContent
     return <div className="text-muted-foreground p-4 text-sm">没有符合条件的项目。</div>
   }
 

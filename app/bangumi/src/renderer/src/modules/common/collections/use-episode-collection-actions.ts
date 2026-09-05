@@ -29,13 +29,12 @@ export function useEpisodeCollectionActions({ index, subjectId, episodes }: Prop
   const episodeCollectionMutation = useMutationEpisodesCollectionBySubjectId({
     mutationKey: ['subject-collection'],
     async onSuccess() {
-      toast.success('已保存到本地')
       try {
         const checkResult = await checkEpisodeFinished({ subjectId })
         if (!checkResult) return
-        toast('观察到你已经看完了', {
+        toast('已看完全部章节', {
           action: {
-            label: '标记',
+            label: '标记为看过',
             onClick: () => {
               openCollectionSheet({
                 open: true,
@@ -60,7 +59,7 @@ export function useEpisodeCollectionActions({ index, subjectId, episodes }: Prop
       }
     },
     onError(error) {
-      toast.error(error.message || '保存到本地失败')
+      toast.error(error.message || '进度更新失败，请重试')
     },
   })
 

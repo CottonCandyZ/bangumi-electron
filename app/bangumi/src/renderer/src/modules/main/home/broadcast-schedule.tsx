@@ -17,6 +17,20 @@ import {
 } from '@renderer/components/ui/carousel'
 import { QueryFallback } from '@renderer/components/query-fallback'
 import { useOnline } from '@renderer/hooks/use-online'
+import { Switch } from '@renderer/components/ui/switch'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { atomWithStorage } from 'jotai/utils'
+import { userIdAtom } from '@renderer/state/session'
+import { loginDialogAtom } from '@renderer/state/dialog/normal'
+import { useWatchingSubjectIds } from '@renderer/data/collection/watching'
+import {
+  collectionSyncDialogAtom,
+  useCollectionSyncOverview,
+} from '@renderer/modules/common/collections/sync-dialog'
+
+const watchingOnlyAtom = atomWithStorage('broadcast-watching-only', false, undefined, {
+  getOnInit: true,
+})
 
 const WEEKDAYS = [
   { id: '1', label: '周一' },
@@ -34,6 +48,14 @@ export function BroadcastSchedule() {
   const [api, setApi] = useState<CarouselApi>()
   const [edges, setEdges] = useState({ start: 0, end: 0 })
   const online = useOnline()
+  const [watchingOnly, setWatchingOnly] = useAtom(watchingOnlyAtom)
+  const userId = useAtomValue(userIdAtom)
+  const watching = useWatchingSubjectIds(watchingOnly)
+  const sync = useCollectionSyncOverview()
+  const openSync = useSetAtom(collectionSyncDialogAtom)
+  const openLogin = useSetAtom(loginDialogAtom)
+  const watchingIds = new Set(watching.data ?? [])
+  const needsSync = watchingOnly && !!userId && sync.data && !sync.data.listComplete
   const weekStart = dayjs()
     .startOf('day')
     .subtract(Number(todayId) - 1, 'day')
@@ -64,7 +86,7 @@ export function BroadcastSchedule() {
       aria-label="每日放送"
     >
       <section className="flex min-w-0 flex-col gap-3">
-        <div className="flex min-w-0 items-baseline justify-between gap-3">
+        <div className="flex min-w-0 flex-wrap items-baseline justify-between gap-3">
           <div className="min-w-0">
             <h2 className="text-xl font-semibold">每日放送</h2>
             <p className="text-muted-foreground mt-1 text-xs tabular-nums">
@@ -72,6 +94,10 @@ export function BroadcastSchedule() {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <label className="text-muted-foreground mr-1 flex cursor-pointer items-center gap-2 text-xs">
+              <Switch size="sm" checked={watchingOnly} onCheckedChange={setWatchingOnly} />
+              只看在追
+            </label>
             <Button size="sm" variant="ghost" onClick={() => api?.scrollTo(Number(todayId) - 1)}>
               今天
             </Button>
@@ -85,7 +111,32 @@ export function BroadcastSchedule() {
             />
           </div>
         </div>
-        {query.data === undefined && (query.isError || !online) ? (
+        {watchingOnly && !userId ? (
+          <div className="text-muted-foreground flex items-center gap-2 py-6 text-sm">
+            登录后查看你在追的放送
+            <Button size="sm" variant="outline" onClick={() => openLogin({ open: true })}>
+              登录
+            </Button>
+          </div>
+        ) : watchingOnly && (sync.isError || watching.isError) ? (
+          <QueryFallback
+            label="在追的放送"
+            error={sync.error ?? watching.error}
+            onRetry={() => {
+              void sync.refetch()
+              void watching.refetch()
+            }}
+          />
+        ) : needsSync ? (
+          <div className="text-muted-foreground flex flex-wrap items-center gap-2 py-6 text-sm">
+            {sync.data?.running
+              ? '首次同步进行中，完成后即可查看在追的放送。'
+              : '先同步收藏，再查看你在追的放送。'}
+            <Button size="sm" variant="outline" onClick={() => openSync(true)}>
+              {sync.data?.running ? '查看同步进度' : '同步收藏'}
+            </Button>
+          </div>
+        ) : query.data === undefined && (query.isError || !online) ? (
           <QueryFallback label="每日放送" error={query.error} onRetry={query.refetch} />
         ) : (
           <div
@@ -94,7 +145,13 @@ export function BroadcastSchedule() {
           >
             <CarouselContent className="ml-0">
               {WEEKDAYS.map((weekday) => {
-                const items = query.data?.[weekday.id]
+                const ready =
+                  !watchingOnly || (watching.data !== undefined && sync.data !== undefined)
+                const items = ready
+                  ? query.data?.[weekday.id]?.filter(
+                      (item) => !watchingOnly || watchingIds.has(item.subject.id),
+                    )
+                  : undefined
                 return (
                   <CarouselItem key={weekday.id} className="max-w-56 basis-56 pl-0">
                     <BroadcastDayColumn
@@ -102,7 +159,8 @@ export function BroadcastSchedule() {
                       items={items}
                       label={weekday.label}
                       date={weekStart.add(Number(weekday.id) - 1, 'day').format('YYYY-MM-DD')}
-                      loading={query.isLoading}
+                      loading={query.isLoading || !ready}
+                      watchingOnly={watchingOnly}
                     />
                   </CarouselItem>
                 )
@@ -121,12 +179,14 @@ function BroadcastDayColumn({
   label,
   date,
   loading,
+  watchingOnly,
 }: {
   current: boolean
   items: CalendarItem[] | undefined
   label: string
   date: string
   loading: boolean
+  watchingOnly: boolean
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [edges, setEdges] = useState({ start: 0, end: 0 })
@@ -179,7 +239,9 @@ function BroadcastDayColumn({
         ) : items?.length ? (
           items.map((item) => <BroadcastItem item={item} key={item.subject.id} />)
         ) : (
-          <p className="text-muted-foreground p-2 text-xs">这一天暂无放送</p>
+          <p className="text-muted-foreground p-2 text-xs">
+            {watchingOnly ? '这一天没有在追的放送' : '这一天暂无放送'}
+          </p>
         )}
       </div>
     </div>
@@ -208,7 +270,7 @@ function BroadcastItem({ item }: { item: CalendarItem }) {
 
   return (
     <MyLink
-      className="hover:bg-accent/60 flex min-w-0 shrink-0 items-center gap-2.5 rounded-md py-1 pr-1 transition-colors"
+      className="hover:bg-accent/60 flex min-w-0 shrink-0 items-center gap-2.5 rounded-md pr-1 transition-colors"
       title={fullTitle}
       to={`/subject/${subject.id}`}
     >
@@ -221,10 +283,10 @@ function BroadcastItem({ item }: { item: CalendarItem }) {
         <div className="bg-muted h-12 w-9 shrink-0 rounded-sm" />
       )}
       <div className="min-w-0 flex-1">
-        <div className="line-clamp-2 text-xs leading-relaxed font-medium" title={fullTitle}>
+        <div className="line-clamp-2 text-xs leading-4 font-medium" title={fullTitle}>
           {title}
         </div>
-        <div className="text-muted-foreground mt-0.5 flex items-center gap-1 text-[0.68rem]">
+        <div className="text-muted-foreground mt-0.5 flex items-center gap-1 text-[0.68rem] leading-3.5">
           <span className="tabular-nums">{item.watchers}</span>
           <span>在看</span>
         </div>
@@ -235,7 +297,7 @@ function BroadcastItem({ item }: { item: CalendarItem }) {
 
 function BroadcastSkeletonItem() {
   return (
-    <div className="flex min-w-0 items-center gap-2 p-1">
+    <div className="flex min-w-0 items-center gap-2 pr-1">
       <Skeleton className="h-12 w-9 shrink-0 rounded-sm" />
       <div className="min-w-0 flex-1 space-y-1.5">
         <Skeleton className="h-3 w-4/5" />

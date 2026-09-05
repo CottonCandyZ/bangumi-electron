@@ -26,10 +26,10 @@ dayjs.extend(timezone)
 /**
  * 从 v0 获得 subject 的基础信息
  */
-export async function getSubjectById({ id }: { id: number }) {
+export async function getSubjectById({ id }: { id: number }, options?: { signal: AbortSignal }) {
   if (!id) throw new FetchParamError('未获得 id')
 
-  const info = await apiFetchWithOptionalAuth<SubjectAPI>(SUBJECTS.BY_ID(id.toString()))
+  const info = await apiFetchWithOptionalAuth<SubjectAPI>(SUBJECTS.BY_ID(id.toString()), options)
 
   return {
     ...info,

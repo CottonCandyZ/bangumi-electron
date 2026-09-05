@@ -111,7 +111,7 @@ async function runCollections() {
           )
           .map((r) => r.subjectId),
       ])
-      if (!ids.size && !scanRequested && collectionRepository.account(id)?.listComplete) return
+      if (!ids.size && !scanRequested) return
       lastError = null
       activity = new CollectionSyncProgress(() => {
         if (!signal.aborted && userId === id) notifySyncProgress()
@@ -119,7 +119,8 @@ async function runCollections() {
       progress = activity
       activity.stage('changes', ids.size)
       await syncSubjects(id, ids, transport, signal, activity)
-      if (scanRequested || !collectionRepository.account(id)?.listComplete) {
+      // Only an explicit full-sync request may download the complete account list.
+      if (scanRequested) {
         const scanRequests = scanRequested
         activity.stage('list', null)
         let offset = 0
@@ -185,12 +186,7 @@ async function runCollections() {
     const pending = collectionRepository
       .all(id)
       .some((r) => ['pending', 'syncing'].includes(r.status))
-    if (
-      requested.size ||
-      scanRequested ||
-      pending ||
-      (!collectionRepository.account(id)?.listComplete && failures)
-    ) {
+    if (requested.size || scanRequested || pending) {
       scheduleCollections(failures ? Math.min(300000, 5000 * 2 ** Math.min(failures, 6)) : 1000)
     }
   })

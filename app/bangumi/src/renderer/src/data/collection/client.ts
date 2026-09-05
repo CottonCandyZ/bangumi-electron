@@ -8,7 +8,7 @@ import { getAccessToken } from '@renderer/data/fetch/session'
 
 export function currentCollectionUser() {
   const userId = Number(store.get(userIdAtom))
-  if (!userId) throw new Error('请先登录；登录后的收藏可以离线修改')
+  if (!userId) throw new Error('请先登录后管理收藏')
   return userId
 }
 export async function invalidateCollections() {
