@@ -127,7 +127,11 @@ function idleMessage(overview: SyncOverview) {
       attention: false,
     }
   if (!overview.listComplete)
-    return { title: '还未同步全部收藏', detail: '准备好后，点击下方按钮开始。', attention: false }
+    return {
+      title: '已开启按需同步',
+      detail: '浏览时更新对应收藏，更改会自动同步。',
+      attention: false,
+    }
   if (overview.progress?.finishedAt)
     return {
       title: '本轮同步已完成',

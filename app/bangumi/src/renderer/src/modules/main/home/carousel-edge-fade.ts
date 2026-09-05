@@ -24,8 +24,9 @@ export function useCarouselEdgeFade(api: CarouselApi) {
 }
 
 export function edgeStrength(distance: number) {
-  // Start withdrawing the mask before the last card reaches the visual fade zone.
-  return smootherStep(Math.min(1, Math.max(0, distance / 120)))
+  // Keep the spatial S-curve, but let its strength visibly fall as soon as the edge approaches.
+  const progress = Math.min(1, Math.max(0, distance / 200))
+  return progress * progress
 }
 
 // Flat slopes at both ends avoid a visible seam against fully opaque content.

@@ -10,6 +10,8 @@ const mocks = vi.hoisted(() => ({
     completeList: vi.fn(),
     seed: vi.fn(),
     get: vi.fn(),
+    list: vi.fn(),
+    collection: vi.fn(),
   },
 }))
 vi.mock('electron', () => ({ BrowserWindow: { getAllWindows: () => [] } }))
@@ -45,6 +47,65 @@ afterEach(() => {
   service.activateCollections(null)
   vi.clearAllTimers()
   vi.useRealTimers()
+})
+
+test('an incomplete library fetches only the requested page and preserves local edits', async () => {
+  mocks.repository.account.mockReturnValue({ listComplete: false })
+  mocks.repository.list.mockReturnValue({ data: [], total: 0, offset: 50, limit: 10 })
+  mocks.list.mockResolvedValue({
+    data: [{ subject_id: 42 }, { subject_id: 43 }],
+    total: 200,
+    limit: 10,
+  })
+  mocks.repository.collection.mockImplementation((_id, subject) =>
+    subject === 42 ? { subject_id: 42, type: 3, rate: 9 } : null,
+  )
+  const page = await service.readCollectionPage({
+    userId: 1,
+    subjectType: 2,
+    collectionType: 3,
+    offset: 50,
+    limit: 10,
+    online: true,
+  })
+  expect(mocks.list).toHaveBeenCalledExactlyOnceWith(
+    50,
+    expect.objectContaining({ subjectType: 2, collectionType: 3, limit: 10 }),
+  )
+  expect(page).toEqual({
+    data: [{ subject_id: 42, type: 3, rate: 9 }],
+    total: 200,
+    offset: 50,
+    limit: 10,
+  })
+  expect(mocks.repository.completeList).not.toHaveBeenCalled()
+  expect(mocks.sync).not.toHaveBeenCalled()
+})
+
+test('partial libraries remain readable offline and on failed requests', async () => {
+  const cached = { data: [{ subject_id: 42 }], total: 1, offset: 0, limit: 10 }
+  mocks.repository.account.mockReturnValue({ listComplete: false })
+  mocks.repository.list.mockReturnValue(cached)
+  expect(await service.readCollectionPage({ userId: 1, online: false })).toEqual(cached)
+  expect(mocks.list).not.toHaveBeenCalled()
+  mocks.list.mockRejectedValue(new SyncError('offline', 'network'))
+  expect(await service.readCollectionPage({ userId: 1, online: true })).toEqual(cached)
+})
+
+test('a page arriving after account switch cannot seed the previous account', async () => {
+  mocks.repository.account.mockReturnValue({ listComplete: false })
+  mocks.repository.list.mockReturnValue({ data: [], total: 0, offset: 0, limit: 50 })
+  let resolve!: (page: unknown) => void
+  mocks.list.mockReturnValue(
+    new Promise((done) => {
+      resolve = done
+    }),
+  )
+  const result = service.readCollectionPage({ userId: 1, online: true })
+  service.activateCollections(2)
+  resolve({ data: [{ subject_id: 42 }], total: 1, limit: 50 })
+  await expect(result).rejects.toThrow()
+  expect(mocks.repository.seed).not.toHaveBeenCalled()
 })
 
 test('a failed manual full scan retries even when the previous list was complete', async () => {

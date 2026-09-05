@@ -219,7 +219,9 @@ function localOrRemoteList(
     userId: number
   },
 ) {
-  return props.own ? client.collectionList(props) : getSubjectCollectionsByUsernameMustAuth(props)
+  return props.own
+    ? client.collectionList({ ...props, online: navigator.onLine })
+    : getSubjectCollectionsByUsernameMustAuth(props)
 }
 async function localOrRemoteSubject(props: {
   own: boolean

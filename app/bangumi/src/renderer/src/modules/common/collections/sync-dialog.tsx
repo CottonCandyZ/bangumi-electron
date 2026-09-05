@@ -87,7 +87,7 @@ export function CollectionSyncDialog() {
           {overview && <SyncCoverage overview={overview} />}
           {overview && !overview.listComplete && !overview.running && (
             <p className="text-muted-foreground text-sm">
-              点击“开始首次同步”，将你的收藏和章节进度带到这台设备。
+              收藏会按浏览需要同步；也可以选择同步全部收藏和章节进度。
             </p>
           )}
         </div>
@@ -106,11 +106,7 @@ export function CollectionSyncDialog() {
             disabled={!overview || sync.isPending || overview.running}
             onClick={() => sync.mutate()}
           >
-            {overview?.running
-              ? '正在同步…'
-              : overview?.listComplete
-                ? '同步全部收藏'
-                : '开始首次同步'}
+            {overview?.running ? '正在同步…' : '同步全部收藏'}
           </Button>
         </div>
       </DialogContent>

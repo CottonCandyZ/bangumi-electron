@@ -237,6 +237,36 @@ export function collectionOverview(id: number): SyncOverview {
     progress: userId === id ? (progress?.value ?? null) : null,
   }
 }
+
+export async function readCollectionPage(
+  input: Parameters<typeof collectionRepository.list>[0] & { online?: boolean },
+) {
+  const cached = collectionRepository.list(input)
+  if (!input.online || collectionRepository.account(input.userId)?.listComplete) return cached
+  if (userId !== input.userId) throw new Error('当前账号已改变')
+  const signal = controller.signal
+  const offset = input.offset ?? 0
+  const limit = Math.min(50, Math.max(1, input.limit ?? 50))
+  try {
+    const transport = createCollectionTransport(input.userId, signal, (profile) =>
+      collectionRepository.saveAccount(profile),
+    )
+    const page = await transport.list(offset, { ...input, limit })
+    signal.throwIfAborted()
+    if (userId !== input.userId) throw new Error('当前账号已改变')
+    for (const item of page.data) collectionRepository.seed(input.userId, item)
+    // Preserve pending edits/removals when an older server page arrives.
+    const data = page.data.flatMap((item) => {
+      const local = collectionRepository.collection(input.userId, item.subject_id)
+      return local && (!input.collectionType || local.type === input.collectionType) ? [local] : []
+    })
+    return { ...page, data, offset, limit }
+  } catch (error) {
+    signal.throwIfAborted()
+    if (cached.data.length) return cached
+    throw error
+  }
+}
 export async function resolveCollection(input: ConflictResolution) {
   if (input.userId !== userId) throw new Error('当前账号已改变')
   await engine.resolve(input, createCollectionTransport(input.userId, controller.signal))

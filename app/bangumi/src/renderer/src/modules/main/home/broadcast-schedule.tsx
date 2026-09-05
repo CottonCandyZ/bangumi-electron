@@ -23,10 +23,6 @@ import { atomWithStorage } from 'jotai/utils'
 import { userIdAtom } from '@renderer/state/session'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { useWatchingSubjectIds } from '@renderer/data/collection/watching'
-import {
-  collectionSyncDialogAtom,
-  useCollectionSyncOverview,
-} from '@renderer/modules/common/collections/sync-dialog'
 
 const watchingOnlyAtom = atomWithStorage('broadcast-watching-only', false, undefined, {
   getOnInit: true,
@@ -52,14 +48,11 @@ export function BroadcastSchedule() {
   const [watchingOnly, setWatchingOnly] = useAtom(watchingOnlyAtom)
   const userId = useAtomValue(userIdAtom)
   const watching = useWatchingSubjectIds(watchingOnly)
-  const sync = useCollectionSyncOverview()
-  const openSync = useSetAtom(collectionSyncDialogAtom)
   const openLogin = useSetAtom(loginDialogAtom)
   const watchingIds = new Set(watching.data ?? [])
-  const needsSync = watchingOnly && !!userId && sync.data && !sync.data.listComplete
   const canNavigate =
     query.data !== undefined &&
-    (!watchingOnly || (!!userId && sync.data?.listComplete && !watching.isError))
+    (!watchingOnly || (!!userId && watching.data !== undefined && !watching.isError))
   const weekStart = dayjs()
     .startOf('day')
     .subtract(Number(todayId) - 1, 'day')
@@ -86,7 +79,12 @@ export function BroadcastSchedule() {
   return (
     <Carousel
       setApi={setApi}
-      opts={{ align: 'start', startIndex: Number(todayId) - 1, inViewThreshold: 0.8 }}
+      opts={{
+        align: 'start',
+        dragFree: true,
+        startIndex: Number(todayId) - 1,
+        inViewThreshold: 0.8,
+      }}
       className="@container min-w-0"
       aria-label="每日放送"
     >
@@ -127,24 +125,8 @@ export function BroadcastSchedule() {
               登录
             </Button>
           </div>
-        ) : watchingOnly && (sync.isError || watching.isError) ? (
-          <QueryFallback
-            label="在追的放送"
-            error={sync.error ?? watching.error}
-            onRetry={() => {
-              void sync.refetch()
-              void watching.refetch()
-            }}
-          />
-        ) : needsSync ? (
-          <div className="text-muted-foreground flex flex-wrap items-center gap-2 py-6 text-sm">
-            {sync.data?.running
-              ? '首次同步进行中，完成后即可查看在追的放送。'
-              : '先同步收藏，再查看你在追的放送。'}
-            <Button size="sm" variant="outline" onClick={() => openSync(true)}>
-              {sync.data?.running ? '查看同步进度' : '同步收藏'}
-            </Button>
-          </div>
+        ) : watchingOnly && watching.isError ? (
+          <QueryFallback label="在追的放送" error={watching.error} onRetry={watching.refetch} />
         ) : query.data === undefined && (query.isError || !online) ? (
           <QueryFallback label="每日放送" error={query.error} onRetry={query.refetch} />
         ) : (
@@ -154,8 +136,7 @@ export function BroadcastSchedule() {
           >
             <CarouselContent className="ml-0">
               {WEEKDAYS.map((weekday) => {
-                const ready =
-                  !watchingOnly || (watching.data !== undefined && sync.data !== undefined)
+                const ready = !watchingOnly || watching.data !== undefined
                 const items = ready
                   ? query.data?.[weekday.id]?.filter(
                       (item) => !watchingOnly || watchingIds.has(item.subject.id),

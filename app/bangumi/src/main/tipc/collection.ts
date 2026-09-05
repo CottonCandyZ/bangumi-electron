@@ -6,6 +6,7 @@ import {
   collectionRepository,
   notifyCollections,
   requestCollection,
+  readCollectionPage,
   resolveCollection,
   scheduleCollections,
   syncCollections,
@@ -48,8 +49,8 @@ export const collectionIPC = {
       return collectionRepository.collection(input.userId, input.subjectId)
     }),
   collectionList: t.procedure
-    .input<Parameters<typeof collectionRepository.list>[0]>()
-    .action(async ({ input }) => collectionRepository.list(input)),
+    .input<Parameters<typeof readCollectionPage>[0]>()
+    .action(async ({ input }) => readCollectionPage(input)),
   collectionReadEpisodes: t.procedure
     .input<Parameters<typeof collectionRepository.episodes>[0]>()
     .action(async ({ input }) => {

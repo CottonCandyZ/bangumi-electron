@@ -38,7 +38,10 @@ export async function retryableNetworkOperation<T>(
 export interface CollectionTransport {
   read(subjectId: number): Promise<RemoteCollection>
   write(subjectId: number, before: CollectionSnapshot, target: CollectionSnapshot): Promise<void>
-  list(offset: number): Promise<{ data: CollectionData[]; total: number; limit: number }>
+  list(
+    offset: number,
+    options?: { limit?: number; subjectType?: number; collectionType?: number },
+  ): Promise<{ data: CollectionData[]; total: number; limit: number }>
 }
 export class CollectionSyncEngine {
   private active = new Map<string, Promise<void>>()

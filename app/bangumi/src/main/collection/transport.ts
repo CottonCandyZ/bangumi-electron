@@ -76,12 +76,16 @@ export function createCollectionTransport(
     return identity
   }
   return {
-    async list(offset) {
+    async list(offset, options = {}) {
       const profile = await identify()
+      const query = new URLSearchParams({
+        limit: String(options.limit ?? 50),
+        offset: String(offset),
+      })
+      if (options.subjectType) query.set('subject_type', String(options.subjectType))
+      if (options.collectionType) query.set('type', String(options.collectionType))
       return readJson<Collections>(
-        await request(
-          `/v0/users/${encodeURIComponent(profile.username)}/collections?limit=50&offset=${offset}`,
-        ),
+        await request(`/v0/users/${encodeURIComponent(profile.username)}/collections?${query}`),
       )
     },
     async read(subjectId) {
