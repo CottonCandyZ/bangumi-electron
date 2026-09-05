@@ -6,25 +6,30 @@ export async function refreshResourceBatch<T extends { id: number }>({
   data,
   fetch,
   save,
+  remove,
   publish,
 }: {
   ids: number[]
   data: Map<number, T>
   fetch: (id: number) => Promise<T>
   save: (items: T[]) => Promise<void>
+  remove?: (ids: number[]) => Promise<void>
   publish: (item: T) => void
 }) {
   const fresh: T[] = []
+  const missing: number[] = []
   let failure: unknown
   for (const id of ids) {
     try {
       fresh.push(await fetch(id))
     } catch (error) {
-      if (isNotFoundError(error)) data.delete(id)
+      if (isNotFoundError(error)) missing.push(id)
       else failure ??= error
     }
   }
   if (fresh.length) await save(fresh)
+  if (missing.length) await remove?.(missing)
+  for (const id of missing) data.delete(id)
   for (const item of fresh) {
     data.set(item.id, item)
     publish(item)

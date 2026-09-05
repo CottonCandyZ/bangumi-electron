@@ -85,6 +85,7 @@ export function useLocalResources<
   apiParams,
   dbQueryFn,
   updateDB,
+  removeDB,
   dbParams,
   dbStaleTime = DB_CONFIG.DEFAULT_STALE_TIME,
   needKeepPreviousData = true,
@@ -96,6 +97,7 @@ export function useLocalResources<
   dbQueryFn: (params: D) => Promise<T[]>
   dbParams: D
   updateDB: (data: T[]) => Promise<void>
+  removeDB?: (ids: number[]) => Promise<void>
   dbStaleTime?: number
   needKeepPreviousData?: boolean
 } & Options<(T | null)[]>) {
@@ -124,6 +126,7 @@ export function useLocalResources<
           data,
           fetch: (id) => apiQueryFn({ ...apiParams, id } as P),
           save: updateDB,
+          remove: removeDB,
           publish: (item) => queryClient.setQueryData([...queryKey, userId, { id: item.id }], item),
         })
         return ordered()

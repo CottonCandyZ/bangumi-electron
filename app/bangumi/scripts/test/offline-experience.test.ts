@@ -21,6 +21,7 @@ test('404 removes cached list items while network failures preserve them', async
   const notFound = new FetchError('not found')
   Object.defineProperty(notFound, 'statusCode', { value: 404 })
   const saved: number[] = []
+  const persisted = new Map(data)
   await refreshResourceBatch({
     ids: [1, 2, 3],
     data,
@@ -31,11 +32,17 @@ test('404 removes cached list items while network failures preserve them', async
     },
     save: async (items) => {
       saved.push(...items.map((item) => item.id))
+      for (const item of items) persisted.set(item.id, item)
+    },
+    remove: async (ids) => {
+      for (const id of ids) persisted.delete(id)
     },
     publish: () => {},
   })
   expect([...data.keys()]).toEqual([2, 3])
   expect(saved).toEqual([3])
+  // Recreating the query from persistent storage must not revive the missing item.
+  expect([...new Map(persisted).keys()]).toEqual([2, 3])
 })
 
 test('uncached network failures do not become a successful empty list', async () => {
