@@ -22,6 +22,8 @@ export type AppUpdateState = {
   version?: string
   packageName?: string
   packageSha256?: string
+  fullPackageSize?: number
+  deltaPackageSize?: number
   releaseNotes?: string
   releaseName?: string | null
   releaseDate?: string

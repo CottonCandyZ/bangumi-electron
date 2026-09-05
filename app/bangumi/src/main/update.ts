@@ -10,6 +10,7 @@ import { setAppQuitting } from '@main/app-flags'
 import type { AppUpdateChannel, AppConfig } from '@shared/config'
 import { normalizeAppConfig } from '@shared/config'
 import type { AppBuildInfo, AppUpdateState } from '@shared/update'
+import { getUpdatePackageSizes } from '@shared/update-size'
 import { UpdateManager, type UpdateInfo, type VelopackAsset } from 'velopack'
 
 declare const __APP_BUILD_HASH__: string
@@ -225,6 +226,12 @@ function getUpdateStateFromAsset(
     version,
     packageName: asset.FileName,
     packageSha256: asset.SHA256,
+    ...getUpdatePackageSizes(
+      asset,
+      availableUpdateInfo?.TargetFullRelease.Version === asset.Version
+        ? availableUpdateInfo
+        : undefined,
+    ),
     releaseNotes: asset.NotesMarkdown || undefined,
     ignored: getIgnoredVersion(channel) === version,
     lastCheckedAt: new Date().toISOString(),

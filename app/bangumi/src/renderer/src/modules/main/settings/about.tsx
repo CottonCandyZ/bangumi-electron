@@ -18,6 +18,7 @@ import {
 import { useAppConfig } from '@renderer/state/app-config'
 import type { AppUpdateChannel } from '@shared/config'
 import type { AppBuildInfo, AppUpdateState } from '@shared/update'
+import { getUpdateSizeDescription } from '@shared/update-size'
 import { Download, FileDown, RefreshCw, Trash2 } from 'lucide-react'
 import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -126,7 +127,14 @@ export function AboutSettings() {
         <SettingRow
           separated
           title="更新"
-          description={getUpdateDescription(state, updateTitle)}
+          description={
+            <span className="block space-y-1">
+              <span className="block">{getUpdateDescription(state, updateTitle)}</span>
+              {getUpdateSizeDescription(state) && (
+                <span className="block tabular-nums">{getUpdateSizeDescription(state)}</span>
+              )}
+            </span>
+          }
           control={
             <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
               {state?.status === 'available' && <Badge variant="secondary">新版本</Badge>}
