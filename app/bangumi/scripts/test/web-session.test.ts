@@ -1,18 +1,49 @@
-import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
-import { test, type TestContext } from 'node:test'
-import { runInNewContext } from 'node:vm'
-import ts from 'typescript'
-import { createFetch, FetchError } from 'ofetch'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+import { FetchError } from 'ofetch'
 import * as webAccess from '../../src/renderer/src/data/fetch/config/web-access'
-import * as promises from '../../src/renderer/src/lib/utils/promise'
-import * as errors from '../../src/renderer/src/lib/utils/error'
+import * as config from '../../src/renderer/src/data/fetch/config'
+import * as session from '../../src/renderer/src/data/fetch/session'
+import * as login from '../../src/renderer/src/data/fetch/web/login'
 
-// Load the actual session -> login -> fetch chain without the renderer, database or network.
-function fixture(t: TestContext, oauthStatus = 200) {
+const mocks = vi.hoisted(() => ({
+  fetch: vi.fn(),
+  readAccessToken: vi.fn(),
+  insertAccessToken: vi.fn(),
+  storeSet: vi.fn(),
+  removeCookie: vi.fn(),
+  collectionActivate: vi.fn(),
+}))
+vi.mock('ofetch', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('ofetch')>()
+  return { ...actual, ofetch: actual.createFetch({ fetch: mocks.fetch }) }
+})
+vi.mock('@renderer/data/fetch/db/user', () => ({
+  readAccessToken: mocks.readAccessToken,
+  insertAccessToken: mocks.insertAccessToken,
+  insertLoginInfo: vi.fn(),
+}))
+vi.mock('@renderer/lib/client', () => ({
+  client: { removeCookie: mocks.removeCookie, collectionActivate: mocks.collectionActivate },
+}))
+vi.mock('@renderer/state/utils', () => ({ store: { get: () => '1', set: mocks.storeSet } }))
+vi.mock('@renderer/state/session', () => ({ userIdAtom: {} }))
+vi.mock('@renderer/state/dialog/normal', () => ({ loginDialogAtom: {} }))
+vi.mock('@renderer/lib/utils/parser', () => ({ domParser: {} }))
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  vi.stubGlobal('navigator', { onLine: true })
+  session.cleanAccessTokenCache()
   webAccess.markWebVerificationComplete()
-  t.after(webAccess.markWebVerificationComplete)
-  let logouts = 0
+})
+afterEach(() => {
+  session.cleanAccessTokenCache()
+  webAccess.markWebVerificationComplete()
+  vi.unstubAllGlobals()
+})
+
+// Exercise the real session -> login -> fetch chain with only external I/O mocked.
+function fixture(oauthStatus = 200, captchaStatus = 200) {
   const requests: string[] = []
   const saved: unknown[] = []
   const expiredToken = {
@@ -23,128 +54,131 @@ function fixture(t: TestContext, oauthStatus = 200) {
     create_time: new Date(0),
     token_type: 'Bearer',
   }
-  const database = {
-    readAccessToken: async () => expiredToken,
-    insertAccessToken: async (token: unknown) => {
-      saved.push(token)
-    },
-  }
-  const fetcher = createFetch({
-    fetch: async (input) => {
-      const url = String(input)
-      requests.push(url)
-      if (url.endsWith('/oauth/access_token')) {
-        return Response.json(
-          { access_token: 'renewed', refresh_token: 'new-refresh', expires_in: 3600 },
-          { status: oauthStatus },
-        )
-      }
-      if (url.endsWith('/oauth/token_status')) return Response.json({ user_id: '1' })
-      return new Response('Cloudflare challenge', {
-        status: 403,
-        headers: { 'cf-mitigated': 'challenge' },
+  mocks.readAccessToken.mockResolvedValue(expiredToken)
+  mocks.insertAccessToken.mockImplementation(async (token: unknown) => {
+    saved.push(token)
+  })
+  mocks.fetch.mockImplementation(async (input: RequestInfo | URL) => {
+    const url = String(input)
+    requests.push(url)
+    if (url.endsWith('/oauth/access_token'))
+      return Response.json(
+        { access_token: 'renewed', refresh_token: 'new-refresh', expires_in: 3600 },
+        { status: oauthStatus },
+      )
+    if (url.endsWith('/oauth/token_status')) return Response.json({ user_id: '1' })
+    if (url.includes('/signup/captcha'))
+      return new Response('test-image', {
+        status: captchaStatus,
+        headers:
+          captchaStatus === 403
+            ? { 'cf-mitigated': 'challenge', 'Content-Type': 'text/html' }
+            : { 'Content-Type': 'image/png' },
       })
-    },
-  })
-  const modules: Record<string, unknown> = {
-    ofetch: { ofetch: fetcher, FetchError },
-    '@renderer/data/fetch/config/web-access': webAccess,
-    '@renderer/lib/utils/promise': promises,
-    '@renderer/lib/utils/error': errors,
-    '@renderer/data/fetch/db/user': database,
-    './db/user': database,
-    '@renderer/data/hooks/session': {
-      safeLogout: async () => {
-        logouts++
-      },
-    },
-    '@renderer/lib/client': { client: {} },
-    '@renderer/state/utils': { store: { get: () => '1', set: () => {} } },
-    '@renderer/state/dialog/normal': { loginDialogAtom: {} },
-    '@renderer/state/session': { userIdAtom: {} },
-    '@renderer/lib/utils/parser': { domParser: {} },
-    '@renderer/lib/utils/date': { getTimestamp: () => 0 },
-    '@renderer/data/fetch/config/path': {
-      AuthorizationHeader: (token: string) => `Bearer ${token}`,
-    },
-  }
-  const sources: Record<string, string> = {
-    '@renderer/data/fetch/config/': 'config/base.ts',
-    '@renderer/data/fetch/session': 'session.ts',
-    '@renderer/data/fetch/web/login': 'web/login.ts',
-  }
-  function load(name: string): unknown {
-    if (name in modules) return modules[name]
-    assert.ok(name in sources, `Unexpected dependency: ${name}`)
-    const exports = {}
-    modules[name] = exports
-    const code = readFileSync(
-      new URL(`../../src/renderer/src/data/fetch/${sources[name]}`, import.meta.url),
-      'utf8',
-    )
-    const compiled = ts.transpileModule(code.replaceAll('import.meta.env.', 'testEnv.'), {
-      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
-    }).outputText
-    runInNewContext(compiled, {
-      exports,
-      require: load,
-      testEnv: {},
-      Headers,
-      URLSearchParams,
-      Date,
-      navigator: { onLine: true },
+    return new Response('Cloudflare challenge', {
+      status: 403,
+      headers: { 'cf-mitigated': 'challenge' },
     })
-    return exports
-  }
-  const config = load(
-    '@renderer/data/fetch/config/',
-  ) as typeof import('../../src/renderer/src/data/fetch/config')
-  Object.assign(config, {
-    LOGIN: {
-      OAUTH_ACCESS_TOKEN_URL: '/oauth/access_token',
-      OAUTH_ACCESS_TOKEN_STATUS: '/oauth/token_status',
-      POST_CONTENT_TYPE: 'application/x-www-form-urlencoded',
-    },
   })
-  const session = load(
-    '@renderer/data/fetch/session',
-  ) as typeof import('../../src/renderer/src/data/fetch/session')
   return {
     config,
     session,
+    login,
     requests,
     saved,
     expiredToken,
     get logouts() {
-      return logouts
+      return mocks.removeCookie.mock.calls.length
     },
   }
 }
 
-test('a webpage challenge cannot log out an expired session with a valid refresh token', async (t) => {
-  const f = fixture(t)
-  await assert.rejects(f.config.webFetch('/anime/browser'), webAccess.WebVerificationRequiredError)
+test('opening or failing a login challenge keeps the previous collection account active', async () => {
+  fixture()
+  mocks.fetch.mockImplementation(async (input: RequestInfo | URL) =>
+    String(input).includes('/signup/captcha')
+      ? new Response('image', { headers: { 'Content-Type': 'image/png' } })
+      : new Response('<input type="hidden" name="formhash" value="test-hash">'),
+  )
+  const captcha = await login.prepareWebLoginChallenge()
+  URL.revokeObjectURL(captcha)
+  expect(mocks.collectionActivate).not.toHaveBeenCalled()
+  mocks.fetch.mockResolvedValue(new Response('login unavailable'))
+  await expect(login.prepareWebLoginChallenge()).rejects.toThrow('formHash')
+  expect(mocks.collectionActivate).not.toHaveBeenCalled()
+})
+
+test('a webpage challenge cannot log out an expired session with a valid refresh token', async () => {
+  const f = fixture()
+  await expect(f.config.webFetch('/anime/browser')).rejects.toThrow(
+    webAccess.WebVerificationRequiredError,
+  )
   const tokens = await Promise.all([f.session.getAccessToken(), f.session.getAccessToken()])
-  assert.ok(tokens.every((token) => token?.access_token === 'renewed'))
-  assert.equal(f.logouts, 0)
-  assert.equal(f.saved.length, 1)
-  assert.equal(f.requests.filter((url) => url.endsWith('/oauth/access_token')).length, 1)
-  assert.equal(webAccess.isWebVerificationRequired(), true)
-  await assert.rejects(f.config.webFetch('/game/browser'), webAccess.WebVerificationRequiredError)
-  assert.equal(f.requests.length, 2)
+  expect(tokens.every((token) => token?.access_token === 'renewed')).toBeTruthy()
+  expect(f.logouts).toBe(0)
+  expect(f.saved.length).toBe(1)
+  expect(f.requests.filter((url) => url.endsWith('/oauth/access_token')).length).toBe(1)
+  expect(webAccess.isWebVerificationRequired()).toBe(true)
+  await expect(f.config.webFetch('/game/browser')).rejects.toThrow(
+    webAccess.WebVerificationRequiredError,
+  )
+  expect(f.requests.length).toBe(2)
 })
 
-test('token status checks bypass a pending webpage challenge', async (t) => {
-  const f = fixture(t)
+test('a previously blocked trends request does not block the login captcha', async () => {
+  const f = fixture()
   webAccess.markWebVerificationRequired()
-  assert.equal(await f.session.isAccessTokenValid(f.expiredToken), true)
-  assert.equal(f.requests.length, 1)
-  assert.equal(webAccess.isWebVerificationRequired(), true)
+  const image = await f.login.getCaptcha()
+  expect(image.startsWith('blob:')).toBeTruthy()
+  URL.revokeObjectURL(image)
+  expect(f.requests.length).toBe(1)
+  expect(webAccess.isWebVerificationRequired()).toBe(true)
 })
 
-test('OAuth rejection remains an OAuth error and does not activate the webpage gate', async (t) => {
-  const f = fixture(t, 403)
-  await assert.rejects(f.config.oauthFetch('/oauth/access_token', { method: 'POST' }), FetchError)
-  assert.equal(webAccess.isWebVerificationRequired(), false)
-  assert.equal(f.requests.length, 1)
+test('an actual captcha 403 requests verification instead of returning an HTML image', async () => {
+  const f = fixture(200, 403)
+  await expect(f.login.getCaptcha()).rejects.toThrow(webAccess.WebVerificationRequiredError)
+  expect(f.requests.length).toBe(1)
+  expect(webAccess.isWebVerificationRequired()).toBe(true)
+})
+
+test('token status checks bypass a pending webpage challenge', async () => {
+  const f = fixture()
+  webAccess.markWebVerificationRequired()
+  expect(await f.session.isAccessTokenValid(f.expiredToken)).toBe(true)
+  expect(f.requests.length).toBe(1)
+  expect(webAccess.isWebVerificationRequired()).toBe(true)
+})
+
+test('OAuth rejection remains an OAuth error and does not activate the webpage gate', async () => {
+  const f = fixture(403)
+  await expect(f.config.oauthFetch('/oauth/access_token', { method: 'POST' })).rejects.toThrow(
+    FetchError,
+  )
+  expect(webAccess.isWebVerificationRequired()).toBe(false)
+  expect(f.requests.length).toBe(1)
+})
+
+test('ordinary permission 403 does not activate the global verification gate', async () => {
+  fixture()
+  mocks.fetch.mockResolvedValue(new Response('permission denied', { status: 403 }))
+  await expect(config.webFetch('/subject/42/interest/update', { method: 'POST' })).rejects.toThrow(
+    FetchError,
+  )
+  expect(webAccess.isWebVerificationRequired()).toBe(false)
+  mocks.fetch.mockResolvedValue(new Response('ok'))
+  await expect(config.webFetch('/anime/browser')).resolves.toBe('ok')
+})
+
+test('challenge HTML without exposed headers is recognized for text and captcha blobs', async () => {
+  fixture()
+  const html = '<script>window._cf_chl_opt = {}</script>'
+  mocks.fetch.mockImplementation(
+    async () => new Response(html, { status: 403, headers: { 'content-type': 'text/html' } }),
+  )
+  await expect(config.webFetch('/anime/browser')).rejects.toThrow(
+    webAccess.WebVerificationRequiredError,
+  )
+  webAccess.markWebVerificationComplete()
+  await expect(login.getCaptcha()).rejects.toThrow(webAccess.WebVerificationRequiredError)
 })

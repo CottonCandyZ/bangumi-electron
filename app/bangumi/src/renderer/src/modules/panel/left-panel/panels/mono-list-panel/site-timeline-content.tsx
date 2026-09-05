@@ -13,6 +13,8 @@ import { monoListSiteTimelineModeAtom, type MonoListPanelTab } from '@renderer/s
 import dayjs from 'dayjs'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useOnline } from '@renderer/hooks/use-online'
+import { QueryFallback } from '@renderer/components/query-fallback'
 
 const SITE_TIMELINE_PAGE_LIMIT = 20
 const ESTIMATED_TIMELINE_ITEM_HEIGHT = 156
@@ -38,6 +40,7 @@ export function SiteTimelineListPanelContent({
   tab: Extract<MonoListPanelTab, { type: 'siteTimeline' }>
 }) {
   const [mode, setMode] = useAtom(monoListSiteTimelineModeAtom)
+  const online = useOnline()
   const [scrollToTopSignal, setScrollToTopSignal] = useState(0)
   const selectedTab = mode === 'friends' ? '关注' : '全站'
   const timelineQuery = useTimelineInfiniteQuery({ mode, limit: SITE_TIMELINE_PAGE_LIMIT })
@@ -93,7 +96,7 @@ export function SiteTimelineListPanelContent({
           />
           <Button
             className="size-8 shrink-0"
-            disabled={timelineQuery.isFetching}
+            disabled={timelineQuery.isFetching || !online}
             onClick={refreshTimeline}
             size="icon"
             title="刷新时间线"
@@ -111,7 +114,7 @@ export function SiteTimelineListPanelContent({
       <SiteTimelineVirtualList
         entries={entries}
         error={timelineQuery.isError}
-        hasMore={!!timelineQuery.hasNextPage}
+        hasMore={online && !!timelineQuery.hasNextPage}
         isFetchingMore={timelineQuery.isFetchingNextPage}
         onListNearBottom={loadMore}
         scrollMemoryKey={`mono-list:${tab.id}:${mode}`}
@@ -139,17 +142,21 @@ function SiteTimelineVirtualList({
   scrollToTopSignal: number
 }) {
   const rows = useMemo(() => (entries ? toTimelineRows(entries) : undefined), [entries])
+  const online = useOnline()
   const requestMore = useCallback(() => {
     if (!hasMore || isFetchingMore) return
 
     return onListNearBottom()
   }, [hasMore, isFetchingMore, onListNearBottom])
 
+  if (rows === undefined && (error || !online)) {
+    return <QueryFallback label="时间线" />
+  }
   if (rows === undefined && !error) {
     return <SiteTimelineSkeletonScroll count={8} />
   }
 
-  if (error) {
+  if (error && !rows) {
     return <div className="text-muted-foreground p-4 text-sm">暂时无法读取时间线。</div>
   }
 

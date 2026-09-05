@@ -1,5 +1,6 @@
 import { Button } from '@renderer/components/ui/button'
 import { cn } from '@renderer/lib/utils'
+import { useOnline } from '@renderer/hooks/use-online'
 
 const REFRESH_AGE_VISIBLE_AFTER = 2 * 60 * 1000
 
@@ -15,6 +16,7 @@ export function TimelineRefreshButton({
   refreshing: boolean
 }) {
   const refreshAgeLabel = getRefreshAgeLabel(lastRefreshedAt, now)
+  const online = useOnline()
   const expanded = !!refreshAgeLabel && !refreshing
 
   return (
@@ -24,7 +26,7 @@ export function TimelineRefreshButton({
         'h-8 shrink-0 justify-start overflow-hidden px-0 transition-[width,background-color,color] duration-300 ease-out',
         expanded ? 'w-40' : 'w-8',
       )}
-      disabled={refreshing}
+      disabled={refreshing || !online}
       onClick={onRefresh}
       size="sm"
       title={expanded ? refreshAgeLabel : '刷新时间线'}

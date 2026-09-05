@@ -4,7 +4,7 @@ import {
   LOGIN,
   URL_OAUTH_REDIRECT,
   oauthFetch,
-  webFetch,
+  sessionFetch as webFetch,
 } from '@renderer/data/fetch/config/'
 import { insertAccessToken, insertLoginInfo } from '@renderer/data/fetch/db/user'
 import { getTimestamp } from '@renderer/lib/utils/date'

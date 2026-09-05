@@ -8,7 +8,9 @@ import {
 import { useAtomValue } from 'jotai'
 import { userIdAtom } from '@renderer/state/session'
 import { DB_CONFIG } from '@renderer/config'
-import { FetchError } from 'ofetch'
+import { OfflineResourceError } from '@renderer/lib/utils/network'
+import { refreshResourceBatch } from './resource-refresh'
+import { isResourceHidden, setResourceHidden } from './resource-visibility'
 
 type Resource = { last_update_at: Date }
 type Options<T> = Omit<UseQueryOptions<T, Error, T, QueryKey>, 'queryFn'>
@@ -51,6 +53,8 @@ export function useLocalResource<P, D, T extends Resource>({
   const refresh = async () => {
     const value = await apiQueryFn(apiParams)
     await updateDB(value)
+    const id = (dbParams as { id?: number }).id
+    if (id !== undefined) await setResourceHidden(queryKey, userId, id, false)
     return value
   }
   return useQuery({
@@ -62,14 +66,16 @@ export function useLocalResource<P, D, T extends Resource>({
     staleTime: dbStaleTime,
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     queryFn: async () => {
-      const local = await dbQueryFn(dbParams)
+      const id = (dbParams as { id?: number }).id
+      const hidden = id !== undefined && (await isResourceHidden(queryKey, userId, id))
+      const local = hidden ? undefined : await dbQueryFn(dbParams)
       if (local) {
         if (Date.now() - local.last_update_at.getTime() > dbStaleTime) {
           refreshLater(key, refresh, (value) => queryClient.setQueryData(key, value))
         }
         return local
       }
-      if (!navigator.onLine) throw new Error('这个条目尚未保存到本地，请联网后打开一次')
+      if (!navigator.onLine) throw new OfflineResourceError()
       return refresh()
     },
   })
@@ -111,33 +117,38 @@ export function useLocalResources<
     placeholderData: needKeepPreviousData ? keepPreviousData : undefined,
     queryFn: async () => {
       const ids = dbParams.ids ?? []
-      const local = await dbQueryFn(dbParams)
+      const local = [] as T[]
+      for (const item of await dbQueryFn(dbParams)) {
+        if (!(await isResourceHidden(queryKey, userId, item.id))) local.push(item)
+      }
       const data = new Map(local.map((item) => [item.id, item]))
       const ordered = () => ids.map((id) => data.get(id) ?? null)
       const stale = ids.filter(
         (id) => !data.has(id) || Date.now() - data.get(id)!.last_update_at.getTime() > dbStaleTime,
       )
       const refresh = async () => {
-        const results = await Promise.allSettled(
-          stale.map((id) => apiQueryFn({ ...apiParams, id } as P)),
-        )
-        const fresh: T[] = []
-        for (const result of results) {
-          if (result.status === 'fulfilled') fresh.push(result.value)
-          else if (!(result.reason instanceof FetchError && result.reason.statusCode === 404))
-            throw result.reason
-        }
-        await updateDB(fresh)
-        for (const item of fresh) {
-          data.set(item.id, item)
-          queryClient.setQueryData([...queryKey, userId, { id: item.id }], item)
-        }
+        await refreshResourceBatch({
+          ids: stale,
+          data,
+          fetch: (id) => apiQueryFn({ ...apiParams, id } as P),
+          save: async (items) => {
+            await updateDB(items)
+            for (const item of items) await setResourceHidden(queryKey, userId, item.id, false)
+          },
+          remove: async (ids) => {
+            for (const id of ids) await setResourceHidden(queryKey, userId, id, true)
+          },
+          evict: (id) =>
+            queryClient.resetQueries({ queryKey: [...queryKey, userId, { id }], exact: true }),
+          publish: (item) => queryClient.setQueryData([...queryKey, userId, { id: item.id }], item),
+        })
         return ordered()
       }
       if (stale.length && navigator.onLine) {
         if (!local.length) return refresh()
         refreshLater(key, refresh, (value) => queryClient.setQueryData(key, value))
       }
+      if (ids.length && !local.length && !navigator.onLine) throw new OfflineResourceError()
       return ordered()
     },
   })

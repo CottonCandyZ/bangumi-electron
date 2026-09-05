@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict'
-import { test } from 'node:test'
+import { expect, test } from 'vitest'
 import {
   assertWebVerificationNotRequired,
   isWebVerificationRequired,
@@ -13,15 +12,15 @@ import {
 
 test('web verification gate blocks repeated requests after the first 403', () => {
   markWebVerificationComplete()
-  assert.doesNotThrow(assertWebVerificationNotRequired)
+  expect(assertWebVerificationNotRequired).not.toThrow()
 
   markWebVerificationRequired()
-  assert.equal(isWebVerificationRequired(), true)
-  assert.throws(assertWebVerificationNotRequired, WebVerificationRequiredError)
+  expect(isWebVerificationRequired()).toBe(true)
+  expect(assertWebVerificationNotRequired).toThrow(WebVerificationRequiredError)
 
   markWebVerificationComplete()
-  assert.equal(isWebVerificationRequired(), false)
-  assert.doesNotThrow(assertWebVerificationNotRequired)
+  expect(isWebVerificationRequired()).toBe(false)
+  expect(assertWebVerificationNotRequired).not.toThrow()
 })
 
 test('web verification state only notifies on transitions', () => {
@@ -35,15 +34,15 @@ test('web verification state only notifies on transitions', () => {
   markWebVerificationComplete()
   unsubscribe()
 
-  assert.equal(changes, 2)
+  expect(changes).toBe(2)
 })
 
 test('web verification errors can be recognized across error boundaries', () => {
-  assert.equal(isWebVerificationRequiredError(new WebVerificationRequiredError()), true)
+  expect(isWebVerificationRequiredError(new WebVerificationRequiredError())).toBe(true)
   const reconstructed = new Error('Bangumi 网页验证已过期')
   reconstructed.name = 'WebVerificationRequiredError'
-  assert.equal(isWebVerificationRequiredError(reconstructed), true)
-  assert.equal(isWebVerificationRequiredError(new Error('403')), false)
+  expect(isWebVerificationRequiredError(reconstructed)).toBe(true)
+  expect(isWebVerificationRequiredError(new Error('403'))).toBe(false)
 })
 
 test('home and list refreshes share a single request slot through body completion', async () => {
@@ -61,8 +60,8 @@ test('home and list refreshes share a single request slot through body completio
       }),
     ),
   )
-  assert.equal(maximum, 1)
-  assert.deepEqual(results, [0, 1, 2, 3, 4, 5])
+  expect(maximum).toBe(1)
+  expect(results).toEqual([0, 1, 2, 3, 4, 5])
 })
 
 test('queued requests stop after a challenge and resume after verification', async () => {
@@ -77,22 +76,22 @@ test('queued requests stop after a challenge and resume after verification', asy
       }),
     ),
   )
-  assert.equal(requests, 1)
-  assert.ok(
+  expect(requests).toBe(1)
+  expect(
     results.every(
       (result) => result.status === 'rejected' && isWebVerificationRequiredError(result.reason),
     ),
-  )
+  ).toBeTruthy()
   markWebVerificationComplete()
-  assert.equal(await queueWebTrends(async () => 'recovered'), 'recovered')
+  expect(await queueWebTrends(async () => 'recovered')).toBe('recovered')
 })
 
 test('network failures release the trends queue for the next request', async () => {
   markWebVerificationComplete()
-  await assert.rejects(
+  await expect(
     queueWebTrends(async () => {
       throw new Error('network failure')
     }),
-  )
-  assert.equal(await queueWebTrends(async () => 'next request'), 'next request')
+  ).rejects.toThrow()
+  expect(await queueWebTrends(async () => 'next request')).toBe('next request')
 })

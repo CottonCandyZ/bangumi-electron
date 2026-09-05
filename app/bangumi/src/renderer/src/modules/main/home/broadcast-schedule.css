@@ -1,0 +1,23 @@
+@property --broadcast-fade-start {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --broadcast-fade-end {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+.broadcast-scroll-fade {
+  transition:
+    --broadcast-fade-start 180ms ease-out,
+    --broadcast-fade-end 180ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .broadcast-scroll-fade {
+    transition: none;
+  }
+}

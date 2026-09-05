@@ -61,6 +61,17 @@ export const webFetch = ofetch.create({
 /** OAuth JSON endpoints must remain reachable while webpage verification is pending. */
 export const oauthFetch = ofetch.create({ baseURL: HOST, credentials: 'include' })
 
+/** Login must be able to recover independently of a previously blocked trends request. */
+export const sessionFetch = ofetch.create({
+  baseURL: HOST,
+  credentials: 'include',
+  async onResponseError({ response }) {
+    if (response.status !== 403 || !(await isCloudflareChallenge(response))) return
+    markWebVerificationRequired()
+    throw new WebVerificationRequiredError()
+  },
+})
+
 /** ofetch api config  */
 export const apiFetch = ofetch.create({ baseURL: API_HOST, credentials: 'omit' })
 

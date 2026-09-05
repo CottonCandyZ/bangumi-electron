@@ -10,6 +10,8 @@ import { cn } from '@renderer/lib/utils'
 import type { ReplyTarget } from '@shared/reply'
 import { useEffect, useMemo, type ReactNode } from 'react'
 import { useInView } from 'react-intersection-observer'
+import { useOnline } from '@renderer/hooks/use-online'
+import { QueryFallback } from '@renderer/components/query-fallback'
 
 export { CommentItem } from './comment-item'
 export { CommentSkeleton } from './comment-list'
@@ -72,6 +74,7 @@ export function CommentBox({
   compact = false,
 }: CommentBoxProps) {
   const resolvedReactionTarget = reactionTarget ?? replyTarget
+  const online = useOnline()
   const visibleComments = useMemo(() => comments?.filter(hasVisibleCommentContent), [comments])
   const visibleTitleCount = titleCount ?? visibleComments?.length
   const visibleFloorNumbers = useMemo(() => {
@@ -90,8 +93,8 @@ export function CommentBox({
   }, [inView, onInView])
 
   const content = useMemo(() => {
-    if (error) {
-      return <p className="text-muted-foreground text-sm">暂时无法读取吐槽箱。</p>
+    if (visibleComments === undefined && (error || !online)) {
+      return <QueryFallback label="吐槽箱" />
     }
 
     if (visibleComments === undefined) {
@@ -125,6 +128,7 @@ export function CommentBox({
     appendPlaceholderCount,
     compact,
     emptyText,
+    online,
     error,
     hasMore,
     isFetchingMore,

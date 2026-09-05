@@ -31,7 +31,10 @@
     "start": "pnpm --filter bangumi-electron start",
     "turnstile:build": "pnpm --filter bangumi-private-api-turnstile-demo build",
     "turnstile:dev": "pnpm --filter bangumi-private-api-turnstile-demo dev",
-    "typecheck": "pnpm --filter bangumi-electron typecheck"
+    "typecheck": "pnpm --filter bangumi-electron typecheck",
+    "test": "pnpm --filter bangumi-electron test",
+    "test:watch": "pnpm --filter bangumi-electron test:watch",
+    "browser": "node app/bangumi/scripts/agent-browser.mjs"
   },
   "devDependencies": {
     "agent-browser": "^0.27.0",

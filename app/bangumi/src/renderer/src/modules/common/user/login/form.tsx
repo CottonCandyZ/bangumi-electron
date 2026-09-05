@@ -40,6 +40,10 @@ import { deleteLoginInfo } from '@renderer/data/fetch/db/user'
 import { cleanAccessTokenCache } from '@renderer/data/fetch/session'
 import { store } from '@renderer/state/utils'
 import { userIdAtom } from '@renderer/state/session'
+import { useBangumiWebVerification } from '@renderer/data/hooks/web-verification'
+import { isWebVerificationRequiredError } from '@renderer/data/fetch/config/web-access'
+import { useOnline } from '@renderer/hooks/use-online'
+import { QueryFallback } from '@renderer/components/query-fallback'
 
 const {
   FORM: LOGIN_FORM_MESSAGE,
@@ -62,6 +66,8 @@ const formSchema = z.object({
 })
 
 export function LoginForm({ success = () => {} }: { success?: () => void }) {
+  const online = useOnline()
+  const verification = useBangumiWebVerification('anime')
   const queryClient = useQueryClient()
   // init data
   const loginInfo = useLocalLoginInfoQuery().data
@@ -113,6 +119,8 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
 
   const captcha = useQuery({
     queryKey: ['captcha'],
+    persister: undefined,
+    networkMode: 'online',
     staleTime: 0,
     refetchOnWindowFocus: false,
     queryFn: prepareWebLoginChallenge,
@@ -135,7 +143,9 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
       success()
     },
     onError(error) {
-      if (error instanceof LoginError) {
+      if (isWebVerificationRequiredError(error)) {
+        toast.dismiss(toastId.current)
+      } else if (error instanceof LoginError) {
         toast.error(error.message, { id: toastId.current, duration: 3000 })
       } else if (error instanceof FetchError) {
         console.error(error.message)
@@ -247,7 +257,34 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
               </FormItem>
             )}
           />
-          {captcha.isFetching ? (
+          {!online ? (
+            <QueryFallback label="登录验证码" />
+          ) : isWebVerificationRequiredError(captcha.error) ||
+            isWebVerificationRequiredError(mutation.error) ? (
+            <div
+              role="status"
+              className="text-muted-foreground space-y-2 rounded-md border p-3 text-sm"
+            >
+              <p>登录需要完成网页验证。</p>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={verification.isPending}
+                onClick={() => {
+                  void verification
+                    .mutateAsync()
+                    .then(() => {
+                      mutation.reset()
+                      form.setValue('captcha', '')
+                      return captcha.refetch()
+                    })
+                    .catch(() => {})
+                }}
+              >
+                {verification.isPending ? '等待验证' : '验证并重新获取验证码'}
+              </Button>
+            </div>
+          ) : captcha.isFetching ? (
             <Skeleton className="h-[60px] w-[160px]" />
           ) : captcha.isError ? (
             <Alert
@@ -292,7 +329,13 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full" disabled={mutation.isPending}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={
+            mutation.isPending || !online || !captcha.data || captcha.isError || captcha.isFetching
+          }
+        >
           {BUTTON_LOGIN}
         </Button>
       </form>

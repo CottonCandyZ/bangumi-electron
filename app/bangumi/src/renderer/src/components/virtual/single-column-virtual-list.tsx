@@ -3,6 +3,7 @@ import { NativeScrollViewport } from '@renderer/components/scroll/native-scroll-
 import { useNativeSmoothVirtualizerScrollToTop } from '@renderer/components/virtual/use-native-smooth-virtualizer-scroll-to-top'
 import { useVirtualScrollMemory } from '@renderer/components/virtual/use-virtual-scroll-memory'
 import { cn } from '@renderer/lib/utils'
+import { useOnline } from '@renderer/hooks/use-online'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, Key, ReactNode } from 'react'
 import { Virtualizer } from 'virtua'
@@ -71,6 +72,7 @@ export function SingleColumnVirtualList<T>({
   showBackToTop = false,
 }: SingleColumnVirtualListProps<T>) {
   const viewportRef = useRef<HTMLElement | null>(null)
+  const online = useOnline()
   const virtualizerRef = useRef<VirtualizerHandle>(null)
   const loadingMoreRef = useRef(false)
   const [viewport, setViewport] = useState<HTMLElement | null>(null)
@@ -121,13 +123,13 @@ export function SingleColumnVirtualList<T>({
   const handledScrollToTopSignalRef = useRef(scrollToTopSignal)
 
   const requestMore = useCallback(() => {
-    if (!hasMore || isFetchingMore || loadingMoreRef.current || !onNearBottom) return
+    if (!online || !hasMore || isFetchingMore || loadingMoreRef.current || !onNearBottom) return
 
     loadingMoreRef.current = true
     Promise.resolve(onNearBottom()).finally(() => {
       loadingMoreRef.current = false
     })
-  }, [hasMore, isFetchingMore, onNearBottom])
+  }, [online, hasMore, isFetchingMore, onNearBottom])
 
   const isNearBottom = useCallback(() => {
     const viewport = viewportRef.current

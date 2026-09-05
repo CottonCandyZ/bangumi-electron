@@ -17,6 +17,10 @@ import { useLocation } from 'react-router-dom'
 
 import { isRoutePathActive, MonoListPanelFilters, useActivePanelItemRef } from './shared'
 import { useMonoListPanelRefreshAction } from './use-panel-refresh-action'
+import { QueryFallback } from '@renderer/components/query-fallback'
+import { useOnline } from '@renderer/hooks/use-online'
+import { isNotFoundError } from '@renderer/lib/utils/network'
+import { userIdAtom } from '@renderer/state/session'
 
 const ESTIMATED_SUBJECT_HEIGHT = 96
 const TRENDING_SUBJECT_INFO_STALE_TIME = 1000 * 60 * 60 * 24
@@ -29,6 +33,7 @@ export function TrendingSubjectsListPanelContent({
   const { pathname } = useLocation()
   const centerActiveItem = useAtomValue(monoListPanelCenterActiveItemAtom)
   const trendsQuery = useTrendsInfiniteQuery(tab.sectionPath)
+  const online = useOnline()
   useMonoListPanelRefreshAction({
     onRefresh: () => trendsQuery.refetch(),
     refreshing: trendsQuery.isRefreshing && !trendsQuery.isFetchingNextPage,
@@ -51,22 +56,17 @@ export function TrendingSubjectsListPanelContent({
     [pathname, subjectIds],
   )
 
+  if (subjectIds.length === 0 && (trendsQuery.isError || !online)) {
+    return (
+      <QueryFallback label="近期热门" error={trendsQuery.error} onRetry={trendsQuery.refetch} />
+    )
+  }
   if (trendsQuery.isLoading && subjectIds.length === 0) {
     return (
       <>
         <TrendingSubjectsPanelStatus label="加载近期热门" />
         <TrendingSubjectsPanelSkeleton />
       </>
-    )
-  }
-
-  if (trendsQuery.isError && subjectIds.length === 0) {
-    return (
-      <div className="text-muted-foreground p-4 text-sm">
-        {trendsQuery.requiresWebVerification
-          ? 'Bangumi 网页验证已过期，点击面板上方的刷新按钮继续。'
-          : '暂时无法读取近期热门，点击面板上方的刷新按钮重试。'}
-      </div>
     )
   }
 
@@ -92,7 +92,7 @@ export function TrendingSubjectsListPanelContent({
             />
           ) : undefined
         }
-        hasMore={!trendsQuery.isFetchNextPageError && !!trendsQuery.hasNextPage}
+        hasMore={online && !trendsQuery.isFetchNextPageError && !!trendsQuery.hasNextPage}
         isFetchingMore={trendsQuery.isFetchingNextPage}
         onNearBottom={() => trendsQuery.fetchNextPage()}
         renderPlaceholder={() => <TrendingSubjectPanelItemSkeleton />}
@@ -158,6 +158,7 @@ function TrendingSubjectsPanelSkeleton() {
 }
 
 function TrendingSubjectPanelItem({ id }: { id: string }) {
+  const userId = useAtomValue(userIdAtom)
   const to = `/subject/${id}`
   const active = isRoutePathActive(useLocation().pathname, to)
   const ref = useActivePanelItemRef(active)
@@ -166,8 +167,17 @@ function TrendingSubjectPanelItem({ id }: { id: string }) {
     dbStaleTime: TRENDING_SUBJECT_INFO_STALE_TIME,
   })
   const subject = subjectQuery.data ?? null
+  if (isNotFoundError(subjectQuery.error) || (!userId && subject?.nsfw)) return null
 
   if (!subject) {
+    if (subjectQuery.isError)
+      return (
+        <QueryFallback
+          label={`条目 #${id}`}
+          error={subjectQuery.error}
+          onRetry={subjectQuery.refetch}
+        />
+      )
     return <TrendingSubjectPanelItemSkeleton innerRef={ref} />
   }
 

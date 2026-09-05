@@ -1,4 +1,6 @@
 import { Badge } from '@renderer/components/ui/badge'
+import { useOnline } from '@renderer/hooks/use-online'
+import { QueryFallback } from '@renderer/components/query-fallback'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
 import {
@@ -100,6 +102,7 @@ function CommunityTopicsVirtualList({
   >
 }) {
   const { pathname } = useLocation()
+  const online = useOnline()
   const centerActiveItem = useAtomValue(monoListPanelCenterActiveItemAtom)
   const topics = useMemo(
     () => query.data?.pages.flatMap((page) => page.data) ?? tab.topics,
@@ -119,6 +122,9 @@ function CommunityTopicsVirtualList({
     tabId: tab.id,
   })
 
+  if (topics.length === 0 && (query.isError || !online)) {
+    return <QueryFallback label="讨论" error={query.error} onRetry={query.refetch} />
+  }
   if (query.isLoading && topics.length === 0) {
     return (
       <div className="flex min-h-0 flex-1 flex-col gap-1 px-2 py-2">
