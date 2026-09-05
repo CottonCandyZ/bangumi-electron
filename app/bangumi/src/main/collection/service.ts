@@ -111,7 +111,6 @@ async function runCollections() {
           )
           .map((r) => r.subjectId),
       ])
-      requested.clear()
       if (!ids.size && !scanRequested && collectionRepository.account(id)?.listComplete) return
       lastError = null
       activity = new CollectionSyncProgress(() => {
@@ -207,6 +206,8 @@ async function syncSubjects(
 ) {
   for (const subjectId of subjects) {
     signal.throwIfAborted()
+    // Leave later requests queued if this subject aborts the serial pass.
+    requested.delete(subjectId)
     let failed = false
     try {
       await engine.sync(id, subjectId, transport, (phase) => {
@@ -214,7 +215,8 @@ async function syncSubjects(
       })
     } catch (error) {
       failed = true
-      if (error instanceof SyncError && error.kind !== 'error') throw error
+      if (error instanceof SyncError && ['network', 'auth-required'].includes(error.kind))
+        throw error
     } finally {
       if (!signal.aborted) activity.settled(collectionRepository.get(id, subjectId)!, failed)
     }
