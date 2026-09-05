@@ -58,6 +58,33 @@ test('a failed manual full scan retries even when the previous list was complete
   expect(mocks.repository.completeList).toHaveBeenCalledTimes(1)
 })
 
+test('first activation and reconnect do not start a full scan without user intent', async () => {
+  mocks.repository.account.mockReturnValue(null)
+  await vi.advanceTimersByTimeAsync(1000)
+  service.syncCollections(1)
+  await vi.advanceTimersByTimeAsync(10000)
+  expect(mocks.list).not.toHaveBeenCalled()
+  expect(mocks.repository.completeList).not.toHaveBeenCalled()
+  service.syncCollections(1, true)
+  await vi.advanceTimersByTimeAsync(1)
+  expect(mocks.list).toHaveBeenCalledTimes(1)
+  expect(mocks.repository.completeList).toHaveBeenCalledTimes(1)
+})
+
+test('individual reads and pending edits do not implicitly download the account list', async () => {
+  mocks.repository.account.mockReturnValue({ listComplete: false })
+  const record = { subjectId: 42, subject: { name: 'test' }, status: 'pending', local: {} }
+  mocks.repository.all.mockReturnValue([record])
+  mocks.repository.get.mockReturnValue(record)
+  mocks.sync.mockImplementation(async () => {
+    record.status = 'clean'
+  })
+  service.requestCollection(43, 1)
+  await vi.advanceTimersByTimeAsync(300)
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([43, 42])
+  expect(mocks.list).not.toHaveBeenCalled()
+})
+
 test('unprocessed refresh requests survive an earlier network failure', async () => {
   mocks.repository.get.mockImplementation((_user, subjectId) => ({
     subjectId,

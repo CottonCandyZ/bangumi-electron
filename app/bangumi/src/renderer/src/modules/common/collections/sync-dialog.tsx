@@ -94,6 +94,11 @@ export function CollectionSyncDialog() {
             </details>
           )}
           {overview && <SyncCoverage overview={overview} />}
+          {overview && !overview.listComplete && !overview.running && (
+            <p className="text-muted-foreground text-sm">
+              首次完整同步需要手动开始。同步完成后，可离线查看已下载的收藏和章节进度。
+            </p>
+          )}
         </div>
         <div className="bg-muted/30 flex flex-wrap items-center justify-end gap-2 border-t px-5 py-3">
           {(overview?.authRequired ||
@@ -110,7 +115,11 @@ export function CollectionSyncDialog() {
             disabled={!overview || sync.isPending || overview.running}
             onClick={() => sync.mutate()}
           >
-            {overview?.running ? '正在同步…' : '同步全部收藏'}
+            {overview?.running
+              ? '正在同步…'
+              : overview?.listComplete
+                ? '同步全部收藏'
+                : '开始首次同步'}
           </Button>
         </div>
       </DialogContent>
