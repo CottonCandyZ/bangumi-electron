@@ -81,6 +81,17 @@
   overflow: visible;
 }
 
+/* Persistent chrome must not inherit the rounded image-transition mask. */
+::view-transition-image-pair(app-header),
+::view-transition-image-pair(app-nav),
+::view-transition-image-pair(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  border-radius: 0;
+  clip-path: none;
+  overflow: visible;
+}
+
 ::view-transition-new(app-header),
 ::view-transition-new(app-nav) {
   opacity: 1;

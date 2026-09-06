@@ -2,14 +2,22 @@ import { Button } from '@renderer/components/ui/button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { cn } from '@renderer/lib/utils'
+import { useLayoutEffect, useState } from 'react'
 
 export function NavButton({ compact = false }: { compact?: boolean }) {
   const navigate = useNavigate()
-  // Subscribe to router navigation so browser history availability is recalculated.
-  useLocation()
-  const historyIndex = typeof history.state?.idx === 'number' ? history.state.idx : 0
-  const backDisable = historyIndex === 0
-  const forwardDisable = historyIndex >= history.length - 1
+  const { key } = useLocation()
+  const [availability, setAvailability] = useState({ back: false, forward: false })
+  useLayoutEffect(() => {
+    // Browser history is external mutable state. Read it after the route commits,
+    // before painting, rather than allowing render-time reads to be memoized.
+    const index = typeof history.state?.idx === 'number' ? history.state.idx : 0
+    const next = { back: index > 0, forward: index < history.length - 1 }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setAvailability((previous) =>
+      previous.back === next.back && previous.forward === next.forward ? previous : next,
+    )
+  }, [key])
   return (
     <div className="flex items-center justify-center gap-0.5">
       <Button
@@ -20,7 +28,7 @@ export function NavButton({ compact = false }: { compact?: boolean }) {
           compact && 'size-7 rounded-sm [&_svg]:size-4',
         )}
         onClick={() => navigate(-1)}
-        disabled={backDisable}
+        disabled={!availability.back}
       >
         <ChevronLeft />
       </Button>
@@ -32,7 +40,7 @@ export function NavButton({ compact = false }: { compact?: boolean }) {
           compact && 'size-7 rounded-sm [&_svg]:size-4',
         )}
         onClick={() => navigate(1)}
-        disabled={forwardDisable}
+        disabled={!availability.forward}
       >
         <ChevronRight />
       </Button>
