@@ -637,6 +637,40 @@ test('new unmarked episodes do not turn offline removal into a lifecycle conflic
   )
 })
 
+test('uncollected reads restore missing episode states and preserve retained progress', (t) => {
+  const f = fixture(t)
+  f.repo.ensure(1, 99)
+  const remote: RemoteCollection = {
+    snapshot: { collection: null, episodes: { 101: 0, 102: 0 }, episodesComplete: true },
+    episodes: [101, 102].map((id, index) => ({
+      id,
+      subject_id: 99,
+      ep: index + 1,
+      sort: index + 1,
+      type: 0,
+      name: '',
+      name_cn: '',
+      airdate: '',
+      duration: '',
+      desc: '',
+      comment: 0,
+      disc: 0,
+      duration_seconds: 0,
+    })),
+    epStatus: 0,
+    volStatus: 0,
+  }
+  f.repo.acknowledge(1, 99, 0, remote)
+  expect(f.repo.episodes({ userId: 1, subjectId: 99 }).total).toBe(2)
+  const record = f.repo.get(1, 99)!
+  f.repo.put({ ...record, local: { ...record.local, episodes: { 101: 2 } } })
+  f.repo.acknowledge(1, 99, 0, remote)
+  expect(f.repo.episodes({ userId: 1, subjectId: 99 }).data?.map((item) => item.type)).toEqual([
+    2, 0,
+  ])
+  expect(f.repo.get(1, 99)!.local.collection).toBeNull()
+})
+
 test('recent removals exclude never-collected reads and retain actual removals', (t) => {
   const f = fixture(t)
   expect(f.repo.collection(1, 99)).toBeUndefined()

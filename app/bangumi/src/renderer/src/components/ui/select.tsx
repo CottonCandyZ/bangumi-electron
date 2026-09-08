@@ -1,3 +1,4 @@
+import { windowCollisionPadding } from "@renderer/lib/window-safe-area"
 "use client"
 
 import * as React from "react"
@@ -90,6 +91,8 @@ function SelectContent({
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Positioner
+
+        collisionPadding={windowCollisionPadding()}
         side={side}
         sideOffset={sideOffset}
         align={align}

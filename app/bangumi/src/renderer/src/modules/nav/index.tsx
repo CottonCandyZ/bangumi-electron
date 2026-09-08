@@ -18,7 +18,7 @@ export function NavBar() {
     <div>
       <nav
         className={cn(
-          'app-sidebar bg-background fixed z-50 flex flex-col border-r transition-[width]',
+          'app-sidebar bg-background fixed z-50 flex cursor-default flex-col border-r transition-[width] select-none',
           open && 'z-50',
         )}
         style={{

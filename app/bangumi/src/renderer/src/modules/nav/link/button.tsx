@@ -16,7 +16,7 @@ export function NavButton({ name, path, icon, active }: Props) {
     <Button
       variant="ghost"
       className={cn(
-        'text-primary/65 hover:text-primary relative aspect-square h-full w-fit cursor-auto p-2 active:scale-95',
+        'text-primary/65 hover:text-primary relative aspect-square h-full w-fit cursor-default p-2 select-none active:scale-95',
         isActive && 'bg-accent text-primary',
         open && 'aspect-auto w-full justify-start gap-2',
       )}

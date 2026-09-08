@@ -1,3 +1,4 @@
+import { windowCollisionPadding } from '@renderer/lib/window-safe-area'
 import { Align, Side } from '@renderer/type/ui'
 import { clamp } from '@renderer/lib/utils/tool'
 
@@ -51,7 +52,7 @@ export function calcPos<T extends Placement | undefined = 'bottom'>({
     bottom: paddingBottom = 0,
     left: paddingLeft = 0,
     right: paddingRight = 0,
-  } = collisionPadding
+  } = windowCollisionPadding(collisionPadding)
 
   if (placement === 'left' || placement === 'right') {
     return calcHorizontalPos({

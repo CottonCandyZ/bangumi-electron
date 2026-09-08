@@ -1,4 +1,5 @@
 body:has(.windows-frame) {
+  --window-titlebar-height: 32px;
   background: transparent;
 }
 
@@ -28,4 +29,39 @@ body:has(.windows-frame) {
 
 .app-sidebar-backdrop {
   top: var(--window-titlebar-height, 0px);
+}
+
+/* Portals live under body, outside the frame's inherited variables. */
+body:has(.windows-frame)
+  :is(
+    [data-slot='sheet-overlay'],
+    [data-slot='dialog-overlay'],
+    [data-slot='alert-dialog-overlay'],
+    .app-hover-backdrop
+  ) {
+  top: var(--window-titlebar-height);
+}
+
+body:has(.windows-frame) [data-slot='sheet-content'] {
+  max-height: calc(100dvh - var(--window-titlebar-height));
+  overflow-y: auto;
+}
+
+body:has(.windows-frame) [data-slot='sheet-content']:not([data-side='bottom']) {
+  top: var(--window-titlebar-height);
+}
+
+body:has(.windows-frame) [data-slot='sheet-content']:is([data-side='left'], [data-side='right']) {
+  height: calc(100dvh - var(--window-titlebar-height));
+}
+
+body:has(.windows-frame) :is([data-slot='dialog-content'], [data-slot='alert-dialog-content']) {
+  top: calc(50% + var(--window-titlebar-height) / 2);
+  max-height: calc(100dvh - var(--window-titlebar-height) - 2rem);
+  overflow-y: auto;
+}
+
+body:has(.windows-frame) .bangumi-image-preview {
+  top: var(--window-titlebar-height);
+  height: calc(100% - var(--window-titlebar-height));
 }

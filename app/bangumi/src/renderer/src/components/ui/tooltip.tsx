@@ -1,3 +1,4 @@
+import { windowCollisionPadding } from "@renderer/lib/window-safe-area"
 "use client"
 
 import * as React from "react"
@@ -73,6 +74,8 @@ function TooltipContent({
   return (
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Positioner
+
+        collisionPadding={windowCollisionPadding()}
         align={align}
         alignOffset={alignOffset}
         side={side}

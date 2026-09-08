@@ -4,7 +4,12 @@ import { ArrowUpIcon } from 'lucide-react'
 import { useEffect, useRef, type CSSProperties } from 'react'
 
 const SHOW_THRESHOLD = 160
-const VISIBLE_CLASSES = ['translate-y-0', 'opacity-100']
+const VISIBLE_CLASSES = [
+  'translate-y-0',
+  'opacity-50',
+  'hover:opacity-100',
+  'focus-visible:opacity-100',
+]
 const HIDDEN_CLASSES = ['pointer-events-none', 'translate-y-2', 'opacity-0']
 
 type BackToTopButtonProps = {

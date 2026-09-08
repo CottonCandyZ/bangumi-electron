@@ -1,11 +1,4 @@
-import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from '@renderer/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover'
 import { Button } from '@renderer/components/ui/button'
 import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
@@ -45,36 +38,22 @@ export function NotificationButton() {
             >
               <span className="i-mingcute-notification-line" />
               {unreadCount > 0 && (
-                <span className="bg-destructive text-destructive-foreground absolute -top-0.5 -right-1 flex min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-4 font-semibold tabular-nums">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
+                <span
+                  aria-hidden="true"
+                  className="absolute top-0.5 right-0.5 size-2 rounded-full bg-pink-400"
+                />
               )}
             </Button>
           </PopoverTrigger>
         }
         Content={<p>通知</p>}
       />
-      <PopoverContent align="end" className="no-drag-region w-96 p-0" sideOffset={8}>
-        <PopoverHeader className="border-b px-4 py-3">
-          <div className="flex items-center justify-between gap-4">
-            <PopoverTitle>通知</PopoverTitle>
-            {unreadCount > 0 && (
-              <Button
-                className="h-7 px-2 text-xs"
-                disabled={clearMutation.isPending}
-                size="sm"
-                type="button"
-                variant="ghost"
-                onClick={() => clearMutation.mutate({})}
-              >
-                全部已读
-              </Button>
-            )}
-          </div>
-          <PopoverDescription>
-            {unreadCount > 0 ? `${unreadCount} 条未读` : '没有未读通知'}
-          </PopoverDescription>
-        </PopoverHeader>
+      <PopoverContent
+        align="end"
+        aria-label="通知"
+        className="no-drag-region w-96 p-0"
+        sideOffset={8}
+      >
         <div className="max-h-[min(32rem,70vh)] overflow-y-auto p-1">
           {notificationsQuery.isPending ? (
             <NotificationSkeleton />
@@ -93,6 +72,17 @@ export function NotificationButton() {
             ))
           )}
         </div>
+        {unreadCount > 0 && (
+          <Button
+            className="m-1 h-7 text-xs"
+            disabled={clearMutation.isPending}
+            size="sm"
+            variant="ghost"
+            onClick={() => clearMutation.mutate({})}
+          >
+            全部已读
+          </Button>
+        )}
       </PopoverContent>
     </Popover>
   )

@@ -1,5 +1,4 @@
 import { ThemeProvider } from '@renderer/modules/wrapper/theme-wrapper'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PropsWithChildren } from 'react'
 import { queryClient } from '@renderer/modules/wrapper/query'
 import { Provider as JotaiProvider } from 'jotai'
@@ -20,7 +19,6 @@ export function Wrapper({ children }: PropsWithChildren) {
             </ThemeProvider>
           </KeyboardShortcutWrapper>
         </AppConfigLoader>
-        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </JotaiProvider>
   )

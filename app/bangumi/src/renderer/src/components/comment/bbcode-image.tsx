@@ -4,6 +4,7 @@ import { client } from '@renderer/lib/client'
 import { cn } from '@renderer/lib/utils'
 import { ExternalLinkIcon, Maximize2Icon, RefreshCcwIcon } from 'lucide-react'
 import PhotoSwipe from 'photoswipe'
+import { getWindowSafeTop } from '@renderer/lib/window-safe-area'
 import {
   createContext,
   useCallback,
@@ -236,6 +237,10 @@ export function BBCodeImage({ src, alt = '' }: { src: string; alt?: string }) {
 
 export function openImagePreview(items: ImagePreviewItem[], index: number) {
   const pswp = new PhotoSwipe({
+    getViewportSizeFn: () => ({
+      x: document.documentElement.clientWidth,
+      y: window.innerHeight - getWindowSafeTop(),
+    }),
     dataSource: items.map((item) => ({
       src: item.src,
       alt: item.alt,
@@ -281,6 +286,9 @@ export function openImagePreview(items: ImagePreviewItem[], index: number) {
     })
   })
 
+  pswp.on('updateScrollOffset', () => {
+    pswp.offset.y += getWindowSafeTop()
+  })
   pswp.init()
 }
 

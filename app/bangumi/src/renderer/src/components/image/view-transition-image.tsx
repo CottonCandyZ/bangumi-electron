@@ -10,6 +10,7 @@ type ViewTransitionElementProps = {
   children?: ReactNode
   className?: string
   initialInView?: boolean
+  visibilityThreshold?: number
   onInViewChange?: (inView: boolean) => void
   style?: React.CSSProperties
   viewTransitionName?: string
@@ -21,13 +22,14 @@ export const ViewTransitionElement = memo(function ViewTransitionElement({
   children,
   className,
   initialInView = true,
+  visibilityThreshold = 1,
   onInViewChange,
   style,
   viewTransitionName,
 }: ViewTransitionElementProps) {
   const { init, setter } = useStateHook({ key: cacheKey ?? 'viewTransitionElementInView' })
-  const { ref, inView } = useInView({
-    threshold: 1,
+  const { ref, inView, entry } = useInView({
+    threshold: [visibilityThreshold, 1],
     initialInView: cacheKey ? ((init as boolean | undefined) ?? initialInView) : initialInView,
   })
 
@@ -42,7 +44,10 @@ export const ViewTransitionElement = memo(function ViewTransitionElement({
       className={className}
       style={{
         ...style,
-        viewTransitionName: active && inView ? viewTransitionName : undefined,
+        viewTransitionName:
+          active && inView && (!entry || entry.intersectionRatio === 1)
+            ? viewTransitionName
+            : undefined,
       }}
     >
       {children}
@@ -61,6 +66,7 @@ export const ViewTransitionImage = memo(function ViewTransitionImage({
   className,
   imageContainerClassName,
   initialInView,
+  visibilityThreshold,
   onInViewChange,
   style,
   viewTransitionName,
@@ -72,6 +78,7 @@ export const ViewTransitionImage = memo(function ViewTransitionImage({
       cacheKey={cacheKey}
       className={className}
       initialInView={initialInView}
+      visibilityThreshold={visibilityThreshold}
       onInViewChange={onInViewChange}
       style={style}
       viewTransitionName={viewTransitionName}

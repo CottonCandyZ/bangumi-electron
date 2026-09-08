@@ -18,7 +18,7 @@ export function CollectionPanel() {
   const openLoginDialog = useSetAtom(loginDialogAtom)
 
   return (
-    <div className="flex h-dvh flex-col">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <CollectionPanelHeader />
       {userInfo === undefined && !panelUsername ? (
         <DelayedLoading>

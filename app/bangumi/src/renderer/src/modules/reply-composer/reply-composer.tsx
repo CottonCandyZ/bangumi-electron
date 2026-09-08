@@ -7,19 +7,21 @@ import { ReplyPreview } from '@renderer/modules/reply-composer/reply-preview'
 import { closeReplyComposerAtomAction, replyComposerAtom } from '@renderer/state/panel'
 import { getReplyTargetLabel } from '@shared/reply'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { Loader2, Save, Send, X } from 'lucide-react'
+import { Loader2, Save, Send, X, ExternalLink, PanelRight } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
-export function ReplyComposer() {
+export function ReplyComposer({ detached = false }: { detached?: boolean }) {
   const state = useAtomValue(replyComposerAtom)
   const closeReplyComposer = useSetAtom(closeReplyComposerAtomAction)
   const [draft, setDraft] = useState('')
+  const [transferring, setTransferring] = useState(false)
+  const [sending, setSending] = useState(false)
   const createMutation = useCreateReplyMutation()
   const updateMutation = useUpdateReplyMutation()
   const content = state.content
   const isEditing = content?.editCommentId !== undefined
-  const submitting = createMutation.isPending || updateMutation.isPending
+  const submitting = createMutation.isPending || updateMutation.isPending || transferring || sending
   const bbcode = useMemo(() => markdownToBBCode(draft), [draft])
   const replyContext = content?.replyToName
     ? ['回复', content.replyToName, content.replyToFloor].filter(Boolean).join(' · ')
@@ -34,16 +36,36 @@ export function ReplyComposer() {
 
   const close = () => {
     if (submitting) return
+    if (detached) {
+      void client.hideReplyWindow({})
+      return
+    }
     closeReplyComposer()
   }
 
+  const transfer = async () => {
+    if (!content || submitting) return
+    setTransferring(true)
+    try {
+      const next = { ...content, draft }
+      if (detached) await client.dockReplyWindow(next)
+      else if (await client.openReplyWindow(next)) closeReplyComposer()
+      else toast.info('已有独立回复窗口，请先完成或收回该草稿')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : '切换编辑器失败')
+    } finally {
+      setTransferring(false)
+    }
+  }
+
   const submit = async () => {
-    if (!content) return
+    if (!content || submitting) return
     if (!bbcode.trim()) {
       toast.error('回复内容不能为空')
       return
     }
 
+    setSending(true)
     try {
       if (isEditing) {
         await updateMutation.mutateAsync({
@@ -64,9 +86,12 @@ export function ReplyComposer() {
         })
         toast.success('回复已发送')
       }
-      closeReplyComposer()
+      if (detached) await client.finishReplyWindow({})
+      else closeReplyComposer()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : isEditing ? '编辑失败' : '回复失败')
+    } finally {
+      setSending(false)
     }
   }
 
@@ -85,17 +110,30 @@ export function ReplyComposer() {
           </h2>
           <p className="text-muted-foreground mt-0.5 line-clamp-1 text-xs">{replyContext}</p>
         </div>
-        <Button
-          aria-label={isEditing ? '关闭编辑' : '关闭回复'}
-          className="no-drag-region -mr-1 size-8 shrink-0"
-          disabled={submitting}
-          onClick={close}
-          size="icon"
-          type="button"
-          variant="ghost"
-        >
-          <X className="size-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            aria-label={detached ? '收回侧边栏' : '弹出独立窗口'}
+            title={detached ? '收回侧边栏' : '弹出独立窗口'}
+            className="no-drag-region size-8 shrink-0"
+            disabled={submitting}
+            onClick={() => void transfer()}
+            size="icon"
+            variant="ghost"
+          >
+            {detached ? <PanelRight className="size-4" /> : <ExternalLink className="size-4" />}
+          </Button>
+          <Button
+            aria-label={isEditing ? '关闭编辑' : '关闭回复'}
+            className="no-drag-region -mr-1 size-8 shrink-0"
+            disabled={submitting}
+            onClick={close}
+            size="icon"
+            type="button"
+            variant="ghost"
+          >
+            <X className="size-4" />
+          </Button>
+        </div>
       </header>
       <div className="flex min-h-0 flex-1 flex-col gap-3 px-3 py-3">
         <section className="flex min-h-0 flex-[0.8] flex-col gap-2">
@@ -108,13 +146,19 @@ export function ReplyComposer() {
             className="min-h-0 flex-1"
             disabled={submitting}
             value={draft}
-            onChange={setDraft}
+            onChange={(value) => {
+              setDraft(value)
+              if (detached)
+                void client.updateReplyWindowDraft({ draft: value }).catch(() => {
+                  toast.error('草稿暂存失败，请先收回侧边栏')
+                })
+            }}
           />
         </section>
       </div>
       <footer className="flex shrink-0 flex-row justify-end gap-2 border-t px-3 py-3">
         <Button variant="outline" onClick={close} disabled={submitting}>
-          取消
+          {detached ? '关闭' : '取消'}
         </Button>
         <Button onClick={submit} disabled={submitting}>
           {submitting ? (

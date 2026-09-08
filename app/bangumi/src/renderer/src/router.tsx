@@ -31,6 +31,7 @@ export const router: ReturnType<typeof createHashRouter> = createHashRouter(
       path: '/',
       element: <App />,
       children: [
+        { path: 'reply-window', lazy: () => import('@renderer/routes/reply-window') },
         {
           path: 'command',
           lazy: () => import('@renderer/routes/command-overlay'),

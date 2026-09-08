@@ -1,27 +1,29 @@
 import { Button } from '@renderer/components/ui/button'
 import { useOpenReplyComposer } from '@renderer/modules/reply-composer/use-open-reply-composer'
-import { mainContainerLeft } from '@renderer/state/main-bounding-box'
+import { mainContainerRight } from '@renderer/state/main-bounding-box'
 import type { ReplyTarget } from '@shared/reply'
 import { useAtomValue } from 'jotai'
 import { MessageCircle } from 'lucide-react'
 
 const COMMENT_FAB_CLASS_NAME =
-  'fixed bottom-6 z-40 h-10 gap-2 rounded-md border-input/70 bg-background/70 px-4 text-foreground/80 shadow-sm backdrop-blur-sm hover:border-input hover:bg-background hover:text-foreground'
+  'no-drag-region fixed right-6 bottom-20 z-30 size-11 rounded-full bg-background p-0 text-primary opacity-50 shadow-lg transition duration-200 hover:-translate-y-0.5 hover:bg-background hover:opacity-100 focus-visible:opacity-100 active:scale-95'
 
 export function MainCommentFab({ replyTarget }: { replyTarget: ReplyTarget }) {
   const openReplyComposer = useOpenReplyComposer()
-  const mainLeft = useAtomValue(mainContainerLeft)
+  const mainRight = useAtomValue(mainContainerRight)
 
   return (
     <Button
       className={COMMENT_FAB_CLASS_NAME}
+      aria-label="评论"
+      title="评论"
       onClick={() => openReplyComposer({ target: replyTarget })}
-      style={mainLeft > 0 ? { left: `${mainLeft + 24}px` } : { left: '1.5rem' }}
+      style={mainRight > 0 ? { right: `calc(100vw - ${mainRight}px + 1.5rem)` } : undefined}
       type="button"
-      variant="outline"
+      variant="ghost"
+      size="icon"
     >
-      <MessageCircle className="size-4" />
-      评论
+      <MessageCircle className="size-5" />
     </Button>
   )
 }

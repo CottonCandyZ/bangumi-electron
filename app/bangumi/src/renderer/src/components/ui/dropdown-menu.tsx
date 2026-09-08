@@ -1,3 +1,4 @@
+import { windowCollisionPadding } from "@renderer/lib/window-safe-area"
 "use client"
 
 import * as React from "react"
@@ -57,7 +58,7 @@ function DropdownMenuContent({
         alignOffset={alignOffset}
         side={side}
         sideOffset={sideOffset}
-        collisionPadding={collisionPadding}
+        collisionPadding={windowCollisionPadding(collisionPadding)}
       >
         <MenuPrimitive.Popup
           data-slot="dropdown-menu-content"

@@ -1,3 +1,4 @@
+import { windowCollisionPadding } from "@renderer/lib/window-safe-area"
 import * as React from "react"
 import { PreviewCard as PreviewCardPrimitive } from "@base-ui/react/preview-card"
 
@@ -66,6 +67,8 @@ function HoverCardContent({
   return (
     <PreviewCardPrimitive.Portal data-slot="hover-card-portal">
       <PreviewCardPrimitive.Positioner
+
+        collisionPadding={windowCollisionPadding()}
         align={align}
         alignOffset={alignOffset}
         side={side}

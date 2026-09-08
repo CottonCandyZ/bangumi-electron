@@ -106,10 +106,12 @@ export function MonoDetailView({
   const setAvatarInView = useSetAtom(monoAvatarImageInViewAtom)
 
   useEffect(() => {
+    // Once mounted, the image observer owns visibility; cached state may be stale.
+    if (detail) return
     setAvatarInView(
       cachedAvatarInView !== undefined ? cachedAvatarInView : (scrollCache.get(pathname) ?? 0) <= 0,
     )
-  }, [cachedAvatarInView, detail?.id, pathname, setAvatarInView])
+  }, [cachedAvatarInView, detail, pathname, setAvatarInView])
 
   if (!detail) return <MonoDetailSkeleton />
 
@@ -134,11 +136,12 @@ export function MonoDetailView({
               className={MONO_MAIN_IMAGE_FRAME}
               imageContainerClassName="w-full overflow-hidden rounded-lg border shadow-sm"
               imageSrc={image}
-              imageClassName="h-auto w-full object-contain"
+              imageClassName="h-auto max-h-[min(32rem,65dvh)] w-full object-contain"
               loadingClassName={MONO_MAIN_IMAGE_LOADING_FRAME}
               loading="eager"
               careLoading
               onInViewChange={setAvatarInView}
+              visibilityThreshold={0}
               viewTransitionName={avatarViewTransitionName}
             >
               {previewImage && <ImagePreviewButton alt={detail.name} src={previewImage} />}
@@ -150,6 +153,7 @@ export function MonoDetailView({
               key={`${detail.type}-${detail.id}-avatar-placeholder`}
               className={`${MONO_MAIN_IMAGE_FRAME} bg-muted text-muted-foreground flex aspect-3/4 items-center justify-center rounded-lg border text-sm`}
               onInViewChange={setAvatarInView}
+              visibilityThreshold={0}
               viewTransitionName={avatarViewTransitionName}
             >
               暂无图片

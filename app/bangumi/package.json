@@ -1,6 +1,6 @@
 {
   "name": "bangumi-electron",
-  "version": "0.0.1-beta.32",
+  "version": "0.0.1-beta.33",
   "type": "module",
   "description": "An Electron application for bangumi",
   "main": "./out/main/index.js",
@@ -103,7 +103,6 @@
     "@tailwindcss/vite": "^4.1.17",
     "@tanstack/eslint-plugin-query": "^5.51.1",
     "@tanstack/react-query": "^5.90.2",
-    "@tanstack/react-query-devtools": "^5.51.1",
     "@tanstack/react-query-persist-client": "^5.90.4",
     "@types/node": "^20.14.10",
     "@types/react": "^19.2.7",

@@ -207,7 +207,8 @@ export class CollectionRepository {
       let local = structuredClone(remote.snapshot)
       let retained = remote.snapshot.collection ?? current.retained
       // A successful delete need not erase the user's local episode backup.
-      if (remote.snapshot.collection === null) local.episodes = { ...current.local.episodes }
+      if (remote.snapshot.collection === null)
+        local.episodes = { ...remote.snapshot.episodes, ...current.local.episodes }
       for (const action of remaining) {
         retained = local.collection ?? retained
         local = applyCommand(local, action.command, retained)

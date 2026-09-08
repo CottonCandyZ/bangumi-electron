@@ -1,3 +1,4 @@
+import { windowCollisionPadding } from "@renderer/lib/window-safe-area"
 import * as React from "react"
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 
@@ -66,7 +67,7 @@ function PopoverContent({
         alignOffset={alignOffset}
         side={side}
         sideOffset={sideOffset}
-        collisionPadding={collisionPadding}
+        collisionPadding={windowCollisionPadding(collisionPadding)}
         className="isolate z-50"
       >
         <PopoverPrimitive.Popup

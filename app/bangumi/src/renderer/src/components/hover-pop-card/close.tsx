@@ -6,7 +6,10 @@ export function BackCover({ className }: { className?: string }) {
   const [activeId, setActiveId] = useAtom(activeHoverPopCardAtom)
   return (
     activeId && (
-      <div className={cn('fixed inset-0 z-20', className)} onMouseEnter={() => setActiveId(null)} />
+      <div
+        className={cn('app-hover-backdrop fixed inset-0 z-20', className)}
+        onMouseEnter={() => setActiveId(null)}
+      />
     )
   )
 }

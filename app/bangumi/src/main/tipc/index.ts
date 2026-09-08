@@ -1,4 +1,5 @@
 import { collectionIPC } from './collection'
+import { replyWindowIPC } from './reply-window'
 import { dbIPC } from '@main/tipc/db'
 import { env } from '@main/tipc/env'
 import { loggerIPC } from '@main/tipc/logger'
@@ -11,6 +12,7 @@ import { turnstileIPC } from '@main/tipc/turnstile'
 import { webVerificationIPC } from '@main/tipc/web-verification'
 
 export const router = {
+  ...replyWindowIPC,
   ...collectionIPC,
   ...window,
   ...env,

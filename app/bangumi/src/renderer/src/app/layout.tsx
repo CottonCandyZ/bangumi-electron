@@ -9,9 +9,27 @@ import { handlers } from '@renderer/lib/client'
 import { MainOutlet } from './main-outlet'
 import { UI_CONFIG } from '@renderer/config'
 import { WindowFrame } from '@renderer/modules/header/window-frame'
+import { store } from '@renderer/state/utils'
+import { openReplyComposerAtomAction } from '@renderer/state/panel'
+import { queryClient } from '@renderer/modules/wrapper/query'
+import { getReplyInvalidationKeys } from '@renderer/data/hooks/api/reply'
 
 function RootLayout() {
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const undock = handlers.dockReplyComposer.listen((content) =>
+      store.set(openReplyComposerAtomAction, content),
+    )
+    const unsubmit = handlers.replySubmitted.listen((target) => {
+      for (const queryKey of getReplyInvalidationKeys(target))
+        void queryClient.invalidateQueries({ queryKey })
+    })
+    return () => {
+      undock()
+      unsubmit()
+    }
+  }, [])
 
   useEffect(() => {
     const unlisten = handlers.navigateTo.listen(({ path }) => {

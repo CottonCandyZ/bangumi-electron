@@ -25,7 +25,7 @@ export function MonoListPanel() {
   if (!activeTab) return null
 
   return (
-    <div className="flex h-dvh min-w-0 flex-col">
+    <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
       <MonoListPanelHeader
         activeTab={activeTab}
         canToggleFilters={canToggleFilters}
