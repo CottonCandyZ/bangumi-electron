@@ -34,8 +34,8 @@ function RootLayout() {
             <MainOutlet />
           </MainContainer>
         </div>
+        <BackCover />
       </div>
-      <BackCover />
     </WindowFrame>
   )
 }

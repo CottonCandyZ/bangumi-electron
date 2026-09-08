@@ -24,8 +24,8 @@ export default function AppShellErrorElement() {
             <MainErrorElement />
           </main>
         </div>
+        <BackCover />
       </div>
-      <BackCover />
     </WindowFrame>
   )
 }
