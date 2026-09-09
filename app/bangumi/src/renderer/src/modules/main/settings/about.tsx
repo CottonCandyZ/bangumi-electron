@@ -205,8 +205,8 @@ function getUpdateDescription(state: AppUpdateState | null, title: string): Reac
   }
   if (state.status === 'downloaded' && state.version) {
     return withUpdatePath(
-      `已下载 ${state.version}，点击后会重启并应用更新。`,
-      '下载包',
+      `${state.version} 已准备就绪，点击后会重启并应用更新。`,
+      '待安装包',
       state.downloadPath,
     )
   }

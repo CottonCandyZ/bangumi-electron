@@ -24,7 +24,9 @@ test('delta chains report total download bytes separately from reconstructed ful
   expect(getUpdateSizeDescription(state('downloading', sizes))).toBe(
     '增量包 103.11 KiB · 完整包 147.29 MiB（增量更新失败时使用）',
   )
-  expect(getUpdateSizeDescription(state('downloaded', sizes))).toBe('完整包 147.29 MiB')
+  expect(getUpdateSizeDescription(state('downloaded', sizes))).toBe(
+    '待安装包大小 147.29 MiB（非实际下载量）',
+  )
 })
 test('full updates and restored downloaded packages expose size without claiming a delta', () => {
   const sizes = getUpdatePackageSizes({ Size: 1048576 }, { DeltasToTarget: [{ Size: 32 }] })
@@ -32,7 +34,7 @@ test('full updates and restored downloaded packages expose size without claiming
   expect(getUpdateSizeDescription(state('available', sizes))).toBe('完整包 1 MiB')
   expect(
     getUpdateSizeDescription(state('downloaded', getUpdatePackageSizes({ Size: 1048576 }))),
-  ).toBe('完整包 1 MiB')
+  ).toBe('待安装包大小 1 MiB（非实际下载量）')
 })
 test('missing or invalid metadata is not displayed as a zero byte download', () => {
   expect(getUpdateSizeDescription(null)).toBeUndefined()

@@ -27,7 +27,10 @@ export function formatUpdatePackageSize(bytes: number): string {
 
 export function getUpdateSizeDescription(state: AppUpdateState | null): string | undefined {
   if (state?.fullPackageSize === undefined) return undefined
+  if (state.status === 'downloaded') {
+    return `待安装包大小 ${formatUpdatePackageSize(state.fullPackageSize)}（非实际下载量）`
+  }
   const full = `完整包 ${formatUpdatePackageSize(state.fullPackageSize)}`
-  if (state.status === 'downloaded' || state.deltaPackageSize === undefined) return full
+  if (state.deltaPackageSize === undefined) return full
   return `增量包 ${formatUpdatePackageSize(state.deltaPackageSize)} · ${full}（增量更新失败时使用）`
 }
