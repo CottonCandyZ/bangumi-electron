@@ -10,6 +10,17 @@ export type AppUpdateStatus =
   | 'downloaded'
   | 'error'
 
+export type AppUpdateActivity = {
+  phase: 'prepare' | 'delta' | 'full' | 'verify' | 'reconstruct'
+  fileName?: string
+  filePath?: string
+  bytes: number
+  totalBytes: number
+  index?: number | null
+  count: number
+  fallback: boolean
+}
+
 export type AppUpdateState = {
   status: AppUpdateStatus
   currentVersion: string
@@ -28,6 +39,7 @@ export type AppUpdateState = {
   releaseName?: string | null
   releaseDate?: string
   percent?: number
+  activity?: AppUpdateActivity
   error?: string
   unavailableReason?: string
   ignored?: boolean

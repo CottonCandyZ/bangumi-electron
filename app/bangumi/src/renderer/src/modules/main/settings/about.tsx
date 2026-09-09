@@ -19,6 +19,7 @@ import { useAppConfig } from '@renderer/state/app-config'
 import type { AppUpdateChannel } from '@shared/config'
 import type { AppBuildInfo, AppUpdateState } from '@shared/update'
 import { getUpdateSizeDescription } from '@shared/update-size'
+import { getUpdateProgressDescription } from '@shared/update-progress'
 import { Download, FileDown, RefreshCw, Trash2 } from 'lucide-react'
 import { type ReactNode, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -143,7 +144,10 @@ export function AboutSettings() {
                 variant="outline"
                 className="h-9 rounded-md font-normal shadow-none"
                 disabled={
-                  clearingDownloads || state?.status === 'unsupported' || !state?.downloadDir
+                  clearingDownloads ||
+                  state?.status === 'downloading' ||
+                  state?.status === 'unsupported' ||
+                  !state?.downloadDir
                 }
                 onClick={clearUpdateDownloads}
               >
@@ -211,7 +215,7 @@ function getUpdateDescription(state: AppUpdateState | null, title: string): Reac
     )
   }
   if (state.status === 'downloading' && state.version)
-    return withUpdatePath(`正在下载 ${state.version}。`, '临时文件', state.downloadTempPath)
+    return withUpdatePath(getUpdateProgressDescription(state), '当前文件', state.activity?.filePath)
   if (state.status === 'error')
     return withUpdatePath(state.error ?? title, '下载目录', state.downloadDir)
   if (state.status === 'unavailable') {

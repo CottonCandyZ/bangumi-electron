@@ -9,7 +9,7 @@ import { JSONStore } from '@main/lib/store'
 import { setAppQuitting } from '@main/app-flags'
 import type { AppUpdateChannel, AppConfig } from '@shared/config'
 import { normalizeAppConfig } from '@shared/config'
-import type { AppBuildInfo, AppUpdateState } from '@shared/update'
+import type { AppBuildInfo, AppUpdateState, AppUpdateActivity } from '@shared/update'
 import { getUpdatePackageSizes } from '@shared/update-size'
 import { UpdateManager, type UpdateInfo, type VelopackAsset } from 'velopack'
 
@@ -83,6 +83,7 @@ type ResolvedUpdateCheck = {
 }
 
 type VelopackBridgeEvent =
+  | { event: 'activity'; activity: AppUpdateActivity }
   | { event: 'progress'; percent: number }
   | { event: 'result'; update?: UpdateInfo | null }
 
@@ -259,6 +260,7 @@ function runVelopackBridge(
   channel: AppUpdateChannel,
   update?: UpdateInfo,
   onProgress?: (percent: number) => void,
+  onActivity?: (activity: AppUpdateActivity) => void,
 ) {
   return new Promise<UpdateInfo | null>((resolve, reject) => {
     const child = spawn(getVelopackBridgePath(), [], {
@@ -273,6 +275,7 @@ function runVelopackBridge(
       if (!line.trim()) return
       const event = JSON.parse(line) as VelopackBridgeEvent
       if (event.event === 'progress') onProgress?.(event.percent)
+      if (event.event === 'activity') onActivity?.(event.activity)
       if (event.event === 'result') result = event.update ?? null
     }
 
@@ -511,16 +514,21 @@ export async function downloadUpdate() {
   })
 
   const sourceUrl = availableUpdateSourceUrl ?? (await resolveUpdateSourceUrl())
+  let activity: AppUpdateActivity | undefined
   const progress = (percent: number) => {
     setState({
       ...getUpdateStateFromAsset('downloading', updateInfo.TargetFullRelease, channel),
       percent,
+      activity,
     })
   }
 
   downloadPromise = (
     parseGitHubRepoUrl(sourceUrl)
-      ? runVelopackBridge('download', channel, updateInfo, progress).then(() => undefined)
+      ? runVelopackBridge('download', channel, updateInfo, progress, (next) => {
+          activity = next
+          setState({ ...updateState, activity })
+        }).then(() => undefined)
       : createUpdateManager(sourceUrl, channel).downloadUpdateAsync(updateInfo, progress)
   )
     .then(() => {

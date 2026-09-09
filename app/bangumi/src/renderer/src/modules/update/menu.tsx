@@ -3,6 +3,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui
 import { handlers, client } from '@renderer/lib/client'
 import { cn } from '@renderer/lib/utils'
 import type { AppUpdateState } from '@shared/update'
+import { getUpdateProgressTitle, getUpdateProgressDescription } from '@shared/update-progress'
 import { Download, RefreshCw, RotateCw, X } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
@@ -22,7 +23,7 @@ export function getPercent(state: AppUpdateState) {
 export function getUpdateTitle(state: AppUpdateState | null) {
   if (!state) return '检查更新'
   if (state.status === 'checking') return '正在检查更新'
-  if (state.status === 'downloading') return `下载中 ${getPercent(state)}%`
+  if (state.status === 'downloading') return getUpdateProgressTitle(state)
   if (state.status === 'downloaded') return '更新已下载'
   if (state.status === 'available') return '发现新版本'
   if (state.status === 'error') return '更新检查失败'
@@ -41,7 +42,7 @@ export function getUpdateActionText(state: AppUpdateState | null) {
     return '检查更新'
   if (state.status === 'checking') return '正在检查'
   if (state.status === 'available') return '下载更新'
-  if (state.status === 'downloading') return `下载中 ${getPercent(state)}%`
+  if (state.status === 'downloading') return getUpdateProgressTitle(state)
   if (state.status === 'downloaded') return '重启更新'
   return '检查更新'
 }
@@ -142,7 +143,11 @@ export function HeaderUpdateIndicator() {
         </div>
       </TooltipTrigger>
       <TooltipContent>
-        {state.version ? `当前 ${state.currentVersion}，新版本 ${state.version}` : title}
+        {state.status === 'downloading'
+          ? getUpdateProgressDescription(state)
+          : state.version
+            ? `当前 ${state.currentVersion}，新版本 ${state.version}`
+            : title}
       </TooltipContent>
     </Tooltip>
   )
