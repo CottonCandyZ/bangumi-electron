@@ -15,6 +15,11 @@ body:has(.windows-frame) {
   padding-right: calc(100vw - env(titlebar-area-width, calc(100vw - 138px)));
 }
 
+/* Windows already has a dedicated title bar; content and portal headers stay interactive. */
+body:has(.windows-frame) .drag-region:not(.window-titlebar) {
+  -webkit-app-region: no-drag;
+}
+
 .app-client-area {
   /* Keep negative-z page artwork above this surface, inside the client area. */
   isolation: isolate;
