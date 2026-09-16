@@ -122,10 +122,10 @@
   --want-to-watch: #cfa4ad;
   --want-to-watch-foreground: #fff;
   --want-to-watch-accent: #cdb7be;
-  --watched: #78abc7;
-  --watched-foreground: #fff;
-  --watched-accent: #afc7cd;
-  --watched-accent-foreground: #295e7b;
+  --watched: #354b63;
+  --watched-foreground: #e8f0fa;
+  --watched-accent: #263445;
+  --watched-accent-foreground: #b8cde5;
   --chart-score-10: 331.83, 80.39%, 60%;
   --chart-score-9: 345.1, 77.66%, 61.37%;
   --chart-score-8: 358.73, 74.74%, 62.75%;
