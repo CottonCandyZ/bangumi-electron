@@ -71,8 +71,8 @@ export function SubjectDiscussions({
     <section className={cn('flex min-w-0 flex-col gap-5', className)} ref={ref}>
       <div className="flex flex-row items-center justify-between gap-3">
         <div className="flex min-w-0 flex-row items-center gap-2">
-          <h2 className="text-2xl font-medium">讨论</h2>
-          <OpenMonoListPanelButton className="mt-1 size-8" tab={panelTab} title="在侧栏打开讨论" />
+          <h2 className="text-base font-semibold">讨论</h2>
+          <OpenMonoListPanelButton className="size-6" tab={panelTab} title="在侧栏打开讨论" />
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {total !== undefined && <span className="text-muted-foreground text-sm">{total}</span>}

@@ -49,12 +49,8 @@ export function SubjectRecommendations({ subjectId }: { subjectId: SubjectId }) 
     <section className="flex flex-col gap-5">
       <div className="flex flex-row items-center justify-between gap-3">
         <div className="flex min-w-0 flex-row items-center gap-2">
-          <h2 className="text-2xl font-medium">推荐条目</h2>
-          <OpenMonoListPanelButton
-            className="mt-1 size-8"
-            tab={panelTab}
-            title="在侧栏打开推荐条目"
-          />
+          <h2 className="text-base font-semibold">推荐条目</h2>
+          <OpenMonoListPanelButton className="size-6" tab={panelTab} title="在侧栏打开推荐条目" />
         </div>
         {total > 0 && <span className="text-muted-foreground text-sm">{total}</span>}
       </div>

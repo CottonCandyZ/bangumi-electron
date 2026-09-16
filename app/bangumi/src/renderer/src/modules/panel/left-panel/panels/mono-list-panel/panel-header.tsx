@@ -55,7 +55,7 @@ export function MonoListPanelHeader({
 
   return (
     <>
-      <div className="drag-region flex h-11 shrink-0 flex-col justify-center border-b px-2">
+      <div className="drag-region h-panel-header flex shrink-0 flex-col justify-center border-b px-2">
         <div className="flex flex-row items-center gap-1">
           <MonoListPanelTabStrip
             activeTabId={activeTab.id}
@@ -265,7 +265,7 @@ function MonoListPanelTabStrip({
   tabs: MonoListPanelTab[]
 }) {
   return (
-    <div className="relative h-11 min-w-0 flex-1 overflow-hidden">
+    <div className="h-panel-header relative min-w-0 flex-1 overflow-hidden">
       <div
         className="h-full w-full overflow-x-auto overflow-y-hidden focus-visible:outline-hidden"
         onWheel={(event) => {

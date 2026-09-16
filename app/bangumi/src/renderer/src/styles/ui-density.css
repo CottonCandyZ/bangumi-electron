@@ -1,0 +1,40 @@
+/* Shared desktop density. Keep the 16px root and native window geometry intact.
+ * These tokens are the configuration point until appearance settings are added.
+ * Text hierarchy: metadata 12 / compact 13 / body 14 / headings 16–22px.
+ * Use normal (400) for copy, medium (500) for labels, semibold (600) for headings.
+ */
+@theme {
+  /* One spacing step: 4px → 3.75px; utilities retain their existing proportions. */
+  --spacing: 0.234375rem;
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.125rem;
+  --text-base: 0.875rem;
+  --text-base--line-height: 1.375rem;
+  --text-lg: 1rem;
+  --text-lg--line-height: 1.5rem;
+  --text-xl: 1.125rem;
+  --text-xl--line-height: 1.625rem;
+  --text-2xl: 1.375rem;
+  --text-2xl--line-height: 1.75rem;
+
+  --spacing-panel: calc(var(--spacing) * 3);
+  --spacing-panel-header: calc(var(--spacing) * 11);
+  --spacing-icon-nav: calc(var(--spacing) * 4.5);
+  --spacing-icon-loading: calc(var(--spacing) * 5);
+}
+
+@layer base {
+  body {
+    @apply text-base;
+  }
+}
+
+/* Icon fonts and SVGs share a box instead of inheriting a text heading size. */
+@utility ui-icon-nav {
+  width: var(--spacing-icon-nav);
+  height: var(--spacing-icon-nav);
+  font-size: var(--spacing-icon-nav);
+  flex-shrink: 0;
+}

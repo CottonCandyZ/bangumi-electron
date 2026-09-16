@@ -54,7 +54,7 @@ export function CollectionPanelHeader() {
   return (
     <div
       data-slot="collection-panel-header"
-      className={`${popupOpen ? 'no-drag-region' : 'drag-region'} flex h-11 shrink-0 flex-row items-center justify-between gap-2 border-b px-2`}
+      className={`${popupOpen ? 'no-drag-region' : 'drag-region'} h-panel-header flex shrink-0 flex-row items-center justify-between gap-2 border-b px-2`}
     >
       {(!!userInfo || !!panelUsername) && (
         <>

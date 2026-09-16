@@ -5,32 +5,32 @@ export const route = [
   {
     name: '动画',
     panelName: 'anime',
-    icon: <span className="i-mingcute-tv-2-line text-lg" />,
-    active: <span className="i-mingcute-tv-2-fill text-lg" />,
+    icon: <span className="i-mingcute-tv-2-line ui-icon-nav" />,
+    active: <span className="i-mingcute-tv-2-fill ui-icon-nav" />,
   },
   {
     name: '游戏',
     panelName: 'game',
-    icon: <span className="i-mingcute-game-1-line text-lg" />,
-    active: <span className="i-mingcute-game-1-fill text-lg" />,
+    icon: <span className="i-mingcute-game-1-line ui-icon-nav" />,
+    active: <span className="i-mingcute-game-1-fill ui-icon-nav" />,
   },
   {
     name: '书籍',
     panelName: 'book',
-    icon: <span className="i-mingcute-book-6-line text-lg" />,
-    active: <span className="i-mingcute-book-6-fill text-lg" />,
+    icon: <span className="i-mingcute-book-6-line ui-icon-nav" />,
+    active: <span className="i-mingcute-book-6-fill ui-icon-nav" />,
   },
   {
     name: '音乐',
     panelName: 'music',
-    icon: <span className="i-mingcute-music-3-line text-lg" />,
-    active: <span className="i-mingcute-music-3-fill text-lg" />,
+    icon: <span className="i-mingcute-music-3-line ui-icon-nav" />,
+    active: <span className="i-mingcute-music-3-fill ui-icon-nav" />,
   },
   {
     name: '三次元',
     panelName: 'real',
-    icon: <span className="i-mingcute-tv-1-line text-lg" />,
-    active: <span className="i-mingcute-tv-1-fill text-lg" />,
+    icon: <span className="i-mingcute-tv-1-line ui-icon-nav" />,
+    active: <span className="i-mingcute-tv-1-fill ui-icon-nav" />,
   },
 ] as const
 

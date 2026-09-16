@@ -17,21 +17,21 @@ export function TagInput({
       {tags.map((value) => (
         <span
           key={value}
-          className="bg-secondary text-secondary-foreground hover:bg-secondary/80 inline-flex h-9 cursor-default items-center gap-0.5 rounded-sm border border-solid pl-1.5 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-secondary text-secondary-foreground hover:bg-secondary/80 inline-flex min-h-7 max-w-full cursor-default items-center gap-0.5 rounded-sm border border-solid pl-1.5 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {value}
+          <span className="min-w-0 break-all">{value}</span>
           <button
             type="button"
             aria-label={`移除标签 ${value}`}
             onClick={() => remove(value)}
-            className="focus-visible:ring-ring inline-flex h-full items-center justify-center rounded-md px-1.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-1 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+            className="focus-visible:ring-ring inline-flex min-h-7 shrink-0 items-center justify-center self-stretch rounded-md px-1.5 text-sm font-medium whitespace-nowrap transition-colors focus-visible:ring-1 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
           >
             <span className="i-mingcute-close-line" />
           </button>
         </span>
       ))}
       <input
-        className="bg-background placeholder:text-muted-foreground flex h-9 min-w-fit flex-1 resize-none px-3 py-2 focus-visible:outline-hidden"
+        className="bg-background placeholder:text-muted-foreground flex h-8 min-w-0 basis-full resize-none px-1 py-1 text-sm focus-visible:outline-hidden"
         onChange={(event) => {
           const value = event.target.value
           if (value === ' ') {

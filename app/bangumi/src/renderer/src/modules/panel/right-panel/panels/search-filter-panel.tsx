@@ -68,7 +68,7 @@ export function SearchFilterPanel() {
 
   return (
     <div className="flex h-full min-w-0 flex-col">
-      <div className="drag-region flex h-12 shrink-0 items-center justify-between border-b px-3">
+      <div className="drag-region h-panel-header flex shrink-0 items-center justify-between border-b px-3">
         <h2 className="text-sm font-medium">搜索筛选</h2>
         <Button
           className="no-drag-region h-8 rounded-md px-2 text-xs shadow-none"
@@ -79,7 +79,7 @@ export function SearchFilterPanel() {
           清除
         </Button>
       </div>
-      <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-3 py-4">
+      <div className="p-panel flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
         <FilterSection title="排序">
           <SortButton value={sort} onValueChanged={setSort} />
         </FilterSection>
@@ -92,7 +92,7 @@ export function SearchFilterPanel() {
               return (
                 <Label
                   key={option.value}
-                  className="hover:bg-accent flex h-9 cursor-pointer items-center rounded-md border px-2"
+                  className="hover:bg-accent flex h-8 cursor-pointer items-center rounded-md border px-2"
                 >
                   <Checkbox
                     checked={checked}

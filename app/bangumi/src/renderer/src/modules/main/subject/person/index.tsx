@@ -11,8 +11,8 @@ export function SubjectPersonTable({ subjectId }: { subjectId: SubjectId }) {
       <div className="h-full w-full overflow-x-hidden overflow-y-auto focus-visible:outline-hidden">
         <div className="min-h-full w-full">
           {persons === undefined ? (
-            <div className="flex h-full w-full items-center justify-center p-6" role="status">
-              <LoaderCircle className="text-muted-foreground h-8 w-8 animate-spin" />
+            <div className="flex h-full w-full items-center justify-center p-4" role="status">
+              <LoaderCircle className="text-muted-foreground size-icon-loading animate-spin" />
               <span className="sr-only">Loading</span>
             </div>
           ) : (

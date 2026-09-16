@@ -50,7 +50,7 @@ export function SubjectCommentsPanel({
   if (comments === undefined && !commentsQuery.isError) {
     return (
       <div className="relative h-full w-full overflow-hidden" key={`subject-comments-${subjectId}`}>
-        <div className="h-full w-full overflow-x-hidden overflow-y-auto px-3 py-3 focus-visible:outline-hidden">
+        <div className="p-panel h-full w-full overflow-x-hidden overflow-y-auto focus-visible:outline-hidden">
           <div className="flex min-h-full w-full flex-col gap-3">
             {Array(8)
               .fill(undefined)
@@ -69,7 +69,7 @@ export function SubjectCommentsPanel({
         title={null}
         className="h-full min-h-0"
         contentClassName="min-h-0 flex-1"
-        listClassName="h-full max-h-none px-3 py-3"
+        listClassName="h-full max-h-none p-panel"
         comments={comments}
         compact
         error={commentsQuery.isError}

@@ -27,7 +27,7 @@ export function MonoListPanelButton() {
     >
       <span
         className={cn(
-          'text-lg',
+          'ui-icon-nav',
           panelState.isOpen ? 'i-mingcute-box-3-fill' : 'i-mingcute-box-3-line',
         )}
       />

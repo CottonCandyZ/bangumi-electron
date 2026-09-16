@@ -1,5 +1,6 @@
 @import './font.css';
 @import './tailwind.css';
+@import './ui-density.css';
 @import './tailwind-extend.css';
 @import './scroll-bar.css';
 @import './base.css';

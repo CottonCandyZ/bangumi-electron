@@ -21,7 +21,7 @@ export function SubjectInfoPanel() {
 
   return (
     <div className="flex h-full min-w-0 flex-col">
-      <div className="drag-region flex h-11 shrink-0 items-center border-b px-3">
+      <div className="drag-region h-panel-header flex shrink-0 items-center border-b px-3">
         <div className="no-drag-region">
           <Tabs
             currentSelect={currentTab}

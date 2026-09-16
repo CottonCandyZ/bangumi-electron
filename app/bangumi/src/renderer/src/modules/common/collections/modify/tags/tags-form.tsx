@@ -4,6 +4,7 @@ import { CollectionData } from '@renderer/data/types/collection'
 import { Subject } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { Tags } from '@renderer/modules/main/subject/tags/tags'
+import { ScrollFade } from '@renderer/components/scroll-fade'
 
 export function FormTags({
   subjectTags,
@@ -24,8 +25,8 @@ export function FormTags({
   }
   const exceed = tags.size > 10
   return (
-    <div className="flex flex-col gap-2">
-      <div className="max-h-36 overflow-y-auto pr-1">
+    <div className="flex min-w-0 flex-col gap-3">
+      <ScrollFade className="max-h-44 pr-2 [scrollbar-gutter:stable]" label="可选收藏标签">
         <Tags
           subjectTags={subjectTags}
           collectionTags={collectionTags}
@@ -38,7 +39,7 @@ export function FormTags({
           selectedTags={tags}
           edit
         />
-      </div>
+      </ScrollFade>
       <div className="border-border/70 flex w-full flex-col items-start gap-2 rounded-md border p-2.5 text-sm transition-colors">
         <TagInput
           tags={[...tags]}

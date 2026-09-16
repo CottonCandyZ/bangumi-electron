@@ -81,7 +81,7 @@ export function CollectionResourceMenuButton() {
             navOpen && 'justify-start gap-2',
           )}
         >
-          <MoreHorizontalIcon className="size-[18px]" />
+          <MoreHorizontalIcon className="ui-icon-nav" />
           {navOpen && <span>{activeResource?.name ?? '更多收藏'}</span>}
         </Button>
       </DropdownMenuTrigger>

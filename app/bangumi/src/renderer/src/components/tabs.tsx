@@ -19,7 +19,7 @@ export function Tabs({
   return (
     <motion.div
       className={cn(
-        'bg-muted text-muted-foreground inline-flex min-h-9 flex-wrap items-center justify-center rounded-lg p-1',
+        'bg-muted text-muted-foreground inline-flex min-h-8 flex-wrap items-center justify-center rounded-lg p-1',
         className,
       )}
       key={layoutId}
@@ -29,7 +29,7 @@ export function Tabs({
       {[...tabsContent].map((item) => (
         <button
           className={cn(
-            'ring-offset-background focus-visible:ring-ring relative inline-flex items-center justify-center rounded-md px-3 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50',
+            'ring-offset-background focus-visible:ring-ring relative inline-flex items-center justify-center rounded-md px-2.5 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50',
             item === currentSelect && 'text-foreground cursor-default',
           )}
           key={item}

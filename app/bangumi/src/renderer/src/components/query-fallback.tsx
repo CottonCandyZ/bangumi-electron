@@ -35,7 +35,7 @@ export function QueryFallback({
       role="status"
       data-query-fallback
       className={cn(
-        'text-muted-foreground flex min-h-32 flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-4 text-center text-sm',
+        'text-muted-foreground flex min-h-24 flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-3 text-center text-sm',
         layoutClasses[layout],
       )}
     >

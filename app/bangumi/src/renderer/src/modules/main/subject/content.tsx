@@ -37,7 +37,7 @@ export const SubjectContent = ({
   }
   return (
     <div
-      className={cn('max-w-8xl @container mx-auto flex flex-col gap-10 px-10', className)}
+      className={cn('max-w-8xl @container mx-auto flex flex-col gap-6 px-6', className)}
       style={style}
     >
       <section className="@container">
@@ -49,7 +49,7 @@ export const SubjectContent = ({
         </div>
       </section>
 
-      <div className="flex w-full flex-col gap-10">
+      <div className="flex w-full flex-col gap-6">
         <section className="flex flex-row gap-5">
           <div className="flex w-full flex-col gap-5">
             {/* 章节 */}
@@ -71,8 +71,10 @@ export const SubjectContent = ({
         <SubjectCharacters subjectId={subjectId} />
         <RelatedSubjects subjectId={subjectId} />
         <SubjectRecommendations subjectId={subjectId} />
-        <SubjectReviews subjectId={subjectId} />
-        <SubjectIndexes subjectId={subjectId} />
+        <div className="grid min-w-0 grid-cols-1 items-start gap-6 @6xl:grid-cols-2">
+          <SubjectReviews subjectId={subjectId} />
+          <SubjectIndexes subjectId={subjectId} />
+        </div>
         <section className="grid grid-cols-1 gap-8 @5xl:grid-cols-[minmax(0,1fr)_minmax(20rem,24rem)]">
           <SubjectComments subjectId={subjectId} />
           <SubjectDiscussions subjectId={subjectId} />

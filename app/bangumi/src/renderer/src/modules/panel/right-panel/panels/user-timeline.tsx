@@ -74,7 +74,7 @@ export function UserTimelinePanel() {
 
   return (
     <div className="flex h-full min-w-0 flex-col">
-      <div className="drag-region flex h-11 shrink-0 items-center justify-between gap-2 border-b px-3">
+      <div className="drag-region h-panel-header flex shrink-0 items-center justify-between gap-2 border-b px-3">
         <div className="no-drag-region flex min-w-0 flex-row items-baseline gap-2">
           <h2 className="line-clamp-1 text-sm font-medium">时间线</h2>
           {username && (
@@ -160,7 +160,7 @@ function UserTimelineVirtualGrid({
         )
       }
       appendPlaceholderCount={APPEND_SKELETON_COUNT}
-      className="px-3 py-3"
+      className="p-panel"
       estimateSize={ESTIMATED_TIMELINE_ITEM_HEIGHT}
       gap={12}
       hasMore={hasMore}
@@ -223,7 +223,7 @@ function UserTimelineDayHeader({ label }: { label: string }) {
 
 function UserTimelineSkeletonScroll({ count }: { count: number }) {
   return (
-    <div className="flex h-full w-full flex-col gap-3 overflow-hidden px-3 py-3">
+    <div className="p-panel flex h-full w-full flex-col gap-3 overflow-hidden">
       {Array(count)
         .fill(undefined)
         .map((_, index) => (

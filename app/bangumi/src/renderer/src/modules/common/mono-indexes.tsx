@@ -1,7 +1,6 @@
 import { MyLink } from '@renderer/components/my-link'
 import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
-import { Card, CardContent } from '@renderer/components/ui/card'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useResourceIndexesQuery } from '@renderer/data/hooks/api/index'
 import type { IndexResourceType, SlimIndex } from '@renderer/data/types/index'
@@ -58,74 +57,79 @@ export function MonoIndexesSection({
   if (query.isError || indexes.length === 0) return null
 
   return (
-    <section className="@container flex flex-col gap-5">
+    <section className="@container flex min-w-0 flex-col gap-2">
       <div className="flex flex-row items-center justify-between gap-3">
         <div className="flex min-w-0 flex-row items-center gap-2">
-          <h2 className="text-2xl font-medium">关联目录</h2>
-          <OpenMonoListPanelButton
-            className="mt-1 size-8"
-            tab={panelTab}
-            title="在侧栏打开关联目录"
-          />
+          <h2 className="text-base font-semibold">关联目录</h2>
+          <span className="text-muted-foreground text-xs tabular-nums">{total}</span>
+          <OpenMonoListPanelButton className="size-6" tab={panelTab} title="在侧栏打开关联目录" />
         </div>
-        {total > 0 && <span className="text-muted-foreground text-sm">{total}</span>}
-      </div>
-      <div className="grid grid-cols-1 gap-3 @3xl:grid-cols-2">
-        {indexes.map((index) => (
-          <MonoIndexCard index={index} key={index.id} />
-        ))}
-      </div>
-      {hasMore && (
-        <div className="flex justify-center">
-          <Button onClick={openInSidePanel} variant="outline">
-            在侧栏查看更多 {indexes.length}/{total}
+        {hasMore && (
+          <Button size="sm" onClick={openInSidePanel} variant="ghost">
+            查看全部
           </Button>
-        </div>
-      )}
+        )}
+      </div>
+      <ul className="divide-y border-y">
+        {indexes.map((index) => (
+          <li key={index.id}>
+            <MonoIndexRow index={index} />
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }
 
-function MonoIndexCard({ index }: { index: SlimIndex }) {
+function MonoIndexRow({ index }: { index: SlimIndex }) {
   const title = getIndexDisplayTitle(index)
 
   return (
-    <MyLink className="group cursor-default" to={`/index/${index.id}`}>
-      <Card className="group-hover:bg-accent h-full rounded-md shadow-none transition-colors">
-        <CardContent className="flex h-full flex-col gap-3 p-3">
-          <div className="flex min-w-0 flex-row items-start justify-between gap-3">
-            <div className="min-w-0">
-              <h3 className="line-clamp-2 text-sm font-medium">{title}</h3>
-              <p className="text-muted-foreground mt-1 line-clamp-1 text-xs">
-                {index.user?.nickname ? `by ${index.user.nickname}` : `#${index.uid}`}
-              </p>
-            </div>
-            {index.private && (
-              <Badge variant="outline" className="shrink-0 text-xs shadow-none">
-                私密
-              </Badge>
-            )}
-          </div>
-          <div className="text-muted-foreground mt-auto flex flex-row flex-wrap gap-2 text-xs">
-            <span>{index.total} 项</span>
-            <span>{formatRecentUnixTime(index.updatedAt)}</span>
-          </div>
-        </CardContent>
-      </Card>
+    <MyLink
+      className="hover:bg-accent/40 focus-visible:ring-ring grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-1 px-2 py-2.5 transition-colors focus-visible:ring-2 focus-visible:outline-none @xl:grid-cols-[minmax(0,1fr)_7rem_4rem_9rem]"
+      to={`/index/${index.id}`}
+    >
+      <div className="flex min-w-0 items-center gap-2">
+        <h3 className="truncate text-sm font-medium" title={title}>
+          {title}
+        </h3>
+        {index.private && (
+          <Badge variant="outline" className="shrink-0 text-xs shadow-none">
+            私密
+          </Badge>
+        )}
+      </div>
+      <span className="text-muted-foreground col-start-1 row-start-2 truncate text-xs @xl:col-start-2 @xl:row-start-1">
+        {index.user?.nickname || `#${index.uid}`}
+      </span>
+      <span className="text-muted-foreground col-start-2 row-start-1 text-right text-xs whitespace-nowrap tabular-nums @xl:col-start-3">
+        {index.total} 项
+      </span>
+      <span className="text-muted-foreground col-start-2 row-start-2 text-right text-xs whitespace-nowrap tabular-nums @xl:col-start-4 @xl:row-start-1">
+        {formatRecentUnixTime(index.updatedAt)}
+      </span>
     </MyLink>
   )
 }
 
 function MonoIndexesSkeleton() {
   return (
-    <section className="@container flex flex-col gap-5">
+    <section
+      className="@container flex flex-col gap-2"
+      aria-label="正在加载关联目录"
+      aria-busy="true"
+    >
       <Skeleton className="h-8 w-28" />
-      <div className="grid grid-cols-1 gap-3 @3xl:grid-cols-2">
+      <div className="divide-y border-y">
         {Array.from({ length: 4 }).map((_, index) => (
-          <div className="flex h-28 flex-col gap-3 rounded-md border p-3" key={index}>
-            <Skeleton className="h-4 w-4/5" />
-            <Skeleton className="h-3 w-1/2" />
-            <Skeleton className="mt-auto h-3 w-1/3" />
+          <div
+            className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-1 px-2 py-2.5 @xl:grid-cols-[minmax(0,1fr)_7rem_4rem_9rem]"
+            key={index}
+          >
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-4 w-14" />
+            <Skeleton className="h-4 w-10" />
+            <Skeleton className="h-4 w-24" />
           </div>
         ))}
       </div>

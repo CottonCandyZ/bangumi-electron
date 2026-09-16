@@ -58,9 +58,9 @@ export function RelatedSubjects({ subjectId }: Props) {
     <section className="flex flex-col gap-5">
       <div className="flex flex-row items-start justify-between gap-10">
         <div className="flex shrink-0 flex-row items-center gap-2">
-          <h2 className="text-2xl font-medium">关联条目</h2>
+          <h2 className="text-base font-semibold">关联条目</h2>
           <OpenMonoListPanelButton
-            className="mt-1 size-8"
+            className="size-6"
             disabled={!relatedSubjects}
             tab={panelTab}
             title="在侧栏打开关联条目"
