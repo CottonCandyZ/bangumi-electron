@@ -1,3 +1,4 @@
+import { NavItemContent } from '@renderer/modules/nav/item-content'
 import { MyLink } from '@renderer/components/my-link'
 import { route } from '@renderer/modules/nav/link/nav'
 import { Button } from '@renderer/components/ui/button'
@@ -15,10 +16,10 @@ export function NavButton({ name, path, icon, active }: Props) {
   return (
     <Button
       variant="ghost"
+      aria-label={name}
       className={cn(
-        'text-primary/65 hover:text-primary relative h-8 w-full shrink-0 cursor-default p-1.5 text-xs select-none active:scale-95',
+        'text-primary/65 hover:text-primary relative h-8 w-full shrink-0 cursor-default justify-start gap-0 overflow-hidden px-0 py-1.5 text-xs select-none',
         isActive && 'bg-accent text-primary',
-        open && 'justify-start gap-2',
       )}
       asChild
     >
@@ -29,8 +30,7 @@ export function NavButton({ name, path, icon, active }: Props) {
           if (open) setOpen(false)
         }}
       >
-        <div className="flex">{isActive ? active : icon}</div>
-        {open && <span>{name}</span>}
+        <NavItemContent icon={isActive ? active : icon} label={name} open={open} />
       </MyLink>
     </Button>
   )

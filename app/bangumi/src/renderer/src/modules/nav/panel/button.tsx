@@ -1,3 +1,4 @@
+import { NavItemContent } from '@renderer/modules/nav/item-content'
 import { route } from '@renderer/modules/nav/panel/nav'
 import { Button } from '@renderer/components/ui/button'
 import {
@@ -39,10 +40,10 @@ export function PanelButton({ name, panelName, icon, active }: Props) {
   return (
     <Button
       variant="ghost"
+      aria-label={name}
       className={cn(
-        'text-primary/65 hover:text-primary relative h-8 w-full shrink-0 p-1.5 text-xs active:scale-95',
+        'text-primary/65 hover:text-primary relative h-8 w-full shrink-0 justify-start gap-0 overflow-hidden px-0 py-1.5 text-xs',
         isActive && 'bg-accent text-primary',
-        navOpen && 'justify-start gap-2',
       )}
       onClick={() => {
         startTransition(() => {
@@ -52,8 +53,7 @@ export function PanelButton({ name, panelName, icon, active }: Props) {
       }}
     >
       <>
-        <div className="flex">{isActive ? active : icon}</div>
-        {navOpen && <span>{name}</span>}
+        <NavItemContent icon={isActive ? active : icon} label={name} open={navOpen} />
       </>
     </Button>
   )
@@ -74,15 +74,18 @@ export function CollectionResourceMenuButton() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
+          aria-label={activeResource?.name ?? '更多收藏'}
           variant="ghost"
           className={cn(
-            'text-primary/65 hover:text-primary relative h-8 w-full shrink-0 p-1.5 text-xs active:scale-95',
+            'text-primary/65 hover:text-primary relative h-8 w-full shrink-0 justify-start gap-0 overflow-hidden px-0 py-1.5 text-xs',
             activeResource && 'bg-accent text-primary',
-            navOpen && 'justify-start gap-2',
           )}
         >
-          <MoreHorizontalIcon className="ui-icon-nav" />
-          {navOpen && <span>{activeResource?.name ?? '更多收藏'}</span>}
+          <NavItemContent
+            icon={<MoreHorizontalIcon className="ui-icon-nav" />}
+            label={activeResource?.name ?? '更多收藏'}
+            open={navOpen}
+          />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-36" side="right">

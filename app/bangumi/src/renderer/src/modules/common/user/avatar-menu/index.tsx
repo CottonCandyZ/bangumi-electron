@@ -28,7 +28,13 @@ import { appConfigAtom } from '@renderer/state/app-config'
 import { formatHotkeyForDisplay, isHotkeyEnabled } from '@renderer/lib/shortcut'
 import { useBangumiWebVerification } from '@renderer/modules/common/bangumi-web-verification'
 
-export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
+export function ProfileMenu({
+  type,
+  sidebar = false,
+}: {
+  type: 'expend' | 'small'
+  sidebar?: boolean
+}) {
   const logoutMutation = useLogoutMutation()
   const userInfo = useSession()
   const isLogin = !!userInfo
@@ -47,20 +53,35 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
         aria-label="账号菜单"
         className={cn(
           'text-muted-foreground hover:text-primary relative flex w-fit flex-row items-center gap-2 rounded-full shadow-xs',
-          type === 'expend' && 'group w-full min-w-0 border p-1.5 shadow-none',
+          !sidebar && type === 'expend' && 'group w-full min-w-0 border p-1.5 shadow-none',
+          sidebar && 'w-full min-w-0 gap-0 overflow-hidden rounded-md shadow-none',
           dropdownOpen && 'bg-accent text-primary',
         )}
       >
-        {isLogin ? (
-          <Image
-            className="aspect-square w-7 shrink-0 overflow-hidden rounded-full"
-            imageSrc={userInfo.avatar.small}
-          />
-        ) : (
-          <div className="bg-accent aspect-square w-7 shrink-0 overflow-hidden rounded-full" />
-        )}
-        {type === 'expend' && (
-          <span className="min-w-0 truncate text-xs font-medium">
+        <span
+          className={cn(
+            'flex shrink-0 items-center justify-center',
+            sidebar && 'w-[var(--nav-icon-column)]',
+          )}
+        >
+          {isLogin ? (
+            <Image
+              className="aspect-square w-7 shrink-0 overflow-hidden rounded-full"
+              imageSrc={userInfo.avatar.small}
+            />
+          ) : (
+            <div className="bg-accent aspect-square w-7 shrink-0 overflow-hidden rounded-full" />
+          )}
+        </span>
+        {(sidebar || type === 'expend') && (
+          <span
+            aria-hidden={sidebar && type === 'small'}
+            className={cn(
+              'min-w-0 truncate text-xs font-medium',
+              sidebar && 'transition-opacity duration-150 motion-reduce:transition-none',
+              sidebar && type === 'small' && 'opacity-0',
+            )}
+          >
             {isLogin && userInfo.nickname}
           </span>
         )}
