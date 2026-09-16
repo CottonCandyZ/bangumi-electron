@@ -776,3 +776,32 @@ for (const mode of ['confirmed', 'uncertain'])
     expect(f.state.collection?.tags).toEqual(['local'])
     expect(f.state.episodes).toEqual({ 101: 2, 102: 0 })
   })
+
+test('an absent subject is unknown before full sync and uncollected after full sync', (t) => {
+  const f = fixture(t)
+  f.repo.saveAccount({
+    id: 1,
+    username: 'test-user',
+    nickname: 'Test',
+    avatar: { small: '', medium: '', large: '' },
+  })
+  expect(f.repo.collection(1, 999)).toBeUndefined()
+  f.repo.completeList(1)
+  expect(f.repo.collection(1, 999)).toBeNull()
+  expect(f.repo.collection(2, 999)).toBeUndefined()
+})
+
+test('episode readiness distinguishes an unsynced subject from a confirmed empty response', (t) => {
+  const f = fixture(t)
+  const input = { userId: 1, subjectId: 99 }
+  expect(f.repo.episodes(input)).toMatchObject({ ready: false, data: [] })
+  f.repo.ensure(1, 99)
+  expect(f.repo.episodes(input)).toMatchObject({ ready: false, data: [] })
+  f.repo.acknowledge(1, 99, 0, {
+    snapshot: { collection: null, episodes: {}, episodesComplete: true },
+    episodes: [],
+    epStatus: 0,
+    volStatus: 0,
+  })
+  expect(f.repo.episodes(input)).toMatchObject({ ready: true, data: [] })
+})

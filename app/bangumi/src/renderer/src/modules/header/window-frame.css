@@ -23,12 +23,12 @@ body:has(.windows-frame) {
 }
 
 .app-sidebar {
-  top: var(--window-titlebar-height, 0px);
-  height: calc(100dvh - var(--window-titlebar-height, 0px));
+  top: calc(var(--window-titlebar-height, 0px) + var(--app-header-height));
+  height: calc(100dvh - var(--window-titlebar-height, 0px) - var(--app-header-height));
 }
 
 .app-sidebar-backdrop {
-  top: var(--window-titlebar-height, 0px);
+  top: calc(var(--window-titlebar-height, 0px) + var(--app-header-height));
 }
 
 /* Portals live under body, outside the frame's inherited variables. */

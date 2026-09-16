@@ -1,3 +1,10 @@
+import { store } from '../../src/renderer/src/state/utils'
+import {
+  authRequiredUserIdAtom,
+  sessionNeedsLoginAtom,
+  userIdAtom,
+} from '../../src/renderer/src/state/session'
+import { loginDialogAtom } from '../../src/renderer/src/state/dialog/normal'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { FetchError } from 'ofetch'
 import * as webAccess from '../../src/renderer/src/data/fetch/config/web-access'
@@ -9,7 +16,6 @@ const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),
   readAccessToken: vi.fn(),
   insertAccessToken: vi.fn(),
-  storeSet: vi.fn(),
   removeCookie: vi.fn(),
   collectionActivate: vi.fn(),
 }))
@@ -25,13 +31,13 @@ vi.mock('@renderer/data/fetch/db/user', () => ({
 vi.mock('@renderer/lib/client', () => ({
   client: { removeCookie: mocks.removeCookie, collectionActivate: mocks.collectionActivate },
 }))
-vi.mock('@renderer/state/utils', () => ({ store: { get: () => '1', set: mocks.storeSet } }))
-vi.mock('@renderer/state/session', () => ({ userIdAtom: {} }))
-vi.mock('@renderer/state/dialog/normal', () => ({ loginDialogAtom: {} }))
 vi.mock('@renderer/lib/utils/parser', () => ({ domParser: {} }))
 
 beforeEach(() => {
   vi.clearAllMocks()
+  store.set(userIdAtom, '1')
+  store.set(authRequiredUserIdAtom, null)
+  store.set(loginDialogAtom, { open: false })
   vi.stubGlobal('navigator', { onLine: true })
   session.cleanAccessTokenCache()
   webAccess.markWebVerificationComplete()
@@ -63,7 +69,9 @@ function fixture(oauthStatus = 200, captchaStatus = 200) {
     requests.push(url)
     if (url.endsWith('/oauth/access_token'))
       return Response.json(
-        { access_token: 'renewed', refresh_token: 'new-refresh', expires_in: 3600 },
+        oauthStatus === 400
+          ? { error: 'invalid_grant', error_description: 'Refresh token has expired' }
+          : { access_token: 'renewed', refresh_token: 'new-refresh', expires_in: 3600 },
         { status: oauthStatus },
       )
     if (url.endsWith('/oauth/token_status')) return Response.json({ user_id: '1' })
@@ -181,4 +189,85 @@ test('challenge HTML without exposed headers is recognized for text and captcha 
   )
   webAccess.markWebVerificationComplete()
   await expect(login.getCaptcha()).rejects.toThrow(webAccess.WebVerificationRequiredError)
+})
+
+test.each([400, 401, 403])(
+  'rejected token refresh (%s) never opens login or clears the account',
+  async (status) => {
+    fixture(status)
+    const results = await Promise.allSettled([session.getAccessToken(), session.getAccessToken()])
+    expect(results.every((result) => result.status === 'rejected')).toBe(true)
+    await expect(session.getAccessToken()).rejects.toBeInstanceOf(FetchError)
+    expect(store.get(loginDialogAtom).open).toBe(false)
+    expect(store.get(userIdAtom)).toBe('1')
+    expect(store.get(sessionNeedsLoginAtom)).toBe(status === 400)
+    expect(mocks.collectionActivate).not.toHaveBeenCalled()
+  },
+)
+
+test('API 401 with failed recovery propagates without opening login', async () => {
+  const f = fixture(400)
+  mocks.readAccessToken.mockResolvedValue({
+    ...f.expiredToken,
+    create_time: new Date(),
+    expires_in: 3600,
+  })
+  mocks.fetch.mockImplementation(async (input: RequestInfo | URL) =>
+    Response.json({}, { status: String(input).endsWith('/oauth/access_token') ? 400 : 401 }),
+  )
+  await expect(config.apiFetchWithAuth('/v0/me')).rejects.toBeInstanceOf(FetchError)
+  expect(store.get(loginDialogAtom).open).toBe(false)
+  expect(store.get(userIdAtom)).toBe('1')
+})
+
+test('network refresh failure does not mark the saved account as expired', async () => {
+  fixture(500)
+  await expect(session.getAccessToken()).rejects.toBeInstanceOf(FetchError)
+  expect(store.get(sessionNeedsLoginAtom)).toBe(false)
+})
+
+test('successful token recovery clears the re-login marker', async () => {
+  fixture()
+  store.set(authRequiredUserIdAtom, '1')
+  await session.getAccessToken()
+  expect(store.get(sessionNeedsLoginAtom)).toBe(false)
+})
+
+test('a refresh failure for an old account cannot mark the active account expired', async () => {
+  const f = fixture(400)
+  store.set(userIdAtom, '2')
+  await expect(session.safeRefreshToken(f.expiredToken)).rejects.toBeInstanceOf(FetchError)
+  expect(store.get(sessionNeedsLoginAtom)).toBe(false)
+})
+
+test('confirmed online expiration signs out once without opening a dialog', async () => {
+  fixture(400)
+  await expect(session.getAccessToken()).rejects.toBeInstanceOf(FetchError)
+  const results = await Promise.all([
+    session.expireInvalidSession(),
+    session.expireInvalidSession(),
+  ])
+  expect(results).toEqual([true, false])
+  expect(store.get(userIdAtom)).toBeNull()
+  expect(store.get(loginDialogAtom).open).toBe(false)
+  expect(mocks.collectionActivate).toHaveBeenCalledExactlyOnceWith({ userId: null })
+})
+
+test('offline state keeps the remembered account even when an expiration signal is pending', async () => {
+  fixture()
+  store.set(authRequiredUserIdAtom, '1')
+  vi.stubGlobal('navigator', { onLine: false })
+  expect(await session.expireInvalidSession()).toBe(false)
+  expect(store.get(userIdAtom)).toBe('1')
+  expect(mocks.collectionActivate).not.toHaveBeenCalled()
+})
+
+test('OAuth client configuration errors do not sign the user out', async () => {
+  fixture(400)
+  mocks.fetch.mockImplementation(async () =>
+    Response.json({ error: 'invalid_client' }, { status: 400 }),
+  )
+  await expect(session.getAccessToken()).rejects.toBeInstanceOf(FetchError)
+  expect(await session.expireInvalidSession()).toBe(false)
+  expect(store.get(userIdAtom)).toBe('1')
 })

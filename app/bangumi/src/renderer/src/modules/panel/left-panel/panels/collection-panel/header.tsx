@@ -54,7 +54,7 @@ export function CollectionPanelHeader() {
   return (
     <div
       data-slot="collection-panel-header"
-      className={`${popupOpen ? 'no-drag-region' : 'drag-region'} flex h-14 shrink-0 flex-row items-center justify-between gap-5 border-b px-2`}
+      className={`${popupOpen ? 'no-drag-region' : 'drag-region'} flex h-11 shrink-0 flex-row items-center justify-between gap-2 border-b px-2`}
     >
       {(!!userInfo || !!panelUsername) && (
         <>
@@ -68,13 +68,16 @@ export function CollectionPanelHeader() {
                 }
                 value={currentSelect.toString()}
               >
-                <SelectTrigger className="no-drag-region w-fit justify-start">
+                <SelectTrigger
+                  size="sm"
+                  className="no-drag-region w-fit justify-start px-2 text-xs data-[size=sm]:h-7 [&_svg]:size-3.5"
+                >
                   <SelectValue>{COLLECTION_TYPE_MAP(subjectType)[currentSelect]}</SelectValue>
                 </SelectTrigger>
                 <SubjectCollectionSelectorContent subjectType={subjectType} />
               </Select>
             ) : (
-              <div className="text-foreground px-2 text-sm font-medium">
+              <div className="text-foreground px-2 text-xs font-medium">
                 {getCollectionResourceLabel(resourceType)}
               </div>
             )}
@@ -87,11 +90,12 @@ export function CollectionPanelHeader() {
               <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen}>
                 <DropdownMenuTrigger asChild>
                   <Button
+                    aria-label="收藏显示设置"
                     variant="ghost"
                     size="icon"
-                    className="text-muted-foreground no-drag-region hover:text-foreground size-8"
+                    className="text-muted-foreground no-drag-region hover:text-foreground size-7"
                   >
-                    <SettingsIcon className="size-4.5" />
+                    <SettingsIcon className="size-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-44">
@@ -113,13 +117,13 @@ export function CollectionPanelHeader() {
               </DropdownMenu>
             ) : (
               <Button
-                className="text-muted-foreground no-drag-region hover:text-foreground size-8"
+                className="text-muted-foreground no-drag-region hover:text-foreground size-7"
                 onClick={() => setLeftPanelOpen(false)}
                 size="icon"
                 title="关闭收藏侧栏"
                 variant="ghost"
               >
-                <XIcon className="size-4.5" />
+                <XIcon className="size-4" />
               </Button>
             )}
           </div>

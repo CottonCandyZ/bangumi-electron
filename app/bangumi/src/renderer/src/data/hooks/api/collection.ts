@@ -1,3 +1,8 @@
+import {
+  readLocalSubject,
+  readLocalEpisodes,
+  pendingCollectionInterval,
+} from '@renderer/data/collection/read'
 import { client } from '@renderer/lib/client'
 import { useSession } from '@renderer/data/hooks/session'
 import { userIdAtom } from '@renderer/state/session'
@@ -168,7 +173,8 @@ export const useCollectionEpisodesInfoBySubjectIdQuery = ({
 }) => {
   const userId = Number(useAtomValue(userIdAtom))
   return useAuthQuery({
-    queryFn: localEpisodes,
+    queryFn: readLocalEpisodes,
+    refetchInterval: pendingCollectionInterval,
     queryKey: ['collection-episodes'],
     queryProps: { subjectId, limit, offset, episodeType, userId },
     enabled: !!userId && (enabled ?? true),
@@ -195,6 +201,7 @@ export const useQuerySubjectCollection = ({
   const own = !!userId && (username === profile?.username || username === String(userId))
   return useAuthQuery({
     queryFn: localOrRemoteSubject,
+    refetchInterval: own ? pendingCollectionInterval : false,
     queryKey: ['collection-subject'],
     queryProps: { subjectId, username, own, userId },
     enabled: !!subjectId && !!username && (enabled ?? true),
@@ -230,19 +237,5 @@ async function localOrRemoteSubject(props: {
   username: string | undefined
 }) {
   if (!props.own) return getSubjectCollectionBySubjectIdAndUsername(props)
-  const collection = await client.collectionRead({
-    userId: props.userId,
-    subjectId: Number(props.subjectId),
-  })
-  if (collection === undefined) throw new Error('尚未取得收藏状态，请联网同步后再试')
-  return collection
-}
-function localEpisodes(props: {
-  userId: number
-  subjectId: string
-  limit: number
-  offset: number
-  episodeType: EpisodeType | undefined
-}) {
-  return client.collectionReadEpisodes({ ...props, subjectId: Number(props.subjectId) })
+  return readLocalSubject({ userId: props.userId, subjectId: Number(props.subjectId) })
 }

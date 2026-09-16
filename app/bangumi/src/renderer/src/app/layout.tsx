@@ -40,19 +40,21 @@ function RootLayout() {
 
   return (
     <WindowFrame>
-      <NavBar />
-      <div
-        className="app-client-area flex min-w-0 flex-row"
-        style={{ marginLeft: UI_CONFIG.NAV_WIDTH }}
-      >
-        <LeftResizablePanel />
-        <div className="flex h-full min-w-0 flex-1 flex-col">
-          <Header />
-          <MainContainer>
-            <MainOutlet />
-          </MainContainer>
+      <div className="app-client-area flex min-w-0 flex-col">
+        <Header />
+        <NavBar />
+        <div
+          className="flex min-h-0 min-w-0 flex-1 flex-row"
+          style={{ marginLeft: UI_CONFIG.NAV_WIDTH }}
+        >
+          <LeftResizablePanel />
+          <div className="flex h-full min-w-0 flex-1 flex-col">
+            <MainContainer>
+              <MainOutlet />
+            </MainContainer>
+          </div>
+          <BackCover />
         </div>
-        <BackCover />
       </div>
     </WindowFrame>
   )

@@ -42,7 +42,7 @@ export function EpisodesGrid({
   const [offset, setOffSet] = useState(0)
   const [temporaryOneBasedEpisodeSort, setTemporaryOneBasedEpisodeSort] = useState(false)
   const limit = 100
-  let skeletonNumber = eps ?? 12
+  let skeletonNumber = eps > 0 ? eps : 12
   if (skeletonNumber > 100) skeletonNumber = 100
   const episodesQuery = useEpisodesInfoBySubjectIdQuery({
     subjectId,
@@ -97,7 +97,7 @@ export function EpisodesGrid({
       />
     )
   }
-  if (episode.data.data === null) return null
+  if (!episode.data.data?.length) return null
   return (
     <div className="flex flex-col gap-5">
       {size === 'default' && (

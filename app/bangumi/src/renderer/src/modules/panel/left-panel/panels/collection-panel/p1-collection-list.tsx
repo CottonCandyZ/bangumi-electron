@@ -1,3 +1,4 @@
+import { QueryFallback } from '@renderer/components/query-fallback'
 import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
 import { Badge } from '@renderer/components/ui/badge'
@@ -45,7 +46,7 @@ export function P1CollectionList({
   )
 
   if (query.isError && !query.data) {
-    return <div className="text-destructive p-4 text-sm">加载收藏失败。</div>
+    return <QueryFallback layout="panel" label="收藏" error={query.error} onRetry={query.refetch} />
   }
 
   if (!query.data) {

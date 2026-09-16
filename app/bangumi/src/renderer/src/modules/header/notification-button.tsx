@@ -33,7 +33,7 @@ export function NotificationButton() {
           <PopoverTrigger asChild>
             <Button
               aria-label={unreadCount > 0 ? `通知，${unreadCount} 条未读` : '通知'}
-              className="no-drag-region text-muted-foreground relative size-8 cursor-auto p-1 text-[1.4rem]"
+              className="no-drag-region text-muted-foreground relative size-7 cursor-auto p-1 text-lg"
               variant="ghost"
             >
               <span className="i-mingcute-notification-line" />

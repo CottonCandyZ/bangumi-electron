@@ -9,8 +9,6 @@ import {
   markWebVerificationRequired,
   WebVerificationRequiredError,
 } from '@renderer/data/fetch/config/web-access'
-import { store } from '@renderer/state/utils'
-import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { FetchError, FetchOptions, ofetch } from 'ofetch'
 
 type JsonFetchOptions = FetchOptions<'json'>
@@ -86,13 +84,7 @@ async function appendAuthHeader(options: { headers?: HeadersInit; signal?: Abort
 
 async function handleUnauthorizedResponse() {
   if (!navigator.onLine) return false
-  const recovered = await safeRecoverAccessTokenAfterUnauthorized()
-  if (recovered) {
-    return true
-  }
-
-  store.set(loginDialogAtom, { open: true, content: { reason: 'session-expired' } })
-  return false
+  return safeRecoverAccessTokenAfterUnauthorized()
 }
 
 async function retryAfterTokenRecovery<T>(

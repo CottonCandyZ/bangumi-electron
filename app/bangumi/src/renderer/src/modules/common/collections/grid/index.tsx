@@ -1,3 +1,6 @@
+import { isNetworkUnavailableError } from '@renderer/lib/utils/network'
+import { useOnline } from '@renderer/hooks/use-online'
+import { useCollectionSyncOverview } from '@renderer/modules/common/collections/sync-dialog'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
 import { useInfinityQueryCollectionsByUsername } from '@renderer/data/hooks/api/collection'
@@ -25,6 +28,8 @@ export function CollectionsGrid({
   username: string
   emptyContent?: ReactNode
 }) {
+  const online = useOnline()
+  const sync = useCollectionSyncOverview().data
   const collectionsQuery = useInfinityQueryCollectionsByUsername({
     username,
     collectionType: collectionType,
@@ -72,8 +77,18 @@ export function CollectionsGrid({
     handledDuplicateSignatureRef.current = duplicateSignature
     refetch()
   }, [isFetching, isRefetching, items, refetch])
+  if (!collections && isError && (!online || isNetworkUnavailableError(collectionsQuery.error))) {
+    return (
+      <div className="text-muted-foreground flex min-h-0 flex-1 flex-col items-center justify-center gap-2 p-4 text-center text-xs">
+        <p>暂无离线收藏</p>
+        <p>请在网络恢复后同步收藏。</p>
+      </div>
+    )
+  }
   if (!collections && isError)
-    return <QueryFallback label="收藏" error={collectionsQuery.error} onRetry={refetch} />
+    return (
+      <QueryFallback layout="panel" label="收藏" error={collectionsQuery.error} onRetry={refetch} />
+    )
   if (!collections)
     return (
       <DelayedLoading>
@@ -87,7 +102,18 @@ export function CollectionsGrid({
 
   if (items.length === 0) {
     if (emptyContent !== undefined) return emptyContent
-    return <div className="text-muted-foreground p-4 text-sm">没有符合条件的项目。</div>
+    return (
+      <div className="text-muted-foreground flex min-h-0 flex-1 flex-col items-center justify-center gap-2 p-4 text-center text-xs">
+        {!online && !sync?.listComplete ? (
+          <>
+            <p>暂无离线收藏</p>
+            <p>请联网后同步收藏。</p>
+          </>
+        ) : (
+          <p>没有符合条件的项目。</p>
+        )}
+      </div>
+    )
   }
 
   return (

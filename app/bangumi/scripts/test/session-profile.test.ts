@@ -18,7 +18,6 @@ vi.mock('@renderer/modules/wrapper/query', () => ({
 }))
 vi.mock('@renderer/data/fetch/api/user', () => ({ getUserInfoWithAuth: mocks.profile }))
 vi.mock('@renderer/data/fetch/session', () => ({ getAccessToken: mocks.token, logout: vi.fn() }))
-vi.mock('@renderer/state/dialog/normal', () => ({ loginDialogAtom: {} }))
 vi.mock('@renderer/state/session', () => ({ userIdAtom: {} }))
 vi.mock('@renderer/state/utils', () => ({ store: { get: () => '1', set: vi.fn() } }))
 vi.mock('jotai', () => ({ useAtomValue: () => '1' }))

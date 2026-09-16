@@ -120,7 +120,7 @@ export function HeaderUpdateIndicator() {
           <Button
             variant="outline"
             className={cn(
-              'border-primary/30 bg-primary/8 text-primary hover:bg-primary/12 hover:text-primary h-8 gap-1.5 rounded-md px-2.5 text-xs font-medium shadow-none',
+              'border-primary/30 bg-primary/8 text-primary hover:bg-primary/12 hover:text-primary h-7 gap-1.5 rounded-md px-2.5 text-xs font-medium shadow-none',
               state.status === 'downloading' && 'pointer-events-none',
             )}
             disabled={busy}

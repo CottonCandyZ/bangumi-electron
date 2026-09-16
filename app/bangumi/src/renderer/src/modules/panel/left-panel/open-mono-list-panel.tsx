@@ -82,7 +82,7 @@ export function OpenMonoListPanelButton({
     <Button
       {...buttonProps}
       aria-label={buttonProps['aria-label'] ?? title}
-      className={cn('size-8', className)}
+      className={cn('size-7', className)}
       disabled={disabled}
       onClick={open}
       size={size ?? 'icon'}
@@ -90,7 +90,7 @@ export function OpenMonoListPanelButton({
       type={type ?? 'button'}
       variant={variant ?? 'ghost'}
     >
-      <span className={cn('i-mingcute-box-3-line text-lg', iconClassName)} />
+      <span className={cn('i-mingcute-box-3-line text-base', iconClassName)} />
     </Button>
   )
 }

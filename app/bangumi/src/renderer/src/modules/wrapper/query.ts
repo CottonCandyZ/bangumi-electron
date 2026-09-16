@@ -1,8 +1,6 @@
 import { newIdbStorage } from '@renderer/lib/persister'
-import { AuthCode, AuthError } from '@renderer/lib/utils/error'
+import { AuthError } from '@renderer/lib/utils/error'
 import { isWebVerificationRequiredError } from '@renderer/data/fetch/config/web-access'
-import { loginDialogAtom } from '@renderer/state/dialog/normal'
-import { store } from '@renderer/state/utils'
 import { QueryCache, QueryClient } from '@tanstack/react-query'
 import {
   experimental_createQueryPersister,
@@ -10,7 +8,7 @@ import {
 } from '@tanstack/react-query-persist-client'
 import { createStore } from 'idb-keyval'
 import { toast } from 'sonner'
-import { isNetworkUnavailableError } from '@renderer/lib/utils/network'
+import { CollectionPendingError, isNetworkUnavailableError } from '@renderer/lib/utils/network'
 
 const persister = experimental_createQueryPersister<PersistedQuery>({
   storage: newIdbStorage(createStore('cache', 'query_persister')),
@@ -19,20 +17,11 @@ const persister = experimental_createQueryPersister<PersistedQuery>({
   deserialize: (cached) => cached,
 })
 
-function openLoginDialogForAuthError(error: AuthError) {
-  if (!navigator.onLine || error.code === AuthCode.NOT_FOND) return
-  const reason =
-    error.code === AuthCode.EXPIRE || error.code === AuthCode.WEB_COOKIE_EXPIRE
-      ? 'session-expired'
-      : undefined
-  store.set(loginDialogAtom, { open: true, content: { reason } })
-}
-
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
       // Blob URLs and one-time login challenges must never reuse a failed cached image.
-      if (query.queryKey[0] === 'captcha') return
+      if (query.queryKey[0] === 'captcha' || error instanceof CollectionPendingError) return
       if (isNetworkUnavailableError(error)) {
         if (query.state.data !== undefined) {
           queryClient.setQueryData(query.queryKey, query.state.data, {
@@ -58,7 +47,6 @@ export const queryClient = new QueryClient({
         if (query.state.data !== undefined) {
           queryClient.setQueryData(query.queryKey, query.state.data)
         }
-        openLoginDialogForAuthError(error)
         return
       }
 
@@ -69,8 +57,7 @@ export const queryClient = new QueryClient({
         error.message.includes('UNAUTHORIZED')
 
       if (isAuthError) {
-        // For 401 errors, we don't need to show another toast since
-        // the onResponseError handler in base.ts already shows one
+        // Background auth failures stay in the query state, without opening login UI.
 
         // Mark the query as successful with its previous data to prevent
         // the error from propagating to error boundaries when using Suspense

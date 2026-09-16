@@ -58,7 +58,12 @@ export function TrendingSubjectsListPanelContent({
 
   if (subjectIds.length === 0 && (trendsQuery.isError || !online)) {
     return (
-      <QueryFallback label="近期热门" error={trendsQuery.error} onRetry={trendsQuery.refetch} />
+      <QueryFallback
+        layout="panel"
+        label="近期热门"
+        error={trendsQuery.error}
+        onRetry={trendsQuery.refetch}
+      />
     )
   }
   if (trendsQuery.isLoading && subjectIds.length === 0) {

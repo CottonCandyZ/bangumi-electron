@@ -123,7 +123,7 @@ function CommunityTopicsVirtualList({
   })
 
   if (topics.length === 0 && (query.isError || !online)) {
-    return <QueryFallback label="讨论" error={query.error} onRetry={query.refetch} />
+    return <QueryFallback layout="panel" label="讨论" error={query.error} onRetry={query.refetch} />
   }
   if (query.isLoading && topics.length === 0) {
     return (

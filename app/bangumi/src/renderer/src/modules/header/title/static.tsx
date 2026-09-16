@@ -22,21 +22,21 @@ export function StaticHeaderTitle({
   visible?: boolean
 }) {
   return (
-    <div className="flex h-full items-center overflow-hidden select-none">
+    <div className="flex h-full min-w-0 items-center overflow-hidden select-none">
       <AnimatePresence key={presenceKey}>
         {visible && (
           <motion.div
-            className="flex min-w-0 flex-row items-center gap-3"
+            className="flex min-w-0 flex-row items-center gap-2"
             animate={{ y: 0, opacity: 1 }}
             initial={{ y: '120%', opacity: 0 }}
             exit={{ y: '120%', opacity: 0 }}
           >
             {image ? (
-              <Image className="group size-9 shrink-0 overflow-hidden rounded-lg" imageSrc={image}>
+              <Image className="group size-7 shrink-0 overflow-hidden rounded-md" imageSrc={image}>
                 {imageOverlay}
               </Image>
             ) : imageFallback ? (
-              <div className="bg-muted text-muted-foreground group relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg text-xs font-medium">
+              <div className="bg-muted text-muted-foreground group relative flex size-7 shrink-0 items-center justify-center overflow-hidden rounded-md text-xs font-medium">
                 {imageFallback}
                 {imageOverlay}
               </div>
@@ -51,13 +51,15 @@ export function StaticHeaderTitle({
 
 export function Header({ name, name_cn }: Pick<Subject, 'name' | 'name_cn'>) {
   return (
-    <header className="flex flex-auto flex-col">
+    <header className="flex min-w-0 flex-auto flex-col">
       {isEmpty(name_cn) ? (
-        <h1 className="line-clamp-2 font-medium">{name}</h1>
+        <h1 className="truncate text-[13px] leading-4 font-medium">{name}</h1>
       ) : (
         <>
-          <h1 className="line-clamp-1 font-medium">{name_cn}</h1>
-          <h2 className="font-jp text-muted-foreground line-clamp-1 text-xs">{name}</h2>
+          <h1 className="truncate text-[13px] leading-4 font-medium">{name_cn}</h1>
+          <h2 className="font-jp text-muted-foreground truncate text-[11px] leading-[14px]">
+            {name}
+          </h2>
         </>
       )}
     </header>

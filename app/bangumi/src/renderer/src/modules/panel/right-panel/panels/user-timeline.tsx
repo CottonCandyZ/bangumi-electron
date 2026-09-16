@@ -74,7 +74,7 @@ export function UserTimelinePanel() {
 
   return (
     <div className="flex h-full min-w-0 flex-col">
-      <div className="drag-region flex h-14 shrink-0 items-center justify-between gap-2 border-b px-3">
+      <div className="drag-region flex h-11 shrink-0 items-center justify-between gap-2 border-b px-3">
         <div className="no-drag-region flex min-w-0 flex-row items-baseline gap-2">
           <h2 className="line-clamp-1 text-sm font-medium">时间线</h2>
           {username && (
@@ -82,7 +82,7 @@ export function UserTimelinePanel() {
           )}
         </div>
         <Button
-          className="no-drag-region size-8 shrink-0"
+          className="no-drag-region size-7 shrink-0"
           disabled={timelineQuery.isFetching}
           onClick={refreshTimeline}
           size="icon"

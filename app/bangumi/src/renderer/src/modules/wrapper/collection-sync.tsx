@@ -1,18 +1,45 @@
+import { toast } from 'sonner'
+import { store } from '@renderer/state/utils'
+import { loginDialogAtom } from '@renderer/state/dialog/normal'
+import { useOnline } from '@renderer/hooks/use-online'
 import { useEffect } from 'react'
 import { useAtomValue } from 'jotai'
-import { userIdAtom } from '@renderer/state/session'
+import { sessionNeedsLoginAtom, userIdAtom } from '@renderer/state/session'
 import { client } from '@renderer/lib/client'
 import { invalidateCollections } from '@renderer/data/collection/client'
 import { CollectionSyncDialog } from '@renderer/modules/common/collections/sync-dialog'
 import { queryClient } from './query'
-import { getAccessToken } from '@renderer/data/fetch/session'
+import { expireInvalidSession, getAccessToken } from '@renderer/data/fetch/session'
 
 export function CollectionSyncProvider() {
   const userId = Number(useAtomValue(userIdAtom)) || null
+  const needsLogin = useAtomValue(sessionNeedsLoginAtom)
+  const online = useOnline()
   const commandWindow = window.location.hash.startsWith('#/command')
   useEffect(() => {
+    if (commandWindow || !online || !needsLogin) return
+    void expireInvalidSession()
+      .then((expired) => {
+        if (!expired) return
+        toast.error('登录已过期，已退出登录，本地收藏已保留', {
+          id: 'session-expired',
+          action: {
+            label: '登录',
+            onClick: () =>
+              store.set(loginDialogAtom, { open: true, content: { reason: 'session-expired' } }),
+          },
+        })
+      })
+      .catch(() => {
+        toast.error('登录已过期，退出清理未完成，请重新登录', {
+          id: 'session-expired',
+          action: { label: '登录', onClick: () => store.set(loginDialogAtom, { open: true }) },
+        })
+      })
+  }, [commandWindow, needsLogin, online])
+  useEffect(() => {
     if (commandWindow) return
-    void client.collectionActivate({ userId })
+    void client.collectionActivate({ userId }).then(() => invalidateCollections())
     if (userId) void getAccessToken(String(userId)).catch(() => {})
     const unsubscribe = window.electron.ipcRenderer.on('collections-changed', () => {
       void invalidateCollections()

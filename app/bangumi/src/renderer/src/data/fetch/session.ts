@@ -1,13 +1,12 @@
-import { LOGIN, oauthFetch, sessionFetch } from '@renderer/data/fetch/config/'
-import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { FetchError } from 'ofetch'
+import { LOGIN, oauthFetch, sessionFetch } from '@renderer/data/fetch/config/'
 import { Token } from '@renderer/data/types/login'
 import { client } from '@renderer/lib/client'
 import { readAccessToken } from './db/user'
 import { refreshToken } from '@renderer/data/fetch/web/login'
 import { createPromiseCache, createSingletonPromise } from '@renderer/lib/utils/promise'
 import { store } from '@renderer/state/utils'
-import { userIdAtom } from '@renderer/state/session'
+import { authRequiredUserIdAtom, userIdAtom } from '@renderer/state/session'
 
 // 这里是用来验证相关 session 的地方，如果可能也会刷新 Session
 
@@ -47,13 +46,14 @@ export async function isAccessTokenValid(token: Token) {
  * 登出时清除相关内容
  */
 export async function logout() {
+  store.set(userIdAtom, null)
+  store.set(authRequiredUserIdAtom, null)
   await client.collectionActivate({ userId: null })
   cleanAccessTokenCache()
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_sid' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_sec_id' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_cookietime' })
   await client.removeCookie({ url: 'https://bgm.tv', name: 'chii_auth' })
-  store.set(userIdAtom, null)
 }
 
 // token cache
@@ -79,10 +79,24 @@ export async function safeRefreshToken(token: Token): Promise<Token & { create_t
 
   // Use the promise cache utility to get or create a refresh promise
   return tokenRefreshCache.getOrCreatePromise(cacheKey, async () => {
-    const newToken = await refreshToken({
-      ...token,
-    })
-    return { ...newToken, create_time: new Date() }
+    try {
+      const newToken = await refreshToken({ ...token })
+      if (store.get(authRequiredUserIdAtom) === String(token.user_id)) {
+        store.set(authRequiredUserIdAtom, null)
+      }
+      return { ...newToken, create_time: new Date() }
+    } catch (error) {
+      if (
+        error instanceof FetchError &&
+        navigator.onLine &&
+        error.statusCode === 400 &&
+        error.data?.error === 'invalid_grant' &&
+        store.get(userIdAtom) === String(token.user_id)
+      ) {
+        store.set(authRequiredUserIdAtom, String(token.user_id))
+      }
+      throw error
+    }
   })
 }
 
@@ -129,15 +143,8 @@ export async function getAccessToken(userId: string | null = store.get(userIdAto
 
   // 判断过期
   if (token && isTokenExpired(token, nowTime)) {
-    // refresh token using the safe refresh function
-    try {
-      accessTokenCache = await safeRefreshToken(token)
-    } catch (error) {
-      if (error instanceof FetchError && [400, 401, 403].includes(error.statusCode ?? 0)) {
-        store.set(loginDialogAtom, { open: true, content: { reason: 'session-expired' } })
-      }
-      throw error
-    }
+    // Propagate refresh failure to the caller; requests never open login UI.
+    accessTokenCache = await safeRefreshToken(token)
     return accessTokenCache
   }
   accessTokenCache = token ?? null
@@ -150,4 +157,12 @@ export function cleanAccessTokenCache() {
   // Also clear any pending refresh token promises
   tokenRefreshCache.clearAllPromises()
   tokenRecoverSingleton.clear()
+}
+
+/** Only a server-confirmed rejection can end the active online session. */
+export async function expireInvalidSession() {
+  const userId = store.get(userIdAtom)
+  if (!navigator.onLine || !userId || store.get(authRequiredUserIdAtom) !== userId) return false
+  await logout()
+  return true
 }

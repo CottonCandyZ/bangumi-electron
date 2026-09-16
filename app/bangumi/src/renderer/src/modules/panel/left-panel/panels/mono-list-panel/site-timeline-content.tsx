@@ -150,7 +150,7 @@ function SiteTimelineVirtualList({
   }, [hasMore, isFetchingMore, onListNearBottom])
 
   if (rows === undefined && (error || !online)) {
-    return <QueryFallback label="时间线" />
+    return <QueryFallback layout="panel" label="时间线" />
   }
   if (rows === undefined && !error) {
     return <SiteTimelineSkeletonScroll count={8} />

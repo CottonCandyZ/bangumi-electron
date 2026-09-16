@@ -264,7 +264,7 @@ export class CollectionRepository {
   }
   collection(userId: number, subjectId: number): CollectionData | null | undefined {
     const record = this.get(userId, subjectId)
-    return record ? toCollectionData(record) : undefined
+    return record ? toCollectionData(record) : this.account(userId)?.listComplete ? null : undefined
   }
   list({
     userId,
@@ -313,7 +313,7 @@ export class CollectionRepository {
     offset?: number
     limit?: number
     episodeType?: number
-  }): CollectionEpisodes {
+  }): CollectionEpisodes & { ready: boolean } {
     const record = this.get(userId, subjectId)
     const resources = this.db
       .select()
@@ -330,6 +330,7 @@ export class CollectionRepository {
           a.data.type - b.data.type || a.data.sort - b.data.sort || a.episodeId - b.episodeId,
       )
     return {
+      ready: record?.local.episodesComplete === true,
       data: resources
         .slice(offset, offset + limit)
         .map((r) => ({ episode: r.data, type: record!.local.episodes[r.episodeId] })),

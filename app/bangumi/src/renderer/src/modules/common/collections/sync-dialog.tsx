@@ -305,16 +305,16 @@ export function CollectionSyncButton() {
     <Button
       variant="ghost"
       size="icon"
-      className="text-muted-foreground no-drag-region hover:text-foreground relative size-8"
+      className="text-muted-foreground no-drag-region hover:text-foreground relative size-7"
       title={indicator.title}
       aria-label="同步收藏"
       aria-haspopup="dialog"
       aria-busy={sync?.running}
       onClick={() => open(true)}
     >
-      <RefreshCw className={`size-4.5 ${sync?.running ? 'animate-spin' : ''}`} />
+      <RefreshCw className={`size-4 ${sync?.running ? 'animate-spin' : ''}`} />
       {indicator.badge !== null && (
-        <span className="bg-muted text-muted-foreground absolute -top-1 -right-1 min-w-4 rounded-full px-1 text-[10px]">
+        <span className="bg-muted text-muted-foreground absolute -top-0.5 -right-0.5 min-w-3.5 rounded-full px-0.5 text-[9px]">
           {indicator.badge}
         </span>
       )}

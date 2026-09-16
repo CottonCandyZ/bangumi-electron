@@ -55,7 +55,7 @@ export function MonoListPanelHeader({
 
   return (
     <>
-      <div className="drag-region flex h-14 shrink-0 flex-col justify-center border-b px-2">
+      <div className="drag-region flex h-11 shrink-0 flex-col justify-center border-b px-2">
         <div className="flex flex-row items-center gap-1">
           <MonoListPanelTabStrip
             activeTabId={activeTab.id}
@@ -102,10 +102,10 @@ function MonoListPanelTabActions({
         <DropdownMenuTrigger asChild>
           <button
             aria-label="标签页列表"
-            className="text-muted-foreground no-drag-region hover:bg-accent hover:text-foreground flex size-8 shrink-0 items-center justify-center rounded-md"
+            className="text-muted-foreground no-drag-region hover:bg-accent hover:text-foreground flex size-7 shrink-0 items-center justify-center rounded-md"
             title="标签页列表"
           >
-            <ChevronsDownIcon className="size-4.5" />
+            <ChevronsDownIcon className="size-4" />
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="max-h-72 w-56">
@@ -140,11 +140,11 @@ function MonoListPanelTabActions({
       </DropdownMenu>
       <button
         aria-label="关闭全部"
-        className="text-muted-foreground no-drag-region hover:bg-accent hover:text-foreground flex size-8 shrink-0 items-center justify-center rounded-md"
+        className="text-muted-foreground no-drag-region hover:bg-accent hover:text-foreground flex size-7 shrink-0 items-center justify-center rounded-md"
         onClick={closeAllTabs}
         title="关闭全部"
       >
-        <span className="i-mingcute-close-circle-line text-lg" />
+        <span className="i-mingcute-close-circle-line text-base" />
       </button>
     </div>
   )
@@ -286,7 +286,7 @@ function MonoListPanelTabStrip({
         <div className="flex h-full w-max min-w-full flex-row items-center gap-1">
           {tabs.map((tab) => (
             <button
-              className="no-drag-region hover:bg-accent data-[active=true]:bg-accent flex h-9 max-w-40 min-w-16 items-center justify-between gap-2 rounded-md px-2 text-left text-sm"
+              className="no-drag-region hover:bg-accent data-[active=true]:bg-accent flex h-7 max-w-40 min-w-16 items-center justify-between gap-2 rounded-md px-2 text-left text-xs"
               data-active={tab.id === activeTabId}
               key={tab.id}
               onClick={() => setActiveTabId(tab.id)}

@@ -5,7 +5,7 @@ import { useAtomValue } from 'jotai'
 export function NavProfile() {
   const open = useAtomValue(navOpenAtom)
   return (
-    <div className="flex w-full p-1">
+    <div className="flex w-full shrink-0 justify-center pt-1.5">
       <ProfileMenu type={open ? 'expend' : 'small'} />
     </div>
   )

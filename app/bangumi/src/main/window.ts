@@ -5,7 +5,6 @@ import { getIconPath } from '@main/helper'
 import { is } from '@electron-toolkit/utils'
 import { isMacOS, isWindows, isWindows11 } from '@main/env'
 import { isAppQuitting } from '@main/app-flags'
-import { setupMacOSTrafficLightSpacing } from '@main/macos-traffic-lights'
 import {
   getWindowTitleBarOverlay,
   restoreWindowTheme,
@@ -52,7 +51,7 @@ export function createWindow(
     case 'darwin': {
       Object.assign(baseWindowConfig, {
         titleBarStyle: 'hiddenInset',
-        trafficLightPosition: { x: 5, y: 4 },
+        trafficLightPosition: { x: 14, y: 16 },
         // vibrancy: 'under-window',
         // visualEffectState: 'active',
         // transparent: true,
@@ -81,7 +80,6 @@ export function createWindow(
     ...config,
   })
 
-  setupMacOSTrafficLightSpacing(window)
   syncWindowTitleBarTheme(window)
 
   window.webContents.setWindowOpenHandler((details) => {

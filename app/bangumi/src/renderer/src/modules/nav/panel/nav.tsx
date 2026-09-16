@@ -5,38 +5,38 @@ export const route = [
   {
     name: '动画',
     panelName: 'anime',
-    icon: <span className="i-mingcute-tv-2-line text-[1.4rem]" />,
-    active: <span className="i-mingcute-tv-2-fill text-[1.4rem]" />,
+    icon: <span className="i-mingcute-tv-2-line text-lg" />,
+    active: <span className="i-mingcute-tv-2-fill text-lg" />,
   },
   {
     name: '游戏',
     panelName: 'game',
-    icon: <span className="i-mingcute-game-1-line text-[1.4rem]" />,
-    active: <span className="i-mingcute-game-1-fill text-[1.4rem]" />,
+    icon: <span className="i-mingcute-game-1-line text-lg" />,
+    active: <span className="i-mingcute-game-1-fill text-lg" />,
   },
   {
     name: '书籍',
     panelName: 'book',
-    icon: <span className="i-mingcute-book-6-line text-[1.4rem]" />,
-    active: <span className="i-mingcute-book-6-fill text-[1.4rem]" />,
+    icon: <span className="i-mingcute-book-6-line text-lg" />,
+    active: <span className="i-mingcute-book-6-fill text-lg" />,
   },
   {
     name: '音乐',
     panelName: 'music',
-    icon: <span className="i-mingcute-music-3-line text-[1.4rem]" />,
-    active: <span className="i-mingcute-music-3-fill text-[1.4rem]" />,
+    icon: <span className="i-mingcute-music-3-line text-lg" />,
+    active: <span className="i-mingcute-music-3-fill text-lg" />,
   },
   {
     name: '三次元',
     panelName: 'real',
-    icon: <span className="i-mingcute-tv-1-line text-[1.4rem]" />,
-    active: <span className="i-mingcute-tv-1-fill text-[1.4rem]" />,
+    icon: <span className="i-mingcute-tv-1-line text-lg" />,
+    active: <span className="i-mingcute-tv-1-fill text-lg" />,
   },
 ] as const
 
 export function PanelNav() {
   return (
-    <ul className="flex w-full flex-col gap-1">
+    <ul className="flex w-full flex-col gap-0.5">
       {route.map((item) => (
         <li key={item.name}>
           <PanelButton {...item} />

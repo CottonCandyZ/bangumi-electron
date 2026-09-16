@@ -21,9 +21,11 @@ export function RightPanelButton() {
       Button={
         <Button
           variant="ghost"
+          aria-label="右边栏"
+          aria-expanded={active}
           disabled={!hasContent}
           className={cn(
-            'no-drag-region text-muted-foreground size-8 p-1 text-[1.4rem]',
+            'no-drag-region text-muted-foreground size-7 p-1 text-lg',
             active && 'text-primary',
           )}
           onClick={() => {

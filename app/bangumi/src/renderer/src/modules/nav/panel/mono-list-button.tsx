@@ -14,9 +14,9 @@ export function MonoListPanelButton() {
     <Button
       variant="ghost"
       className={cn(
-        'text-primary/65 hover:text-primary relative aspect-square h-full w-fit p-2 active:scale-95',
+        'text-primary/65 hover:text-primary relative h-8 w-full shrink-0 p-1.5 text-xs active:scale-95',
         panelState.isOpen && 'bg-accent text-primary',
-        navOpen && 'aspect-auto w-full justify-start gap-2',
+        navOpen && 'justify-start gap-2',
       )}
       onClick={() => {
         startTransition(() => {
@@ -27,7 +27,7 @@ export function MonoListPanelButton() {
     >
       <span
         className={cn(
-          'text-[1.4rem]',
+          'text-lg',
           panelState.isOpen ? 'i-mingcute-box-3-fill' : 'i-mingcute-box-3-line',
         )}
       />

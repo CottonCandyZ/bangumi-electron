@@ -12,17 +12,17 @@ export function SubjectHeaderTitle({ subjectId }: { subjectId: SubjectId }) {
   const isInView = useAtomValue(subjectCoverImageInViewAtom)
   if (!subjectInfo) return null
   return (
-    <div className="flex h-full items-center overflow-hidden select-none">
+    <div className="flex h-full min-w-0 items-center overflow-hidden select-none">
       <AnimatePresence key={subjectId}>
         {!isInView && (
           <motion.div
-            className="flex flex-row items-center gap-3"
+            className="flex min-w-0 flex-row items-center gap-2"
             animate={{ y: 0, opacity: 1 }}
             initial={{ y: '120%', opacity: 0 }}
             exit={{ y: '120%', opacity: 0 }}
           >
             <Image
-              className="size-9 shrink-0 overflow-hidden rounded-lg"
+              className="size-7 shrink-0 overflow-hidden rounded-md"
               imageSrc={subjectInfo.images.common}
             />
             <Header {...subjectInfo} />

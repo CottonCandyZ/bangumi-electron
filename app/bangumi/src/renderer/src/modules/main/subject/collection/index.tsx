@@ -1,3 +1,5 @@
+import { useOnline } from '@renderer/hooks/use-online'
+import { CollectionPendingError } from '@renderer/lib/utils/network'
 import { AddSubjectCollection } from '@renderer/modules/common/collections/modify/add'
 import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Skeleton } from '@renderer/components/ui/skeleton'
@@ -21,6 +23,7 @@ import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 
 export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
   const userInfo = useSession()
+  const online = useOnline()
   const subjectCollectionQuery = useQuerySubjectCollection({
     subjectId,
     username: userInfo?.username,
@@ -53,8 +56,12 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
           <PrivateSwitch subjectCollection={subjectCollection} />
         )}
       </div>
-      {subjectCollectionQuery.isError && subjectCollection === undefined ? (
-        <p className="text-muted-foreground text-sm">尚未取得收藏状态，请联网同步后再试</p>
+      {!online && subjectCollection === undefined ? (
+        <p className="text-muted-foreground text-xs">暂无此条目的离线收藏信息，请联网后同步。</p>
+      ) : subjectCollectionQuery.isError &&
+        !(subjectCollectionQuery.error instanceof CollectionPendingError) &&
+        subjectCollection === undefined ? (
+        <p className="text-muted-foreground text-sm">暂时无法确认收藏状态，请稍后重试</p>
       ) : loading ? (
         <div className="flex flex-col gap-2">
           <Skeleton className="h-9 w-full" />

@@ -1,16 +1,12 @@
 import { LinkNav } from '@renderer/modules/nav/link/nav'
 import { PanelNav } from '@renderer/modules/nav/panel/nav'
 import { NavProfile } from '@renderer/modules/nav/profile'
-import { Button } from '@renderer/components/ui/button'
 import { Separator } from '@renderer/components/ui/separator'
-import { client } from '@renderer/lib/client'
 import { cn } from '@renderer/lib/utils'
 import { navOpenAtom } from '@renderer/state/panel'
 import { AnimatePresence, motion } from 'motion/react'
 import { useAtom } from 'jotai'
 import { UI_CONFIG } from '@renderer/config'
-
-const platform = await client.platform({})
 
 export function NavBar() {
   const [open, setOpen] = useAtom(navOpenAtom)
@@ -22,29 +18,12 @@ export function NavBar() {
           open && 'z-50',
         )}
         style={{
-          width: open ? '15rem' : UI_CONFIG.NAV_WIDTH,
+          width: open ? '13rem' : UI_CONFIG.NAV_WIDTH,
           viewTransitionName: 'app-nav',
         }}
       >
-        <div
-          className={cn(
-            'flex h-14 w-full shrink-0 items-center border-b p-2',
-            platform === 'darwin' && 'pt-6',
-          )}
-        >
-          <Button
-            variant="ghost"
-            className={cn(
-              'text-primary/65 hover:text-primary relative aspect-square h-fit w-fit p-2',
-              platform === 'darwin' && 'm-1 p-1',
-            )}
-            onClick={() => setOpen(!open)}
-          >
-            <span className="i-mingcute-menu-line flex text-[1.4rem]" />
-          </Button>
-        </div>
-        <div className="flex h-full w-full flex-col justify-between overflow-x-hidden p-2">
-          <div className="flex w-full flex-col gap-2">
+        <div className="flex h-full w-full flex-col justify-between overflow-x-hidden p-1.5">
+          <div className="flex w-full flex-col gap-1.5">
             <LinkNav />
             <Separator />
             <PanelNav />

@@ -47,7 +47,7 @@ export function EpisodeHeaderTitle({ episodeId }: { episodeId: EpId }) {
       />
       {episodesPanel.canOpen && (
         <OpenMonoListPanelButton
-          className="no-drag-region size-8 shrink-0"
+          className="no-drag-region size-7 shrink-0"
           tab={episodesPanel.tab}
           title="在侧栏打开章节"
         />

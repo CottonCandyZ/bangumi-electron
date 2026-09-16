@@ -44,22 +44,25 @@ export function ProfileMenu({ type }: { type: 'expend' | 'small' }) {
     <DropdownMenu onOpenChange={(open) => setDropDownOpen(open)}>
       <DropdownMenuTrigger
         data-expend={type}
+        aria-label="账号菜单"
         className={cn(
-          'text-muted-foreground hover:text-primary flex w-fit flex-row items-center gap-3 rounded-full shadow-xs',
-          type === 'expend' && 'group w-full border p-2 shadow-none',
+          'text-muted-foreground hover:text-primary relative flex w-fit flex-row items-center gap-2 rounded-full shadow-xs',
+          type === 'expend' && 'group w-full min-w-0 border p-1.5 shadow-none',
           dropdownOpen && 'bg-accent text-primary',
         )}
       >
         {isLogin ? (
           <Image
-            className="aspect-square w-8 shrink-0 overflow-hidden rounded-full"
+            className="aspect-square w-7 shrink-0 overflow-hidden rounded-full"
             imageSrc={userInfo.avatar.small}
           />
         ) : (
-          <div className="bg-accent aspect-square w-8 shrink-0 overflow-hidden rounded-full" />
+          <div className="bg-accent aspect-square w-7 shrink-0 overflow-hidden rounded-full" />
         )}
         {type === 'expend' && (
-          <span className="shrink-0 font-semibold">{isLogin && userInfo.nickname}</span>
+          <span className="min-w-0 truncate text-xs font-medium">
+            {isLogin && userInfo.nickname}
+          </span>
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent

@@ -19,7 +19,7 @@ export function QueryRefreshButton({
   return (
     <Button
       aria-label={label}
-      className={cn('size-8 shrink-0', className)}
+      className={cn('size-7 shrink-0', className)}
       disabled={disabled || refreshing || !online}
       onClick={() => {
         void onRefresh()

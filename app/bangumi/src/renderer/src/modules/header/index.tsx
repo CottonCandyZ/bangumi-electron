@@ -9,13 +9,16 @@ import { HeaderTitle } from '@renderer/modules/header/subject-title'
 import { HeaderUpdateIndicator } from '@renderer/modules/update/menu'
 import { NotificationButton } from '@renderer/modules/header/notification-button'
 
+import { NavMenuButton } from '@renderer/modules/nav/menu-button'
+
 const platform = await client.platform({})
 
 export function Header() {
   return (
     <header
       className={cn(
-        'bg-background drag-region @container/header relative z-10 flex shrink-0 flex-row items-center justify-between gap-4 border-b pl-2',
+        'bg-background drag-region @container/header relative z-10 flex shrink-0 flex-row items-center justify-between gap-3 border-b pl-2',
+        platform === 'darwin' && 'pl-[88px]',
       )}
       style={{
         height: UI_CONFIG.HEADER_HEIGHT,
@@ -23,7 +26,10 @@ export function Header() {
       }}
     >
       <div className="flex h-full min-w-0 flex-1 flex-row items-center gap-3 overflow-hidden">
-        <NavButton />
+        <div className="flex shrink-0 items-center gap-2">
+          <NavMenuButton />
+          <NavButton compact />
+        </div>
         <HeaderTitle />
       </div>
       <div

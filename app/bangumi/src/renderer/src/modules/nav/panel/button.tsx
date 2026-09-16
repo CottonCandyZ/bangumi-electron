@@ -40,9 +40,9 @@ export function PanelButton({ name, panelName, icon, active }: Props) {
     <Button
       variant="ghost"
       className={cn(
-        'text-primary/65 hover:text-primary relative aspect-square h-full w-fit p-2 active:scale-95',
+        'text-primary/65 hover:text-primary relative h-8 w-full shrink-0 p-1.5 text-xs active:scale-95',
         isActive && 'bg-accent text-primary',
-        navOpen && 'aspect-auto w-full justify-start gap-2',
+        navOpen && 'justify-start gap-2',
       )}
       onClick={() => {
         startTransition(() => {
@@ -76,12 +76,12 @@ export function CollectionResourceMenuButton() {
         <Button
           variant="ghost"
           className={cn(
-            'text-primary/65 hover:text-primary relative aspect-square h-full w-fit p-2 active:scale-95',
+            'text-primary/65 hover:text-primary relative h-8 w-full shrink-0 p-1.5 text-xs active:scale-95',
             activeResource && 'bg-accent text-primary',
-            navOpen && 'aspect-auto w-full justify-start gap-2',
+            navOpen && 'justify-start gap-2',
           )}
         >
-          <MoreHorizontalIcon className="size-[1.4rem]" />
+          <MoreHorizontalIcon className="size-[18px]" />
           {navOpen && <span>{activeResource?.name ?? '更多收藏'}</span>}
         </Button>
       </DropdownMenuTrigger>
