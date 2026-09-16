@@ -1,4 +1,5 @@
 import { MyLink } from '@renderer/components/my-link'
+import { AuthorLabel } from '@renderer/components/author-label'
 import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
@@ -86,7 +87,7 @@ function MonoIndexRow({ index }: { index: SlimIndex }) {
 
   return (
     <MyLink
-      className="hover:bg-accent/40 focus-visible:ring-ring grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-1 px-2 py-2.5 transition-colors focus-visible:ring-2 focus-visible:outline-none @xl:grid-cols-[minmax(0,1fr)_7rem_4rem_9rem]"
+      className="hover:bg-accent/40 focus-visible:ring-ring grid min-w-0 cursor-default grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-4 gap-y-1 px-2 py-2.5 transition-colors focus-visible:ring-2 focus-visible:outline-none @xl:grid-cols-[minmax(0,1fr)_7rem_4rem_9rem]"
       to={`/index/${index.id}`}
     >
       <div className="flex min-w-0 items-center gap-2">
@@ -100,7 +101,10 @@ function MonoIndexRow({ index }: { index: SlimIndex }) {
         )}
       </div>
       <span className="text-muted-foreground col-start-1 row-start-2 truncate text-xs @xl:col-start-2 @xl:row-start-1">
-        {index.user?.nickname || `#${index.uid}`}
+        <AuthorLabel
+          name={index.user?.nickname || `#${index.uid}`}
+          avatar={index.user?.avatar?.small}
+        />
       </span>
       <span className="text-muted-foreground col-start-2 row-start-1 text-right text-xs whitespace-nowrap tabular-nums @xl:col-start-3">
         {index.total} 项

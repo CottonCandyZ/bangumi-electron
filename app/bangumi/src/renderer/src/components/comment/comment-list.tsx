@@ -5,10 +5,27 @@ import type { ReactionTarget } from '@renderer/data/fetch/api/reaction'
 import type { Comment } from '@renderer/data/types/comment'
 import { cn } from '@renderer/lib/utils'
 import type { ReplyTarget } from '@shared/reply'
+import { useLocation } from 'react-router-dom'
+import { CommentExpansionProvider } from './comment-expansion'
 
 export const DEFAULT_COMMENT_PLACEHOLDER_COUNT = 6
 
-export function CommentList({
+export function CommentList(props: Parameters<typeof CommentListContent>[0]) {
+  const { pathname } = useLocation()
+  const scope = JSON.stringify([
+    pathname,
+    props.scrollMemoryKey,
+    props.reactionTarget,
+    props.replyTarget,
+  ])
+  return (
+    <CommentExpansionProvider key={scope}>
+      <CommentListContent {...props} />
+    </CommentExpansionProvider>
+  )
+}
+
+function CommentListContent({
   comments,
   className,
   appendPlaceholderCount = DEFAULT_COMMENT_PLACEHOLDER_COUNT,

@@ -1,4 +1,5 @@
 import { BBCodeImagePreviewProvider } from '@renderer/components/comment/bbcode-image'
+import { useCommentExpansion } from './comment-expansion'
 import { CommentDeleteButton } from '@renderer/components/comment/comment-delete-button'
 import { CommentEditButton } from '@renderer/components/comment/comment-edit-button'
 import {
@@ -27,7 +28,6 @@ import dayjs from 'dayjs'
 import { useAtomValue } from 'jotai'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import {
-  useEffect,
   useId,
   useLayoutEffect,
   useMemo,
@@ -68,7 +68,7 @@ export function CommentItem({
   userAvatarViewTransition: boolean
   virtual?: boolean
 }) {
-  const [showAllReplies, setShowAllReplies] = useState(false)
+  const [showAllReplies, setShowAllReplies] = useCommentExpansion(`comment:${comment.id}:replies`)
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false)
   const [replyHovering, setReplyHovering] = useState(false)
   const replyComposer = useAtomValue(replyComposerAtom)
@@ -104,6 +104,7 @@ export function CommentItem({
   const highlightedReplyId = getHighlightedReplyId(replyComposer, replyTarget)
   const highlighted = highlightedReplyId === comment.id
   const contentState = useCommentContentState({
+    expansionKey: `comment:${comment.id}:content`,
     content: comment.content,
     disableHeightTransition: virtual,
     maxCollapsedHeight: COMMENT_CONTENT_COLLAPSED_HEIGHT,
@@ -365,6 +366,7 @@ function ReplyItem({
   const session = useSession()
   const showEdit = !!replyTarget && canEditReply(replyTarget) && session?.id === reply.creatorID
   const contentState = useCommentContentState({
+    expansionKey: `reply:${reply.id}:content`,
     content: reply.content,
     disableHeightTransition: virtual,
     maxCollapsedHeight: REPLY_CONTENT_COLLAPSED_HEIGHT,
@@ -468,17 +470,19 @@ function ReplyItem({
 }
 
 function useCommentContentState({
+  expansionKey,
   content,
   disableHeightTransition,
   maxCollapsedHeight,
 }: {
+  expansionKey: string
   content: string
   disableHeightTransition: boolean
   maxCollapsedHeight: number
 }) {
   const contentId = useId()
   const contentRef = useRef<HTMLDivElement>(null)
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useCommentExpansion(expansionKey, content)
   const [measurement, setMeasurement] = useState({ content: '', height: 0 })
   const renderedContent = useMemo(() => renderBBCode(content), [content])
   const measured = measurement.content === content
@@ -504,8 +508,6 @@ function useCommentContentState({
     const element = contentRef.current
     if (!element) return
 
-    setExpanded(false)
-
     const updateContentHeight = () => {
       const nextHeight = Math.ceil(element.scrollHeight || element.getBoundingClientRect().height)
       setMeasurement((current) => {
@@ -523,10 +525,6 @@ function useCommentContentState({
       observer.disconnect()
     }
   }, [content])
-
-  useEffect(() => {
-    if (!collapsible) setExpanded(false)
-  }, [collapsible])
 
   return {
     clipStyle,
