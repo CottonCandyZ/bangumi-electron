@@ -5,9 +5,10 @@ import { BrowserWindow } from 'electron'
 const VERIFICATION_TIMEOUT_MS = 5 * 60 * 1000
 
 type BangumiSectionPath = 'anime' | 'book' | 'music' | 'game' | 'real'
+type VerifiedPages = Partial<Record<BangumiSectionPath, string>>
 
 let verificationWindow: BrowserWindow | null = null
-let verificationPromise: Promise<string> | null = null
+let verificationPromise: Promise<VerifiedPages> | null = null
 
 export const webVerificationIPC = {
   requestBangumiWebVerification: t.procedure
@@ -32,7 +33,7 @@ function requestBangumiWebVerification(sectionPath: BangumiSectionPath) {
 }
 
 function createBangumiWebVerificationWindow(sectionPath: BangumiSectionPath) {
-  return new Promise<string>((resolve, reject) => {
+  return new Promise<VerifiedPages>((resolve, reject) => {
     const parent = BrowserWindow.getFocusedWindow() ?? undefined
     const window = new BrowserWindow({
       width: 860,
@@ -51,11 +52,12 @@ function createBangumiWebVerificationWindow(sectionPath: BangumiSectionPath) {
     verificationWindow = window
 
     let settled = false
+    let collecting = false
     const timeout = setTimeout(() => {
       finish(new Error('Bangumi 网页验证超时。'))
     }, VERIFICATION_TIMEOUT_MS)
 
-    const finish = (error?: Error, html?: string) => {
+    const finish = (error?: Error, pages?: VerifiedPages) => {
       if (settled) return
       settled = true
       clearTimeout(timeout)
@@ -64,7 +66,7 @@ function createBangumiWebVerificationWindow(sectionPath: BangumiSectionPath) {
         reject(error)
         return
       }
-      resolve(html ?? '')
+      resolve(pages ?? {})
     }
 
     window.webContents.on('did-finish-load', () => {
@@ -73,8 +75,31 @@ function createBangumiWebVerificationWindow(sectionPath: BangumiSectionPath) {
           "document.querySelector('.subjectCover.cover.ll') ? document.documentElement.outerHTML : null",
           true,
         )
-        .then((html: string | null) => {
-          if (html) finish(undefined, html)
+        .then(async (html: string | null) => {
+          if (!html || collecting || settled) return
+          collecting = true
+          const pages: VerifiedPages = { [sectionPath]: html }
+          // Reuse the verified first-party browser context for every home category.
+          // A slow or unavailable category must not discard the pages already read.
+          for (const section of ['anime', 'book', 'music', 'game', 'real'] as const) {
+            if (settled || window.isDestroyed()) return
+            if (section === sectionPath) continue
+            try {
+              const page = await window.webContents.executeJavaScript(`(async () => {
+                const response = await fetch('/${section}/browser/?sort=trends', {
+                  credentials: 'include', signal: AbortSignal.timeout(10000)
+                });
+                if (!response.ok) return null;
+                const html = await response.text();
+                const document = new DOMParser().parseFromString(html, 'text/html');
+                return document.querySelector('.subjectCover.cover.ll') ? html : null;
+              })()`)
+              if (typeof page === 'string') pages[section] = page
+            } catch {
+              // Failed categories will retry through their normal query after verification.
+            }
+          }
+          finish(undefined, pages)
         })
         .catch(() => {
           // The challenge can navigate while the previous document is being inspected.

@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest'
+import { expect, test, vi } from 'vitest'
 import { QueryClient, QueryObserver } from '@tanstack/react-query'
 import { FetchError } from 'ofetch'
 import { refreshResourceBatch } from '../../src/renderer/src/data/hooks/resource-refresh'
@@ -7,6 +7,7 @@ import {
   markWebVerificationRequired,
   markWebVerificationComplete,
   queueWebTrends,
+  WebVerificationRequiredError,
 } from '../../src/renderer/src/data/fetch/config/web-access'
 import {
   isNetworkUnavailableError,
@@ -142,13 +143,79 @@ test('verification refreshes every mounted category serially and leaves inactive
     }
     client.setQueryData(['SectionTrendsInfiniteV2', 'game'], { pages: [[]], pageParams: [1] })
     markWebVerificationRequired()
-    await restoreQueriesAfterWebVerification(client, 'anime', [{ SubjectId: '1' }])
+    await restoreQueriesAfterWebVerification(client, { anime: [{ SubjectId: '1' }] })
     expect(calls).toEqual(['game', 'book', 'music', 'real'])
     expect(maximum).toBe(1)
     expect(client.getQueryData(['SectionTrendsV2', 'anime'])).toEqual([{ SubjectId: '1' }])
     expect(client.getQueryState(['SectionTrendsInfiniteV2', 'game'])?.isInvalidated).toBe(true)
   } finally {
     unsubscribes.forEach((unsubscribe) => unsubscribe())
+    client.clear()
+    markWebVerificationComplete()
+  }
+})
+
+test('one verified browser session populates all five categories without fetching them again', async () => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+  })
+  const sections = ['anime', 'book', 'music', 'game', 'real'] as const
+  const unsubscribes: (() => void)[] = []
+  const fetchCategory = vi.fn(async () => [])
+  try {
+    for (const section of sections) {
+      client.setQueryData(['SectionTrendsV2', section], [])
+      const observer = new QueryObserver(client, {
+        queryKey: ['SectionTrendsV2', section],
+        queryFn: fetchCategory,
+      })
+      unsubscribes.push(observer.subscribe(() => {}))
+    }
+    markWebVerificationRequired()
+    const lists = Object.fromEntries(
+      sections.map((section, i) => [section, [{ SubjectId: String(i) }]]),
+    )
+    await restoreQueriesAfterWebVerification(client, lists)
+    expect(fetchCategory).not.toHaveBeenCalled()
+    for (const section of sections) {
+      expect(client.getQueryData(['SectionTrendsV2', section])).toEqual(lists[section])
+      expect(client.getQueryData(['SectionTrendsInfiniteV2', section])).toEqual({
+        pages: [lists[section]],
+        pageParams: [1],
+      })
+    }
+  } finally {
+    unsubscribes.forEach((unsubscribe) => unsubscribe())
+    client.clear()
+    markWebVerificationComplete()
+  }
+})
+
+test('verification also restores mounted non-category reads blocked by the site gate', async () => {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+  })
+  const queryKey = ['SubjectInfoBoxV2', true, '1']
+  await client
+    .fetchQuery({
+      queryKey,
+      queryFn: async () => {
+        throw new WebVerificationRequiredError()
+      },
+    })
+    .catch(() => {})
+  const observer = new QueryObserver(client, {
+    queryKey,
+    refetchOnMount: false,
+    queryFn: async () => 'restored',
+  })
+  const unsubscribe = observer.subscribe(() => {})
+  try {
+    markWebVerificationRequired()
+    await restoreQueriesAfterWebVerification(client, { anime: [{ SubjectId: '1' }] })
+    expect(client.getQueryData(queryKey)).toBe('restored')
+  } finally {
+    unsubscribe()
     client.clear()
     markWebVerificationComplete()
   }

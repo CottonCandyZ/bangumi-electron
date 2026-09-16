@@ -1,23 +1,42 @@
 import type { QueryClient } from '@tanstack/react-query'
 import type { SectionPath, TopList } from '@renderer/data/types/web'
-import { markWebVerificationComplete } from '../fetch/config/web-access'
+import {
+  isWebVerificationRequiredError,
+  markWebVerificationComplete,
+} from '../fetch/config/web-access'
 
 export async function restoreQueriesAfterWebVerification(
   queryClient: QueryClient,
-  sectionPath: SectionPath,
-  topList: TopList[],
+  lists: Partial<Record<SectionPath, TopList[]>>,
 ) {
+  const affected = ({
+    queryKey,
+    state,
+  }: {
+    queryKey: readonly unknown[]
+    state: { error: unknown }
+  }) =>
+    queryKey[0] === 'SectionTrendsV2' ||
+    queryKey[0] === 'SectionTrendsInfiniteV2' ||
+    isWebVerificationRequiredError(state.error)
+  // Stop old query results from replacing the freshly verified pages.
+  await queryClient.cancelQueries({ predicate: affected })
   markWebVerificationComplete()
-  queryClient.setQueryData(['SectionTrendsV2', sectionPath], topList)
-  queryClient.setQueryData(['SectionTrendsInfiniteV2', sectionPath], {
-    pages: [topList],
-    pageParams: [1],
-  })
-  // Mounted categories resume through the shared serial trends queue. Inactive ones
-  // remain stale until opened; the verified category already has fresh response data.
+  for (const [sectionPath, topList] of Object.entries(lists)) {
+    queryClient.setQueryData(['SectionTrendsV2', sectionPath], topList)
+    queryClient.setQueryData(['SectionTrendsInfiniteV2', sectionPath], {
+      pages: [topList],
+      pageParams: [1],
+    })
+  }
+  // Only retry missing categories and other reads blocked by the same site gate.
   await queryClient.invalidateQueries({
-    predicate: ({ queryKey }) =>
-      (queryKey[0] === 'SectionTrendsV2' || queryKey[0] === 'SectionTrendsInfiniteV2') &&
-      queryKey[1] !== sectionPath,
+    predicate: (query) =>
+      affected(query) &&
+      !(
+        (query.queryKey[0] === 'SectionTrendsV2' ||
+          query.queryKey[0] === 'SectionTrendsInfiniteV2') &&
+        Object.hasOwn(lists, String(query.queryKey[1]))
+      ),
   })
 }

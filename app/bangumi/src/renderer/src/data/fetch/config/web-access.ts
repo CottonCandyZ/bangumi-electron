@@ -8,6 +8,7 @@ export class WebVerificationRequiredError extends Error {
 }
 
 let verificationRequired = false
+let verificationEpoch = 0
 const listeners = new Set<() => void>()
 let trendsQueue: Promise<unknown> = Promise.resolve()
 
@@ -26,7 +27,10 @@ export async function isCloudflareChallenge(response: { headers: Headers; _data?
 
 /** Home categories and list panels share one request slot, including body parsing. */
 export function queueWebTrends<T>(request: () => Promise<T>): Promise<T> {
+  const epoch = verificationEpoch
   const result = trendsQueue.then(() => {
+    if (epoch !== verificationEpoch)
+      throw new DOMException('Verification session changed', 'AbortError')
     assertWebVerificationNotRequired()
     return request()
   })
@@ -39,13 +43,19 @@ export function isWebVerificationRequired() {
   return verificationRequired
 }
 
-export function markWebVerificationRequired() {
+export function getWebVerificationEpoch() {
+  return verificationEpoch
+}
+
+export function markWebVerificationRequired(epoch = verificationEpoch) {
+  if (epoch !== verificationEpoch) return
   if (verificationRequired) return
   verificationRequired = true
   emitChange()
 }
 
 export function markWebVerificationComplete() {
+  verificationEpoch++
   if (!verificationRequired) return
   verificationRequired = false
   emitChange()

@@ -8,6 +8,7 @@ import {
   queueWebTrends,
   subscribeWebVerificationRequired,
   WebVerificationRequiredError,
+  getWebVerificationEpoch,
 } from '../../src/renderer/src/data/fetch/config/web-access'
 
 test('web verification gate blocks repeated requests after the first 403', () => {
@@ -94,4 +95,38 @@ test('network failures release the trends queue for the next request', async () 
     }),
   ).rejects.toThrow()
   expect(await queueWebTrends(async () => 'next request')).toBe('next request')
+})
+
+test('a challenge response from before verification cannot close the new session gate', () => {
+  const oldEpoch = getWebVerificationEpoch()
+  markWebVerificationRequired()
+  markWebVerificationComplete()
+  markWebVerificationRequired(oldEpoch)
+  expect(isWebVerificationRequired()).toBe(false)
+  markWebVerificationRequired(getWebVerificationEpoch())
+  expect(isWebVerificationRequired()).toBe(true)
+  markWebVerificationComplete()
+})
+
+test('verification discards requests still queued under the old session', async () => {
+  markWebVerificationComplete()
+  let finish!: () => void
+  const active = queueWebTrends(
+    () =>
+      new Promise<void>((resolve) => {
+        finish = resolve
+      }),
+  )
+  await Promise.resolve()
+  let staleRequestStarted = false
+  const queued = queueWebTrends(async () => {
+    staleRequestStarted = true
+  })
+  const rejected = expect(queued).rejects.toMatchObject({ name: 'AbortError' })
+  markWebVerificationComplete()
+  finish()
+  await active
+  await rejected
+  expect(staleRequestStarted).toBe(false)
+  expect(await queueWebTrends(async () => 'fresh')).toBe('fresh')
 })

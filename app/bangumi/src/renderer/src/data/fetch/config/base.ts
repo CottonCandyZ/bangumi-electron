@@ -5,6 +5,7 @@ import {
 } from '@renderer/data/fetch/session'
 import {
   assertWebVerificationNotRequired,
+  getWebVerificationEpoch,
   isCloudflareChallenge,
   markWebVerificationRequired,
   WebVerificationRequiredError,
@@ -43,15 +44,17 @@ export const APP_SECRET = import.meta.env.VITE_APP_SECRET
 export const URL_OAUTH_REDIRECT = `${HOST}/dev/app`
 
 /** ofetch web config */
+const requestVerificationEpochs = new WeakMap<object, number>()
 export const webFetch = ofetch.create({
   baseURL: HOST,
   credentials: 'include',
-  onRequest() {
+  onRequest({ options }) {
     assertWebVerificationNotRequired()
+    requestVerificationEpochs.set(options, getWebVerificationEpoch())
   },
-  async onResponseError({ response }) {
+  async onResponseError({ response, options }) {
     if (response.status !== 403 || !(await isCloudflareChallenge(response))) return
-    markWebVerificationRequired()
+    markWebVerificationRequired(requestVerificationEpochs.get(options))
     throw new WebVerificationRequiredError()
   },
 })
@@ -63,9 +66,12 @@ export const oauthFetch = ofetch.create({ baseURL: HOST, credentials: 'include' 
 export const sessionFetch = ofetch.create({
   baseURL: HOST,
   credentials: 'include',
-  async onResponseError({ response }) {
+  onRequest({ options }) {
+    requestVerificationEpochs.set(options, getWebVerificationEpoch())
+  },
+  async onResponseError({ response, options }) {
     if (response.status !== 403 || !(await isCloudflareChallenge(response))) return
-    markWebVerificationRequired()
+    markWebVerificationRequired(requestVerificationEpochs.get(options))
     throw new WebVerificationRequiredError()
   },
 })
