@@ -1,72 +1,48 @@
 import { t } from './_init'
-import {
-  activateCollections,
-  collectionCredentialsChanged,
-  collectionOverview,
-  collectionRepository,
-  notifyCollections,
-  requestCollection,
-  readCollectionPage,
-  resolveCollection,
-  scheduleCollections,
-  syncCollections,
-} from '../collection/service'
-import type {
-  CollectionCommand,
-  ConflictResolution,
-  LocalAccount,
-} from '../../shared/collection-sync'
+import { collectionService } from '../collection/service'
+import type { CollectionApi } from '../collection/worker-api'
+
 export const collectionIPC = {
   collectionCredentialsChanged: t.procedure
-    .input<{ userId: number }>()
-    .action(async ({ input }) => collectionCredentialsChanged(input.userId)),
+    .input<Parameters<CollectionApi['collectionCredentialsChanged']>[0]>()
+    .action(({ input }) => collectionService().call('collectionCredentialsChanged', input)),
   collectionEpisodeResource: t.procedure
-    .input<{ episodeId: number }>()
-    .action(async ({ input }) => collectionRepository.episodeResource(input.episodeId)),
+    .input<Parameters<CollectionApi['collectionEpisodeResource']>[0]>()
+    .action(({ input }) => collectionService().call('collectionEpisodeResource', input)),
   collectionState: t.procedure
-    .input<{ userId: number; subjectId: number }>()
-    .action(async ({ input }) => collectionRepository.get(input.userId, input.subjectId) ?? null),
+    .input<Parameters<CollectionApi['collectionState']>[0]>()
+    .action(({ input }) => collectionService().call('collectionState', input)),
   collectionActivate: t.procedure
-    .input<{ userId: number | null }>()
-    .action(async ({ input }) => activateCollections(input.userId)),
+    .input<Parameters<CollectionApi['collectionActivate']>[0]>()
+    .action(({ input }) => collectionService().call('collectionActivate', input)),
   collectionAccount: t.procedure
-    .input<{ userId: number }>()
-    .action(async ({ input }) => collectionRepository.account(input.userId)?.profile ?? null),
-  collectionSaveAccount: t.procedure.input<LocalAccount>().action(async ({ input }) => {
-    collectionRepository.saveAccount(input)
-    notifyCollections()
-  }),
-  collectionCommand: t.procedure.input<CollectionCommand>().action(async ({ input }) => {
-    const result = collectionRepository.command(input)
-    notifyCollections()
-    scheduleCollections()
-    return result
-  }),
+    .input<Parameters<CollectionApi['collectionAccount']>[0]>()
+    .action(({ input }) => collectionService().call('collectionAccount', input)),
+  collectionSaveAccount: t.procedure
+    .input<Parameters<CollectionApi['collectionSaveAccount']>[0]>()
+    .action(({ input }) => collectionService().call('collectionSaveAccount', input)),
+  collectionCommand: t.procedure
+    .input<Parameters<CollectionApi['collectionCommand']>[0]>()
+    .action(({ input }) => collectionService().call('collectionCommand', input)),
   collectionRead: t.procedure
-    .input<{ userId: number; subjectId: number }>()
-    .action(async ({ input }) => {
-      requestCollection(input.subjectId, input.userId)
-      return collectionRepository.collection(input.userId, input.subjectId)
-    }),
+    .input<Parameters<CollectionApi['collectionRead']>[0]>()
+    .action(({ input }) => collectionService().call('collectionRead', input)),
   collectionList: t.procedure
-    .input<Parameters<typeof readCollectionPage>[0]>()
-    .action(async ({ input }) => readCollectionPage(input)),
+    .input<Parameters<CollectionApi['collectionList']>[0]>()
+    .action(({ input }) => collectionService().call('collectionList', input)),
   collectionReadEpisodes: t.procedure
-    .input<Parameters<typeof collectionRepository.episodes>[0]>()
-    .action(async ({ input }) => {
-      requestCollection(input.subjectId, input.userId)
-      return collectionRepository.episodes(input)
-    }),
+    .input<Parameters<CollectionApi['collectionReadEpisodes']>[0]>()
+    .action(({ input }) => collectionService().call('collectionReadEpisodes', input)),
   collectionOverview: t.procedure
-    .input<{ userId: number }>()
-    .action(async ({ input }) => collectionOverview(input.userId)),
+    .input<Parameters<CollectionApi['collectionOverview']>[0]>()
+    .action(({ input }) => collectionService().call('collectionOverview', input)),
   collectionSync: t.procedure
-    .input<{ userId: number; full?: boolean }>()
-    .action(async ({ input }) => syncCollections(input.userId, input.full)),
+    .input<Parameters<CollectionApi['collectionSync']>[0]>()
+    .action(({ input }) => collectionService().call('collectionSync', input)),
   collectionResolve: t.procedure
-    .input<ConflictResolution>()
-    .action(async ({ input }) => resolveCollection(input)),
+    .input<Parameters<CollectionApi['collectionResolve']>[0]>()
+    .action(({ input }) => collectionService().call('collectionResolve', input)),
   collectionRemoved: t.procedure
-    .input<{ userId: number }>()
-    .action(async ({ input }) => collectionRepository.removed(input.userId)),
+    .input<Parameters<CollectionApi['collectionRemoved']>[0]>()
+    .action(({ input }) => collectionService().call('collectionRemoved', input)),
 }

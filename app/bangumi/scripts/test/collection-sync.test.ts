@@ -805,3 +805,40 @@ test('episode readiness distinguishes an unsynced subject from a confirmed empty
   })
   expect(f.repo.episodes(input)).toMatchObject({ ready: true, data: [] })
 })
+
+test('SQL collection pagination preserves account/type filtering, order and local progress', (t) => {
+  const f = fixture(t)
+  f.repo.transaction(() => {
+    for (let id = 100; id < 300; id++) {
+      const row = structuredClone(f.repo.get(1, 42)!)
+      row.subjectId = id
+      row.subject.id = id
+      row.subject.type = id % 2 ? 2 : 1
+      row.local.collection!.type = id % 3 ? 3 : 2
+      row.updatedAt = 100000 + (id % 7)
+      f.repo.put(row)
+      f.repo.put({ ...row, userId: 2 })
+    }
+  })
+  f.repo.command({ userId: 1, subjectId: 103, actionId: 'page-removal', kind: 'remove' })
+  const expected = f.repo
+    .all(1)
+    .filter((row) => row.subject.type === 2 && row.local.collection?.type === 3)
+  const page = f.repo.list({ userId: 1, subjectType: 2, collectionType: 3, offset: 11, limit: 7 })
+  expect(page.total).toBe(expected.length)
+  expect(page.data).toEqual(
+    expected.slice(11, 18).map((row) => f.repo.collection(1, row.subjectId)),
+  )
+  expect(f.repo.list({ userId: 3 }).data).toEqual([])
+})
+
+test('unchanged downloaded pages neither rewrite SQLite rows nor announce subject changes', (t) => {
+  const f = fixture(t)
+  const collection = f.repo.collection(1, 42)!
+  f.repo.seedPage(1, [collection])
+  const before = f.db.prepare('select total_changes() as n').get()
+  expect(f.repo.seedPage(1, [collection])).toEqual([])
+  expect(f.db.prepare('select total_changes() as n').get()).toEqual(before)
+  expect(f.repo.seedPage(1, [{ ...collection, rate: 9 }])).toEqual([42])
+  expect(f.repo.collection(1, 42)?.rate).toBe(9)
+})

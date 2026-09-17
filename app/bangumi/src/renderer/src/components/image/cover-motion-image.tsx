@@ -56,7 +56,7 @@ export function CoverMotionImage({
       {...props}
       draggable={false}
     >
-      <motion.img
+      <img
         className={cn(
           'h-full w-full max-w-none object-cover select-none',
           imageClassName,
@@ -71,11 +71,12 @@ export function CoverMotionImage({
           setIsError(true)
           setStateImageSrc(undefined)
         }}
-        loading={isLoad ? 'eager' : loading}
+        decoding="async"
+        loading={loading}
         src={stateImageSrc}
         draggable={false}
       />
-      <MotionSkeleton className={cn('absolute inset-0 -z-10')} />
+      {(!isLoad || isError) && <MotionSkeleton className={cn('absolute inset-0 -z-10')} />}
     </motion.div>
   )
 }

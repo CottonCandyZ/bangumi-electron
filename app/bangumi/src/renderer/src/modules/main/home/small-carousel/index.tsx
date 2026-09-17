@@ -25,6 +25,8 @@ import { useOnline } from '@renderer/hooks/use-online'
 import { userIdAtom } from '@renderer/state/session'
 import { CarouselNavigation } from '../carousel-navigation'
 import { useCarouselEdgeFade } from '../carousel-edge-fade'
+import { useInView } from 'react-intersection-observer'
+import type { Subject } from '@renderer/data/types/subject'
 
 export type SmallCarouselProps = {
   href: string
@@ -39,7 +41,9 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
     .filter((item) => item !== undefined)
   const subjectsQuery = useSubjectsInfoQuery({ subjectIds: subjectIds, enabled: !!subjectIds })
   const userId = useAtomValue(userIdAtom)
-  const subjectsInfo = subjectsQuery.data?.filter((subject) => subject && (userId || !subject.nsfw))
+  const subjectsInfo = subjectsQuery.data?.filter(
+    (subject): subject is Subject => !!subject && (!!userId || !subject.nsfw),
+  )
   const online = useOnline()
   const currentSectionPath = useAtomValue(activeSectionAtom)
   const [api, setApi] = useState<CarouselApi>()
@@ -47,6 +51,8 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
   const { init: initIndex, setter: setIndex } = useStateHook({
     key: `Home-Small-Carousel-${sectionPath}`,
   })
+  // Updating the saved snap during a drag must not reinitialize the moving carousel.
+  const [startIndex] = useState(() => (initIndex as number | undefined) ?? 0)
   useEffect(() => {
     if (!api) {
       return
@@ -75,7 +81,7 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
       opts={{
         align: 'start',
         slidesToScroll: 'auto',
-        startIndex: (initIndex as number | undefined) ?? 0,
+        startIndex,
       }}
     >
       <div className="mb-2 flex items-center justify-between gap-3">
@@ -138,16 +144,8 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
         ) : (
           <CarouselContent className="-ml-3 py-1">
             {subjectsInfo
-              ? subjectsInfo.map((subject, index) => (
-                  <CarouselItem key={index} className="basis-[clamp(7.5rem,18cqi,10rem)] pl-3">
-                    <div className="p-0.5">
-                      {subject ? (
-                        <SubjectCard subjectInfo={subject} sectionPath={sectionPath} />
-                      ) : (
-                        <Skeleton className="aspect-2/3 w-full" />
-                      )}
-                    </div>
-                  </CarouselItem>
+              ? subjectsInfo.map((subject) => (
+                  <LazySubjectSlide key={subject.id} subject={subject} sectionPath={sectionPath} />
                 ))
               : Array.from({ length: 10 }).map((_, index) => (
                   <CarouselItem key={index} className="basis-[clamp(7.5rem,18cqi,10rem)] pl-3">
@@ -160,5 +158,54 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
         )}
       </div>
     </Carousel>
+  )
+}
+
+const mountedSlides = new Set<string>()
+
+function LazySubjectSlide({
+  subject,
+  sectionPath,
+}: {
+  subject: Subject
+  sectionPath: SectionPath
+}) {
+  const id = `${sectionPath}:${subject.id}`
+  // Returning home must not flash placeholders for cards the user has already seen.
+  const [wasMounted] = useState(() => mountedSlides.has(id))
+  // Keep each slide's geometry for Embla; clipping ancestors also exclude horizontal offscreen slides.
+  const { ref, inView } = useInView({
+    rootMargin: '240px',
+    triggerOnce: true,
+    initialInView: wasMounted,
+    skip: wasMounted,
+  })
+  useEffect(() => {
+    if (!inView) return
+    mountedSlides.delete(id)
+    mountedSlides.add(id)
+    if (mountedSlides.size > 240) mountedSlides.delete(mountedSlides.values().next().value!)
+  }, [id, inView])
+  return (
+    <CarouselItem ref={ref} className="basis-[clamp(7.5rem,18cqi,10rem)] pl-3">
+      <div className="p-0.5">
+        {inView ? (
+          <SubjectCard subjectInfo={subject} sectionPath={sectionPath} />
+        ) : (
+          <div aria-label={subject.name_cn || subject.name}>
+            <div
+              className={cn(
+                'bg-muted aspect-2/3 rounded-xl',
+                sectionPath === 'music' && 'aspect-square',
+              )}
+            />
+            <div className="mt-2 p-0.5">
+              <div className="h-5" />
+              <div className="mt-0.5 h-4" />
+            </div>
+          </div>
+        )}
+      </div>
+    </CarouselItem>
   )
 }

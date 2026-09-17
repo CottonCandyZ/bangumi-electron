@@ -6,11 +6,7 @@ import { Button } from '@renderer/components/ui/button'
 import { client } from '@renderer/lib/client'
 import { userIdAtom } from '@renderer/state/session'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
-import {
-  currentCollectionUser,
-  invalidateCollections,
-  submitCollection,
-} from '@renderer/data/collection/client'
+import { currentCollectionUser, submitCollection } from '@renderer/data/collection/client'
 import { getAccessToken } from '@renderer/data/fetch/session'
 import type { CollectionFields, LocalCollectionRecord, SyncOverview } from '@shared/collection-sync'
 import { toast } from 'sonner'
@@ -19,7 +15,9 @@ import { SyncActivity, SyncCoverage, SyncRecent, SyncSummary } from './sync-prog
 import { collectionSyncIndicator } from './sync-indicator'
 
 export const collectionSyncDialogAtom = atom(false)
-export function useCollectionSyncOverview() {
+export function useCollectionSyncOverview<T = SyncOverview>(
+  select?: (overview: SyncOverview) => T,
+) {
   const userId = Number(useAtomValue(userIdAtom))
   return useQuery({
     queryKey: ['collection-sync', userId],
@@ -28,6 +26,8 @@ export function useCollectionSyncOverview() {
     networkMode: 'always',
     persister: undefined,
     staleTime: Infinity,
+    gcTime: 10 * 60 * 1000,
+    select,
   })
 }
 export async function startCollectionSync(userId: number) {
@@ -36,12 +36,13 @@ export async function startCollectionSync(userId: number) {
   if (currentCollectionUser() !== userId) throw new Error('当前账号已改变')
   await client.collectionActivate({ userId })
   await client.collectionSync({ userId, full: true })
-  await invalidateCollections()
 }
 export function CollectionSyncDialog() {
   const userId = Number(useAtomValue(userIdAtom))
   const [open, setOpen] = useAtom(collectionSyncDialogAtom)
-  const overview = useCollectionSyncOverview().data
+  const overview = useCollectionSyncOverview<SyncOverview | null>(
+    open ? undefined : () => null,
+  ).data
   const hasConflicts = !!overview?.conflicts.length
   const login = useSetAtom(loginDialogAtom)
   const removed = useQuery({
@@ -184,7 +185,6 @@ function ConflictCard({ record }: { record: LocalCollectionRecord }) {
         choices,
       }),
     networkMode: 'always',
-    onSettled: () => invalidateCollections(),
     onError: (error) => toast.error(error.message),
   })
   const chooseAll = (choice: 'local' | 'remote') =>
@@ -299,8 +299,8 @@ function LifecycleEpisodes({ record }: { record: LocalCollectionRecord }) {
 
 export function CollectionSyncButton() {
   const open = useSetAtom(collectionSyncDialogAtom)
-  const sync = useCollectionSyncOverview().data
-  const indicator = collectionSyncIndicator(sync)
+  const sync = useCollectionSyncOverview(selectSyncIndicator).data
+  const indicator = sync?.indicator ?? collectionSyncIndicator(undefined)
   return (
     <Button
       variant="ghost"
@@ -320,4 +320,8 @@ export function CollectionSyncButton() {
       )}
     </Button>
   )
+}
+
+function selectSyncIndicator(overview: SyncOverview) {
+  return { running: overview.running, indicator: collectionSyncIndicator(overview) }
 }

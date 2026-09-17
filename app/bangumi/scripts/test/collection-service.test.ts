@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
+import { createCollectionService } from '../../src/main/collection/service-core'
+import type { CollectionRepository } from '../../src/main/collection/repository'
 import { SyncError } from '../../src/main/collection/sync'
 
 const mocks = vi.hoisted(() => ({
@@ -8,23 +10,16 @@ const mocks = vi.hoisted(() => ({
     all: vi.fn(),
     account: vi.fn(),
     completeList: vi.fn(),
-    seed: vi.fn(),
+    seedPage: vi.fn(),
+    resetErrors: vi.fn(),
+    pendingSubjectIds: vi.fn(),
+    inspectSubjectIds: vi.fn(),
+    hasPending: vi.fn(),
+    overview: vi.fn(),
     get: vi.fn(),
     list: vi.fn(),
     collection: vi.fn(),
   },
-}))
-vi.mock('electron', () => ({ BrowserWindow: { getAllWindows: () => [] } }))
-vi.mock('../../src/main/lib/db', () => ({ sqlite: {} }))
-vi.mock('../../src/main/collection/repository', () => ({
-  CollectionRepository: class {
-    constructor() {
-      return mocks.repository
-    }
-  },
-}))
-vi.mock('../../src/main/collection/transport', () => ({
-  createCollectionTransport: () => ({ list: mocks.list }),
 }))
 vi.mock('../../src/main/collection/sync', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../src/main/collection/sync')>()),
@@ -32,7 +27,7 @@ vi.mock('../../src/main/collection/sync', async (importOriginal) => ({
     sync = mocks.sync
   },
 }))
-let service: typeof import('../../src/main/collection/service')
+let service: ReturnType<typeof createCollectionService>
 beforeEach(async () => {
   vi.resetModules()
   vi.resetAllMocks()
@@ -40,11 +35,39 @@ beforeEach(async () => {
   mocks.repository.all.mockReturnValue([])
   mocks.repository.account.mockReturnValue({ listComplete: true })
   mocks.list.mockResolvedValue({ data: [], total: 0 })
-  service = await import('../../src/main/collection/service')
+  mocks.repository.seedPage.mockImplementation((_id, items) => items.map((item) => item.subject_id))
+  mocks.repository.pendingSubjectIds.mockImplementation(() =>
+    mocks.repository
+      .all()
+      .filter(
+        (r) => r.status !== 'conflict' && (['pending', 'syncing'].includes(r.status) || r.attempt),
+      )
+      .map((r) => r.subjectId),
+  )
+  mocks.repository.hasPending.mockImplementation(() =>
+    mocks.repository.all().some((r) => ['pending', 'syncing'].includes(r.status)),
+  )
+  mocks.repository.inspectSubjectIds.mockImplementation((_id, seen) =>
+    mocks.repository
+      .all()
+      .filter(
+        (r) =>
+          r.status !== 'conflict' &&
+          (!seen.has(r.subjectId) || r.local.collection?.type === 3 || r.local.episodesComplete),
+      )
+      .map((r) => r.subjectId),
+  )
+  mocks.repository.overview.mockReturnValue({ pending: 0, conflicts: [], errors: [] })
+  service = createCollectionService(
+    mocks.repository as unknown as CollectionRepository,
+    () => ({ list: mocks.list, read: vi.fn(), write: vi.fn() }),
+    vi.fn(),
+    vi.fn(),
+  )
   service.activateCollections(1)
 })
 afterEach(() => {
-  service.activateCollections(null)
+  service.dispose()
   vi.clearAllTimers()
   vi.useRealTimers()
 })
@@ -105,7 +128,7 @@ test('a page arriving after account switch cannot seed the previous account', as
   service.activateCollections(2)
   resolve({ data: [{ subject_id: 42 }], total: 1, limit: 50 })
   await expect(result).rejects.toThrow()
-  expect(mocks.repository.seed).not.toHaveBeenCalled()
+  expect(mocks.repository.seedPage).not.toHaveBeenCalled()
 })
 
 test('a failed manual full scan retries even when the previous list was complete', async () => {

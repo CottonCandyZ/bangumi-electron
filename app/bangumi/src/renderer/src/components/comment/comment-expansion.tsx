@@ -11,6 +11,7 @@ import { createCommentExpansionStore } from './comment-expansion-store'
 
 const ExpansionContext = createContext<ReturnType<typeof createCommentExpansionStore> | null>(null)
 
+/** Mount outside the virtualizer so recycled rows retain content and reply expansion. */
 export function CommentExpansionProvider({ children }: PropsWithChildren) {
   const [store] = useState(createCommentExpansionStore)
   return <ExpansionContext.Provider value={store}>{children}</ExpansionContext.Provider>

@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai'
 import { userIdAtom } from '@renderer/state/session'
 import { client } from '@renderer/lib/client'
+import { localCollectionQueryOptions } from './cache'
 
 /** Only fetch the watching anime list; no full-library or episode scan is needed. */
 export function useWatchingSubjectIds(enabled: boolean) {
@@ -10,8 +11,7 @@ export function useWatchingSubjectIds(enabled: boolean) {
     queryKey: ['collection-subjects', 'broadcast-watching', userId],
     enabled: enabled && !!userId,
     networkMode: 'always',
-    persister: undefined,
-    staleTime: 5 * 60 * 1000,
+    ...localCollectionQueryOptions,
     queryFn: async () => {
       const ids = new Set<number>()
       let offset = 0

@@ -1,14 +1,12 @@
 import * as React from "react"
-import useEmblaCarousel, {
-  type UseEmblaCarouselType,
-} from "embla-carousel-react"
+import { useLayoutCarousel } from "@renderer/hooks/use-layout-carousel"
 
 import { cn } from "@renderer/lib/utils"
 import { Button } from "@renderer/components/ui/button"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-type CarouselApi = UseEmblaCarouselType[1]
-type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
+type CarouselApi = ReturnType<typeof useLayoutCarousel>[1]
+type UseCarouselParameters = Parameters<typeof useLayoutCarousel>
 type CarouselOptions = UseCarouselParameters[0]
 type CarouselPlugin = UseCarouselParameters[1]
 
@@ -20,8 +18,8 @@ type CarouselProps = {
 }
 
 type CarouselContextProps = {
-  carouselRef: ReturnType<typeof useEmblaCarousel>[0]
-  api: ReturnType<typeof useEmblaCarousel>[1]
+  carouselRef: ReturnType<typeof useLayoutCarousel>[0]
+  api: CarouselApi
   scrollPrev: () => void
   scrollNext: () => void
   canScrollPrev: boolean
@@ -49,7 +47,7 @@ function Carousel({
   children,
   ...props
 }: React.ComponentProps<"div"> & CarouselProps) {
-  const [carouselRef, api] = useEmblaCarousel(
+  const [carouselRef, api] = useLayoutCarousel(
     {
       ...opts,
       axis: orientation === "horizontal" ? "x" : "y",
@@ -86,12 +84,12 @@ function Carousel({
     [scrollPrev, scrollNext]
   )
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (!api || !setApi) return
     setApi(api)
   }, [api, setApi])
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (!api) return
     onSelect(api)
     api.on("reInit", onSelect)
@@ -99,6 +97,7 @@ function Carousel({
 
     return () => {
       api?.off("select", onSelect)
+      api?.off("reInit", onSelect)
     }
   }, [api, onSelect])
 

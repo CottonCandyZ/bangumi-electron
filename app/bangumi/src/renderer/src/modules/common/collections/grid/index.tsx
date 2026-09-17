@@ -29,7 +29,7 @@ export function CollectionsGrid({
   emptyContent?: ReactNode
 }) {
   const online = useOnline()
-  const sync = useCollectionSyncOverview().data
+  const listComplete = useCollectionSyncOverview((overview) => overview.listComplete).data
   const collectionsQuery = useInfinityQueryCollectionsByUsername({
     username,
     collectionType: collectionType,
@@ -104,7 +104,7 @@ export function CollectionsGrid({
     if (emptyContent !== undefined) return emptyContent
     return (
       <div className="text-muted-foreground flex min-h-0 flex-1 flex-col items-center justify-center gap-2 p-4 text-center text-xs">
-        {!online && !sync?.listComplete ? (
+        {!online && !listComplete ? (
           <>
             <p>暂无离线收藏</p>
             <p>请联网后同步收藏。</p>

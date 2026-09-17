@@ -105,6 +105,8 @@ export type SyncOverview = {
   error: string | null
   progress: SyncProgress | null
 }
+/** A committed local change. Null means the account's list coverage changed. */
+export type CollectionChange = { userId: number; subjectIds: number[] | null }
 export type ConflictResolution = {
   userId: number
   subjectId: number

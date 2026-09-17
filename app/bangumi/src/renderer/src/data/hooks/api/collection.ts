@@ -7,6 +7,7 @@ import { client } from '@renderer/lib/client'
 import { useSession } from '@renderer/data/hooks/session'
 import { userIdAtom } from '@renderer/state/session'
 import { useAtomValue } from 'jotai'
+import { localCollectionQueryOptions } from '@renderer/data/collection/cache'
 import { useMutation } from '@tanstack/react-query'
 import { editLocalCollection, editLocalEpisodes } from '@renderer/data/collection/client'
 import {
@@ -68,6 +69,7 @@ export const useInfinityQueryCollectionsByUsername = ({
     enabled,
     needKeepPreviousData,
     refetchPageLimit,
+    ...(own ? localCollectionQueryOptions : {}),
   })
 }
 
@@ -179,8 +181,7 @@ export const useCollectionEpisodesInfoBySubjectIdQuery = ({
     queryProps: { subjectId, limit, offset, episodeType, userId },
     enabled: !!userId && (enabled ?? true),
     networkMode: 'always',
-    persister: undefined,
-    staleTime: 5 * 60 * 1000,
+    ...localCollectionQueryOptions,
     needKeepPreviousData: false,
   })
 }
@@ -208,6 +209,7 @@ export const useQuerySubjectCollection = ({
     networkMode: own ? 'always' : 'offlineFirst',
     persister: undefined,
     needKeepPreviousData: own ? false : needKeepPreviousData,
+    ...(own ? localCollectionQueryOptions : {}),
   })
 }
 

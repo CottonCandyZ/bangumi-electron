@@ -4,6 +4,7 @@ import {
   CommentSkeleton,
   hasVisibleCommentContent,
 } from '@renderer/components/comment/comment-box'
+import { CommentExpansionProvider } from '@renderer/components/comment/comment-expansion'
 import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Badge } from '@renderer/components/ui/badge'
 import { Button } from '@renderer/components/ui/button'
@@ -96,34 +97,36 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
   }
 
   return (
-    <div className="min-h-full">
-      <Virtualizer
-        cache={restoredVirtualCache}
-        data={rows}
-        item={EpisodePageVirtualItem}
-        itemSize={EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE}
-        key={virtualizerMountKey}
-        onScroll={saveVirtualScrollState}
-        onScrollEnd={saveVirtualScrollState}
-        ref={virtualizerRef}
-        scrollRef={scrollRef}
-        bufferSize={EPISODE_PAGE_VIRTUAL_OVERSCAN * EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE}
-      >
-        {(row) => (
-          <EpisodePageRow
-            row={row}
-            title={title}
-            episode={episode}
-            subject={subjectQuery.data}
-            onRefreshComments={() => commentsQuery.refetch()}
-            replyTarget={replyTarget}
-            refreshingComments={commentsQuery.isFetching}
-          />
-        )}
-      </Virtualizer>
-      <MainCommentFab replyTarget={replyTarget} />
-      <MainBackToTopButton onBackToTop={scrollToTop} />
-    </div>
+    <CommentExpansionProvider key={virtualScrollKey}>
+      <div className="min-h-full">
+        <Virtualizer
+          cache={restoredVirtualCache}
+          data={rows}
+          item={EpisodePageVirtualItem}
+          itemSize={EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE}
+          key={virtualizerMountKey}
+          onScroll={saveVirtualScrollState}
+          onScrollEnd={saveVirtualScrollState}
+          ref={virtualizerRef}
+          scrollRef={scrollRef}
+          bufferSize={EPISODE_PAGE_VIRTUAL_OVERSCAN * EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE}
+        >
+          {(row) => (
+            <EpisodePageRow
+              row={row}
+              title={title}
+              episode={episode}
+              subject={subjectQuery.data}
+              onRefreshComments={() => commentsQuery.refetch()}
+              replyTarget={replyTarget}
+              refreshingComments={commentsQuery.isFetching}
+            />
+          )}
+        </Virtualizer>
+        <MainCommentFab replyTarget={replyTarget} />
+        <MainBackToTopButton onBackToTop={scrollToTop} />
+      </div>
+    </CommentExpansionProvider>
   )
 }
 
@@ -272,6 +275,7 @@ function EpisodePageRow({
         reactionTarget={replyTarget}
         replyTarget={replyTarget}
         userAvatarViewTransition={true}
+        virtual
       />
     </div>
   )

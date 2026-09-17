@@ -5,6 +5,7 @@ import {
   CommentUserUsername,
   hasVisibleCommentContent,
 } from '@renderer/components/comment/comment-box'
+import { CommentExpansionProvider } from '@renderer/components/comment/comment-expansion'
 import {
   CommentReactionButton,
   CommentReactions,
@@ -142,33 +143,35 @@ function TopicDetail({
   if (!scrollViewport) return <TopicDetailSkeleton />
 
   return (
-    <div className="min-h-full">
-      <Virtualizer
-        cache={restoredVirtualCache}
-        data={rows}
-        item={TopicDetailVirtualItem}
-        itemSize={TOPIC_DETAIL_ITEM_ESTIMATE}
-        key={virtualizerMountKey}
-        onScroll={saveVirtualScrollState}
-        onScrollEnd={saveVirtualScrollState}
-        ref={virtualizerRef}
-        scrollRef={scrollRef}
-        bufferSize={TOPIC_DETAIL_OVERSCAN * TOPIC_DETAIL_ITEM_ESTIMATE}
-      >
-        {(row) => (
-          <TopicDetailRow
-            row={row}
-            topic={topic}
-            kind={kind}
-            onRefresh={onRefresh}
-            refreshing={refreshing}
-            replyTarget={replyTarget}
-          />
-        )}
-      </Virtualizer>
-      <MainCommentFab replyTarget={replyTarget} />
-      <MainBackToTopButton onBackToTop={scrollToTop} />
-    </div>
+    <CommentExpansionProvider key={virtualScrollKey}>
+      <div className="min-h-full">
+        <Virtualizer
+          cache={restoredVirtualCache}
+          data={rows}
+          item={TopicDetailVirtualItem}
+          itemSize={TOPIC_DETAIL_ITEM_ESTIMATE}
+          key={virtualizerMountKey}
+          onScroll={saveVirtualScrollState}
+          onScrollEnd={saveVirtualScrollState}
+          ref={virtualizerRef}
+          scrollRef={scrollRef}
+          bufferSize={TOPIC_DETAIL_OVERSCAN * TOPIC_DETAIL_ITEM_ESTIMATE}
+        >
+          {(row) => (
+            <TopicDetailRow
+              row={row}
+              topic={topic}
+              kind={kind}
+              onRefresh={onRefresh}
+              refreshing={refreshing}
+              replyTarget={replyTarget}
+            />
+          )}
+        </Virtualizer>
+        <MainCommentFab replyTarget={replyTarget} />
+        <MainBackToTopButton onBackToTop={scrollToTop} />
+      </div>
+    </CommentExpansionProvider>
   )
 }
 
@@ -283,6 +286,7 @@ function TopicDetailRow({
         reactionTarget={replyTarget}
         replyTarget={replyTarget}
         userAvatarViewTransition={false}
+        virtual
       />
     </div>
   )

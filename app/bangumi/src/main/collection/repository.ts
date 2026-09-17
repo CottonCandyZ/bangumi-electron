@@ -1,5 +1,18 @@
 import type BetterSqlite3 from 'better-sqlite3'
-import { and, asc, desc, eq, isNull, lte } from 'drizzle-orm'
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  lte,
+  ne,
+  or,
+  sql,
+} from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import {
   collectionActions,
@@ -11,6 +24,7 @@ import { subject as subjects } from '../../db/schema/subject'
 import {
   applyCommand,
   emptySnapshot,
+  equalValue,
   type CollectionCommand,
   type LocalAccount,
   type LocalCollectionRecord,
@@ -43,9 +57,109 @@ export class CollectionRepository {
       .all()
   }
   removed(userId: number) {
-    return this.all(userId)
-      .filter((record) => record.local.collection === null && record.retained !== null)
-      .slice(0, 30)
+    return this.db
+      .select()
+      .from(localCollections)
+      .where(
+        and(
+          eq(localCollections.userId, userId),
+          sql`json_type(${localCollections.local}, '$.collection') = 'null'`,
+          isNotNull(localCollections.retained),
+        ),
+      )
+      .orderBy(desc(localCollections.updatedAt), asc(localCollections.subjectId))
+      .limit(30)
+      .all()
+  }
+  overview(userId: number) {
+    const pending = this.db
+      .select({ count: count() })
+      .from(localCollections)
+      .where(
+        and(
+          eq(localCollections.userId, userId),
+          inArray(localCollections.status, ['pending', 'syncing']),
+          sql`exists (select 1 from ${collectionActions} where ${collectionActions.userId} = ${localCollections.userId}
+        and ${collectionActions.subjectId} = ${localCollections.subjectId} and ${collectionActions.acknowledgedAt} is null)`,
+        ),
+      )
+      .get()!.count
+    const attention = this.db
+      .select()
+      .from(localCollections)
+      .where(
+        and(
+          eq(localCollections.userId, userId),
+          inArray(localCollections.status, ['conflict', 'error', 'auth-required']),
+        ),
+      )
+      .orderBy(desc(localCollections.updatedAt), asc(localCollections.subjectId))
+      .all()
+    return {
+      pending,
+      conflicts: attention.filter((r) => r.status === 'conflict'),
+      errors: attention.filter((r) => r.status !== 'conflict'),
+    }
+  }
+  pendingSubjectIds(userId: number) {
+    return this.db
+      .select({ id: localCollections.subjectId })
+      .from(localCollections)
+      .where(
+        and(
+          eq(localCollections.userId, userId),
+          ne(localCollections.status, 'conflict'),
+          or(
+            inArray(localCollections.status, ['pending', 'syncing']),
+            isNotNull(localCollections.attempt),
+          ),
+        ),
+      )
+      .orderBy(desc(localCollections.updatedAt), asc(localCollections.subjectId))
+      .all()
+      .map((r) => r.id)
+  }
+  hasPending(userId: number) {
+    return !!this.db
+      .select({ id: localCollections.subjectId })
+      .from(localCollections)
+      .where(
+        and(
+          eq(localCollections.userId, userId),
+          inArray(localCollections.status, ['pending', 'syncing']),
+        ),
+      )
+      .limit(1)
+      .get()
+  }
+  resetErrors(userId: number, authOnly = false) {
+    this.db
+      .update(localCollections)
+      .set({ status: 'pending', error: null })
+      .where(
+        and(
+          eq(localCollections.userId, userId),
+          inArray(
+            localCollections.status,
+            authOnly ? ['auth-required'] : ['error', 'auth-required'],
+          ),
+        ),
+      )
+      .run()
+  }
+  inspectSubjectIds(userId: number, seen: Set<number>) {
+    return this.db
+      .select({
+        id: localCollections.subjectId,
+        type: sql<number>`json_extract(${localCollections.local}, '$.collection.type')`,
+        complete: sql<number>`json_extract(${localCollections.local}, '$.episodesComplete')`,
+      })
+      .from(localCollections)
+      .where(and(eq(localCollections.userId, userId), ne(localCollections.status, 'conflict')))
+      .orderBy(desc(localCollections.updatedAt), asc(localCollections.subjectId))
+      .all()
+      .filter((r) => !seen.has(r.id) || r.type === 3 || r.complete)
+      .map((r) => r.id)
   }
   put(record: LocalCollectionRecord) {
     this.db
@@ -235,7 +349,7 @@ export class CollectionRepository {
     })
   }
   seed(userId: number, collection: CollectionData) {
-    this.transaction(() => {
+    return this.transaction(() => {
       const record = this.ensure(userId, collection.subject_id, collection.subject)
       const fields = {
         type: collection.type,
@@ -246,7 +360,7 @@ export class CollectionRepository {
       }
       const clean =
         !this.actions(userId, record.subjectId).length && !record.attempt && !record.conflict
-      this.put({
+      const next: LocalCollectionRecord = {
         ...record,
         subject: collection.subject,
         ...(clean
@@ -259,8 +373,18 @@ export class CollectionRepository {
               updatedAt: Date.parse(collection.updated_at) || Date.now(),
             }
           : {}),
-      })
+      }
+      if (equalValue(record, next)) return false
+      this.put(next)
+      return true
     })
+  }
+  seedPage(userId: number, collections: CollectionData[]) {
+    return this.transaction(() =>
+      collections
+        .filter((collection) => this.seed(userId, collection))
+        .map((collection) => collection.subject_id),
+    )
   }
   collection(userId: number, subjectId: number): CollectionData | null | undefined {
     const record = this.get(userId, subjectId)
@@ -279,15 +403,37 @@ export class CollectionRepository {
     offset?: number
     limit?: number
   }): Collections {
-    const records = this.all(userId).filter(
-      (r) =>
-        r.local.collection &&
-        (!subjectType || r.subject.type === subjectType) &&
-        (!collectionType || r.local.collection.type === collectionType),
+    const where = and(
+      eq(localCollections.userId, userId),
+      sql`json_type(${localCollections.local}, '$.collection') = 'object'`,
+      subjectType
+        ? sql`json_extract(${localCollections.subject}, '$.type') = ${subjectType}`
+        : undefined,
+      collectionType
+        ? sql`json_extract(${localCollections.local}, '$.collection.type') = ${collectionType}`
+        : undefined,
     )
+    const total = this.db.select({ count: count() }).from(localCollections).where(where).get()!
+      .count
+    const records = this.db
+      .select({
+        subjectId: localCollections.subjectId,
+        subject: localCollections.subject,
+        base: localCollections.base,
+        local: localCollections.local,
+        updatedAt: localCollections.updatedAt,
+        epStatus: localCollections.epStatus,
+        volStatus: localCollections.volStatus,
+      })
+      .from(localCollections)
+      .where(where)
+      .orderBy(desc(localCollections.updatedAt), asc(localCollections.subjectId))
+      .offset(Math.max(0, offset))
+      .limit(Math.max(0, limit))
+      .all()
     return {
-      data: records.slice(offset, offset + limit).map((r) => toCollectionData(r)!),
-      total: records.length,
+      data: records.map((r) => toCollectionData(r)!),
+      total,
       offset,
       limit,
     }
@@ -340,7 +486,12 @@ export class CollectionRepository {
     }
   }
 }
-function toCollectionData(record: LocalCollectionRecord): CollectionData | null | undefined {
+function toCollectionData(
+  record: Pick<
+    LocalCollectionRecord,
+    'subjectId' | 'subject' | 'base' | 'local' | 'updatedAt' | 'epStatus' | 'volStatus'
+  >,
+): CollectionData | null | undefined {
   if (!record.local.collection) return record.local.collection
   const delta = Object.entries(record.local.episodes).reduce(
     // Bangumi's ep_status counts all marked episodes, including wish and dropped.

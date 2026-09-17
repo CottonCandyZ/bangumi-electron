@@ -4,8 +4,8 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useCalendarQuery } from '@renderer/data/hooks/api/calendar'
 import type { CalendarItem } from '@renderer/data/types/calendar'
 import dayjs from 'dayjs'
-import { useEffect, useRef, useState } from 'react'
-import { carouselEdgeDistances, edgeStrength, scrollEdgeMask } from './carousel-edge-fade'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { edgeStrength, scrollEdgeMask, useCarouselEdgeFade } from './carousel-edge-fade'
 import './broadcast-schedule.css'
 import { Button } from '@renderer/components/ui/button'
 import {
@@ -43,7 +43,7 @@ export function BroadcastSchedule() {
   const todayId = getBangumiWeekdayId()
   const [api, setApi] = useState<CarouselApi>()
   const [todayVisible, setTodayVisible] = useState(true)
-  const [edges, setEdges] = useState({ start: 0, end: 0 })
+  const edgeFade = useCarouselEdgeFade(api)
   const online = useOnline()
   const [watchingOnly, setWatchingOnly] = useAtom(watchingOnlyAtom)
   const userId = useAtomValue(userIdAtom)
@@ -61,12 +61,6 @@ export function BroadcastSchedule() {
     if (!api) return
     const update = () => {
       setTodayVisible(api.slidesInView().includes(Number(todayId) - 1))
-      setEdges((previous) => {
-        const distance = carouselEdgeDistances(api)
-        const start = edgeStrength(distance.start)
-        const end = edgeStrength(distance.end)
-        return previous.start === start && previous.end === end ? previous : { start, end }
-      })
     }
     update()
     api.on('scroll', update).on('reInit', update).on('slidesInView', update)
@@ -129,10 +123,7 @@ export function BroadcastSchedule() {
         ) : query.data === undefined && (query.isError || !online) ? (
           <QueryFallback label="每日放送" error={query.error} onRetry={query.refetch} />
         ) : (
-          <div
-            className="broadcast-scroll-fade"
-            style={scrollEdgeMask('right', edges.start, edges.end)}
-          >
+          <div className="broadcast-scroll-fade" style={edgeFade}>
             <CarouselContent className="ml-0">
               {WEEKDAYS.map((weekday) => {
                 const ready = !watchingOnly || watching.data !== undefined
@@ -179,7 +170,8 @@ function BroadcastDayColumn({
 }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const [edges, setEdges] = useState({ start: 0, end: 0 })
-  useEffect(() => {
+  // Measure new content before paint, including when cached calendar data returns.
+  useLayoutEffect(() => {
     const element = scrollRef.current
     if (!element) return
     const update = () => {

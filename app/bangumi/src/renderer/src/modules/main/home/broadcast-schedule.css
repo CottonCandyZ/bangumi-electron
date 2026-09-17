@@ -11,13 +11,6 @@
 }
 
 .broadcast-scroll-fade {
-  transition:
-    --broadcast-fade-start 80ms ease-out,
-    --broadcast-fade-end 80ms ease-out;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .broadcast-scroll-fade {
-    transition: none;
-  }
+  /* Strength follows scroll distance; a timed transition makes the mask lag behind content. */
+  transition: none;
 }

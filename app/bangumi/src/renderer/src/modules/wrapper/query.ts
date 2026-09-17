@@ -85,3 +85,10 @@ export const queryClient = new QueryClient({
     },
   },
 })
+
+// Batch refreshes also seed unobserved detail queries. Give those the same bounded lifetime
+// as mounted SQLite-backed queries instead of inheriting the global durable-cache defaults.
+queryClient.setQueryDefaults(['subject-info'], {
+  gcTime: 10 * 60 * 1000,
+  persister: undefined,
+})

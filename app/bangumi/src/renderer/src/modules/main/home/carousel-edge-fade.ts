@@ -1,9 +1,10 @@
 import type { CarouselApi } from '@renderer/components/ui/carousel'
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useLayoutEffect, useState, type CSSProperties } from 'react'
 
 export function useCarouselEdgeFade(api: CarouselApi) {
   const [edges, setEdges] = useState({ start: 0, end: 0 })
-  useEffect(() => {
+  // Carousel restores its position in a layout effect; finish measuring before the same paint.
+  useLayoutEffect(() => {
     if (!api) return
     const update = () => {
       const distance = carouselEdgeDistances(api)

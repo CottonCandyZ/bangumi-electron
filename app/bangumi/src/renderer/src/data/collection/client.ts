@@ -2,25 +2,21 @@ import { client } from '@renderer/lib/client'
 import { queryClient } from '@renderer/modules/wrapper/query'
 import { store } from '@renderer/state/utils'
 import { userIdAtom } from '@renderer/state/session'
-import type { CollectionFields, CollectionCommand } from '@shared/collection-sync'
+import type { CollectionFields, CollectionCommand, CollectionChange } from '@shared/collection-sync'
 import type { Subject } from '@shared/types/subject'
 import { getAccessToken } from '@renderer/data/fetch/session'
+import { createCollectionCacheUpdater } from './cache'
 
 export function currentCollectionUser() {
   const userId = Number(store.get(userIdAtom))
   if (!userId) throw new Error('请先登录后管理收藏')
   return userId
 }
-export async function invalidateCollections() {
-  await Promise.all(
-    [
-      'collection-subject',
-      'collection-subjects',
-      'collection-episodes',
-      'collection-sync',
-      'collection-removed',
-    ].map((root) => queryClient.invalidateQueries({ queryKey: [root] })),
-  )
+const updateCollectionCache = createCollectionCacheUpdater(queryClient)
+export function invalidateCollections(
+  change: CollectionChange = { userId: Number(store.get(userIdAtom)), subjectIds: null },
+) {
+  return updateCollectionCache(change)
 }
 export async function submitCollection(
   command:
@@ -36,7 +32,7 @@ export async function submitCollection(
   })
   // Refresh credentials only after the durable local write, without delaying the UI.
   void getAccessToken(String(userId)).catch(() => {})
-  await invalidateCollections()
+  // The committed worker notification updates every window, including this one.
   return result
 }
 export async function editLocalCollection(input: {

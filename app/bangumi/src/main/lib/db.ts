@@ -10,50 +10,10 @@ export const sqlite: BetterSqlite3.Database = new BetterSqlite3(
     verbose: isDev ? console.log : undefined,
   },
 )
+// The collection worker has its own connection. Readers must not wait for its write batches.
+sqlite.pragma('journal_mode = WAL')
 
 const db = drizzle(sqlite)
-
-export type ExecuteType = {
-  sql: string
-  params: unknown[]
-  method: 'run' | 'all' | 'get' | 'values'
-}
-
-export type ExecuteBatchType = {
-  queries: ExecuteType[]
-}
-
-export const execute = async ({ sql, params, method }: ExecuteType) => {
-  const pre = sqlite.prepare(sql)
-  const ret = pre[method](...params) as Record<string, unknown> | Array<Record<string, unknown>>
-  return toDrizzleResult(ret)
-}
-
-/** only for insert & delete, no query return here */
-export const executeBatch = async ({ queries }: ExecuteBatchType) => {
-  const pres = Array(queries.length)
-  queries.forEach((item, index) => {
-    pres[index] = sqlite.prepare(item.sql)
-  })
-  const batch = sqlite.transaction((params: unknown[]) => {
-    params.forEach((param, index) => pres[index].run(...(param as unknown[])))
-  })
-  batch(queries.map((item) => item.params))
-}
-
-function toDrizzleResult(rows: Record<string, unknown> | Array<Record<string, unknown>>) {
-  if (!rows) {
-    return []
-  }
-  // map object to array
-  if (Array.isArray(rows)) {
-    return rows.map((row) => {
-      return Object.keys(row).map((key) => row[key])
-    })
-  } else {
-    return Object.keys(rows).map((key) => rows[key])
-  }
-}
 
 export async function initDB() {
   migrate(db, {

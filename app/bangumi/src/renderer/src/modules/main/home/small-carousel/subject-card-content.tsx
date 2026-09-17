@@ -9,7 +9,8 @@ import { SectionPath } from '@renderer/data/types/web'
 import { cn } from '@renderer/lib/utils'
 import dayjs from 'dayjs'
 import { motion } from 'motion/react'
-import { memo, useState } from 'react'
+import { memo, useMemo, useState } from 'react'
+import { selectAtom } from 'jotai/utils'
 import { useViewTransitionState, useLocation } from 'react-router-dom'
 import { MyLink } from '@renderer/components/my-link'
 import { useAtomValue, useSetAtom } from 'jotai'
@@ -44,11 +45,6 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
   // const follow = topList?.data?.[index].follow?.replace(/[^0-9]/g, '')
   // const subjectInfo = useSubjectInfoQuery({ subjectId, enabled: !!subjectId })
 
-  /* eslint-disable */
-  // @ts-ignore: motion needed
-  const activeId = useAtomValue(activeHoverPopCardAtom) // framer motion 需要其用于确保 re-render ?
-  /* eslint-enable */
-
   // 一些状态
   const setActionSection = useSetAtom(activeSectionAtom) // 用来防止轮播图相互覆盖
   const [isPopCardActive, setIsPopCardActive] = useState(false)
@@ -56,7 +52,12 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
   const openTagSearchPanel = useOpenTagSearchPanel()
   const id = `${sectionPath}-${subjectId}`
   const layoutId = `${sectionId}-${id}`
-  const isActive = activeId === layoutId
+  const isActive = useAtomValue(
+    useMemo(
+      () => selectAtom(activeHoverPopCardAtom, (activeId) => activeId === layoutId),
+      [layoutId],
+    ),
+  )
   const subjectCollectionQuery = useQuerySubjectCollection({
     subjectId: subjectId.toString(),
     username,
@@ -109,9 +110,10 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
                     'aspect-2/3 overflow-hidden rounded-xl',
                     sectionPath === 'music' && 'aspect-square',
                   )}
-                  loading="eager"
+                  loading="lazy"
                   imageSrc={subjectInfo.images.common}
                   layoutId={`${layoutId}-image`}
+                  layoutDependency={isActive}
                 />
 
                 <div

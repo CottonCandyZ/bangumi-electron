@@ -70,7 +70,8 @@ export function Image({
           setIsError(true)
           setStateImageSrc(undefined)
         }}
-        loading={isLoad ? 'eager' : loading}
+        decoding="async"
+        loading={loading}
         src={stateImageSrc}
         draggable={false}
       />

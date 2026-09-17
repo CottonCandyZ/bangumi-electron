@@ -36,6 +36,7 @@ export async function retryableNetworkOperation<T>(
   }
 }
 export interface CollectionTransport {
+  dispose?(): void
   read(subjectId: number): Promise<RemoteCollection>
   write(subjectId: number, before: CollectionSnapshot, target: CollectionSnapshot): Promise<void>
   list(
@@ -47,7 +48,7 @@ export class CollectionSyncEngine {
   private active = new Map<string, Promise<void>>()
   constructor(
     private repository: CollectionRepository,
-    private changed: () => void = () => {},
+    private changed: (userId: number, subjectId: number, dataChanged: boolean) => void = () => {},
   ) {}
   sync(
     userId: number,
@@ -71,9 +72,10 @@ export class CollectionSyncEngine {
     progress: (phase: SyncPhase) => void,
   ) {
     let record = this.repository.ensure(userId, subjectId)
+    const before = record
     if (record.status === 'conflict') return
     this.repository.put({ ...record, status: 'syncing', error: null })
-    this.changed()
+    this.changed(userId, subjectId, false)
     try {
       progress('reading')
       const remote = await transport.read(subjectId)
@@ -129,7 +131,20 @@ export class CollectionSyncEngine {
       })
       throw error
     } finally {
-      this.changed()
+      const after = this.repository.get(userId, subjectId)!
+      // Status/progress-only updates must not refetch every collection and episode grid.
+      const changed = [
+        'local',
+        'base',
+        'subject',
+        'epStatus',
+        'volStatus',
+        'updatedAt',
+        'error',
+      ].some(
+        (key) => !equalValue(before[key as keyof typeof before], after[key as keyof typeof after]),
+      )
+      this.changed(userId, subjectId, changed)
     }
   }
   private plan(record: LocalCollectionRecord, remote: CollectionSnapshot) {
@@ -177,7 +192,7 @@ export class CollectionSyncEngine {
           ? { revision: current.revision, remote: remote.snapshot, fields: next.conflicts }
           : null,
       })
-      this.changed()
+      this.changed(input.userId, input.subjectId, false)
       throw new Error('远端状态已改变，请重新查看差异')
     }
     const plan = this.plan(current, remote.snapshot)
@@ -238,6 +253,6 @@ export class CollectionSyncEngine {
           })
       }
     })
-    this.changed()
+    this.changed(input.userId, input.subjectId, true)
   }
 }

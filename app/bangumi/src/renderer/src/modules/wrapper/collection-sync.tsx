@@ -10,6 +10,7 @@ import { invalidateCollections } from '@renderer/data/collection/client'
 import { CollectionSyncDialog } from '@renderer/modules/common/collections/sync-dialog'
 import { queryClient } from './query'
 import { expireInvalidSession, getAccessToken } from '@renderer/data/fetch/session'
+import type { CollectionChange, SyncOverview } from '@shared/collection-sync'
 
 export function CollectionSyncProvider() {
   const userId = Number(useAtomValue(userIdAtom)) || null
@@ -39,14 +40,26 @@ export function CollectionSyncProvider() {
   }, [commandWindow, needsLogin, online])
   useEffect(() => {
     if (commandWindow) return
-    void client.collectionActivate({ userId }).then(() => invalidateCollections())
-    if (userId) void getAccessToken(String(userId)).catch(() => {})
-    const unsubscribe = window.electron.ipcRenderer.on('collections-changed', () => {
-      void invalidateCollections()
-    })
-    const unsubscribeProgress = window.electron.ipcRenderer.on('collection-sync-progress', () => {
+    void client.collectionActivate({ userId }).then(() => {
+      if (userId) void invalidateCollections({ userId, subjectIds: null })
       void queryClient.invalidateQueries({ queryKey: ['collection-sync'] })
     })
+    if (userId) void getAccessToken(String(userId)).catch(() => {})
+    const unsubscribe = window.electron.ipcRenderer.on(
+      'collections-changed',
+      (_event, change: CollectionChange) => {
+        if (change.userId === userId) void invalidateCollections(change)
+      },
+    )
+    const unsubscribeProgress = window.electron.ipcRenderer.on(
+      'collection-sync-progress',
+      (_event, update: { userId: number; overview: SyncOverview }) => {
+        if (update.userId !== userId) return
+        const queryKey = ['collection-sync', userId]
+        void queryClient.cancelQueries({ queryKey })
+        queryClient.setQueryData(queryKey, update.overview)
+      },
+    )
     const reconnect = async () => {
       if (!userId) return
       try {
