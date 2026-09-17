@@ -139,7 +139,7 @@ export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps)
             >
               {subjectInfo.name_cn || subjectInfo.name}
             </motion.h3>
-            <p className="text-muted-foreground mt-0.5 h-4 truncate text-[11px]">
+            <p className="text-muted-foreground mt-0.5 min-h-4 truncate text-[11px] leading-4">
               {subjectInfo.name_cn && subjectInfo.name_cn !== subjectInfo.name
                 ? subjectInfo.name
                 : ''}
