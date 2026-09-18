@@ -48,13 +48,34 @@ export function EpisodeGridContent({
               {/* 种类标签 */}
               <div
                 className={cn(
-                  'before:bg-primary relative flex h-10 min-w-10 items-center justify-center border border-transparent font-bold before:absolute before:top-2 before:bottom-2 before:left-0 before:w-1 before:rounded-lg',
-                  size === 'small' &&
-                    'h-6 min-w-6 pl-1 text-xs font-normal before:top-1 before:bottom-1 before:left-px before:w-[2.5px]',
-                  item.type > 3 && 'pl-2',
+                  'flex shrink-0 items-center justify-center',
+                  size === 'small'
+                    ? 'h-5 gap-1 px-1 text-[0.7rem] font-normal'
+                    : 'before:bg-primary relative h-10 min-w-10 border border-transparent font-bold before:absolute before:top-2 before:bottom-2 before:left-0 before:w-1 before:rounded-lg',
+                  size === 'default' && item.type > 3 && 'pl-2',
                 )}
                 key={`${item.type}-tag`}
               >
+                {size === 'small' && (
+                  <svg
+                    aria-hidden="true"
+                    className="text-primary h-3 w-[2px] shrink-0 overflow-visible"
+                    viewBox="0 0 2 12"
+                    preserveAspectRatio="none"
+                  >
+                    {/* Keep the stroke crisp at fractional positions and UI zoom levels. */}
+                    <line
+                      x1="1"
+                      x2="1"
+                      y1="0"
+                      y2="12"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      vectorEffect="non-scaling-stroke"
+                      shapeRendering="crispEdges"
+                    />
+                  </svg>
+                )}
                 {item.type <= 3 ? EpisodeType[item.type] : '其他'}
               </div>
               <EpisodeGridItem
