@@ -1,4 +1,3 @@
-import { Tabs } from '@renderer/components/tabs'
 import { Button } from '@renderer/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import { CollectionEpisode } from '@renderer/data/types/collection'
@@ -9,10 +8,8 @@ import { CarouselNavigation } from '@renderer/modules/main/home/carousel-navigat
 import { episodeViewModeAtom } from '@renderer/state/episodes'
 import { appConfigAtom } from '@renderer/state/app-config'
 import { useAtom, useAtomValue } from 'jotai'
-import { GalleryHorizontal, Grid2X2, ListRestart } from 'lucide-react'
-import { useId, type ReactNode } from 'react'
-
-const viewModes = new Set(['grid', 'cards'])
+import { ListOrdered, ListRestart, RectangleEllipsis } from 'lucide-react'
+import { type ReactNode } from 'react'
 
 export function EpisodeToolbar({
   episodeSortStart,
@@ -33,10 +30,12 @@ export function EpisodeToolbar({
 }) {
   const [viewMode, setViewMode] = useAtom(episodeViewModeAtom)
   const showQuickMark = useAtomValue(appConfigAtom).general.showEpisodeQuickMark
-  const viewTabsId = useId()
+  const cardView = viewMode === 'cards'
+  const viewLabel = cardView ? '卡片' : '数字'
+  const nextViewLabel = cardView ? '数字' : '卡片'
   const sortLabel = oneBased ? `还原为从 ${episodeSortStart} 开始计数` : '切换为从 1 开始计数'
   return (
-    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+    <div className="mb-3 flex min-h-9 flex-wrap items-center justify-between gap-2">
       <div className="flex items-center gap-1">
         <h2 className="mr-1 text-2xl font-medium">章节</h2>
         {episodeSortStart !== 1 && (
@@ -55,6 +54,28 @@ export function EpisodeToolbar({
             <TooltipContent>{sortLabel}</TooltipContent>
           </Tooltip>
         )}
+        <Tooltip delayDuration={300}>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant={cardView ? 'secondary' : 'ghost'}
+              size="icon"
+              className="text-muted-foreground size-7 shrink-0 shadow-none transition-[color,background-color,transform] active:scale-95 motion-reduce:transform-none motion-reduce:transition-none"
+              aria-label="章节卡片视图"
+              aria-pressed={cardView}
+              onClick={() => setViewMode(cardView ? 'grid' : 'cards')}
+            >
+              {cardView ? (
+                <RectangleEllipsis className="size-3.5" aria-hidden="true" />
+              ) : (
+                <ListOrdered className="size-3.5" aria-hidden="true" />
+              )}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            当前为{viewLabel}视图，点击切换为{nextViewLabel}视图
+          </TooltipContent>
+        </Tooltip>
         <OpenMonoListPanelButton
           className="size-7"
           disabled={!episodesPanel.canOpen}
@@ -71,23 +92,9 @@ export function EpisodeToolbar({
             sortOffset={oneBased ? 1 - episodeSortStart : 0}
           />
         )}
-        {viewMode === 'cards' && <CarouselNavigation label="章节" />}
-        <Tabs
-          aria-label="章节展示模式"
-          currentSelect={viewMode}
-          setCurrentSelect={(_, value) => setViewMode(value === 'cards' ? 'cards' : 'grid')}
-          tabsContent={viewModes}
-          layoutId={viewTabsId}
-          tabClassName="size-7 p-0"
-          getTabLabel={(value) => (value === 'grid' ? '数字视图' : '卡片视图')}
-          renderTab={(value) =>
-            value === 'grid' ? (
-              <Grid2X2 className="size-4" aria-hidden="true" />
-            ) : (
-              <GalleryHorizontal className="size-4" aria-hidden="true" />
-            )
-          }
-        />
+        <div className={cardView ? undefined : 'invisible'} aria-hidden={!cardView}>
+          <CarouselNavigation label="章节" />
+        </div>
       </div>
     </div>
   )

@@ -133,7 +133,7 @@ function EpisodesView({
       mainEpisodeSortOffset={mainEpisodeSortOffset}
     />
   )
-  // Keep the toolbar and its shared-layout indicator mounted when changing view modes.
+  // Keep the toolbar mounted while only the episode content changes view modes.
   if (size === 'default')
     return (
       <EpisodeCarousel
