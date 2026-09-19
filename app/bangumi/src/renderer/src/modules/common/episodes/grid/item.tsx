@@ -23,6 +23,7 @@ import { MouseEvent, useEffect, useState } from 'react'
 import { EpisodeButton } from '@renderer/components/button/episode'
 import { useEpisodeCollectionActions } from '@renderer/modules/common/collections/use-episode-collection-actions'
 import { useNavigate } from 'react-router-dom'
+import { Check } from 'lucide-react'
 
 function isCollectionEpisode(
   episodes: Episode[] | CollectionEpisode[],
@@ -37,11 +38,13 @@ export function EpisodeGridItem({
   modifyEpisodeCollectionOpt,
   collectionType,
   mainEpisodeSortOffset = 0,
+  presentation = 'number',
 }: {
   index: number
   episodes: Episode[] | CollectionEpisode[]
   collectionType: CollectionType | undefined
   mainEpisodeSortOffset?: number
+  presentation?: 'number' | 'card'
 } & EpisodeGridSize &
   ModifyEpisodeCollectionOptType) {
   const episode = isCollectionEpisode(episodes) ? episodes[index].episode : episodes[index]
@@ -51,7 +54,7 @@ export function EpisodeGridItem({
   const [hoverCardContent, setHoverCardContent] = useAtom(hoverCardEpisodeContentAtom)
   const closeHoverCardImmediately = useSetAtom(closeHoverCardImmediatelyAtomAction)
   const collectionEpisodes = isCollectionEpisode(episodes) ? episodes : undefined
-  const { currentAction, mutateByAction } = useEpisodeCollectionActions({
+  const { currentAction, isPending, mutateByAction } = useEpisodeCollectionActions({
     index,
     subjectId: episode.subject_id.toString(),
     episodes: collectionEpisodes,
@@ -103,7 +106,11 @@ export function EpisodeGridItem({
         className={cn(
           `flex h-9 min-w-9 rounded-md px-2 py-0`,
           size === 'small' && 'h-5 min-w-5 rounded-sm px-1 text-[0.7rem]',
+          presentation === 'card' &&
+            'h-16 w-full flex-col items-start justify-center gap-1 px-3 py-2 text-left font-normal whitespace-normal shadow-none hover:shadow-none',
         )}
+        aria-label={`${episode.type === EpisodeType.本篇 ? '第' : (EpisodeType[episode.type] ?? '其他')} ${displaySort} 集 ${episode.name_cn || episode.name}`}
+        disabled={isPending}
         variant={selfOpen && open ? `${status}Hover` : status}
         onClick={(e) => {
           e.preventDefault()
@@ -123,7 +130,24 @@ export function EpisodeGridItem({
           navigate(`/episode/${episode.id}`)
         }}
       >
-        {displaySort}
+        {presentation === 'card' ? (
+          <>
+            <span className="flex w-full items-center justify-between gap-2 text-[10px] font-medium opacity-70">
+              <span>
+                {episode.type === EpisodeType.本篇 ? 'EP' : (EpisodeType[episode.type] ?? '其他')}.
+                {displaySort}
+              </span>
+              {episodeCollectionType === EpisodeCollectionType.watched && (
+                <Check className="size-3" />
+              )}
+            </span>
+            <span className="w-full truncate text-xs font-medium">
+              {episode.name_cn || episode.name || '—'}
+            </span>
+          </>
+        ) : (
+          displaySort
+        )}
       </EpisodeButton>
     </HoverCardTrigger>
   )

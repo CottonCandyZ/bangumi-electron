@@ -4,6 +4,11 @@ import { beforeEach, expect, test, vi } from 'vitest'
 import { EpisodesGrid } from '../../src/renderer/src/modules/common/episodes/grid'
 
 const fixture = vi.hoisted(() => ({ data: [] as unknown[] | null, loggedIn: false, loaded: true }))
+vi.mock('@renderer/state/app-config', async () => {
+  const { atom } = await import('jotai')
+  const { DEFAULT_APP_CONFIG } = await import('../../src/shared/config')
+  return { appConfigAtom: atom(DEFAULT_APP_CONFIG) }
+})
 vi.mock('@renderer/data/hooks/session', () => ({
   useSession: () => (fixture.loggedIn ? { id: 1 } : null),
 }))
@@ -25,6 +30,12 @@ vi.mock('@renderer/modules/panel/left-panel/open-mono-list-panel', () => ({
 }))
 vi.mock('@renderer/modules/common/episodes/grid/content', () => ({
   EpisodeGridContent: () => null,
+}))
+vi.mock('@renderer/modules/common/episodes/carousel', () => ({
+  EpisodeCarousel: () => null,
+}))
+vi.mock('@renderer/modules/common/episodes/progress-editor', () => ({
+  EpisodeProgressEditor: () => null,
 }))
 vi.mock('@renderer/modules/common/episodes/grid/page-selector', () => ({
   PageSelector: () => null,

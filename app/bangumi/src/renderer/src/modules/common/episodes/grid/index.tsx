@@ -1,28 +1,50 @@
+import { QueryFallback } from '@renderer/components/query-fallback'
+import { Skeleton } from '@renderer/components/ui/skeleton'
+import {
+  ALL_LOCAL_EPISODES_LIMIT,
+  EPISODE_PAGE_SIZE,
+  getEpisodePage,
+} from '@renderer/data/collection/episode-progress'
+import { useCollectionEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/api/collection'
+import { useEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/api/episodes'
+import { useSession } from '@renderer/data/hooks/session'
+import { SubjectId } from '@renderer/data/types/bgm'
+import { CollectionType } from '@renderer/data/types/collection'
+import { cn } from '@renderer/lib/utils'
+import { EpisodeCarousel } from '@renderer/modules/common/episodes/carousel'
 import { EpisodeGridContent } from '@renderer/modules/common/episodes/grid/content'
 import {
   PageSelector,
   PageSelectorSkeleton,
 } from '@renderer/modules/common/episodes/grid/page-selector'
-import { Button } from '@renderer/components/ui/button'
-import { Skeleton } from '@renderer/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
-import { useCollectionEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/api/collection'
-import { useEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/api/episodes'
-import { SubjectId } from '@renderer/data/types/bgm'
-import { CollectionEpisode, CollectionType } from '@renderer/data/types/collection'
-import { Episode, EpisodeType } from '@renderer/data/types/episode'
-import { cn } from '@renderer/lib/utils'
+import { EpisodeToolbar } from '@renderer/modules/common/episodes/grid/toolbar'
 import { useOpenSubjectEpisodesPanel } from '@renderer/modules/common/episodes/use-open-subject-episodes-panel'
-import { OpenMonoListPanelButton } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
-import { ListRestart } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { useSession } from '@renderer/data/hooks/session'
+import { episodeViewModeAtom } from '@renderer/state/episodes'
+import { useAtomValue } from 'jotai'
+import { useState } from 'react'
 
-export type EpisodeGridSize = {
-  size?: 'small' | 'default'
+export type EpisodeGridSize = { size?: 'small' | 'default' }
+type Props = {
+  subjectId: SubjectId
+  eps: number
+  selector?: boolean
+  collectionType?: CollectionType
+  sourceTitle?: string
+  useOneBasedEpisodeSort?: boolean
+} & EpisodeGridSize
+
+export function EpisodesGrid(props: Props) {
+  const userInfo = useSession()
+  return (
+    <EpisodesView
+      key={`${props.subjectId}:${userInfo?.id ?? 'guest'}`}
+      {...props}
+      userInfo={userInfo}
+    />
+  )
 }
 
-export function EpisodesGrid({
+function EpisodesView({
   subjectId,
   eps,
   size = 'default',
@@ -30,155 +52,122 @@ export function EpisodesGrid({
   collectionType,
   sourceTitle,
   useOneBasedEpisodeSort = false,
-}: {
-  subjectId: SubjectId
-  eps: number
-  selector?: boolean
-  collectionType?: CollectionType
-  sourceTitle?: string
-  useOneBasedEpisodeSort?: boolean
-} & EpisodeGridSize) {
-  const userInfo = useSession()
-  const [offset, setOffSet] = useState(0)
+  userInfo,
+}: Props & { userInfo: ReturnType<typeof useSession> }) {
+  const [requestedOffset, setRequestedOffset] = useState<number | null>(null)
   const [temporaryOneBasedEpisodeSort, setTemporaryOneBasedEpisodeSort] = useState(false)
-  const limit = 100
-  let skeletonNumber = eps > 0 ? eps : 12
-  if (skeletonNumber > 100) skeletonNumber = 100
+  const viewMode = useAtomValue(episodeViewModeAtom)
+  const limit = EPISODE_PAGE_SIZE
   const episodesQuery = useEpisodesInfoBySubjectIdQuery({
     subjectId,
-    offset,
+    offset: requestedOffset ?? 0,
     limit,
-    enabled: !userInfo,
+    enabled: userInfo === null,
+    needKeepPreviousData: false,
   })
-
   const collectionEpisodesQuery = useCollectionEpisodesInfoBySubjectIdQuery({
     subjectId,
-    offset,
-    limit,
+    limit: ALL_LOCAL_EPISODES_LIMIT,
     enabled: !!userInfo,
   })
-
-  const episode = userInfo ? collectionEpisodesQuery : episodesQuery
+  const episodeQuery = userInfo ? collectionEpisodesQuery : episodesQuery
+  const { progress, offset, episodes, episodeSortStart } = getEpisodePage({
+    episodes: episodeQuery.data?.data ?? [],
+    collection: !!userInfo,
+    requestedOffset,
+    compact: size === 'small',
+  })
   const episodesPanel = useOpenSubjectEpisodesPanel({
-    episodeTotal: episode.data?.total,
+    episodeTotal: episodeQuery.data?.total,
     initialOffset: offset,
     sourceTitle: sourceTitle || `条目 ${subjectId}`,
     subjectId,
   })
-  const episodeSortStart = getMainEpisodeSortStart(episode.data?.data, offset)
-  const canUseOneBasedEpisodeSort = episodeSortStart !== null && episodeSortStart !== 1
   const showOneBasedEpisodeSort = useOneBasedEpisodeSort || temporaryOneBasedEpisodeSort
-  const mainEpisodeSortOffset =
-    canUseOneBasedEpisodeSort && showOneBasedEpisodeSort ? 1 - episodeSortStart : 0
-  const oneBasedSortButtonLabel = showOneBasedEpisodeSort
-    ? `还原为从 ${episodeSortStart} 开始计数`
-    : '切换为从 1 开始计数'
+  const mainEpisodeSortOffset = showOneBasedEpisodeSort ? 1 - episodeSortStart : 0
 
-  useEffect(() => {
-    setTemporaryOneBasedEpisodeSort(false)
-  }, [subjectId])
-
-  if (userInfo === undefined) {
+  if (episodeQuery.isError && !episodeQuery.data)
+    return (
+      <QueryFallback
+        layout={size === 'small' ? 'panel' : 'card'}
+        label="章节"
+        error={episodeQuery.error}
+        onRetry={episodeQuery.refetch}
+      />
+    )
+  if (userInfo === undefined || episodeQuery.data === undefined)
     return (
       <EpisodeSkeleton
         showSelector={selector && eps > limit}
-        skeletonNumber={skeletonNumber}
+        skeletonNumber={Math.min(eps > 0 ? eps : 12, limit)}
         size={size}
       />
     )
-  }
+  if (!episodeQuery.data.data?.length) return null
 
-  if (episode.data === undefined) {
+  const pagination = selector && (
+    <PageSelector
+      episodes={episodeQuery}
+      limit={limit}
+      offset={offset}
+      setOffSet={setRequestedOffset}
+    />
+  )
+  const header = (
+    <EpisodeToolbar
+      episodeSortStart={episodeSortStart}
+      oneBased={showOneBasedEpisodeSort}
+      onToggleSort={() => setTemporaryOneBasedEpisodeSort((value) => !value)}
+      episodesPanel={episodesPanel}
+      progressEpisodes={progress.main}
+      subjectId={subjectId}
+      pagination={pagination}
+    />
+  )
+  const gridContent = (
+    <EpisodeGridContent
+      episodes={episodes}
+      size={size}
+      modifyEpisodeCollectionOpt={{ limit, offset }}
+      collectionType={collectionType}
+      mainEpisodeSortOffset={mainEpisodeSortOffset}
+    />
+  )
+  // Keep the toolbar and its shared-layout indicator mounted when changing view modes.
+  if (size === 'default')
     return (
-      <EpisodeSkeleton
-        showSelector={selector && eps > limit}
-        skeletonNumber={skeletonNumber}
-        size={size}
+      <EpisodeCarousel
+        key={offset}
+        episodes={episodes}
+        initialEpisodeId={progress.anchor?.episode.id}
+        mainEpisodeSortOffset={mainEpisodeSortOffset}
+        header={header}
+        gridContent={viewMode === 'grid' ? gridContent : undefined}
+        collectionType={collectionType}
+        modifyEpisodeCollectionOpt={{ limit, offset }}
       />
     )
-  }
-  if (!episode.data.data?.length) return null
   return (
-    <div className="flex flex-col gap-5">
-      {size === 'default' && (
-        <div className="flex flex-row items-center gap-2">
-          <h2 className="text-2xl font-medium">章节</h2>
-          {canUseOneBasedEpisodeSort && (
-            <Tooltip delayDuration={300}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant={showOneBasedEpisodeSort ? 'secondary' : 'outline'}
-                  size="icon"
-                  className="mt-1 size-8 shadow-none"
-                  aria-label={oneBasedSortButtonLabel}
-                  onClick={() => setTemporaryOneBasedEpisodeSort((value) => !value)}
-                >
-                  <ListRestart className="size-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{oneBasedSortButtonLabel}</TooltipContent>
-            </Tooltip>
-          )}
-          <OpenMonoListPanelButton
-            className="mt-1 size-8"
-            disabled={!episodesPanel.canOpen}
-            tab={episodesPanel.tab}
-            title="在侧栏打开章节"
-          />
-        </div>
-      )}
-      <div className={cn('flex flex-col gap-4')}>
-        {selector && (
-          <PageSelector episodes={episode} limit={limit} offset={offset} setOffSet={setOffSet} />
-        )}
-        <EpisodeGridContent
-          episodes={episode.data.data}
-          size={size}
-          modifyEpisodeCollectionOpt={{ limit, offset }}
-          collectionType={collectionType}
-          mainEpisodeSortOffset={mainEpisodeSortOffset}
-        />
-      </div>
+    <div className="min-w-0">
+      {pagination}
+      {gridContent}
     </div>
   )
 }
 
-function getEpisodeFromGridItem(item: Episode | CollectionEpisode) {
-  return (item as CollectionEpisode).episode ?? item
-}
-
-function getMainEpisodeSortStart(
-  episodes: Episode[] | CollectionEpisode[] | null | undefined,
-  offset: number,
-) {
-  const firstMainEpisode = episodes
-    ?.map(getEpisodeFromGridItem)
-    .filter((item) => item.type === EpisodeType['本篇'])
-    .at(0)
-
-  return firstMainEpisode === undefined ? null : firstMainEpisode.sort - offset
-}
-
 function EpisodeSkeleton({
-  showSelector = false,
+  showSelector,
   skeletonNumber,
-  size = 'default',
-}: {
-  showSelector?: boolean
-  skeletonNumber: number
-} & EpisodeGridSize) {
+  size,
+}: { showSelector: boolean; skeletonNumber: number } & EpisodeGridSize) {
   return (
     <div className="flex flex-col gap-5">
       {size === 'default' && <h2 className="text-2xl font-medium">章节</h2>}
-      <div className="flex flex-col gap-4">
-        {showSelector && <PageSelectorSkeleton />}
-        <div className={cn('flex flex-row flex-wrap gap-1.5', size === 'small' && 'gap-1')}>
-          {Array(skeletonNumber)
-            .fill(0)
-            .map((_, index) => (
-              <Skeleton className={cn('size-9', size === 'small' && 'size-5')} key={index} />
-            ))}
-        </div>
+      {showSelector && <PageSelectorSkeleton />}
+      <div className={cn('flex flex-wrap gap-1.5', size === 'small' && 'gap-1')}>
+        {Array.from({ length: skeletonNumber }, (_, index) => (
+          <Skeleton className={cn('size-9', size === 'small' && 'size-5')} key={index} />
+        ))}
       </div>
     </div>
   )

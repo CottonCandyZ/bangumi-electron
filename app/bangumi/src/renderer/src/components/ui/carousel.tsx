@@ -73,6 +73,8 @@ function Carousel({
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
+      // Portaled menus and forms keep their own keyboard controls.
+      if (!event.currentTarget.contains(event.target as Node)) return
       if (event.key === "ArrowLeft") {
         event.preventDefault()
         scrollPrev()

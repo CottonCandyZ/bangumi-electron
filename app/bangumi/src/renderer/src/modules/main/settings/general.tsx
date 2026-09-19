@@ -23,6 +23,7 @@ import { toast } from 'sonner'
 export function GeneralSettings() {
   const { config, loaded, updateConfig, exportConfig, importConfig } = useAppConfig()
   const [savingNsfw, setSavingNsfw] = useState(false)
+  const [savingQuickMark, setSavingQuickMark] = useState(false)
   const [selectingDownloadDirectory, setSelectingDownloadDirectory] = useState(false)
   const [transferring, setTransferring] = useState(false)
   const [resetting, setResetting] = useState(false)
@@ -49,6 +50,17 @@ export function GeneralSettings() {
       throw error
     } finally {
       setTransferring(false)
+    }
+  }
+
+  const updateQuickMark = async (checked: boolean) => {
+    setSavingQuickMark(true)
+    try {
+      await updateConfig({ general: { showEpisodeQuickMark: checked } })
+    } catch {
+      toast.error('保存设置失败')
+    } finally {
+      setSavingQuickMark(false)
     }
   }
 
@@ -120,6 +132,19 @@ export function GeneralSettings() {
               checked={config.general.enableNsfw}
               disabled={!loaded || savingNsfw}
               onCheckedChange={updateNsfw}
+            />
+          }
+        />
+        <SettingRow
+          separated
+          title="显示章节快速标记"
+          description="开启后可输入集数批量更新观看进度。也可按住 Shift 点击目标章节，标记为「看到这集」，无需开启此功能。"
+          control={
+            <Switch
+              aria-label="显示章节快速标记"
+              checked={config.general.showEpisodeQuickMark}
+              disabled={!loaded || savingQuickMark}
+              onCheckedChange={updateQuickMark}
             />
           }
         />

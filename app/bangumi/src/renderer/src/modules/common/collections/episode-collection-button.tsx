@@ -19,7 +19,7 @@ export function EpisodeCollectionButton({
   episodes,
   modifyEpisodeCollectionOpt,
 }: Props) {
-  const { currentAction, episodeCollectionType, mutateByAction, mutateNotCollected } =
+  const { currentAction, episodeCollectionType, isPending, mutateByAction, mutateNotCollected } =
     useEpisodeCollectionActions({
       index,
       subjectId,
@@ -53,6 +53,7 @@ export function EpisodeCollectionButton({
                 currentAction == item && 'cursor-default',
               )}
               key={item}
+              disabled={isPending}
               onClick={(e) => {
                 e.preventDefault()
                 if (item === currentAction) return
@@ -69,6 +70,7 @@ export function EpisodeCollectionButton({
         <Button
           className="px-3 py-1"
           variant="outline"
+          disabled={isPending}
           onClick={(e) => {
             e.preventDefault()
             mutateNotCollected()

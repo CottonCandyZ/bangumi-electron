@@ -50,15 +50,15 @@ export const SubjectContent = ({
       </section>
 
       <div className="flex w-full flex-col gap-6">
-        <section className="flex flex-row gap-5">
-          <div className="flex w-full flex-col gap-5">
+        <section className="flex flex-col gap-5 @2xl:flex-row">
+          <div className="flex min-w-0 flex-1 flex-col gap-5">
             {/* 章节 */}
             <SubjectEpisodes subjectId={subjectId} />
             <div className="flex w-full flex-row">
               <SubjectTags subjectId={subjectId} />
             </div>
           </div>
-          <Card className="h-fit bg-transparent p-4">
+          <Card className="h-fit shrink-0 self-start bg-transparent p-4">
             <section className="flex min-w-56 flex-1 flex-col gap-2">
               <SubjectCollection subjectId={subjectId} />
               <Separator />

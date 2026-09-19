@@ -19,19 +19,21 @@ export const useEpisodesInfoBySubjectIdQuery = ({
   offset = 0,
   type,
   enabled,
+  needKeepPreviousData = true,
 }: {
   subjectId: SubjectId
   limit?: number
   offset?: number
   type?: number
   enabled?: boolean
+  needKeepPreviousData?: boolean
 }) =>
   useAuthQuery({
     queryFn: getEpisodesBySubjectId,
     queryKey: ['episodes-info'],
     queryProps: { subjectId, limit, offset, type },
     enabled,
-    needKeepPreviousData: true,
+    needKeepPreviousData,
   })
 
 /**

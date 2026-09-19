@@ -1,5 +1,6 @@
 import { cn } from '@renderer/lib/utils'
 import { motion } from 'motion/react'
+import { type ReactNode } from 'react'
 
 type TabsOnlyProps = {
   currentSelect: string
@@ -7,6 +8,10 @@ type TabsOnlyProps = {
   tabsContent: Set<string>
   layoutId: string
   className?: string
+  tabClassName?: string
+  renderTab?: (value: string) => ReactNode
+  getTabLabel?: (value: string) => string
+  'aria-label'?: string
 }
 
 export function Tabs({
@@ -15,6 +20,10 @@ export function Tabs({
   tabsContent,
   className,
   layoutId,
+  tabClassName,
+  renderTab,
+  getTabLabel,
+  'aria-label': ariaLabel,
 }: TabsOnlyProps) {
   return (
     <motion.div
@@ -25,13 +34,20 @@ export function Tabs({
       key={layoutId}
       layout
       layoutRoot
+      role="group"
+      aria-label={ariaLabel}
     >
       {[...tabsContent].map((item) => (
         <button
           className={cn(
             'ring-offset-background focus-visible:ring-ring relative inline-flex items-center justify-center rounded-md px-2.5 py-1 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50',
             item === currentSelect && 'text-foreground cursor-default',
+            tabClassName,
           )}
+          type="button"
+          aria-pressed={item === currentSelect}
+          aria-label={getTabLabel?.(item)}
+          title={getTabLabel?.(item)}
           key={item}
           onClick={() => setCurrentSelect(layoutId, item)}
         >
@@ -42,7 +58,7 @@ export function Tabs({
               style={{ originY: 'top' }}
             />
           )}
-          <span className="z-10">{item}</span>
+          <span className="z-10">{renderTab ? renderTab(item) : item}</span>
         </button>
       ))}
     </motion.div>

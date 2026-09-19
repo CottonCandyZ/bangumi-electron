@@ -102,7 +102,7 @@ export function HoverEpisodeDetail({ content }: { content: HoverEpisodeDetailTyp
   const subjectCollectionQuery = useQuerySubjectCollection({
     subjectId: episode.subject_id.toString(),
     username,
-    enabled: !!username && !!collectionType,
+    enabled: !!username && isCollectionEpisode(episodes),
     needKeepPreviousData: false,
   })
   const subjectCollection = subjectCollectionQuery.data

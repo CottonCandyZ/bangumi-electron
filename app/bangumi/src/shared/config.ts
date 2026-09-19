@@ -2,6 +2,7 @@ export type AppConfig = {
   general: {
     downloadDirectory: string
     enableNsfw: boolean
+    showEpisodeQuickMark: boolean
   }
   update: {
     channel: AppUpdateChannel
@@ -44,6 +45,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   general: {
     downloadDirectory: '',
     enableNsfw: false,
+    showEpisodeQuickMark: false,
   },
   update: {
     channel: 'beta',
@@ -148,6 +150,10 @@ export function normalizeAppConfig(value: unknown): AppConfig {
         typeof general.enableNsfw === 'boolean'
           ? general.enableNsfw
           : DEFAULT_APP_CONFIG.general.enableNsfw,
+      showEpisodeQuickMark:
+        typeof general.showEpisodeQuickMark === 'boolean'
+          ? general.showEpisodeQuickMark
+          : DEFAULT_APP_CONFIG.general.showEpisodeQuickMark,
     },
     update: {
       channel:

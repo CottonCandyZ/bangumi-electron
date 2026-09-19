@@ -6,6 +6,7 @@ import type { CollectionFields, CollectionCommand, CollectionChange } from '@sha
 import type { Subject } from '@shared/types/subject'
 import { getAccessToken } from '@renderer/data/fetch/session'
 import { createCollectionCacheUpdater } from './cache'
+import { ALL_LOCAL_EPISODES_LIMIT, getWatchedThroughEpisodes } from './episode-progress'
 
 export function currentCollectionUser() {
   const userId = Number(store.get(userIdAtom))
@@ -86,4 +87,29 @@ export async function editLocalEpisodes(input: {
     subjectId: Number(input.subjectId),
     episodes: Object.fromEntries(input.episodesId.map((id) => [id, input.episodeCollectionType])),
   })
+}
+
+export async function markLocalEpisodesWatchedThrough(input: {
+  subjectId: string
+  episodeId: number
+}) {
+  const userId = currentCollectionUser()
+  const snapshot = await client.collectionReadEpisodes({
+    userId,
+    subjectId: Number(input.subjectId),
+    limit: ALL_LOCAL_EPISODES_LIMIT,
+  })
+  if (!snapshot.ready) throw new Error('章节进度尚未加载完成，请稍后重试')
+  if (currentCollectionUser() !== userId) throw new Error('账号已切换，请重新更新进度')
+  if (!snapshot.data?.some((item) => item.episode.id === input.episodeId)) {
+    throw new Error('找不到这个章节，请刷新后重试')
+  }
+  const changed = getWatchedThroughEpisodes(snapshot.data, input.episodeId)
+  if (!changed.length) return 0
+  await editLocalEpisodes({
+    subjectId: input.subjectId,
+    episodesId: changed.map((item) => item.episode.id),
+    episodeCollectionType: 2,
+  })
+  return changed.length
 }

@@ -20,7 +20,7 @@ export function PageSelector({
   offset = 0,
 }: {
   episodes: UseQueryResult<Episodes | CollectionEpisodes, Error>
-  setOffSet: React.Dispatch<React.SetStateAction<number>>
+  setOffSet: (offset: number) => void
   limit: number
   offset?: number
 }) {
@@ -33,14 +33,14 @@ export function PageSelector({
           <div className="flex items-center gap-2">
             {episodes.isFetching && <span className="i-mingcute-loading-line animate-spin" />}
             <SelectValue>
-              {offset + 1} - {offset + limit}
+              {offset + 1} - {Math.min(offset + limit, episodes.data.total)}
             </SelectValue>
           </div>
         </SelectTrigger>
         <SelectContent>
           {selectArray.map((item) => (
             <SelectItem value={item.toString()} key={item}>
-              {item + 1} - {item + limit}
+              {item + 1} - {Math.min(item + limit, episodes.data.total)}
             </SelectItem>
           ))}
         </SelectContent>

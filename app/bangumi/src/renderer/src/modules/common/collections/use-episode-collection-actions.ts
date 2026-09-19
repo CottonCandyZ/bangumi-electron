@@ -1,5 +1,8 @@
 import { EpisodeCollectionAction } from '@renderer/constant/collection'
-import { useMutationEpisodesCollectionBySubjectId } from '@renderer/data/hooks/api/collection'
+import {
+  useMutationEpisodesCollectionBySubjectId,
+  useMutationEpisodesWatchedThrough,
+} from '@renderer/data/hooks/api/collection'
 import { SubjectId } from '@renderer/data/types/bgm'
 import {
   CollectionEpisode,
@@ -17,16 +20,22 @@ type Props = {
   index: number
   subjectId: SubjectId
   episodes: CollectionEpisode[] | undefined
-} & ModifyEpisodeCollectionOptType
+  onProgressSaved?: (count: number) => void
+} & Partial<ModifyEpisodeCollectionOptType>
 
-export function useEpisodeCollectionActions({ index, subjectId, episodes }: Props) {
+export function useEpisodeCollectionActions({
+  index,
+  subjectId,
+  episodes,
+  onProgressSaved,
+}: Props) {
   const openCollectionSheet = useSetAtom(subjectCollectionSheetFormAtom)
   const episodeCollectionType = episodes?.[index]?.type
   const currentAction =
     episodeCollectionType === undefined
       ? null
       : (EPISODE_COLLECTION_TYPE_MAP[episodeCollectionType] ?? null)
-  const episodeCollectionMutation = useMutationEpisodesCollectionBySubjectId({
+  const mutationOptions = {
     mutationKey: ['subject-collection'],
     async onSuccess() {
       try {
@@ -58,10 +67,19 @@ export function useEpisodeCollectionActions({ index, subjectId, episodes }: Prop
         // 检查仅用于提示，不影响章节收藏主流程。
       }
     },
-    onError(error) {
+    onError(error: Error) {
       toast.error(error.message || '进度更新失败，请重试')
     },
+  }
+  const episodeCollectionMutation = useMutationEpisodesCollectionBySubjectId(mutationOptions)
+  const watchedThroughMutation = useMutationEpisodesWatchedThrough({
+    ...mutationOptions,
+    onSuccess(count) {
+      onProgressSaved?.(count)
+      return mutationOptions.onSuccess()
+    },
   })
+  const isPending = episodeCollectionMutation.isPending || watchedThroughMutation.isPending
 
   const mutateWatchedAction = () => {
     const currentEpisode = episodes?.[index]?.episode
@@ -74,20 +92,16 @@ export function useEpisodeCollectionActions({ index, subjectId, episodes }: Prop
   }
 
   const mutateSeenAction = () => {
-    if (!episodes) return
-    const start = episodes.findIndex((episode) => episode.type !== EpisodeCollectionType.watched)
-    if (start < 0 || start > index) return
-    const episodesId = episodes.slice(start, index + 1).map((episode) => episode.episode.id)
-    if (episodesId.length === 0) return
-    episodeCollectionMutation.mutate({
-      episodeCollectionType: EpisodeCollectionType.watched,
+    const currentEpisode = episodes?.[index]?.episode
+    if (!currentEpisode) return
+    watchedThroughMutation.mutate({
       subjectId,
-      episodesId,
+      episodeId: currentEpisode.id,
     })
   }
 
   const mutateByAction = (action: EpisodeCollectionAction) => {
-    if (!episodes?.[index]) return
+    if (!episodes?.[index] || isPending) return
     if (action === '看到') {
       mutateSeenAction()
       return
@@ -104,6 +118,7 @@ export function useEpisodeCollectionActions({ index, subjectId, episodes }: Prop
   }
 
   const mutateNotCollected = () => {
+    if (isPending) return
     const currentEpisode = episodes?.[index]?.episode
     if (!currentEpisode) return
     episodeCollectionMutation.mutate({
@@ -115,6 +130,7 @@ export function useEpisodeCollectionActions({ index, subjectId, episodes }: Prop
 
   return {
     currentAction,
+    isPending,
     episodeCollectionType,
     mutateByAction,
     mutateNotCollected,

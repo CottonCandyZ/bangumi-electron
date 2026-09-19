@@ -9,7 +9,11 @@ import { userIdAtom } from '@renderer/state/session'
 import { useAtomValue } from 'jotai'
 import { localCollectionQueryOptions } from '@renderer/data/collection/cache'
 import { useMutation } from '@tanstack/react-query'
-import { editLocalCollection, editLocalEpisodes } from '@renderer/data/collection/client'
+import {
+  editLocalCollection,
+  editLocalEpisodes,
+  markLocalEpisodesWatchedThrough,
+} from '@renderer/data/collection/client'
 import {
   getCharacterCollectionByIdAndUsername,
   getP1Collections,
@@ -221,6 +225,16 @@ export const useMutationSubjectCollection = (
 export const useMutationEpisodesCollectionBySubjectId = (
   options: ApiMutationOptionsWithoutToken<typeof editLocalEpisodes>,
 ) => useMutation({ ...options, mutationFn: editLocalEpisodes, networkMode: 'always', retry: false })
+
+export const useMutationEpisodesWatchedThrough = (
+  options: ApiMutationOptionsWithoutToken<typeof markLocalEpisodesWatchedThrough>,
+) =>
+  useMutation({
+    ...options,
+    mutationFn: markLocalEpisodesWatchedThrough,
+    networkMode: 'always',
+    retry: false,
+  })
 
 function localOrRemoteList(
   props: Parameters<typeof getSubjectCollectionsByUsernameMustAuth>[0] & {
