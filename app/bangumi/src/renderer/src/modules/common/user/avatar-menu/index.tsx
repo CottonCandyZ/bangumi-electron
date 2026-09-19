@@ -52,7 +52,7 @@ export function ProfileMenu({
         data-expend={type}
         aria-label="账号菜单"
         className={cn(
-          'text-muted-foreground hover:text-primary relative flex w-fit flex-row items-center gap-2 rounded-full shadow-xs',
+          'text-muted-foreground hover:text-primary relative flex w-fit flex-row items-center gap-2 rounded-full shadow-xs transition-[transform,background-color,color] duration-150 active:scale-95 motion-reduce:transform-none motion-reduce:transition-none',
           !sidebar && type === 'expend' && 'group w-full min-w-0 border p-1.5 shadow-none',
           sidebar && 'w-full min-w-0 gap-0 overflow-hidden rounded-md shadow-none',
           dropdownOpen && 'bg-accent text-primary',
@@ -87,6 +87,7 @@ export function ProfileMenu({
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent
+        className="duration-200 data-closed:duration-150 motion-reduce:animate-none"
         align={type === 'expend' ? 'end' : 'center'}
         side={'top'}
         collisionPadding={{

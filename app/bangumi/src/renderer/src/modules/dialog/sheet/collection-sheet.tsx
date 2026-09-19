@@ -8,32 +8,15 @@ import {
   subjectCollectionSheetFormAtom,
   type SubjectCollectionSheetProps,
 } from '@renderer/state/dialog/sheet'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback } from 'react'
 
 export function SubjectCollectionSheet() {
   const [sheetProps, setSheetProps] = useAtom(subjectCollectionSheetFormAtom)
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const setOpen = useCallback(
     (open: boolean) => {
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
-      closeTimerRef.current = null
-      setSheetProps({ open })
-
-      if (!open) {
-        closeTimerRef.current = setTimeout(() => {
-          setSheetProps({ open: false, content: null })
-          closeTimerRef.current = null
-        }, 240)
-      }
+      setSheetProps(open ? { open } : { open: false, content: null })
     },
     [setSheetProps],
-  )
-
-  useEffect(
-    () => () => {
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
-    },
-    [],
   )
 
   return (

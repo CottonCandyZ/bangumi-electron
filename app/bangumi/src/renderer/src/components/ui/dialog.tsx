@@ -7,9 +7,11 @@ import { cn } from "@renderer/lib/utils"
 import { Button } from "@renderer/components/ui/button"
 import { getAsChildRender } from "@renderer/components/ui/base-ui-compat"
 import { XIcon } from "lucide-react"
+import { useDialogExitRetention } from "./use-dialog-exit-retention"
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
-  return <DialogPrimitive.Root data-slot="dialog" {...props} />
+  const retained = useDialogExitRetention(props)
+  return <DialogPrimitive.Root data-slot="dialog" {...props} {...retained} />
 }
 
 function DialogTrigger({

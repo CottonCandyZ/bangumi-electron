@@ -4,9 +4,11 @@ import { Dialog as SheetPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@renderer/lib/utils"
 import { Button } from "@renderer/components/ui/button"
 import { XIcon } from "lucide-react"
+import { useDialogExitRetention } from "./use-dialog-exit-retention"
 
 function Sheet({ ...props }: SheetPrimitive.Root.Props) {
-  return <SheetPrimitive.Root data-slot="sheet" {...props} />
+  const retained = useDialogExitRetention(props)
+  return <SheetPrimitive.Root data-slot="sheet" {...props} {...retained} />
 }
 
 function SheetTrigger({ ...props }: SheetPrimitive.Trigger.Props) {

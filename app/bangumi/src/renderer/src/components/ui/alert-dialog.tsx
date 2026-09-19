@@ -4,9 +4,11 @@ import { AlertDialog as AlertDialogPrimitive } from "@base-ui/react/alert-dialog
 import { cn } from "@renderer/lib/utils"
 import { Button } from "@renderer/components/ui/button"
 import { getAsChildRender } from "@renderer/components/ui/base-ui-compat"
+import { useDialogExitRetention } from "./use-dialog-exit-retention"
 
 function AlertDialog({ ...props }: AlertDialogPrimitive.Root.Props) {
-  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
+  const retained = useDialogExitRetention(props)
+  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} {...retained} />
 }
 
 function AlertDialogTrigger({
