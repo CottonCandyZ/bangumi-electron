@@ -17,6 +17,7 @@ export const lastSearchQueryStringAtom = atom<string | null>(null)
 export const searchSummaryAtom = atom({
   total: 0,
   loading: false,
+  error: false,
 })
 
 export const searchKeywordActionAtom = atom(null, (get, set, keyword: string) => {
