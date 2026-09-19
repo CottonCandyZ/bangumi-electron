@@ -95,6 +95,7 @@ export type SyncProgress = {
   finishedAt: number | null
 }
 export type SyncOverview = {
+  retryAt?: number | null
   authRequired: boolean
   pending: number
   conflicts: LocalCollectionRecord[]

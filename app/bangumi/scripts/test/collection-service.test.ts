@@ -208,7 +208,52 @@ test('unprocessed refresh requests survive an earlier network failure', async ()
   await vi.advanceTimersByTimeAsync(300)
   expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42])
   await vi.advanceTimersByTimeAsync(10000)
-  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42, 43])
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42, 42, 43])
+})
+
+test('a gateway timeout pauses all subjects and new reads or edits cannot bypass the cooldown', async () => {
+  mocks.repository.get.mockImplementation((_user, subjectId) => ({
+    subjectId,
+    subject: { name: 'test' },
+    status: 'clean',
+    local: {},
+  }))
+  mocks.sync.mockRejectedValue(new SyncError('Bangumi 请求失败（504）', 'network'))
+  service.requestCollection(42, 1)
+  service.requestCollection(43, 1)
+  await vi.advanceTimersByTimeAsync(300)
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42])
+  const retryAt = service.collectionOverview(1).retryAt!
+  expect(retryAt).toBe(Date.now() + 10000)
+  service.requestCollection(44, 1)
+  service.scheduleCollections(0)
+  await vi.advanceTimersByTimeAsync(9999)
+  expect(mocks.sync).toHaveBeenCalledTimes(1)
+  await vi.advanceTimersByTimeAsync(1)
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42, 42])
+  expect(service.collectionOverview(1).retryAt).toBe(Date.now() + 20000)
+  mocks.sync.mockResolvedValue(undefined)
+  service.syncCollections(1)
+  await vi.advanceTimersByTimeAsync(1)
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42, 42, 42, 43, 44])
+  expect(service.collectionOverview(1).retryAt).toBeNull()
+})
+
+test('collection page timeouts share the sync cooldown and cached pages remain readable', async () => {
+  const cached = { data: [{ subject_id: 42 }], total: 1, offset: 0, limit: 10 }
+  mocks.repository.account.mockReturnValue({ listComplete: false })
+  mocks.repository.list.mockReturnValue(cached)
+  mocks.list.mockRejectedValue(new SyncError('Bangumi 请求失败（504）', 'network'))
+  expect(await service.readCollectionPage({ userId: 1, online: true })).toEqual(cached)
+  expect(await service.readCollectionPage({ userId: 1, online: true })).toEqual(cached)
+  expect(mocks.list).toHaveBeenCalledTimes(1)
+  mocks.repository.list.mockReturnValue({ ...cached, data: [] })
+  await expect(service.readCollectionPage({ userId: 1, online: true })).rejects.toThrow('504')
+  expect(mocks.list).toHaveBeenCalledTimes(1)
+  service.activateCollections(2)
+  expect(service.collectionOverview(2).retryAt).toBeNull()
+  await expect(service.readCollectionPage({ userId: 2, online: true })).rejects.toThrow('504')
+  expect(mocks.list).toHaveBeenCalledTimes(2)
 })
 
 test('web authorization failure does not pause other OAuth-capable subjects', async () => {

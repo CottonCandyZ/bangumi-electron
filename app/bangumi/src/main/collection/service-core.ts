@@ -35,6 +35,7 @@ export function createCollectionService(
   let progress: CollectionSyncProgress | null = null
   let timer: ReturnType<typeof setTimeout> | undefined
   let failures = 0
+  let networkRetryAt = 0
   let pausedForAuth = false
   let lastError: string | null = null
   const requested = new Set<number>()
@@ -48,6 +49,7 @@ export function createCollectionService(
     requested.clear()
     scanRequested = 0
     failures = 0
+    networkRetryAt = 0
     pausedForAuth = false
     lastError = null
     progress = null
@@ -70,10 +72,13 @@ export function createCollectionService(
   }
   function scheduleCollections(delay = 500) {
     if (timer) clearTimeout(timer)
-    timer = setTimeout(() => {
-      timer = undefined
-      void runCollections().catch(() => {})
-    }, delay)
+    timer = setTimeout(
+      () => {
+        timer = undefined
+        void runCollections().catch(() => {})
+      },
+      Math.max(delay, networkRetryAt - Date.now()),
+    )
     timer.unref()
   }
   function syncCollections(id: number, full = false) {
@@ -81,6 +86,7 @@ export function createCollectionService(
     collectionRepository.resetErrors(id)
     if (full) scanRequested += 1
     failures = 0
+    networkRetryAt = 0
     pausedForAuth = false
     scheduleCollections(0)
   }
@@ -92,11 +98,29 @@ export function createCollectionService(
     collectionRepository.resetErrors(id, true)
     pausedForAuth = false
     failures = 0
+    networkRetryAt = 0
     scheduleCollections(0)
+  }
+  function pauseForNetwork(error: SyncError) {
+    lastError = error.message
+    // Concurrent reads share one cooldown; ordinary reads/edits cannot shorten it.
+    if (networkRetryAt <= Date.now()) {
+      failures += 1
+      networkRetryAt = Date.now() + Math.min(300000, 5000 * 2 ** Math.min(failures, 6))
+    }
+    notifySyncProgress()
+  }
+  function throwIfNetworkPaused() {
+    if (networkRetryAt > Date.now())
+      throw new SyncError(lastError ?? '连接暂不可用，同步稍后重试', 'network')
   }
   async function runCollections() {
     if (running) return running
     if (!userId || pausedForAuth) return
+    if (networkRetryAt > Date.now()) {
+      scheduleCollections(0)
+      return
+    }
     const id = userId
     const signal = controller.signal
     runningUserId = id
@@ -124,6 +148,7 @@ export function createCollectionService(
           let total = Infinity
           const seen = new Set<number>()
           while (offset < total) {
+            throwIfNetworkPaused()
             const page = await transport.list(offset)
             total = page.total
             signal.throwIfAborted()
@@ -145,12 +170,15 @@ export function createCollectionService(
           // Keep failed scans and requests made during this scan eligible for retry.
           scanRequested -= scanRequests
         }
+        throwIfNetworkPaused()
         failures = 0
+        networkRetryAt = 0
         pausedForAuth = false
       } catch (error) {
         if (!signal.aborted) {
           lastError = error instanceof Error ? error.message : '同步失败'
-          failures += 1
+          if (error instanceof SyncError && error.kind === 'network') pauseForNetwork(error)
+          else failures += 1
           pausedForAuth = error instanceof SyncError && error.kind === 'auth-required'
         }
       } finally {
@@ -184,6 +212,7 @@ export function createCollectionService(
   ) {
     for (const subjectId of subjects) {
       signal.throwIfAborted()
+      throwIfNetworkPaused()
       // Leave later requests queued if this subject aborts the serial pass.
       requested.delete(subjectId)
       let failed = false
@@ -193,8 +222,14 @@ export function createCollectionService(
         })
       } catch (error) {
         failed = true
-        if (error instanceof SyncError && ['network', 'auth-required'].includes(error.kind))
+        if (error instanceof SyncError && ['network', 'auth-required'].includes(error.kind)) {
+          // Retry the failed request first, rather than probing every remaining subject.
+          const remaining = [...requested]
+          requested.clear()
+          requested.add(subjectId)
+          for (const pendingId of remaining) requested.add(pendingId)
           throw error
+        }
       } finally {
         if (!signal.aborted) activity.settled(collectionRepository.get(id, subjectId)!, failed)
       }
@@ -209,6 +244,7 @@ export function createCollectionService(
       listComplete: account?.listComplete ?? false,
       error: userId === id ? lastError : null,
       authRequired: userId === id && pausedForAuth,
+      retryAt: userId === id && networkRetryAt > Date.now() ? networkRetryAt : null,
       progress: userId === id ? (progress?.value ?? null) : null,
     }
   }
@@ -219,6 +255,10 @@ export function createCollectionService(
     const cached = collectionRepository.list(input)
     if (!input.online || collectionRepository.account(input.userId)?.listComplete) return cached
     if (userId !== input.userId) throw new Error('当前账号已改变')
+    if (networkRetryAt > Date.now()) {
+      if (cached.data.length) return cached
+      throwIfNetworkPaused()
+    }
     const signal = controller.signal
     const offset = input.offset ?? 0
     const limit = Math.min(50, Math.max(1, input.limit ?? 50))
@@ -240,6 +280,10 @@ export function createCollectionService(
       return { ...page, data, offset, limit }
     } catch (error) {
       signal.throwIfAborted()
+      if (userId === input.userId && error instanceof SyncError && error.kind === 'network') {
+        pauseForNetwork(error)
+        scheduleCollections(0)
+      }
       if (cached.data.length) return cached
       throw error
     } finally {

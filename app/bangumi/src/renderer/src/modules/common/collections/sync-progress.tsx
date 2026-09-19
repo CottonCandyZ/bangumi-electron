@@ -108,6 +108,12 @@ function StageProgress({ progress }: { progress: SyncProgress }) {
 function idleMessage(overview: SyncOverview) {
   if (overview.authRequired)
     return { title: '需要重新登录', detail: '请重新登录后继续同步。', attention: true }
+  if (overview.retryAt && overview.retryAt > Date.now())
+    return {
+      title: '同步已暂停',
+      detail: '连接暂不可用，所有待同步条目会统一等待后重试，本地更改已保留。',
+      attention: true,
+    }
   if (overview.error || overview.errors.length)
     return {
       title: '部分内容尚未同步',
