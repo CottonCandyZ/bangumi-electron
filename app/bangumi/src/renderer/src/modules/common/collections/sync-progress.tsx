@@ -172,7 +172,13 @@ function ResultIcon({ status }: { status: SyncResult['status'] }) {
   if (status === 'pending') return <Clock3 className="size-3.5" />
   return <CircleAlert className="size-3.5" />
 }
-export function SyncRecent({ items }: { items: SyncResult[] }) {
+export function SyncRecent({
+  items,
+  shownErrors = [],
+}: {
+  items: SyncResult[]
+  shownErrors?: (string | null)[]
+}) {
   if (!items.length) return null
   return (
     <section aria-label="最近同步结果">
@@ -189,7 +195,7 @@ export function SyncRecent({ items }: { items: SyncResult[] }) {
               </span>
               <span className="text-muted-foreground shrink-0">{resultLabels[item.status]}</span>
             </div>
-            {item.error && (
+            {item.error && !shownErrors.includes(item.error) && (
               <p className="text-destructive mt-1 pl-5 text-xs break-words">{item.error}</p>
             )}
           </li>

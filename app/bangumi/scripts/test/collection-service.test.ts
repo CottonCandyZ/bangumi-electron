@@ -155,6 +155,32 @@ test('first activation and reconnect do not start a full scan without user inten
   expect(mocks.repository.completeList).toHaveBeenCalledTimes(1)
 })
 
+test('network failures retry pending subjects automatically and manual retry bypasses the delay', async () => {
+  const record = { subjectId: 42, subject: { name: 'test' }, status: 'pending', local: {} }
+  mocks.repository.all.mockReturnValue([record])
+  mocks.repository.get.mockReturnValue(record)
+  mocks.sync
+    .mockRejectedValueOnce(new SyncError('Bangumi 请求失败（502）', 'network'))
+    .mockRejectedValueOnce(new SyncError('Bangumi 请求失败（502）', 'network'))
+    .mockImplementation(async () => {
+      record.status = 'clean'
+    })
+  await vi.advanceTimersByTimeAsync(500)
+  expect(mocks.sync).toHaveBeenCalledTimes(1)
+  await vi.advanceTimersByTimeAsync(9999)
+  expect(mocks.sync).toHaveBeenCalledTimes(1)
+  await vi.advanceTimersByTimeAsync(1)
+  expect(mocks.sync).toHaveBeenCalledTimes(2)
+  service.syncCollections(1)
+  await vi.advanceTimersByTimeAsync(1)
+  expect(mocks.sync).toHaveBeenCalledTimes(3)
+  expect(mocks.repository.resetErrors).toHaveBeenCalledWith(1)
+  expect(mocks.list).not.toHaveBeenCalled()
+  expect(service.collectionOverview(1).error).toBeNull()
+  await vi.advanceTimersByTimeAsync(300000)
+  expect(mocks.sync).toHaveBeenCalledTimes(3)
+})
+
 test('individual reads and pending edits do not implicitly download the account list', async () => {
   mocks.repository.account.mockReturnValue({ listComplete: false })
   const record = { subjectId: 42, subject: { name: 'test' }, status: 'pending', local: {} }

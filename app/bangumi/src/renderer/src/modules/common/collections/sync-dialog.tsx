@@ -30,12 +30,12 @@ export function useCollectionSyncOverview<T = SyncOverview>(
     select,
   })
 }
-export async function startCollectionSync(userId: number) {
+export async function startCollectionSync(userId: number, full = true) {
   // Refresh OAuth if possible. A connection failure must not prevent reading the local library.
   await getAccessToken(String(userId))
   if (currentCollectionUser() !== userId) throw new Error('当前账号已改变')
   await client.collectionActivate({ userId })
-  await client.collectionSync({ userId, full: true })
+  await client.collectionSync({ userId, full })
 }
 export function CollectionSyncDialog() {
   const userId = Number(useAtomValue(userIdAtom))
@@ -53,7 +53,7 @@ export function CollectionSyncDialog() {
     persister: undefined,
   })
   const sync = useMutation({
-    mutationFn: () => startCollectionSync(userId),
+    mutationFn: (full: boolean) => startCollectionSync(userId, full),
     networkMode: 'always',
     onError: (error) => toast.error(error.message),
   })
@@ -69,7 +69,11 @@ export function CollectionSyncDialog() {
         </DialogHeader>
         <div className="min-h-0 space-y-4 overflow-y-auto px-5 pb-5">
           {overview ? (
-            <SyncDetails overview={overview} />
+            <SyncDetails
+              overview={overview}
+              retrying={sync.isPending || overview.running}
+              onRetry={() => sync.mutate(false)}
+            />
           ) : (
             <p className="text-muted-foreground text-sm">正在查看同步进度…</p>
           )}
@@ -86,11 +90,6 @@ export function CollectionSyncDialog() {
             </details>
           )}
           {overview && <SyncCoverage overview={overview} />}
-          {overview && !overview.listComplete && !overview.running && (
-            <p className="text-muted-foreground text-sm">
-              收藏会按浏览需要同步；也可以选择同步全部收藏和章节进度。
-            </p>
-          )}
         </div>
         <div className="bg-muted/30 flex flex-wrap items-center justify-end gap-2 border-t px-5 py-3">
           {(overview?.authRequired ||
@@ -105,7 +104,7 @@ export function CollectionSyncDialog() {
           <Button
             variant="outline"
             disabled={!overview || sync.isPending || overview.running}
-            onClick={() => sync.mutate()}
+            onClick={() => sync.mutate(true)}
           >
             {overview?.running ? '正在同步…' : '同步全部收藏'}
           </Button>
@@ -114,18 +113,31 @@ export function CollectionSyncDialog() {
     </Dialog>
   )
 }
-function SyncDetails({ overview }: { overview: SyncOverview }) {
+function SyncDetails({
+  overview,
+  retrying,
+  onRetry,
+}: {
+  overview: SyncOverview
+  retrying: boolean
+  onRetry: () => void
+}) {
   return (
     <>
       <SyncSummary overview={overview} />
       <SyncActivity overview={overview} />
       {overview.error && (
-        <p
-          className="bg-destructive/5 text-destructive rounded-lg border p-3 text-xs leading-relaxed break-words"
+        <div
+          className="bg-destructive/5 flex items-center justify-between gap-3 rounded-lg border p-3"
           role="status"
         >
-          {overview.error}
-        </p>
+          <p className="text-destructive min-w-0 text-xs leading-relaxed break-words">
+            {overview.error}
+          </p>
+          <Button size="sm" variant="outline" disabled={retrying} onClick={onRetry}>
+            {retrying ? '正在重试…' : '重试'}
+          </Button>
+        </div>
       )}
       {overview.conflicts.map((record) => (
         <ConflictCard
@@ -135,16 +147,28 @@ function SyncDetails({ overview }: { overview: SyncOverview }) {
       ))}
       {!!overview.errors.length && (
         <section className="space-y-2" aria-label="同步异常">
-          <h3 className="text-muted-foreground text-xs">需要重试的条目</h3>
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="text-muted-foreground text-xs">需要重试的条目</h3>
+            {!overview.error && (
+              <Button size="sm" variant="outline" disabled={retrying} onClick={onRetry}>
+                {retrying ? '正在重试…' : '重试'}
+              </Button>
+            )}
+          </div>
           {overview.errors.map((record) => (
             <div className="space-y-1 rounded-lg border p-3" key={record.subjectId}>
               <p className="text-sm font-medium">{record.subject.name_cn || record.subject.name}</p>
-              <p className="text-destructive text-xs break-words">{record.error}</p>
+              {record.error !== overview.error && (
+                <p className="text-destructive text-xs break-words">{record.error}</p>
+              )}
             </div>
           ))}
         </section>
       )}
-      <SyncRecent items={overview.progress?.recent ?? []} />
+      <SyncRecent
+        items={overview.progress?.recent ?? []}
+        shownErrors={[overview.error, ...overview.errors.map((record) => record.error)]}
+      />
     </>
   )
 }
