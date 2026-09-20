@@ -10,7 +10,9 @@ import { useEpisodesInfoBySubjectIdQuery } from '@renderer/data/hooks/api/episod
 import { useSession } from '@renderer/data/hooks/session'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { CollectionType } from '@renderer/data/types/collection'
+import { useOnline } from '@renderer/hooks/use-online'
 import { cn } from '@renderer/lib/utils'
+import { CollectionPendingError } from '@renderer/lib/utils/network'
 import { EpisodeCarousel } from '@renderer/modules/common/episodes/carousel'
 import { EpisodeGridContent } from '@renderer/modules/common/episodes/grid/content'
 import {
@@ -54,6 +56,7 @@ function EpisodesView({
   useOneBasedEpisodeSort = false,
   userInfo,
 }: Props & { userInfo: ReturnType<typeof useSession> }) {
+  const online = useOnline()
   const [requestedOffset, setRequestedOffset] = useState<number | null>(null)
   const [temporaryOneBasedEpisodeSort, setTemporaryOneBasedEpisodeSort] = useState(false)
   const viewMode = useAtomValue(episodeViewModeAtom)
@@ -86,7 +89,12 @@ function EpisodesView({
   const showOneBasedEpisodeSort = useOneBasedEpisodeSort || temporaryOneBasedEpisodeSort
   const mainEpisodeSortOffset = showOneBasedEpisodeSort ? 1 - episodeSortStart : 0
 
-  if (episodeQuery.isError && !episodeQuery.data)
+  // An incomplete local snapshot is still loading while collection sync can continue.
+  if (
+    episodeQuery.isError &&
+    !episodeQuery.data &&
+    (!online || !(episodeQuery.error instanceof CollectionPendingError))
+  )
     return (
       <QueryFallback
         layout={size === 'small' ? 'panel' : 'card'}
