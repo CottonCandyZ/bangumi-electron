@@ -80,6 +80,7 @@ function CommunityGroupsVirtualList({
       getKey={(group) => group.id}
       renderItem={(group) => <CommunityGroupPanelItem group={group} />}
       activeIndex={centerActiveItem ? activeIndex : undefined}
+      locateIndex={activeIndex}
       empty={<div className="text-muted-foreground p-4 text-sm">没有小组。</div>}
       rootClassName="flex-1"
       className="px-2 py-2"

@@ -74,6 +74,7 @@ export function SearchSubjectsListPanelContent({
         getKey={(item) => item.id}
         renderItem={(item) => <SearchPanelItem item={item} />}
         activeIndex={centerActiveItem ? activeIndex : undefined}
+        locateIndex={activeIndex}
         empty={<div className="text-muted-foreground p-4 text-sm">没有符合条件的条目。</div>}
         estimateSize={92}
         gap={4}

@@ -1,4 +1,5 @@
 import { BackToTopButton } from '@renderer/components/button/back-to-top'
+import { useListLocateAction } from '@renderer/components/virtual/list-locate-context'
 import { NativeScrollViewport } from '@renderer/components/scroll/native-scroll-viewport'
 import { useNativeSmoothVirtualizerScrollToTop } from '@renderer/components/virtual/use-native-smooth-virtualizer-scroll-to-top'
 import { useVirtualScrollMemory } from '@renderer/components/virtual/use-virtual-scroll-memory'
@@ -14,6 +15,7 @@ type SingleColumnVirtualListProps<T> = {
   getKey: (item: T, index: number) => Key
   renderItem: (item: T, index: number) => ReactNode
   activeIndex?: number
+  locateIndex?: number
   appendPlaceholderCount?: number
   className?: string
   empty?: ReactNode
@@ -54,6 +56,7 @@ export function SingleColumnVirtualList<T>({
   getKey,
   renderItem,
   activeIndex,
+  locateIndex,
   appendPlaceholderCount = 4,
   className,
   empty,
@@ -121,6 +124,12 @@ export function SingleColumnVirtualList<T>({
     virtualizerRef,
   })
   const handledScrollToTopSignalRef = useRef(scrollToTopSignal)
+  const canLocate = locateIndex !== undefined && locateIndex >= 0 && locateIndex < items.length
+  const locateCurrentItem = useCallback(() => {
+    if (!canLocate || locateIndex === undefined) return
+    virtualizerRef.current?.scrollToIndex(locateIndex, { align: 'center' })
+  }, [canLocate, locateIndex])
+  useListLocateAction(canLocate && viewport ? locateCurrentItem : null)
 
   const requestMore = useCallback(() => {
     if (!online || !hasMore || isFetchingMore || loadingMoreRef.current || !onNearBottom) return

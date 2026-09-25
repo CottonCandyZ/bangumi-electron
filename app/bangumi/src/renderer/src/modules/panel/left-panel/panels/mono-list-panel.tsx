@@ -1,3 +1,4 @@
+import { ListLocateProvider } from '@renderer/components/virtual/list-locate-context'
 import {
   closeAllMonoListPanelTabsAtomAction,
   closeMonoListPanelTabAtomAction,
@@ -25,18 +26,20 @@ export function MonoListPanel() {
   if (!activeTab) return null
 
   return (
-    <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
-      <MonoListPanelHeader
-        activeTab={activeTab}
-        canToggleFilters={canToggleFilters}
-        closeAllTabs={closeAllTabs}
-        closeTab={closeTab}
-        filtersOpen={filtersOpen}
-        setActiveTabId={setActiveTabId}
-        tabs={tabs}
-        toggleFilters={toggleFilters}
-      />
-      <MonoListPanelContent filtersOpen={filtersOpen} tab={activeTab} />
-    </div>
+    <ListLocateProvider>
+      <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
+        <MonoListPanelHeader
+          activeTab={activeTab}
+          canToggleFilters={canToggleFilters}
+          closeAllTabs={closeAllTabs}
+          closeTab={closeTab}
+          filtersOpen={filtersOpen}
+          setActiveTabId={setActiveTabId}
+          tabs={tabs}
+          toggleFilters={toggleFilters}
+        />
+        <MonoListPanelContent filtersOpen={filtersOpen} tab={activeTab} />
+      </div>
+    </ListLocateProvider>
   )
 }

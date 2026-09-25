@@ -78,6 +78,7 @@ export function SubjectReviewsListPanelContent({
       />
       <SingleColumnVirtualList
         activeIndex={centerActiveItem ? activeIndex : undefined}
+        locateIndex={activeIndex}
         appendPlaceholderCount={SUBJECT_REVIEWS_PANEL_LIMIT}
         className="px-2 py-2"
         empty={<div className="text-muted-foreground p-4 text-sm">没有评论文章。</div>}

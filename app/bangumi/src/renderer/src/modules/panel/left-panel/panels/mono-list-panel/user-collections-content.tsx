@@ -90,6 +90,7 @@ export function UserCollectionsListPanelContent({
       getKey={(item) => item.data.subject_id}
       renderItem={(item) => <UserCollectionListItem item={item.data} />}
       activeIndex={centerActiveItem ? activeIndex : undefined}
+      locateIndex={activeIndex}
       rootClassName="flex-1"
       className="px-2 py-2"
       estimateSize={84}

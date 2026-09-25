@@ -1,3 +1,4 @@
+import { ListLocateProvider } from '@renderer/components/virtual/list-locate-context'
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useSession } from '@renderer/data/hooks/session'
@@ -18,20 +19,22 @@ export function CollectionPanel() {
   const openLoginDialog = useSetAtom(loginDialogAtom)
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
-      <CollectionPanelHeader />
-      {userInfo === undefined && !panelUsername ? (
-        <DelayedLoading>
-          <CollectionPanelLoading />
-        </DelayedLoading>
-      ) : !username ? (
-        <CollectionPanelLoginPrompt onLogin={() => openLoginDialog({ open: true })} />
-      ) : resourceType === 'subject' ? (
-        <SubjectCollectionPanelContent username={username} />
-      ) : (
-        <P1CollectionList resourceType={resourceType} username={panelUsername} />
-      )}
-    </div>
+    <ListLocateProvider>
+      <div className="flex h-full min-h-0 flex-col overflow-hidden">
+        <CollectionPanelHeader />
+        {userInfo === undefined && !panelUsername ? (
+          <DelayedLoading>
+            <CollectionPanelLoading />
+          </DelayedLoading>
+        ) : !username ? (
+          <CollectionPanelLoginPrompt onLogin={() => openLoginDialog({ open: true })} />
+        ) : resourceType === 'subject' ? (
+          <SubjectCollectionPanelContent username={username} />
+        ) : (
+          <P1CollectionList resourceType={resourceType} username={panelUsername} />
+        )}
+      </div>
+    </ListLocateProvider>
   )
 }
 
