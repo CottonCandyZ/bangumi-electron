@@ -49,6 +49,7 @@ export function SearchMonosListPanelContent({
         getKey={(item) => item.id}
         renderItem={(item) => <SearchMonoPanelItem item={item} monoType={monoType} />}
         activeIndex={centerActiveItem ? activeIndex : undefined}
+        locateIndex={activeIndex}
         empty={<div className="text-muted-foreground p-4 text-sm">没有符合条件的结果。</div>}
         estimateSize={92}
         gap={4}

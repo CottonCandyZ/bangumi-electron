@@ -1,3 +1,4 @@
+import { ListLocateButton } from '@renderer/components/virtual/list-locate-context'
 import { CollectionSyncButton } from '@renderer/modules/common/collections/sync-dialog'
 import { SubjectCollectionSelectorContent } from '@renderer/modules/common/collections/subject-select-content'
 import { Button } from '@renderer/components/ui/button'
@@ -83,6 +84,7 @@ export function CollectionPanelHeader() {
             )}
           </div>
           <div className="flex items-center gap-1">
+            <ListLocateButton />
             {userInfo &&
               (!panelUsername || panelUsername === userInfo.username) &&
               resourceType === 'subject' && <CollectionSyncButton />}

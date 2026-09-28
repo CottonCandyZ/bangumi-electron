@@ -79,6 +79,7 @@ export function MonoIndexesListPanelContent({
       />
       <SingleColumnVirtualList
         activeIndex={centerActiveItem ? activeIndex : undefined}
+        locateIndex={activeIndex}
         appendPlaceholderCount={INDEX_PANEL_LIMIT}
         className="px-2 py-2"
         empty={<div className="text-muted-foreground p-4 text-sm">没有关联目录。</div>}
@@ -210,6 +211,7 @@ export function IndexRelatedListPanelContent({
       />
       <SingleColumnVirtualList
         activeIndex={centerActiveItem ? activeIndex : undefined}
+        locateIndex={activeIndex}
         appendPlaceholderCount={INDEX_PANEL_LIMIT}
         className="px-2 py-2"
         empty={<div className="text-muted-foreground p-4 text-sm">没有符合条件的内容。</div>}

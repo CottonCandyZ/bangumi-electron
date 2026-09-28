@@ -72,6 +72,7 @@ export function UserFriendsListPanelContent({
       </MonoListPanelFilters>
       <SingleColumnVirtualList
         activeIndex={centerActiveItem ? activeIndex : undefined}
+        locateIndex={activeIndex}
         appendPlaceholderCount={USER_FRIENDS_PANEL_LIMIT}
         className="px-2 py-2"
         empty={<div className="text-muted-foreground p-4 text-sm">还没有好友。</div>}

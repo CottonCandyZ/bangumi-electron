@@ -86,6 +86,7 @@ export function TrendingSubjectsListPanelContent({
         getKey={(id) => id}
         renderItem={(id) => <TrendingSubjectPanelItem id={id} />}
         activeIndex={centerActiveItem ? activeIndex : undefined}
+        locateIndex={activeIndex}
         empty={<div className="text-muted-foreground p-4 text-sm">没有近期热门条目。</div>}
         estimateSize={ESTIMATED_SUBJECT_HEIGHT}
         gap={4}

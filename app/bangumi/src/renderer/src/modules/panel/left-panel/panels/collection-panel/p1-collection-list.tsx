@@ -24,6 +24,7 @@ export function P1CollectionList({
   resourceType: P1PanelResourceType
   username: string | undefined
 }) {
+  const { pathname } = useLocation()
   const query = useInfinityQueryP1Collections({
     username,
     resourceType,
@@ -65,6 +66,7 @@ export function P1CollectionList({
 
   return (
     <SingleColumnVirtualList
+      locateIndex={items.findIndex(({ item }) => pathname === `/${resourceType}/${item.id}`)}
       appendPlaceholderCount={P1_COLLECTION_PANEL_LIMIT}
       className="px-1 py-1"
       estimateSize={84}

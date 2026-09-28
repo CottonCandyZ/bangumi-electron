@@ -1,3 +1,4 @@
+import { ListLocateButton } from '@renderer/components/virtual/list-locate-context'
 import { MyLink } from '@renderer/components/my-link'
 import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
 import {
@@ -179,6 +180,7 @@ function MonoListPanelMeta({
               <span className="text-muted-foreground ml-1 text-xs font-normal">{count}</span>
             )}
           </div>
+          <ListLocateButton />
           {activeRefreshAction && (
             <QueryRefreshButton
               className="text-muted-foreground hover:text-foreground size-6 [&>span]:text-sm"

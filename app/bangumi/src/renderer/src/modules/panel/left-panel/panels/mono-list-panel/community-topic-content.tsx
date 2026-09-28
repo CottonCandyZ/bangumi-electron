@@ -143,6 +143,7 @@ function CommunityTopicsVirtualList({
         <CommunityTopicPanelItem fixedLeadingKind={fixedLeadingKind} topic={topic} />
       )}
       activeIndex={centerActiveItem ? activeIndex : undefined}
+      locateIndex={activeIndex}
       empty={<div className="text-muted-foreground p-4 text-sm">没有讨论。</div>}
       rootClassName="flex-1"
       className="px-2 py-2"

@@ -73,6 +73,7 @@ export function SubjectRecommendationsListPanelContent({
       </MonoListPanelFilters>
       <SingleColumnVirtualList
         activeIndex={centerActiveItem ? activeIndex : undefined}
+        locateIndex={activeIndex}
         appendPlaceholderCount={SUBJECT_RECOMMENDATIONS_PANEL_LIMIT}
         className="px-2 py-2"
         empty={<div className="text-muted-foreground p-4 text-sm">没有推荐条目。</div>}

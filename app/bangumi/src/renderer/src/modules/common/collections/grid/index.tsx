@@ -1,3 +1,4 @@
+import { useLocation } from 'react-router-dom'
 import { isNetworkUnavailableError } from '@renderer/lib/utils/network'
 import { useOnline } from '@renderer/hooks/use-online'
 import { useCollectionSyncOverview } from '@renderer/modules/common/collections/sync-dialog'
@@ -28,6 +29,7 @@ export function CollectionsGrid({
   username: string
   emptyContent?: ReactNode
 }) {
+  const { pathname } = useLocation()
   const online = useOnline()
   const listComplete = useCollectionSyncOverview((overview) => overview.listComplete).data
   const collectionsQuery = useInfinityQueryCollectionsByUsername({
@@ -118,6 +120,7 @@ export function CollectionsGrid({
 
   return (
     <SingleColumnVirtualList
+      locateIndex={items.findIndex(({ data }) => pathname === `/subject/${data.subject_id}`)}
       items={items}
       getKey={(item) => item.data.subject_id}
       renderItem={(item) => (

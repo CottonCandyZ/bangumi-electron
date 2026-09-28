@@ -81,6 +81,7 @@ export function MonoPanelInfiniteList({
       getKey={(item, index) => getReactNodeKey(item) ?? index}
       renderItem={(item) => item}
       activeIndex={centerActiveItem ? activeIndex : undefined}
+      locateIndex={activeIndex}
       rootClassName="flex-1"
       className="px-2 py-2"
       estimateSize={84}
