@@ -2,7 +2,6 @@
 import { APP_ID, URL_OAUTH_REDIRECT } from './base'
 import { CharacterId, PersonId, SubjectId } from '@renderer/data/types/bgm'
 import { UserInfo } from '@renderer/data/types/user'
-import { SectionPath } from '@renderer/data/types/web'
 import { getTimestamp } from '@renderer/lib/utils/date'
 
 /** 构建 Author 头 */
@@ -50,13 +49,11 @@ export const SUBJECTS = {
   CHARACTERS_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/characters`,
   PERSONS_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/persons`,
   RELATED_SUBJECT_BY_ID: (id: SubjectId) => `/v0/subjects/${id}/subjects`,
-  /** web 排行榜  exp https://bgm.tv/anime/browser/?sort=trends */
-  TRENDS: (sectionPath: SectionPath, page?: number) =>
-    `/${sectionPath}/browser/?sort=trends${page && page > 1 ? `&page=${page}` : ''}`,
 }
 
 /** Private API 条目 */
 export const NEXT_SUBJECTS = {
+  TRENDS: '/p1/trending/subjects',
   /** p1 条目吐槽箱 */
   COMMENTS_BY_ID: (id: SubjectId) => `/p1/subjects/${id}/comments`,
   /** p1 条目推荐 */

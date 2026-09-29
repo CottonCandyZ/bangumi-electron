@@ -16,7 +16,7 @@ import { type MonoListPanelTab } from '@renderer/state/panel'
 import { useAtomValue } from 'jotai'
 import { ChevronRight } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useTopListQuery } from '@renderer/data/hooks/web/subject'
+import { useTopListQuery } from '@renderer/data/hooks/trending-subjects'
 import { useSubjectsInfoQuery } from '@renderer/data/hooks/db/subject'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-button'
@@ -111,9 +111,7 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
           />
           <QueryRefreshButton
             className="text-muted-foreground hover:text-foreground size-7 [&_span]:text-sm"
-            label={
-              topList.requiresWebVerification ? `网页验证并刷新热门${name}` : `刷新热门${name}`
-            }
+            label={`刷新热门${name}`}
             onRefresh={topList.refetch}
             refreshing={topList.isRefreshing}
           />

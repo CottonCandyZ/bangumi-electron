@@ -1,33 +1,6 @@
-import { HTML_SUBJECTS, SUBJECTS, webFetch } from '@renderer/data/fetch/config/'
-import { queueWebTrends } from '@renderer/data/fetch/config/web-access'
+import { HTML_SUBJECTS, webFetch } from '@renderer/data/fetch/config/'
 import { SubjectId } from '@renderer/data/types/bgm'
-import type { SectionPath } from '@renderer/data/types/web'
 import { AuthError } from '@renderer/lib/utils/error'
-
-/**
- * 通用各分区首页 Fetch
- * @param sectionPath 各分区路径
- * @returns HTML
- */
-export async function fetchSectionHome({ sectionPath }: { sectionPath: SectionPath }) {
-  return await webFetch<string>(`/${sectionPath}`, {
-    parseResponse: (text) => text,
-  })
-}
-
-export async function fetchTrends({
-  page,
-  sectionPath,
-}: {
-  page?: number
-  sectionPath: SectionPath
-}) {
-  return queueWebTrends(() =>
-    webFetch<string>(SUBJECTS.TRENDS(sectionPath, page), {
-      parseResponse: (text) => text,
-    }),
-  )
-}
 
 export async function fetchSubjectInfoById({ subjectId }: { subjectId: SubjectId }) {
   const text = await webFetch<string>(HTML_SUBJECTS.BY_ID(subjectId.toString()), {
