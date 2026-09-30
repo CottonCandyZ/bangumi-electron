@@ -55,13 +55,15 @@ export function ProfileMenu({
           'text-muted-foreground hover:text-primary relative flex w-fit flex-row items-center gap-2 rounded-full shadow-xs transition-[transform,background-color,color] duration-150 active:scale-95 motion-reduce:transform-none motion-reduce:transition-none',
           !sidebar && type === 'expend' && 'group w-full min-w-0 border p-1.5 shadow-none',
           sidebar && 'w-full min-w-0 gap-0 overflow-hidden rounded-md shadow-none',
+          sidebar && type === 'small' && 'aspect-square justify-center',
+          sidebar && type === 'expend' && 'py-1.5',
           dropdownOpen && 'bg-accent text-primary',
         )}
       >
         <span
           className={cn(
             'flex shrink-0 items-center justify-center',
-            sidebar && 'w-[var(--nav-icon-column)]',
+            sidebar && type === 'expend' && 'w-[var(--nav-icon-column)]',
           )}
         >
           {isLogin ? (
@@ -73,13 +75,11 @@ export function ProfileMenu({
             <div className="bg-accent aspect-square w-7 shrink-0 overflow-hidden rounded-full" />
           )}
         </span>
-        {(sidebar || type === 'expend') && (
+        {type === 'expend' && (
           <span
-            aria-hidden={sidebar && type === 'small'}
             className={cn(
               'min-w-0 truncate text-xs font-medium',
               sidebar && 'transition-opacity duration-150 motion-reduce:transition-none',
-              sidebar && type === 'small' && 'opacity-0',
             )}
           >
             {isLogin && userInfo.nickname}

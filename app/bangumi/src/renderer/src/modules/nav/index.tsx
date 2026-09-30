@@ -8,11 +8,11 @@ import type { CSSProperties } from 'react'
 export function NavBar() {
   return (
     <nav
-      className="app-sidebar bg-background fixed z-50 flex cursor-default flex-col border-r select-none"
+      className="app-sidebar bg-background after:bg-border fixed z-50 flex cursor-default flex-col select-none after:pointer-events-none after:absolute after:inset-y-0 after:right-0 after:w-px"
       style={
         {
           width: UI_CONFIG.NAV_WIDTH,
-          '--nav-icon-column': `calc(${UI_CONFIG.NAV_WIDTH}px - 1px - var(--spacing) * 3)`,
+          '--nav-icon-column': `calc(${UI_CONFIG.NAV_WIDTH}px - var(--spacing) * 3)`,
           viewTransitionName: 'app-nav',
         } as CSSProperties
       }
