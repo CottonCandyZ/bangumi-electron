@@ -1,4 +1,3 @@
-import { getWindowSafeTop } from '@renderer/lib/window-safe-area'
 import { UI_CONFIG } from '@renderer/config'
 import { clamp } from '@renderer/lib/utils/tool'
 import { panelSize } from '@renderer/state/global-var'
@@ -39,7 +38,7 @@ export function calculatePopCardPosition(
 
   const viewportLeft = UI_CONFIG.NAV_WIDTH + marginLeft + panelSize.left_width
   const viewportRight = window.innerWidth - marginRight - panelSize.right_width
-  const viewportTop = getWindowSafeTop() + UI_CONFIG.HEADER_HEIGHT + marginTop
+  const viewportTop = UI_CONFIG.HEADER_HEIGHT + marginTop
   const viewportBottom = window.innerHeight - marginBottom
 
   left = clamp(left, viewportLeft, viewportRight - popWidth)
@@ -67,7 +66,7 @@ export function calculatePopSizePosition(
 
   const viewportLeft = UI_CONFIG.NAV_WIDTH + marginLeft + panelSize.left_width
   const viewportRight = window.innerWidth - marginRight - panelSize.right_width
-  const viewportTop = getWindowSafeTop() + UI_CONFIG.HEADER_HEIGHT + marginTop
+  const viewportTop = UI_CONFIG.HEADER_HEIGHT + marginTop
   const viewportBottom = window.innerHeight - marginBottom
 
   left = clamp(left, viewportLeft, viewportRight - pop.width)

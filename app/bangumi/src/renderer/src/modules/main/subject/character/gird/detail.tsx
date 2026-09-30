@@ -11,10 +11,7 @@ export function Detail({ characterId }: { characterId: CharacterId }) {
   }
   const renderSummery = renderBBCode(characterDetailData.summary)
   return characterDetailData.summary !== '' ? (
-    <div
-      className="bbcode max-h-56 min-h-8 overflow-x-hidden overflow-y-auto py-0.5 pr-2 whitespace-pre-line"
-      onClick={(event) => event.stopPropagation()}
-    >
+    <div className="bbcode max-h-56 min-h-8 overflow-x-hidden overflow-y-auto py-0.5 pr-2 whitespace-pre-line">
       {renderSummery}
     </div>
   ) : (

@@ -78,7 +78,8 @@ export function SubjectReviews({ subjectId }: { subjectId: SubjectId }) {
               {entry.summary && (
                 <div
                   inert
-                  className="bbcode text-muted-foreground mt-1 line-clamp-1 text-xs [&_p]:inline"
+                  // 单行摘要只保留文字，隐藏 bbcode 渲染出的图片（含外层预览容器）
+                  className="bbcode text-muted-foreground mt-1 line-clamp-1 text-xs [&_p]:inline [&_span:has(img)]:hidden"
                 >
                   {renderBBCode(entry.summary)}
                 </div>

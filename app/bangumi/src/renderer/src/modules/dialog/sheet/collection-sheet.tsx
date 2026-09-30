@@ -56,7 +56,7 @@ function Content({
   const saved = state.data?.local.collection ?? state.data?.retained
 
   return (
-    <SheetContent className="gap-0 p-0" style={{ width: 'min(92vw, 38rem)', maxWidth: '38rem' }}>
+    <SheetContent className="gap-0 p-0" style={{ width: 'min(92vw, 28rem)', maxWidth: '28rem' }}>
       <SheetHeader className="border-border/70 border-b px-5 py-4 pr-12 text-left">
         <SheetTitle className="text-base">{sheetTitle}</SheetTitle>
       </SheetHeader>

@@ -37,7 +37,7 @@ export function EpisodeToolbar({
   return (
     <div className="mb-3 flex min-h-9 flex-wrap items-center justify-between gap-2">
       <div className="flex items-center gap-1">
-        <h2 className="mr-1 text-2xl font-medium">章节</h2>
+        <h2 className="mr-1 text-base font-semibold">章节</h2>
         {episodeSortStart !== 1 && (
           <Tooltip delayDuration={300}>
             <TooltipTrigger asChild>

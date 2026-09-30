@@ -1,20 +1,37 @@
 import { Button } from '@renderer/components/ui/button'
 import { useCreateReplyMutation, useUpdateReplyMutation } from '@renderer/data/hooks/api/reply'
 import { client } from '@renderer/lib/client'
+import { cn } from '@renderer/lib/utils'
 import { markdownToBBCode } from '@renderer/lib/utils/markdown-bbcode'
 import { MarkdownReplyEditor } from '@renderer/modules/reply-composer/markdown-reply-editor'
-import { ReplyPreview } from '@renderer/modules/reply-composer/reply-preview'
+import { mainContainerRight } from '@renderer/state/main-bounding-box'
 import { closeReplyComposerAtomAction, replyComposerAtom } from '@renderer/state/panel'
 import { getReplyTargetLabel } from '@shared/reply'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { Loader2, Save, Send, X, ExternalLink, PanelRight } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import {
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Loader2,
+  PictureInPicture2,
+  Save,
+  Send,
+  X,
+} from 'lucide-react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { toast } from 'sonner'
 
+/**
+ * 回复编辑器。
+ * - 主窗口内：悬浮在主内容区右下角的卡片，可最小化，写的时候仍能浏览评论区；
+ * - detached：独立回复窗口，铺满整个窗口。
+ */
 export function ReplyComposer({ detached = false }: { detached?: boolean }) {
   const state = useAtomValue(replyComposerAtom)
   const closeReplyComposer = useSetAtom(closeReplyComposerAtomAction)
+  const mainRight = useAtomValue(mainContainerRight)
   const [draft, setDraft] = useState('')
+  const [minimized, setMinimized] = useState(false)
   const [transferring, setTransferring] = useState(false)
   const [sending, setSending] = useState(false)
   const createMutation = useCreateReplyMutation()
@@ -24,7 +41,7 @@ export function ReplyComposer({ detached = false }: { detached?: boolean }) {
   const submitting = createMutation.isPending || updateMutation.isPending || transferring || sending
   const bbcode = useMemo(() => markdownToBBCode(draft), [draft])
   const replyContext = content?.replyToName
-    ? ['回复', content.replyToName, content.replyToFloor].filter(Boolean).join(' · ')
+    ? [content.replyToName, content.replyToFloor].filter(Boolean).join(' · ')
     : content
       ? getReplyTargetLabel(content.target)
       : ''
@@ -32,7 +49,8 @@ export function ReplyComposer({ detached = false }: { detached?: boolean }) {
   useEffect(() => {
     if (!state.open) return
     setDraft(content?.draft ?? '')
-  }, [content?.draft, state.open])
+    setMinimized(false)
+  }, [content, state.open])
 
   const close = () => {
     if (submitting) return
@@ -97,80 +115,143 @@ export function ReplyComposer({ detached = false }: { detached?: boolean }) {
 
   if (!state.open || !content) return null
 
+  const title = isEditing ? '编辑' : '回复'
+
   return (
-    <aside
+    <section
       aria-labelledby="reply-composer-title"
-      className="bg-background flex h-full min-w-0 flex-col"
-      role="complementary"
+      className={cn(
+        'bg-background flex min-w-0 flex-col',
+        detached
+          ? 'h-full'
+          : 'fixed right-6 bottom-6 z-40 w-[32rem] max-w-[calc(100vw-3rem)] overflow-hidden rounded-xl border shadow-2xl',
+      )}
+      onKeyDown={(event) => {
+        if (
+          event.key === 'Enter' &&
+          (event.ctrlKey || event.metaKey) &&
+          !event.nativeEvent.isComposing
+        ) {
+          event.preventDefault()
+          void submit()
+        }
+      }}
+      role="dialog"
+      style={
+        detached
+          ? undefined
+          : {
+              height: minimized ? undefined : 'min(26rem, calc(100vh - 8rem))',
+              right: mainRight > 0 ? `calc(100vw - ${mainRight}px + 1.5rem)` : undefined,
+            }
+      }
     >
-      <header className="drag-region flex h-14 shrink-0 flex-row items-center justify-between gap-3 border-b px-3">
-        <div className="min-w-0">
-          <h2 id="reply-composer-title" className="text-foreground font-semibold">
-            {isEditing ? '编辑' : '回复'}
+      <header
+        className={cn(
+          'flex shrink-0 flex-row items-center gap-2 px-3',
+          detached ? 'drag-region h-12 border-b' : 'h-11',
+          !detached && !minimized && 'border-b',
+        )}
+      >
+        <button
+          type="button"
+          className="no-drag-region flex min-w-0 flex-1 flex-row items-baseline gap-2 text-left"
+          disabled={detached}
+          onClick={() => setMinimized((value) => !value)}
+        >
+          <h2 id="reply-composer-title" className="shrink-0 text-sm font-semibold">
+            {title}
           </h2>
-          <p className="text-muted-foreground mt-0.5 line-clamp-1 text-xs">{replyContext}</p>
-        </div>
-        <div className="flex items-center gap-1">
-          <Button
-            aria-label={detached ? '收回侧边栏' : '弹出独立窗口'}
-            title={detached ? '收回侧边栏' : '弹出独立窗口'}
-            className="no-drag-region size-8 shrink-0"
+          <span className="text-muted-foreground truncate text-xs">{replyContext}</span>
+        </button>
+        <div className="flex shrink-0 items-center gap-0.5">
+          {!detached && (
+            <HeaderIconButton
+              label={minimized ? '展开' : '最小化'}
+              onClick={() => setMinimized((value) => !value)}
+            >
+              {minimized ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+            </HeaderIconButton>
+          )}
+          <HeaderIconButton
             disabled={submitting}
+            label={detached ? '收回到主窗口' : '弹出独立窗口'}
             onClick={() => void transfer()}
-            size="icon"
-            variant="ghost"
           >
-            {detached ? <PanelRight className="size-4" /> : <ExternalLink className="size-4" />}
-          </Button>
-          <Button
-            aria-label={isEditing ? '关闭编辑' : '关闭回复'}
-            className="no-drag-region -mr-1 size-8 shrink-0"
+            {detached ? (
+              <PictureInPicture2 className="size-4" />
+            ) : (
+              <ExternalLink className="size-4" />
+            )}
+          </HeaderIconButton>
+          <HeaderIconButton
             disabled={submitting}
+            label={isEditing ? '关闭编辑' : '关闭回复'}
             onClick={close}
-            size="icon"
-            type="button"
-            variant="ghost"
           >
             <X className="size-4" />
-          </Button>
+          </HeaderIconButton>
         </div>
       </header>
-      <div className="flex min-h-0 flex-1 flex-col gap-3 px-3 py-3">
-        <section className="flex min-h-0 flex-[0.8] flex-col gap-2">
-          <h3 className="text-muted-foreground shrink-0 text-xs font-medium">预览</h3>
-          <ReplyPreview className="min-h-0 flex-1" value={draft} />
-        </section>
-        <section className="flex min-h-0 flex-[1.2] flex-col gap-2">
-          <h3 className="text-muted-foreground shrink-0 text-xs font-medium">编辑</h3>
-          <MarkdownReplyEditor
-            className="min-h-0 flex-1"
-            disabled={submitting}
-            value={draft}
-            onChange={(value) => {
-              setDraft(value)
-              if (detached)
-                void client.updateReplyWindowDraft({ draft: value }).catch(() => {
-                  toast.error('草稿暂存失败，请先收回侧边栏')
-                })
-            }}
-          />
-        </section>
-      </div>
-      <footer className="flex shrink-0 flex-row justify-end gap-2 border-t px-3 py-3">
-        <Button variant="outline" onClick={close} disabled={submitting}>
-          {detached ? '关闭' : '取消'}
-        </Button>
-        <Button onClick={submit} disabled={submitting}>
-          {submitting ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : isEditing ? (
-            <Save className="size-4" />
-          ) : (
-            <Send className="size-4" />
-          )}
-          {isEditing ? '保存' : '发送'}
-        </Button>
-      </footer>
-    </aside>
+      {!minimized && (
+        <MarkdownReplyEditor
+          className="min-h-0 flex-1"
+          disabled={submitting}
+          value={draft}
+          onChange={(value) => {
+            setDraft(value)
+            if (detached)
+              void client.updateReplyWindowDraft({ draft: value }).catch(() => {
+                toast.error('草稿暂存失败，请先收回到主窗口')
+              })
+          }}
+          footerEnd={
+            <Button
+              className="h-7 gap-1.5 px-3 text-xs"
+              disabled={submitting}
+              onClick={() => void submit()}
+              title="Ctrl / ⌘ + Enter"
+              size="sm"
+            >
+              {submitting ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : isEditing ? (
+                <Save className="size-3.5" />
+              ) : (
+                <Send className="size-3.5" />
+              )}
+              {isEditing ? '保存' : '发送'}
+            </Button>
+          }
+        />
+      )}
+    </section>
+  )
+}
+
+function HeaderIconButton({
+  children,
+  disabled,
+  label,
+  onClick,
+}: {
+  children: ReactNode
+  disabled?: boolean
+  label: string
+  onClick: () => void
+}) {
+  return (
+    <Button
+      aria-label={label}
+      className="no-drag-region text-muted-foreground hover:text-foreground size-7"
+      disabled={disabled}
+      onClick={onClick}
+      size="icon"
+      title={label}
+      type="button"
+      variant="ghost"
+    >
+      {children}
+    </Button>
   )
 }

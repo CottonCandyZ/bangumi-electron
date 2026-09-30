@@ -1,10 +1,10 @@
 import { TagInput } from '@renderer/modules/common/collections/modify/tags/tags-input'
-import { Button } from '@renderer/components/ui/button'
 import { CollectionData } from '@renderer/data/types/collection'
 import { Subject } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 import { Tags } from '@renderer/modules/main/subject/tags/tags'
 import { ScrollFade } from '@renderer/components/scroll-fade'
+import { INPUT_LIMIT_CONFIG } from '@renderer/config'
 
 export function FormTags({
   subjectTags,
@@ -23,10 +23,10 @@ export function FormTags({
     updater(next)
     onTagsChanges(next)
   }
-  const exceed = tags.size > 10
+  const exceed = tags.size > INPUT_LIMIT_CONFIG.tags_max_length_limit
   return (
     <div className="flex min-w-0 flex-col gap-3">
-      <ScrollFade className="max-h-44 pr-2 [scrollbar-gutter:stable]" label="可选收藏标签">
+      <ScrollFade className="max-h-[16.75rem] pr-2 [scrollbar-gutter:stable]" label="可选收藏标签">
         <Tags
           subjectTags={subjectTags}
           collectionTags={collectionTags}
@@ -40,41 +40,39 @@ export function FormTags({
           edit
         />
       </ScrollFade>
-      <div className="border-border/70 flex w-full flex-col items-start gap-2 rounded-md border p-2.5 text-sm transition-colors">
-        <TagInput
-          tags={[...tags]}
-          add={(value) =>
-            updateTags((next) => {
-              const trimmed = value.trim()
-              if (trimmed) next.add(trimmed)
-            })
-          }
-          remove={(value) => {
-            updateTags((next) => next.delete(value))
-          }}
-        />
-        <div className="flex w-full flex-row items-center justify-between gap-2">
-          <div className="text-muted-foreground">
-            已选{' '}
-            <span
-              className={cn(
-                'text-foreground font-medium tabular-nums',
-                exceed && 'text-destructive',
-              )}
+      <div
+        className={cn(
+          'border-input focus-within:ring-ring flex w-full flex-row items-end gap-2 rounded-md border px-2 py-1.5 text-sm transition-colors focus-within:ring-1',
+          exceed && 'border-destructive',
+        )}
+      >
+        <div className="min-w-0 flex-1">
+          <TagInput
+            tags={[...tags]}
+            add={(value) =>
+              updateTags((next) => {
+                const trimmed = value.trim()
+                if (trimmed) next.add(trimmed)
+              })
+            }
+            remove={(value) => {
+              updateTags((next) => next.delete(value))
+            }}
+          />
+        </div>
+        <div className="flex h-8 shrink-0 flex-row items-center gap-2 pr-1 text-xs">
+          {tags.size > 0 && (
+            <button
+              type="button"
+              onClick={() => onTagsChanges(new Set())}
+              className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              {tags.size}
-            </span>{' '}
-            个
-          </div>
-          <Button
-            className="h-8 px-2 text-xs"
-            disabled={tags.size === 0}
-            onClick={() => onTagsChanges(new Set())}
-            type="button"
-            variant="ghost"
-          >
-            清除
-          </Button>
+              清除
+            </button>
+          )}
+          <span className={cn('text-muted-foreground tabular-nums', exceed && 'text-destructive')}>
+            {tags.size}/{INPUT_LIMIT_CONFIG.tags_max_length_limit}
+          </span>
         </div>
       </div>
     </div>

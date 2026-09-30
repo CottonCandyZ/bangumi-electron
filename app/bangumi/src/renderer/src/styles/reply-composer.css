@@ -63,3 +63,85 @@
 .reply-md-editor .cm-editor.cm-focused .cm-cursor {
   border-left-color: var(--foreground);
 }
+
+/* 实时渲染（live preview）装饰 */
+.reply-md-editor .cm-lp-strong {
+  font-weight: 700;
+}
+
+.reply-md-editor .cm-lp-em {
+  font-style: italic;
+}
+
+.reply-md-editor .cm-lp-strike {
+  text-decoration: line-through;
+}
+
+.reply-md-editor .cm-lp-underline {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.reply-md-editor .cm-lp-mask {
+  border-radius: 3px;
+  background-color: color-mix(in oklch, var(--foreground) 82%, transparent);
+  color: var(--background);
+  padding: 0 2px;
+}
+
+.reply-md-editor .cm-lp-code {
+  border-radius: 4px;
+  background-color: var(--muted);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.85em;
+  padding: 1px 4px;
+}
+
+.reply-md-editor .cm-lp-codeblock {
+  background-color: var(--muted);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.85em;
+}
+
+.reply-md-editor .cm-lp-link {
+  color: var(--color-blue-600, #2563eb);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.reply-md-editor .cm-lp-quote {
+  border-left: 3px solid var(--border);
+  color: var(--muted-foreground);
+  padding-left: 0.75rem !important;
+}
+
+.reply-md-editor .cm-lp-h1 {
+  font-size: 1.4em;
+  font-weight: 700;
+}
+
+.reply-md-editor .cm-lp-h2 {
+  font-size: 1.25em;
+  font-weight: 700;
+}
+
+.reply-md-editor .cm-lp-h3,
+.reply-md-editor .cm-lp-h4,
+.reply-md-editor .cm-lp-h5,
+.reply-md-editor .cm-lp-h6 {
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.reply-md-editor .cm-lp-smile {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.reply-md-editor .cm-lp-image {
+  display: inline-block;
+  max-height: 10rem;
+  max-width: 100%;
+  border-radius: 6px;
+  vertical-align: bottom;
+}

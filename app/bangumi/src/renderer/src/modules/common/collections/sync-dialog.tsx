@@ -10,7 +10,7 @@ import { currentCollectionUser, submitCollection } from '@renderer/data/collecti
 import { getAccessToken } from '@renderer/data/fetch/session'
 import type { CollectionFields, LocalCollectionRecord, SyncOverview } from '@shared/collection-sync'
 import { toast } from 'sonner'
-import { RefreshCw } from 'lucide-react'
+import { RotateCw } from 'lucide-react'
 import { SyncActivity, SyncCoverage, SyncRecent, SyncSummary } from './sync-progress'
 import { collectionSyncIndicator } from './sync-indicator'
 
@@ -336,7 +336,7 @@ export function CollectionSyncButton() {
       aria-busy={sync?.running}
       onClick={() => open(true)}
     >
-      <RefreshCw className={`size-4 ${sync?.running ? 'animate-spin' : ''}`} />
+      <RotateCw className={`size-[15px] ${sync?.running ? 'animate-spin' : ''}`} />
       {indicator.badge !== null && (
         <span className="bg-muted text-muted-foreground absolute -top-0.5 -right-0.5 min-w-3.5 rounded-full px-0.5 text-[9px]">
           {indicator.badge}

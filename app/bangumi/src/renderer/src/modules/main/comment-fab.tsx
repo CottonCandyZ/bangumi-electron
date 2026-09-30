@@ -1,6 +1,7 @@
 import { Button } from '@renderer/components/ui/button'
 import { useOpenReplyComposer } from '@renderer/modules/reply-composer/use-open-reply-composer'
 import { mainContainerRight } from '@renderer/state/main-bounding-box'
+import { replyComposerAtom } from '@renderer/state/panel'
 import type { ReplyTarget } from '@shared/reply'
 import { useAtomValue } from 'jotai'
 import { MessageCircle } from 'lucide-react'
@@ -11,6 +12,10 @@ const COMMENT_FAB_CLASS_NAME =
 export function MainCommentFab({ replyTarget }: { replyTarget: ReplyTarget }) {
   const openReplyComposer = useOpenReplyComposer()
   const mainRight = useAtomValue(mainContainerRight)
+  // 悬浮回复框占据同一个角落，打开时隐藏
+  const composerOpen = useAtomValue(replyComposerAtom).open
+
+  if (composerOpen) return null
 
   return (
     <Button

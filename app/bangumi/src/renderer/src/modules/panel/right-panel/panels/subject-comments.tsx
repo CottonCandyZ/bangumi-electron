@@ -69,9 +69,11 @@ export function SubjectCommentsPanel({
         title={null}
         className="h-full min-h-0"
         contentClassName="min-h-0 flex-1"
-        listClassName="h-full max-h-none p-panel"
+        // 气泡样式没有卡片内边距，右侧留出滚动条的位置
+        listClassName="h-full max-h-none p-panel pr-4"
         comments={comments}
         compact
+        itemVariant="bubble"
         error={commentsQuery.isError}
         emptyText="还没有吐槽。"
         floorNumbers={floorNumbers}

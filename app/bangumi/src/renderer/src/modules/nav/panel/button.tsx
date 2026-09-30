@@ -1,4 +1,4 @@
-import { NavItemContent } from '@renderer/modules/nav/item-content'
+import { NavItemContent, NavTooltip } from '@renderer/modules/nav/item-content'
 import { route } from '@renderer/modules/nav/panel/nav'
 import { Button } from '@renderer/components/ui/button'
 import {
@@ -10,7 +10,7 @@ import {
 } from '@renderer/components/ui/dropdown-menu'
 import type { CollectionPanelResourceType } from '@renderer/state/collection'
 import { cn } from '@renderer/lib/utils'
-import { navOpenAtom, nvaCollectionButtonAtomAction } from '@renderer/state/panel'
+import { nvaCollectionButtonAtomAction } from '@renderer/state/panel'
 import { useAtom } from 'jotai'
 import { MoreHorizontalIcon } from 'lucide-react'
 import { startTransition } from 'react'
@@ -35,33 +35,29 @@ export function PanelButton({ name, panelName, icon, active }: Props) {
     panelState.subjectType === panelName &&
     !panelState.username &&
     panelState.resourceType === 'subject'
-  const [navOpen, setNavOpen] = useAtom(navOpenAtom)
-
   return (
-    <Button
-      variant="ghost"
-      aria-label={name}
-      className={cn(
-        'text-primary/65 hover:text-primary relative h-8 w-full shrink-0 justify-start gap-0 overflow-hidden px-0 py-1.5 text-xs',
-        isActive && 'bg-accent text-primary',
-      )}
-      onClick={() => {
-        startTransition(() => {
-          if (navOpen) setNavOpen(false)
-          setPanelState(panelName, !isActive, undefined, 'subject')
-        })
-      }}
-    >
-      <>
-        <NavItemContent icon={isActive ? active : icon} label={name} open={navOpen} />
-      </>
-    </Button>
+    <NavTooltip label={name}>
+      <Button
+        variant="ghost"
+        aria-label={name}
+        className={cn(
+          'text-primary/65 hover:text-primary relative h-8 w-full shrink-0 justify-start gap-0 overflow-hidden px-0 py-1.5 text-xs',
+          isActive && 'bg-accent text-primary',
+        )}
+        onClick={() => {
+          startTransition(() => {
+            setPanelState(panelName, !isActive, undefined, 'subject')
+          })
+        }}
+      >
+        <NavItemContent icon={isActive ? active : icon} />
+      </Button>
+    </NavTooltip>
   )
 }
 
 export function CollectionResourceMenuButton() {
   const [panelState, setPanelState] = useAtom(nvaCollectionButtonAtomAction)
-  const [navOpen, setNavOpen] = useAtom(navOpenAtom)
   const activeResource = EXTRA_COLLECTION_RESOURCES.find(
     (item) =>
       panelState.openState &&
@@ -72,22 +68,20 @@ export function CollectionResourceMenuButton() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          aria-label={activeResource?.name ?? '更多收藏'}
-          variant="ghost"
-          className={cn(
-            'text-primary/65 hover:text-primary relative h-8 w-full shrink-0 justify-start gap-0 overflow-hidden px-0 py-1.5 text-xs',
-            activeResource && 'bg-accent text-primary',
-          )}
-        >
-          <NavItemContent
-            icon={<MoreHorizontalIcon className="ui-icon-nav" />}
-            label={activeResource?.name ?? '更多收藏'}
-            open={navOpen}
-          />
-        </Button>
-      </DropdownMenuTrigger>
+      <NavTooltip label={activeResource?.name ?? '更多收藏'}>
+        <DropdownMenuTrigger asChild>
+          <Button
+            aria-label={activeResource?.name ?? '更多收藏'}
+            variant="ghost"
+            className={cn(
+              'text-primary/65 hover:text-primary relative h-8 w-full shrink-0 justify-start gap-0 overflow-hidden px-0 py-1.5 text-xs',
+              activeResource && 'bg-accent text-primary',
+            )}
+          >
+            <NavItemContent icon={<MoreHorizontalIcon className="ui-icon-nav" />} />
+          </Button>
+        </DropdownMenuTrigger>
+      </NavTooltip>
       <DropdownMenuContent align="start" className="w-36" side="right">
         <DropdownMenuRadioGroup
           value={activeResource?.value}
@@ -100,7 +94,6 @@ export function CollectionResourceMenuButton() {
               panelState.resourceType === resourceType
 
             startTransition(() => {
-              if (navOpen) setNavOpen(false)
               setPanelState(panelState.subjectType, !isActive, undefined, resourceType)
             })
           }}

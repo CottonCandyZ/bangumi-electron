@@ -1,4 +1,7 @@
-import { SubjectCollectionSelectorContent } from '@renderer/modules/common/collections/subject-select-content'
+import {
+  CollectionStatusDot,
+  SubjectCollectionSelectorContent,
+} from '@renderer/modules/common/collections/subject-select-content'
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { useSessionUsername } from '@renderer/data/hooks/session'
 import { CollectionData, CollectionType } from '@renderer/data/types/collection'
@@ -37,9 +40,15 @@ export function SubjectCollectionSelector({
         })
       }}
     >
-      <SelectTrigger className="bg-background w-fit font-medium">
+      <SelectTrigger
+        size="sm"
+        className="hover:bg-accent data-popup-open:bg-accent -ml-2 w-fit gap-1 border-none bg-transparent px-2 text-sm font-semibold shadow-none dark:bg-transparent"
+      >
         <SelectValue>
-          {COLLECTION_TYPE_MAP(subjectCollection.subject_type)[subjectCollection.type]}
+          <span className="flex items-center gap-2">
+            <CollectionStatusDot type={subjectCollection.type} />
+            {COLLECTION_TYPE_MAP(subjectCollection.subject_type)[subjectCollection.type]}
+          </span>
         </SelectValue>
       </SelectTrigger>
       <SubjectCollectionSelectorContent subjectType={subjectCollection.subject_type} />

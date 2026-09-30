@@ -84,6 +84,8 @@ async function exercise(importModule, kind, controlled) {
   try {
     ReactDOM.flushSync(() => root.render(h(Fixture)))
     await wait(200)
+    const captionBottom = navigator.windowControlsOverlay?.getTitlebarAreaRect().bottom || 0
+    const captionSafe = popup().getBoundingClientRect().top >= captionBottom
     cancelClose = true
     close()
     const canceled = popup()?.textContent
@@ -100,10 +102,19 @@ async function exercise(importModule, kind, controlled) {
       render({ open: false, text: null })
       const secondExit = popup()?.textContent
       await wait(250)
-      return { canceled, closing, duringExit, reopened, secondExit, removed: !popup(), completed }
+      return {
+        canceled,
+        closing,
+        duringExit,
+        reopened,
+        secondExit,
+        removed: !popup(),
+        completed,
+        captionSafe,
+      }
     }
     await wait(250)
-    return { canceled, closing, duringExit, removed: !popup(), completed }
+    return { canceled, closing, duringExit, removed: !popup(), completed, captionSafe }
   } finally {
     ReactDOM.flushSync(() => root.unmount())
     host.remove()
@@ -131,6 +142,7 @@ test.each(['dialog', 'alert-dialog', 'sheet'])(
         `(${exercise.toString()})(path => import(path), ${JSON.stringify(kind)}, ${controlled})`,
       )
       expect(result.canceled).toContain('original content')
+      expect(result.captionSafe, 'Popup controls must stay below native caption buttons').toBe(true)
       expect(result.closing).toContain('original content')
       expect(result.duringExit).toContain('original content')
       if (controlled) {

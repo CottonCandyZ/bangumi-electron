@@ -13,6 +13,7 @@ import { store } from '@renderer/state/utils'
 import { openReplyComposerAtomAction } from '@renderer/state/panel'
 import { queryClient } from '@renderer/modules/wrapper/query'
 import { getReplyInvalidationKeys } from '@renderer/data/hooks/api/reply'
+import { ReplyComposer } from '@renderer/modules/reply-composer/reply-composer'
 
 function RootLayout() {
   const navigate = useNavigate()
@@ -55,6 +56,7 @@ function RootLayout() {
           </div>
           <BackCover />
         </div>
+        <ReplyComposer />
       </div>
     </WindowFrame>
   )

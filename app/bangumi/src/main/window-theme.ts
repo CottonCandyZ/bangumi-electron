@@ -5,9 +5,12 @@ import { isWindows } from './env'
 type ThemeSource = 'light' | 'dark' | 'system'
 const key = 'windowThemeSource'
 
+// 原生标题栏按钮直接放进应用顶部栏，高度与 UI_CONFIG.HEADER_HEIGHT 保持一致
+const WINDOW_TITLE_BAR_OVERLAY_HEIGHT = 44
+
 export function getWindowTitleBarOverlay() {
   return {
-    height: 32,
+    height: WINDOW_TITLE_BAR_OVERLAY_HEIGHT,
     // Let the Mica surface show through, instead of Windows' fixed light button face.
     color: '#00000000',
     symbolColor: nativeTheme.shouldUseDarkColors ? '#ffffff' : '#000000',

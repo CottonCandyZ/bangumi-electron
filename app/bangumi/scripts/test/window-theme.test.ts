@@ -57,7 +57,7 @@ test('updates existing caption controls for system theme changes and cleans up c
   }
   syncWindowTitleBarTheme(window as unknown as BrowserWindow)
   expect(window.setTitleBarOverlay).toHaveBeenLastCalledWith({
-    height: 32,
+    height: 44,
     color: '#00000000',
     symbolColor: '#000000',
   })
@@ -65,7 +65,7 @@ test('updates existing caption controls for system theme changes and cleans up c
   state.theme.shouldUseDarkColors = true
   update()
   expect(window.setTitleBarOverlay).toHaveBeenLastCalledWith({
-    height: 32,
+    height: 44,
     color: '#00000000',
     symbolColor: '#ffffff',
   })
@@ -80,7 +80,7 @@ test('updates existing caption controls for system theme changes and cleans up c
 test('initial dark caption controls are configured before showing the window', () => {
   state.theme.shouldUseDarkColors = true
   expect(getWindowTitleBarOverlay()).toEqual({
-    height: 32,
+    height: 44,
     color: '#00000000',
     symbolColor: '#ffffff',
   })

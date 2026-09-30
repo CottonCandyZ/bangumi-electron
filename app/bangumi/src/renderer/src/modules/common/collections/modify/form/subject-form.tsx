@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { Radio } from '@base-ui/react/radio'
+import { RadioGroup } from '@base-ui/react/radio-group'
 import { RateButtons } from '@renderer/modules/common/collections/rate'
-import { SubjectCollectionSelectorContent } from '@renderer/modules/common/collections/subject-select-content'
 import { Button } from '@renderer/components/ui/button'
 import {
   Form,
@@ -11,8 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@renderer/components/ui/form'
-import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
-import { Switch } from '@renderer/components/ui/switch'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { INPUT_LIMIT_CONFIG } from '@renderer/config'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
@@ -107,26 +107,38 @@ export function AddOrModifySubjectCollectionForm({
   return (
     <Form {...form}>
       <form className="flex min-h-full flex-col" onSubmit={form.handleSubmit(onSubmit)}>
-        <div className="flex flex-1 flex-col">
-          <CollectionFormSection title="收藏状态">
-            <div className="space-y-3">
+        <div className="flex flex-1 flex-col gap-7 px-5 py-5">
+          <CollectionFormSection>
+            <div className="flex flex-row items-center justify-between gap-2">
               <FormField
                 control={form.control}
                 name="collectionType"
                 render={({ field }) => (
-                  <FormItem className="grid grid-cols-[4rem_auto] items-center justify-start space-y-0 gap-x-3 gap-y-1">
-                    <FormLabel>标记为</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(Number(value))}
-                      value={field.value.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="w-40 shadow-none">
-                          <SelectValue>{COLLECTION_TYPE_MAP(subjectType)[field.value]}</SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SubjectCollectionSelectorContent subjectType={subjectType} />
-                    </Select>
+                  <FormItem className="space-y-0">
+                    <FormLabel className="sr-only">收藏状态</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        aria-label="收藏状态"
+                        className="bg-muted inline-flex flex-row gap-0.5 rounded-md p-0.5"
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        {COLLECTION_TYPES.map((type) => (
+                          <Radio.Root
+                            key={type}
+                            value={type}
+                            nativeButton
+                            render={<button type="button" />}
+                            className={cn(
+                              'text-muted-foreground hover:text-foreground h-7 rounded-[5px] px-3 text-xs font-medium transition-colors',
+                              field.value === type && 'bg-background text-foreground shadow-sm',
+                            )}
+                          >
+                            {COLLECTION_TYPE_MAP(subjectType)[type]}
+                          </Radio.Root>
+                        ))}
+                      </RadioGroup>
+                    </FormControl>
                   </FormItem>
                 )}
               />
@@ -134,23 +146,43 @@ export function AddOrModifySubjectCollectionForm({
                 control={form.control}
                 name="isPrivate"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between gap-4 space-y-0 border-t pt-3">
-                    <div className="space-y-0.5">
-                      <FormLabel className={cn(!field.value && 'text-muted-foreground')}>
-                        {field.value ? '私密收藏' : '设为私密'}
-                      </FormLabel>
-                      <FormDescription>仅自己可见</FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch checked={field.value} onCheckedChange={field.onChange} />
-                    </FormControl>
+                  <FormItem className="space-y-0">
+                    <FormLabel className="sr-only">私密收藏</FormLabel>
+                    <Tooltip delayDuration={300}>
+                      <TooltipTrigger asChild>
+                        <FormControl>
+                          <button
+                            type="button"
+                            aria-label={field.value ? '私密收藏，点击公开' : '设为私密'}
+                            aria-pressed={field.value}
+                            onClick={() => field.onChange(!field.value)}
+                            className={cn(
+                              'hover:bg-accent flex h-8 flex-row items-center gap-1 rounded-md px-2 text-xs transition-colors',
+                              field.value
+                                ? 'text-primary'
+                                : 'text-muted-foreground hover:text-foreground',
+                            )}
+                          >
+                            <span
+                              className={
+                                field.value ? 'i-mingcute-lock-fill' : 'i-mingcute-unlock-line'
+                              }
+                            />
+                            {field.value && '私密'}
+                          </button>
+                        </FormControl>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom">
+                        {field.value ? '仅自己可见，点击公开' : '设为私密'}
+                      </TooltipContent>
+                    </Tooltip>
                   </FormItem>
                 )}
               />
             </div>
           </CollectionFormSection>
 
-          <CollectionFormSection title="评分">
+          <CollectionFormSection>
             <FormField
               control={form.control}
               name="rate"
@@ -165,7 +197,7 @@ export function AddOrModifySubjectCollectionForm({
             />
           </CollectionFormSection>
 
-          <CollectionFormSection title="收藏标签">
+          <CollectionFormSection>
             <FormField
               control={form.control}
               name="tags"
@@ -186,7 +218,7 @@ export function AddOrModifySubjectCollectionForm({
             />
           </CollectionFormSection>
 
-          <CollectionFormSection title="短评">
+          <CollectionFormSection>
             <FormField
               control={form.control}
               name="comment"
@@ -234,11 +266,10 @@ export function AddOrModifySubjectCollectionForm({
   )
 }
 
-function CollectionFormSection({ children, title }: PropsWithChildren<{ title: string }>) {
-  return (
-    <section className="space-y-3 border-b px-5 py-4 last:border-b-0">
-      <h3 className="text-sm font-medium">{title}</h3>
-      <div className="min-w-0">{children}</div>
-    </section>
-  )
+const COLLECTION_TYPES = Object.keys(CollectionType)
+  .slice(0, Object.keys(CollectionType).length / 2)
+  .map(Number) as CollectionType[]
+
+function CollectionFormSection({ children }: PropsWithChildren) {
+  return <section className="min-w-0">{children}</section>
 }

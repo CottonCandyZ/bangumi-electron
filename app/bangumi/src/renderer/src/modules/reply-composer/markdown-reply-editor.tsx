@@ -4,12 +4,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@renderer/components/u
 import { BangumiSmile, BANGUMI_SMILE_GROUPS } from '@renderer/components/comment/bangumi-smile'
 import { DYNAMIC_SMILE_GROUPS, DynamicSmile } from '@renderer/components/comment/dynamic-smile'
 import { cn } from '@renderer/lib/utils'
-import { markdown } from '@codemirror/lang-markdown'
+import { livePreview } from '@renderer/modules/reply-composer/live-preview'
+import { markdown, markdownLanguage } from '@codemirror/lang-markdown'
 import { languages } from '@codemirror/language-data'
 import { EditorView } from '@codemirror/view'
 import CodeMirror from '@uiw/react-codemirror'
+import { useAtom } from 'jotai'
+import { atomWithStorage } from 'jotai/utils'
 import {
   Bold,
+  Code,
   EyeOff,
   ImageIcon,
   Italic,
@@ -23,9 +27,14 @@ import {
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 
+/** 是否强制显示 Markdown 源码（关闭实时渲染），跨会话记忆 */
+const replyEditorSourceModeAtom = atomWithStorage('reply-editor-source-mode', false)
+
 type MarkdownReplyEditorProps = {
   className?: string
   disabled?: boolean
+  /** 渲染在底部工具栏右侧，例如发送按钮 */
+  footerEnd?: ReactNode
   onChange: (value: string) => void
   value: string
 }
@@ -33,14 +42,21 @@ type MarkdownReplyEditorProps = {
 export function MarkdownReplyEditor({
   className,
   disabled,
+  footerEnd,
   onChange,
   value,
 }: MarkdownReplyEditorProps) {
   const editorRef = useRef<EditorView | null>(null)
   const [emojiOpen, setEmojiOpen] = useState(false)
+  const [sourceMode, setSourceMode] = useAtom(replyEditorSourceModeAtom)
   const extensions = useMemo(
-    () => [markdown({ codeLanguages: languages }), EditorView.lineWrapping],
-    [],
+    () => [
+      // markdownLanguage 基于 GFM，支持 ~~删除线~~ 等语法
+      markdown({ base: markdownLanguage, codeLanguages: languages }),
+      EditorView.lineWrapping,
+      ...(sourceMode ? [] : [livePreview]),
+    ],
+    [sourceMode],
   )
   const replaceSelection = useCallback(
     (createText: (selected: string) => string) => {
@@ -112,13 +128,27 @@ export function MarkdownReplyEditor({
   )
 
   return (
-    <div
-      className={cn(
-        'reply-md-editor flex min-h-0 flex-col overflow-hidden rounded-md border',
-        className,
-      )}
-    >
-      <div className="bg-muted/20 flex shrink-0 flex-row flex-wrap items-center gap-0.5 border-b p-1">
+    <div className={cn('reply-md-editor flex min-h-0 flex-col overflow-hidden', className)}>
+      <CodeMirror
+        autoFocus
+        basicSetup={{
+          foldGutter: false,
+          highlightActiveLine: false,
+          highlightActiveLineGutter: false,
+          lineNumbers: false,
+        }}
+        className="min-h-0 flex-1"
+        editable={!disabled}
+        extensions={extensions}
+        onChange={onChange}
+        onCreateEditor={(view) => {
+          editorRef.current = view
+        }}
+        placeholder="写点什么… 支持 Markdown，也可以直接输入 [mask]、[color] 等 BBCode"
+        theme="none"
+        value={value}
+      />
+      <div className="flex shrink-0 flex-row flex-wrap items-center gap-0.5 border-t px-2 py-1.5">
         {actions.map((action) => (
           <EditorActionButton
             disabled={disabled}
@@ -220,25 +250,25 @@ export function MarkdownReplyEditor({
             </Tabs>
           </PopoverContent>
         </Popover>
+        <div className="ml-auto flex flex-row items-center gap-1.5">
+          <Button
+            aria-label={sourceMode ? '切换到实时渲染' : '切换到源码'}
+            aria-pressed={sourceMode}
+            className={cn(
+              'text-muted-foreground hover:text-foreground size-7 rounded-sm shadow-none',
+              sourceMode && 'bg-accent text-foreground',
+            )}
+            onClick={() => setSourceMode((value) => !value)}
+            size="icon"
+            title={sourceMode ? '切换到实时渲染' : '切换到源码'}
+            type="button"
+            variant="ghost"
+          >
+            <Code className="size-3.5" />
+          </Button>
+          {footerEnd}
+        </div>
       </div>
-      <CodeMirror
-        basicSetup={{
-          foldGutter: false,
-          highlightActiveLine: false,
-          highlightActiveLineGutter: false,
-          lineNumbers: false,
-        }}
-        className="min-h-0 flex-1"
-        editable={!disabled}
-        extensions={extensions}
-        onChange={onChange}
-        onCreateEditor={(view) => {
-          editorRef.current = view
-        }}
-        placeholder="使用 Markdown 编写回复，也可以直接输入 [color]、[mask] 等 BBCode 标签。"
-        theme="none"
-        value={value}
-      />
     </div>
   )
 }

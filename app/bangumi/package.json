@@ -55,6 +55,8 @@
     "test:watch": "node scripts/test.mjs"
   },
   "dependencies": {
+    "@codemirror/language": "6.12.3",
+    "@codemirror/state": "6.6.0",
     "@egoist/tipc": "^0.3.2",
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",

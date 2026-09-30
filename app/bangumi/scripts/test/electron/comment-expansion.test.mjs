@@ -52,7 +52,7 @@ async function mountFixture(kind, importModule) {
     ...base,
     id: index + 1,
     mainID: index + 1,
-    content: index === 0 ? longContent : `Comment ${index}`,
+    content: index === 0 ? longContent : index === 1 ? '' : `Comment ${index}`,
     replies:
       index === 0
         ? Array.from({ length: 5 }, (_, child) => ({
@@ -111,6 +111,7 @@ async function mountFixture(kind, importModule) {
             comments,
             virtual: true,
             userAvatarViewTransition: false,
+            reactionTarget: { id: fixtureId, type: 'episode' },
             scrollMemoryKey: `fixture:${id}`,
           })
         : kind === 'episode'
@@ -167,6 +168,14 @@ test.each(['group', 'subject', 'episode', 'list'])(
         '--fn',
         `!!document.querySelector('#comment-expansion-fixture [data-comment-id="1"] button[aria-label="展开评论"]')`,
       )
+      if (kind === 'list') {
+        expect(
+          evaluate(
+            '!!document.querySelector(\'#comment-expansion-fixture [data-comment-id="2"] button[aria-label="贴贴"]\')',
+          ),
+          'Empty comments retain their reaction action in bubble layout',
+        ).toBe(true)
+      }
       evaluate(`(() => {
       const row = document.querySelector('#comment-expansion-fixture [data-comment-id="1"]');
       const buttons = [...row.querySelectorAll('button[aria-label="展开评论"]')];

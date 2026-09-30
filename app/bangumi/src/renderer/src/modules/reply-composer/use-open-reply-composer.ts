@@ -13,7 +13,7 @@ export function useOpenReplyComposer() {
       void client
         .focusReplyWindow({})
         .then((focused) => {
-          if (focused) toast.info('已打开现有草稿，可收回侧边栏后继续')
+          if (focused) toast.info('已在独立窗口中打开现有草稿，可收回到主窗口后继续')
           else openReplyComposer(content)
         })
         .catch(() => openReplyComposer(content))

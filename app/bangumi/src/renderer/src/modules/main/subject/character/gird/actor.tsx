@@ -56,7 +56,7 @@ function ActorLink({
       state={{ viewTransitionName }}
       viewTransition
       className={cn(
-        'group/actor flex min-w-0 flex-row items-end gap-2 focus-visible:outline-hidden',
+        'group/actor flex min-w-0 cursor-default flex-row items-end gap-2 focus-visible:outline-hidden',
         showAll || !hasMoreActors ? 'max-w-full flex-none' : 'max-w-[calc(100%-2rem)] flex-none',
       )}
     >

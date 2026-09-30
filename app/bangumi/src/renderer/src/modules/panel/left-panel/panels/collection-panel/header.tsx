@@ -25,6 +25,8 @@ import {
   collectionPanelUsernameAtom,
   leftPanelOpenAtom,
 } from '@renderer/state/panel'
+import { cn } from '@renderer/lib/utils'
+import { LeftPanelHeaderPortal } from '@renderer/modules/panel/left-panel/header-portal'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { SettingsIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
@@ -53,85 +55,90 @@ export function CollectionPanelHeader() {
   const popupOpen = selectOpen || settingsOpen
 
   return (
-    <div
-      data-slot="collection-panel-header"
-      className={`${popupOpen ? 'no-drag-region' : 'drag-region'} h-panel-header flex shrink-0 flex-row items-center justify-between gap-2 border-b px-2`}
-    >
-      {(!!userInfo || !!panelUsername) && (
-        <>
-          <div className="flex min-w-0 flex-row items-center gap-2">
-            {resourceType === 'subject' ? (
-              <Select
-                open={selectOpen}
-                onOpenChange={setSelectOpen}
-                onValueChange={(value) =>
-                  setCurrentTypeFilter(subjectType.toString(), Number(value) as CollectionType)
-                }
-                value={currentSelect.toString()}
-              >
-                <SelectTrigger
-                  size="sm"
-                  className="no-drag-region w-fit justify-start px-2 text-xs data-[size=sm]:h-7 [&_svg]:size-3.5"
+    <LeftPanelHeaderPortal>
+      <div
+        data-slot="collection-panel-header"
+        className={cn(
+          popupOpen ? 'no-drag-region' : 'drag-region',
+          'flex h-full w-full min-w-0 flex-row items-center justify-between gap-2',
+        )}
+      >
+        {(!!userInfo || !!panelUsername) && (
+          <>
+            <div className="flex min-w-0 flex-row items-center gap-2">
+              {resourceType === 'subject' ? (
+                <Select
+                  open={selectOpen}
+                  onOpenChange={setSelectOpen}
+                  onValueChange={(value) =>
+                    setCurrentTypeFilter(subjectType.toString(), Number(value) as CollectionType)
+                  }
+                  value={currentSelect.toString()}
                 >
-                  <SelectValue>{COLLECTION_TYPE_MAP(subjectType)[currentSelect]}</SelectValue>
-                </SelectTrigger>
-                <SubjectCollectionSelectorContent subjectType={subjectType} />
-              </Select>
-            ) : (
-              <div className="text-foreground px-2 text-xs font-medium">
-                {getCollectionResourceLabel(resourceType)}
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-1">
-            <ListLocateButton />
-            {userInfo &&
-              (!panelUsername || panelUsername === userInfo.username) &&
-              resourceType === 'subject' && <CollectionSyncButton />}
-            {resourceType === 'subject' ? (
-              <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen}>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    aria-label="收藏显示设置"
-                    variant="ghost"
-                    size="icon"
-                    className="text-muted-foreground no-drag-region hover:text-foreground size-7"
+                  <SelectTrigger
+                    size="sm"
+                    className="no-drag-region w-fit justify-start px-2 text-xs data-[size=sm]:h-7 [&_svg]:size-3.5"
                   >
-                    <SettingsIcon className="size-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-44">
-                  <DropdownMenuCheckboxItem
-                    checked={showEpisodeList}
-                    onCheckedChange={(value) => setShowEpisodeList(value === true)}
-                    onSelect={(event) => event.preventDefault()}
-                  >
-                    显示章节列表
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={useOneBasedEpisodeSort}
-                    onCheckedChange={(value) => setUseOneBasedEpisodeSort(value === true)}
-                    onSelect={(event) => event.preventDefault()}
-                  >
-                    章节从 1 计数
-                  </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button
-                className="text-muted-foreground no-drag-region hover:text-foreground size-7"
-                onClick={() => setLeftPanelOpen(false)}
-                size="icon"
-                title="关闭收藏侧栏"
-                variant="ghost"
-              >
-                <XIcon className="size-4" />
-              </Button>
-            )}
-          </div>
-        </>
-      )}
-    </div>
+                    <SelectValue>{COLLECTION_TYPE_MAP(subjectType)[currentSelect]}</SelectValue>
+                  </SelectTrigger>
+                  <SubjectCollectionSelectorContent subjectType={subjectType} />
+                </Select>
+              ) : (
+                <div className="text-foreground px-2 text-xs font-medium">
+                  {getCollectionResourceLabel(resourceType)}
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              <ListLocateButton className="size-7 [&_svg]:size-4" />
+              {userInfo &&
+                (!panelUsername || panelUsername === userInfo.username) &&
+                resourceType === 'subject' && <CollectionSyncButton />}
+              {resourceType === 'subject' ? (
+                <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      aria-label="收藏显示设置"
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground no-drag-region hover:text-foreground size-7"
+                    >
+                      <SettingsIcon className="size-[15px]" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44">
+                    <DropdownMenuCheckboxItem
+                      checked={showEpisodeList}
+                      onCheckedChange={(value) => setShowEpisodeList(value === true)}
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      显示章节列表
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={useOneBasedEpisodeSort}
+                      onCheckedChange={(value) => setUseOneBasedEpisodeSort(value === true)}
+                      onSelect={(event) => event.preventDefault()}
+                    >
+                      章节从 1 计数
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button
+                  className="text-muted-foreground no-drag-region hover:text-foreground size-7"
+                  onClick={() => setLeftPanelOpen(false)}
+                  size="icon"
+                  title="关闭收藏侧栏"
+                  variant="ghost"
+                >
+                  <XIcon className="size-4" />
+                </Button>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </LeftPanelHeaderPortal>
   )
 }
 

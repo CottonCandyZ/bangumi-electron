@@ -65,6 +65,7 @@ export function AddSubjectCollection({
           <Button
             key={item}
             variant="outline"
+            size="sm"
             className={cn(
               'rounded-none border-l-0 px-2',
               Number(item) === 1 && 'rounded-l-md border-l',

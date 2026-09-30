@@ -47,15 +47,13 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
 
   const loading = subjectInfo === undefined || subjectCollection === undefined || !userInfo
   if (userInfo === null)
-    return <Button onClick={() => openLoginDialog({ open: true })}>登录</Button>
+    return (
+      <Button size="sm" onClick={() => openLoginDialog({ open: true })}>
+        登录
+      </Button>
+    )
   return (
     <div className="flex flex-col gap-2" ref={ref}>
-      <div className="flex flex-row items-center justify-between">
-        <h2 className="text-xl font-medium">收藏盒</h2>
-        {!loading && subjectCollection !== null && (
-          <PrivateSwitch subjectCollection={subjectCollection} />
-        )}
-      </div>
       {!online && subjectCollection === undefined ? (
         <p className="text-muted-foreground text-xs">暂无此条目的离线收藏信息，请联网后同步。</p>
       ) : subjectCollectionQuery.isError &&
@@ -64,18 +62,22 @@ export function SubjectCollection({ subjectId }: { subjectId: SubjectId }) {
         <p className="text-muted-foreground text-sm">暂时无法确认收藏状态，请稍后重试</p>
       ) : loading ? (
         <div className="flex flex-col gap-2">
-          <Skeleton className="h-9 w-full" />
-          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-10 w-full" />
         </div>
       ) : subjectCollection !== null ? (
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-row items-center gap-2">
+        <div className="flex flex-col gap-3">
+          {/* 与左侧「章节」标题行同高，保证两列首行垂直居中对齐 */}
+          <div className="flex min-h-9 flex-row items-center gap-2">
             <SubjectCollectionSelector subjectCollection={subjectCollection} />
-            <ModifySubjectCollection
-              subjectCollection={subjectCollection}
-              subjectInfo={subjectInfo}
-            />
-            <MoreActionDropDown subjectId={subjectId} />
+            <div className="ml-auto flex flex-row items-center gap-0.5">
+              <ModifySubjectCollection
+                subjectCollection={subjectCollection}
+                subjectInfo={subjectInfo}
+              />
+              <PrivateSwitch subjectCollection={subjectCollection} />
+              <MoreActionDropDown subjectId={subjectId} />
+            </div>
           </div>
           {subjectCollection.type !== CollectionType.wantToWatch && (
             <QuickRate subjectCollection={subjectCollection} />

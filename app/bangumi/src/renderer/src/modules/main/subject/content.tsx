@@ -1,5 +1,3 @@
-import { Card } from '@renderer/components/ui/card'
-import { Separator } from '@renderer/components/ui/separator'
 import { SubjectId } from '@renderer/data/types/bgm'
 import { cn } from '@renderer/lib/utils'
 import { SubjectCharacters } from '@renderer/modules/main/subject/character'
@@ -50,7 +48,7 @@ export const SubjectContent = ({
       </section>
 
       <div className="flex w-full flex-col gap-6">
-        <section className="flex flex-col gap-5 @2xl:flex-row">
+        <section className="flex flex-col gap-8 @2xl:flex-row @2xl:gap-10">
           <div className="flex min-w-0 flex-1 flex-col gap-5">
             {/* 章节 */}
             <SubjectEpisodes subjectId={subjectId} />
@@ -58,20 +56,15 @@ export const SubjectContent = ({
               <SubjectTags subjectId={subjectId} />
             </div>
           </div>
-          <Card className="h-fit shrink-0 self-start bg-transparent p-4">
-            <section className="flex min-w-56 flex-1 flex-col gap-2">
-              <SubjectCollection subjectId={subjectId} />
-              <Separator />
-              <div className="w-56">
-                <SubjectScore subjectId={subjectId} key={subjectId} />
-              </div>
-            </section>
-          </Card>
+          <aside className="flex w-full max-w-80 shrink-0 flex-col gap-4 self-start @2xl:w-60">
+            <SubjectCollection subjectId={subjectId} />
+            <SubjectScore subjectId={subjectId} key={subjectId} />
+          </aside>
         </section>
         <SubjectCharacters subjectId={subjectId} />
         <RelatedSubjects subjectId={subjectId} />
         <SubjectRecommendations subjectId={subjectId} />
-        <div className="grid min-w-0 grid-cols-1 items-start gap-6 @6xl:grid-cols-2">
+        <div className="grid min-w-0 grid-cols-1 items-start gap-6 @6xl:grid-cols-2 [&>:only-child]:col-span-full">
           <SubjectReviews subjectId={subjectId} />
           <SubjectIndexes subjectId={subjectId} />
         </div>

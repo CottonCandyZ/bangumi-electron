@@ -14,7 +14,7 @@ export function MoreActionDropDown({ subjectId }: { subjectId: string }) {
       <DropdownMenu>
         <DropdownMenuTrigger
           aria-label="收藏操作"
-          className="data-popup-open:bg-accent rounded-sm transition-[transform,background-color] duration-150 active:scale-90 motion-reduce:transform-none motion-reduce:transition-none"
+          className="data-popup-open:bg-accent hover:bg-accent text-muted-foreground hover:text-foreground flex size-7 items-center justify-center rounded-md transition-[transform,background-color,color] duration-150 active:scale-90 motion-reduce:transform-none motion-reduce:transition-none"
         >
           <span className="i-mingcute-more-2-fill text-base" />
         </DropdownMenuTrigger>

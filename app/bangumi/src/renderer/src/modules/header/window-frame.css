@@ -1,42 +1,36 @@
 body:has(.windows-frame) {
-  --window-titlebar-height: 32px;
+  --window-titlebar-height: 44px;
+  /* 让 Windows 11 的 Mica 材质透出来 */
   background: transparent;
 }
 
 .windows-frame {
-  --window-titlebar-height: 32px;
   position: fixed;
   inset: 0;
   overflow: hidden;
 }
 
-.window-titlebar {
-  height: var(--window-titlebar-height);
+/*
+ * Windows 原生标题栏按钮（titleBarOverlay）叠在顶部栏右上角，高度与顶部栏一致；
+ * 顶部栏本身就是拖拽区域，这里只需给右侧按钮留出位置。
+ */
+.windows-frame .app-header {
   padding-right: calc(100vw - env(titlebar-area-width, calc(100vw - 138px)));
-}
-
-/* Windows already has a dedicated title bar; content and portal headers stay interactive. */
-body:has(.windows-frame) .drag-region:not(.window-titlebar) {
-  -webkit-app-region: no-drag;
 }
 
 .app-client-area {
   /* Keep negative-z page artwork above this surface, inside the client area. */
   isolation: isolate;
-  height: calc(100dvh - var(--window-titlebar-height, 0px));
+  height: 100dvh;
   background: var(--background);
 }
 
 .app-sidebar {
-  top: calc(var(--window-titlebar-height, 0px) + var(--app-header-height));
-  height: calc(100dvh - var(--window-titlebar-height, 0px) - var(--app-header-height));
+  top: var(--app-header-height);
+  height: calc(100dvh - var(--app-header-height));
 }
 
-.app-sidebar-backdrop {
-  top: calc(var(--window-titlebar-height, 0px) + var(--app-header-height));
-}
-
-/* Portals live under body, outside the frame's inherited variables. */
+/* Portals must keep their controls below the native caption buttons. */
 body:has(.windows-frame)
   :is(
     [data-slot='sheet-overlay'],

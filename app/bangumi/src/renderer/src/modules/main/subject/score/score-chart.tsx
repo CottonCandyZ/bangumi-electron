@@ -36,7 +36,7 @@ export function ScoreChart({
         data={data}
         barCategoryGap={2}
         margin={{
-          top: 30,
+          top: 18,
         }}
       >
         <XAxisCompat

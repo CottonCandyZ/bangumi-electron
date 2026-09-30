@@ -4,6 +4,7 @@ import {
   CommentSkeletonList,
   DEFAULT_COMMENT_PLACEHOLDER_COUNT,
 } from '@renderer/components/comment/comment-list'
+import type { CommentItemVariant } from '@renderer/components/comment/comment-item'
 import type { ReactionTarget } from '@renderer/data/fetch/api/reaction'
 import type { Comment, CommentBase } from '@renderer/data/types/comment'
 import { cn } from '@renderer/lib/utils'
@@ -42,7 +43,7 @@ type CommentBoxProps = {
   reactionTarget?: ReactionTarget
   replyTarget?: ReplyTarget
   showReplyEntry?: boolean
-  itemVariant?: 'card' | 'inline'
+  itemVariant?: CommentItemVariant
   compact?: boolean
 }
 
@@ -70,7 +71,7 @@ export function CommentBox({
   reactionTarget,
   replyTarget,
   showReplyEntry = true,
-  itemVariant = 'card',
+  itemVariant = 'bubble',
   compact = false,
 }: CommentBoxProps) {
   const resolvedReactionTarget = reactionTarget ?? replyTarget

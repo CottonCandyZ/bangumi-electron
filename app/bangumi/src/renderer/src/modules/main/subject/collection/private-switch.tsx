@@ -1,5 +1,4 @@
-import { Label } from '@renderer/components/ui/label'
-import { Switch } from '@renderer/components/ui/switch'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import { useMutationSubjectCollection } from '@renderer/data/hooks/api/collection'
 import { CollectionData } from '@renderer/data/types/collection'
 import { cn } from '@renderer/lib/utils'
@@ -12,26 +11,32 @@ export function PrivateSwitch({ subjectCollection }: { subjectCollection: Collec
       toast.error(error.message || '私密设置更新失败，请重试')
     },
   })
+  const isPrivate = subjectCollection.private
+  const label = isPrivate ? '私密收藏，点击公开' : '设为私密'
 
   return (
-    <div className={cn('flex items-center gap-2')}>
-      <Label
-        htmlFor="private-switch"
-        className={cn('text-muted-foreground/70', subjectCollection.private && 'text-primary')}
-      >
-        {subjectCollection.private ? '私密' : '设为私密'}
-      </Label>
-      <Switch
-        id="private-switch"
-        checked={subjectCollection.private}
-        disabled={subjectCollectionMutation.isPending}
-        onCheckedChange={(checked) => {
-          subjectCollectionMutation.mutate({
-            subjectId: subjectCollection.subject_id.toString(),
-            isPrivate: checked,
-          })
-        }}
-      />
-    </div>
+    <Tooltip delayDuration={300}>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          aria-label={label}
+          aria-pressed={isPrivate}
+          disabled={subjectCollectionMutation.isPending}
+          onClick={() => {
+            subjectCollectionMutation.mutate({
+              subjectId: subjectCollection.subject_id.toString(),
+              isPrivate: !isPrivate,
+            })
+          }}
+          className={cn(
+            'hover:bg-accent flex size-7 items-center justify-center rounded-md transition-colors disabled:opacity-50',
+            isPrivate ? 'text-primary' : 'text-muted-foreground hover:text-foreground',
+          )}
+        >
+          <span className={isPrivate ? 'i-mingcute-lock-fill' : 'i-mingcute-unlock-line'} />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom">{label}</TooltipContent>
+    </Tooltip>
   )
 }

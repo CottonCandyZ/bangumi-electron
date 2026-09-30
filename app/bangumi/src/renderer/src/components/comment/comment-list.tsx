@@ -1,4 +1,4 @@
-import { CommentItem } from '@renderer/components/comment/comment-item'
+import { CommentItem, type CommentItemVariant } from '@renderer/components/comment/comment-item'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
 import type { ReactionTarget } from '@renderer/data/fetch/api/reaction'
@@ -39,7 +39,7 @@ function CommentListContent({
   virtual,
   reactionTarget,
   replyTarget,
-  itemVariant = 'card',
+  itemVariant = 'bubble',
   compact = false,
 }: {
   comments: Comment[]
@@ -55,12 +55,12 @@ function CommentListContent({
   virtual: boolean
   reactionTarget?: ReactionTarget
   replyTarget?: ReplyTarget
-  itemVariant?: 'card' | 'inline'
+  itemVariant?: CommentItemVariant
   compact?: boolean
 }) {
   if (!virtual) {
     return (
-      <div className={cn('flex flex-col gap-3', className)}>
+      <div className={cn('flex flex-col', itemVariant === 'bubble' ? 'gap-5' : 'gap-3', className)}>
         {comments.map((comment, index) => (
           <CommentItem
             comment={comment}
@@ -96,7 +96,7 @@ function CommentListContent({
       rootClassName="h-full"
       className={cn('max-h-[40rem] pr-2', className)}
       estimateSize={132}
-      gap={12}
+      gap={itemVariant === 'bubble' ? 18 : 12}
       hasMore={hasMore}
       isFetchingMore={isFetchingMore}
       appendPlaceholderCount={appendPlaceholderCount}

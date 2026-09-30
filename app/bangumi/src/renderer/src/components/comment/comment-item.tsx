@@ -45,6 +45,8 @@ const CONTENT_COLLAPSE_MASK = 'linear-gradient(to bottom, black calc(100% - 3rem
 const LONG_CONTENT_TEXT_LENGTH = 700
 const LONG_CONTENT_LINE_COUNT = 14
 
+export type CommentItemVariant = 'card' | 'inline' | 'bubble'
+
 export function hasVisibleReplyContent(reply: CommentBase) {
   return reply.content.trim().length > 0
 }
@@ -53,7 +55,7 @@ export function CommentItem({
   comment,
   compact = false,
   floorNumber,
-  itemVariant = 'card',
+  itemVariant = 'bubble',
   reactionTarget,
   userAvatarViewTransition,
   virtual = false,
@@ -62,12 +64,13 @@ export function CommentItem({
   comment: Comment
   compact?: boolean
   floorNumber: number
-  itemVariant?: 'card' | 'inline'
+  itemVariant?: CommentItemVariant
   reactionTarget?: ReactionTarget
   replyTarget?: ReplyTarget
   userAvatarViewTransition: boolean
   virtual?: boolean
 }) {
+  const isBubble = itemVariant === 'bubble'
   const [showAllReplies, setShowAllReplies] = useCommentExpansion(`comment:${comment.id}:replies`)
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false)
   const [replyHovering, setReplyHovering] = useState(false)
@@ -109,22 +112,36 @@ export function CommentItem({
     disableHeightTransition: virtual,
     maxCollapsedHeight: COMMENT_CONTENT_COLLAPSED_HEIGHT,
   })
-  const commentActions =
-    showReaction || replyTarget ? (
-      <div
-        className={cn(
-          'pointer-events-none flex flex-row items-center gap-1.5 opacity-0 transition-opacity',
-          !replyHovering &&
-            'group-focus-within/comment:pointer-events-auto group-focus-within/comment:opacity-100 group-hover/comment:pointer-events-auto group-hover/comment:opacity-100',
-          reactionPickerOpen && 'pointer-events-auto opacity-100',
-        )}
-      >
+  // 悬停评论时才显示的操作（回复到子回复区域时隐藏，避免与子回复的操作重叠）
+  const hoverRevealClass = cn(
+    'pointer-events-none opacity-0 transition-opacity',
+    !replyHovering &&
+      'group-focus-within/comment:pointer-events-auto group-focus-within/comment:opacity-100 group-hover/comment:pointer-events-auto group-hover/comment:opacity-100',
+    reactionPickerOpen && 'pointer-events-auto opacity-100',
+  )
+  // 气泡样式下，贴贴按钮悬浮在气泡右上角
+  const bubbleReactionButton =
+    isBubble && showReaction ? (
+      <div className={cn('absolute -top-2.5 -right-2.5', hoverRevealClass)}>
         <CommentReactionButton
-          className="h-6 px-1.5"
+          className="bg-background hover:bg-accent size-6 rounded-full border p-0 shadow-xs"
           comment={comment}
           onOpenChange={setReactionPickerOpen}
           target={reactionTarget}
         />
+      </div>
+    ) : null
+  const commentActions =
+    (showReaction && (!isBubble || !hasContent)) || replyTarget ? (
+      <div className={cn('flex flex-row items-center gap-1.5', hoverRevealClass)}>
+        {showReaction && (!isBubble || !hasContent) && (
+          <CommentReactionButton
+            className="h-6 px-1.5"
+            comment={comment}
+            onOpenChange={setReactionPickerOpen}
+            target={reactionTarget}
+          />
+        )}
         {replyTarget && (
           <>
             <CommentReplyButton
@@ -147,7 +164,8 @@ export function CommentItem({
       className={cn(
         'group/comment relative flex flex-row gap-3 p-3 shadow-none',
         itemVariant === 'inline' && 'gap-2 rounded-none border-0 bg-transparent px-0 py-2.5',
-        highlighted && 'border-primary/70 bg-primary/5',
+        isBubble && 'rounded-none border-0 bg-transparent p-0',
+        highlighted && !isBubble && 'border-primary/70 bg-primary/5',
       )}
       data-comment-id={comment.id}
     >
@@ -164,46 +182,41 @@ export function CommentItem({
       )}
       <BBCodeImagePreviewProvider>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <div className="flex min-w-0 items-start justify-between gap-3">
-            <CommentHeader
-              comment={comment}
-              compact={compactUser}
+          {isBubble ? (
+            <BubbleHeader
+              actions={commentActions}
               contentToggle={
                 hasContent && contentState.collapsible ? (
                   <CommentContentToggle contentState={contentState} placement="inline" />
                 ) : null
               }
+              createdAt={comment.createdAt}
+              creatorID={comment.creatorID}
+              floorLabel={isSubjectInterest ? undefined : `#${floorNumber}`}
+              meta={<SubjectInterestMeta comment={comment} showRate={showRate} />}
+              user={comment.user}
             />
-            {isSubjectInterest ? (
-              <div className="grid shrink-0 grid-rows-[1.5rem_1rem]">
-                <div className="flex h-6 items-center justify-end gap-2">
-                  {commentActions}
-                  {comment.collectionLabel ? (
-                    <span className="text-muted-foreground text-xs leading-none font-medium">
-                      {comment.collectionLabel}
-                    </span>
-                  ) : null}
-                  {showRate ? (
-                    <span
-                      aria-label={`评分 ${comment.rate}`}
-                      className="inline-flex items-center gap-0.5 text-sm leading-none font-medium tabular-nums"
-                      style={{ color: `hsl(var(--chart-score-${comment.rate}))` }}
-                    >
-                      {comment.rate}
-                      <span aria-hidden="true" className="i-mingcute-star-fill text-xs" />
-                    </span>
-                  ) : null}
-                </div>
-                <div className="flex h-4 items-center justify-end">
-                  <CommentTimestamp createdAt={comment.createdAt} />
-                </div>
-              </div>
-            ) : (
-              <div className="flex shrink-0 flex-row items-start gap-2">
-                {commentActions}
-                <div className="flex h-6 items-center gap-0.5">
-                  {showRate ? (
-                    <>
+          ) : (
+            <div className="flex min-w-0 items-start justify-between gap-3">
+              <CommentHeader
+                comment={comment}
+                compact={compactUser}
+                contentToggle={
+                  hasContent && contentState.collapsible ? (
+                    <CommentContentToggle contentState={contentState} placement="inline" />
+                  ) : null
+                }
+              />
+              {isSubjectInterest ? (
+                <div className="grid shrink-0 grid-rows-[1.5rem_1rem]">
+                  <div className="flex h-6 items-center justify-end gap-2">
+                    {commentActions}
+                    {comment.collectionLabel ? (
+                      <span className="text-muted-foreground text-xs leading-none font-medium">
+                        {comment.collectionLabel}
+                      </span>
+                    ) : null}
+                    {showRate ? (
                       <span
                         aria-label={`评分 ${comment.rate}`}
                         className="inline-flex items-center gap-0.5 text-sm leading-none font-medium tabular-nums"
@@ -212,27 +225,68 @@ export function CommentItem({
                         {comment.rate}
                         <span aria-hidden="true" className="i-mingcute-star-fill text-xs" />
                       </span>
-                      <CommentMetaSeparator />
-                    </>
-                  ) : null}
-                  <span className="text-muted-foreground text-xs tabular-nums">#{floorNumber}</span>
-                  <CommentMetaSeparator />
-                  <CommentTimestamp createdAt={comment.createdAt} />
+                    ) : null}
+                  </div>
+                  <div className="flex h-4 items-center justify-end">
+                    <CommentTimestamp createdAt={comment.createdAt} />
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-          {hasContent && (
-            <CommentContent className="text-sm whitespace-pre-line" contentState={contentState} />
+              ) : (
+                <div className="flex shrink-0 flex-row items-start gap-2">
+                  {commentActions}
+                  <div className="flex h-6 items-center gap-0.5">
+                    {showRate ? (
+                      <>
+                        <span
+                          aria-label={`评分 ${comment.rate}`}
+                          className="inline-flex items-center gap-0.5 text-sm leading-none font-medium tabular-nums"
+                          style={{ color: `hsl(var(--chart-score-${comment.rate}))` }}
+                        >
+                          {comment.rate}
+                          <span aria-hidden="true" className="i-mingcute-star-fill text-xs" />
+                        </span>
+                        <CommentMetaSeparator />
+                      </>
+                    ) : null}
+                    <span className="text-muted-foreground text-xs tabular-nums">
+                      #{floorNumber}
+                    </span>
+                    <CommentMetaSeparator />
+                    <CommentTimestamp createdAt={comment.createdAt} />
+                  </div>
+                </div>
+              )}
+            </div>
           )}
-          <CommentReactions comment={comment} target={reactionTarget} />
+          {hasContent &&
+            (isBubble ? (
+              <div
+                className={cn(
+                  bubbleClass(!!session && session.id === comment.creatorID, highlighted),
+                  'relative px-3.5 py-2',
+                )}
+              >
+                {bubbleReactionButton}
+                <CommentContent
+                  className="text-sm whitespace-pre-line"
+                  contentState={contentState}
+                />
+                <CommentReactions comment={comment} inBubble target={reactionTarget} />
+              </div>
+            ) : (
+              <CommentContent className="text-sm whitespace-pre-line" contentState={contentState} />
+            ))}
+          {!(isBubble && hasContent) && (
+            <CommentReactions comment={comment} target={reactionTarget} />
+          )}
           {replyCount > 0 && (
             <div
               className={cn(
                 'flex flex-col',
-                itemVariant === 'inline'
-                  ? 'border-border/70 ml-1 border-l pl-3'
-                  : 'border-border/60 bg-muted/25 rounded-md border px-2',
+                itemVariant === 'card'
+                  ? 'border-border/60 bg-muted/25 rounded-md border px-2'
+                  : 'border-border/70 ml-1 border-l pl-3',
+                isBubble && 'mt-1 gap-1',
               )}
               id={repliesId}
               onMouseEnter={() => setReplyHovering(true)}
@@ -322,6 +376,95 @@ function CommentHeader({
   )
 }
 
+/** 气泡样式的单行头部：昵称 + 元信息（收藏状态 / 评分 / 楼层）· 时间，操作按钮悬停时出现在右侧 */
+function BubbleHeader({
+  actions,
+  contentToggle,
+  createdAt,
+  creatorID,
+  floorLabel,
+  meta,
+  user,
+}: {
+  actions: ReactNode
+  contentToggle: ReactNode
+  createdAt: number
+  creatorID: number
+  floorLabel?: string
+  meta?: ReactNode
+  user: CommentBase['user']
+}) {
+  return (
+    <div className="flex h-6 min-w-0 flex-row items-center gap-2">
+      <div className="flex min-w-0 flex-row items-center gap-1.5">
+        {user ? (
+          <UserProfileLink
+            className="hover:text-primary min-w-0 truncate text-sm font-medium transition-colors"
+            user={user}
+          >
+            {user.nickname}
+          </UserProfileLink>
+        ) : (
+          <span className="text-sm font-medium">#{creatorID}</span>
+        )}
+        {meta}
+        {floorLabel ? (
+          <>
+            <CommentMetaSeparator />
+            <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
+              {floorLabel}
+            </span>
+          </>
+        ) : null}
+        <CommentMetaSeparator />
+        <CommentTimestamp createdAt={createdAt} />
+        {contentToggle}
+      </div>
+      {actions}
+    </div>
+  )
+}
+
+function SubjectInterestMeta({ comment, showRate }: { comment: Comment; showRate: boolean }) {
+  return (
+    <>
+      {comment.collectionLabel ? (
+        <span className="text-muted-foreground ml-1 shrink-0 text-xs">
+          {comment.collectionLabel}
+        </span>
+      ) : null}
+      {showRate ? (
+        <>
+          <CommentMetaSeparator />
+          <span
+            aria-label={`评分 ${comment.rate}`}
+            className="inline-flex shrink-0 items-center gap-0.5 text-xs font-medium tabular-nums"
+            style={{ color: `hsl(var(--chart-score-${comment.rate}))` }}
+          >
+            {comment.rate}
+            <span aria-hidden="true" className="i-mingcute-star-fill text-[0.65rem]" />
+          </span>
+        </>
+      ) : null}
+    </>
+  )
+}
+
+/**
+ * 气泡外形：自己发的用柔和蓝色作为主态，其他人用灰色；
+ * 正在被回复的气泡用浅黄色底标记（不用描边，主色偏灰时描边很突兀）
+ */
+function bubbleClass(isSelf: boolean, highlighted: boolean) {
+  return cn(
+    'w-fit max-w-full rounded-2xl rounded-tl-sm transition-colors',
+    highlighted
+      ? 'bg-amber-100/80 dark:bg-amber-900/40'
+      : isSelf
+        ? 'bg-sky-100/80 dark:bg-sky-950/60'
+        : 'bg-muted/70',
+  )
+}
+
 function CommentTimestamp({ createdAt }: { createdAt: number }) {
   return (
     <span className="text-muted-foreground shrink-0 text-xs">
@@ -355,7 +498,7 @@ function ReplyItem({
 }: {
   floorLabel: string
   highlighted: boolean
-  itemVariant: 'card' | 'inline'
+  itemVariant: CommentItemVariant
   reactionTarget?: ReactionTarget
   reply: CommentBase
   replyTarget?: ReplyTarget
@@ -371,6 +514,84 @@ function ReplyItem({
     disableHeightTransition: virtual,
     maxCollapsedHeight: REPLY_CONTENT_COLLAPSED_HEIGHT,
   })
+
+  if (itemVariant === 'bubble') {
+    const hoverRevealClass = cn(
+      'pointer-events-none opacity-0 transition-opacity group-focus-within/reply:pointer-events-auto group-focus-within/reply:opacity-100 group-hover/reply:pointer-events-auto group-hover/reply:opacity-100',
+      reactionPickerOpen && 'pointer-events-auto opacity-100',
+    )
+    return (
+      <div className="group/reply flex flex-row gap-2 py-1.5" data-reply-id={reply.id}>
+        {reply.user?.avatar.medium ? (
+          <CommentUserAvatarLink
+            className="size-7 shrink-0"
+            imageClassName="size-7 overflow-hidden rounded-full"
+            transitionKey={`reply-${reply.id}`}
+            user={reply.user}
+            viewTransition={userAvatarViewTransition}
+          />
+        ) : (
+          <div className="bg-muted size-7 shrink-0 rounded-full" />
+        )}
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <BubbleHeader
+            actions={
+              replyTarget ? (
+                <div className={cn('flex flex-row items-center gap-1', hoverRevealClass)}>
+                  <CommentReplyButton
+                    className="h-6 px-1.5"
+                    comment={reply}
+                    floorLabel={floorLabel}
+                    target={replyTarget}
+                  />
+                  {showEdit && (
+                    <CommentEditButton
+                      className="h-6 px-1.5"
+                      comment={reply}
+                      target={replyTarget}
+                    />
+                  )}
+                  <CommentDeleteButton
+                    className="h-6 px-1.5"
+                    comment={reply}
+                    target={replyTarget}
+                  />
+                </div>
+              ) : null
+            }
+            contentToggle={
+              contentState.collapsible ? (
+                <CommentContentToggle contentState={contentState} placement="inline" />
+              ) : null
+            }
+            createdAt={reply.createdAt}
+            creatorID={reply.creatorID}
+            floorLabel={floorLabel}
+            user={reply.user}
+          />
+          <div
+            className={cn(
+              bubbleClass(!!session && session.id === reply.creatorID, highlighted),
+              'relative px-3 py-1.5 text-sm',
+            )}
+          >
+            {canReact(reactionTarget) && (
+              <div className={cn('absolute -top-2.5 -right-2.5', hoverRevealClass)}>
+                <CommentReactionButton
+                  className="bg-background hover:bg-accent size-6 rounded-full border p-0 shadow-xs"
+                  comment={reply}
+                  onOpenChange={setReactionPickerOpen}
+                  target={reactionTarget}
+                />
+              </div>
+            )}
+            <CommentContent className="whitespace-pre-line" contentState={contentState} />
+            <CommentReactions comment={reply} inBubble target={reactionTarget} />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div

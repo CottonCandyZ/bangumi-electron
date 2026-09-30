@@ -279,7 +279,7 @@ function TopicDetailRow({
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-10 pb-3">
+    <div className="mx-auto max-w-5xl px-10 pb-5">
       <CommentItem
         comment={row.comment}
         floorNumber={row.floorNumber}

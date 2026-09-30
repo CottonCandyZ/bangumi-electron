@@ -52,14 +52,21 @@ export function SubjectComments({ subjectId }: { subjectId: SubjectId }) {
       comments={comments}
       error={commentsQuery.isError}
       floorNumbers={floorNumbers}
+      itemVariant="bubble"
       onInView={enableComments}
       reactionTarget={{ id: subjectId, type: 'subject-collect' }}
       titleCount={total}
       footer={
         hasMore ? (
           <div className="flex justify-center">
-            <Button variant="outline" onClick={openCommentsPanel}>
-              在右侧栏查看更多 {comments.length}/{total}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground gap-1"
+              onClick={openCommentsPanel}
+            >
+              查看全部 {total} 条吐槽
+              <span className="i-mingcute-right-line" />
             </Button>
           </div>
         ) : null

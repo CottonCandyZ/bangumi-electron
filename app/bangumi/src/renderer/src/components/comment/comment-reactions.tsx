@@ -20,6 +20,8 @@ import { toast } from 'sonner'
 type CommentReactionsProps = {
   comment: ReactionItem
   compact?: boolean
+  /** 放在评论气泡内部（类似 Telegram），芯片改为半透明白底无边框 */
+  inBubble?: boolean
   target?: ReactionTarget
 }
 
@@ -28,7 +30,12 @@ export type ReactionItem = {
   reactions?: CommentReaction[]
 }
 
-export function CommentReactions({ comment, compact = false, target }: CommentReactionsProps) {
+export function CommentReactions({
+  comment,
+  compact = false,
+  inBubble = false,
+  target,
+}: CommentReactionsProps) {
   const visibleReactions = useMemo(
     () => comment.reactions?.filter((reaction) => reaction.users.length > 0) ?? [],
     [comment.reactions],
@@ -37,10 +44,16 @@ export function CommentReactions({ comment, compact = false, target }: CommentRe
   if (visibleReactions.length === 0) return null
 
   return (
-    <div className={cn('flex flex-row flex-wrap gap-1.5', compact ? 'mt-1' : 'mt-0.5')}>
+    <div
+      className={cn(
+        'flex flex-row flex-wrap gap-1.5',
+        inBubble ? 'mt-1.5' : compact ? 'mt-1' : 'mt-0.5',
+      )}
+    >
       {visibleReactions.map((reaction) => (
         <CommentReactionChip
           comment={comment}
+          inBubble={inBubble}
           key={reaction.value}
           reaction={reaction}
           target={target}
@@ -173,10 +186,12 @@ export function CommentReactionButton({
 
 function CommentReactionChip({
   comment,
+  inBubble,
   reaction,
   target,
 }: {
   comment: ReactionItem
+  inBubble: boolean
   reaction: CommentReaction
   target?: ReactionTarget
 }) {
@@ -211,6 +226,7 @@ function CommentReactionChip({
         <button
           className={cn(
             'border-border/70 bg-muted/30 hover:bg-muted/60 inline-flex h-[25px] items-center gap-1 rounded-full border px-1.5 text-xs leading-none transition-colors select-none',
+            inBubble && 'bg-background/70 hover:bg-background h-[22px] border-transparent',
             userPopoverOpen && 'bg-muted/60 text-foreground',
             active &&
               'bg-primary/10 text-primary ring-primary/35 hover:bg-primary/15 border-transparent ring-1',
@@ -223,7 +239,11 @@ function CommentReactionChip({
           type="button"
         >
           {smileCode ? (
-            <BangumiSmile code={smileCode} variant="reaction" />
+            <BangumiSmile
+              className={inBubble ? 'size-[14px]' : undefined}
+              code={smileCode}
+              variant="reaction"
+            />
           ) : (
             <span className="text-muted-foreground tabular-nums">{reaction.value}</span>
           )}

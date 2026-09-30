@@ -1,4 +1,5 @@
 import bangumiSmilesSprite from '@renderer/assets/comment/bangumi-smiles-sprite.png'
+import { cn } from '@renderer/lib/utils'
 import type { CSSProperties } from 'react'
 
 const BANGUMI_SMILE_PATTERN = /^bgm(0*[1-9]\d*)$/
@@ -62,15 +63,13 @@ export function BangumiSmile({ code, className, variant = 'inline' }: BangumiSmi
   const externalSrc = getExternalBangumiSmileSrc(code)
   if (index === undefined && !externalSrc) return `(${code})`
 
-  const classNames = [
+  const classNames = cn(
     'bbcode-smile inline-block',
     variant === 'reaction'
       ? 'size-[17px] shrink-0 align-middle'
       : 'relative top-[2px] mx-0.5 size-5 align-baseline',
     className,
-  ]
-    .filter(Boolean)
-    .join(' ')
+  )
 
   if (externalSrc) {
     return (

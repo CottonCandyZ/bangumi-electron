@@ -21,6 +21,7 @@ import { ChevronsDownIcon, ListFilterIcon, XIcon } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 import type { MutableRefObject } from 'react'
 import { useLocation } from 'react-router-dom'
+import { LeftPanelHeaderPortal } from '../../header-portal'
 import { isRoutePathActive } from './shared'
 
 type MonoListPanelHeaderProps = {
@@ -56,8 +57,9 @@ export function MonoListPanelHeader({
 
   return (
     <>
-      <div className="drag-region h-panel-header flex shrink-0 flex-col justify-center border-b px-2">
-        <div className="flex flex-row items-center gap-1">
+      {/* 标签栏渲染到顶部栏左段 */}
+      <LeftPanelHeaderPortal>
+        <div className="drag-region flex h-full w-full min-w-0 flex-row items-center gap-1">
           <MonoListPanelTabStrip
             activeTabId={activeTab.id}
             closeTab={closeTab}
@@ -73,7 +75,7 @@ export function MonoListPanelHeader({
             tabs={tabs}
           />
         </div>
-      </div>
+      </LeftPanelHeaderPortal>
       <MonoListPanelMeta
         activeTab={activeTab}
         canToggleFilters={canToggleFilters}

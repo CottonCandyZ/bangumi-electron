@@ -170,7 +170,7 @@ function EpisodeSkeleton({
 }: { showSelector: boolean; skeletonNumber: number } & EpisodeGridSize) {
   return (
     <div className="flex flex-col gap-5">
-      {size === 'default' && <h2 className="text-2xl font-medium">章节</h2>}
+      {size === 'default' && <h2 className="text-base font-semibold">章节</h2>}
       {showSelector && <PageSelectorSkeleton />}
       <div className={cn('flex flex-wrap gap-1.5', size === 'small' && 'gap-1')}>
         {Array.from({ length: skeletonNumber }, (_, index) => (

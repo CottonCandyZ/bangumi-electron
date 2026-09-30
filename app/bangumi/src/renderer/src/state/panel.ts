@@ -29,7 +29,7 @@ export type LeftPanelName = 'collection' | 'monoList'
 
 export type RightPanelName = 'subjectInfo'
 
-export type RightPanelContent = 'replyComposer' | 'searchFilter' | 'subjectInfo' | 'userTimeline'
+export type RightPanelContent = 'searchFilter' | 'subjectInfo' | 'userTimeline'
 
 export type MonoListPanelTab =
   | {
@@ -221,13 +221,14 @@ export type MonoListPanelTab =
       sectionPath: SectionPath
     }
 
-export const navOpenAtom = atom(false)
-
 export const leftPanelOpenAtom = atom(false)
 
 export const rightPanelOpenAtom = atom(false)
 
 export const leftPanelOpenContentAtom = atom<LeftPanelName>('collection')
+
+/** 顶部栏里留给左侧栏工具条的位置，左侧栏通过 portal 把工具条渲染进去 */
+export const leftPanelHeaderSlotAtom = atom<HTMLElement | null>(null)
 
 export const replyComposerAtom = dialogAtomFactory<ReplyComposerContent>()
 
@@ -386,13 +387,12 @@ export const restoreMonoListPanelAtomAction = atom(
   },
 )
 
-// right
+// reply composer（悬浮在主内容区右下角，不再占用右侧栏）
 
 export const openReplyComposerAtomAction = atom(
   null,
   (_get, set, content: ReplyComposerContent) => {
     set(replyComposerAtom, { open: true, content })
-    set(rightPanelOpenAtom, true)
   },
 )
 

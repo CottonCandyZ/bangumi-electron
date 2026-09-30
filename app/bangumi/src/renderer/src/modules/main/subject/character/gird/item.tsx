@@ -46,7 +46,7 @@ export function Item({
             <HoverCardContent className="h-full cursor-default">
               <CardContent
                 className={cn(
-                  'flex h-full min-w-0 cursor-pointer flex-row items-start gap-4 overflow-hidden p-2',
+                  'flex h-full min-w-0 cursor-default flex-row items-start gap-4 overflow-hidden p-2',
                   isEmpty(character.images.large) && 'pl-4',
                 )}
                 onClick={openCharacter}
@@ -56,7 +56,7 @@ export function Item({
                     to={`/character/${id}`}
                     state={{ viewTransitionName }}
                     viewTransition
-                    className="shrink-0"
+                    className="shrink-0 cursor-default"
                   >
                     <ViewTransitionImage
                       active={isTransitioning}
@@ -86,7 +86,7 @@ function PopCard({ character }: { character: Character }) {
   return (
     <PopCardContent className="w-96 cursor-default">
       <CardContent
-        className="flex h-full cursor-pointer flex-col overflow-hidden p-2"
+        className="flex h-full cursor-default flex-col overflow-hidden p-2"
         onClick={openCharacter}
       >
         <div className="flex h-full flex-row gap-4">
@@ -95,7 +95,7 @@ function PopCard({ character }: { character: Character }) {
               to={`/character/${character.id}`}
               state={{ viewTransitionName }}
               viewTransition
-              className="basis-1/4"
+              className="basis-1/4 cursor-default"
             >
               <ViewTransitionImage
                 active={isTransitioning}
@@ -126,6 +126,8 @@ function useOpenCharacter(characterId: number, viewTransitionName: string) {
   return (event: MouseEvent<HTMLElement>) => {
     const target = event.target
     if (target instanceof Element && target.closest('a,button')) return
+    // 选中文字时不跳转，方便复制简介
+    if (window.getSelection()?.toString()) return
 
     navigate(`/character/${characterId}`, {
       state: { viewTransitionName },
@@ -153,7 +155,7 @@ function MetaInfo({
           state={{ viewTransitionName }}
           viewTransition
           className={cn(
-            'min-w-0 leading-5 font-medium break-words',
+            'min-w-0 cursor-default leading-5 font-medium break-words',
             showAll ? 'line-clamp-2' : 'line-clamp-1',
           )}
         >
