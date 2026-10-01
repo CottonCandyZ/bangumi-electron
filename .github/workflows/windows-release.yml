@@ -1,0 +1,137 @@
+name: Windows beta release
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Commit, tag, or branch to build
+        required: true
+        default: main
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-beta-release-${{ inputs.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install build tools and dependencies
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          npm install -g pnpm@10.14.0
+          if ($LASTEXITCODE) { throw 'pnpm installation failed' }
+          dotnet tool install -g vpk --version 1.1.1
+          if ($LASTEXITCODE) { throw 'vpk installation failed' }
+          rustup update stable
+          if ($LASTEXITCODE) { throw 'Rust installation failed' }
+          rustup default stable
+          pnpm install --frozen-lockfile
+          if ($LASTEXITCODE) { throw 'Dependency installation failed' }
+
+      - name: Validate release and prepare previous beta
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = (Get-Content app/bangumi/package.json -Raw | ConvertFrom-Json).version
+          if ($version -notmatch '^\d+\.\d+\.\d+-beta\.\d+$') { throw 'Only beta versions can be published by this workflow' }
+          $tag = "v$version"
+          $sha = git rev-parse HEAD
+          $release = gh release view $tag --json isDraft,targetCommitish 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            $release = $release | ConvertFrom-Json
+            if (-not $release.isDraft) { throw 'Refusing to replace an already published release' }
+            if ($release.targetCommitish -ne $sha) { throw 'Draft release targets a different commit' }
+          } else {
+            gh release create $tag --target $sha --title "Bangumi-$version" --draft --prerelease --notes "Windows x64 beta build from $sha."
+            if ($LASTEXITCODE) { throw 'Draft release creation failed' }
+          }
+          "BANGUMI_RELEASE_TAG=$tag" >> $env:GITHUB_ENV
+          "BANGUMI_RELEASE_SHA=$sha" >> $env:GITHUB_ENV
+          $previous = Join-Path $env:RUNNER_TEMP previous-beta
+          New-Item -ItemType Directory -Force $previous | Out-Null
+          $releases = gh api "repos/$env:GITHUB_REPOSITORY/releases?per_page=100" | ConvertFrom-Json
+          $prior = $releases | Where-Object { -not $_.draft -and $_.prerelease -and $_.tag_name -ne $tag -and ($_.assets.name -contains 'releases.win-x64-beta.json') } | Select-Object -First 1
+          if ($prior) {
+            gh release download $prior.tag_name --pattern 'releases.win-x64-beta.json' --pattern '*-win-x64-beta-full.nupkg' --dir $previous
+            if ($LASTEXITCODE) { throw 'Previous Windows beta download failed' }
+          }
+          "BANGUMI_VELOPACK_PUBLISH_TARGET=local" >> $env:GITHUB_ENV
+          "BANGUMI_VELOPACK_LOCAL_PATH=$previous" >> $env:GITHUB_ENV
+
+      - name: Test and build Windows x64
+        shell: pwsh
+        run: |
+          pnpm test
+          if ($LASTEXITCODE) { throw 'Tests failed' }
+          pnpm build
+          if ($LASTEXITCODE) { throw 'Production build failed' }
+          pnpm --filter bangumi-electron exec node scripts/velopack-win.mjs --channel beta --arch x64 --publish never --download-existing true
+          if ($LASTEXITCODE) { throw 'Windows packaging failed' }
+
+      - name: Check packaged Windows native modules
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $resources = (Resolve-Path app/bangumi/dist/win-unpacked/resources/app.asar).Path
+          $env:BANGUMI_SMOKE_ASAR = $resources
+          $smoke = Join-Path $env:RUNNER_TEMP native-smoke.cjs
+          @'
+          const path = require('node:path')
+          const root = process.env.BANGUMI_SMOKE_ASAR
+          const Database = require(path.join(root, 'node_modules/better-sqlite3'))
+          const db = new Database(':memory:')
+          db.exec('CREATE TABLE smoke(value INTEGER)')
+          db.prepare('INSERT INTO smoke(value) VALUES (?)').run(44)
+          if (db.prepare('SELECT value FROM smoke').get().value !== 44) throw Error('SQLite smoke failed')
+          db.close()
+          const koffi = require(path.join(root, 'node_modules/koffi'))
+          if (!koffi.load('kernel32.dll').func('uint32_t __stdcall GetCurrentProcessId()')()) throw Error('Koffi smoke failed')
+          if (!require(path.join(root, 'node_modules/velopack')).VelopackApp) throw Error('Velopack smoke failed')
+          console.log(JSON.stringify({ platform: process.platform, arch: process.arch, abi: process.versions.modules, sqlite: 'ok', koffi: 'ok', velopack: 'ok' }))
+          '@ | Set-Content $smoke -Encoding utf8
+          $env:ELECTRON_RUN_AS_NODE = '1'
+          try {
+            & app/bangumi/dist/win-unpacked/Bangumi.exe $smoke
+            if ($LASTEXITCODE) { throw 'Packaged Windows native modules failed' }
+          } finally {
+            Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue
+          }
+
+      - name: Stage and publish Windows assets
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $stage = Join-Path $env:RUNNER_TEMP release-assets
+          vpk upload local --outputDir app/bangumi/dist/velopack/win-x64-beta --channel win-x64-beta --path $stage --regenerate true --keepMaxReleases 1
+          if ($LASTEXITCODE) { throw 'Release staging failed' }
+          $assets = Get-ChildItem $stage -File | Where-Object { $_.Extension -in '.exe', '.zip', '.nupkg', '.json' }
+          if (($assets | Measure-Object).Count -lt 4) { throw 'Release assets are incomplete' }
+          foreach ($asset in $assets) {
+            gh release upload $env:BANGUMI_RELEASE_TAG $asset.FullName --clobber
+            if ($LASTEXITCODE) { throw "Upload failed: $($asset.Name)" }
+          }
+          $release = gh release view $env:BANGUMI_RELEASE_TAG --json assets,isDraft | ConvertFrom-Json
+          if (-not $release.isDraft -or ($release.assets | Measure-Object).Count -ne ($assets | Measure-Object).Count) { throw 'Uploaded asset verification failed' }
+          gh release edit $env:BANGUMI_RELEASE_TAG --draft=false --prerelease
+          if ($LASTEXITCODE) { throw 'Release publication failed' }

@@ -75,7 +75,7 @@ Windows 产物会输出到 `app/bangumi/dist/velopack/win-x64-beta`，其中包�
 
 ### Linux 云环境交叉编译 Windows
 
-Linux x64 也可以使用相同的 Windows beta 打包命令。除 Node、pnpm、.NET 8 SDK、`vpk` 1.1.1 和 Rust 1.88 或以上版本外，需要安装 Wine、Clang/LLD、`curl`、`tar` 和 `cargo-xwin`，并添加 Windows MSVC target：
+Linux x64 也可以使用相同的 Windows beta 打包命令。除 Node、pnpm、.NET 8 SDK、`vpk` 1.1.1 和 Rust 1.88 或以上版本外，需要安装带 32 位支持的 Wine（资源编辑器与免安装启动器需要）、Clang/LLD、`curl`、`tar`、`zstd` 和 `cargo-xwin`，并添加 Windows MSVC target：
 
 ```bash
 cargo install cargo-xwin --locked
@@ -85,6 +85,10 @@ pnpm build:bangumi:win:beta
 ```
 
 无图形界面的机器可以用 `xvfb-run -a pnpm build:bangumi:win:beta`。首次运行 `cargo-xwin` 会下载 MSVC CRT 和 Windows SDK，需要网络访问。通过代理下载 Electron 时配置 `ELECTRON_GET_USE_PROXY=1`；安装脚本的 HTTPS 请求在 Node 24 中可以使用 `NODE_USE_ENV_PROXY=1`。
+
+如果 SDK 首次准备过慢，可以使用 `XWIN_CROSS_COMPILER=clang xvfb-run -a pnpm build:bangumi:win:beta`；该后端使用预整理的 MSVC sysroot。较新的 Electron 需要较新的 Wine 来做启动检查。
+
+如果云环境的 GitHub 文件上传接口不可用，可在 GitHub Actions 手动触发 `Windows beta release` 工作流，指定已经提交的 commit、tag 或分支。工作流在 Windows runner 上执行测试、构建和原生模块检查，再上传并发布同版本 draft。它会拒绝覆盖已经发布的版本；已有 draft 必须指向同一个构建 commit。
 
 跨平台打包脚本会按锁定的 SQLite 版本、Electron ABI 和目标架构下载 Windows 预编译模块，检查 PE 架构，在打包结束或失败后恢复宿主模块；Rust 更新桥使用 `cargo xwin build`，Velopack 使用 `[win]` 指令和明确的 Windows runtime。不要把 Linux 的 `better_sqlite3.node` 直接打进 Windows 包。
 
