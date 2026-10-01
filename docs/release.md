@@ -73,6 +73,29 @@ pnpm build:bangumi:win:beta
 
 Windows 产物会输出到 `app/bangumi/dist/velopack/win-x64-beta`，其中包含 Velopack installer、Portable zip、`.nupkg` 和 `releases.win-x64-beta.json`。
 
+### Linux 云环境交叉编译 Windows
+
+Linux x64 也可以使用相同的 Windows beta 打包命令。除 Node、pnpm、.NET 8 SDK、`vpk` 1.1.1 和 Rust 1.88 或以上版本外，需要安装 Wine、Clang/LLD、`curl`、`tar` 和 `cargo-xwin`，并添加 Windows MSVC target：
+
+```bash
+cargo install cargo-xwin --locked
+rustup target add x86_64-pc-windows-msvc
+pnpm install --frozen-lockfile
+pnpm build:bangumi:win:beta
+```
+
+无图形界面的机器可以用 `xvfb-run -a pnpm build:bangumi:win:beta`。首次运行 `cargo-xwin` 会下载 MSVC CRT 和 Windows SDK，需要网络访问。通过代理下载 Electron 时配置 `ELECTRON_GET_USE_PROXY=1`；安装脚本的 HTTPS 请求在 Node 24 中可以使用 `NODE_USE_ENV_PROXY=1`。
+
+跨平台打包脚本会按锁定的 SQLite 版本、Electron ABI 和目标架构下载 Windows 预编译模块，检查 PE 架构，在打包结束或失败后恢复宿主模块；Rust 更新桥使用 `cargo xwin build`，Velopack 使用 `[win]` 指令和明确的 Windows runtime。不要把 Linux 的 `better_sqlite3.node` 直接打进 Windows 包。
+
+云环境可检查 PE 架构，并用 Wine 验证原生模块加载和应用启动。Wine 验证不能替代真实 Windows 上的安装、卸载和自动更新验收。
+
+要先下载上一版、生成 delta，再验收后手动上传，可使用：
+
+```bash
+pnpm --filter bangumi-electron exec node scripts/velopack-win.mjs --channel beta --arch x64 --publish never --download-existing true
+```
+
 macOS 机器上试打 macOS 包：
 
 ```bash

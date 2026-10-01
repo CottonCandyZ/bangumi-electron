@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
+import { withWindowsSqlitePrebuild } from './windows-native.mjs'
 
 const args = parseArgs(process.argv.slice(2))
 const projectDir = process.cwd()
@@ -12,7 +13,7 @@ const packId = 'io.github.cottoncandyz.bangumi-electron'
 const appUserModelId = packId
 const releaseTag = `v${packageJson.version}`
 const packChannel = `win-${arch}-${channel}`
-const packDir = join(projectDir, 'dist', 'win-unpacked')
+const packDir = join(projectDir, 'dist', arch === 'x64' ? 'win-unpacked' : `win-${arch}-unpacked`)
 const outputDir = join(projectDir, 'dist', 'velopack', packChannel)
 const iconPath = join(projectDir, 'build', 'icon.ico')
 const vpkCommand = process.env.VPK_COMMAND || 'vpk'
@@ -21,9 +22,11 @@ const repoUrl = 'https://github.com/CottonCandyZ/bangumi-electron'
 const publishTarget = process.env.BANGUMI_VELOPACK_PUBLISH_TARGET || 'github'
 
 resetOutputDir()
-if (publish) downloadExistingRelease()
+if (publish || args['download-existing'] === 'true') downloadExistingRelease()
 
-run('pnpm', ['exec', 'electron-builder', '--win', '--dir', `--${arch}`])
+withWindowsSqlitePrebuild(arch, () =>
+  run('pnpm', ['exec', 'electron-builder', '--win', '--dir', `--${arch}`]),
+)
 
 if (!existsSync(join(packDir, 'Bangumi.exe'))) {
   fail(`Expected unpacked app was not found: ${join(packDir, 'Bangumi.exe')}`)
@@ -35,6 +38,8 @@ if (!existsSync(iconPath)) {
 
 runVpk([
   'pack',
+  '--runtime',
+  `win-${arch}`,
   '--packId',
   packId,
   '--packVersion',
@@ -66,7 +71,14 @@ function resetOutputDir() {
 }
 
 function downloadExistingRelease() {
-  const downloadArgs = ['download', publishTarget, '--outputDir', outputDir, '--channel', packChannel]
+  const downloadArgs = [
+    'download',
+    publishTarget,
+    '--outputDir',
+    outputDir,
+    '--channel',
+    packChannel,
+  ]
 
   if (publishTarget === 'github') appendGitHubArgs(downloadArgs, { forDownload: true })
   else if (publishTarget === 's3') appendS3Args(downloadArgs)
@@ -119,9 +131,17 @@ function appendS3Args(commandArgs, options = {}) {
   appendOptionalArg(commandArgs, '--secret', process.env.BANGUMI_VELOPACK_S3_SECRET)
   appendOptionalArg(commandArgs, '--session', process.env.BANGUMI_VELOPACK_S3_SESSION)
   appendOptionalArg(commandArgs, '--prefix', process.env.BANGUMI_VELOPACK_S3_PREFIX)
-  appendOptionalArg(commandArgs, '--disablePathStyle', process.env.BANGUMI_VELOPACK_S3_DISABLE_PATH_STYLE)
+  appendOptionalArg(
+    commandArgs,
+    '--disablePathStyle',
+    process.env.BANGUMI_VELOPACK_S3_DISABLE_PATH_STYLE,
+  )
   if (options.forUpload) {
-    appendOptionalArg(commandArgs, '--keepMaxReleases', process.env.BANGUMI_VELOPACK_KEEP_MAX_RELEASES)
+    appendOptionalArg(
+      commandArgs,
+      '--keepMaxReleases',
+      process.env.BANGUMI_VELOPACK_KEEP_MAX_RELEASES,
+    )
   }
 }
 
@@ -132,7 +152,11 @@ function appendLocalArgs(commandArgs, options = {}) {
   commandArgs.push('--path', localPath)
   if (options.forUpload) {
     commandArgs.push('--regenerate=true')
-    appendOptionalArg(commandArgs, '--keepMaxReleases', process.env.BANGUMI_VELOPACK_KEEP_MAX_RELEASES)
+    appendOptionalArg(
+      commandArgs,
+      '--keepMaxReleases',
+      process.env.BANGUMI_VELOPACK_KEEP_MAX_RELEASES,
+    )
   }
 }
 
@@ -160,7 +184,8 @@ function parseArgs(values) {
 
 function runVpk(commandArgs, options = {}) {
   const [command, ...commandPrefix] = vpkCommand.split(' ').filter(Boolean)
-  return run(command, [...commandPrefix, ...commandArgs], options)
+  const platformArgs = process.platform === 'win32' ? [] : ['[win]']
+  return run(command, [...commandPrefix, ...platformArgs, ...commandArgs], options)
 }
 
 function run(command, commandArgs, options = {}) {

@@ -16,7 +16,9 @@ async function buildVelopackBridge(context) {
       ? 'bangumi-velopack-bridge.exe'
       : 'bangumi-velopack-bridge'
 
-  await run('cargo', ['build', '--locked', '--release', '--target', target], BRIDGE_DIR)
+  const crossWindows = context.electronPlatformName === 'win32' && process.platform !== 'win32'
+  const buildArgs = crossWindows ? ['xwin', 'build'] : ['build']
+  await run('cargo', [...buildArgs, '--locked', '--release', '--target', target], BRIDGE_DIR)
 
   const source = join(BRIDGE_DIR, 'target', target, 'release', executableName)
   const destinationDir = join(getPackagedResourcesDir(context), 'velopack-bridge')
