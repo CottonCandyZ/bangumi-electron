@@ -39,7 +39,7 @@ function CommentListContent({
   virtual,
   reactionTarget,
   replyTarget,
-  itemVariant = 'bubble',
+  itemVariant = 'floor',
   compact = false,
 }: {
   comments: Comment[]
@@ -60,7 +60,13 @@ function CommentListContent({
 }) {
   if (!virtual) {
     return (
-      <div className={cn('flex flex-col', itemVariant === 'bubble' ? 'gap-5' : 'gap-3', className)}>
+      <div
+        className={cn(
+          'flex flex-col',
+          itemVariant === 'floor' ? 'gap-0' : itemVariant === 'bubble' ? 'gap-5' : 'gap-3',
+          className,
+        )}
+      >
         {comments.map((comment, index) => (
           <CommentItem
             comment={comment}
@@ -96,7 +102,7 @@ function CommentListContent({
       rootClassName="h-full"
       className={cn('max-h-[40rem] pr-2', className)}
       estimateSize={132}
-      gap={itemVariant === 'bubble' ? 18 : 12}
+      gap={itemVariant === 'floor' ? 0 : itemVariant === 'bubble' ? 18 : 12}
       hasMore={hasMore}
       isFetchingMore={isFetchingMore}
       appendPlaceholderCount={appendPlaceholderCount}

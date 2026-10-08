@@ -18,6 +18,7 @@ import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 type CommentReactionsProps = {
+  className?: string
   comment: ReactionItem
   compact?: boolean
   /** 放在评论气泡内部（类似 Telegram），芯片改为半透明白底无边框 */
@@ -31,6 +32,7 @@ export type ReactionItem = {
 }
 
 export function CommentReactions({
+  className,
   comment,
   compact = false,
   inBubble = false,
@@ -48,6 +50,7 @@ export function CommentReactions({
       className={cn(
         'flex flex-row flex-wrap gap-1.5',
         inBubble ? 'mt-1.5' : compact ? 'mt-1' : 'mt-0.5',
+        className,
       )}
     >
       {visibleReactions.map((reaction) => (
@@ -225,7 +228,7 @@ function CommentReactionChip({
       <PopoverTrigger asChild>
         <button
           className={cn(
-            'border-border/70 bg-muted/30 hover:bg-muted/60 inline-flex h-[25px] items-center gap-1 rounded-full border px-1.5 text-xs leading-none transition-colors select-none',
+            'border-border/70 bg-muted/30 hover:bg-muted/60 inline-flex h-[22px] items-center gap-1 rounded-full border pr-2 pl-1.5 text-xs leading-none transition-colors select-none',
             inBubble && 'bg-background/70 hover:bg-background h-[22px] border-transparent',
             userPopoverOpen && 'bg-muted/60 text-foreground',
             active &&
@@ -240,7 +243,8 @@ function CommentReactionChip({
         >
           {smileCode ? (
             <BangumiSmile
-              className={inBubble ? 'size-[14px]' : undefined}
+              // 表情上方是天线，主体偏下，上移 1px 让主体与数字对齐
+              className={cn('size-[14px]', !inBubble && '-translate-y-px')}
               code={smileCode}
               variant="reaction"
             />

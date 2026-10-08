@@ -45,7 +45,13 @@ const CONTENT_COLLAPSE_MASK = 'linear-gradient(to bottom, black calc(100% - 3rem
 const LONG_CONTENT_TEXT_LENGTH = 700
 const LONG_CONTENT_LINE_COUNT = 14
 
-export type CommentItemVariant = 'card' | 'inline' | 'bubble'
+/**
+ * - floor：楼层式（讨论区默认），无框无气泡，楼与楼之间用细线分隔，右侧显示楼层号；
+ * - bubble：聊天气泡式，用于吐槽箱；
+ * - inline：紧凑行内式，用于时间线；
+ * - card：带边框的卡片。
+ */
+export type CommentItemVariant = 'card' | 'inline' | 'bubble' | 'floor'
 
 export function hasVisibleReplyContent(reply: CommentBase) {
   return reply.content.trim().length > 0
@@ -55,7 +61,7 @@ export function CommentItem({
   comment,
   compact = false,
   floorNumber,
-  itemVariant = 'bubble',
+  itemVariant = 'floor',
   reactionTarget,
   userAvatarViewTransition,
   virtual = false,
@@ -71,6 +77,7 @@ export function CommentItem({
   virtual?: boolean
 }) {
   const isBubble = itemVariant === 'bubble'
+  const isFloor = itemVariant === 'floor'
   const [showAllReplies, setShowAllReplies] = useCommentExpansion(`comment:${comment.id}:replies`)
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false)
   const [replyHovering, setReplyHovering] = useState(false)
@@ -112,6 +119,26 @@ export function CommentItem({
     disableHeightTransition: virtual,
     maxCollapsedHeight: COMMENT_CONTENT_COLLAPSED_HEIGHT,
   })
+  const threadLineRef = useRef<HTMLDivElement>(null)
+  const repliesRef = useRef<HTMLDivElement>(null)
+  // 线索线只画到最后一条回复的顶部，剩下的弯折由该回复自己的连线完成；
+  // 回复展开/收起、内容高度变化时重新测量（直接改 style，避免额外渲染）
+  useLayoutEffect(() => {
+    const line = threadLineRef.current
+    const replies = repliesRef.current
+    if (!isFloor || !line || !replies) return
+    const update = () => {
+      const lastReply = replies.lastElementChild
+      if (!lastReply) return
+      const height = lastReply.getBoundingClientRect().top - line.getBoundingClientRect().top
+      line.style.height = `${Math.max(0, height)}px`
+    }
+    update()
+    const observer = new ResizeObserver(update)
+    observer.observe(replies)
+    if (replies.parentElement) observer.observe(replies.parentElement)
+    return () => observer.disconnect()
+  }, [isFloor, visibleReplies.length])
   // 悬停评论时才显示的操作（回复到子回复区域时隐藏，避免与子回复的操作重叠）
   const hoverRevealClass = cn(
     'pointer-events-none opacity-0 transition-opacity',
@@ -165,21 +192,32 @@ export function CommentItem({
         'group/comment relative flex flex-row gap-3 p-3 shadow-none',
         itemVariant === 'inline' && 'gap-2 rounded-none border-0 bg-transparent px-0 py-2.5',
         isBubble && 'rounded-none border-0 bg-transparent p-0',
-        highlighted && !isBubble && 'border-primary/70 bg-primary/5',
+        // 楼层式不用分隔线，靠间距和楼中楼的线索线体现结构
+        isFloor && '-mx-2 rounded-lg border-0 bg-transparent px-2 py-3',
+        highlighted &&
+          (isFloor
+            ? 'bg-amber-50/70 dark:bg-amber-900/20'
+            : !isBubble && 'border-primary/70 bg-primary/5'),
       )}
       data-comment-id={comment.id}
     >
-      {comment.user?.avatar.medium ? (
-        <CommentUserAvatarLink
-          className={cn('size-10 shrink-0', compactUser && 'size-8')}
-          imageClassName={cn('size-10 overflow-hidden rounded-full', compactUser && 'size-8')}
-          transitionKey={`comment-${comment.id}`}
-          user={comment.user}
-          viewTransition={userAvatarViewTransition}
-        />
-      ) : (
-        <div className={cn('bg-muted size-10 shrink-0 rounded-full', compactUser && 'size-8')} />
-      )}
+      <div className="flex shrink-0 flex-col items-center">
+        {comment.user?.avatar.medium ? (
+          <CommentUserAvatarLink
+            className={cn('size-10 shrink-0', compactUser && 'size-8')}
+            imageClassName={cn('size-10 overflow-hidden rounded-full', compactUser && 'size-8')}
+            transitionKey={`comment-${comment.id}`}
+            user={comment.user}
+            viewTransition={userAvatarViewTransition}
+          />
+        ) : (
+          <div className={cn('bg-muted size-10 shrink-0 rounded-full', compactUser && 'size-8')} />
+        )}
+        {/* 楼中楼的线索线：从头像下方延伸到最后一条回复（之后由该回复的连线弯过去） */}
+        {isFloor && replyCount > 0 && (
+          <div aria-hidden className="bg-border mt-2 w-px" ref={threadLineRef} />
+        )}
+      </div>
       <BBCodeImagePreviewProvider>
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           {isBubble ? (
@@ -194,6 +232,19 @@ export function CommentItem({
               creatorID={comment.creatorID}
               floorLabel={isSubjectInterest ? undefined : `#${floorNumber}`}
               meta={<SubjectInterestMeta comment={comment} showRate={showRate} />}
+              user={comment.user}
+            />
+          ) : isFloor ? (
+            <FloorHeader
+              actions={commentActions}
+              contentToggle={
+                hasContent && contentState.collapsible ? (
+                  <CommentContentToggle contentState={contentState} placement="inline" />
+                ) : null
+              }
+              createdAt={comment.createdAt}
+              creatorID={comment.creatorID}
+              floorLabel={`#${floorNumber}`}
               user={comment.user}
             />
           ) : (
@@ -285,10 +336,19 @@ export function CommentItem({
                 'flex flex-col',
                 itemVariant === 'card'
                   ? 'border-border/60 bg-muted/25 rounded-md border px-2'
-                  : 'border-border/70 ml-1 border-l pl-3',
+                  : isFloor
+                    ? 'gap-1'
+                    : 'border-border/70 ml-1 border-l pl-3',
                 isBubble && 'mt-1 gap-1',
               )}
               id={repliesId}
+              ref={repliesRef}
+              // 楼中楼连线需要知道父楼头像的半宽
+              style={
+                isFloor
+                  ? ({ '--thread-half': compactUser ? '16px' : '20px' } as CSSProperties)
+                  : undefined
+              }
               onMouseEnter={() => setReplyHovering(true)}
               onMouseLeave={() => setReplyHovering(false)}
             >
@@ -425,6 +485,52 @@ function BubbleHeader({
   )
 }
 
+/**
+ * 楼层式单行头部：昵称（签名）· 楼层号 · 时间，悬停时操作按钮紧跟在时间后面出现。
+ * 楼层与楼中楼共用，保证时间、楼层、操作的位置一致。
+ */
+function FloorHeader({
+  actions,
+  contentToggle,
+  createdAt,
+  creatorID,
+  floorLabel,
+  user,
+}: {
+  actions?: ReactNode
+  contentToggle: ReactNode
+  createdAt: number
+  creatorID: number
+  floorLabel: string
+  user: CommentBase['user']
+}) {
+  return (
+    <div className="flex h-6 min-w-0 flex-row items-center gap-1.5">
+      {user ? (
+        <>
+          <UserProfileLink
+            className="hover:text-primary max-w-full shrink-0 truncate text-sm font-medium transition-colors"
+            user={user}
+          >
+            {user.nickname}
+          </UserProfileLink>
+          <div className="min-w-0 truncate [&>span]:whitespace-nowrap">
+            <CommentUserSignature sign={user.sign} />
+          </div>
+        </>
+      ) : (
+        <span className="text-sm font-medium">#{creatorID}</span>
+      )}
+      <CommentMetaSeparator />
+      <span className="text-muted-foreground shrink-0 text-xs tabular-nums">{floorLabel}</span>
+      <CommentMetaSeparator />
+      <CommentTimestamp createdAt={createdAt} />
+      {contentToggle}
+      {actions && <div className="ml-1 shrink-0">{actions}</div>}
+    </div>
+  )
+}
+
 function SubjectInterestMeta({ comment, showRate }: { comment: Comment; showRate: boolean }) {
   return (
     <>
@@ -514,6 +620,88 @@ function ReplyItem({
     disableHeightTransition: virtual,
     maxCollapsedHeight: REPLY_CONTENT_COLLAPSED_HEIGHT,
   })
+
+  if (itemVariant === 'floor') {
+    return (
+      <div
+        className={cn(
+          'group/reply relative -mx-2 flex flex-row gap-2.5 rounded-lg px-2 py-2 text-sm',
+          // 楼中楼连线：从父楼头像下方的线索线弯到这条回复的头像
+          // （--thread-half 为父楼头像半宽，由回复容器提供）
+          'before:border-border before:pointer-events-none before:absolute before:top-0 before:left-[calc(-1*(var(--thread-half)+3px))] before:h-[22px] before:w-[calc(var(--thread-half)+9px)] before:rounded-bl-[10px] before:border-b before:border-l',
+          highlighted && 'bg-amber-50/70 dark:bg-amber-900/20',
+        )}
+        data-reply-id={reply.id}
+      >
+        {reply.user?.avatar.medium ? (
+          <CommentUserAvatarLink
+            className="size-7 shrink-0"
+            imageClassName="size-7 overflow-hidden rounded-full"
+            transitionKey={`reply-${reply.id}`}
+            user={reply.user}
+            viewTransition={userAvatarViewTransition}
+          />
+        ) : (
+          <div className="bg-muted size-7 shrink-0 rounded-full" />
+        )}
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <FloorHeader
+            actions={
+              canReact(reactionTarget) || replyTarget ? (
+                // 悬停这条回复时才出现
+                <div
+                  className={cn(
+                    'pointer-events-none flex flex-row items-center gap-1 opacity-0 transition-opacity group-focus-within/reply:pointer-events-auto group-focus-within/reply:opacity-100 group-hover/reply:pointer-events-auto group-hover/reply:opacity-100',
+                    reactionPickerOpen && 'pointer-events-auto opacity-100',
+                  )}
+                >
+                  <CommentReactionButton
+                    className="h-6 px-1.5"
+                    comment={reply}
+                    onOpenChange={setReactionPickerOpen}
+                    target={reactionTarget}
+                  />
+                  {replyTarget && (
+                    <>
+                      <CommentReplyButton
+                        className="h-6 px-1.5"
+                        comment={reply}
+                        floorLabel={floorLabel}
+                        target={replyTarget}
+                      />
+                      {showEdit && (
+                        <CommentEditButton
+                          className="h-6 px-1.5"
+                          comment={reply}
+                          target={replyTarget}
+                        />
+                      )}
+                      <CommentDeleteButton
+                        className="h-6 px-1.5"
+                        comment={reply}
+                        target={replyTarget}
+                      />
+                    </>
+                  )}
+                </div>
+              ) : null
+            }
+            contentToggle={
+              contentState.collapsible ? (
+                <CommentContentToggle contentState={contentState} placement="inline" />
+              ) : null
+            }
+            createdAt={reply.createdAt}
+            creatorID={reply.creatorID}
+            floorLabel={floorLabel}
+            user={reply.user}
+          />
+          <CommentContent className="whitespace-pre-line" contentState={contentState} />
+          <CommentReactions comment={reply} compact target={reactionTarget} />
+        </div>
+      </div>
+    )
+  }
 
   if (itemVariant === 'bubble') {
     const hoverRevealClass = cn(

@@ -268,7 +268,7 @@ function EpisodePageRow({
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-10 pb-5">
+    <div className="mx-auto max-w-6xl px-10">
       <CommentItem
         comment={row.comment}
         floorNumber={row.floorNumber}

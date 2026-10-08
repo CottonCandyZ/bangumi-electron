@@ -71,7 +71,7 @@ export function CommentBox({
   reactionTarget,
   replyTarget,
   showReplyEntry = true,
-  itemVariant = 'bubble',
+  itemVariant = 'floor',
   compact = false,
 }: CommentBoxProps) {
   const resolvedReactionTarget = reactionTarget ?? replyTarget
