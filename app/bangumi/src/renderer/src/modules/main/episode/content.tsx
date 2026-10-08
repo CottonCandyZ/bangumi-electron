@@ -66,6 +66,7 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
   const virtualScrollKey = `episode-page:${episodeId}`
   const {
     cache: restoredVirtualCache,
+    keepMounted: restoredVisibleIndexes,
     mountKey: virtualizerMountKey,
     saveScrollState: saveVirtualScrollState,
   } = useVirtualScrollMemory({
@@ -101,6 +102,7 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
       <div className="min-h-full">
         <Virtualizer
           cache={restoredVirtualCache}
+          keepMounted={restoredVisibleIndexes}
           data={rows}
           item={EpisodePageVirtualItem}
           itemSize={EPISODE_PAGE_VIRTUAL_ITEM_ESTIMATE}

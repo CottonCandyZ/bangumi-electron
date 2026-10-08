@@ -19,7 +19,8 @@ import { useLocation } from 'react-router-dom'
 
 const SCROLL_RESTORE_TOLERANCE = 2
 const SCROLL_RESTORE_TIMEOUT = 1600
-const PAGE_SCROLL_CACHE_DISABLED_PATHS = [/^\/episode\//]
+// These pages own both their height cache and scroll restoration in the virtualizer.
+const PAGE_SCROLL_CACHE_DISABLED_PATHS = [/^\/episode\//, /^\/(group|subject)\/topic\//]
 const SUBJECT_DETAIL_PATH_PATTERN = /^\/subject\/[^/]+\/?$/
 
 type ScrollRestoreReadyContextValue = {
@@ -148,6 +149,10 @@ export function PageScrollWrapper({
       scrollCache.set(scrollKeyRef.current, lastScrollTopRef.current)
     }
     scrollKeyRef.current = scrollKey
+
+    // A second restore here can reset the virtualizer after its layout effect,
+    // or fight its resize compensation while images and comments are measured.
+    if (!pageScrollCacheEnabled) return
 
     const initialScrollTop = getInitialScrollTop(pathname, scrollKey, viewport)
     const startedAt = performance.now()
