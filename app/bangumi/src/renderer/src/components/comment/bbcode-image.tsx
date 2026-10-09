@@ -20,6 +20,11 @@ import 'photoswipe/style.css'
 import { toast } from 'sonner'
 
 type ImageStatus = 'loading' | 'loaded' | 'error'
+type ImageDimensions = { height: number; width: number }
+// Virtual rows are recycled. Retain intrinsic dimensions so remounts reserve the
+// same responsive space, without retaining image elements or decoded pixels.
+const imageDimensionsCache = new Map<string, ImageDimensions>()
+const IMAGE_DIMENSIONS_CACHE_LIMIT = 500
 export type ImagePreviewItem = {
   alt: string
   height: number
@@ -87,21 +92,17 @@ export function BBCodeImagePreviewProvider({ children }: { children: ReactNode }
 }
 
 export function BBCodeImage({ src, alt = '' }: { src: string; alt?: string }) {
+  return <BBCodeImageContent key={src} src={src} alt={alt} />
+}
+
+function BBCodeImageContent({ src, alt }: { src: string; alt: string }) {
   const id = useId()
   const previewGroup = useContext(BBCodeImagePreviewContext)
   const [status, setStatus] = useState<ImageStatus>('loading')
-  const [dimensions, setDimensions] = useState<{ height: number; width: number }>()
+  const [dimensions, setDimensions] = useState(() => imageDimensionsCache.get(src))
   const [retryKey, setRetryKey] = useState(0)
   const [retrying, setRetrying] = useState(false)
   const retryTimerRef = useRef<number | null>(null)
-
-  useEffect(() => {
-    setStatus('loading')
-    setDimensions(undefined)
-    setRetryKey(0)
-    setRetrying(false)
-    if (retryTimerRef.current) window.clearTimeout(retryTimerRef.current)
-  }, [src])
 
   useEffect(() => {
     if (!previewGroup || status !== 'loaded' || !dimensions) return
@@ -146,56 +147,60 @@ export function BBCodeImage({ src, alt = '' }: { src: string; alt?: string }) {
     <span
       className={cn(
         'relative my-2 flex min-h-32 w-full max-w-xl items-center justify-center overflow-hidden rounded-md',
-        status === 'loaded' && 'min-h-0 w-fit max-w-full',
+        dimensions && status !== 'error' && 'min-h-0 max-w-full',
       )}
+      style={
+        dimensions && status !== 'error'
+          ? {
+              aspectRatio: `${dimensions.width} / ${dimensions.height}`,
+              width: `min(${dimensions.width}px, ${(24 * dimensions.width) / dimensions.height}rem)`,
+            }
+          : undefined
+      }
     >
-      {status === 'loaded' ? (
-        <button
-          type="button"
-          className="group focus-visible:ring-ring relative max-w-full cursor-zoom-in rounded-md text-left focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-          aria-label="全屏预览图片"
-          onClick={openPreview}
-        >
-          <img
-            key={`${src}-${retryKey}`}
-            className="max-h-96 max-w-full rounded-md object-contain select-none"
-            src={src}
-            alt={alt}
-            loading="lazy"
-            referrerPolicy="no-referrer"
-            draggable={false}
-            onLoad={(event) => {
-              setStatus('loaded')
-              setDimensions({
-                width: event.currentTarget.naturalWidth,
-                height: event.currentTarget.naturalHeight,
-              })
-            }}
-            onError={() => setStatus('error')}
-          />
-          <span className="absolute right-2 bottom-2 flex size-8 items-center justify-center rounded-full bg-black/60 text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-            <Maximize2Icon className="size-4" />
-          </span>
-        </button>
-      ) : (
+      <button
+        type="button"
+        className="group focus-visible:ring-ring absolute inset-0 size-full cursor-zoom-in rounded-md text-left focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-default"
+        aria-label="全屏预览图片"
+        disabled={status !== 'loaded'}
+        onClick={openPreview}
+      >
         <img
-          key={`${src}-${retryKey}`}
-          className="pointer-events-none absolute inset-0 h-full w-full opacity-0"
+          key={retryKey}
+          className={cn(
+            'size-full rounded-md object-contain select-none',
+            status !== 'loaded' && 'opacity-0',
+          )}
           src={src}
           alt={alt}
+          width={dimensions?.width}
+          height={dimensions?.height}
           loading="lazy"
           referrerPolicy="no-referrer"
           draggable={false}
           onLoad={(event) => {
-            setStatus('loaded')
-            setDimensions({
+            const next = {
               width: event.currentTarget.naturalWidth,
               height: event.currentTarget.naturalHeight,
-            })
+            }
+            if (next.width > 0 && next.height > 0) {
+              imageDimensionsCache.delete(src)
+              imageDimensionsCache.set(src, next)
+              if (imageDimensionsCache.size > IMAGE_DIMENSIONS_CACHE_LIMIT) {
+                imageDimensionsCache.delete(imageDimensionsCache.keys().next().value!)
+              }
+              setDimensions(next)
+            }
+            setStatus('loaded')
           }}
           onError={() => setStatus('error')}
         />
-      )}
+        {status === 'loaded' && (
+          <span className="absolute right-2 bottom-2 flex size-8 items-center justify-center rounded-full bg-black/60 text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+            <Maximize2Icon className="size-4" />
+          </span>
+        )}
+      </button>
       {status === 'loading' && <Skeleton className="absolute inset-0" />}
       {status === 'error' && (
         <span className="bg-muted/70 relative z-10 flex h-full min-h-32 w-full flex-col items-center justify-center gap-2 rounded-md border p-4">
