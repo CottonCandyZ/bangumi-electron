@@ -8,6 +8,7 @@ import { useState, type ReactNode } from 'react'
 
 export function EpisodeCarousel({
   episodes,
+  dataUpdatedAt,
   initialEpisodeId,
   mainEpisodeSortOffset,
   header,
@@ -16,6 +17,7 @@ export function EpisodeCarousel({
   modifyEpisodeCollectionOpt,
 }: {
   episodes: Episode[] | CollectionEpisode[]
+  dataUpdatedAt: number
   initialEpisodeId?: number
   mainEpisodeSortOffset: number
   header: ReactNode
@@ -44,6 +46,7 @@ export function EpisodeCarousel({
               <EpisodeGridItem
                 presentation="card"
                 episodes={episodes}
+                dataUpdatedAt={dataUpdatedAt}
                 index={index}
                 collectionType={collectionType}
                 modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}

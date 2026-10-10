@@ -11,12 +11,14 @@ function isCollectionEpisode(episode: Episode | CollectionEpisode): episode is C
 }
 export function EpisodeGridContent({
   episodes,
+  dataUpdatedAt,
   size = 'default',
   modifyEpisodeCollectionOpt,
   collectionType,
   mainEpisodeSortOffset = 0,
 }: {
   episodes: Episode[] | CollectionEpisode[]
+  dataUpdatedAt: number
   collectionType: CollectionType | undefined
   mainEpisodeSortOffset?: number
 } & EpisodeGridSize &
@@ -85,6 +87,7 @@ export function EpisodeGridContent({
                 size={size}
                 index={index}
                 episodes={episodes}
+                dataUpdatedAt={dataUpdatedAt}
                 modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
                 collectionType={collectionType}
                 mainEpisodeSortOffset={mainEpisodeSortOffset}
@@ -98,6 +101,7 @@ export function EpisodeGridContent({
             size={size}
             index={index}
             episodes={episodes}
+            dataUpdatedAt={dataUpdatedAt}
             modifyEpisodeCollectionOpt={modifyEpisodeCollectionOpt}
             collectionType={collectionType}
             mainEpisodeSortOffset={mainEpisodeSortOffset}

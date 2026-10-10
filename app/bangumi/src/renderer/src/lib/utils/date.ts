@@ -42,11 +42,12 @@ export function formatRecentUnixTime(
 /**
  * 用来获得当前 OnAir 进度
  * @param date Date 对象初始化字符串
+ * @param referenceTime 章节数据源的更新时间戳
  */
-export function getOnAirStatus(date: string): OnAirStatus {
-  const day = new Date(new Date(date).setHours(0))
-  const sub = new Date().valueOf() - day.valueOf()
-  if (sub < 0) return 'noAired'
-  if (sub < 1000 * 60 * 60 * 24) return 'onAir'
+export function getOnAirStatus(date: string, referenceTime = Date.now()): OnAirStatus {
+  const airDay = dayjs(date).startOf('day')
+  const currentDay = dayjs(referenceTime).startOf('day')
+  if (airDay.isAfter(currentDay)) return 'noAired'
+  if (airDay.isSame(currentDay)) return 'onAir'
   return 'aired'
 }

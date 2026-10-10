@@ -6,6 +6,7 @@ import { EpisodesGrid } from '../../src/renderer/src/modules/common/episodes/gri
 
 const fixture = vi.hoisted(() => ({
   data: [] as unknown[] | null,
+  dataUpdatedAt: new Date(2026, 9, 9, 23, 59, 59).getTime(),
   loggedIn: false,
   loaded: true,
   error: null as Error | null,
@@ -24,6 +25,7 @@ vi.mock('@renderer/hooks/use-online', () => ({ useOnline: () => fixture.online }
 vi.mock('@renderer/data/hooks/api/collection', () => ({
   useCollectionEpisodesInfoBySubjectIdQuery: () => ({
     data: fixture.loaded ? { data: fixture.data, total: 0 } : undefined,
+    dataUpdatedAt: fixture.dataUpdatedAt,
     isError: fixture.error !== null,
     error: fixture.error,
     refetch: fixture.refetch,
@@ -32,6 +34,7 @@ vi.mock('@renderer/data/hooks/api/collection', () => ({
 vi.mock('@renderer/data/hooks/api/episodes', () => ({
   useEpisodesInfoBySubjectIdQuery: () => ({
     data: fixture.loaded ? { data: fixture.data, total: 0 } : undefined,
+    dataUpdatedAt: fixture.dataUpdatedAt,
     isError: fixture.error !== null,
     error: fixture.error,
     refetch: fixture.refetch,
@@ -44,10 +47,11 @@ vi.mock('@renderer/modules/panel/left-panel/open-mono-list-panel', () => ({
   OpenMonoListPanelButton: () => null,
 }))
 vi.mock('@renderer/modules/common/episodes/grid/content', () => ({
-  EpisodeGridContent: () => null,
+  EpisodeGridContent: ({ dataUpdatedAt }) =>
+    createElement('div', { 'data-episode-snapshot': dataUpdatedAt }),
 }))
 vi.mock('@renderer/modules/common/episodes/carousel', () => ({
-  EpisodeCarousel: () => null,
+  EpisodeCarousel: ({ gridContent }) => gridContent ?? null,
 }))
 vi.mock('@renderer/modules/common/episodes/progress-editor', () => ({
   EpisodeProgressEditor: () => null,
@@ -119,3 +123,18 @@ test('uncached episodes show the offline fallback when collection sync cannot co
   expect(html).toContain('等待联网')
   expect(html).not.toContain('data-slot="skeleton"')
 })
+
+test.each([false, true])(
+  'compact and main grids pass the same query snapshot time (logged in: %s)',
+  (loggedIn) => {
+    fixture.loggedIn = loggedIn
+    const episode = { id: 2, type: 0, sort: 2, airdate: '2026-10-10' }
+    fixture.data = loggedIn ? [{ episode, type: 0 }] : [episode]
+    for (const size of ['small', 'default'] as const) {
+      const html = renderToStaticMarkup(
+        createElement(EpisodesGrid, { subjectId: '42', eps: 12, size }),
+      )
+      expect(html).toContain(`data-episode-snapshot="${fixture.dataUpdatedAt}"`)
+    }
+  },
+)

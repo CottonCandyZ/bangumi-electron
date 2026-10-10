@@ -74,6 +74,8 @@ function EpisodesView({
     enabled: !!userInfo,
   })
   const episodeQuery = userInfo ? collectionEpisodesQuery : episodesQuery
+  // Keep airing status tied to the shared query snapshot, rather than each view's render time.
+  const dataUpdatedAt = episodeQuery.dataUpdatedAt
   const { progress, offset, episodes, episodeSortStart } = getEpisodePage({
     episodes: episodeQuery.data?.data ?? [],
     collection: !!userInfo,
@@ -135,6 +137,7 @@ function EpisodesView({
   const gridContent = (
     <EpisodeGridContent
       episodes={episodes}
+      dataUpdatedAt={dataUpdatedAt}
       size={size}
       modifyEpisodeCollectionOpt={{ limit, offset }}
       collectionType={collectionType}
@@ -147,6 +150,7 @@ function EpisodesView({
       <EpisodeCarousel
         key={offset}
         episodes={episodes}
+        dataUpdatedAt={dataUpdatedAt}
         initialEpisodeId={progress.anchor?.episode.id}
         mainEpisodeSortOffset={mainEpisodeSortOffset}
         header={header}

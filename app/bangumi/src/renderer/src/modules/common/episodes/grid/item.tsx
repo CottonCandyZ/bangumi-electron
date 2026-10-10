@@ -35,6 +35,7 @@ export function EpisodeGridItem({
   size = 'default',
   index,
   episodes,
+  dataUpdatedAt,
   modifyEpisodeCollectionOpt,
   collectionType,
   mainEpisodeSortOffset = 0,
@@ -42,6 +43,7 @@ export function EpisodeGridItem({
 }: {
   index: number
   episodes: Episode[] | CollectionEpisode[]
+  dataUpdatedAt: number
   collectionType: CollectionType | undefined
   mainEpisodeSortOffset?: number
   presentation?: 'number' | 'card'
@@ -65,7 +67,7 @@ export function EpisodeGridItem({
     : EpisodeCollectionType.notCollected
   const status =
     episodeCollectionType === EpisodeCollectionType.notCollected
-      ? getOnAirStatus(episode.airdate)
+      ? getOnAirStatus(episode.airdate, dataUpdatedAt)
       : (EpisodeCollectionType[episodeCollectionType] as Exclude<
           keyof typeof EpisodeCollectionType,
           'notCollected'
