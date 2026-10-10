@@ -76,7 +76,9 @@ export function EpisodeGridContent({
                     />
                   </svg>
                 )}
-                {item.type <= 3 ? EpisodeType[item.type] : '其他'}
+                <span className="episode-label">
+                  {item.type <= 3 ? EpisodeType[item.type] : '其他'}
+                </span>
               </div>
               <EpisodeGridItem
                 key={item.id}

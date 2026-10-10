@@ -34,6 +34,12 @@
   }
 }
 
+/* Noto Sans digits sit slightly low inside compact episode controls on Windows. */
+html[data-platform='win32'] .episode-label {
+  position: relative;
+  top: -1px;
+}
+
 :where([data-sonner-toaster]) {
   @apply font-sans!;
   & :where([data-title]) {

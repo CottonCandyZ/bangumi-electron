@@ -18,17 +18,19 @@ const buttonVariants = cva(
         noAired:
           'hover:bg-accent hover:text-accent-foreground text-muted-foreground hover:shadow-sm',
         onAir:
-          'border border-input bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground',
+          'border border-input bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:border-muted-foreground/30 dark:bg-secondary dark:hover:bg-muted-foreground/20',
         aired:
-          'border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:shadow-inner',
+          'border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:shadow-inner dark:border-muted-foreground/30 dark:bg-secondary dark:hover:bg-muted-foreground/20',
         wantToWatchHover: 'shadow-inner bg-(--want-to-watch) text-(--want-to-watch-foreground)',
         watchedHover:
           'border border-input shadow-inner hover:shadow-none bg-(--watched) text-(--watched-foreground)',
         abandonedHover:
           'border border-primary-foreground line-through shadow-inner bg-accent text-accent-foreground text-muted-foreground',
         noAiredHover: 'bg-accent text-accent-foreground shadow-sm',
-        onAirHover: 'border border-input text-muted-foreground bg-accent text-accent-foreground',
-        airedHover: 'border border-input bg-accent text-accent-foreground shadow-inner',
+        onAirHover:
+          'border border-input text-muted-foreground bg-accent text-accent-foreground dark:border-muted-foreground/30 dark:bg-muted-foreground/20',
+        airedHover:
+          'border border-input bg-accent text-accent-foreground shadow-inner dark:border-muted-foreground/30 dark:bg-muted-foreground/20',
       },
       size: {
         default: 'h-9 px-4 py-2',

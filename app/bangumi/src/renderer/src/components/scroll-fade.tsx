@@ -1,15 +1,17 @@
 import { cn } from '@renderer/lib/utils'
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 
 /** Fade only edges with hidden content, including after content or viewport resizing. */
 export function ScrollFade({
   children,
   className,
   label,
+  style,
 }: {
   children: ReactNode
   className?: string
   label: string
+  style?: CSSProperties
 }) {
   const viewportRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -50,6 +52,7 @@ export function ScrollFade({
         className,
       )}
       style={{
+        ...style,
         maskImage: `linear-gradient(to bottom, rgb(0 0 0 / ${1 - edges.start}), #000 1.5em, #000 calc(100% - 1.5em), rgb(0 0 0 / ${1 - edges.end}))`,
       }}
     >

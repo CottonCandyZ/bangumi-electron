@@ -5,6 +5,9 @@ import { cn } from '@renderer/lib/utils'
 import { Tags } from '@renderer/modules/main/subject/tags/tags'
 import { ScrollFade } from '@renderer/components/scroll-fade'
 import { INPUT_LIMIT_CONFIG } from '@renderer/config'
+import { useLayoutEffect, useRef, useState } from 'react'
+
+const MIN_TAG_LIST_HEIGHT = 96
 
 export function FormTags({
   subjectTags,
@@ -17,6 +20,40 @@ export function FormTags({
   collectionTags: CollectionData['tags'] | undefined
   onTagsChanges: (value: Set<string>) => void
 }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [maxListHeight, setMaxListHeight] = useState<number>()
+
+  useLayoutEffect(() => {
+    const container = containerRef.current
+    const form = container?.closest('form')
+    const viewport = form?.parentElement
+    const body = form?.firstElementChild
+    const footer = form?.lastElementChild
+    const list = container?.firstElementChild
+    const lastSection = body?.lastElementChild
+    if (!container || !form || !viewport || !body || !footer || !list || !lastSection) return
+
+    const update = () => {
+      const listRect = list.getBoundingClientRect()
+      // Ignore the body's spare space so a taller window can expand the list again.
+      const occupiedHeight =
+        listRect.top -
+        form.getBoundingClientRect().top +
+        lastSection.getBoundingClientRect().bottom -
+        listRect.bottom +
+        parseFloat(getComputedStyle(body).paddingBottom) +
+        footer.getBoundingClientRect().height
+      setMaxListHeight(Math.max(MIN_TAG_LIST_HEIGHT, viewport.clientHeight - occupiedHeight))
+    }
+    const observer = new ResizeObserver(update)
+    observer.observe(viewport)
+    observer.observe(footer)
+    observer.observe(container.lastElementChild!)
+    for (const section of body.children) observer.observe(section)
+    update()
+    return () => observer.disconnect()
+  }, [])
+
   const tags = selectedTags
   const updateTags = (updater: (next: Set<string>) => void) => {
     const next = new Set(tags)
@@ -25,8 +62,12 @@ export function FormTags({
   }
   const exceed = tags.size > INPUT_LIMIT_CONFIG.tags_max_length_limit
   return (
-    <div className="flex min-w-0 flex-col gap-3">
-      <ScrollFade className="max-h-[16.75rem] pr-2 [scrollbar-gutter:stable]" label="可选收藏标签">
+    <div ref={containerRef} className="flex min-w-0 flex-col gap-3">
+      <ScrollFade
+        className="pr-2 [scrollbar-gutter:stable]"
+        label="可选收藏标签"
+        style={{ maxHeight: maxListHeight }}
+      >
         <Tags
           subjectTags={subjectTags}
           collectionTags={collectionTags}

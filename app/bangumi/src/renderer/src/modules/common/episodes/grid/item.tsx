@@ -146,7 +146,7 @@ export function EpisodeGridItem({
             </span>
           </>
         ) : (
-          displaySort
+          <span className="episode-label">{displaySort}</span>
         )}
       </EpisodeButton>
     </HoverCardTrigger>
