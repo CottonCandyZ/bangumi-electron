@@ -107,11 +107,12 @@ export function SingleColumnVirtualList<T>({
       : undefined
   const {
     cache: restoredVirtualCache,
+    keepMounted: restoredVisibleIndexes,
     mountKey,
     saveScrollState,
   } = useVirtualScrollMemory({
     canSave: !isFetchingMore,
-    itemCount: items.length,
+    itemCount: rows.length,
     memoryKey: scrollMemoryKey,
     viewport,
     viewportRef,
@@ -200,6 +201,7 @@ export function SingleColumnVirtualList<T>({
       {viewport && (
         <Virtualizer
           cache={restoredVirtualCache}
+          keepMounted={restoredVisibleIndexes}
           data={rows}
           item={VirtualListItem}
           itemSize={estimateSize}

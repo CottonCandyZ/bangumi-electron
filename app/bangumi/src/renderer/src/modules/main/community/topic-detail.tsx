@@ -117,6 +117,7 @@ function TopicDetail({
   const virtualScrollKey = `${kind}-topic-page:${topic.id}`
   const {
     cache: restoredVirtualCache,
+    keepMounted: restoredVisibleIndexes,
     mountKey: virtualizerMountKey,
     saveScrollState: saveVirtualScrollState,
   } = useVirtualScrollMemory({
@@ -147,6 +148,7 @@ function TopicDetail({
       <div className="min-h-full">
         <Virtualizer
           cache={restoredVirtualCache}
+          keepMounted={restoredVisibleIndexes}
           data={rows}
           item={TopicDetailVirtualItem}
           itemSize={TOPIC_DETAIL_ITEM_ESTIMATE}
