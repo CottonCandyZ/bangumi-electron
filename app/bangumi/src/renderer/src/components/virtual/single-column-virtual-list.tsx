@@ -169,13 +169,16 @@ export function SingleColumnVirtualList<T>({
     virtualizerRef.current?.scrollToIndex(activeIndex, { align: 'center' })
   }, [activeIndex, activeItemKey, items.length])
 
+  // Only sync when the Virtualizer (re)mounts onto an already-scrolled viewport.
+  // virtua's scrollTo keeps re-applying the target offset whenever items get measured,
+  // so running this on every rows change would pull the list back up mid-scroll.
   useLayoutEffect(() => {
     const currentViewport = viewportRef.current
     const currentVirtualizer = virtualizerRef.current
     if (!currentViewport || !currentVirtualizer || currentViewport.scrollTop <= 0) return
 
     currentVirtualizer.scrollTo(currentViewport.scrollTop)
-  }, [rows.length, viewport])
+  }, [mountKey, viewport])
 
   useEffect(() => {
     if (rows.length === 0 || !isNearBottom()) return
