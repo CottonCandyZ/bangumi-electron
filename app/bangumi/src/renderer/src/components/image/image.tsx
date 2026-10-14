@@ -1,7 +1,7 @@
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
 import { ImageLoadCache } from '@renderer/state/global-var'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 type ImageProps = React.HTMLAttributes<HTMLDivElement> & {
   imageSrc?: string
@@ -24,24 +24,24 @@ export function Image({
   const [isLoad, setIsLoad] = useState(imageSrc ? (ImageLoadCache.get(imageSrc) ?? false) : false)
   const [isError, setIsError] = useState(false)
   const [stateImageSrc, setStateImageSrc] = useState(imageSrc)
-  const errorTimeId = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  useEffect(() => {
+  const [prevImageSrc, setPrevImageSrc] = useState(imageSrc)
+  if (prevImageSrc !== imageSrc) {
+    setPrevImageSrc(imageSrc)
     setStateImageSrc(imageSrc)
-  }, [imageSrc])
+  }
 
+  // 只在出错时才注册重试；正常挂载不做任何事（页面切换时会同时挂载上百张图片）
   useEffect(() => {
-    clearTimeout(errorTimeId.current)
+    if (!isError) return
     const refresh = () => {
       setStateImageSrc(imageSrc)
     }
-    window.removeEventListener('online', refresh)
-    if (isError) {
-      if (navigator.onLine) {
-        errorTimeId.current = setTimeout(refresh, 5000)
-      } else {
-        window.addEventListener('online', refresh)
-      }
+    if (navigator.onLine) {
+      const timeId = setTimeout(refresh, 5000)
+      return () => clearTimeout(timeId)
     }
+    window.addEventListener('online', refresh)
+    return () => window.removeEventListener('online', refresh)
   }, [isError, imageSrc])
 
   return (

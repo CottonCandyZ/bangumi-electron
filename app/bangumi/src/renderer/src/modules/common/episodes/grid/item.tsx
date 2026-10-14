@@ -18,8 +18,8 @@ import {
   hoverCardEpisodeContentAtom,
   hoverCardOpenAtom,
 } from '@renderer/state/hover-card'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { MouseEvent, useEffect, useState } from 'react'
+import { atom, useAtomValue, useSetAtom } from 'jotai'
+import { MouseEvent, useMemo } from 'react'
 import { EpisodeButton } from '@renderer/components/button/episode'
 import { useEpisodeCollectionActions } from '@renderer/modules/common/collections/use-episode-collection-actions'
 import { useNavigate } from 'react-router-dom'
@@ -53,7 +53,7 @@ export function EpisodeGridItem({
   const displaySort =
     episode.type === EpisodeType['本篇'] ? episode.sort + mainEpisodeSortOffset : episode.sort
   const navigate = useNavigate()
-  const [hoverCardContent, setHoverCardContent] = useAtom(hoverCardEpisodeContentAtom)
+  const setHoverCardContent = useSetAtom(hoverCardEpisodeContentAtom)
   const closeHoverCardImmediately = useSetAtom(closeHoverCardImmediatelyAtomAction)
   const collectionEpisodes = isCollectionEpisode(episodes) ? episodes : undefined
   const { currentAction, isPending, mutateByAction } = useEpisodeCollectionActions({
@@ -72,16 +72,21 @@ export function EpisodeGridItem({
           keyof typeof EpisodeCollectionType,
           'notCollected'
         >)
-  const [selfOpen, setSelfOpen] = useState(false)
-  const open = useAtomValue(hoverCardOpenAtom)
-  useEffect(() => {
-    if (
-      hoverCardContent !== null &&
-      hoverCardContent.id === 'episode-content' &&
-      hoverCardContent.episodes[hoverCardContent.index] !== episodes[index]
-    )
-      setSelfOpen(false)
-  }, [hoverCardContent, episodes, index])
+  // 只订阅「自己是否是当前打开的那张卡片」，避免卡片开关时所有剧集按钮一起重渲染
+  const isHoverCardOwnerAtom = useMemo(
+    () =>
+      atom((get) => {
+        const content = get(hoverCardEpisodeContentAtom)
+        return (
+          get(hoverCardOpenAtom) &&
+          content !== null &&
+          content.id === 'episode-content' &&
+          content.episodes[content.index] === episodes[index]
+        )
+      }),
+    [episodes, index],
+  )
+  const isHoverCardOwner = useAtomValue(isHoverCardOwnerAtom)
 
   const toModifierState = (e: MouseEvent<HTMLButtonElement>): CollectionShortcutModifierState => ({
     metaKey: e.metaKey,
@@ -100,7 +105,6 @@ export function EpisodeGridItem({
           collectionType,
           modifyEpisodeCollectionOpt,
         })
-        setSelfOpen(true)
       }}
     >
       <EpisodeButton
@@ -113,7 +117,7 @@ export function EpisodeGridItem({
         )}
         aria-label={`${episode.type === EpisodeType.本篇 ? '第' : (EpisodeType[episode.type] ?? '其他')} ${displaySort} 集 ${episode.name_cn || episode.name}`}
         disabled={isPending}
-        variant={selfOpen && open ? `${status}Hover` : status}
+        variant={isHoverCardOwner ? `${status}Hover` : status}
         onClick={(e) => {
           e.preventDefault()
           e.stopPropagation()
@@ -127,7 +131,6 @@ export function EpisodeGridItem({
               return
             }
           }
-          setSelfOpen(false)
           closeHoverCardImmediately()
           navigate(`/episode/${episode.id}`)
         }}

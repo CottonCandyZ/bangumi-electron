@@ -21,13 +21,16 @@ export function SubjectInfoPanel() {
 
   return (
     <div className="flex h-full min-w-0 flex-col">
-      <div className="drag-region h-panel-header flex shrink-0 items-center border-b px-3">
-        <div className="no-drag-region">
+      <div className="drag-region h-panel-header flex shrink-0 items-stretch border-b px-3">
+        <div className="no-drag-region -mb-px flex items-stretch">
           <Tabs
-            currentSelect={currentTab}
-            setCurrentSelect={setFilter}
+            variant="underline"
+            className="flex-nowrap items-stretch justify-start gap-x-4"
+            tabClassName="py-0 font-medium"
             tabsContent={SUBJECT_INFO_TABS}
             layoutId={tabId}
+            currentSelect={currentTab}
+            setCurrentSelect={setFilter}
           />
         </div>
       </div>

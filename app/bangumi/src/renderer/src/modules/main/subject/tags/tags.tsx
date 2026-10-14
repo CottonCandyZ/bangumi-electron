@@ -1,7 +1,9 @@
-import { Button } from '@renderer/components/ui/button'
 import { CollectionData } from '@renderer/data/types/collection'
 import { Subject } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
+
+const TAG_CLASS_NAME =
+  'inline-flex items-baseline gap-1 rounded-md px-2 py-1 text-sm transition-colors focus-visible:ring-ring/50 focus-visible:ring-2 focus-visible:outline-hidden'
 
 export function Tags({
   subjectTags,
@@ -22,53 +24,53 @@ export function Tags({
   const subjectTagsSet = new Set(subjectTags.map((item) => item.name))
   const collectionTagsSet = new Set(collectionTags)
   const diff = collectionTagsSet.difference(subjectTagsSet)
+  const tags: [string, number | undefined][] = [
+    ...[...subjectTagsMap].sort((a, b) => b[1] - a[1]),
+    ...[...diff].map((name) => [name, undefined] as [string, undefined]),
+  ]
+
   return (
-    <div className="flex flex-row flex-wrap gap-2 after:grow-999">
-      {[...subjectTagsMap]
-        .sort((a, b) => b[1] - a[1])
-        .map(([name, count]) => (
-          <Button
+    <div className="flex flex-row flex-wrap gap-1.5">
+      {tags.map(([name, count]) => {
+        const mine = collectionTagsSet.has(name)
+        return (
+          <button
             type="button"
             key={name}
             className={cn(
-              'relative h-auto flex-auto items-baseline justify-center gap-1 overflow-hidden px-1.5 py-1.5 whitespace-normal shadow-none',
-
-              edit && selectedTags && selectedTags.has(name) && 'opacity-50',
+              TAG_CLASS_NAME,
+              mine
+                ? 'bg-(--watched-accent) text-(--watched-accent-foreground) hover:brightness-110'
+                : 'bg-muted/60 text-foreground/80 hover:bg-muted hover:text-foreground',
+              edit && selectedTags?.has(name) && 'opacity-50',
             )}
-            variant="outline"
-            onClick={() => onTagClicked && onTagClicked(name)}
+            onClick={() => onTagClicked?.(name)}
           >
-            {collectionTagsSet.has(name) && (
-              <div className="bg-primary absolute right-0 bottom-0 left-0 h-0.5" />
+            <span>{name}</span>
+            {count !== undefined && (
+              <span
+                className={cn(
+                  'text-xs tabular-nums',
+                  mine ? 'text-(--watched-accent-foreground)/70' : 'text-muted-foreground',
+                )}
+              >
+                {count}
+              </span>
             )}
-            <span className="text-sm">{name}</span>
-            <span className="text-muted-foreground text-xs">{count}</span>
-          </Button>
-        ))}
-      {[...diff].map((item) => (
-        <Button
-          type="button"
-          key={item}
-          className={cn(
-            'relative h-auto flex-auto items-baseline justify-center gap-1 overflow-hidden px-1.5 py-1.5 whitespace-normal shadow-none',
-            edit && selectedTags && selectedTags.has(item) && 'opacity-50',
-          )}
-          variant="outline"
-          onClick={() => onTagClicked && onTagClicked(item)}
-        >
-          <div className="bg-primary absolute right-0 bottom-0 left-0 h-0.5" />
-          <span className="text-sm">{item}</span>
-        </Button>
-      ))}
+          </button>
+        )
+      })}
       {setEdit && collectionTags !== undefined && !edit && (
-        <Button
+        <button
           type="button"
-          className="h-auto flex-auto gap-1 py-1.5 text-sm shadow-none"
-          variant="outline"
+          className={cn(
+            TAG_CLASS_NAME,
+            'text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-dashed',
+          )}
           onClick={() => setEdit(true)}
         >
           + 添加标签
-        </Button>
+        </button>
       )}
     </div>
   )

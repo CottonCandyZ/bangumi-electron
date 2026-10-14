@@ -1,6 +1,5 @@
 import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Tabs } from '@renderer/components/tabs'
-import { Card } from '@renderer/components/ui/card'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useRelatedSubjectsQuery } from '@renderer/data/hooks/api/subject'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
@@ -55,8 +54,8 @@ export function RelatedSubjects({ subjectId }: Props) {
 
   if (relatedSubjects?.size === 0) return null
   return (
-    <section className="flex flex-col gap-5">
-      <div className="flex flex-row items-start justify-between gap-10">
+    <section className="flex flex-col gap-3">
+      <div className="flex flex-row items-center justify-between gap-6">
         <div className="flex shrink-0 flex-row items-center gap-2">
           <h2 className="text-base font-semibold">关联条目</h2>
           <OpenMonoListPanelButton
@@ -68,13 +67,14 @@ export function RelatedSubjects({ subjectId }: Props) {
         </div>
         {relatedSubjects ? (
           <Tabs
+            variant="underline"
             currentSelect={filter}
             setCurrentSelect={setFilter}
             tabsContent={relations}
             layoutId={id}
           />
         ) : (
-          <Skeleton className="h-9 w-40" />
+          <Skeleton className="h-5 w-48" />
         )}
       </div>
       {relatedSubjects ? (
@@ -88,8 +88,8 @@ export function RelatedSubjects({ subjectId }: Props) {
 
 function RelatedGridSkeleton() {
   return (
-    <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(8rem,_1fr))] gap-x-2 gap-y-5 py-2">
-      {Array(5)
+    <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(7.5rem,1fr))] gap-x-3 gap-y-4">
+      {Array(6)
         .fill(0)
         .map((_, index) => (
           <RelatedSubjectSkeleton key={index} />
@@ -101,12 +101,10 @@ function RelatedGridSkeleton() {
 function RelatedSubjectSkeleton() {
   return (
     <div className="flex flex-col gap-2">
-      <Card className="overflow-hidden shadow-none">
-        <Skeleton className="aspect-square rounded-xl" />
-      </Card>
+      <Skeleton className="aspect-square rounded-lg" />
       <div className="flex flex-col gap-1">
-        <Skeleton className="h-3 w-full" />
-        <Skeleton className="h-3 w-2/3" />
+        <Skeleton className="h-3 w-10" />
+        <Skeleton className="h-3.5 w-full" />
       </div>
     </div>
   )

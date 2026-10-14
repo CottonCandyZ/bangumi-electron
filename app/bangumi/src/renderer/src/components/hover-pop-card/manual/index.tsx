@@ -178,14 +178,13 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
     <div
       ref={wrapperRef}
       className={cn(
-        isAnimate
-          ? 'absolute'
-          : 'h-full hover:-translate-y-0.5 hover:shadow-xl! hover:duration-700',
+        isAnimate ? 'absolute' : 'h-full',
         'inset-0',
         shouldClipOverflow && 'overflow-hidden',
         isActive && 'z-10',
         className,
       )}
+      data-popped={isActive || isAnimate ? '' : undefined}
       onMouseLeave={() => {
         clearTimeout(timeoutRef.current)
         timeoutRef.current = undefined

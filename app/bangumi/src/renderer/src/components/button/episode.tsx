@@ -12,25 +12,22 @@ const buttonVariants = cva(
         wantToWatch:
           'bg-(--want-to-watch-accent) text-(--want-to-watch-accent-foreground) shadow-inner hover:bg-(--want-to-watch) hover:text-(--want-to-watch-foreground)',
         watched:
-          'border border-input bg-(--watched-accent) text-(--watched-accent-foreground) shadow-inner hover:shadow-none hover:bg-(--watched) hover:text-(--watched-foreground)',
+          'bg-(--watched-accent) text-(--watched-accent-foreground) hover:bg-(--watched) hover:text-(--watched-foreground)',
         abandoned:
           'border border-primary-foreground line-through shadow-inner hover:bg-accent hover:text-accent-foreground text-muted-foreground',
         noAired:
           'hover:bg-accent hover:text-accent-foreground text-muted-foreground hover:shadow-sm',
         onAir:
-          'border border-input bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:border-muted-foreground/30 dark:bg-secondary dark:hover:bg-muted-foreground/20',
+          'bg-foreground/2.5 text-muted-foreground hover:bg-foreground/6 hover:text-foreground dark:bg-foreground/4 dark:hover:bg-foreground/8',
         aired:
-          'border border-input bg-background hover:bg-accent hover:text-accent-foreground hover:shadow-inner dark:border-muted-foreground/30 dark:bg-secondary dark:hover:bg-muted-foreground/20',
+          'bg-foreground/4.5 text-foreground/85 hover:bg-foreground/9 hover:text-foreground dark:bg-foreground/8 dark:hover:bg-foreground/14',
         wantToWatchHover: 'shadow-inner bg-(--want-to-watch) text-(--want-to-watch-foreground)',
-        watchedHover:
-          'border border-input shadow-inner hover:shadow-none bg-(--watched) text-(--watched-foreground)',
+        watchedHover: 'bg-(--watched) text-(--watched-foreground)',
         abandonedHover:
           'border border-primary-foreground line-through shadow-inner bg-accent text-accent-foreground text-muted-foreground',
         noAiredHover: 'bg-accent text-accent-foreground shadow-sm',
-        onAirHover:
-          'border border-input text-muted-foreground bg-accent text-accent-foreground dark:border-muted-foreground/30 dark:bg-muted-foreground/20',
-        airedHover:
-          'border border-input bg-accent text-accent-foreground shadow-inner dark:border-muted-foreground/30 dark:bg-muted-foreground/20',
+        onAirHover: 'bg-foreground/6 text-foreground dark:bg-foreground/8',
+        airedHover: 'bg-foreground/9 text-foreground dark:bg-foreground/14',
       },
       size: {
         default: 'h-9 px-4 py-2',

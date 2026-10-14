@@ -116,7 +116,7 @@ function ProgressForm({
               aria-valuemax={progress.main.length}
               aria-valuenow={watchedCount}
               aria-valuetext={`已看 ${watchedCount} / ${progress.main.length} 集`}
-              className="pointer-events-none absolute inset-y-0 left-0 bg-linear-to-r from-(--watched)/20 to-(--watched)/5 transition-[width] duration-300 motion-reduce:transition-none dark:from-(--watched-accent)/70 dark:to-(--watched-accent)/30"
+              className="pointer-events-none absolute inset-y-0 left-0 bg-linear-to-r from-(--watched)/20 to-(--watched)/5 transition-[width] duration-300 motion-reduce:transition-none dark:from-(--watched)/25 dark:to-(--watched)/8"
               style={{ width: `${(watchedCount / progress.main.length) * 100}%` }}
             />
             <Input

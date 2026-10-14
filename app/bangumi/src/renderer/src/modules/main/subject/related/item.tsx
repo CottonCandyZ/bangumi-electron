@@ -1,44 +1,52 @@
 import { Image } from '@renderer/components/image/image'
 import { ViewTransitionElement } from '@renderer/components/image/view-transition-image'
-import { Card } from '@renderer/components/ui/card'
 import { RelatedSubject } from '@renderer/data/types/subject'
 import { Link, useViewTransitionState, useLocation } from 'react-router-dom'
 
 const sectionId = 'RelatedSubjects'
-export function Item({ relatedSubject }: { relatedSubject: RelatedSubject }) {
+export function Item({
+  relatedSubject,
+  relation,
+}: {
+  relatedSubject: RelatedSubject
+  /** 「全部」视图下显示关系标签 */
+  relation?: string
+}) {
   const { key } = useLocation()
   const layoutId = `${sectionId}-${relatedSubject.id}-${key}`
 
   const isTransitioning = useViewTransitionState(`/subject/${relatedSubject.id}`)
+
   return (
-    <div className="flex flex-col gap-2">
-      <Link
-        to={`/subject/${relatedSubject.id}`}
-        className="cursor-default"
-        state={{ viewTransitionName: `cover-image-${key}` }}
-        viewTransition
+    <Link
+      to={`/subject/${relatedSubject.id}`}
+      className="group/related flex min-w-0 cursor-default flex-col gap-2 focus-visible:outline-hidden"
+      state={{ viewTransitionName: `cover-image-${key}` }}
+      viewTransition
+    >
+      <ViewTransitionElement
+        active={isTransitioning}
+        className="overflow-hidden rounded-lg"
+        viewTransitionName={`cover-image-${key}`}
       >
-        <ViewTransitionElement
-          active={isTransitioning}
-          className="overflow-hidden rounded-xl"
-          viewTransitionName={`cover-image-${key}`}
-        >
-          <Card className="overflow-hidden hover:-translate-y-0.5 hover:shadow-xl hover:duration-700">
-            {relatedSubject.images.common !== '' ? (
-              <Image
-                key={`${layoutId}-image`}
-                imageSrc={relatedSubject.images.common}
-                className="aspect-square"
-              />
-            ) : (
-              <div className="bg-muted aspect-square" />
-            )}
-          </Card>
-        </ViewTransitionElement>
-      </Link>
-      <div className="flex flex-col">
-        <span className="line-clamp-3 text-xs">{relatedSubject.name}</span>
+        <div className="bg-muted group-focus-visible/related:ring-ring/50 overflow-hidden rounded-lg ring-1 ring-black/5 transition-[filter] group-hover/related:brightness-110 group-focus-visible/related:ring-2 dark:ring-white/10">
+          {relatedSubject.images.common !== '' ? (
+            <Image
+              key={`${layoutId}-image`}
+              imageSrc={relatedSubject.images.common}
+              className="aspect-square"
+            />
+          ) : (
+            <div className="aspect-square" />
+          )}
+        </div>
+      </ViewTransitionElement>
+      <div className="flex min-w-0 flex-col gap-0.5">
+        {relation && <span className="text-muted-foreground text-xs">{relation}</span>}
+        <span className="line-clamp-2 text-sm leading-snug group-hover/related:underline group-hover/related:underline-offset-2">
+          {relatedSubject.name}
+        </span>
       </div>
-    </div>
+    </Link>
   )
 }

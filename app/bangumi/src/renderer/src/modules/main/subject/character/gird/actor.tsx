@@ -20,15 +20,13 @@ export function Actors({ actors, showAll = false }: { actors: Actor[]; showAll?:
             <div
               key={actor.id}
               className={cn(
-                'flex min-w-0 flex-row items-end gap-2',
-                showAll ? 'max-w-full flex-none' : 'flex-1',
+                'flex min-w-0 flex-row gap-2',
+                showAll ? 'max-w-full flex-none items-end' : 'flex-1 items-center gap-1.5',
               )}
             >
               <ActorLink actor={actor} showAll={showAll} hasMoreActors={actors.length > 1} />
               {!showAll && actors.length > 1 && (
-                <div className="-mb-[3px] flex size-6 shrink-0 items-center justify-center rounded-full border pb-0.5">
-                  <div className="text-accent-foreground text-[0.7rem]">+{actors.length - 1}</div>
-                </div>
+                <span className="text-muted-foreground shrink-0 text-xs">+{actors.length - 1}</span>
               )}
             </div>
           ),
@@ -56,7 +54,8 @@ function ActorLink({
       state={{ viewTransitionName }}
       viewTransition
       className={cn(
-        'group/actor flex min-w-0 cursor-default flex-row items-end gap-2 focus-visible:outline-hidden',
+        'group/actor flex min-w-0 cursor-default flex-row focus-visible:outline-hidden',
+        showAll ? 'items-end gap-2' : 'items-center gap-1.5',
         showAll || !hasMoreActors ? 'max-w-full flex-none' : 'max-w-[calc(100%-2rem)] flex-none',
       )}
     >
@@ -64,11 +63,21 @@ function ActorLink({
         <ViewTransitionImage
           active={isTransitioning}
           imageSrc={getCharacterAvatarURL(actor.images.large)}
-          className="size-9 shrink-0 overflow-hidden rounded-md"
+          className={cn(
+            'shrink-0 overflow-hidden',
+            showAll ? 'size-9 rounded-md' : 'size-5 rounded-full',
+          )}
           viewTransitionName={viewTransitionName}
         />
       )}
-      <span className="font-jp text-primary line-clamp-1 min-w-0 underline-offset-2 group-hover/actor:underline group-focus-visible/actor:underline">
+      <span
+        className={cn(
+          'font-jp line-clamp-1 min-w-0 underline-offset-2 group-hover/actor:underline group-focus-visible/actor:underline',
+          showAll
+            ? 'text-primary'
+            : 'text-muted-foreground group-hover/actor:text-foreground text-xs',
+        )}
+      >
         {actor.name}
       </span>
     </MyLink>

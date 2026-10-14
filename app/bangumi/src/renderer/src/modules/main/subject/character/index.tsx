@@ -1,6 +1,5 @@
 import { usePageScrollRestoreReady } from '@renderer/components/scroll/page-scroll-wrapper'
 import { Tabs } from '@renderer/components/tabs'
-import { Card } from '@renderer/components/ui/card'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useQuerySubjectCharacters } from '@renderer/data/hooks/api/character'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
@@ -42,7 +41,7 @@ export function SubjectCharacters({ subjectId }: Props) {
 
   if (!characters) {
     return (
-      <section className="flex flex-col gap-5">
+      <section className="flex flex-col gap-3">
         <div className="flex flex-row items-center justify-between">
           <div className="flex flex-row items-center gap-2">
             <h2 className="text-base font-semibold">角色</h2>
@@ -53,9 +52,9 @@ export function SubjectCharacters({ subjectId }: Props) {
               title="在侧栏打开角色"
             />
           </div>
-          <Skeleton className="h-9 w-40" />
+          <Skeleton className="h-5 w-48" />
         </div>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-3 py-2">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-1">
           {Array(8)
             .fill(0)
             .map((_, index) => (
@@ -66,62 +65,40 @@ export function SubjectCharacters({ subjectId }: Props) {
     )
   }
 
-  if (characters?.size === 0) return null
+  if (characters.size === 0) return null
   return (
-    <section className="flex flex-col gap-5">
-      <div className="flex flex-row items-center justify-between">
-        <div className="flex flex-row items-center gap-2">
+    <section className="flex flex-col gap-3">
+      <div className="flex flex-row items-center justify-between gap-6">
+        <div className="flex shrink-0 flex-row items-center gap-2">
           <h2 className="text-base font-semibold">角色</h2>
           <OpenMonoListPanelButton className="size-6" tab={panelTab} title="在侧栏打开角色" />
         </div>
-        {characters ? (
-          <Tabs
-            tabsContent={relations}
-            layoutId={id}
-            currentSelect={filter}
-            setCurrentSelect={setFilter}
-          />
-        ) : (
-          <Skeleton className="h-9 w-40" />
-        )}
-      </div>
-      {characters ? (
-        <CharactersGrid
-          characters={filter === '全部' ? [...characters.values()].flat() : characters.get(filter)!}
+        <Tabs
+          variant="underline"
+          tabsContent={relations}
+          layoutId={id}
+          currentSelect={filter}
+          setCurrentSelect={setFilter}
         />
-      ) : (
-        <CharactersGridSkeleton />
-      )}
+      </div>
+      <CharactersGrid
+        characters={filter === '全部' ? allCharacters : (characters.get(filter) ?? allCharacters)}
+      />
     </section>
-  )
-}
-
-function CharactersGridSkeleton() {
-  return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-3 py-2">
-      {Array(8)
-        .fill(0)
-        .map((_, index) => (
-          <CharacterCardSkeleton key={index} />
-        ))}
-    </div>
   )
 }
 
 function CharacterCardSkeleton() {
   return (
-    <Card className="flex h-20 flex-row items-start gap-4 overflow-hidden p-2 shadow-none">
-      <Skeleton className="size-14 shrink-0 rounded-lg" />
+    <div className="flex h-18 flex-row items-center gap-3 p-2">
+      <Skeleton className="size-13 shrink-0 rounded-lg" />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <div className="flex flex-row items-start justify-between gap-2">
-          <Skeleton className="h-5 w-24" />
-          <Skeleton className="h-5 w-12 rounded-full" />
-        </div>
-        <div className="flex flex-row items-center gap-2">
-          <Skeleton className="size-6 shrink-0 rounded-full" />
-          <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-4 w-24" />
+        <div className="flex flex-row items-center gap-1.5">
+          <Skeleton className="size-5 shrink-0 rounded-full" />
+          <Skeleton className="h-3 w-16" />
         </div>
       </div>
-    </Card>
+    </div>
   )
 }

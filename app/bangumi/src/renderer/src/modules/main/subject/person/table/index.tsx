@@ -1,6 +1,5 @@
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import { MyLink } from '@renderer/components/my-link'
-import { Table, TableBody, TableCell, TableRow } from '@renderer/components/ui/table'
 import { UI_CONFIG } from '@renderer/config'
 import { InfoBoxWeb, InfoBoxWebValueLinkItem } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
@@ -9,20 +8,29 @@ import { Detail } from '@renderer/modules/main/subject/person/table/detail'
 const BANGUMI_INTERNAL_LINK_PATTERN = /^\/(person|character|subject|ep)\/(\d+)\/?$/
 const BANGUMI_HOSTS = new Set(['bgm.tv', 'bangumi.tv', 'chii.in'])
 
+const LINK_CLASS_NAME =
+  'text-primary decoration-primary/40 cursor-pointer underline-offset-2 hover:underline'
+
 export function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
   return (
-    <Table className="w-full">
-      <TableBody>
-        {Array.from(persons).map(([key, value]) => (
-          <TableRow key={key}>
-            <TableCell className="min-w-20 text-center font-medium">{key.slice(0, -2)}</TableCell>
-            <TableCell className="break-all whitespace-pre-wrap">
+    <dl className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-3 px-4 py-3 text-sm">
+      {Array.from(persons).map(([key, value]) => {
+        const label = key.slice(0, -2)
+        const isBlockList = UI_CONFIG.INFO_BOX_INLINE_BLOCK.includes(label)
+
+        return (
+          <div
+            className="border-border/50 col-span-2 grid grid-cols-subgrid border-b py-2 last:border-b-0"
+            key={key}
+          >
+            <dt className="text-muted-foreground pt-px text-xs leading-5">{label}</dt>
+            <dd className="leading-5 break-words whitespace-pre-wrap">
               {value.map((item, index) => {
                 if (typeof item === 'string') {
-                  if (UI_CONFIG.INFO_BOX_INLINE_BLOCK.includes(key.slice(0, -2)))
+                  if (isBlockList)
                     return (
                       <span
-                        className={cn('inline-block', index !== value.length - 1 && 'pb-2')}
+                        className={cn('inline-block', index !== value.length - 1 && 'pb-1')}
                         key={index}
                       >
                         {item}
@@ -33,11 +41,11 @@ export function PersonsTable({ persons }: { persons: InfoBoxWeb }) {
 
                 return <InfoBoxLink item={item} key={index} />
               })}
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+            </dd>
+          </div>
+        )
+      })}
+    </dl>
   )
 }
 
@@ -49,10 +57,7 @@ function InfoBoxLink({ item }: { item: InfoBoxWebValueLinkItem }) {
     return (
       <HoverCard openDelay={300} closeDelay={200}>
         <HoverCardTrigger asChild className="inline-block">
-          <MyLink
-            to={route.to}
-            className="decoration-primary/40 hover:decoration-primary cursor-pointer underline underline-offset-2"
-          >
+          <MyLink to={route.to} className={LINK_CLASS_NAME}>
             {item.name}
           </MyLink>
         </HoverCardTrigger>
@@ -65,10 +70,7 @@ function InfoBoxLink({ item }: { item: InfoBoxWebValueLinkItem }) {
 
   if (route) {
     return (
-      <MyLink
-        to={route.to}
-        className="decoration-primary/40 hover:decoration-primary cursor-pointer underline underline-offset-2"
-      >
+      <MyLink to={route.to} className={LINK_CLASS_NAME}>
         {item.name}
       </MyLink>
     )
@@ -79,7 +81,7 @@ function InfoBoxLink({ item }: { item: InfoBoxWebValueLinkItem }) {
       href={externalHref}
       target="_blank"
       rel="noreferrer"
-      className="decoration-primary/40 hover:decoration-primary cursor-pointer underline underline-offset-2"
+      className={LINK_CLASS_NAME}
       onClick={(event) => {
         event.preventDefault()
         window.open(externalHref, '_blank', 'noopener,noreferrer')

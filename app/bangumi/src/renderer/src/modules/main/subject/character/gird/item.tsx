@@ -6,7 +6,6 @@ import {
   PopCardContent,
 } from '@renderer/components/hover-pop-card/manual'
 import { MyLink } from '@renderer/components/my-link'
-import { Badge } from '@renderer/components/ui/badge'
 import { CardContent } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
 import { Character } from '@renderer/data/types/character'
@@ -41,13 +40,13 @@ export function Item({
     >
       <HoverPopCard layoutId={layoutId}>
         <HoverCardWrapper
-          className="bg-card text-card-foreground rounded-xl border"
+          className="text-card-foreground hover:bg-card hover:border-border data-popped:bg-card data-popped:border-border rounded-xl border border-transparent transition-colors"
           hoverContent={
             <HoverCardContent className="h-full cursor-default">
               <CardContent
                 className={cn(
-                  'flex h-full min-w-0 cursor-default flex-row items-start gap-4 overflow-hidden p-2',
-                  isEmpty(character.images.large) && 'pl-4',
+                  'flex h-full min-w-0 cursor-default flex-row items-center gap-3 overflow-hidden p-2',
+                  isEmpty(character.images.large) && 'pl-3',
                 )}
                 onClick={openCharacter}
               >
@@ -60,7 +59,7 @@ export function Item({
                   >
                     <ViewTransitionImage
                       active={isTransitioning}
-                      className="aspect-square size-14 overflow-hidden rounded-lg"
+                      className="aspect-square size-13 overflow-hidden rounded-lg"
                       imageSrc={character.images.grid}
                       viewTransitionName={viewTransitionName}
                     />
@@ -147,23 +146,24 @@ function MetaInfo({
 }) {
   return (
     <section
-      className={cn('flex min-w-0 flex-col gap-2 overflow-hidden', showAll ? 'shrink-0' : 'flex-1')}
+      className={cn(
+        'flex min-w-0 flex-col overflow-hidden',
+        showAll ? 'shrink-0 gap-2' : 'flex-1 gap-1.5',
+      )}
     >
-      <div className="flex flex-row items-start justify-between gap-2">
+      <div className="flex flex-row items-baseline justify-between gap-2">
         <MyLink
           to={`/character/${character.id}`}
           state={{ viewTransitionName }}
           viewTransition
           className={cn(
-            'min-w-0 cursor-default leading-5 font-medium break-words',
-            showAll ? 'line-clamp-2' : 'line-clamp-1',
+            'min-w-0 cursor-default text-sm leading-5 font-medium break-words',
+            showAll ? 'line-clamp-2 text-base' : 'line-clamp-1',
           )}
         >
           {character.name}
         </MyLink>
-        <Badge variant="outline" className="text-primary/70 w-fit shrink-0 text-xs font-medium">
-          {character.relation}
-        </Badge>
+        <span className="text-muted-foreground shrink-0 text-xs">{character.relation}</span>
       </div>
       {character.actors.length !== 0 && <Actors actors={character.actors} showAll={showAll} />}
     </section>

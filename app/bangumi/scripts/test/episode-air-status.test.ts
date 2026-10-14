@@ -84,10 +84,10 @@ test('sidebar and main buttons use the same cached snapshot and refresh together
     expect(main.getCurrentResult().data).toBe(originalData)
     expect(main.getCurrentResult().dataUpdatedAt).toBe(sidebar.getCurrentResult().dataUpdatedAt)
     expect(renderEpisode(sidebar.getCurrentResult().dataUpdatedAt, 'small')).not.toContain(
-      'border border-input',
+      'bg-foreground/2.5',
     )
     expect(renderEpisode(main.getCurrentResult().dataUpdatedAt, 'default')).not.toContain(
-      'border border-input',
+      'bg-foreground/2.5',
     )
     expect(queryFn).toHaveBeenCalledTimes(1)
 
@@ -97,10 +97,10 @@ test('sidebar and main buttons use the same cached snapshot and refresh together
     expect(sidebar.getCurrentResult().dataUpdatedAt).toBe(new Date(2026, 9, 10, 12).getTime())
     expect(main.getCurrentResult().dataUpdatedAt).toBe(sidebar.getCurrentResult().dataUpdatedAt)
     expect(renderEpisode(sidebar.getCurrentResult().dataUpdatedAt, 'small')).toContain(
-      'border border-input',
+      'bg-foreground/2.5',
     )
     expect(renderEpisode(main.getCurrentResult().dataUpdatedAt, 'default')).toContain(
-      'border border-input',
+      'bg-foreground/2.5',
     )
   } finally {
     unmountSidebar()

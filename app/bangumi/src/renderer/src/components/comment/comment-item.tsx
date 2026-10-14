@@ -28,6 +28,7 @@ import dayjs from 'dayjs'
 import { useAtomValue } from 'jotai'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import {
+  useEffect,
   useId,
   useLayoutEffect,
   useMemo,
@@ -913,7 +914,7 @@ function useCommentContentState({
     }
   }, [collapsed, collapsible, contentHeight, expanded, maxCollapsedHeight])
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const element = contentRef.current
     if (!element) return
 
@@ -925,8 +926,9 @@ function useCommentContentState({
       })
     }
 
-    updateContentHeight()
-
+    // 不在 effect 里同步读取 scrollHeight：页面切换时会强制整页布局并触发级联渲染。
+    // ResizeObserver 会在浏览器完成布局后、绘制前回调一次初始尺寸，此时读取几乎没有成本；
+    // 测量前由 shouldPreCollapse 先行判断是否折叠。
     const observer = new ResizeObserver(updateContentHeight)
     observer.observe(element)
 

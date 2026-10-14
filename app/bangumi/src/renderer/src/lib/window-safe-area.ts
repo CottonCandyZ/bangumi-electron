@@ -8,9 +8,20 @@ export function windowCollisionPadding(
       : padding
   return { ...sides, top: getWindowSafeTop() + (sides.top ?? 5) }
 }
+let cachedSafeTop: number | undefined
+
+/**
+ * 每个 Tooltip / Popover 渲染都会调用；getComputedStyle 会强制样式计算，
+ * 页面切换时大量调用会拖慢 view transition。同一帧内复用结果。
+ */
 export function getWindowSafeTop() {
   if (typeof document === 'undefined') return 0
-  return (
-    parseFloat(getComputedStyle(document.body).getPropertyValue('--window-titlebar-height')) || 0
-  )
+  if (cachedSafeTop === undefined) {
+    cachedSafeTop =
+      parseFloat(getComputedStyle(document.body).getPropertyValue('--window-titlebar-height')) || 0
+    requestAnimationFrame(() => {
+      cachedSafeTop = undefined
+    })
+  }
+  return cachedSafeTop
 }
