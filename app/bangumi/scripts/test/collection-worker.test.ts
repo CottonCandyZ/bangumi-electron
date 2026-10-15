@@ -167,6 +167,50 @@ test('transport error classification survives worker RPC and pauses expired auth
   expect(await rpc.call('collectionRead', { userId: 1, subjectId: 42 })).toMatchObject({ rate: 9 })
 }, 15000)
 
+test('opening an uncached subject bypasses a blocked sidebar sync and shares duplicate reads', async (t) => {
+  let unblock!: () => void
+  const blocked = new Promise<void>((resolve) => (unblock = resolve))
+  const reads: number[] = []
+  const { rpc } = fixture(t, {
+    async request(_id: number, _userId: number, method: string, args: unknown[]) {
+      if (method !== 'read') throw new Error(`Unexpected network method ${method}`)
+      const subjectId = args[0] as number
+      reads.push(subjectId)
+      if (subjectId === 42) await blocked
+      return {
+        value: {
+          snapshot: { collection: null, episodes: {}, episodesComplete: true },
+          episodes: [],
+          epStatus: 0,
+          volStatus: 0,
+        } satisfies RemoteCollection,
+      }
+    },
+    close: vi.fn(),
+  })
+  await rpc.call('collectionActivate', { userId: 1 })
+  await rpc.call('collectionReadEpisodes', { userId: 1, subjectId: 42, priority: 'background' })
+  await rpc.call('collectionReadEpisodes', { userId: 1, subjectId: 43, priority: 'background' })
+  await vi.waitFor(() => expect(reads).toEqual([42]))
+  // Visiting the subject already syncing must leave the foreground lane free for the next page.
+  await rpc.call('collectionRead', { userId: 1, subjectId: 42 })
+  await rpc.call('collectionRead', { userId: 1, subjectId: 43 })
+  await rpc.call('collectionReadEpisodes', { userId: 1, subjectId: 43 })
+  await vi.waitFor(async () => {
+    expect(await rpc.call('collectionReadEpisodes', { userId: 1, subjectId: 43 })).toMatchObject({
+      ready: true,
+      data: [],
+    })
+  })
+  expect(reads).toEqual([42, 43])
+  expect(await rpc.call('collectionOverview', { userId: 1 })).toMatchObject({ running: true })
+  unblock()
+  await vi.waitFor(async () => {
+    expect(await rpc.call('collectionOverview', { userId: 1 })).toMatchObject({ running: false })
+  })
+  expect(reads).toEqual([42, 43])
+}, 15000)
+
 test('worker database bridge preserves row shape, atomic batches and durable subject search indexes', async (t) => {
   const { rpc, sqlite } = fixture(t)
   await rpc.call('db', {

@@ -71,6 +71,7 @@ function EpisodesView({
   const collectionEpisodesQuery = useCollectionEpisodesInfoBySubjectIdQuery({
     subjectId,
     limit: ALL_LOCAL_EPISODES_LIMIT,
+    priority: size === 'small' ? 'background' : 'foreground',
     enabled: !!userInfo,
   })
   const episodeQuery = userInfo ? collectionEpisodesQuery : episodesQuery

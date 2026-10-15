@@ -6,6 +6,7 @@ import { SyncError } from '../../src/main/collection/sync'
 const mocks = vi.hoisted(() => ({
   list: vi.fn(),
   sync: vi.fn(),
+  changed: vi.fn(),
   repository: {
     all: vi.fn(),
     account: vi.fn(),
@@ -25,6 +26,7 @@ vi.mock('../../src/main/collection/sync', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../../src/main/collection/sync')>()),
   CollectionSyncEngine: class {
     sync = mocks.sync
+    isSyncing = () => false
   },
 }))
 let service: ReturnType<typeof createCollectionService>
@@ -61,7 +63,7 @@ beforeEach(async () => {
   service = createCollectionService(
     mocks.repository as unknown as CollectionRepository,
     () => ({ list: mocks.list, read: vi.fn(), write: vi.fn() }),
-    vi.fn(),
+    mocks.changed,
     vi.fn(),
   )
   service.activateCollections(1)
@@ -113,6 +115,58 @@ test('partial libraries remain readable offline and on failed requests', async (
   expect(mocks.list).not.toHaveBeenCalled()
   mocks.list.mockRejectedValue(new SyncError('offline', 'network'))
   expect(await service.readCollectionPage({ userId: 1, online: true })).toEqual(cached)
+})
+
+test('a complete library refreshes the visible list and discovers website additions without blocking cached reads', async () => {
+  const cached = { data: [{ subject_id: 42 }], total: 1, offset: 0, limit: 10 }
+  mocks.repository.list.mockReturnValue(cached)
+  let resolve!: (page: unknown) => void
+  mocks.list.mockReturnValueOnce(new Promise((done) => (resolve = done)))
+  const input = { userId: 1, subjectType: 2 as const, collectionType: 3, limit: 10, online: true }
+
+  expect(await service.readCollectionPage(input)).toEqual(cached)
+  expect(await service.readCollectionPage(input)).toEqual(cached)
+  expect(mocks.list).toHaveBeenCalledExactlyOnceWith(
+    0,
+    expect.objectContaining({ subjectType: 2, collectionType: 3, limit: 10 }),
+  )
+  expect(mocks.repository.seedPage).not.toHaveBeenCalled()
+  resolve({ data: [{ subject_id: 43 }, { subject_id: 42 }], total: 2, limit: 10 })
+  await vi.advanceTimersByTimeAsync(250)
+  expect(mocks.repository.seedPage).toHaveBeenCalledWith(1, [
+    { subject_id: 43 },
+    { subject_id: 42 },
+  ])
+  expect(mocks.changed).toHaveBeenCalledWith({ userId: 1, subjectIds: [43, 42] })
+  await service.readCollectionPage(input)
+  expect(mocks.list).toHaveBeenCalledTimes(1)
+  await vi.advanceTimersByTimeAsync(5 * 60 * 1000)
+  await service.readCollectionPage(input)
+  expect(mocks.list).toHaveBeenCalledTimes(2)
+  expect(mocks.repository.completeList).not.toHaveBeenCalled()
+  expect(mocks.sync).not.toHaveBeenCalled()
+})
+
+test('complete list refreshes keep cached local changes readable on network failure', async () => {
+  const cached = { data: [{ subject_id: 42, rate: 9 }], total: 1, offset: 0, limit: 10 }
+  mocks.repository.list.mockReturnValue(cached)
+  mocks.list.mockRejectedValue(new SyncError('offline', 'network'))
+  expect(await service.readCollectionPage({ userId: 1, online: true })).toEqual(cached)
+  await vi.advanceTimersByTimeAsync(1)
+  expect(service.collectionOverview(1).retryAt).toBeGreaterThan(Date.now())
+  expect(await service.readCollectionPage({ userId: 1, online: true })).toEqual(cached)
+  expect(mocks.list).toHaveBeenCalledTimes(1)
+  expect(mocks.repository.seedPage).not.toHaveBeenCalled()
+})
+
+test('complete list refreshes are isolated by filter and account activation', async () => {
+  mocks.repository.list.mockReturnValue({ data: [], total: 0, offset: 0, limit: 50 })
+  await service.readCollectionPage({ userId: 1, collectionType: 3, online: true })
+  await service.readCollectionPage({ userId: 1, collectionType: 2, online: true })
+  expect(mocks.list).toHaveBeenCalledTimes(2)
+  service.activateCollections(2)
+  await service.readCollectionPage({ userId: 2, collectionType: 3, online: true })
+  expect(mocks.list).toHaveBeenCalledTimes(3)
 })
 
 test('a page arriving after account switch cannot seed the previous account', async () => {
@@ -209,6 +263,51 @@ test('unprocessed refresh requests survive an earlier network failure', async ()
   expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42])
   await vi.advanceTimersByTimeAsync(10000)
   expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42, 42, 43])
+})
+
+test('foreground subjects finish while sidebar progress sync is still blocked', async () => {
+  mocks.repository.get.mockImplementation((_user, subjectId) => ({
+    subjectId,
+    subject: { name: 'test' },
+    status: 'clean',
+    local: {},
+  }))
+  let unblock!: () => void
+  const blocked = new Promise<void>((resolve) => (unblock = resolve))
+  mocks.sync.mockImplementation((_user, subjectId) =>
+    subjectId === 42 ? blocked : Promise.resolve(),
+  )
+  service.requestCollection(42, 1)
+  service.requestCollection(43, 1)
+  await vi.advanceTimersByTimeAsync(300)
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42])
+
+  service.requestCollection(44, 1, 'foreground')
+  service.requestCollection(44, 1, 'foreground')
+  await vi.advanceTimersByTimeAsync(1)
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42, 44])
+  expect(service.collectionOverview(1).running).toBe(true)
+  unblock()
+  await vi.advanceTimersByTimeAsync(1000)
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42, 44, 43])
+})
+
+test('foreground reads respect the shared network cooldown and retry automatically', async () => {
+  mocks.repository.get.mockImplementation((_user, subjectId) => ({
+    subjectId,
+    subject: { name: 'test' },
+    status: 'clean',
+    local: {},
+  }))
+  mocks.sync.mockRejectedValueOnce(new SyncError('offline', 'network'))
+  service.requestCollection(42, 1, 'foreground')
+  await vi.advanceTimersByTimeAsync(1)
+  service.requestCollection(43, 1, 'foreground')
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42])
+  await vi.advanceTimersByTimeAsync(10000)
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42, 42, 43])
+  expect(service.collectionOverview(1).retryAt).toBeNull()
+  expect(service.collectionOverview(1).error).toBeNull()
 })
 
 test('a gateway timeout pauses all subjects and new reads or edits cannot bypass the cooldown', async () => {

@@ -50,6 +50,9 @@ export class CollectionSyncEngine {
     private repository: CollectionRepository,
     private changed: (userId: number, subjectId: number, dataChanged: boolean) => void = () => {},
   ) {}
+  isSyncing(userId: number, subjectId: number): boolean {
+    return this.active.has(`${userId}:${subjectId}`)
+  }
   sync(
     userId: number,
     subjectId: number,

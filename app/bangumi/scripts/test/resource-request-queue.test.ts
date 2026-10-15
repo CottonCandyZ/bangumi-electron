@@ -10,7 +10,7 @@ const deferred = <T>() => {
 }
 afterEach(() => vi.restoreAllMocks())
 
-test('overlapping batches and detail calls share a serial resource queue', async () => {
+test('overlapping calls within one lane share a serial resource queue', async () => {
   const queue = new ResourceRequestQueue()
   const gate = deferred<number>()
   const controller = new AbortController()
@@ -31,6 +31,48 @@ test('overlapping batches and detail calls share a serial resource queue', async
   expect(await Promise.all([first, duplicate, different])).toEqual([1, 1, 1])
   expect(fetch).toHaveBeenCalledTimes(2)
   expect(maximum).toBe(1)
+})
+
+test('detail reads finish while a background batch is blocked, with one request per lane', async () => {
+  const queue = new ResourceRequestQueue()
+  const gate = deferred<number>()
+  const signal = new AbortController().signal
+  const background = queue.run('batch:1', signal, () => gate.promise, 'background')
+  const fetchNext = vi.fn(async () => 2)
+  const next = queue.run('batch:2', signal, fetchNext, 'background')
+  const detail = queue.run('detail:3', signal, async () => 3)
+  expect(await detail).toBe(3)
+  expect(fetchNext).not.toHaveBeenCalled()
+  gate.resolve(1)
+  expect(await Promise.all([background, next])).toEqual([1, 2])
+})
+
+test('opening a queued batch item promotes it and reuses the same request', async () => {
+  const queue = new ResourceRequestQueue()
+  const gate = deferred<number>()
+  const signal = new AbortController().signal
+  const background = queue.run('1', signal, () => gate.promise, 'background')
+  const fetch = vi.fn(async () => 42)
+  const queued = queue.run('42', signal, fetch, 'background')
+  const detail = queue.run('42', signal, fetch)
+  expect(await detail).toBe(42)
+  expect(await queued).toBe(42)
+  expect(fetch).toHaveBeenCalledTimes(1)
+  gate.resolve(1)
+  await background
+})
+
+test('foreground reads share already running background requests', async () => {
+  const queue = new ResourceRequestQueue()
+  const gate = deferred<number>()
+  const signal = new AbortController().signal
+  const fetch = vi.fn(() => gate.promise)
+  const background = queue.run('42', signal, fetch, 'background')
+  await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(1))
+  const detail = queue.run('42', signal, fetch)
+  gate.resolve(42)
+  expect(await Promise.all([background, detail])).toEqual([42, 42])
+  expect(fetch).toHaveBeenCalledTimes(1)
 })
 
 test('one cancelled consumer does not abort another consumer of the same resource', async () => {

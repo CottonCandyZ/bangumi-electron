@@ -124,3 +124,32 @@ test('unmounting the last observer prevents late writes and publications', async
   expect(save).not.toHaveBeenCalled()
   expect(context.client.getQueryData(key(705))).toBeUndefined()
 })
+
+test('an uncached detail loads without waiting for a blocked batch refresh', async () => {
+  const gate = deferred<ReturnType<typeof old>>()
+  const fetchBatch = vi.fn(() => gate.promise)
+  const batchOptions = useLocalResources({
+    queryKey: ['resource-test'],
+    dbParams: { ids: [706, 707] },
+    apiQueryFn: fetchBatch,
+    dbQueryFn: async () => [],
+    updateDB: vi.fn(async () => {}),
+    retry: false,
+  }) as unknown as UseQueryOptions<(ReturnType<typeof old> | null)[]>
+  const batch = context.client.fetchQuery(batchOptions)
+  await vi.waitFor(() => expect(fetchBatch).toHaveBeenCalledTimes(1))
+  const fetchDetail = vi.fn(async () => old(708))
+  const detailOptions = useLocalResource({
+    queryKey: ['resource-test'],
+    apiParams: { id: 708 },
+    dbParams: { id: 708 },
+    apiQueryFn: fetchDetail,
+    dbQueryFn: async () => undefined,
+    updateDB: vi.fn(async () => {}),
+    retry: false,
+  }) as unknown as UseQueryOptions<ReturnType<typeof old>>
+  expect((await context.client.fetchQuery(detailOptions))?.id).toBe(708)
+  expect(fetchBatch).toHaveBeenCalledTimes(1)
+  gate.resolve(old(706))
+  await batch
+})

@@ -4,10 +4,13 @@ import { CollectionSyncProgress } from './progress'
 import type { createCollectionTransport as TransportFactory } from './transport'
 import type {
   CollectionChange,
+  CollectionReadPriority,
   ConflictResolution,
   SyncOverview,
 } from '../../shared/collection-sync'
 import { CollectionNotifications } from './notifications'
+
+const listRefreshInterval = 5 * 60 * 1000
 
 export function createCollectionService(
   collectionRepository: CollectionRepository,
@@ -32,6 +35,8 @@ export function createCollectionService(
   let controller = new AbortController()
   let running: Promise<void> | null = null
   let runningUserId: number | null = null
+  let foregroundRunning: Promise<void> | null = null
+  let foregroundUserId: number | null = null
   let progress: CollectionSyncProgress | null = null
   let timer: ReturnType<typeof setTimeout> | undefined
   let failures = 0
@@ -39,6 +44,9 @@ export function createCollectionService(
   let pausedForAuth = false
   let lastError: string | null = null
   const requested = new Set<number>()
+  const foregroundRequested = new Set<number>()
+  const pageReads = new Map<string, Promise<Awaited<ReturnType<CollectionTransport['list']>>>>()
+  const pageRefreshedAt = new Map<string, number>()
   let scanRequested = 0
 
   function activateCollections(id: number | null) {
@@ -47,6 +55,9 @@ export function createCollectionService(
     controller = new AbortController()
     userId = id
     requested.clear()
+    foregroundRequested.clear()
+    pageReads.clear()
+    pageRefreshedAt.clear()
     scanRequested = 0
     failures = 0
     networkRetryAt = 0
@@ -57,7 +68,11 @@ export function createCollectionService(
     if (timer) clearTimeout(timer)
     if (id) scheduleCollections(500)
   }
-  function requestCollection(subjectId: number, id: number) {
+  function requestCollection(
+    subjectId: number,
+    id: number,
+    priority: CollectionReadPriority = 'background',
+  ) {
     if (id !== userId) return
     const record = collectionRepository.get(id, subjectId)
     if (record?.syncedAt && Date.now() - record.syncedAt < 300000) return
@@ -67,7 +82,12 @@ export function createCollectionService(
       record?.status === 'auth-required'
     )
       return
+    if (foregroundRequested.has(subjectId) || engine.isSyncing(id, subjectId)) return
     requested.add(subjectId)
+    if (priority === 'foreground') {
+      foregroundRequested.add(subjectId)
+      void runForegroundCollections()
+    }
     scheduleCollections(300)
   }
   function scheduleCollections(delay = 500) {
@@ -88,17 +108,22 @@ export function createCollectionService(
     failures = 0
     networkRetryAt = 0
     pausedForAuth = false
+    pageRefreshedAt.clear()
+    notifyCollections(id, null)
     scheduleCollections(0)
   }
   async function collectionCredentialsChanged(id: number) {
     if (userId !== id) return
     // Let any transport holding the old token finish before clearing its auth error.
-    await running?.catch(() => {})
+    await Promise.allSettled([running, foregroundRunning, ...pageReads.values()])
     if (userId !== id) return
     collectionRepository.resetErrors(id, true)
     pausedForAuth = false
     failures = 0
     networkRetryAt = 0
+    lastError = null
+    pageRefreshedAt.clear()
+    notifyCollections(id, null)
     scheduleCollections(0)
   }
   function pauseForNetwork(error: SyncError) {
@@ -110,9 +135,56 @@ export function createCollectionService(
     }
     notifySyncProgress()
   }
-  function throwIfNetworkPaused() {
+  function throwIfSyncPaused() {
+    if (pausedForAuth) throw new SyncError(lastError ?? '请登录后同步', 'auth-required')
     if (networkRetryAt > Date.now())
       throw new SyncError(lastError ?? '连接暂不可用，同步稍后重试', 'network')
+  }
+  function handleSyncError(error: unknown, signal: AbortSignal) {
+    if (signal.aborted) return
+    lastError = error instanceof Error ? error.message : '同步失败'
+    if (error instanceof SyncError && error.kind === 'network') pauseForNetwork(error)
+    else failures += 1
+    if (error instanceof SyncError && error.kind === 'auth-required') pausedForAuth = true
+    notifySyncProgress()
+  }
+  function runForegroundCollections() {
+    if (foregroundRunning || !userId || pausedForAuth || networkRetryAt > Date.now()) return
+    if (!foregroundRequested.size) return
+    const id = userId
+    const signal = controller.signal
+    const subjectId = foregroundRequested.values().next().value!
+    foregroundUserId = id
+    foregroundRunning = (async () => {
+      const transport = createCollectionTransport(id, signal, (profile) =>
+        collectionRepository.saveAccount(profile),
+      )
+      try {
+        // One foreground subject may run alongside the serial sidebar/full-sync pass.
+        // The engine still shares in-flight work for the same account and subject.
+        await syncSubjects(id, [subjectId], transport, signal)
+        signal.throwIfAborted()
+        foregroundRequested.delete(subjectId)
+        if (!pausedForAuth && networkRetryAt <= Date.now()) {
+          failures = 0
+          networkRetryAt = 0
+          lastError = null
+        }
+      } catch (error) {
+        handleSyncError(error, signal)
+      } finally {
+        transport.dispose?.()
+      }
+    })().finally(() => {
+      foregroundRunning = null
+      foregroundUserId = null
+      notifySyncProgress()
+      if (userId && !pausedForAuth) {
+        runForegroundCollections()
+        scheduleCollections(0)
+      }
+    })
+    notifySyncProgress()
   }
   async function runCollections() {
     if (running) return running
@@ -123,6 +195,7 @@ export function createCollectionService(
     }
     const id = userId
     const signal = controller.signal
+    runForegroundCollections()
     runningUserId = id
     let activity: CollectionSyncProgress | null = null
     running = (async () => {
@@ -131,7 +204,11 @@ export function createCollectionService(
       )
       try {
         // Process pending edits first. Conflicts only block their own subject.
-        const ids = new Set([...requested, ...collectionRepository.pendingSubjectIds(id)])
+        const ids = new Set(
+          [...requested, ...collectionRepository.pendingSubjectIds(id)].filter(
+            (subjectId) => !foregroundRequested.has(subjectId),
+          ),
+        )
         if (!ids.size && !scanRequested) return
         lastError = null
         activity = new CollectionSyncProgress(() => {
@@ -148,7 +225,7 @@ export function createCollectionService(
           let total = Infinity
           const seen = new Set<number>()
           while (offset < total) {
-            throwIfNetworkPaused()
+            throwIfSyncPaused()
             const page = await transport.list(offset)
             total = page.total
             signal.throwIfAborted()
@@ -170,17 +247,12 @@ export function createCollectionService(
           // Keep failed scans and requests made during this scan eligible for retry.
           scanRequested -= scanRequests
         }
-        throwIfNetworkPaused()
+        throwIfSyncPaused()
         failures = 0
         networkRetryAt = 0
         pausedForAuth = false
       } catch (error) {
-        if (!signal.aborted) {
-          lastError = error instanceof Error ? error.message : '同步失败'
-          if (error instanceof SyncError && error.kind === 'network') pauseForNetwork(error)
-          else failures += 1
-          pausedForAuth = error instanceof SyncError && error.kind === 'auth-required'
-        }
+        handleSyncError(error, signal)
       } finally {
         transport.dispose?.()
       }
@@ -208,17 +280,30 @@ export function createCollectionService(
     subjects: Iterable<number>,
     transport: CollectionTransport,
     signal: AbortSignal,
-    activity: CollectionSyncProgress,
+    activity?: CollectionSyncProgress,
   ) {
+    const startedAt = Date.now()
     for (const subjectId of subjects) {
       signal.throwIfAborted()
-      throwIfNetworkPaused()
+      throwIfSyncPaused()
+      const current = collectionRepository.get(id, subjectId)
+      // A queued sidebar item may already have finished in the foreground lane.
+      if (
+        !requested.has(subjectId) &&
+        !foregroundRequested.has(subjectId) &&
+        current?.status === 'clean' &&
+        current.syncedAt != null &&
+        current.syncedAt >= startedAt
+      ) {
+        activity?.settled(current, false)
+        continue
+      }
       // Leave later requests queued if this subject aborts the serial pass.
       requested.delete(subjectId)
       let failed = false
       try {
         await engine.sync(id, subjectId, transport, (phase) => {
-          if (!signal.aborted) activity.subject(collectionRepository.get(id, subjectId)!, phase)
+          if (!signal.aborted) activity?.subject(collectionRepository.get(id, subjectId)!, phase)
         })
       } catch (error) {
         failed = true
@@ -231,7 +316,7 @@ export function createCollectionService(
           throw error
         }
       } finally {
-        if (!signal.aborted) activity.settled(collectionRepository.get(id, subjectId)!, failed)
+        if (!signal.aborted) activity?.settled(collectionRepository.get(id, subjectId)!, failed)
       }
     }
   }
@@ -239,13 +324,16 @@ export function createCollectionService(
     const account = collectionRepository.account(id)
     return {
       ...collectionRepository.overview(id),
-      running: userId === id && runningUserId === id,
+      running: userId === id && (runningUserId === id || foregroundUserId === id),
       lastSyncedAt: account?.lastSyncedAt ?? null,
       listComplete: account?.listComplete ?? false,
       error: userId === id ? lastError : null,
       authRequired: userId === id && pausedForAuth,
       retryAt: userId === id && networkRetryAt > Date.now() ? networkRetryAt : null,
-      progress: userId === id ? (progress?.value ?? null) : null,
+      progress:
+        userId === id && (runningUserId === id || foregroundUserId !== id)
+          ? (progress?.value ?? null)
+          : null,
     }
   }
 
@@ -253,23 +341,46 @@ export function createCollectionService(
     input: Parameters<typeof collectionRepository.list>[0] & { online?: boolean },
   ) {
     const cached = collectionRepository.list(input)
-    if (!input.online || collectionRepository.account(input.userId)?.listComplete) return cached
+    if (!input.online) return cached
     if (userId !== input.userId) throw new Error('当前账号已改变')
-    if (networkRetryAt > Date.now()) {
-      if (cached.data.length) return cached
-      throwIfNetworkPaused()
+    const complete = collectionRepository.account(input.userId)?.listComplete
+    if (pausedForAuth || networkRetryAt > Date.now()) {
+      if (complete || cached.data.length) return cached
+      throwIfSyncPaused()
     }
     const signal = controller.signal
     const offset = input.offset ?? 0
     const limit = Math.min(50, Math.max(1, input.limit ?? 50))
-    const transport = createCollectionTransport(input.userId, signal, (profile) =>
-      collectionRepository.saveAccount(profile),
-    )
+    const key = JSON.stringify([
+      input.userId,
+      input.subjectType,
+      input.collectionType,
+      offset,
+      limit,
+    ])
+    if (complete && Date.now() - (pageRefreshedAt.get(key) ?? -Infinity) < listRefreshInterval)
+      return cached
+    let read = pageReads.get(key)
+    if (!read) {
+      const startedAt = Date.now()
+      const refresh = refreshCollectionPage(input, offset, limit, signal).then((page) => {
+        signal.throwIfAborted()
+        pageRefreshedAt.set(key, startedAt)
+        return page
+      })
+      read = refresh.finally(() => {
+        if (pageReads.get(key) === read) pageReads.delete(key)
+      })
+      pageReads.set(key, read)
+    }
+    // Full coverage says which records are cached, not whether the website has changed.
+    // Keep that cache immediately readable while refreshing just the visible list page.
+    if (complete) {
+      void read.catch(() => {})
+      return cached
+    }
     try {
-      const page = await transport.list(offset, { ...input, limit })
-      signal.throwIfAborted()
-      if (userId !== input.userId) throw new Error('当前账号已改变')
-      collectionRepository.seedPage(input.userId, page.data)
+      const page = await read
       // Preserve pending edits/removals when an older server page arrives.
       const data = page.data.flatMap((item) => {
         const local = collectionRepository.collection(input.userId, item.subject_id)
@@ -280,11 +391,32 @@ export function createCollectionService(
       return { ...page, data, offset, limit }
     } catch (error) {
       signal.throwIfAborted()
-      if (userId === input.userId && error instanceof SyncError && error.kind === 'network') {
-        pauseForNetwork(error)
+      if (cached.data.length) return cached
+      throw error
+    }
+  }
+  async function refreshCollectionPage(
+    input: Parameters<typeof collectionRepository.list>[0],
+    offset: number,
+    limit: number,
+    signal: AbortSignal,
+  ) {
+    const transport = createCollectionTransport(input.userId, signal, (profile) =>
+      collectionRepository.saveAccount(profile),
+    )
+    try {
+      const page = await transport.list(offset, { ...input, limit })
+      signal.throwIfAborted()
+      if (userId !== input.userId) throw new Error('当前账号已改变')
+      const changed = collectionRepository.seedPage(input.userId, page.data)
+      if (changed.length) notifyCollections(input.userId, changed)
+      return page
+    } catch (error) {
+      signal.throwIfAborted()
+      if (userId === input.userId && error instanceof SyncError) {
+        handleSyncError(error, signal)
         scheduleCollections(0)
       }
-      if (cached.data.length) return cached
       throw error
     } finally {
       transport.dispose?.()

@@ -2,6 +2,7 @@ import type { CollectionRepository } from './repository'
 import type { createCollectionService } from './service-core'
 import type {
   CollectionCommand,
+  CollectionReadPriority,
   ConflictResolution,
   LocalAccount,
 } from '../../shared/collection-sync'
@@ -38,13 +39,15 @@ export function createCollectionApi(
       service.scheduleCollections()
     },
     collectionRead: (input: { userId: number; subjectId: number }) => {
-      service.requestCollection(input.subjectId, input.userId)
+      service.requestCollection(input.subjectId, input.userId, 'foreground')
       return repository.collection(input.userId, input.subjectId)
     },
     collectionList: (input: Parameters<typeof service.readCollectionPage>[0]) =>
       service.readCollectionPage(input),
-    collectionReadEpisodes: (input: Parameters<typeof repository.episodes>[0]) => {
-      service.requestCollection(input.subjectId, input.userId)
+    collectionReadEpisodes: (
+      input: Parameters<typeof repository.episodes>[0] & { priority?: CollectionReadPriority },
+    ) => {
+      service.requestCollection(input.subjectId, input.userId, input.priority ?? 'foreground')
       return repository.episodes(input)
     },
     collectionOverview: (input: { userId: number }) => service.collectionOverview(input.userId),

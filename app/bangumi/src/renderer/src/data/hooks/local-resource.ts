@@ -11,7 +11,7 @@ import { DB_CONFIG } from '@renderer/config'
 import { OfflineResourceError, ResourceNotFoundError } from '@renderer/lib/utils/network'
 import { refreshResourceBatch } from './resource-refresh'
 import { isResourceHidden, setResourceHidden } from './resource-visibility'
-import { resourceRequests } from './resource-request-queue'
+import { resourceRequests, type ResourceRequestPriority } from './resource-request-queue'
 
 // Rotate on every transition, including A -> B -> A while a request is in flight.
 let identity = new AbortController()
@@ -56,6 +56,7 @@ export function useLocalResource<
     dbParams,
     dbStaleTime,
     needKeepPreviousData,
+    priority: 'foreground',
     ids: [dbParams.id],
     fetch: (_id, signal) => apiQueryFn(apiParams, { signal }),
     read: async () => {
@@ -102,6 +103,7 @@ export function useLocalResources<
     dbParams,
     dbStaleTime,
     needKeepPreviousData,
+    priority: 'background',
     ids: dbParams.ids ?? [],
     fetch: (id, signal) => apiQueryFn({ ...apiParams, id } as P, { signal }),
     read: () => dbQueryFn(dbParams),
@@ -120,6 +122,7 @@ function useResourceQuery<T extends Resource, R>({
   read,
   save,
   selectResult,
+  priority,
   ...options
 }: {
   queryKey: QueryKey
@@ -131,6 +134,7 @@ function useResourceQuery<T extends Resource, R>({
   read: () => Promise<T[]>
   save: (items: T[]) => Promise<void>
   selectResult: (items: (T | null)[]) => R
+  priority: ResourceRequestPriority
 } & Options<R>) {
   const userId = useAtomValue(userIdAtom)
   const queryClient = useQueryClient()
@@ -189,6 +193,7 @@ function useResourceQuery<T extends Resource, R>({
                 requestSignal.throwIfAborted()
                 return fetch(id, requestSignal)
               },
+              priority,
             ),
           save: async (items) => {
             check()

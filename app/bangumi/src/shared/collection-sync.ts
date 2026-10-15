@@ -108,6 +108,7 @@ export type SyncOverview = {
 }
 /** A committed local change. Null means the account's list coverage changed. */
 export type CollectionChange = { userId: number; subjectIds: number[] | null }
+export type CollectionReadPriority = 'foreground' | 'background'
 export type ConflictResolution = {
   userId: number
   subjectId: number

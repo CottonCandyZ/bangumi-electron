@@ -7,7 +7,9 @@ import { client } from '@renderer/lib/client'
 import { useSession } from '@renderer/data/hooks/session'
 import { userIdAtom } from '@renderer/state/session'
 import { useAtomValue } from 'jotai'
+import { useEffect } from 'react'
 import { localCollectionQueryOptions } from '@renderer/data/collection/cache'
+import type { CollectionReadPriority } from '@shared/collection-sync'
 import { useMutation } from '@tanstack/react-query'
 import {
   editLocalCollection,
@@ -74,6 +76,7 @@ export const useInfinityQueryCollectionsByUsername = ({
     needKeepPreviousData,
     refetchPageLimit,
     ...(own ? localCollectionQueryOptions : {}),
+    refetchInterval: own ? localCollectionQueryOptions.staleTime : false,
   })
 }
 
@@ -169,17 +172,25 @@ export const useCollectionEpisodesInfoBySubjectIdQuery = ({
   limit = 100,
   offset = 0,
   episodeType,
+  priority = 'foreground',
   enabled,
 }: {
   subjectId: SubjectId
   limit?: number
   offset?: number
   episodeType?: EpisodeType
+  priority?: CollectionReadPriority
   enabled?: boolean
 }) => {
   const userId = Number(useAtomValue(userIdAtom))
+  useEffect(() => {
+    if (!userId || enabled === false || priority !== 'foreground') return
+    // Promote a detail view even if its shared query is already loading in the sidebar.
+    void client.collectionRead({ userId, subjectId: Number(subjectId) }).catch(() => {})
+  }, [userId, subjectId, enabled, priority])
   return useAuthQuery({
-    queryFn: readLocalEpisodes,
+    // Shared data uses one query key; foreground consumers are promoted by the effect above.
+    queryFn: (props) => readLocalEpisodes({ ...props, priority: 'background' }),
     refetchInterval: pendingCollectionInterval,
     queryKey: ['collection-episodes'],
     queryProps: { subjectId, limit, offset, episodeType, userId },

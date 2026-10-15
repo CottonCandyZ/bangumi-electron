@@ -1,6 +1,7 @@
 import { client } from '@renderer/lib/client'
 import { CollectionPendingError } from '@renderer/lib/utils/network'
 import type { EpisodeType } from '@renderer/data/types/episode'
+import type { CollectionReadPriority } from '@shared/collection-sync'
 
 // IPC reads may finish before the sync-complete notification is handled. Re-read
 // only unresolved local snapshots; successful and failed requests stop polling.
@@ -26,6 +27,7 @@ export async function readLocalEpisodes(props: {
   limit: number
   offset: number
   episodeType: EpisodeType | undefined
+  priority?: CollectionReadPriority
 }) {
   const input = { ...props, subjectId: Number(props.subjectId) }
   const episodes = await client.collectionReadEpisodes(input)
