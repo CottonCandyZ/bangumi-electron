@@ -32,20 +32,17 @@ export async function searchV0({
           keyword: searchParam.keyword ?? '',
         }
 
-  const result = await apiFetchWithOptionalAuth<Omit<SearchDataPage, 'limit' | 'offset'>>(
-    SEARCH.V0(category),
-    {
-      method: 'POST',
-      query: {
-        limit,
-        offset,
-      },
-      body,
+  const result = await apiFetchWithOptionalAuth<SearchDataPage>(SEARCH.V0(category), {
+    method: 'POST',
+    query: {
+      limit,
+      offset,
     },
-  )
+    body,
+  })
   return {
     ...result,
-    limit: limit ?? 20,
-    offset,
+    limit: result.limit ?? limit ?? 20,
+    offset: result.offset ?? offset,
   }
 }
