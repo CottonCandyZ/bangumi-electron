@@ -182,18 +182,21 @@ function MonoListPanelMeta({
               <span className="text-muted-foreground ml-1 text-xs font-normal">{count}</span>
             )}
           </div>
-          <ListLocateButton />
-          {activeRefreshAction && (
-            <QueryRefreshButton
-              className="text-muted-foreground hover:text-foreground size-6 [&>span]:text-sm"
-              disabled={activeRefreshAction.disabled}
-              onRefresh={activeRefreshAction.onRefresh}
-              refreshing={activeRefreshAction.refreshing}
-            />
-          )}
-          {canToggleFilters && (
-            <MonoListPanelFilterButton filtersOpen={filtersOpen} onToggle={toggleFilters} />
-          )}
+          {/* Keep controls centered without letting them stretch the title row. */}
+          <div className="flex h-0 shrink-0 items-center gap-1">
+            <ListLocateButton />
+            {activeRefreshAction && (
+              <QueryRefreshButton
+                className="text-muted-foreground hover:text-foreground size-6 [&>span]:text-sm"
+                disabled={activeRefreshAction.disabled}
+                onRefresh={activeRefreshAction.onRefresh}
+                refreshing={activeRefreshAction.refreshing}
+              />
+            )}
+            {canToggleFilters && (
+              <MonoListPanelFilterButton filtersOpen={filtersOpen} onToggle={toggleFilters} />
+            )}
+          </div>
         </div>
         <Label className="text-muted-foreground no-drag-region shrink-0 gap-1.5 text-xs font-normal">
           <Switch
