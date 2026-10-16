@@ -71,6 +71,21 @@ export class CollectionRepository {
       .limit(30)
       .all()
   }
+  clearRemoved(userId: number) {
+    // Only settled removals drop their restore backup; in-flight ones still need it.
+    this.db
+      .update(localCollections)
+      .set({ retained: null })
+      .where(
+        and(
+          eq(localCollections.userId, userId),
+          eq(localCollections.status, 'clean'),
+          sql`json_type(${localCollections.local}, '$.collection') = 'null'`,
+          isNotNull(localCollections.retained),
+        ),
+      )
+      .run()
+  }
   overview(userId: number) {
     const pending = this.db
       .select({ count: count() })
@@ -90,7 +105,12 @@ export class CollectionRepository {
       .where(
         and(
           eq(localCollections.userId, userId),
-          inArray(localCollections.status, ['conflict', 'error', 'auth-required']),
+          inArray(localCollections.status, [
+            'conflict',
+            'error',
+            'auth-required',
+            'web-verification-required',
+          ]),
         ),
       )
       .orderBy(desc(localCollections.updatedAt), asc(localCollections.subjectId))
@@ -109,6 +129,7 @@ export class CollectionRepository {
         and(
           eq(localCollections.userId, userId),
           ne(localCollections.status, 'conflict'),
+          ne(localCollections.status, 'web-verification-required'),
           or(
             inArray(localCollections.status, ['pending', 'syncing']),
             isNotNull(localCollections.attempt),
@@ -147,6 +168,18 @@ export class CollectionRepository {
       )
       .run()
   }
+  resetWebVerificationErrors(userId: number) {
+    this.db
+      .update(localCollections)
+      .set({ status: 'pending', error: null })
+      .where(
+        and(
+          eq(localCollections.userId, userId),
+          eq(localCollections.status, 'web-verification-required'),
+        ),
+      )
+      .run()
+  }
   inspectSubjectIds(userId: number, seen: Set<number>) {
     return this.db
       .select({
@@ -155,7 +188,13 @@ export class CollectionRepository {
         complete: sql<number>`json_extract(${localCollections.local}, '$.episodesComplete')`,
       })
       .from(localCollections)
-      .where(and(eq(localCollections.userId, userId), ne(localCollections.status, 'conflict')))
+      .where(
+        and(
+          eq(localCollections.userId, userId),
+          ne(localCollections.status, 'conflict'),
+          ne(localCollections.status, 'web-verification-required'),
+        ),
+      )
       .orderBy(desc(localCollections.updatedAt), asc(localCollections.subjectId))
       .all()
       .filter((r) => !seen.has(r.id) || r.type === 3 || r.complete)

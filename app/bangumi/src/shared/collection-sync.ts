@@ -43,6 +43,7 @@ export type CollectionSyncStatus =
   | 'conflict'
   | 'error'
   | 'auth-required'
+  | 'web-verification-required'
 export type LocalCollectionRecord = {
   userId: number
   subjectId: number

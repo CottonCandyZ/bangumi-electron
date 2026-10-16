@@ -1,3 +1,5 @@
+export { isCloudflareChallenge } from '@shared/web-verification'
+
 export class WebVerificationRequiredError extends Error {
   readonly statusCode = 403
 
@@ -11,19 +13,6 @@ let verificationRequired = false
 let verificationEpoch = 0
 const listeners = new Set<() => void>()
 let trendsQueue: Promise<unknown> = Promise.resolve()
-
-/** A permission error or stale form hash is not a Cloudflare challenge. */
-export async function isCloudflareChallenge(response: { headers: Headers; _data?: unknown }) {
-  if (response.headers.get('cf-mitigated') === 'challenge') return true
-  if (!response.headers.get('content-type')?.includes('text/html')) return false
-  const body =
-    typeof response._data === 'string'
-      ? response._data
-      : response._data instanceof Blob
-        ? await response._data.text()
-        : ''
-  return /window\._cf_chl_opt\s*=|\/cdn-cgi\/challenge-platform\//.test(body)
-}
 
 /** Home categories and list panels share one request slot, including body parsing. */
 export function queueWebTrends<T>(request: () => Promise<T>): Promise<T> {

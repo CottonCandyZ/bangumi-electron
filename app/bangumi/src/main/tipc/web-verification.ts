@@ -12,27 +12,32 @@ let verificationPromise: Promise<VerifiedPages> | null = null
 
 export const webVerificationIPC = {
   requestBangumiWebVerification: t.procedure
-    .input<{ sectionPath?: BangumiSectionPath }>()
+    .input<{ sectionPath?: BangumiSectionPath; subjectId?: number }>()
     .action(async ({ input }) => {
-      return await requestBangumiWebVerification(input.sectionPath ?? 'anime')
+      if (
+        input.subjectId !== undefined &&
+        (!Number.isSafeInteger(input.subjectId) || input.subjectId <= 0)
+      )
+        throw new Error('无效的条目 ID')
+      return await requestBangumiWebVerification(input.sectionPath ?? 'anime', input.subjectId)
     }),
 }
 
-function requestBangumiWebVerification(sectionPath: BangumiSectionPath) {
+function requestBangumiWebVerification(sectionPath: BangumiSectionPath, subjectId?: number) {
   if (verificationPromise) {
     verificationWindow?.show()
     verificationWindow?.focus()
     return verificationPromise
   }
 
-  verificationPromise = createBangumiWebVerificationWindow(sectionPath).finally(() => {
+  verificationPromise = createBangumiWebVerificationWindow(sectionPath, subjectId).finally(() => {
     verificationPromise = null
     verificationWindow = null
   })
   return verificationPromise
 }
 
-function createBangumiWebVerificationWindow(sectionPath: BangumiSectionPath) {
+function createBangumiWebVerificationWindow(sectionPath: BangumiSectionPath, subjectId?: number) {
   return new Promise<VerifiedPages>((resolve, reject) => {
     const parent = BrowserWindow.getFocusedWindow() ?? undefined
     const window = new BrowserWindow({
@@ -72,12 +77,18 @@ function createBangumiWebVerificationWindow(sectionPath: BangumiSectionPath) {
     window.webContents.on('did-finish-load', () => {
       void window.webContents
         .executeJavaScript(
-          "document.querySelector('.subjectCover.cover.ll') ? document.documentElement.outerHTML : null",
+          subjectId
+            ? "document.querySelector('#headerSubject') ? document.documentElement.outerHTML : null"
+            : "document.querySelector('.subjectCover.cover.ll') ? document.documentElement.outerHTML : null",
           true,
         )
         .then(async (html: string | null) => {
           if (!html || collecting || settled) return
           collecting = true
+          if (subjectId) {
+            finish()
+            return
+          }
           const pages: VerifiedPages = { [sectionPath]: html }
           // Reuse the verified first-party browser context for every home category.
           // A slow or unavailable category must not discard the pages already read.
@@ -117,7 +128,10 @@ function createBangumiWebVerificationWindow(sectionPath: BangumiSectionPath) {
     window.once('closed', () => {
       finish(new Error('Bangumi 网页验证已取消。'))
     })
-    window.loadURL(`https://bgm.tv/${sectionPath}/browser/?sort=trends`).catch((error: unknown) => {
+    const url = subjectId
+      ? `https://bgm.tv/subject/${subjectId}`
+      : `https://bgm.tv/${sectionPath}/browser/?sort=trends`
+    window.loadURL(url).catch((error: unknown) => {
       finish(error instanceof Error ? error : new Error('无法打开 Bangumi 网页验证。'))
     })
   })

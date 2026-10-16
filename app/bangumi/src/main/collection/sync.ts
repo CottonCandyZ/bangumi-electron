@@ -19,7 +19,12 @@ import type { CollectionData } from '../../shared/types/collection'
 export class SyncError extends Error {
   constructor(
     message: string,
-    public kind: 'network' | 'auth-required' | 'web-auth-required' | 'error' = 'error',
+    public kind:
+      | 'network'
+      | 'auth-required'
+      | 'web-auth-required'
+      | 'web-verification-required'
+      | 'error' = 'error',
   ) {
     super(message)
   }
@@ -76,7 +81,7 @@ export class CollectionSyncEngine {
   ) {
     let record = this.repository.ensure(userId, subjectId)
     const before = record
-    if (record.status === 'conflict') return
+    if (record.status === 'conflict' || record.status === 'web-verification-required') return
     this.repository.put({ ...record, status: 'syncing', error: null })
     this.changed(userId, subjectId, false)
     try {
@@ -127,9 +132,11 @@ export class CollectionSyncEngine {
           : error instanceof SyncError &&
               ['auth-required', 'web-auth-required'].includes(error.kind)
             ? 'auth-required'
-            : error instanceof SyncError && error.kind === 'network'
-              ? 'pending'
-              : 'error',
+            : error instanceof SyncError && error.kind === 'web-verification-required'
+              ? 'web-verification-required'
+              : error instanceof SyncError && error.kind === 'network'
+                ? 'pending'
+                : 'error',
         error: cancelled ? null : error instanceof Error ? error.message : '同步失败',
       })
       throw error

@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
     completeList: vi.fn(),
     seedPage: vi.fn(),
     resetErrors: vi.fn(),
+    resetWebVerificationErrors: vi.fn(),
     pendingSubjectIds: vi.fn(),
     inspectSubjectIds: vi.fn(),
     hasPending: vi.fn(),
@@ -42,7 +43,9 @@ beforeEach(async () => {
     mocks.repository
       .all()
       .filter(
-        (r) => r.status !== 'conflict' && (['pending', 'syncing'].includes(r.status) || r.attempt),
+        (r) =>
+          !['conflict', 'web-verification-required'].includes(r.status) &&
+          (['pending', 'syncing'].includes(r.status) || r.attempt),
       )
       .map((r) => r.subjectId),
   )
@@ -370,6 +373,48 @@ test('web authorization failure does not pause other OAuth-capable subjects', as
   service.requestCollection(44, 1)
   await vi.advanceTimersByTimeAsync(300)
   expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([42, 43, 44])
+})
+
+test('CF verification gates deletion retries while other subjects continue and completion resumes them', async () => {
+  const blocked = {
+    subjectId: 42,
+    subject: { name: 'test' },
+    status: 'pending',
+    local: { collection: null },
+    attempt: {} as object | null,
+  }
+  mocks.repository.all.mockReturnValue([blocked])
+  mocks.repository.get.mockImplementation((_id, subjectId) =>
+    subjectId === 42 ? blocked : { subjectId, subject: { name: 'other' }, status: 'clean' },
+  )
+  mocks.repository.resetWebVerificationErrors.mockImplementation(() => {
+    blocked.status = 'pending'
+  })
+  mocks.sync.mockImplementation(async (_id, subjectId) => {
+    if (subjectId !== 42) return
+    blocked.status = 'web-verification-required'
+    throw new SyncError('需要网页验证', 'web-verification-required')
+  })
+  service.requestCollection(43, 1)
+  await vi.advanceTimersByTimeAsync(300)
+  expect(mocks.sync.mock.calls.map((call) => call[1])).toEqual([43, 42])
+  service.requestCollection(42, 1, 'foreground')
+  service.requestCollection(44, 1)
+  service.syncCollections(1, true)
+  await vi.advanceTimersByTimeAsync(300000)
+  expect(mocks.sync.mock.calls.filter((call) => call[1] === 42)).toHaveLength(1)
+  expect(mocks.sync.mock.calls.some((call) => call[1] === 44)).toBe(true)
+  expect(service.collectionOverview(1)).toMatchObject({ authRequired: false, retryAt: null })
+  mocks.sync.mockImplementation(async (_id, subjectId) => {
+    if (subjectId === 42) {
+      blocked.status = 'clean'
+      blocked.attempt = null
+    }
+  })
+  await service.collectionWebVerificationComplete()
+  await vi.advanceTimersByTimeAsync(1)
+  expect(mocks.repository.resetWebVerificationErrors).toHaveBeenCalledWith(1)
+  expect(mocks.sync.mock.calls.filter((call) => call[1] === 42)).toHaveLength(2)
 })
 
 test('a per-subject failure also keeps the requested full scan pending', async () => {

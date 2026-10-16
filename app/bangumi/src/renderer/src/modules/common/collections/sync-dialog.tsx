@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@renderer/components/ui/dialog'
 import { Button } from '@renderer/components/ui/button'
 import { client } from '@renderer/lib/client'
@@ -8,10 +8,11 @@ import { userIdAtom } from '@renderer/state/session'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { currentCollectionUser, submitCollection } from '@renderer/data/collection/client'
 import { getAccessToken } from '@renderer/data/fetch/session'
+import { useBangumiWebVerification } from '@renderer/data/hooks/web-verification'
 import type { CollectionFields, LocalCollectionRecord, SyncOverview } from '@shared/collection-sync'
 import { toast } from 'sonner'
-import { RotateCw } from 'lucide-react'
-import { SyncActivity, SyncCoverage, SyncRecent, SyncSummary } from './sync-progress'
+import { Loader2, RotateCw, ShieldCheck } from 'lucide-react'
+import { SyncActivity, SyncRecent, SyncStatus, lastSyncedText } from './sync-progress'
 import { collectionSyncIndicator } from './sync-indicator'
 
 export const collectionSyncDialogAtom = atom(false)
@@ -44,6 +45,10 @@ export function CollectionSyncDialog() {
     open ? undefined : () => null,
   ).data
   const hasConflicts = !!overview?.conflicts.length
+  const verificationRecord = overview?.errors.find(
+    (record) => record.status === 'web-verification-required',
+  )
+  const verification = useBangumiWebVerification('anime', verificationRecord?.subjectId)
   const login = useSetAtom(loginDialogAtom)
   const removed = useQuery({
     queryKey: ['collection-removed', userId],
@@ -57,57 +62,80 @@ export function CollectionSyncDialog() {
     networkMode: 'always',
     onError: (error) => toast.error(error.message),
   })
+  const queryClient = useQueryClient()
+  const clearRemoved = useMutation({
+    mutationFn: () => client.collectionClearRemoved({ userId }),
+    networkMode: 'always',
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['collection-removed', userId] }),
+    onError: (error) => toast.error(error.message),
+  })
   if (!userId) return null
+  const running = sync.isPending || !!overview?.running
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent
         aria-describedby={undefined}
-        className={`flex max-h-[85vh] flex-col gap-0 overflow-hidden p-0 ${hasConflicts ? 'sm:max-w-2xl' : 'sm:max-w-md'}`}
+        className={`flex max-h-[80vh] flex-col gap-0 overflow-hidden p-0 ${hasConflicts ? 'sm:max-w-2xl' : 'sm:max-w-sm'}`}
       >
-        <DialogHeader className="p-5 pr-10">
-          <DialogTitle>收藏同步</DialogTitle>
+        <DialogHeader className="space-y-1 px-5 pt-5 pr-10 pb-4">
+          <DialogTitle className="text-base">收藏同步</DialogTitle>
+          {overview && <SyncStatus overview={overview} />}
         </DialogHeader>
-        <div className="min-h-0 space-y-4 overflow-y-auto px-5 pb-5">
-          {overview ? (
+        <div className="min-h-0 space-y-5 overflow-y-auto px-5 pb-5 empty:hidden">
+          {overview && (
             <SyncDetails
               overview={overview}
-              retrying={sync.isPending || overview.running}
+              retrying={running}
               onRetry={() => sync.mutate(false)}
             />
-          ) : (
-            <p className="text-muted-foreground text-sm">正在查看同步进度…</p>
           )}
           {!!removed.data?.length && (
-            <details className="rounded-lg border p-3">
-              <summary className="cursor-pointer text-xs">
-                最近移除 · {removed.data.length} 部可再次收藏
-              </summary>
-              <div className="mt-3 space-y-2">
+            <section aria-label="最近移除">
+              <div className="mb-1 flex items-center justify-between">
+                <h3 className="text-muted-foreground text-xs">最近移除</h3>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-muted-foreground h-6 px-2 text-xs"
+                  disabled={clearRemoved.isPending}
+                  onClick={() => clearRemoved.mutate()}
+                >
+                  清空
+                </Button>
+              </div>
+              <ul>
                 {removed.data.map((record) => (
                   <RestoreRow key={record.subjectId} record={record} />
                 ))}
-              </div>
-            </details>
+              </ul>
+            </section>
           )}
-          {overview && <SyncCoverage overview={overview} />}
         </div>
-        <div className="bg-muted/30 flex flex-wrap items-center justify-end gap-2 border-t px-5 py-3">
+        <div className="flex items-center gap-2 border-t px-5 py-3">
+          <span className="text-muted-foreground mr-auto truncate text-xs">
+            {overview && lastSyncedText(overview)}
+          </span>
           {(overview?.authRequired ||
             !!overview?.errors.some((r) => r.status === 'auth-required')) && (
-            <Button variant="outline" onClick={() => login({ open: true })}>
+            <Button size="sm" variant="outline" onClick={() => login({ open: true })}>
               重新登录
             </Button>
           )}
-          <Button variant="ghost" onClick={() => setOpen(false)}>
-            {hasConflicts ? '稍后处理' : '关闭'}
-          </Button>
-          <Button
-            variant="outline"
-            disabled={!overview || sync.isPending || overview.running}
-            onClick={() => sync.mutate(true)}
-          >
-            {overview?.running ? '正在同步…' : '同步全部收藏'}
-          </Button>
+          {verificationRecord ? (
+            <Button
+              size="sm"
+              disabled={verification.isPending}
+              onClick={() => verification.mutate()}
+            >
+              {verification.isPending ? <Loader2 className="animate-spin" /> : <ShieldCheck />}
+              {verification.isPending ? '等待验证' : '打开网页验证'}
+            </Button>
+          ) : (
+            <Button size="sm" disabled={!overview || running} onClick={() => sync.mutate(true)}>
+              <RotateCw className={running ? 'animate-spin' : ''} />
+              {running ? '同步中' : '立即同步'}
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
@@ -124,18 +152,14 @@ function SyncDetails({
 }) {
   return (
     <>
-      <SyncSummary overview={overview} />
       <SyncActivity overview={overview} />
       {overview.error && (
-        <div
-          className="bg-destructive/5 flex items-center justify-between gap-3 rounded-lg border p-3"
-          role="status"
-        >
+        <div className="bg-destructive/5 flex items-center justify-between gap-3 rounded-md px-3 py-2">
           <p className="text-destructive min-w-0 text-xs leading-relaxed break-words">
             {overview.error}
           </p>
           <Button size="sm" variant="outline" disabled={retrying} onClick={onRetry}>
-            {retrying ? '正在重试…' : '重试'}
+            重试
           </Button>
         </div>
       )}
@@ -146,23 +170,32 @@ function SyncDetails({
         />
       ))}
       {!!overview.errors.length && (
-        <section className="space-y-2" aria-label="同步异常">
-          <div className="flex items-center justify-between gap-3">
-            <h3 className="text-muted-foreground text-xs">需要重试的条目</h3>
-            {!overview.error && (
-              <Button size="sm" variant="outline" disabled={retrying} onClick={onRetry}>
-                {retrying ? '正在重试…' : '重试'}
-              </Button>
-            )}
-          </div>
-          {overview.errors.map((record) => (
-            <div className="space-y-1 rounded-lg border p-3" key={record.subjectId}>
-              <p className="text-sm font-medium">{record.subject.name_cn || record.subject.name}</p>
-              {record.error !== overview.error && (
-                <p className="text-destructive text-xs break-words">{record.error}</p>
+        <section aria-label="同步失败">
+          <div className="mb-1 flex items-center justify-between gap-3">
+            <h3 className="text-muted-foreground text-xs">同步失败</h3>
+            {!overview.error &&
+              overview.errors.some((record) => record.status !== 'web-verification-required') && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 px-2 text-xs"
+                  disabled={retrying}
+                  onClick={onRetry}
+                >
+                  重试
+                </Button>
               )}
-            </div>
-          ))}
+          </div>
+          <ul>
+            {overview.errors.map((record) => (
+              <li className="py-1.5 text-sm" key={record.subjectId}>
+                <p className="truncate">{record.subject.name_cn || record.subject.name}</p>
+                {record.error !== overview.error && (
+                  <p className="text-destructive text-xs break-words">{record.error}</p>
+                )}
+              </li>
+            ))}
+          </ul>
         </section>
       )}
       <SyncRecent
@@ -184,17 +217,18 @@ function RestoreRow({ record }: { record: LocalCollectionRecord }) {
     onError: (error) => toast.error(error.message),
   })
   return (
-    <div className="flex items-center justify-between gap-3 text-sm">
-      <span>{record.subject.name_cn || record.subject.name}</span>
+    <li className="flex items-center justify-between gap-3 py-1 text-sm">
+      <span className="min-w-0 truncate">{record.subject.name_cn || record.subject.name}</span>
       <Button
         size="sm"
-        variant="outline"
+        variant="ghost"
+        className="h-6 shrink-0 px-2 text-xs"
         disabled={mutation.isPending}
         onClick={() => mutation.mutate()}
       >
-        再次收藏
+        恢复
       </Button>
-    </div>
+    </li>
   )
 }
 function ConflictCard({ record }: { record: LocalCollectionRecord }) {
@@ -218,10 +252,10 @@ function ConflictCard({ record }: { record: LocalCollectionRecord }) {
       <div className="font-medium">{record.subject.name_cn || record.subject.name}</div>
       <div className="flex gap-2">
         <Button size="sm" variant="outline" onClick={() => chooseAll('local')}>
-          保留这台设备的修改
+          全部用本机
         </Button>
         <Button size="sm" variant="outline" onClick={() => chooseAll('remote')}>
-          使用 Bangumi 上的版本
+          全部用 Bangumi
         </Button>
       </div>
       {conflict.fields.map((field) => (

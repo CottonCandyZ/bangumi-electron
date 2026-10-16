@@ -79,7 +79,8 @@ export function createCollectionService(
     if (
       record?.status === 'conflict' ||
       record?.status === 'error' ||
-      record?.status === 'auth-required'
+      record?.status === 'auth-required' ||
+      record?.status === 'web-verification-required'
     )
       return
     if (foregroundRequested.has(subjectId) || engine.isSyncing(id, subjectId)) return
@@ -124,6 +125,17 @@ export function createCollectionService(
     lastError = null
     pageRefreshedAt.clear()
     notifyCollections(id, null)
+    scheduleCollections(0)
+  }
+  async function collectionWebVerificationComplete() {
+    const id = userId
+    if (!id) return
+    // Old requests must settle before releasing the persisted verification gate.
+    await Promise.allSettled([running, foregroundRunning])
+    if (userId !== id) return
+    collectionRepository.resetWebVerificationErrors(id)
+    notifyCollections(id, null)
+    notifySyncProgress()
     scheduleCollections(0)
   }
   function pauseForNetwork(error: SyncError) {
@@ -287,6 +299,10 @@ export function createCollectionService(
       signal.throwIfAborted()
       throwIfSyncPaused()
       const current = collectionRepository.get(id, subjectId)
+      if (current?.status === 'web-verification-required') {
+        requested.delete(subjectId)
+        continue
+      }
       // A queued sidebar item may already have finished in the foreground lane.
       if (
         !requested.has(subjectId) &&
@@ -436,6 +452,7 @@ export function createCollectionService(
   return {
     activateCollections,
     collectionCredentialsChanged,
+    collectionWebVerificationComplete,
     collectionOverview,
     readCollectionPage,
     requestCollection,

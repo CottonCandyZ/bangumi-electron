@@ -13,6 +13,7 @@ import {
 } from '../../shared/collection-sync'
 import type { CollectionData, CollectionEpisodes, Collections } from '../../shared/types/collection'
 import type { Episode } from '../../shared/types/episode'
+import { isCloudflareChallenge } from '../../shared/web-verification'
 import { retryableNetworkOperation, SyncError, type CollectionTransport } from './sync'
 
 const agent = 'CottonCandyZ/bangumi-electron (https://github.com/CottonCandyZ/bangumi-electron)'
@@ -189,8 +190,24 @@ async function removeWebCollection(subjectId: number, profile: LocalAccount, sig
         },
       })
       signal.throwIfAborted()
-      if (!response.ok) throw new SyncError(`网页请求失败（${response.status}）`, 'network')
-      return response.text()
+      const verificationError = () =>
+        new SyncError(
+          'Bangumi 网页需要 Cloudflare 验证，请打开网页验证后继续取消收藏',
+          'web-verification-required',
+        )
+      if (await isCloudflareChallenge(response)) throw verificationError()
+      const html = await response.text()
+      signal.throwIfAborted()
+      if (await isCloudflareChallenge({ headers: response.headers, _data: html }))
+        throw verificationError()
+      if (response.status === 401 || response.status === 403)
+        throw new SyncError('网页登录已失效或没有取消收藏权限，请重新登录', 'web-auth-required')
+      if (!response.ok)
+        throw new SyncError(
+          `网页请求失败（${response.status}）`,
+          response.status === 429 || response.status >= 500 ? 'network' : 'error',
+        )
+      return html
     }, '暂时无法连接 Bangumi 网页，稍后将重试')
   }
   const html = await web(`/subject/${subjectId}`)

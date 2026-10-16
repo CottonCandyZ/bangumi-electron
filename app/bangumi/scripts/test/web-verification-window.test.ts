@@ -1,8 +1,14 @@
 import { afterEach, expect, test, vi } from 'vitest'
 
 const mocks = vi.hoisted(() => ({
-  windows: [] as { destroyed: boolean; webContents: { executeJavaScript: unknown } }[],
+  windows: [] as {
+    destroyed: boolean
+    close(): void
+    webContents: { executeJavaScript: unknown; emit(event: string): void }
+  }[],
   failSection: '',
+  urls: [] as string[],
+  challenge: false,
 }))
 
 vi.mock('@main/helper', () => ({ getIconPath: () => 'icon.png' }))
@@ -18,7 +24,8 @@ vi.mock('electron', async () => {
     destroyed = false
     webContents = Object.assign(new EventEmitter(), {
       executeJavaScript: vi.fn(async (script: string) => {
-        if (script.startsWith('document.querySelector')) return '<html>verified anime</html>'
+        if (script.startsWith('document.querySelector'))
+          return mocks.challenge ? null : '<html>verified anime</html>'
         const section = script.match(/fetch\('\/(\w+)\/browser/)?.[1]
         if (section === mocks.failSection) throw new Error('network unavailable')
         return `<html>${section}</html>`
@@ -42,7 +49,8 @@ vi.mock('electron', async () => {
       this.destroyed = true
       this.emit('closed')
     }
-    async loadURL() {
+    async loadURL(url: string) {
+      mocks.urls.push(url)
       queueMicrotask(() => this.webContents.emit('did-finish-load'))
     }
   }
@@ -52,16 +60,18 @@ vi.mock('electron', async () => {
 afterEach(() => {
   mocks.windows.length = 0
   mocks.failSection = ''
+  mocks.urls.length = 0
+  mocks.challenge = false
 })
 
-async function verify(sectionPath: string) {
+async function verify(sectionPath: string, subjectId?: number) {
   const { webVerificationIPC } = await import('../../src/main/tipc/web-verification')
   // The IPC builder is replaced with its action handler for the window lifecycle test.
   return (
     webVerificationIPC.requestBangumiWebVerification as unknown as (args: {
-      input: { sectionPath: string }
+      input: { sectionPath: string; subjectId?: number }
     }) => Promise<Record<string, string>>
-  )({ input: { sectionPath } })
+  )({ input: { sectionPath, subjectId } })
 }
 
 test('concurrent categories share one verification window and receive correctly keyed pages', async () => {
@@ -83,4 +93,30 @@ test('one failed category retains verified pages and still collects subsequent c
   expect(pages.music).toBeDefined()
   expect(pages.game).toBeDefined()
   expect(pages.real).toBeDefined()
+})
+
+test('collection verification opens the subject page and waits for the CF challenge to finish', async () => {
+  mocks.challenge = true
+  const pending = verify('anime', 42)
+  await vi.waitFor(() => expect(mocks.windows).toHaveLength(1))
+  const window = mocks.windows[0]
+  expect(mocks.urls).toEqual(['https://bgm.tv/subject/42'])
+  expect(window.destroyed).toBe(false)
+  mocks.challenge = false
+  window.webContents.emit('did-finish-load')
+  await expect(pending).resolves.toEqual({})
+  expect(window.destroyed).toBe(true)
+  expect(window.webContents.executeJavaScript).toHaveBeenCalledWith(
+    expect.stringContaining('#headerSubject'),
+    true,
+  )
+})
+
+test('closing the CF window cancels verification without completing it', async () => {
+  mocks.challenge = true
+  const pending = verify('anime', 42)
+  const cancelled = expect(pending).rejects.toThrow('已取消')
+  await vi.waitFor(() => expect(mocks.windows).toHaveLength(1))
+  mocks.windows[0].close()
+  await cancelled
 })

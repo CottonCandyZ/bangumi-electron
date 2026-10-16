@@ -16,6 +16,7 @@ export function createCollectionApi(
       service.activateCollections(input.userId),
     collectionCredentialsChanged: (input: { userId: number }) =>
       service.collectionCredentialsChanged(input.userId),
+    collectionWebVerificationComplete: () => service.collectionWebVerificationComplete(),
     collectionEpisodeResource: (input: { episodeId: number }) =>
       repository.episodeResource(input.episodeId),
     collectionState: (input: { userId: number; subjectId: number }) => {
@@ -55,6 +56,7 @@ export function createCollectionApi(
       service.syncCollections(input.userId, input.full),
     collectionResolve: (input: ConflictResolution) => service.resolveCollection(input),
     collectionRemoved: (input: { userId: number }) => repository.removed(input.userId),
+    collectionClearRemoved: (input: { userId: number }) => repository.clearRemoved(input.userId),
   }
 }
 export type CollectionApi = ReturnType<typeof createCollectionApi>

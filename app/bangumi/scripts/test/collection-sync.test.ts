@@ -51,6 +51,41 @@ test('network operation preserves classified sync errors', async () => {
     }, '网络失败'),
   ).rejects.toSatisfy((error: unknown) => error === failure)
 })
+test('CF-blocked deletions remain durable, skip retries and resume only after verification', async (t) => {
+  const f = fixture(t, true)
+  f.command({ kind: 'remove' })
+  const write = f.transport.write
+  let verified = false
+  let attempts = 0
+  f.transport.write = async (...args) => {
+    attempts++
+    if (!verified) throw new SyncError('需要网页验证', 'web-verification-required')
+    await write(...args)
+  }
+  await expect(f.engine().sync(1, 42, f.transport)).rejects.toMatchObject({
+    kind: 'web-verification-required',
+  })
+  f.reopen()
+  expect(f.repo.get(1, 42)).toMatchObject({
+    status: 'web-verification-required',
+    local: { collection: null },
+    retained: snapshot().collection,
+  })
+  expect(f.repo.get(1, 42)?.attempt).not.toBeNull()
+  expect(f.repo.overview(1).errors[0].status).toBe('web-verification-required')
+  expect(f.repo.pendingSubjectIds(1)).toEqual([])
+  expect(f.repo.inspectSubjectIds(1, new Set())).toEqual([])
+  f.repo.resetErrors(1)
+  await f.engine().sync(1, 42, f.transport)
+  expect(attempts).toBe(1)
+  verified = true
+  f.repo.resetWebVerificationErrors(1)
+  expect(f.repo.pendingSubjectIds(1)).toEqual([42])
+  await f.engine().sync(1, 42, f.transport)
+  expect(attempts).toBe(2)
+  expect(f.repo.get(1, 42)).toMatchObject({ status: 'clean', local: { collection: null } })
+  expect(f.repo.actions(1, 42)).toEqual([])
+})
 function fixture(t: TestContext, disk = false) {
   const directory = mkdtempSync(join(tmpdir(), 'bangumi-sync-test-'))
   const filename = disk ? join(directory, 'test.sqlite') : ':memory:'

@@ -167,6 +167,55 @@ test('transport error classification survives worker RPC and pauses expired auth
   expect(await rpc.call('collectionRead', { userId: 1, subjectId: 42 })).toMatchObject({ rate: 9 })
 }, 15000)
 
+test('CF-blocked deletion survives RPC and verification completion resumes the pending removal', async (t) => {
+  let state: CollectionSnapshot = {
+    collection: defaultCollection(),
+    episodes: {},
+    episodesComplete: true,
+  }
+  let verified = false
+  let writes = 0
+  const { rpc, sqlite } = fixture(t, {
+    async request(_id: number, _userId: number, method: string, args: unknown[]) {
+      if (method === 'read')
+        return {
+          value: { snapshot: structuredClone(state), episodes: [], epStatus: 0, volStatus: 0 },
+        }
+      if (method === 'write') {
+        writes++
+        if (!verified) throw new SyncError('需要网页验证', 'web-verification-required')
+        state = structuredClone(args[2] as CollectionSnapshot)
+        return {}
+      }
+      throw new Error(`Unexpected network method ${method}`)
+    },
+    close: vi.fn(),
+  })
+  const repository = new CollectionRepository(sqlite)
+  repository.acknowledge(1, 42, 0, { snapshot: state, episodes: [], epStatus: 0, volStatus: 0 })
+  await rpc.call('collectionCommand', {
+    userId: 1,
+    subjectId: 42,
+    actionId: 'cf-removal',
+    kind: 'remove',
+  })
+  await rpc.call('collectionActivate', { userId: 1 })
+  await vi.waitFor(async () =>
+    expect(await rpc.call('collectionOverview', { userId: 1 })).toMatchObject({
+      authRequired: false,
+      running: false,
+      errors: [{ subjectId: 42, status: 'web-verification-required' }],
+    }),
+  )
+  expect(writes).toBe(1)
+  verified = true
+  await rpc.call('collectionWebVerificationComplete')
+  await vi.waitFor(async () => expect(repository.get(1, 42)?.status).toBe('clean'))
+  expect(state.collection).toBeNull()
+  expect(writes).toBe(2)
+  expect(repository.actions(1, 42)).toEqual([])
+}, 15000)
+
 test('opening an uncached subject bypasses a blocked sidebar sync and shares duplicate reads', async (t) => {
   let unblock!: () => void
   const blocked = new Promise<void>((resolve) => (unblock = resolve))

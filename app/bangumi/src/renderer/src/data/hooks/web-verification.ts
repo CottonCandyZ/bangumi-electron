@@ -12,18 +12,22 @@ import { restoreQueriesAfterWebVerification } from './web-verification-cache'
 
 const pendingVerifications = new WeakMap<QueryClient, Promise<void>>()
 
-function verifyAndRestore(queryClient: QueryClient, sectionPath: SectionPath) {
+function verifyAndRestore(queryClient: QueryClient, sectionPath: SectionPath, subjectId?: number) {
   const pending = pendingVerifications.get(queryClient)
   if (pending) return pending
   const request = (async () => {
-    const pages = await client.requestBangumiWebVerification({ sectionPath })
+    const pages = await client.requestBangumiWebVerification({ sectionPath, subjectId })
     const lists: Partial<Record<SectionPath, TopList[]>> = {}
     for (const section of ['anime', 'book', 'music', 'game', 'real'] as const) {
       const html = pages[section]
       if (html) lists[section] = parseTopListFromHTML(html)
     }
+    await client.collectionWebVerificationComplete({})
     await restoreQueriesAfterWebVerification(queryClient, lists)
-    if (!isWebVerificationRequired()) toast.success('网页验证完成，已恢复各分类刷新')
+    if (!isWebVerificationRequired())
+      toast.success(
+        subjectId ? '网页验证完成，已继续同步取消收藏' : '网页验证完成，已恢复各分类刷新',
+      )
   })().finally(() => pendingVerifications.delete(queryClient))
   pendingVerifications.set(queryClient, request)
   return request
@@ -37,13 +41,13 @@ export function useWebVerificationRequired() {
   )
 }
 
-export function useBangumiWebVerification(sectionPath: SectionPath = 'anime') {
+export function useBangumiWebVerification(sectionPath: SectionPath = 'anime', subjectId?: number) {
   const queryClient = useQueryClient()
   const pending = useIsMutating({ mutationKey: ['bangumi-web-verification'] }) > 0
 
   const mutation = useMutation({
     mutationKey: ['bangumi-web-verification'],
-    mutationFn: () => verifyAndRestore(queryClient, sectionPath),
+    mutationFn: () => verifyAndRestore(queryClient, sectionPath, subjectId),
     onError: (error) => {
       const message = error instanceof Error ? error.message : '网页验证失败'
       if (message.includes('已取消')) return

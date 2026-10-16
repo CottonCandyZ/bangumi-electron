@@ -3,6 +3,9 @@ import { collectionService } from '../collection/service'
 import type { CollectionApi } from '../collection/worker-api'
 
 export const collectionIPC = {
+  collectionWebVerificationComplete: t.procedure
+    .input<Record<string, never>>()
+    .action(() => collectionService().call('collectionWebVerificationComplete')),
   collectionCredentialsChanged: t.procedure
     .input<Parameters<CollectionApi['collectionCredentialsChanged']>[0]>()
     .action(({ input }) => collectionService().call('collectionCredentialsChanged', input)),
@@ -45,4 +48,7 @@ export const collectionIPC = {
   collectionRemoved: t.procedure
     .input<Parameters<CollectionApi['collectionRemoved']>[0]>()
     .action(({ input }) => collectionService().call('collectionRemoved', input)),
+  collectionClearRemoved: t.procedure
+    .input<Parameters<CollectionApi['collectionClearRemoved']>[0]>()
+    .action(({ input }) => collectionService().call('collectionClearRemoved', input)),
 }
