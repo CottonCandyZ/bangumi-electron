@@ -7,7 +7,7 @@ module.exports = async function pruneAfterPack(context) {
   const platform = context.electronPlatformName
 
   await Promise.all([
-    pruneBetterSqlite3(unpackedRoot),
+    pruneBetterSqlite3(unpackedRoot, platform, context.arch),
     pruneMacOSTrafficLights(unpackedRoot, platform),
     pruneKoffi(unpackedRoot, platform, context.arch),
     pruneVelopack(unpackedRoot, platform, context.arch),
@@ -18,8 +18,18 @@ module.exports = async function pruneAfterPack(context) {
   await buildVelopackBridge(context)
 }
 
-async function pruneBetterSqlite3(unpackedRoot) {
+async function pruneBetterSqlite3(unpackedRoot, platform, contextArch) {
   const root = join(unpackedRoot, 'better-sqlite3')
+  const arch = getArchName(contextArch)
+  // Keep both macOS slices for universal builds; musl prebuilds only matter on Linux.
+  const keepParts =
+    {
+      win32: arch ? [`win32-${arch}.`] : ['win32-'],
+      darwin: arch && arch !== 'universal' ? [`darwin-${arch}.`] : ['darwin-'],
+      linux: arch ? [`linux-${arch}.`, `linuxmusl-${arch}.`] : ['linux-', 'linuxmusl-'],
+    }[platform] ?? null
+
+  if (keepParts) await removeExcept(join(root, 'prebuilds'), keepParts)
   await removeAll([
     join(root, 'deps'),
     join(root, 'src'),

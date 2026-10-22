@@ -13,18 +13,9 @@ const packId = 'io.github.cottoncandyz.bangumi-electron'
 const releaseTag = `v${packageJson.version}`
 const hostArch = process.arch === 'arm64' ? 'arm64' : 'x64'
 const archs = arch === 'all' ? ['x64', 'arm64'] : [arch]
+// better-sqlite3 ships Node-API prebuilds for both macOS archs, so only addons built from
+// source need rebuilding per arch.
 const nativeModules = [
-  {
-    name: 'better-sqlite3',
-    binaryPath: join(
-      projectDir,
-      'node_modules',
-      'better-sqlite3',
-      'build',
-      'Release',
-      'better_sqlite3.node',
-    ),
-  },
   {
     name: 'bangumi-macos-traffic-lights',
     binaryPath: join(

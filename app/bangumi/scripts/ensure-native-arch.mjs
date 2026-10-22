@@ -9,18 +9,9 @@ if (process.platform !== 'darwin') {
 const projectDir = process.cwd()
 const packageJson = JSON.parse(readFileSync(join(projectDir, 'package.json'), 'utf8'))
 const hostArch = process.arch === 'arm64' ? 'arm64' : 'x64'
+// better-sqlite3 ships Node-API prebuilds for both macOS archs, so only addons built from
+// source need an arch check.
 const nativeModules = [
-  {
-    name: 'better-sqlite3',
-    binaryPath: join(
-      projectDir,
-      'node_modules',
-      'better-sqlite3',
-      'build',
-      'Release',
-      'better_sqlite3.node',
-    ),
-  },
   {
     name: 'bangumi-macos-traffic-lights',
     binaryPath: join(

@@ -67,12 +67,22 @@ async function getAvailableFilePath(filename: string) {
 
 export const utils = {
   getSafeStorageEncrypted: t.procedure.input<{ origin: string[] }>().action(async ({ input }) => {
-    return input.origin.map((item) => safeStorage.encryptString(item).toString('base64'))
+    return Promise.all(
+      input.origin.map(async (item) =>
+        (await safeStorage.encryptStringAsync(item)).toString('base64'),
+      ),
+    )
   }),
   getSafeStorageDecrypted: t.procedure
     .input<{ encrypted: string[] }>()
     .action(async ({ input }) => {
-      return input.encrypted.map((item) => safeStorage.decryptString(Buffer.from(item, 'base64')))
+      // The async decryptor also reads values written by the deprecated sync encryptString.
+      return Promise.all(
+        input.encrypted.map(
+          async (item) =>
+            (await safeStorage.decryptStringAsync(Buffer.from(item, 'base64'))).result,
+        ),
+      )
     }),
   getCookie: t.procedure.input<Electron.CookiesGetFilter>().action(async ({ input }) => {
     return await session.defaultSession.cookies.get(input)

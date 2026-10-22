@@ -1,7 +1,6 @@
 import { existsSync, readFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { withWindowsSqlitePrebuild } from './windows-native.mjs'
 
 const args = parseArgs(process.argv.slice(2))
 const projectDir = process.cwd()
@@ -24,9 +23,7 @@ const publishTarget = process.env.BANGUMI_VELOPACK_PUBLISH_TARGET || 'github'
 resetOutputDir()
 if (publish || args['download-existing'] === 'true') downloadExistingRelease()
 
-withWindowsSqlitePrebuild(arch, () =>
-  run('pnpm', ['exec', 'electron-builder', '--win', '--dir', `--${arch}`]),
-)
+run('pnpm', ['exec', 'electron-builder', '--win', '--dir', `--${arch}`])
 
 if (!existsSync(join(packDir, 'Bangumi.exe'))) {
   fail(`Expected unpacked app was not found: ${join(packDir, 'Bangumi.exe')}`)

@@ -90,7 +90,7 @@ pnpm build:bangumi:win:beta
 
 如果云环境的 GitHub 文件上传接口不可用，可在 GitHub Actions 手动触发 `Windows beta release` 工作流，指定已经提交的 commit、tag 或分支。工作流在 Windows runner 上执行测试、构建和原生模块检查，再上传并发布同版本 draft。它会拒绝覆盖已经发布的版本；已有 draft 必须指向同一个构建 commit。
 
-跨平台打包脚本会按锁定的 SQLite 版本、Electron ABI 和目标架构下载 Windows 预编译模块，检查 PE 架构，在打包结束或失败后恢复宿主模块；Rust 更新桥使用 `cargo xwin build`，Velopack 使用 `[win]` 指令和明确的 Windows runtime。不要把 Linux 的 `better_sqlite3.node` 直接打进 Windows 包。
+`better-sqlite3` 13 使用 Node-API，npm 包自带各平台和架构的预编译模块，不再需要按 Electron ABI 下载或替换 SQLite 模块。打包完成后只保留目标平台和架构的 prebuild；Rust 更新桥使用 `cargo xwin build`，Velopack 使用 `[win]` 指令和明确的 Windows runtime。发布前仍需检查包中的 Windows 原生模块能否加载。
 
 云环境可检查 PE 架构，并用 Wine 验证原生模块加载和应用启动。Wine 验证不能替代真实 Windows 上的安装、卸载和自动更新验收。
 
@@ -113,7 +113,7 @@ pnpm build:bangumi:mac:beta:x64
 pnpm build:bangumi:mac:beta:arm64
 ```
 
-macOS 打包脚本会按目标架构临时 rebuild `better-sqlite3`，结束后恢复成本机架构；本地 `dev` 启动前也会检查 native 模块架构，避免在 Apple Silicon 上误用 x64 native 包。
+macOS 打包脚本会按目标架构临时 rebuild `bangumi-macos-traffic-lights`，结束后恢复成本机架构；本地 `dev` 启动前也会检查这个 native 模块的架构。SQLite 直接使用包内对应架构的 Node-API prebuild。
 
 发布前手动验收建议：
 
