@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { delimiter, dirname, resolve } from 'node:path'
 import { spawnSync } from 'node:child_process'
+import { withWindowsOverlayScrollbars } from '../src/shared/chromium-startup.mjs'
 
 const [command, ...commandArgs] = process.argv.slice(2)
 
@@ -26,6 +27,21 @@ const env = {
   NODE_PATH: nodePath,
   BANGUMI_ELECTRON_CDP_PORT: cdpPort,
   REMOTE_DEBUGGING_PORT: process.env.REMOTE_DEBUGGING_PORT || cdpPort,
+}
+
+const launchesElectronVite = [command, ...commandArgs].some((arg) =>
+  /(?:^|[/\\])electron-vite(?:\.js)?$/.test(arg),
+)
+if (launchesElectronVite && process.platform === 'win32' && !commandArgs.includes('build')) {
+  const separator = commandArgs.indexOf('--')
+  if (separator >= 0) {
+    const args = withWindowsOverlayScrollbars(commandArgs.slice(separator + 1), process.platform)
+    commandArgs.splice(separator + 1, commandArgs.length, ...args)
+  } else {
+    const args = JSON.parse(env.ELECTRON_CLI_ARGS || '[]')
+    // electron-vite replaces ELECTRON_CLI_ARGS while parsing its own CLI.
+    commandArgs.push('--', ...withWindowsOverlayScrollbars(args, process.platform))
+  }
 }
 
 const result = spawnSync(command, commandArgs, {

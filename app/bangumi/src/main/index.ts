@@ -1,7 +1,19 @@
 import { app, BrowserWindow } from 'electron'
 import { VelopackApp } from 'velopack'
+import { withWindowsOverlayScrollbars } from '@shared/chromium-startup.mjs'
 
 VelopackApp.build().run()
+
+if (app.isPackaged) {
+  // Electron initializes Chromium features before loading this entry point.
+  // Restart before loading application modules so every launch path gets the mode.
+  const args = process.argv.slice(1)
+  const startupArgs = withWindowsOverlayScrollbars(args, process.platform)
+  if (startupArgs !== args) {
+    app.relaunch({ args: startupArgs })
+    app.exit(0)
+  }
+}
 
 const { electronApp, is, optimizer } = await import('@electron-toolkit/utils')
 const { initialize } = await import('@main/init')
@@ -16,11 +28,6 @@ const { setMainWindowGetter } = await import('@main/app-context')
 const { setupAutoUpdate } = await import('@main/update')
 
 const DEV_CDP_PORT = process.env.BANGUMI_ELECTRON_CDP_PORT || '9222'
-
-if (process.platform === 'win32') {
-  // Chromium 156 defaults to the OS mode; the old Fluent feature flags no longer exist.
-  app.commandLine.appendSwitch('enable-features', 'OverlayScrollbar:mode/overlay')
-}
 
 if (is.dev) {
   app.commandLine.appendSwitch('remote-debugging-address', '127.0.0.1')
