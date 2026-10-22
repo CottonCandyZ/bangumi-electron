@@ -3,8 +3,12 @@ import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@renderer/components/ui/dialog'
 import { Button } from '@renderer/components/ui/button'
+import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
 import { client } from '@renderer/lib/client'
 import { userIdAtom } from '@renderer/state/session'
+import { appConfigAtom } from '@renderer/state/app-config'
+import { getHotkeyForHook, isHotkeyEnabled } from '@renderer/lib/shortcut'
+import { useHotkeys } from 'react-hotkeys-hook'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { currentCollectionUser, submitCollection } from '@renderer/data/collection/client'
 import { getAccessToken } from '@renderer/data/fetch/session'
@@ -41,6 +45,13 @@ export async function startCollectionSync(userId: number, full = true) {
 export function CollectionSyncDialog() {
   const userId = Number(useAtomValue(userIdAtom))
   const [open, setOpen] = useAtom(collectionSyncDialogAtom)
+  const syncHotkey = useAtomValue(appConfigAtom).shortcuts.syncCollections
+  useHotkeys(
+    getHotkeyForHook(syncHotkey),
+    () => setOpen(true),
+    { enabled: isHotkeyEnabled(syncHotkey) && !!userId, preventDefault: true },
+    [syncHotkey, userId],
+  )
   const overview = useCollectionSyncOverview<SyncOverview | null>(
     open ? undefined : () => null,
   ).data
@@ -131,8 +142,13 @@ export function CollectionSyncDialog() {
               {verification.isPending ? '等待验证' : '打开网页验证'}
             </Button>
           ) : (
-            <Button size="sm" disabled={!overview || running} onClick={() => sync.mutate(true)}>
-              <RotateCw className={running ? 'animate-spin' : ''} />
+            <Button
+              size="sm"
+              className="h-7 gap-1.5 px-2.5"
+              disabled={!overview || running}
+              onClick={() => sync.mutate(true)}
+            >
+              <RotateCw className={`size-3.5 ${running ? 'animate-spin' : ''}`} />
               {running ? '同步中' : '立即同步'}
             </Button>
           )}
@@ -359,24 +375,30 @@ export function CollectionSyncButton() {
   const open = useSetAtom(collectionSyncDialogAtom)
   const sync = useCollectionSyncOverview(selectSyncIndicator).data
   const indicator = sync?.indicator ?? collectionSyncIndicator(undefined)
+  const hotkey = useAtomValue(appConfigAtom).shortcuts.syncCollections
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="text-muted-foreground no-drag-region hover:text-foreground relative size-7"
-      title={indicator.title}
-      aria-label="同步收藏"
-      aria-haspopup="dialog"
-      aria-busy={sync?.running}
-      onClick={() => open(true)}
-    >
-      <RotateCw className={`size-[15px] ${sync?.running ? 'animate-spin' : ''}`} />
-      {indicator.badge !== null && (
-        <span className="bg-muted text-muted-foreground absolute -top-0.5 -right-0.5 min-w-3.5 rounded-full px-0.5 text-[9px]">
-          {indicator.badge}
-        </span>
-      )}
-    </Button>
+    <HeaderButton
+      Button={
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-muted-foreground no-drag-region hover:text-foreground relative size-7"
+          aria-label="同步收藏"
+          aria-haspopup="dialog"
+          aria-busy={sync?.running}
+          onClick={() => open(true)}
+        >
+          <RotateCw className={`size-[15px] ${sync?.running ? 'animate-spin' : ''}`} />
+          {indicator.badge !== null && (
+            <span className="bg-muted text-muted-foreground absolute -top-0.5 -right-0.5 min-w-3.5 rounded-full px-0.5 text-[9px]">
+              {indicator.badge}
+            </span>
+          )}
+        </Button>
+      }
+      Content={indicator.title}
+      hotkey={hotkey}
+    />
   )
 }
 

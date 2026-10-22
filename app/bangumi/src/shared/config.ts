@@ -13,6 +13,12 @@ export type AppConfig = {
     openCommandPanel: string
     openCommandPanelGlobal: string
     openSubjectSearch: string
+    navigateBack: string
+    navigateForward: string
+    toggleRightPanel: string
+    openNotifications: string
+    syncCollections: string
+    openWebPage: string
   }
 }
 
@@ -56,6 +62,12 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
     openCommandPanel: 'mod+p',
     openCommandPanelGlobal: 'mod+shift+alt+b',
     openSubjectSearch: 'mod+k',
+    navigateBack: 'alt+left',
+    navigateForward: 'alt+right',
+    toggleRightPanel: 'mod+alt+b',
+    openNotifications: 'mod+shift+n',
+    syncCollections: 'mod+shift+s',
+    openWebPage: 'mod+shift+o',
   },
 }
 
@@ -77,6 +89,42 @@ export const APP_SHORTCUT_DEFINITIONS: readonly AppShortcutDefinition[] = [
     group: 'general',
     title: '切换左侧面板',
     description: '展开或收起左侧面板',
+  },
+  {
+    key: 'toggleRightPanel',
+    group: 'general',
+    title: '切换右边栏',
+    description: '展开或收起当前页面的右边栏',
+  },
+  {
+    key: 'navigateBack',
+    group: 'general',
+    title: '后退',
+    description: '返回上一个页面',
+  },
+  {
+    key: 'navigateForward',
+    group: 'general',
+    title: '前进',
+    description: '前往下一个页面',
+  },
+  {
+    key: 'openNotifications',
+    group: 'general',
+    title: '打开通知',
+    description: '展开或收起顶栏的通知列表',
+  },
+  {
+    key: 'syncCollections',
+    group: 'general',
+    title: '同步收藏',
+    description: '打开收藏同步面板',
+  },
+  {
+    key: 'openWebPage',
+    group: 'general',
+    title: '打开网页版',
+    description: '在浏览器中打开当前页面对应的 Bangumi 网页',
   },
   {
     key: 'openCommandPanel',
@@ -167,6 +215,12 @@ export function normalizeAppConfig(value: unknown): AppConfig {
       openCommandPanel: normalizeShortcut('openCommandPanel'),
       openCommandPanelGlobal: normalizeShortcut('openCommandPanelGlobal'),
       openSubjectSearch: normalizeShortcut('openSubjectSearch'),
+      navigateBack: normalizeShortcut('navigateBack'),
+      navigateForward: normalizeShortcut('navigateForward'),
+      toggleRightPanel: normalizeShortcut('toggleRightPanel'),
+      openNotifications: normalizeShortcut('openNotifications'),
+      syncCollections: normalizeShortcut('syncCollections'),
+      openWebPage: normalizeShortcut('openWebPage'),
     },
   })
 }

@@ -1,6 +1,6 @@
 import { Button } from '@renderer/components/ui/button'
 import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
-import { isHotkeyEnabled, splitHotkeyForDisplay } from '@renderer/lib/shortcut'
+import { HotkeyKbd } from '@renderer/components/ui/kbd'
 import { appConfigAtom } from '@renderer/state/app-config'
 import { commandPanelAtom } from '@renderer/state/command'
 import { useAtomValue, useSetAtom } from 'jotai'
@@ -9,7 +9,6 @@ import { Search } from 'lucide-react'
 export function CommandButton() {
   const setCommandPanel = useSetAtom(commandPanelAtom)
   const hotkey = useAtomValue(appConfigAtom).shortcuts.openSubjectSearch
-  const shortcutKeys = splitHotkeyForDisplay(hotkey)
 
   return (
     <HeaderButton
@@ -24,21 +23,15 @@ export function CommandButton() {
             <Search className="size-4 shrink-0" />
             <span className="truncate text-xs @max-[900px]/header:hidden">搜索条目</span>
           </span>
-          {isHotkeyEnabled(hotkey) && (
-            <span className="flex shrink-0 items-center gap-1 @max-[900px]/header:hidden">
-              {shortcutKeys.map((key) => (
-                <kbd
-                  key={key}
-                  className="bg-background text-muted-foreground pointer-events-none inline-flex h-4 min-w-4 items-center justify-center rounded border px-1 font-sans text-[10px] leading-none"
-                >
-                  {key}
-                </kbd>
-              ))}
-            </span>
-          )}
+          <HotkeyKbd
+            className="@max-[900px]/header:hidden"
+            hotkey={hotkey}
+            keyClassName="h-4 min-w-4 text-[10px]"
+          />
         </Button>
       }
-      Content={<p>搜索条目</p>}
+      Content="搜索条目"
+      hotkey={hotkey}
     />
   )
 }

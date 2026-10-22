@@ -1,4 +1,5 @@
 import { ListLocateButton } from '@renderer/components/virtual/list-locate-context'
+import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
 import { CollectionSyncButton } from '@renderer/modules/common/collections/sync-dialog'
 import { SubjectCollectionSelectorContent } from '@renderer/modules/common/collections/subject-select-content'
 import { Button } from '@renderer/components/ui/button'
@@ -96,16 +97,21 @@ export function CollectionPanelHeader() {
                 resourceType === 'subject' && <CollectionSyncButton />}
               {resourceType === 'subject' ? (
                 <DropdownMenu open={settingsOpen} onOpenChange={setSettingsOpen}>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      aria-label="收藏显示设置"
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground no-drag-region hover:text-foreground size-7"
-                    >
-                      <SettingsIcon className="size-[15px]" />
-                    </Button>
-                  </DropdownMenuTrigger>
+                  <HeaderButton
+                    Button={
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          aria-label="收藏显示设置"
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground no-drag-region hover:text-foreground size-7"
+                        >
+                          <SettingsIcon className="size-[15px]" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                    }
+                    Content={<p>收藏显示设置</p>}
+                  />
                   <DropdownMenuContent align="end" className="w-44">
                     <DropdownMenuCheckboxItem
                       checked={showEpisodeList}
@@ -124,15 +130,20 @@ export function CollectionPanelHeader() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Button
-                  className="text-muted-foreground no-drag-region hover:text-foreground size-7"
-                  onClick={() => setLeftPanelOpen(false)}
-                  size="icon"
-                  title="关闭收藏侧栏"
-                  variant="ghost"
-                >
-                  <XIcon className="size-4" />
-                </Button>
+                <HeaderButton
+                  Button={
+                    <Button
+                      aria-label="关闭收藏侧栏"
+                      className="text-muted-foreground no-drag-region hover:text-foreground size-7"
+                      onClick={() => setLeftPanelOpen(false)}
+                      size="icon"
+                      variant="ghost"
+                    >
+                      <XIcon className="size-4" />
+                    </Button>
+                  }
+                  Content={<p>关闭收藏侧栏</p>}
+                />
               )}
             </div>
           </>

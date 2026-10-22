@@ -1,3 +1,9 @@
+import {
+  enterHoverCardTriggerInSafeArea,
+  isHoverCardContent,
+  isInHoverCardSafeArea,
+  startHoverCardSafeArea,
+} from '@renderer/components/hover-card/safe-area'
 import { hoverCardOpenAtomAction, triggerClientRectAtom } from '@renderer/state/hover-card'
 import { useSetAtom } from 'jotai'
 import { PropsWithChildren, useEffect, useRef } from 'react'
@@ -19,18 +25,38 @@ export function HoverCardTrigger({ children, onOpen }: PropsWithChildren<{ onOpe
     }
   }, [setOpen])
 
+  const open = () => {
+    if (!hoveringRef.current || !ref.current) return
+    rectSet(ref.current.getBoundingClientRect())
+    setOpen(true)
+    onOpen?.()
+  }
+  const keepOpen = () => setOpen(true, 0, 0)
+
   return (
     <div
       ref={ref}
       onMouseEnter={() => {
         hoveringRef.current = true
-        rectSet(ref.current!.getBoundingClientRect())
-        setOpen(true)
-        onOpen?.()
+        // 正往已打开的卡片走时，路过的其他触发器先不切换；回到自己则直接保持
+        if (isInHoverCardSafeArea()) enterHoverCardTriggerInSafeArea(hoveringRef, open)
+        else open()
       }}
-      onMouseLeave={() => {
+      onMouseLeave={(event) => {
         hoveringRef.current = false
-        setOpen(false)
+        if (isInHoverCardSafeArea()) return
+        // 直接移进了卡片（卡片贴着或盖住触发器时）
+        if (isHoverCardContent(event.relatedTarget)) return keepOpen()
+        const started = startHoverCardSafeArea(
+          { x: event.clientX, y: event.clientY },
+          {
+            close: () => setOpen(false),
+            keepOpen,
+            owner: hoveringRef,
+            trigger: event.currentTarget.getBoundingClientRect(),
+          },
+        )
+        if (!started) setOpen(false)
       }}
     >
       {children}

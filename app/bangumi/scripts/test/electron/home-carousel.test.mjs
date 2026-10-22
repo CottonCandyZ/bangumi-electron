@@ -4,7 +4,7 @@ import { runAgentBrowser } from '../../agent-browser.mjs'
 const port = process.env.BANGUMI_ELECTRON_CDP_PORT || '9222'
 function run(...args) {
   const result = runAgentBrowser(
-    ['--session', 'home-regression', '--cdp', port, '--json', ...args],
+    ['--session', `home-regression-${port}`, '--cdp', port, '--json', ...args],
     {
       encoding: 'utf8',
       windowsHide: true,
@@ -26,23 +26,26 @@ async function mountFixture(importModule, broadcast = false, subjectCount = 24) 
       .filter((entry) => entry.name.split('?')[0].endsWith(path))
       .at(-1)?.name
     if (!url && path === '/react-dom.js') {
-      url = performance
+      const clientUrl = performance
         .getEntriesByType('resource')
-        .find((entry) => entry.name.includes('/react-dom_client.js'))
-        ?.name.replace('react-dom_client.js', 'react-dom.js')
+        .find((entry) => entry.name.includes('/react-dom_client.js'))?.name
+      // Vite can give each optimized entry its own hash; the client's hash does not apply here.
+      if (clientUrl) url = new URL('react-dom.js', clientUrl).href
     }
     return importModule(url || path).then((module) => module.default ?? module)
   }
-  const [React, DOM, ClientDOM, Router, Query, Jotai, home, calendar] = await Promise.all([
-    load('/react.js'),
-    load('/react-dom.js'),
-    load('/react-dom_client.js'),
-    load('/react-router-dom.js'),
-    load('/@tanstack_react-query.js'),
-    load('/jotai.js'),
-    load('/src/modules/main/home/small-carousel/index.tsx'),
-    load('/src/modules/main/home/broadcast-schedule.tsx'),
-  ])
+  const [React, DOM, ClientDOM, Router, Query, Jotai, home, calendar, hoverState] =
+    await Promise.all([
+      load('/react.js'),
+      load('/react-dom.js'),
+      load('/react-dom_client.js'),
+      load('/react-router-dom.js'),
+      load('/@tanstack_react-query.js'),
+      load('/jotai.js'),
+      load('/src/modules/main/home/small-carousel/index.tsx'),
+      load('/src/modules/main/home/broadcast-schedule.tsx'),
+      load('/src/state/hover-pop-card.ts'),
+    ])
   const h = React.createElement
   const cover =
     'data:image/svg+xml,' +
@@ -95,9 +98,16 @@ async function mountFixture(importModule, broadcast = false, subjectCount = 24) 
     }
   }
   const snapshot = () => ({
-    mask: readMask(host.querySelector('.broadcast-scroll-fade')),
+    columns: (() => {
+      const track = host.querySelector('[data-slot=carousel-content] > div')
+      return track.getBoundingClientRect().width / track.children[0].getBoundingClientRect().width
+    })(),
     days: [...host.querySelectorAll('[aria-label$="放送条目"]')].map(readMask),
-    transform: host.querySelector('[data-slot=carousel-content] > div').style.transform,
+    transform: Math.round(
+      new DOMMatrixReadOnly(
+        getComputedStyle(host.querySelector('[data-slot=carousel-content] > div')).transform,
+      ).m41,
+    ),
   })
   let setVisible
   function Content() {
@@ -142,6 +152,19 @@ async function mountFixture(importModule, broadcast = false, subjectCount = 24) 
     host,
     mounts,
     snapshot,
+    activeCard: () => atoms.get(hoverState.activeHoverPopCardAtom),
+    settle: async () => {
+      let previous
+      let stable = 0
+      for (let frame = 0; frame < 180; frame++) {
+        await new Promise(requestAnimationFrame)
+        const current = snapshot().transform
+        stable = current === previous ? stable + 1 : 0
+        if (stable >= 6) return
+        previous = current
+      }
+      throw new Error('Carousel did not settle')
+    },
     setCalendarSize: (count) =>
       cache.setQueriesData({ queryKey: ['calendar-v1'] }, calendarData(count)),
     show: (visible) => DOM.flushSync(() => setVisible(visible)),
@@ -175,16 +198,17 @@ function focusMainWindow() {
 function readMountFrames() {
   run('wait', '--fn', 'window.__homeCarouselFixture.mounts.at(-1).length === 6')
   const frames = evaluate('window.__homeCarouselFixture.mounts.at(-1)')
-  // Neither the restored transform nor either mask may change after the first painted frame.
+  // Restored position, whole-column layout and vertical masks must be ready for first paint.
   for (const frame of frames) expect(frame).toEqual(frames[0])
   return frames[0]
 }
 
-test('carousel keeps its edge masks and seen cards on return, and defers hidden cards', () => {
+test('carousel keeps whole columns and seen cards on return, and defers hidden cards', () => {
   focusMainWindow()
   try {
     evaluate(`(${mountFixture.toString()})(path => import(path))`)
-    expect(readMountFrames().mask).toEqual({ start: 0, end: 1 })
+    const initial = readMountFrames()
+    expect(initial.columns).toBeCloseTo(Math.round(initial.columns), 2)
     run('wait', '--fn', '!!document.querySelector("#home-carousel-fixture img")')
     const first = evaluate('document.querySelectorAll("#home-carousel-fixture img").length')
     expect(first).toBeGreaterThan(0)
@@ -209,17 +233,16 @@ test('carousel keeps its edge masks and seen cards on return, and defers hidden 
     run(
       'wait',
       '--fn',
-      `Number(getComputedStyle(document.querySelector('#home-carousel-fixture .broadcast-scroll-fade')).getPropertyValue('--broadcast-fade-start')) === 1`,
+      `!document.querySelector('#home-carousel-fixture button[aria-label=向前浏览Fixture]').disabled`,
     )
+    evaluate('window.__homeCarouselFixture.settle()')
+    const scrolled = evaluate('window.__homeCarouselFixture.snapshot()')
     evaluate('window.__homeCarouselFixture.show(false)')
     const after = evaluate(
       '(() => { window.__homeCarouselFixture.show(true); return document.querySelectorAll("#home-carousel-fixture img").length })()',
     )
     expect(after).toBeGreaterThanOrEqual(before)
-    expect(readMountFrames().mask).toEqual({
-      start: 1,
-      end: 1,
-    })
+    expect(readMountFrames()).toEqual(scrolled)
     expect(
       evaluate(
         '[...document.querySelectorAll("#home-carousel-fixture img")].every(image => image.loading === "lazy" && image.decoding === "async")',
@@ -232,37 +255,72 @@ test('carousel keeps its edge masks and seen cards on return, and defers hidden 
         await new Promise(requestAnimationFrame);
       }
     })()`)
-    run('wait', '--fn', `window.__homeCarouselFixture.snapshot().mask.end < 0.0001`)
+    run(
+      'wait',
+      '--fn',
+      `document.querySelector('#home-carousel-fixture button[aria-label=向后浏览Fixture]').disabled`,
+    )
+    evaluate('window.__homeCarouselFixture.settle()')
+    const end = evaluate('window.__homeCarouselFixture.snapshot()')
     evaluate('window.__homeCarouselFixture.show(false)')
     evaluate('window.__homeCarouselFixture.show(true)')
-    expect(readMountFrames().mask).toEqual({ start: 1, end: 0 })
-    // Recompute against the current viewport; old masks and snap bounds cannot be reused blindly.
+    expect(readMountFrames()).toEqual(end)
+    // Recompute columns and snap bounds against the current viewport.
     evaluate(`(() => {
       const fixture = window.__homeCarouselFixture;
       fixture.show(false);
       fixture.host.style.width = '4200px';
       fixture.show(true);
     })()`)
-    expect(readMountFrames().mask).toEqual({ start: 0, end: 0 })
+    expect(readMountFrames().columns).toBeGreaterThanOrEqual(24)
+    expect(
+      evaluate(
+        'document.querySelector("#home-carousel-fixture button[aria-label=向后浏览Fixture]").disabled',
+      ),
+    ).toBe(true)
   } finally {
     evaluate('window.__homeCarouselFixture?.dispose()')
   }
 }, 120000)
 
-test('a short carousel starts without masks and measures a narrower viewport before returning', () => {
+test('right-clicking a subject link cancels its delayed hover card', () => {
   focusMainWindow()
   try {
     evaluate(`(${mountFixture.toString()})(path => import(path), false, 4)`)
-    expect(readMountFrames().mask).toEqual({ start: 0, end: 0 })
+    run('wait', '--fn', '!!document.querySelector("#home-carousel-fixture a")')
+    const state = evaluate(`(async () => {
+      const fixture = window.__homeCarouselFixture;
+      const link = fixture.host.querySelector('[data-slot=carousel-item] a');
+      link.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }));
+      const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
+      link.dispatchEvent(event);
+      await new Promise(resolve => setTimeout(resolve, 850));
+      return { handled: event.defaultPrevented, active: fixture.activeCard() };
+    })()`)
+    expect(state).toEqual({ handled: true, active: null })
+  } finally {
+    evaluate('window.__homeCarouselFixture?.dispose()')
+  }
+}, 60000)
+
+test('a short carousel measures whole columns again before returning to a narrower viewport', () => {
+  focusMainWindow()
+  try {
+    evaluate(`(${mountFixture.toString()})(path => import(path), false, 4)`)
+    expect(readMountFrames().columns).toBeGreaterThanOrEqual(4)
     evaluate(`(() => {
       const fixture = window.__homeCarouselFixture;
       fixture.show(false);
       fixture.host.style.width = '300px';
       fixture.show(true);
     })()`)
-    const { mask } = readMountFrames()
-    expect(mask.start).toBe(0)
-    expect(mask.end).toBeGreaterThan(0)
+    const { columns } = readMountFrames()
+    expect(columns).toBeCloseTo(2, 2)
+    expect(
+      evaluate(
+        'document.querySelector("#home-carousel-fixture button[aria-label=向后浏览Fixture]").disabled',
+      ),
+    ).toBe(false)
   } finally {
     evaluate('window.__homeCarouselFixture?.dispose()')
   }
@@ -273,7 +331,7 @@ test('broadcast masks cover first paint and update without a delayed fade-in', (
   try {
     evaluate(`(${mountFixture.toString()})(path => import(path), true)`)
     const initial = readMountFrames()
-    expect(Math.max(initial.mask.start, initial.mask.end)).toBe(1)
+    expect(initial.columns).toBeCloseTo(Math.round(initial.columns), 2)
     expect(initial.days).toEqual(Array(7).fill({ start: 0, end: 1 }))
     evaluate('window.__homeCarouselFixture.show(false)')
     evaluate('window.__homeCarouselFixture.show(true)')

@@ -1,3 +1,4 @@
+import { HintTooltip } from '@renderer/components/tooltip-button/hint-tooltip'
 import { Button } from '@renderer/components/ui/button'
 import { cn } from '@renderer/lib/utils'
 import { openMonoListPanelTabAtomAction, type MonoListPanelTab } from '@renderer/state/panel'
@@ -79,18 +80,19 @@ export function OpenMonoListPanelButton({
   const open = useMonoListPanelOpenHandler(tab, { preventDefault, stopPropagation })
 
   return (
-    <Button
-      {...buttonProps}
-      aria-label={buttonProps['aria-label'] ?? title}
-      className={cn('size-7', className)}
-      disabled={disabled}
-      onClick={open}
-      size={size ?? 'icon'}
-      title={title}
-      type={type ?? 'button'}
-      variant={variant ?? 'ghost'}
-    >
-      <span className={cn('i-mingcute-box-3-line text-base', iconClassName)} />
-    </Button>
+    <HintTooltip content={title}>
+      <Button
+        {...buttonProps}
+        aria-label={buttonProps['aria-label'] ?? title}
+        className={cn('size-7', className)}
+        disabled={disabled}
+        onClick={open}
+        size={size ?? 'icon'}
+        type={type ?? 'button'}
+        variant={variant ?? 'ghost'}
+      >
+        <span className={cn('i-mingcute-box-3-line text-base', iconClassName)} />
+      </Button>
+    </HintTooltip>
   )
 }

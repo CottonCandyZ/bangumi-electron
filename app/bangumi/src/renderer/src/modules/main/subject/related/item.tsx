@@ -1,7 +1,8 @@
+import { MyLink } from '@renderer/components/my-link'
 import { Image } from '@renderer/components/image/image'
 import { ViewTransitionElement } from '@renderer/components/image/view-transition-image'
 import { RelatedSubject } from '@renderer/data/types/subject'
-import { Link, useViewTransitionState, useLocation } from 'react-router-dom'
+import { useViewTransitionState, useLocation } from 'react-router-dom'
 
 const sectionId = 'RelatedSubjects'
 export function Item({
@@ -18,8 +19,9 @@ export function Item({
   const isTransitioning = useViewTransitionState(`/subject/${relatedSubject.id}`)
 
   return (
-    <Link
+    <MyLink
       to={`/subject/${relatedSubject.id}`}
+      contextMenuTitle={relatedSubject.name_cn || relatedSubject.name}
       className="group/related flex min-w-0 cursor-default flex-col gap-2 focus-visible:outline-hidden"
       state={{ viewTransitionName: `cover-image-${key}` }}
       viewTransition
@@ -47,6 +49,6 @@ export function Item({
           {relatedSubject.name}
         </span>
       </div>
-    </Link>
+    </MyLink>
   )
 }

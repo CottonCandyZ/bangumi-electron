@@ -88,6 +88,8 @@ function isCollectionEpisode(
 
 export type HoverEpisodeDetailType = {
   id: 'episode-content'
+  /** 打开卡片的那个剧集按钮实例；侧栏和正文共用同一份剧集数据，不能只按数据判断 */
+  ownerId: string
   index: number
   episodes: Episode[] | CollectionEpisode[]
   collectionType: CollectionType | undefined

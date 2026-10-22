@@ -641,7 +641,7 @@ test('sidebar counts remaining stage work and restores attention after completio
     },
   }
   expect(collectionSyncIndicator(overview).badge).toBe(61)
-  expect(collectionSyncIndicator(overview).title).toMatch(/剩余 61 项/)
+  expect(collectionSyncIndicator(overview).title).toBe('正在同步收藏')
   overview.progress!.completed = 162
   expect(collectionSyncIndicator(overview).badge).toBe(null)
   overview.running = false

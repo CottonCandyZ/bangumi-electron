@@ -1,3 +1,4 @@
+import { HintTooltip } from '@renderer/components/tooltip-button/hint-tooltip'
 import { Button } from '@renderer/components/ui/button'
 import { cn } from '@renderer/lib/utils'
 import { useOnline } from '@renderer/hooks/use-online'
@@ -20,30 +21,33 @@ export function TimelineRefreshButton({
   const expanded = !!refreshAgeLabel && !refreshing
 
   return (
-    <Button
-      aria-label={expanded ? `刷新时间线，${refreshAgeLabel}` : '刷新时间线'}
-      className={cn(
-        'h-8 shrink-0 justify-start overflow-hidden px-0 transition-[width,background-color,color] duration-300 ease-out',
-        expanded ? 'w-40' : 'w-8',
-      )}
-      disabled={refreshing || !online}
-      onClick={onRefresh}
-      size="sm"
-      title={expanded ? refreshAgeLabel : '刷新时间线'}
-      variant="ghost"
-    >
-      <span className="flex size-8 shrink-0 items-center justify-center">
-        <span className={cn('i-mingcute-refresh-2-line text-base', refreshing && 'animate-spin')} />
-      </span>
-      <span
+    <HintTooltip content={online ? '刷新时间线' : '联网后可刷新'}>
+      <Button
+        aria-label={expanded ? `刷新时间线，${refreshAgeLabel}` : '刷新时间线'}
         className={cn(
-          'min-w-0 pr-2 text-xs transition-[opacity,transform] duration-300 ease-out',
-          expanded ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0',
+          'h-8 shrink-0 justify-start overflow-hidden px-0 transition-[width,background-color,color] duration-300 ease-out',
+          expanded ? 'w-40' : 'w-8',
         )}
+        disabled={refreshing || !online}
+        onClick={onRefresh}
+        size="sm"
+        variant="ghost"
       >
-        {refreshAgeLabel}
-      </span>
-    </Button>
+        <span className="flex size-8 shrink-0 items-center justify-center">
+          <span
+            className={cn('i-mingcute-refresh-2-line text-base', refreshing && 'animate-spin')}
+          />
+        </span>
+        <span
+          className={cn(
+            'min-w-0 pr-2 text-xs transition-[opacity,transform] duration-300 ease-out',
+            expanded ? 'translate-x-0 opacity-100' : '-translate-x-1 opacity-0',
+          )}
+        >
+          {refreshAgeLabel}
+        </span>
+      </Button>
+    </HintTooltip>
   )
 }
 

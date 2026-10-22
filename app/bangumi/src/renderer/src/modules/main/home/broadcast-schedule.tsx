@@ -5,7 +5,8 @@ import { useCalendarQuery } from '@renderer/data/hooks/api/calendar'
 import type { CalendarItem } from '@renderer/data/types/calendar'
 import dayjs from 'dayjs'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { edgeStrength, scrollEdgeMask, useCarouselEdgeFade } from './carousel-edge-fade'
+import { useCarouselColumns } from './carousel-columns'
+import { edgeStrength, scrollEdgeMask } from './carousel-edge-fade'
 import './broadcast-schedule.css'
 import { Button } from '@renderer/components/ui/button'
 import {
@@ -43,7 +44,17 @@ export function BroadcastSchedule() {
   const todayId = getBangumiWeekdayId()
   const [api, setApi] = useState<CarouselApi>()
   const [todayVisible, setTodayVisible] = useState(true)
-  const edgeFade = useCarouselEdgeFade(api)
+  // A whole number of days fills the row; wide windows show the full week without cutting a day.
+  const {
+    ref: columnsRef,
+    columns,
+    itemStyle: dayStyle,
+  } = useCarouselColumns<HTMLDivElement>({
+    preferredRem: 13,
+    gapRem: 0,
+    minColumns: 1,
+    maxColumns: WEEKDAYS.length,
+  })
   const online = useOnline()
   const [watchingOnly, setWatchingOnly] = useAtom(watchingOnlyAtom)
   const userId = useAtomValue(userIdAtom)
@@ -57,15 +68,27 @@ export function BroadcastSchedule() {
     .startOf('day')
     .subtract(Number(todayId) - 1, 'day')
 
+  // Column widths can change in the parent's layout effect after Embla has measured them.
+  // Refresh its snap positions before paint instead of waiting for ResizeObserver's next frame.
+  useLayoutEffect(() => {
+    api?.reInit()
+  }, [api, columns])
+
   useEffect(() => {
     if (!api) return
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const check = () => setTodayVisible(api.slidesInView().includes(Number(todayId) - 1))
+    // Judge only once scrolling settles: mid-scroll the today column crosses the visibility
+    // threshold back and forth, which made the button flicker.
     const update = () => {
-      setTodayVisible(api.slidesInView().includes(Number(todayId) - 1))
+      clearTimeout(timer)
+      timer = setTimeout(check, 150)
     }
-    update()
-    api.on('scroll', update).on('reInit', update).on('slidesInView', update)
+    check()
+    api.on('settle', update).on('reInit', update)
     return () => {
-      api.off('scroll', update).off('reInit', update).off('slidesInView', update)
+      clearTimeout(timer)
+      api.off('settle', update).off('reInit', update)
     }
   }, [api, todayId])
 
@@ -81,7 +104,8 @@ export function BroadcastSchedule() {
       className="@container min-w-0"
       aria-label="每日放送"
     >
-      <section className="flex min-w-0 flex-col gap-3">
+      {/* A draggable schedule of links; dragging it should never select its text. */}
+      <section className="flex min-w-0 flex-col gap-3 select-none">
         <div className="flex min-w-0 flex-wrap items-end justify-between gap-x-4 gap-y-2">
           <div className="min-w-0">
             <h2 className="text-xl font-semibold">每日放送</h2>
@@ -123,7 +147,9 @@ export function BroadcastSchedule() {
         ) : query.data === undefined && (query.isError || !online) ? (
           <QueryFallback label="每日放送" error={query.error} onRetry={query.refetch} />
         ) : (
-          <div className="broadcast-scroll-fade" style={edgeFade}>
+          // Fractional column widths can bleed one antialiased pixel of the next day's cover at
+          // the right edge; that pixel falls in the last column's right padding, so clip it.
+          <div ref={columnsRef} className="[clip-path:inset(0_1px_0_0)]">
             <CarouselContent className="ml-0">
               {WEEKDAYS.map((weekday) => {
                 const ready = !watchingOnly || watching.data !== undefined
@@ -133,7 +159,7 @@ export function BroadcastSchedule() {
                     )
                   : undefined
                 return (
-                  <CarouselItem key={weekday.id} className="max-w-56 basis-56 pl-0">
+                  <CarouselItem key={weekday.id} className="pl-0" style={dayStyle}>
                     <BroadcastDayColumn
                       current={weekday.id === todayId}
                       items={items}
@@ -240,6 +266,7 @@ function BroadcastItem({ item }: { item: CalendarItem }) {
   return (
     <MyLink
       className="hover:bg-accent/60 flex min-w-0 shrink-0 cursor-default items-center gap-2.5 rounded-md pr-1 transition-colors"
+      contextMenuTitle={subject.nameCN || subject.name}
       title={fullTitle}
       to={`/subject/${subject.id}`}
     >

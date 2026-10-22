@@ -6,7 +6,16 @@ import {
   CommentReactionButton,
   CommentReactions,
 } from '@renderer/components/comment/comment-reactions'
-import { CommentReplyButton } from '@renderer/components/comment/comment-reply-button'
+import {
+  CommentReplyButton,
+  getCommentReplyContent,
+} from '@renderer/components/comment/comment-reply-button'
+import { copyText } from '@renderer/components/context-menu/link-entries'
+import {
+  CONTEXT_MENU_SEPARATOR,
+  useContextMenu,
+} from '@renderer/components/context-menu/use-context-menu'
+import { useOpenReplyComposer } from '@renderer/modules/reply-composer/use-open-reply-composer'
 import {
   CommentUserAvatarLink,
   CommentUserSignature,
@@ -35,6 +44,7 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type MouseEvent,
   type ReactNode,
 } from 'react'
 
@@ -58,9 +68,47 @@ export function hasVisibleReplyContent(reply: CommentBase) {
   return reply.content.trim().length > 0
 }
 
+/** 楼层 / 楼中楼共用的右键菜单：回复、复制内容、查看用户 */
+function useCommentContextMenu(replyTarget?: ReplyTarget) {
+  const openContextMenu = useContextMenu()
+  const openReplyComposer = useOpenReplyComposer()
+
+  return (event: MouseEvent, comment: CommentBase, floorLabel: string) => {
+    const user = comment.user
+    const text = bbcodeToPlainText(comment.content)
+    openContextMenu(event, [
+      !!replyTarget && {
+        label: `回复 ${floorLabel}`,
+        icon: 'i-mingcute-chat-1-line',
+        shortcut: 'r',
+        onSelect: () =>
+          openReplyComposer(getCommentReplyContent({ comment, floorLabel, target: replyTarget })),
+      },
+      !!text && {
+        label: '复制内容',
+        icon: 'i-mingcute-copy-2-line',
+        shortcut: 'c',
+        onSelect: () => copyText(text, '已复制内容'),
+      },
+      CONTEXT_MENU_SEPARATOR,
+      !!user && {
+        label: `查看 ${user.nickname || user.username} 的主页`,
+        icon: 'i-mingcute-user-3-line',
+        shortcut: 'u',
+        onSelect: ({ navigate }) => navigate(`/user/${encodeURIComponent(user.username)}`),
+      },
+    ])
+  }
+}
+
+function bbcodeToPlainText(content: string) {
+  return content.replace(/\[\/?[a-z]+(?:=[^\]]*)?\]/gi, '').trim()
+}
+
 export function CommentItem({
   comment,
   compact = false,
+  divider = false,
   floorNumber,
   itemVariant = 'floor',
   reactionTarget,
@@ -70,6 +118,8 @@ export function CommentItem({
 }: {
   comment: Comment
   compact?: boolean
+  /** 楼层式下在楼顶画一条细分隔线（列表第一楼不画） */
+  divider?: boolean
   floorNumber: number
   itemVariant?: CommentItemVariant
   reactionTarget?: ReactionTarget
@@ -120,6 +170,7 @@ export function CommentItem({
     disableHeightTransition: virtual,
     maxCollapsedHeight: COMMENT_CONTENT_COLLAPSED_HEIGHT,
   })
+  const openCommentContextMenu = useCommentContextMenu(replyTarget)
   const threadLineRef = useRef<HTMLDivElement>(null)
   const repliesRef = useRef<HTMLDivElement>(null)
   // 线索线只画到最后一条回复的顶部，剩下的弯折由该回复自己的连线完成；
@@ -193,14 +244,18 @@ export function CommentItem({
         'group/comment relative flex flex-row gap-3 p-3 shadow-none',
         itemVariant === 'inline' && 'gap-2 rounded-none border-0 bg-transparent px-0 py-2.5',
         isBubble && 'rounded-none border-0 bg-transparent p-0',
-        // 楼层式不用分隔线，靠间距和楼中楼的线索线体现结构
-        isFloor && '-mx-2 rounded-lg border-0 bg-transparent px-2 py-3',
+        // 楼层式：楼与楼之间用细线分隔，楼内结构靠楼中楼的线索线体现
+        isFloor && '-mx-2 rounded-lg border-0 bg-transparent px-2 py-4',
+        isFloor &&
+          divider &&
+          'before:bg-border/70 before:pointer-events-none before:absolute before:inset-x-2 before:top-0 before:h-px',
         highlighted &&
           (isFloor
             ? 'bg-amber-50/70 dark:bg-amber-900/20'
             : !isBubble && 'border-primary/70 bg-primary/5'),
       )}
       data-comment-id={comment.id}
+      onContextMenu={(event) => openCommentContextMenu(event, comment, `#${floorNumber}`)}
     >
       <div className="flex shrink-0 flex-col items-center">
         {comment.user?.avatar.medium ? (
@@ -614,6 +669,8 @@ function ReplyItem({
 }) {
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false)
   const session = useSession()
+  const openCommentContextMenu = useCommentContextMenu(replyTarget)
+  const onContextMenu = (event: MouseEvent) => openCommentContextMenu(event, reply, floorLabel)
   const showEdit = !!replyTarget && canEditReply(replyTarget) && session?.id === reply.creatorID
   const contentState = useCommentContentState({
     expansionKey: `reply:${reply.id}:content`,
@@ -633,6 +690,7 @@ function ReplyItem({
           highlighted && 'bg-amber-50/70 dark:bg-amber-900/20',
         )}
         data-reply-id={reply.id}
+        onContextMenu={onContextMenu}
       >
         {reply.user?.avatar.medium ? (
           <CommentUserAvatarLink
@@ -710,7 +768,11 @@ function ReplyItem({
       reactionPickerOpen && 'pointer-events-auto opacity-100',
     )
     return (
-      <div className="group/reply flex flex-row gap-2 py-1.5" data-reply-id={reply.id}>
+      <div
+        className="group/reply flex flex-row gap-2 py-1.5"
+        data-reply-id={reply.id}
+        onContextMenu={onContextMenu}
+      >
         {reply.user?.avatar.medium ? (
           <CommentUserAvatarLink
             className="size-7 shrink-0"
@@ -794,6 +856,7 @@ function ReplyItem({
             : 'bg-primary/10 ring-primary/25 ring-1 ring-inset'),
       )}
       data-reply-id={reply.id}
+      onContextMenu={onContextMenu}
     >
       {reply.user?.avatar.medium ? (
         <CommentUserAvatarLink

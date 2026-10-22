@@ -8,10 +8,10 @@ export function collectionSyncIndicator(overview: SyncOverview | undefined) {
     const remaining =
       progress?.total == null ? null : Math.max(0, progress.total - progress.completed)
     const stage = progress?.stage === 'list' ? '下载收藏清单' : '同步收藏'
-    const count = remaining === null ? '' : `（剩余 ${remaining} 项）`
+    // The remaining count is already on the button's badge.
     return {
       badge: remaining || null,
-      title: `正在${stage}${count}${needsAttention ? ' · 有冲突或异常待处理' : ''}`,
+      title: `正在${stage}${needsAttention ? ' · 有冲突或异常待处理' : ''}`,
     }
   }
   return {

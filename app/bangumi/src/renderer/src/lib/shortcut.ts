@@ -90,7 +90,16 @@ export function createHotkeyFromKeyboardEvent(event: KeyboardEvent) {
   return [...modifiers, key].join('+')
 }
 
-function getKeyFromKeyboardEvent(event: KeyboardEvent) {
+/** 快捷键的每个片段，例如 `mod+shift+k` → ['mod', 'shift', 'k'] */
+export function splitHotkeyTokens(hotkey: unknown) {
+  return normalizeHotkeyValue(hotkey).split('+').filter(Boolean)
+}
+
+export function getHotkeyTokenLabel(token: string) {
+  return KEY_LABEL_MAP[token] ?? token.toUpperCase()
+}
+
+export function getKeyFromKeyboardEvent(event: KeyboardEvent) {
   if (/^Key[A-Z]$/.test(event.code)) return event.code.slice(3).toLowerCase()
   if (/^Digit\d$/.test(event.code)) return event.code.slice(5)
   if (/^Arrow/.test(event.code)) return event.code.replace('Arrow', '').toLowerCase()

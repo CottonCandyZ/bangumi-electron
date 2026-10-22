@@ -5,6 +5,27 @@ import type { CommentBase } from '@renderer/data/types/comment'
 import type { ReplyTarget } from '@shared/reply'
 import { MessageCircle } from 'lucide-react'
 
+/** 回复某条评论（或直接评论 target）时传给回复框的内容，按钮和右键菜单共用 */
+export function getCommentReplyContent({
+  comment,
+  floorLabel,
+  target,
+}: {
+  comment?: CommentBase
+  floorLabel?: string
+  target: ReplyTarget
+}) {
+  const isTopicReply = target.type === 'group-topic' || target.type === 'subject-topic'
+  return {
+    replyTo: comment ? (isTopicReply ? comment.id : comment.relatedID || comment.id) : undefined,
+    replyToFloor: floorLabel,
+    replyToHighlight: comment?.id,
+    replyToRoot: comment ? comment.relatedID || comment.id : undefined,
+    replyToName: comment?.user?.nickname || comment?.user?.username,
+    target,
+  }
+}
+
 export function CommentReplyButton({
   className,
   comment,
@@ -19,13 +40,6 @@ export function CommentReplyButton({
   target: ReplyTarget
 }) {
   const openReplyComposer = useOpenReplyComposer()
-  const isTopicReply = target.type === 'group-topic' || target.type === 'subject-topic'
-  const replyTo = comment
-    ? isTopicReply
-      ? comment.id
-      : comment.relatedID || comment.id
-    : undefined
-  const replyToRoot = comment ? comment.relatedID || comment.id : undefined
 
   return (
     <Button
@@ -34,16 +48,7 @@ export function CommentReplyButton({
         className,
       )}
       onMouseDown={(event) => event.preventDefault()}
-      onClick={() =>
-        openReplyComposer({
-          replyTo,
-          replyToFloor: floorLabel,
-          replyToHighlight: comment?.id,
-          replyToRoot,
-          replyToName: comment?.user?.nickname || comment?.user?.username,
-          target,
-        })
-      }
+      onClick={() => openReplyComposer(getCommentReplyContent({ comment, floorLabel, target }))}
       size="sm"
       type="button"
       variant="ghost"

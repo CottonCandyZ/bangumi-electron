@@ -1,3 +1,4 @@
+import { HintTooltip } from '@renderer/components/tooltip-button/hint-tooltip'
 import { Button } from '@renderer/components/ui/button'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { useCreateTimelineMutation } from '@renderer/data/hooks/api/timeline'
@@ -67,25 +68,26 @@ export function TimelineComposer() {
   return (
     <section aria-label="发布动态" className="shrink-0" data-timeline-composer>
       <div className="relative w-fit">
-        <Button
-          aria-controls={`${composerId}-panel`}
-          aria-expanded={open}
-          aria-label={open ? '收起动态编辑器' : content.trim() ? '继续编辑动态' : '发布动态'}
-          className="text-muted-foreground hover:text-foreground size-8 shadow-none"
-          disabled={session === undefined || mutation.isPending}
-          onClick={open ? closeComposer : openComposer}
-          size="icon"
-          title={open ? '收起' : content.trim() ? '继续编辑动态' : '发布动态'}
-          type="button"
-          variant="ghost"
-        >
-          <motion.span
-            animate={{ rotate: open ? 45 : 0 }}
-            transition={reducedMotion ? { duration: 0 } : { duration: 0.2, ease: EXPAND_EASE }}
+        <HintTooltip content={open ? '收起' : content.trim() ? '继续编辑动态' : '发布动态'}>
+          <Button
+            aria-controls={`${composerId}-panel`}
+            aria-expanded={open}
+            aria-label={open ? '收起动态编辑器' : content.trim() ? '继续编辑动态' : '发布动态'}
+            className="text-muted-foreground hover:text-foreground size-8 shadow-none"
+            disabled={session === undefined || mutation.isPending}
+            onClick={open ? closeComposer : openComposer}
+            size="icon"
+            type="button"
+            variant="ghost"
           >
-            <Plus className="size-4" />
-          </motion.span>
-        </Button>
+            <motion.span
+              animate={{ rotate: open ? 45 : 0 }}
+              transition={reducedMotion ? { duration: 0 } : { duration: 0.2, ease: EXPAND_EASE }}
+            >
+              <Plus className="size-4" />
+            </motion.span>
+          </Button>
+        </HintTooltip>
         {content.trim() && !open && (
           <span className="bg-primary pointer-events-none absolute top-1 right-1 size-1.5 rounded-full" />
         )}

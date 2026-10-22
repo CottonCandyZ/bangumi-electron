@@ -7,11 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@renderer/components/ui/dialog'
-import {
-  createHotkeyFromKeyboardEvent,
-  isHotkeyEnabled,
-  splitHotkeyForDisplay,
-} from '@renderer/lib/shortcut'
+import { HotkeyKbd } from '@renderer/components/ui/kbd'
+import { createHotkeyFromKeyboardEvent, isHotkeyEnabled } from '@renderer/lib/shortcut'
 import { cn } from '@renderer/lib/utils'
 import { useAppConfig } from '@renderer/state/app-config'
 import {
@@ -224,22 +221,9 @@ function ShortcutRecorderDialog({
 }
 
 function ShortcutKeys({ hotkey }: { hotkey: string }) {
-  const keys = splitHotkeyForDisplay(hotkey)
-
   if (!isHotkeyEnabled(hotkey)) {
     return <span className="text-muted-foreground text-sm">未绑定</span>
   }
 
-  return (
-    <span className="flex shrink-0 items-center gap-1">
-      {keys.map((key) => (
-        <kbd
-          key={key}
-          className="bg-background text-muted-foreground pointer-events-none inline-flex h-5 min-w-5 items-center justify-center rounded border px-1.5 font-sans text-[11px] leading-none"
-        >
-          {key}
-        </kbd>
-      ))}
-    </span>
-  )
+  return <HotkeyKbd className="gap-1" hotkey={hotkey} keyClassName="px-1.5" />
 }

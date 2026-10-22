@@ -1,3 +1,4 @@
+import { MyLink } from '@renderer/components/my-link'
 import { Image } from '@renderer/components/image/image'
 import {
   AlertDialog,
@@ -10,6 +11,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@renderer/components/ui/alert-dialog'
+import { HintTooltip } from '@renderer/components/tooltip-button/hint-tooltip'
 import { Button } from '@renderer/components/ui/button'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@renderer/components/ui/hover-card'
 import {
@@ -29,7 +31,7 @@ import { renderBBCode } from '@renderer/lib/utils/bbcode'
 import { formatRecentUnixTime } from '@renderer/lib/utils/date'
 import { Ban, Loader2, UserMinus, UserPlus } from 'lucide-react'
 import { useMemo, type MouseEvent, type ReactNode } from 'react'
-import { Link, useNavigate, type LinkProps } from 'react-router-dom'
+import { useNavigate, type LinkProps } from 'react-router-dom'
 import { toast } from 'sonner'
 
 type HoverUser = Pick<CommentUser, 'avatar' | 'id' | 'joinedAt' | 'nickname' | 'sign' | 'username'>
@@ -50,14 +52,14 @@ export function UserHoverCardLink({
   return (
     <HoverCard closeDelay={120} openDelay={250}>
       <HoverCardTrigger asChild>
-        <Link
+        <MyLink
           className={className}
           draggable={false}
           to={to ?? `/user/${encodeURIComponent(user.username)}`}
           {...linkProps}
         >
           {children}
-        </Link>
+        </MyLink>
       </HoverCardTrigger>
       <HoverCardContent align="start" className="w-80 p-0" sideOffset={8}>
         <UserHoverCardContent fallback={user} />
@@ -170,40 +172,42 @@ function UserHoverCardContent({ fallback }: { fallback: HoverUser }) {
             onKeyDown={(event) => event.stopPropagation()}
           >
             {isBlocked ? (
-              <Button
-                aria-label="取消拉黑"
-                className="size-8"
-                disabled={submitting || blocklistQuery.isLoading}
-                onClick={unblockUser}
-                size="icon"
-                title="取消拉黑"
-                variant="outline"
-              >
-                {removeBlockMutation.isPending ? (
-                  <Loader2 className="size-3.5 animate-spin" />
-                ) : (
-                  <Ban className="size-3.5" />
-                )}
-              </Button>
+              <HintTooltip content="取消拉黑">
+                <Button
+                  aria-label="取消拉黑"
+                  className="size-8"
+                  disabled={submitting || blocklistQuery.isLoading}
+                  onClick={unblockUser}
+                  size="icon"
+                  variant="outline"
+                >
+                  {removeBlockMutation.isPending ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Ban className="size-3.5" />
+                  )}
+                </Button>
+              </HintTooltip>
             ) : (
               <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    aria-label="拉黑"
-                    className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/20 size-8"
-                    disabled={submitting || blocklistQuery.isLoading}
-                    onMouseDown={(event) => event.preventDefault()}
-                    size="icon"
-                    title="拉黑"
-                    variant="ghost"
-                  >
-                    {addBlockMutation.isPending ? (
-                      <Loader2 className="size-3.5 animate-spin" />
-                    ) : (
-                      <Ban className="size-3.5" />
-                    )}
-                  </Button>
-                </AlertDialogTrigger>
+                <HintTooltip content="拉黑">
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      aria-label="拉黑"
+                      className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/20 size-8"
+                      disabled={submitting || blocklistQuery.isLoading}
+                      onMouseDown={(event) => event.preventDefault()}
+                      size="icon"
+                      variant="ghost"
+                    >
+                      {addBlockMutation.isPending ? (
+                        <Loader2 className="size-3.5 animate-spin" />
+                      ) : (
+                        <Ban className="size-3.5" />
+                      )}
+                    </Button>
+                  </AlertDialogTrigger>
+                </HintTooltip>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>确定要拉黑这个用户吗？</AlertDialogTitle>
@@ -224,26 +228,29 @@ function UserHoverCardContent({ fallback }: { fallback: HoverUser }) {
                 </AlertDialogContent>
               </AlertDialog>
             )}
-            <Button
-              aria-label={isFriend ? '取消好友' : '加好友'}
-              className={cn(
-                'size-8',
-                isFriend ? 'text-muted-foreground' : 'text-muted-foreground hover:text-foreground',
-              )}
-              disabled={submitting || friendlistQuery.isLoading}
-              onClick={toggleFriend}
-              size="icon"
-              title={isFriend ? '取消好友' : '加好友'}
-              variant={isFriend ? 'outline' : 'ghost'}
-            >
-              {addFriendMutation.isPending || removeFriendMutation.isPending ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : isFriend ? (
-                <UserMinus className="size-3.5" />
-              ) : (
-                <UserPlus className="size-3.5" />
-              )}
-            </Button>
+            <HintTooltip content={isFriend ? '取消好友' : '加好友'}>
+              <Button
+                aria-label={isFriend ? '取消好友' : '加好友'}
+                className={cn(
+                  'size-8',
+                  isFriend
+                    ? 'text-muted-foreground'
+                    : 'text-muted-foreground hover:text-foreground',
+                )}
+                disabled={submitting || friendlistQuery.isLoading}
+                onClick={toggleFriend}
+                size="icon"
+                variant={isFriend ? 'outline' : 'ghost'}
+              >
+                {addFriendMutation.isPending || removeFriendMutation.isPending ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : isFriend ? (
+                  <UserMinus className="size-3.5" />
+                ) : (
+                  <UserPlus className="size-3.5" />
+                )}
+              </Button>
+            </HintTooltip>
           </div>
         )}
       </div>

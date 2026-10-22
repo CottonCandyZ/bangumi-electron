@@ -7,12 +7,30 @@ import {
   useNotificationsQuery,
 } from '@renderer/data/hooks/api/notification'
 import { useSession } from '@renderer/data/hooks/session'
+import { getHotkeyForHook, isHotkeyEnabled } from '@renderer/lib/shortcut'
 import { NotificationItem } from '@renderer/modules/header/notification-item'
+import { appConfigAtom } from '@renderer/state/app-config'
+import { useAtomValue } from 'jotai'
+import { useState } from 'react'
+import { useHotkeys } from 'react-hotkeys-hook'
 
 export function NotificationButton() {
   const session = useSession()
   const notificationsQuery = useNotificationsQuery({ enabled: !!session })
   const clearMutation = useClearNotificationsMutation()
+  const hotkey = useAtomValue(appConfigAtom).shortcuts.openNotifications
+  const [open, setOpen] = useState(false)
+  const changeOpen = (nextOpen: boolean) => {
+    setOpen(nextOpen)
+    if (nextOpen && notificationsQuery.isStale) void notificationsQuery.refetch()
+  }
+
+  useHotkeys(
+    getHotkeyForHook(hotkey),
+    () => changeOpen(!open),
+    { enabled: isHotkeyEnabled(hotkey) && !!session, preventDefault: true },
+    [hotkey, open, notificationsQuery.isStale],
+  )
 
   if (!session) return null
 
@@ -23,11 +41,7 @@ export function NotificationButton() {
   }
 
   return (
-    <Popover
-      onOpenChange={(open) => {
-        if (open && notificationsQuery.isStale) void notificationsQuery.refetch()
-      }}
-    >
+    <Popover open={open} onOpenChange={changeOpen}>
       <HeaderButton
         Button={
           <PopoverTrigger asChild>
@@ -46,7 +60,8 @@ export function NotificationButton() {
             </Button>
           </PopoverTrigger>
         }
-        Content={<p>通知</p>}
+        Content="通知"
+        hotkey={hotkey}
       />
       <PopoverContent
         align="end"

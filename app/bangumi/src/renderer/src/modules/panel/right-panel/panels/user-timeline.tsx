@@ -1,4 +1,5 @@
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
+import { HintTooltip } from '@renderer/components/tooltip-button/hint-tooltip'
 import { Button } from '@renderer/components/ui/button'
 import {
   hasUserTimelineItemDetails,
@@ -81,21 +82,23 @@ export function UserTimelinePanel() {
             <span className="text-muted-foreground line-clamp-1 min-w-0 text-xs">@{username}</span>
           )}
         </div>
-        <Button
-          className="no-drag-region size-7 shrink-0"
-          disabled={timelineQuery.isFetching}
-          onClick={refreshTimeline}
-          size="icon"
-          title="刷新时间线"
-          variant="ghost"
-        >
-          <span
-            className={cn(
-              'i-mingcute-refresh-2-line text-base',
-              timelineQuery.isFetching && 'animate-spin',
-            )}
-          />
-        </Button>
+        <HintTooltip content="刷新时间线">
+          <Button
+            aria-label="刷新时间线"
+            className="no-drag-region size-7 shrink-0"
+            disabled={timelineQuery.isFetching}
+            onClick={refreshTimeline}
+            size="icon"
+            variant="ghost"
+          >
+            <span
+              className={cn(
+                'i-mingcute-refresh-2-line text-base',
+                timelineQuery.isFetching && 'animate-spin',
+              )}
+            />
+          </Button>
+        </HintTooltip>
       </div>
       <div className="min-h-0 flex-1">
         <UserTimelineVirtualGrid

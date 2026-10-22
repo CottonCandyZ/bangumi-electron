@@ -1,6 +1,5 @@
 import { CoverMotionImage } from '@renderer/components/image/cover-motion-image'
 import { ViewTransitionElement } from '@renderer/components/image/view-transition-image'
-import { Button } from '@renderer/components/ui/button'
 import { Card, CardContent } from '@renderer/components/ui/card'
 import { Select, SelectTrigger, SelectValue } from '@renderer/components/ui/select'
 import { Separator } from '@renderer/components/ui/separator'
@@ -31,255 +30,261 @@ import { useSubjectCollectionTypeMutation } from '@renderer/data/hooks/api/colle
 import { COLLECTION_TYPE_MAP } from '@renderer/lib/utils/map'
 import { Loader2 } from 'lucide-react'
 import { useOpenTagSearchPanel } from '@renderer/modules/main/search/use-open-tag-search-panel'
+import { Tags } from '@renderer/modules/main/subject/tags/tags'
 
 export interface SubjectCardProps {
   sectionPath: SectionPath
   subjectInfo: Subject
+  /** Distinguishes layout ids when the same subject appears in several carousels on one page. */
+  layoutScope?: string
+  /** Replaces the home-page section stacking when the carousel tracks its own active card. */
+  onActiveChange?: (active: boolean) => void
 }
 const sectionId = 'Home-Small-Carousel'
 
-export const SubjectCard = memo(({ subjectInfo, sectionPath }: SubjectCardProps) => {
-  // 获得数据
-  // const topList = useTopListQuery(sectionPath)
-  const subjectId = subjectInfo.id
-  // const follow = topList?.data?.[index].follow?.replace(/[^0-9]/g, '')
-  // const subjectInfo = useSubjectInfoQuery({ subjectId, enabled: !!subjectId })
+export const SubjectCard = memo(
+  ({ subjectInfo, sectionPath, layoutScope = sectionId, onActiveChange }: SubjectCardProps) => {
+    // 获得数据
+    // const topList = useTopListQuery(sectionPath)
+    const subjectId = subjectInfo.id
+    // const follow = topList?.data?.[index].follow?.replace(/[^0-9]/g, '')
+    // const subjectInfo = useSubjectInfoQuery({ subjectId, enabled: !!subjectId })
 
-  // 一些状态
-  const setActionSection = useSetAtom(activeSectionAtom) // 用来防止轮播图相互覆盖
-  const [isPopCardActive, setIsPopCardActive] = useState(false)
-  const username = useSessionUsername()
-  const openTagSearchPanel = useOpenTagSearchPanel()
-  const id = `${sectionPath}-${subjectId}`
-  const layoutId = `${sectionId}-${id}`
-  const isActive = useAtomValue(
-    useMemo(
-      () => selectAtom(activeHoverPopCardAtom, (activeId) => activeId === layoutId),
-      [layoutId],
-    ),
-  )
-  const subjectCollectionQuery = useQuerySubjectCollection({
-    subjectId: subjectId.toString(),
-    username,
-    enabled: isPopCardActive && !!username,
-    needKeepPreviousData: false,
-  })
-  const subjectCollection = subjectCollectionQuery.data
+    // 一些状态
+    const setActionSection = useSetAtom(activeSectionAtom) // 用来防止轮播图相互覆盖
+    const [isPopCardActive, setIsPopCardActive] = useState(false)
+    const username = useSessionUsername()
+    const openTagSearchPanel = useOpenTagSearchPanel()
+    const id = `${sectionPath}-${subjectId}`
+    const layoutId = `${layoutScope}-${id}`
+    const isActive = useAtomValue(
+      useMemo(
+        () => selectAtom(activeHoverPopCardAtom, (activeId) => activeId === layoutId),
+        [layoutId],
+      ),
+    )
+    const subjectCollectionQuery = useQuerySubjectCollection({
+      subjectId: subjectId.toString(),
+      username,
+      enabled: isPopCardActive && !!username,
+      needKeepPreviousData: false,
+    })
+    const subjectCollection = subjectCollectionQuery.data
 
-  const subjectCollectionMutation = useSubjectCollectionTypeMutation({
-    subjectId: subjectId.toString(),
-    subjectType: subjectInfo.type,
-    username,
-    onSuccess(collectionType) {
-      toast.success(`已标记成 ${COLLECTION_TYPE_MAP(subjectInfo.type)[collectionType]}`)
-    },
-    onError() {
-      toast.error('呀，出了点错误...')
-    },
-  })
+    const subjectCollectionMutation = useSubjectCollectionTypeMutation({
+      subjectId: subjectId.toString(),
+      subjectType: subjectInfo.type,
+      username,
+      onSuccess(collectionType) {
+        toast.success(`已标记成 ${COLLECTION_TYPE_MAP(subjectInfo.type)[collectionType]}`)
+      },
+      onError() {
+        toast.error('呀，出了点错误...')
+      },
+    })
 
-  const isTransitioning = useViewTransitionState(`/subject/${subjectId}`) // viewTransition API
-  const { key } = useLocation()
-  const viewTransitionName = `cover-image-${key}`
+    const isTransitioning = useViewTransitionState(`/subject/${subjectId}`) // viewTransition API
+    const { key } = useLocation()
+    const viewTransitionName = `cover-image-${key}`
 
-  return (
-    <HoverPopCard
-      portal
-      layoutId={layoutId}
-      isActive={(isActive) => {
-        setActionSection(isActive ? sectionPath : null)
-        setIsPopCardActive(isActive)
-      }}
-    >
-      <HoverCardContent
-        className="relative z-1 w-full cursor-default"
-        CardContent={
-          <ViewTransitionElement
-            active={!isActive && isTransitioning}
-            viewTransitionName={viewTransitionName}
-          >
-            <MyLink
-              to={`/subject/${subjectId}`}
-              className="cursor-default"
-              viewTransition
-              state={{ viewTransitionName }}
+    return (
+      <HoverPopCard
+        portal
+        layoutId={layoutId}
+        isActive={(isActive) => {
+          if (onActiveChange) onActiveChange(isActive)
+          else setActionSection(isActive ? sectionPath : null)
+          setIsPopCardActive(isActive)
+        }}
+      >
+        <HoverCardContent
+          className="relative z-1 w-full cursor-default"
+          CardContent={
+            <ViewTransitionElement
+              active={!isActive && isTransitioning}
+              viewTransitionName={viewTransitionName}
             >
-              <CardContent className="p-0">
-                <CoverMotionImage
-                  className={cn(
-                    'aspect-2/3 overflow-hidden rounded-xl',
-                    sectionPath === 'music' && 'aspect-square',
-                  )}
-                  loading="lazy"
-                  imageSrc={subjectInfo.images.common}
-                  layoutId={`${layoutId}-image`}
-                  layoutDependency={isActive}
-                />
-
-                <div
-                  className={`absolute right-0 bottom-0 left-0 z-20 flex h-12 items-end justify-between bg-linear-to-t from-black/50 px-2 py-1`}
-                >
-                  <motion.div
-                    className="flex items-center justify-center gap-1 font-bold text-white"
-                    layoutId={`${layoutId}-score`}
+              <MyLink
+                to={`/subject/${subjectId}`}
+                className="cursor-default"
+                contextMenuTitle={subjectInfo.name_cn || subjectInfo.name}
+                viewTransition
+                state={{ viewTransitionName }}
+              >
+                <CardContent className="p-0">
+                  <CoverMotionImage
+                    className={cn(
+                      'aspect-2/3 overflow-hidden rounded-xl',
+                      sectionPath === 'music' && 'aspect-square',
+                    )}
+                    loading="lazy"
+                    imageSrc={subjectInfo.images.common}
+                    layoutId={`${layoutId}-image`}
                     layoutDependency={isActive}
+                  />
+
+                  <div
+                    className={`absolute right-0 bottom-0 left-0 z-20 flex h-12 items-end justify-between bg-linear-to-t from-black/50 px-2 py-1`}
                   >
-                    {subjectInfo.rating.score.toFixed(1)}
-                    <span className="i-mingcute-star-fill mt-0.5 text-xs" />
-                  </motion.div>
-                </div>
-              </CardContent>
-            </MyLink>
-          </ViewTransitionElement>
-        }
-        Description={
-          <div className="mt-2 w-full p-0.5">
-            <motion.h3
-              className="h-5 truncate text-sm font-medium"
-              layoutId={`${layoutId}-header`}
-              layoutDependency={isActive}
-            >
-              {subjectInfo.name_cn || subjectInfo.name}
-            </motion.h3>
-            <p className="text-muted-foreground mt-0.5 min-h-4 truncate text-[11px] leading-4">
-              {subjectInfo.name_cn && subjectInfo.name_cn !== subjectInfo.name
-                ? subjectInfo.name
-                : ''}
-            </p>
-          </div>
-        }
-      />
-      <PopCardContent>
-        <MyLink
-          to={`/subject/${subjectId}`}
-          className="cursor-default"
-          viewTransition
-          state={{ viewTransitionName }}
-        >
-          <Card className="h-full w-full overflow-visible">
-            <CardContent className="flex h-full min-h-0 flex-col gap-1 p-0">
-              {/* Cover */}
-              <section className="flex w-full flex-row items-start gap-2 p-4">
-                {subjectInfo ? (
-                  <ViewTransitionElement
-                    active={isTransitioning}
-                    className="shrink-0 basis-1/6"
-                    viewTransitionName={viewTransitionName}
-                  >
-                    <CoverMotionImage
-                      imageSrc={subjectInfo.images.common}
-                      className="overflow-hidden rounded-lg shadow-lg"
-                      layoutId={`${layoutId}-image`}
-                    />
-                  </ViewTransitionElement>
-                ) : (
-                  <Skeleton className="aspect-square shrink-0 basis-1/6" />
-                )}
-                {/* 标题描述 */}
-                <section className="flex w-full flex-col justify-between gap-0.5">
-                  <div className="flex w-full flex-col">
-                    <motion.h1
-                      className="font-jp text-sm font-medium"
-                      layoutId={`${layoutId}-header`}
-                      layoutDependency={isActive}
-                    >
-                      {subjectInfo.name}
-                    </motion.h1>
-                  </div>
-                  {/* meta */}
-                  <div className="flex flex-wrap items-center justify-start gap-1 font-medium">
                     <motion.div
-                      className="flex items-center justify-center gap-1 text-xs"
+                      className="flex items-center justify-center gap-1 font-bold text-white"
                       layoutId={`${layoutId}-score`}
                       layoutDependency={isActive}
                     >
                       {subjectInfo.rating.score.toFixed(1)}
-                      <span className="i-mingcute-star-fill mt-[2px] text-[0.6rem]" />
+                      <span className="i-mingcute-star-fill mt-0.5 text-xs" />
                     </motion.div>
-                    <Separator
-                      orientation="vertical"
-                      className="h-[0.85rem] w-[1.5px] rounded-2xl"
-                    />
+                  </div>
+                </CardContent>
+              </MyLink>
+            </ViewTransitionElement>
+          }
+          Description={
+            <div className="mt-2 w-full p-0.5">
+              <motion.h3
+                className="h-5 truncate text-sm font-medium"
+                layoutId={`${layoutId}-header`}
+                layoutDependency={isActive}
+              >
+                {subjectInfo.name_cn || subjectInfo.name}
+              </motion.h3>
+              <p className="text-muted-foreground mt-0.5 min-h-4 truncate text-[11px] leading-4">
+                {subjectInfo.name_cn && subjectInfo.name_cn !== subjectInfo.name
+                  ? subjectInfo.name
+                  : ''}
+              </p>
+            </div>
+          }
+        />
+        <PopCardContent>
+          <MyLink
+            to={`/subject/${subjectId}`}
+            className="cursor-default"
+            contextMenuTitle={subjectInfo.name_cn || subjectInfo.name}
+            viewTransition
+            state={{ viewTransitionName }}
+          >
+            <Card className="h-full w-full overflow-visible">
+              <CardContent className="flex h-full min-h-0 flex-col gap-1 p-0">
+                {/* Cover */}
+                <section className="flex w-full flex-row items-start gap-2 p-4">
+                  {subjectInfo ? (
+                    <ViewTransitionElement
+                      active={isTransitioning}
+                      className="shrink-0 basis-1/6"
+                      viewTransitionName={viewTransitionName}
+                    >
+                      <CoverMotionImage
+                        imageSrc={subjectInfo.images.common}
+                        className="overflow-hidden rounded-lg shadow-lg"
+                        layoutId={`${layoutId}-image`}
+                      />
+                    </ViewTransitionElement>
+                  ) : (
+                    <Skeleton className="aspect-square shrink-0 basis-1/6" />
+                  )}
+                  {/* 标题描述 */}
+                  <section className="flex w-full flex-col justify-between gap-0.5">
+                    <div className="flex w-full flex-col">
+                      <motion.h1
+                        className="font-jp text-sm font-medium"
+                        layoutId={`${layoutId}-header`}
+                        layoutDependency={isActive}
+                      >
+                        {subjectInfo.name}
+                      </motion.h1>
+                    </div>
+                    {/* meta */}
+                    <div className="flex flex-wrap items-center justify-start gap-1 font-medium">
+                      <motion.div
+                        className="flex items-center justify-center gap-1 text-xs"
+                        layoutId={`${layoutId}-score`}
+                        layoutDependency={isActive}
+                      >
+                        {subjectInfo.rating.score.toFixed(1)}
+                        <span className="i-mingcute-star-fill mt-[2px] text-[0.6rem]" />
+                      </motion.div>
+                      <Separator
+                        orientation="vertical"
+                        className="h-[0.85rem] w-[1.5px] rounded-2xl"
+                      />
+                      <motion.div
+                        className="shrink-0 text-xs"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        {dayjs(subjectInfo.date, 'YYYY-MM-DD').format('YY 年 M 月')}
+                      </motion.div>
+                    </div>
+                  </section>
+                  {/* 标记下拉 */}
+                  {!!username && (
                     <motion.div
-                      className="shrink-0 text-xs"
+                      className="grow-0"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
+                      layoutDependency={isActive}
+                      onClick={(event) => event.preventDefault()}
                     >
-                      {dayjs(subjectInfo.date, 'YYYY-MM-DD').format('YY 年 M 月')}
+                      <Select
+                        value={subjectCollection?.type?.toString()}
+                        disabled={
+                          subjectCollection === undefined || subjectCollectionMutation.isPending
+                        }
+                        onValueChange={(value) => {
+                          subjectCollectionMutation.mutate({
+                            subjectId: subjectId.toString(),
+                            collectionType: Number(value) as CollectionType,
+                            modify: subjectCollection !== null,
+                          })
+                        }}
+                      >
+                        <SelectTrigger className="bg-background w-fit">
+                          {subjectCollection === undefined ? (
+                            <span className="text-muted-foreground inline-flex items-center gap-1">
+                              <Loader2 className="size-3.5 animate-spin" />
+                              同步中
+                            </span>
+                          ) : (
+                            <SelectValue placeholder="标记为">
+                              {subjectCollection
+                                ? COLLECTION_TYPE_MAP(subjectInfo.type)[subjectCollection.type]
+                                : '标记为'}
+                            </SelectValue>
+                          )}
+                        </SelectTrigger>
+                        <SubjectCollectionSelectorContent subjectType={subjectInfo.type} />
+                      </Select>
                     </motion.div>
-                  </div>
+                  )}
                 </section>
-                {/* 标记下拉 */}
-                {!!username && (
-                  <motion.div
-                    className="grow-0"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    layoutDependency={isActive}
-                    onClick={(event) => event.preventDefault()}
-                  >
-                    <Select
-                      value={subjectCollection?.type?.toString()}
-                      disabled={
-                        subjectCollection === undefined || subjectCollectionMutation.isPending
-                      }
-                      onValueChange={(value) => {
-                        subjectCollectionMutation.mutate({
-                          subjectId: subjectId.toString(),
-                          collectionType: Number(value) as CollectionType,
-                          modify: subjectCollection !== null,
-                        })
-                      }}
-                    >
-                      <SelectTrigger className="bg-background w-fit">
-                        {subjectCollection === undefined ? (
-                          <span className="text-muted-foreground inline-flex items-center gap-1">
-                            <Loader2 className="size-3.5 animate-spin" />
-                            同步中
-                          </span>
-                        ) : (
-                          <SelectValue placeholder="标记为">
-                            {subjectCollection
-                              ? COLLECTION_TYPE_MAP(subjectInfo.type)[subjectCollection.type]
-                              : '标记为'}
-                          </SelectValue>
-                        )}
-                      </SelectTrigger>
-                      <SubjectCollectionSelectorContent subjectType={subjectInfo.type} />
-                    </Select>
-                  </motion.div>
-                )}
-              </section>
-              {/* 标签 */}
-              <motion.div
-                className="mr-1 mb-4 ml-4 flex min-h-0 flex-1 flex-wrap content-start items-start gap-2 overflow-x-hidden overflow-y-auto py-2 pr-3"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                {subjectInfo.tags.map((item) => (
-                  <Button
-                    key={item.name}
-                    className="h-auto flex-auto justify-center px-1.5 py-1.5 text-xs whitespace-normal"
-                    variant="outline"
-                    onClick={(event) => {
-                      event.preventDefault()
-                      event.stopPropagation()
-                      openTagSearchPanel(item.name)
-                    }}
-                  >
-                    {item.name}
-                  </Button>
-                ))}
-              </motion.div>
-            </CardContent>
-          </Card>
-        </MyLink>
-      </PopCardContent>
-    </HoverPopCard>
-  )
-})
+                {/* 标签：与详情页同一组件；外层拦下点击，避免触发卡片链接 */}
+                <motion.div
+                  // Tags grow to fill each wrapped row instead of leaving a ragged right edge.
+                  className="mr-1 mb-4 ml-4 min-h-0 flex-1 overflow-x-hidden overflow-y-auto py-2 pr-3 [&_button]:grow [&_button]:justify-center"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    event.stopPropagation()
+                  }}
+                >
+                  <Tags
+                    subjectTags={subjectInfo.tags}
+                    collectionTags={subjectCollection?.tags}
+                    onTagClicked={openTagSearchPanel}
+                  />
+                </motion.div>
+              </CardContent>
+            </Card>
+          </MyLink>
+        </PopCardContent>
+      </HoverPopCard>
+    )
+  },
+)
 
 SubjectCard.displayName = 'SubjectCard'

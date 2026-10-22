@@ -2,6 +2,7 @@ import {
   BangumiSmile,
   REACTION_VALUE_TO_BANGUMI_SMILE,
 } from '@renderer/components/comment/bangumi-smile'
+import { HintTooltip } from '@renderer/components/tooltip-button/hint-tooltip'
 import { Button } from '@renderer/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@renderer/components/ui/popover'
 import {
@@ -116,31 +117,32 @@ export function CommentReactionButton({
 
   return (
     <Popover open={open} onOpenChange={setPopoverOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          aria-label="贴贴"
-          className={cn(
-            'text-muted-foreground hover:text-foreground h-6 px-1.5 text-xs select-none',
-            open && 'bg-accent text-foreground hover:bg-accent hover:text-foreground',
-            currentValue !== undefined && 'text-primary hover:text-primary',
-            className,
-          )}
-          disabled={mutation.isPending}
-          onKeyDown={() => {
-            openedByPointerRef.current = false
-          }}
-          onMouseDown={(event) => {
-            openedByPointerRef.current = true
-            event.preventDefault()
-          }}
-          size="sm"
-          title="贴贴"
-          type="button"
-          variant="ghost"
-        >
-          <SmilePlus className="size-3.5" />
-        </Button>
-      </PopoverTrigger>
+      <HintTooltip content="贴贴">
+        <PopoverTrigger asChild>
+          <Button
+            aria-label="贴贴"
+            className={cn(
+              'text-muted-foreground hover:text-foreground h-6 px-1.5 text-xs select-none',
+              open && 'bg-accent text-foreground hover:bg-accent hover:text-foreground',
+              currentValue !== undefined && 'text-primary hover:text-primary',
+              className,
+            )}
+            disabled={mutation.isPending}
+            onKeyDown={() => {
+              openedByPointerRef.current = false
+            }}
+            onMouseDown={(event) => {
+              openedByPointerRef.current = true
+              event.preventDefault()
+            }}
+            size="sm"
+            type="button"
+            variant="ghost"
+          >
+            <SmilePlus className="size-3.5" />
+          </Button>
+        </PopoverTrigger>
+      </HintTooltip>
       <PopoverContent
         align="start"
         className="w-auto p-2"
@@ -158,27 +160,27 @@ export function CommentReactionButton({
             const active = currentValue === value
 
             return (
-              <Button
-                aria-label={active ? '取消贴贴' : '贴贴'}
-                className={cn(
-                  'size-8 rounded-md p-0 select-none',
-                  active &&
-                    'bg-primary/10 text-primary ring-primary/35 hover:bg-primary/15 focus-visible:ring-primary/45 ring-1',
-                )}
-                disabled={mutation.isPending}
-                key={value}
-                onClick={() => toggle(value)}
-                size="icon"
-                title={smileCode ?? value.toString()}
-                type="button"
-                variant="ghost"
-              >
-                {smileCode ? (
-                  <BangumiSmile code={smileCode} variant="reaction" />
-                ) : (
-                  <span className="text-xs tabular-nums">{value}</span>
-                )}
-              </Button>
+              <HintTooltip content={smileCode ?? value.toString()} key={value}>
+                <Button
+                  aria-label={active ? '取消贴贴' : '贴贴'}
+                  className={cn(
+                    'size-8 rounded-md p-0 select-none',
+                    active &&
+                      'bg-primary/10 text-primary ring-primary/35 hover:bg-primary/15 focus-visible:ring-primary/45 ring-1',
+                  )}
+                  disabled={mutation.isPending}
+                  onClick={() => toggle(value)}
+                  size="icon"
+                  type="button"
+                  variant="ghost"
+                >
+                  {smileCode ? (
+                    <BangumiSmile code={smileCode} variant="reaction" />
+                  ) : (
+                    <span className="text-xs tabular-nums">{value}</span>
+                  )}
+                </Button>
+              </HintTooltip>
             )
           })}
         </div>

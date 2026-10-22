@@ -71,6 +71,7 @@ function CommentListContent({
           <CommentItem
             comment={comment}
             compact={compact}
+            divider={index > 0}
             floorNumber={floorNumbers?.[index] ?? index + 1}
             itemVariant={itemVariant}
             key={comment.id}
@@ -91,6 +92,7 @@ function CommentListContent({
         <CommentItem
           comment={comment}
           compact={compact}
+          divider={index > 0}
           floorNumber={floorNumbers?.[index] ?? index + 1}
           itemVariant={itemVariant}
           reactionTarget={reactionTarget}

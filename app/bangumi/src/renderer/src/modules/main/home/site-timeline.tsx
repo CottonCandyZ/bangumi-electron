@@ -1,4 +1,5 @@
 import { Tabs } from '@renderer/components/tabs'
+import { HintTooltip } from '@renderer/components/tooltip-button/hint-tooltip'
 import { Button } from '@renderer/components/ui/button'
 import { useTimelineQuery } from '@renderer/data/hooks/api/timeline'
 import {
@@ -92,16 +93,17 @@ export function SiteTimelinePreview() {
             }}
             refreshing={query.isFetching}
           />
-          <Button
-            className="h-8 shrink-0 gap-1 px-2 text-xs"
-            onClick={openPanel}
-            size="sm"
-            title="在侧栏打开"
-            variant="ghost"
-          >
-            查看更多
-            <span className="i-mingcute-right-line text-base" />
-          </Button>
+          <HintTooltip content="在侧栏查看更多">
+            <Button
+              className="h-8 shrink-0 gap-1 px-2 text-xs"
+              onClick={openPanel}
+              size="sm"
+              variant="ghost"
+            >
+              查看更多
+              <span className="i-mingcute-right-line text-base" />
+            </Button>
+          </HintTooltip>
         </div>
       </div>
       <TimelineComposer />

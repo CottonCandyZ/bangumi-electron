@@ -92,6 +92,8 @@ export const HoverCardContent: FC<PropsWithChildren<HTMLMotionProps<'div'>>> = (
         }, hoverCardContext.delay)
       }}
       onMouseLeave={() => clearTimeout(timeoutRef.current)}
+      // 右键是去开菜单的，别再弹起卡片
+      onContextMenuCapture={() => clearTimeout(timeoutRef.current)}
       transition={{
         duration:
           hoverCardContext.activeId !== hoverCardContext.layoutId && hoverCardContext.finished

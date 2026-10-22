@@ -1,3 +1,4 @@
+import { MyLink } from '@renderer/components/my-link'
 import { Badge } from '@renderer/components/ui/badge'
 import { useOnline } from '@renderer/hooks/use-online'
 import { QueryFallback } from '@renderer/components/query-fallback'
@@ -22,7 +23,7 @@ import {
 import { monoListPanelCenterActiveItemAtom, type MonoListPanelTab } from '@renderer/state/panel'
 import { useAtomValue } from 'jotai'
 import { useMemo } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import type { CommunityTopicQuery } from './community-types'
 import { isRoutePathActive, useActivePanelItemRef } from './shared'
@@ -206,13 +207,13 @@ function CommunityTopicPanelItem({
           <p className="line-clamp-2 text-sm font-medium">{topic.title}</p>
           <div className="text-muted-foreground mt-1 flex flex-row flex-wrap items-center gap-1.5 text-xs">
             {leadingKind === 'source' && sourceTo ? (
-              <Link
+              <MyLink
                 className="text-primary line-clamp-1 underline-offset-2 hover:underline"
                 to={sourceTo}
                 onClick={(event) => event.stopPropagation()}
               >
                 {metaTitle}
-              </Link>
+              </MyLink>
             ) : (
               <span className="line-clamp-1">{metaTitle}</span>
             )}
@@ -223,13 +224,13 @@ function CommunityTopicPanelItem({
           </div>
           {sourceTitle &&
             (sourceTo ? (
-              <Link
+              <MyLink
                 className="text-primary mt-1 line-clamp-1 w-fit max-w-full text-xs underline-offset-2 hover:underline"
                 to={sourceTo}
                 onClick={(event) => event.stopPropagation()}
               >
                 {sourceTitle}
-              </Link>
+              </MyLink>
             ) : (
               <div className="text-primary mt-1 line-clamp-1 text-xs">{sourceTitle}</div>
             ))}

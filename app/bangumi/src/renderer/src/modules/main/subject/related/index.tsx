@@ -4,6 +4,7 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useRelatedSubjectsQuery } from '@renderer/data/hooks/api/subject'
 import { useSubjectInfoQuery } from '@renderer/data/hooks/db/subject'
 import { SubjectId } from '@renderer/data/types/bgm'
+import { SERIES_RELATIONS } from '@renderer/modules/main/subject/header-info/series-links'
 import { RelatedSubjectsGrid } from '@renderer/modules/main/subject/related/content'
 import { OpenMonoListPanelButton } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import type { MonoListPanelTab } from '@renderer/state/panel'
@@ -28,6 +29,8 @@ export function RelatedSubjects({ subjectId }: Props) {
     if (_relatedSubjects) {
       const temp = new Map(_relatedSubjects)
       temp.delete('单行本')
+      // 前传、续集已经放在标题下面
+      SERIES_RELATIONS.forEach((relation) => temp.delete(relation))
       return temp
     }
     return undefined

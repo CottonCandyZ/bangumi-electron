@@ -27,7 +27,8 @@ export function LeftResizablePanel() {
       onResizing={setResizing}
       width={width}
       onWidthChange={setWidth}
-      className="bg-background border-r"
+      // Lists of links and episode controls, not text to read; selection only gets in the way.
+      className="bg-background border-r select-none"
       resizeHandlePos="right"
     >
       <LeftPanel />

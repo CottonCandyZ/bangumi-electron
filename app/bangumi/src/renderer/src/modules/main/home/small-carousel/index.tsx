@@ -15,7 +15,7 @@ import { activeSectionAtom } from '@renderer/state/small-carousel'
 import { type MonoListPanelTab } from '@renderer/state/panel'
 import { useAtomValue } from 'jotai'
 import { ChevronRight } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState, type CSSProperties } from 'react'
 import { useTopListQuery } from '@renderer/data/hooks/trending-subjects'
 import { useSubjectsInfoQuery } from '@renderer/data/hooks/db/subject'
 import { Skeleton } from '@renderer/components/ui/skeleton'
@@ -24,7 +24,7 @@ import { QueryFallback } from '@renderer/components/query-fallback'
 import { useOnline } from '@renderer/hooks/use-online'
 import { userIdAtom } from '@renderer/state/session'
 import { CarouselNavigation } from '../carousel-navigation'
-import { useCarouselEdgeFade } from '../carousel-edge-fade'
+import { useCarouselColumns } from '../carousel-columns'
 import { useInView } from 'react-intersection-observer'
 import type { Subject } from '@renderer/data/types/subject'
 
@@ -32,27 +32,32 @@ export type SmallCarouselProps = {
   href: string
   name: string
   sectionPath: SectionPath
+  /** Leading subjects already shown elsewhere on the page (the home big carousel). */
+  skip?: number
 }
 
-export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
+export function SmallCarousel({ href, name, sectionPath, skip = 0 }: SmallCarouselProps) {
   const topList = useTopListQuery(sectionPath)
   const subjectIds = topList.data
     ?.map((item) => item.SubjectId)
     .filter((item) => item !== undefined)
   const subjectsQuery = useSubjectsInfoQuery({ subjectIds: subjectIds, enabled: !!subjectIds })
   const userId = useAtomValue(userIdAtom)
-  const subjectsInfo = subjectsQuery.data?.filter(
-    (subject): subject is Subject => !!subject && (!!userId || !subject.nsfw),
-  )
+  const subjectsInfo = subjectsQuery.data
+    ?.filter((subject): subject is Subject => !!subject && (!!userId || !subject.nsfw))
+    .slice(skip)
   const online = useOnline()
   const currentSectionPath = useAtomValue(activeSectionAtom)
   const [api, setApi] = useState<CarouselApi>()
-  const edgeFade = useCarouselEdgeFade(api)
+  const { ref: rowRef, columns, itemStyle } = useCarouselColumns<HTMLDivElement>()
   const { init: initIndex, setter: setIndex } = useStateHook({
     key: `Home-Small-Carousel-${sectionPath}`,
   })
   // Updating the saved snap during a drag must not reinitialize the moving carousel.
   const [startIndex] = useState(() => (initIndex as number | undefined) ?? 0)
+  useLayoutEffect(() => {
+    api?.reInit()
+  }, [api, columns])
   useEffect(() => {
     if (!api) {
       return
@@ -89,10 +94,10 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
           <Button
             asChild
             variant="ghost"
-            className="group h-8 px-1 py-1 text-base font-semibold duration-100"
+            className="group h-8 px-2 py-1 text-base font-semibold duration-100"
           >
             <MyLink to={href}>
-              <div className="flex items-center justify-center gap-1 transition-colors group-hover:text-rose-500">
+              <div className="flex -translate-x-2 items-center justify-center gap-1 transition-all duration-100 group-hover:translate-x-0 group-hover:text-red-600/70 dark:group-hover:text-red-400">
                 <span>{name}</span>
                 <ChevronRight
                   className="mt-px h-4 w-4 text-red-600/50 group-hover:text-red-600/70 dark:text-red-600/80 dark:group-hover:text-red-400"
@@ -118,13 +123,7 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
           <CarouselNavigation label={name} className="ml-1" />
         </div>
       </div>
-      <div
-        className={cn(
-          'broadcast-scroll-fade @container relative',
-          currentSectionPath === sectionPath && 'z-40',
-        )}
-        style={edgeFade}
-      >
+      <div ref={rowRef} className={cn('relative', currentSectionPath === sectionPath && 'z-40')}>
         {!subjectsInfo?.length &&
         ((topList.data === undefined && (topList.isError || !online)) || subjectsQuery.isError) ? (
           <QueryFallback
@@ -143,10 +142,15 @@ export function SmallCarousel({ href, name, sectionPath }: SmallCarouselProps) {
           <CarouselContent className="-ml-3 py-1">
             {subjectsInfo
               ? subjectsInfo.map((subject) => (
-                  <LazySubjectSlide key={subject.id} subject={subject} sectionPath={sectionPath} />
+                  <LazySubjectSlide
+                    key={subject.id}
+                    subject={subject}
+                    sectionPath={sectionPath}
+                    style={itemStyle}
+                  />
                 ))
               : Array.from({ length: 10 }).map((_, index) => (
-                  <CarouselItem key={index} className="basis-[clamp(7.5rem,18cqi,10rem)] pl-3">
+                  <CarouselItem key={index} className="pl-3" style={itemStyle}>
                     <div className="p-0.5">
                       <Skeleton className="aspect-2/3 w-full" />
                     </div>
@@ -164,9 +168,11 @@ const mountedSlides = new Set<string>()
 function LazySubjectSlide({
   subject,
   sectionPath,
+  style,
 }: {
   subject: Subject
   sectionPath: SectionPath
+  style: CSSProperties
 }) {
   const id = `${sectionPath}:${subject.id}`
   // Returning home must not flash placeholders for cards the user has already seen.
@@ -185,7 +191,7 @@ function LazySubjectSlide({
     if (mountedSlides.size > 240) mountedSlides.delete(mountedSlides.values().next().value!)
   }, [id, inView])
   return (
-    <CarouselItem ref={ref} className="basis-[clamp(7.5rem,18cqi,10rem)] pl-3">
+    <CarouselItem ref={ref} className="pl-3" style={style}>
       <div className="p-0.5">
         {inView ? (
           <SubjectCard subjectInfo={subject} sectionPath={sectionPath} />

@@ -1,3 +1,4 @@
+import { MyLink } from '@renderer/components/my-link'
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import {
@@ -12,7 +13,7 @@ import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-butto
 import { LoginInlineAction } from '@renderer/modules/common/user/login/login-inline-action'
 import { useMonoListPanelOpenHandler } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { type MonoListPanelTab } from '@renderer/state/panel'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { QueryFallback } from '@renderer/components/query-fallback'
 import { useOnline } from '@renderer/hooks/use-online'
 
@@ -194,13 +195,13 @@ function HomeTopicItem({ topic }: { topic: CommunityTopic }) {
           <span>{formatRecentUnixTime(topic.updatedAt)}</span>
         </div>
         {sourceTo ? (
-          <Link
+          <MyLink
             className="text-primary mt-0.5 line-clamp-1 w-fit max-w-full text-xs underline-offset-2 hover:underline"
             to={sourceTo}
             onClick={(event) => event.stopPropagation()}
           >
             {topic.source.title}
-          </Link>
+          </MyLink>
         ) : (
           <div className="text-primary mt-0.5 line-clamp-1 text-xs">{topic.source.title}</div>
         )}

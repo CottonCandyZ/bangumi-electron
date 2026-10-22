@@ -1,3 +1,5 @@
+import { MyLink } from '@renderer/components/my-link'
+import { HintTooltip } from '@renderer/components/tooltip-button/hint-tooltip'
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
 import type { CommunityTopic } from '@renderer/data/types/community'
@@ -8,7 +10,7 @@ import { LoginInlineAction } from '@renderer/modules/common/user/login/login-inl
 import { useMonoListPanelOpenHandler } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { type MonoListPanelTab } from '@renderer/state/panel'
 import type { ReactNode } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import type { CommunityOverviewSection, CommunityTopicQuery } from './types'
 
@@ -127,17 +129,18 @@ function OpenCommunityPanelButton({
   return (
     <div className="flex shrink-0 items-center gap-1">
       <QueryRefreshButton onRefresh={onRefresh} refreshing={refreshing} />
-      <Button
-        variant="ghost"
-        size="sm"
-        className="no-drag-region text-muted-foreground hover:text-foreground h-8 shrink-0 gap-1 px-2"
-        disabled={disabled}
-        onClick={openPanel}
-        title="在侧栏查看更多"
-      >
-        <span>查看更多</span>
-        <span className="i-mingcute-right-line text-base" />
-      </Button>
+      <HintTooltip content="在侧栏查看更多">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="no-drag-region text-muted-foreground hover:text-foreground h-8 shrink-0 gap-1 px-2"
+          disabled={disabled}
+          onClick={openPanel}
+        >
+          <span>查看更多</span>
+          <span className="i-mingcute-right-line text-base" />
+        </Button>
+      </HintTooltip>
     </div>
   )
 }
@@ -170,13 +173,13 @@ function CommunityPreviewItem({ topic }: { topic: CommunityTopic }) {
         </div>
         <div className="mt-1 min-w-0">
           {sourceInternal ? (
-            <Link
+            <MyLink
               className="text-primary line-clamp-1 w-fit max-w-full text-xs underline-offset-2 hover:underline"
               to={topic.source.route}
               onClick={(event) => event.stopPropagation()}
             >
               {topic.source.title}
-            </Link>
+            </MyLink>
           ) : (
             <span className="text-primary line-clamp-1 w-fit max-w-full text-xs">
               {topic.source.title}

@@ -1,3 +1,4 @@
+import { MyLink } from '@renderer/components/my-link'
 import {
   ViewTransitionElement,
   ViewTransitionImage,
@@ -11,7 +12,7 @@ import { RelatedSubject } from '@renderer/data/types/subject'
 import { isEmpty } from '@renderer/lib/utils/string'
 import { OpenMonoListPanelButton } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import type { MonoListPanelTab } from '@renderer/state/panel'
-import { Link, useViewTransitionState, useLocation } from 'react-router-dom'
+import { useViewTransitionState, useLocation } from 'react-router-dom'
 
 interface Props {
   subjectId: SubjectId
@@ -60,7 +61,7 @@ function Item({ item }: { item: RelatedSubject }) {
   return (
     <Tooltip key={item.id} delayDuration={0}>
       <TooltipTrigger asChild>
-        <Link
+        <MyLink
           to={`/subject/${item.id}`}
           state={{ viewTransitionName: `cover-image-${key}` }}
           viewTransition
@@ -79,7 +80,7 @@ function Item({ item }: { item: RelatedSubject }) {
               viewTransitionName={`cover-image-${key}`}
             />
           )}
-        </Link>
+        </MyLink>
       </TooltipTrigger>
       <TooltipContent sideOffset={7}>
         <span>{item.name}</span>

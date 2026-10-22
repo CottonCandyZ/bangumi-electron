@@ -10,6 +10,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@renderer/components/ui/alert-dialog'
+import { HintTooltip } from '@renderer/components/tooltip-button/hint-tooltip'
 import { Button } from '@renderer/components/ui/button'
 import { Textarea } from '@renderer/components/ui/textarea'
 import { ReportButton } from '@renderer/components/report-button'
@@ -164,22 +165,23 @@ function TimelineInlineReplyComposer({ target }: { target: ReplyTarget }) {
         placeholder="写下回复…"
         value={draft}
       />
-      <Button
-        aria-label="发送回复"
-        className="size-8 shrink-0"
-        disabled={mutation.isPending || session === undefined || !normalizedDraft}
-        onClick={submit}
-        size="icon"
-        title="发送回复（Ctrl+Enter）"
-        type="button"
-        variant="ghost"
-      >
-        {mutation.isPending ? (
-          <Loader2 className="size-4 animate-spin" />
-        ) : (
-          <Send className="size-4" />
-        )}
-      </Button>
+      <HintTooltip content="发送回复" hotkey="mod+enter">
+        <Button
+          aria-label="发送回复"
+          className="size-8 shrink-0"
+          disabled={mutation.isPending || session === undefined || !normalizedDraft}
+          onClick={submit}
+          size="icon"
+          type="button"
+          variant="ghost"
+        >
+          {mutation.isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Send className="size-4" />
+          )}
+        </Button>
+      </HintTooltip>
     </div>
   )
 }

@@ -1,15 +1,26 @@
 import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
 import { Button } from '@renderer/components/ui/button'
+import { getHotkeyForHook, isHotkeyEnabled } from '@renderer/lib/shortcut'
 import { cn } from '@renderer/lib/utils'
+import { appConfigAtom } from '@renderer/state/app-config'
 import { getRightPanelContentByPathname, rightPanelOpenAtom } from '@renderer/state/panel'
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
+import { useHotkeys } from 'react-hotkeys-hook'
 import { useLocation } from 'react-router-dom'
 
 export function RightPanelButton() {
   const [open, setOpen] = useAtom(rightPanelOpenAtom)
   const { pathname } = useLocation()
+  const hotkey = useAtomValue(appConfigAtom).shortcuts.toggleRightPanel
   const hasContent = getRightPanelContentByPathname(pathname) !== null
   const active = open && hasContent
+
+  useHotkeys(
+    getHotkeyForHook(hotkey),
+    () => setOpen(!open),
+    { enabled: isHotkeyEnabled(hotkey) && hasContent, preventDefault: true },
+    [hotkey, open, setOpen],
+  )
 
   return (
     <HeaderButton
@@ -34,7 +45,8 @@ export function RightPanelButton() {
           )}
         </Button>
       }
-      Content={<p>右边栏</p>}
+      Content="右边栏"
+      hotkey={hotkey}
     />
   )
 }

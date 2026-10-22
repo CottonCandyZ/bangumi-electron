@@ -1,3 +1,4 @@
+import { MyLink } from '@renderer/components/my-link'
 import { Image } from '@renderer/components/image/image'
 import { Button } from '@renderer/components/ui/button'
 import { Skeleton } from '@renderer/components/ui/skeleton'
@@ -7,7 +8,6 @@ import { QueryRefreshButton } from '@renderer/modules/common/query-refresh-butto
 import { LoginInlineAction } from '@renderer/modules/common/user/login/login-inline-action'
 import { useMonoListPanelOpenHandler } from '@renderer/modules/panel/left-panel/open-mono-list-panel'
 import { type MonoListPanelTab } from '@renderer/state/panel'
-import { Link } from 'react-router-dom'
 
 export function GroupsSection({
   emptyText,
@@ -113,7 +113,7 @@ export function GroupsSection({
 function JoinedGroupItem({ group }: { group: SlimGroup }) {
   return (
     <div className="hover:bg-accent flex min-w-0 items-center gap-1 rounded-md border p-1 transition-colors">
-      <Link
+      <MyLink
         className="flex min-w-0 flex-1 items-center gap-2 rounded-md p-1"
         to={`/group/${group.name}`}
       >
@@ -133,7 +133,7 @@ function JoinedGroupItem({ group }: { group: SlimGroup }) {
             {group.members} 成员
           </div>
         </div>
-      </Link>
+      </MyLink>
       <OpenGroupTopicsPanelButton
         className="text-muted-foreground hover:text-foreground"
         group={group}

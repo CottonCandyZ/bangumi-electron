@@ -189,6 +189,11 @@ export const HoverCardWrapper: FC<HoverCardWrapperProps> = ({
         clearTimeout(timeoutRef.current)
         timeoutRef.current = undefined
       }}
+      // 右键是去开菜单的，别再弹起卡片
+      onContextMenuCapture={() => {
+        clearTimeout(timeoutRef.current)
+        timeoutRef.current = undefined
+      }}
       {...props}
     >
       {isActive ? (

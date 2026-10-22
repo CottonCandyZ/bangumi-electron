@@ -18,8 +18,12 @@ import {
 } from '@renderer/state/panel'
 import { useAtom, useAtomValue } from 'jotai'
 import { ChevronsDownIcon, ListFilterIcon, XIcon } from 'lucide-react'
+import {
+  CONTEXT_MENU_SEPARATOR,
+  useContextMenu,
+} from '@renderer/components/context-menu/use-context-menu'
 import { useEffect, useRef } from 'react'
-import type { MutableRefObject } from 'react'
+import type { MouseEvent, MutableRefObject } from 'react'
 import { useLocation } from 'react-router-dom'
 import { LeftPanelHeaderPortal } from '../../header-portal'
 import { isRoutePathActive } from './shared'
@@ -62,6 +66,7 @@ export function MonoListPanelHeader({
         <div className="drag-region flex h-full w-full min-w-0 flex-row items-center gap-1">
           <MonoListPanelTabStrip
             activeTabId={activeTab.id}
+            closeAllTabs={closeAllTabs}
             closeTab={closeTab}
             setActiveTabId={setActiveTabId}
             tabRefs={tabRefs}
@@ -102,15 +107,19 @@ function MonoListPanelTabActions({
   return (
     <div className="flex shrink-0 flex-row items-center gap-1">
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            aria-label="标签页列表"
-            className="text-muted-foreground no-drag-region hover:bg-accent hover:text-foreground flex size-7 shrink-0 items-center justify-center rounded-md"
-            title="标签页列表"
-          >
-            <ChevronsDownIcon className="size-4" />
-          </button>
-        </DropdownMenuTrigger>
+        <HeaderButton
+          Button={
+            <DropdownMenuTrigger asChild>
+              <button
+                aria-label="标签页列表"
+                className="text-muted-foreground no-drag-region hover:bg-accent hover:text-foreground flex size-7 shrink-0 items-center justify-center rounded-md"
+              >
+                <ChevronsDownIcon className="size-4" />
+              </button>
+            </DropdownMenuTrigger>
+          }
+          Content={<p>标签页列表</p>}
+        />
         <DropdownMenuContent align="end" className="max-h-72 w-56">
           {tabs.map((tab) => (
             <DropdownMenuItem
@@ -141,14 +150,18 @@ function MonoListPanelTabActions({
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      <button
-        aria-label="关闭全部"
-        className="text-muted-foreground no-drag-region hover:bg-accent hover:text-foreground flex size-7 shrink-0 items-center justify-center rounded-md"
-        onClick={closeAllTabs}
-        title="关闭全部"
-      >
-        <span className="i-mingcute-close-circle-line text-base" />
-      </button>
+      <HeaderButton
+        Button={
+          <button
+            aria-label="关闭全部"
+            className="text-muted-foreground no-drag-region hover:bg-accent hover:text-foreground flex size-7 shrink-0 items-center justify-center rounded-md"
+            onClick={closeAllTabs}
+          >
+            <span className="i-mingcute-close-circle-line text-base" />
+          </button>
+        }
+        Content={<p>关闭全部</p>}
+      />
     </div>
   )
 }
@@ -260,17 +273,55 @@ function MonoListPanelFilterButton({
 
 function MonoListPanelTabStrip({
   activeTabId,
+  closeAllTabs,
   closeTab,
   setActiveTabId,
   tabRefs,
   tabs,
 }: {
   activeTabId: string
+  closeAllTabs: () => void
   closeTab: (id: string) => void
   setActiveTabId: (id: string) => void
   tabRefs: MutableRefObject<Map<string, HTMLButtonElement>>
   tabs: MonoListPanelTab[]
 }) {
+  const openContextMenu = useContextMenu()
+  const openTabContextMenu = (event: MouseEvent, tab: MonoListPanelTab, index: number) =>
+    openContextMenu(event, [
+      {
+        label: '关闭',
+        icon: 'i-mingcute-close-line',
+        shortcut: 'w',
+        onSelect: () => closeTab(tab.id),
+      },
+      {
+        label: '关闭其他',
+        icon: 'i-mingcute-close-circle-line',
+        shortcut: 'o',
+        disabled: tabs.length < 2,
+        onSelect: () => {
+          setActiveTabId(tab.id)
+          tabs.forEach((item) => item.id !== tab.id && closeTab(item.id))
+        },
+      },
+      {
+        label: '关闭右侧',
+        icon: 'i-mingcute-arrows-right-line',
+        shortcut: 'r',
+        disabled: index === tabs.length - 1,
+        onSelect: () => tabs.slice(index + 1).forEach((item) => closeTab(item.id)),
+      },
+      CONTEXT_MENU_SEPARATOR,
+      {
+        label: '关闭全部',
+        icon: 'i-mingcute-delete-2-line',
+        shortcut: 'a',
+        variant: 'destructive',
+        onSelect: closeAllTabs,
+      },
+    ])
+
   return (
     <div className="h-panel-header relative min-w-0 flex-1 overflow-hidden">
       <div
@@ -291,12 +342,13 @@ function MonoListPanelTabStrip({
         }}
       >
         <div className="flex h-full w-max min-w-full flex-row items-center gap-1">
-          {tabs.map((tab) => (
+          {tabs.map((tab, index) => (
             <button
               className="no-drag-region hover:bg-accent data-[active=true]:bg-accent flex h-7 max-w-40 min-w-16 items-center justify-between gap-2 rounded-md px-2 text-left text-xs"
               data-active={tab.id === activeTabId}
               key={tab.id}
               onClick={() => setActiveTabId(tab.id)}
+              onContextMenu={(event) => openTabContextMenu(event, tab, index)}
               ref={(element) => {
                 if (element) tabRefs.current.set(tab.id, element)
                 else tabRefs.current.delete(tab.id)

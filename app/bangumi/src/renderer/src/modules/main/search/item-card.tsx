@@ -2,7 +2,6 @@ import { Image } from '@renderer/components/image/image'
 import { MyLink } from '@renderer/components/my-link'
 import { Badge } from '@renderer/components/ui/badge'
 import { Card, CardContent } from '@renderer/components/ui/card'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import type { SearchData, SearchMonoData, SearchSubjectData } from '@renderer/data/types/search'
 import { cn } from '@renderer/lib/utils'
 import { SUBJECT_TYPE_MAP } from '@renderer/lib/utils/map'
@@ -181,16 +180,11 @@ export function SearchSubjectRow({
 
 export function PinSearchButton({ tab }: { tab: MonoListPanelTab }) {
   return (
-    <Tooltip delayDuration={300}>
-      <TooltipTrigger asChild>
-        <OpenMonoListPanelButton
-          variant="outline"
-          className="size-9 shrink-0 shadow-none"
-          tab={tab}
-          title="固定到左侧列表"
-        />
-      </TooltipTrigger>
-      <TooltipContent side="bottom">固定到左侧列表</TooltipContent>
-    </Tooltip>
+    <OpenMonoListPanelButton
+      variant="outline"
+      className="size-9 shrink-0 shadow-none"
+      tab={tab}
+      title="固定到左侧列表"
+    />
   )
 }

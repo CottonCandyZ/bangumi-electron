@@ -3,26 +3,31 @@ import {
   HomeJoinedGroupsPreview,
   HomeTrendingSubjectTopicsPreview,
 } from '@renderer/modules/main/home/community-overview'
+import { HOME_HERO_QUOTA, HomeHero } from '@renderer/modules/main/home/home-hero'
 import { SiteTimelinePreview } from '@renderer/modules/main/home/site-timeline'
 import { SmallCarousel, type SmallCarouselProps } from '@renderer/modules/main/home/small-carousel'
 import './home.css'
 
+// Each carousel starts after the subjects the big carousel above already shows.
 const primaryCarousel = {
   href: '/anime',
   name: '动画',
   sectionPath: 'anime',
+  skip: HOME_HERO_QUOTA.anime,
 } satisfies SmallCarouselProps
 const secondaryCarousels = [
-  { href: '/game', name: '游戏', sectionPath: 'game' },
-  { href: '/book', name: '书', sectionPath: 'book' },
-  { href: '/music', name: '音乐', sectionPath: 'music' },
-  { href: '/real', name: '三次元', sectionPath: 'real' },
+  { href: '/game', name: '游戏', sectionPath: 'game', skip: HOME_HERO_QUOTA.game },
+  { href: '/book', name: '书', sectionPath: 'book', skip: HOME_HERO_QUOTA.book },
+  { href: '/music', name: '音乐', sectionPath: 'music', skip: HOME_HERO_QUOTA.music },
+  { href: '/real', name: '三次元', sectionPath: 'real', skip: HOME_HERO_QUOTA.real },
 ] satisfies SmallCarouselProps[]
 
 export function Component() {
   return (
     <div className="home-page">
       <div className="home-content">
+        <HomeHero />
+
         <div className="home-schedule">
           <BroadcastSchedule />
         </div>

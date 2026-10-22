@@ -145,7 +145,7 @@ function TopicDetail({
 
   return (
     <CommentExpansionProvider key={virtualScrollKey}>
-      <div className="min-h-full">
+      <div className="min-h-full pb-8">
         <Virtualizer
           cache={restoredVirtualCache}
           keepMounted={restoredVisibleIndexes}
@@ -190,6 +190,7 @@ type TopicDetailRow =
     }
   | {
       comment: Comment
+      first: boolean
       floorNumber: number
       key: string
       type: 'comment'
@@ -223,8 +224,9 @@ function getTopicRows(topic: GroupTopic | SubjectTopic): TopicDetailRow[] {
   }
 
   rows.push(
-    ...visibleReplies.map(({ comment, floorNumber, reply }) => ({
+    ...visibleReplies.map(({ comment, floorNumber, reply }, index) => ({
       comment,
+      first: index === 0,
       floorNumber,
       key: `reply-${reply.id}`,
       type: 'comment' as const,
@@ -284,6 +286,7 @@ function TopicDetailRow({
     <div className="mx-auto max-w-5xl px-10">
       <CommentItem
         comment={row.comment}
+        divider={!row.first}
         floorNumber={row.floorNumber}
         reactionTarget={replyTarget}
         replyTarget={replyTarget}

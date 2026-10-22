@@ -99,7 +99,7 @@ export function EpisodeContent({ episodeId }: { episodeId: string }) {
 
   return (
     <CommentExpansionProvider key={virtualScrollKey}>
-      <div className="min-h-full">
+      <div className="min-h-full pb-8">
         <Virtualizer
           cache={restoredVirtualCache}
           keepMounted={restoredVisibleIndexes}
@@ -156,6 +156,7 @@ type EpisodePageRow =
     }
   | {
       comment: NonNullable<ReturnType<typeof useEpisodeCommentsByIdQuery>['data']>[number]
+      first: boolean
       floorNumber: number
       key: string
       type: 'comment'
@@ -194,8 +195,9 @@ function getEpisodePageRows({
   }
 
   rows.push(
-    ...visibleComments.map(({ comment, floorNumber }) => ({
+    ...visibleComments.map(({ comment, floorNumber }, index) => ({
       comment,
+      first: index === 0,
       floorNumber,
       key: `comment-${comment.id}`,
       type: 'comment' as const,
@@ -273,6 +275,7 @@ function EpisodePageRow({
     <div className="mx-auto max-w-6xl px-10">
       <CommentItem
         comment={row.comment}
+        divider={!row.first}
         floorNumber={row.floorNumber}
         reactionTarget={replyTarget}
         replyTarget={replyTarget}

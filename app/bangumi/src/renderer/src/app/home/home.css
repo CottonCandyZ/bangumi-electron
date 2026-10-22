@@ -8,9 +8,9 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  max-width: 1440px;
-  margin-inline: auto;
-  padding: 1rem clamp(1rem, 3cqi, 2rem) 4rem;
+  /* Same full-width gutter as the category pages; the big carousel bleeds into it. */
+  --category-gutter: clamp(1rem, 2.5cqi, 3rem);
+  padding: 1rem var(--category-gutter) 4rem;
 }
 
 .home-schedule {

@@ -126,6 +126,8 @@ export const HoverCardContent: FC<
           }, delay)
         }}
         onMouseOut={() => clearTimeout(timeoutRef.current)}
+        // 右键是去开菜单的，别再弹起卡片
+        onContextMenuCapture={() => clearTimeout(timeoutRef.current)}
       >
         {CardContent}
       </Card>

@@ -1,3 +1,4 @@
+import { HintTooltip } from '@renderer/components/tooltip-button/hint-tooltip'
 import { Button } from '@renderer/components/ui/button'
 import { useOpenReplyComposer } from '@renderer/modules/reply-composer/use-open-reply-composer'
 import { mainContainerRight } from '@renderer/state/main-bounding-box'
@@ -18,17 +19,18 @@ export function MainCommentFab({ replyTarget }: { replyTarget: ReplyTarget }) {
   if (composerOpen) return null
 
   return (
-    <Button
-      className={COMMENT_FAB_CLASS_NAME}
-      aria-label="评论"
-      title="评论"
-      onClick={() => openReplyComposer({ target: replyTarget })}
-      style={mainRight > 0 ? { right: `calc(100vw - ${mainRight}px + 1.5rem)` } : undefined}
-      type="button"
-      variant="ghost"
-      size="icon"
-    >
-      <MessageCircle className="size-5" />
-    </Button>
+    <HintTooltip content="评论" side="left">
+      <Button
+        className={COMMENT_FAB_CLASS_NAME}
+        aria-label="评论"
+        onClick={() => openReplyComposer({ target: replyTarget })}
+        style={mainRight > 0 ? { right: `calc(100vw - ${mainRight}px + 1.5rem)` } : undefined}
+        type="button"
+        variant="ghost"
+        size="icon"
+      >
+        <MessageCircle className="size-5" />
+      </Button>
+    </HintTooltip>
   )
 }

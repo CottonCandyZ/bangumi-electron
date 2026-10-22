@@ -1,5 +1,5 @@
-import { DevelopingPage } from '@renderer/components/placeholder/developing-page'
+import { CategoryPage } from '@renderer/modules/main/category/page'
 
 export function Component() {
-  return <DevelopingPage />
+  return <CategoryPage sectionPath="anime" />
 }

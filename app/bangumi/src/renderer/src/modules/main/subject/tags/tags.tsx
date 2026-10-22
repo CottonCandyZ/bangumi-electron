@@ -3,7 +3,7 @@ import { Subject } from '@renderer/data/types/subject'
 import { cn } from '@renderer/lib/utils'
 
 const TAG_CLASS_NAME =
-  'inline-flex items-baseline gap-1 rounded-md px-2 py-1 text-sm transition-colors focus-visible:ring-ring/50 focus-visible:ring-2 focus-visible:outline-hidden'
+  'inline-flex items-baseline gap-1 rounded-md px-2 py-1 text-sm transition-[background-color,color,transform] active:scale-[0.97] focus-visible:ring-ring/50 focus-visible:ring-2 focus-visible:outline-hidden'
 
 export function Tags({
   subjectTags,
@@ -39,9 +39,10 @@ export function Tags({
             key={name}
             className={cn(
               TAG_CLASS_NAME,
+              // 悬停时往前景色方向加深一点，浅色/深色主题下都清晰可辨（brightness 会把浅蓝冲成白色）
               mine
-                ? 'bg-(--watched-accent) text-(--watched-accent-foreground) hover:brightness-110'
-                : 'bg-muted/60 text-foreground/80 hover:bg-muted hover:text-foreground',
+                ? 'bg-(--watched-accent) text-(--watched-accent-foreground) hover:bg-[color-mix(in_oklab,var(--watched-accent),var(--watched-accent-foreground)_14%)]'
+                : 'bg-foreground/[0.05] text-foreground/80 hover:bg-foreground/[0.1] hover:text-foreground',
               edit && selectedTags?.has(name) && 'opacity-50',
             )}
             onClick={() => onTagClicked?.(name)}
@@ -65,7 +66,7 @@ export function Tags({
           type="button"
           className={cn(
             TAG_CLASS_NAME,
-            'text-muted-foreground hover:text-foreground hover:bg-muted/60 border border-dashed',
+            'text-muted-foreground hover:text-foreground hover:bg-foreground/[0.05] border border-dashed',
           )}
           onClick={() => setEdit(true)}
         >

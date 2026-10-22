@@ -19,7 +19,7 @@ import {
   hoverCardOpenAtom,
 } from '@renderer/state/hover-card'
 import { atom, useAtomValue, useSetAtom } from 'jotai'
-import { MouseEvent, useMemo } from 'react'
+import { MouseEvent, useId, useMemo } from 'react'
 import { EpisodeButton } from '@renderer/components/button/episode'
 import { useEpisodeCollectionActions } from '@renderer/modules/common/collections/use-episode-collection-actions'
 import { useNavigate } from 'react-router-dom'
@@ -72,6 +72,7 @@ export function EpisodeGridItem({
           keyof typeof EpisodeCollectionType,
           'notCollected'
         >)
+  const ownerId = useId()
   // 只订阅「自己是否是当前打开的那张卡片」，避免卡片开关时所有剧集按钮一起重渲染
   const isHoverCardOwnerAtom = useMemo(
     () =>
@@ -81,10 +82,10 @@ export function EpisodeGridItem({
           get(hoverCardOpenAtom) &&
           content !== null &&
           content.id === 'episode-content' &&
-          content.episodes[content.index] === episodes[index]
+          content.ownerId === ownerId
         )
       }),
-    [episodes, index],
+    [ownerId],
   )
   const isHoverCardOwner = useAtomValue(isHoverCardOwnerAtom)
 
@@ -100,6 +101,7 @@ export function EpisodeGridItem({
       onOpen={() => {
         setHoverCardContent({
           id: 'episode-content',
+          ownerId,
           index,
           episodes,
           collectionType,

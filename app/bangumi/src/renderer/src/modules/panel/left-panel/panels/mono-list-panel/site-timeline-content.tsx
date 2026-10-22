@@ -1,4 +1,5 @@
 import { Tabs } from '@renderer/components/tabs'
+import { HintTooltip } from '@renderer/components/tooltip-button/hint-tooltip'
 import { Button } from '@renderer/components/ui/button'
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
 import { useTimelineInfiniteQuery } from '@renderer/data/hooks/api/timeline'
@@ -94,21 +95,23 @@ export function SiteTimelineListPanelContent({
             setCurrentSelect={(_, value) => setMode(value === '关注' ? 'friends' : 'all')}
             tabsContent={TIMELINE_MODE_TABS}
           />
-          <Button
-            className="size-8 shrink-0"
-            disabled={timelineQuery.isFetching || !online}
-            onClick={refreshTimeline}
-            size="icon"
-            title="刷新时间线"
-            variant="ghost"
-          >
-            <span
-              className={cn(
-                'i-mingcute-refresh-2-line text-base',
-                timelineQuery.isFetching && 'animate-spin',
-              )}
-            />
-          </Button>
+          <HintTooltip content={online ? '刷新时间线' : '联网后可刷新'}>
+            <Button
+              aria-label="刷新时间线"
+              className="size-8 shrink-0"
+              disabled={timelineQuery.isFetching || !online}
+              onClick={refreshTimeline}
+              size="icon"
+              variant="ghost"
+            >
+              <span
+                className={cn(
+                  'i-mingcute-refresh-2-line text-base',
+                  timelineQuery.isFetching && 'animate-spin',
+                )}
+              />
+            </Button>
+          </HintTooltip>
         </div>
       </div>
       <SiteTimelineVirtualList

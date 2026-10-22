@@ -1,47 +1,36 @@
 import { HeaderButton } from '@renderer/components/tooltip-button/header-button'
 import { Button } from '@renderer/components/ui/button'
-import { HOST } from '@renderer/data/fetch/config/'
 import { useSession } from '@renderer/data/hooks/session'
+import { getHotkeyForHook, isHotkeyEnabled } from '@renderer/lib/shortcut'
+import { getSiteUrl, openInBrowser } from '@renderer/lib/site-url'
+import { appConfigAtom } from '@renderer/state/app-config'
+import { useAtomValue } from 'jotai'
+import { useHotkeys } from 'react-hotkeys-hook'
 import { useLocation } from 'react-router-dom'
 
 export function OriginalLink() {
   const { pathname } = useLocation()
   const session = useSession()
-  const episodePath = pathname.match(/^\/episode\/(\d+)/)
-  const groupTopicPath = pathname.match(/^\/group\/topic\/(\d+)/)
-  const subjectTopicPath = pathname.match(/^\/subject\/topic\/(\d+)/)
-  const blogPath = pathname.match(/^\/blog\/(\d+)/)
-  const userPath = pathname.match(/^\/user\/([^/]+)/)
-  const profileUsername = pathname === '/profile' ? session?.username : undefined
-  const isOriginalLinkPath =
-    /^\/(subject|person|character|index)\/\d+/.test(pathname) ||
-    !!episodePath ||
-    !!groupTopicPath ||
-    !!subjectTopicPath ||
-    !!blogPath ||
-    !!userPath ||
-    !!profileUsername
-  const href = episodePath
-    ? `${HOST}/ep/${episodePath[1]}`
-    : groupTopicPath
-      ? `${HOST}/group/topic/${groupTopicPath[1]}`
-      : subjectTopicPath
-        ? `${HOST}/subject/topic/${subjectTopicPath[1]}`
-        : blogPath
-          ? `${HOST}/blog/${blogPath[1]}`
-          : userPath
-            ? `${HOST}/user/${userPath[1]}`
-            : profileUsername
-              ? `${HOST}/user/${profileUsername}`
-              : `${HOST}${pathname}`
+  const hotkey = useAtomValue(appConfigAtom).shortcuts.openWebPage
+  const href = getSiteUrl(pathname, session?.username)
+
+  useHotkeys(
+    getHotkeyForHook(hotkey),
+    () => {
+      if (href) openInBrowser(href)
+    },
+    { enabled: isHotkeyEnabled(hotkey) && !!href, preventDefault: true },
+    [hotkey, href],
+  )
 
   return (
-    isOriginalLinkPath && (
+    href && (
       <HeaderButton
         Button={
           <Button
             asChild
             variant="ghost"
+            aria-label="在浏览器中打开网页版"
             className="no-drag-region text-muted-foreground size-7 cursor-auto p-1 text-lg"
           >
             <a href={href} target="_blank" rel="noreferrer">
@@ -49,7 +38,8 @@ export function OriginalLink() {
             </a>
           </Button>
         }
-        Content={<p>站点链接</p>}
+        Content="在浏览器中打开网页版"
+        hotkey={hotkey}
       />
     )
   )

@@ -5,6 +5,7 @@ import { SubjectId } from '@renderer/data/types/bgm'
 import { Collections } from '@renderer/modules/main/subject/header-info/collections'
 import { Header } from '@renderer/modules/main/subject/header-info/header'
 import { Meta } from '@renderer/modules/main/subject/header-info/meta'
+import { SeriesLinks } from '@renderer/modules/main/subject/header-info/series-links'
 import { Summary } from '@renderer/modules/main/subject/header-info/summary'
 
 export function SubjectHeaderInfo({ subjectId }: { subjectId: SubjectId }) {
@@ -42,6 +43,7 @@ export function SubjectHeaderInfo({ subjectId }: { subjectId: SubjectId }) {
       <section className="flex flex-col items-center gap-2 @3xl:items-start">
         {/* 标题 */}
         <Header {...subjectInfo} />
+        <SeriesLinks subjectId={subjectId} />
         {/* 一些 meta 数据 */}
         <Meta {...subjectInfo} />
         {/* collections */}
