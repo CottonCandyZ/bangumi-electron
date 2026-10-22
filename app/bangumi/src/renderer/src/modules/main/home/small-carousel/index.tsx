@@ -34,9 +34,17 @@ export type SmallCarouselProps = {
   sectionPath: SectionPath
   /** Leading subjects already shown elsewhere on the page (the home big carousel). */
   skip?: number
+  /** Denser cards for the secondary discovery rows. */
+  compact?: boolean
 }
 
-export function SmallCarousel({ href, name, sectionPath, skip = 0 }: SmallCarouselProps) {
+export function SmallCarousel({
+  href,
+  name,
+  sectionPath,
+  skip = 0,
+  compact = false,
+}: SmallCarouselProps) {
   const topList = useTopListQuery(sectionPath)
   const subjectIds = topList.data
     ?.map((item) => item.SubjectId)
@@ -49,7 +57,13 @@ export function SmallCarousel({ href, name, sectionPath, skip = 0 }: SmallCarous
   const online = useOnline()
   const currentSectionPath = useAtomValue(activeSectionAtom)
   const [api, setApi] = useState<CarouselApi>()
-  const { ref: rowRef, columns, itemStyle } = useCarouselColumns<HTMLDivElement>()
+  const {
+    ref: rowRef,
+    columns,
+    itemStyle,
+  } = useCarouselColumns<HTMLDivElement>({
+    preferredRem: compact ? 7.5 : 9,
+  })
   const { init: initIndex, setter: setIndex } = useStateHook({
     key: `Home-Small-Carousel-${sectionPath}`,
   })

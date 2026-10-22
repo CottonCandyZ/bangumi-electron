@@ -60,7 +60,13 @@ export function CategoryHero({
     return (
       <div className="@container -mx-(--category-gutter)">
         <div className={cn('flex gap-3 overflow-hidden', heroHeight)}>
-          <Skeleton className="h-full w-[calc(var(--category-gutter)-12px)] shrink-0 rounded-l-none" />
+          <div className="relative h-full w-[calc(var(--category-gutter)-12px)] shrink-0 overflow-hidden">
+            {/* Crop a full card so the peek keeps the same corner curve as a loaded slide. */}
+            <Skeleton
+              className="absolute inset-y-0 right-0 h-full rounded-[32px]"
+              style={{ aspectRatio: coverRatio }}
+            />
+          </div>
           <Skeleton className="h-full w-[min(100%,calc(clamp(260px,28cqi,440px)*0.67+clamp(280px,38cqi,760px)))] shrink-0 rounded-[32px]" />
           {Array.from({ length: 6 }).map((_, index) => (
             <Skeleton key={index} className="aspect-2/3 h-full shrink-0 rounded-[32px]" />
@@ -137,6 +143,7 @@ const HeroSlide = memo(function HeroSlide({
   selected: boolean
 }) {
   const title = subject.name_cn || subject.name
+  const backdrop = backdropSource(subject)
   const date = subject.date ? dayjs(subject.date) : null
   const episodeCount = subject.total_episodes || subject.eps
   const meta = [
@@ -173,17 +180,25 @@ const HeroSlide = memo(function HeroSlide({
           containCover ? 'left-0' : 'left-(--big-carousel-cover)',
         )}
       >
-        <HeroImage
-          src={backdropSource(subject)}
-          className="absolute inset-0 size-full scale-125 transform-gpu object-cover opacity-60 blur-2xl"
+        {/* Paint the tint and image together: separately clipped translucent layers leave a
+            bright hairline at the card's fractional right edge in Chromium. */}
+        <div
+          className="absolute inset-0 scale-125 transform-gpu bg-cover bg-center blur-2xl"
+          style={{
+            backgroundImage: [
+              // Combines the original 40% neutral tint with the 40–75% black gradient.
+              'linear-gradient(to right, rgb(8.625 8.625 8.625 / 64%) 10%, rgb(4.842 4.842 4.842 / 76%) 50%, rgb(2.706 2.706 2.706 / 85%) 90%)',
+              ...(backdrop ? [`url(${JSON.stringify(backdrop)})`] : []),
+            ].join(', '),
+          }}
         />
-        <div className="absolute inset-0 bg-linear-to-r from-black/40 via-black/60 to-black/75" />
       </div>
 
       {/* Collapsed and expanded cards share the cover; expanding only reveals the info panel. */}
       <div
         className={cn(
-          'relative h-full w-(--big-carousel-cover) shrink-0',
+          // Composite the cover and fading caption before the slide's rounded clip.
+          'relative h-full w-(--big-carousel-cover) shrink-0 transform-gpu',
           // A square cover in a portrait slot sits as an album on the blurred backdrop.
           containCover && 'flex items-center justify-center px-[clamp(0.75rem,1.5cqi,1.25rem)]',
         )}

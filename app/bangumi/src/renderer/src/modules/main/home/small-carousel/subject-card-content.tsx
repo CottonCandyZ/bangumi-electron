@@ -111,10 +111,12 @@ export const SubjectCard = memo(
                 viewTransition
                 state={{ viewTransitionName }}
               >
-                <CardContent className="p-0">
+                <CardContent className="transform-gpu p-0">
                   <CoverMotionImage
                     className={cn(
-                      'aspect-2/3 overflow-hidden rounded-xl',
+                      // HoverCardContent already clips the whole poster, including its score.
+                      // A second rounded clip exposes a rim between the cover and card background.
+                      'aspect-2/3',
                       sectionPath === 'music' && 'aspect-square',
                     )}
                     loading="lazy"

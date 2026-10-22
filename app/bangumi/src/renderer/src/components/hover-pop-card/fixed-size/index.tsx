@@ -103,7 +103,7 @@ export const HoverCardContent: FC<
   return (
     <motion.div key={layoutId} layoutId={layoutId} ref={hoverRef} className={className} {...props}>
       <Card
-        className="relative overflow-hidden border-none hover:-translate-x-0 hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
+        className="relative overflow-hidden border-none shadow-none hover:-translate-x-0 hover:-translate-y-0.5 hover:shadow-xl hover:duration-700"
         onMouseOver={() => {
           if (activeId === layoutId) return
           setActiveId(null)

@@ -18,10 +18,8 @@ const { setupAutoUpdate } = await import('@main/update')
 const DEV_CDP_PORT = process.env.BANGUMI_ELECTRON_CDP_PORT || '9222'
 
 if (process.platform === 'win32') {
-  app.commandLine.appendSwitch(
-    'enable-features',
-    ['OverlayScrollbar', 'FluentScrollbar', 'FluentOverlayScrollbar'].join(','),
-  )
+  // Chromium 156 defaults to the OS mode; the old Fluent feature flags no longer exist.
+  app.commandLine.appendSwitch('enable-features', 'OverlayScrollbar:mode/overlay')
 }
 
 if (is.dev) {

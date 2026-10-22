@@ -19,25 +19,23 @@ function run(...args) {
 const evaluate = (script) => run('eval', '-b', Buffer.from(script).toString('base64')).result
 
 // Exercise real carousel/card components with an isolated in-memory query cache.
-async function mountFixture(importModule, broadcast = false, subjectCount = 24) {
+async function mountFixture(
+  importModule,
+  broadcast = false,
+  subjectCount = 24,
+  { compact = false, width = 900 } = {},
+) {
   const load = (path) => {
-    let url = performance
+    const url = performance
       .getEntriesByType('resource')
       .filter((entry) => entry.name.split('?')[0].endsWith(path))
       .at(-1)?.name
-    if (!url && path === '/react-dom.js') {
-      const clientUrl = performance
-        .getEntriesByType('resource')
-        .find((entry) => entry.name.includes('/react-dom_client.js'))?.name
-      // Vite can give each optimized entry its own hash; the client's hash does not apply here.
-      if (clientUrl) url = new URL('react-dom.js', clientUrl).href
-    }
     return importModule(url || path).then((module) => module.default ?? module)
   }
   const [React, DOM, ClientDOM, Router, Query, Jotai, home, calendar, hoverState] =
     await Promise.all([
       load('/react.js'),
-      load('/react-dom.js'),
+      load('/src/test-support/react-dom.ts'),
       load('/react-dom_client.js'),
       load('/react-router-dom.js'),
       load('/@tanstack_react-query.js'),
@@ -85,8 +83,7 @@ async function mountFixture(importModule, broadcast = false, subjectCount = 24) 
   cache.setQueryDefaults(['calendar-v1'], { initialData: calendarData(8) })
   const host = document.createElement('div')
   host.id = 'home-carousel-fixture'
-  host.style.cssText =
-    'position:fixed;inset:0;z-index:99999;background:var(--background);overflow:hidden;width:900px;height:400px'
+  host.style.cssText = `position:fixed;inset:0;z-index:99999;background:var(--background);overflow:hidden;width:${width}px;height:400px`
   document.body.append(host)
   const atoms = Jotai.createStore()
   const mounts = []
@@ -128,7 +125,7 @@ async function mountFixture(importModule, broadcast = false, subjectCount = 24) 
     return visible
       ? broadcast
         ? h(calendar.BroadcastSchedule)
-        : h(home.SmallCarousel, { href: '/anime', name: 'Fixture', sectionPath: 'anime' })
+        : h(home.SmallCarousel, { href: '/anime', name: 'Fixture', sectionPath: 'anime', compact })
       : null
   }
   const router = Router.createMemoryRouter([{ path: '*', element: h(Content) }], {
@@ -203,6 +200,14 @@ function readMountFrames() {
   return frames[0]
 }
 
+function expectRestoredLayout(expected) {
+  const { transform, ...layout } = readMountFrames()
+  const { transform: previousTransform, ...previousLayout } = expected
+  expect(layout).toEqual(previousLayout)
+  // Fractional column widths can round a snap boundary by one pixel on remount.
+  expect(Math.abs(transform - previousTransform)).toBeLessThanOrEqual(1)
+}
+
 test('carousel keeps whole columns and seen cards on return, and defers hidden cards', () => {
   focusMainWindow()
   try {
@@ -242,7 +247,7 @@ test('carousel keeps whole columns and seen cards on return, and defers hidden c
       '(() => { window.__homeCarouselFixture.show(true); return document.querySelectorAll("#home-carousel-fixture img").length })()',
     )
     expect(after).toBeGreaterThanOrEqual(before)
-    expect(readMountFrames()).toEqual(scrolled)
+    expectRestoredLayout(scrolled)
     expect(
       evaluate(
         '[...document.querySelectorAll("#home-carousel-fixture img")].every(image => image.loading === "lazy" && image.decoding === "async")',
@@ -264,7 +269,7 @@ test('carousel keeps whole columns and seen cards on return, and defers hidden c
     const end = evaluate('window.__homeCarouselFixture.snapshot()')
     evaluate('window.__homeCarouselFixture.show(false)')
     evaluate('window.__homeCarouselFixture.show(true)')
-    expect(readMountFrames()).toEqual(end)
+    expectRestoredLayout(end)
     // Recompute columns and snap bounds against the current viewport.
     evaluate(`(() => {
       const fixture = window.__homeCarouselFixture;
@@ -282,6 +287,21 @@ test('carousel keeps whole columns and seen cards on return, and defers hidden c
     evaluate('window.__homeCarouselFixture?.dispose()')
   }
 }, 120000)
+
+test('compact discovery rows fit four cards and adapt to a narrow container', () => {
+  focusMainWindow()
+  try {
+    evaluate(
+      `(${mountFixture.toString()})(path => import(path), false, 24, { compact: true, width: 500 })`,
+    )
+    expect(readMountFrames().columns).toBeCloseTo(4, 2)
+    evaluate("window.__homeCarouselFixture.host.style.width = '240px'")
+    run('wait', '--fn', 'Math.abs(window.__homeCarouselFixture.snapshot().columns - 2) < 0.01')
+    expect(evaluate('window.__homeCarouselFixture.snapshot().columns')).toBeCloseTo(2, 2)
+  } finally {
+    evaluate('window.__homeCarouselFixture?.dispose()')
+  }
+}, 60000)
 
 test('right-clicking a subject link cancels its delayed hover card', () => {
   focusMainWindow()

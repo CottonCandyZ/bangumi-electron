@@ -39,7 +39,7 @@ export function Component() {
             </div>
             {secondaryCarousels.map((item) => (
               <div className="min-w-0" key={item.sectionPath}>
-                <SmallCarousel {...item} />
+                <SmallCarousel {...item} compact />
               </div>
             ))}
           </div>
