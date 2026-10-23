@@ -6,6 +6,8 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { useMonoPhotoCommentsQuery, useMonoPhotoQuery } from '@renderer/data/hooks/api/photo'
 import type { MonoType } from '@renderer/data/types/mono'
 import { renderBBCode } from '@renderer/lib/utils/bbcode'
+import { MainBackToTopButton } from '@renderer/modules/main/back-to-top-button'
+import { MainCommentFab } from '@renderer/modules/main/comment-fab'
 import dayjs from 'dayjs'
 
 export function MonoPhotoDetail({
@@ -66,9 +68,12 @@ export function MonoPhotoDetail({
         comments={commentsQuery.data}
         error={commentsQuery.isError}
         replyTarget={replyTarget}
+        showReplyEntry={false}
         title="评论"
         virtual={false}
       />
+      <MainCommentFab replyTarget={replyTarget} />
+      <MainBackToTopButton />
     </main>
   )
 }

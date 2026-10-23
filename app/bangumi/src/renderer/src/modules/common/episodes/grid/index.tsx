@@ -112,6 +112,7 @@ function EpisodesView({
         showSelector={selector && eps > limit}
         skeletonNumber={Math.min(eps > 0 ? eps : 12, limit)}
         size={size}
+        viewMode={viewMode}
       />
     )
   if (!episodeQuery.data.data?.length) return null
@@ -172,7 +173,36 @@ function EpisodeSkeleton({
   showSelector,
   skeletonNumber,
   size,
-}: { showSelector: boolean; skeletonNumber: number } & EpisodeGridSize) {
+  viewMode,
+}: {
+  showSelector: boolean
+  skeletonNumber: number
+  viewMode: 'grid' | 'cards'
+} & EpisodeGridSize) {
+  // 卡片视图和 EpisodeToolbar + EpisodeCarousel 的尺寸对齐，加载完成时不跳动
+  if (size === 'default' && viewMode === 'cards')
+    return (
+      <div className="min-w-0">
+        <div className="mb-3 flex min-h-9 items-center justify-between gap-2">
+          <div className="flex items-center gap-1">
+            <h2 className="mr-1 text-base font-semibold">章节</h2>
+            <Skeleton className="size-7 rounded-md" />
+            <Skeleton className="size-7 rounded-md" />
+          </div>
+          <Skeleton className="h-8 w-15 rounded-md" />
+        </div>
+        <div className="-ml-2 flex overflow-hidden py-1">
+          {Array.from({ length: Math.min(skeletonNumber, 8) }, (_, index) => (
+            <div className="shrink-0 basis-48 pl-2" key={index}>
+              <div className="bg-muted/40 flex h-16 flex-col justify-center gap-2 rounded-md px-3">
+                <Skeleton className="h-2.5 w-10" />
+                <Skeleton className="h-3 w-3/4" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   return (
     <div className="flex flex-col gap-5">
       {size === 'default' && <h2 className="text-base font-semibold">章节</h2>}
