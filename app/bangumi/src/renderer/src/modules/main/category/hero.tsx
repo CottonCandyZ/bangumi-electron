@@ -18,7 +18,9 @@ const PRELOAD_TIMEOUT = 1500
 /** JS twin of the page's `--category-gutter: clamp(1rem, 2.5cqi, 3rem)`. */
 const categoryGutter = (width: number) => Math.min(48, Math.max(16, width * 0.025))
 
-const coverSource = (subject: Subject) => subject.images.common
+// The cover reaches 440 CSS pixels tall, so a 400px thumbnail is too small on high-DPI screens.
+const coverSource = (subject: Subject) =>
+  subject.images.large || subject.images.medium || subject.images.common
 // The backdrop is blurred heavily, so a small source looks the same and decodes far faster.
 const backdropSource = (subject: Subject) => subject.images.small || subject.images.common
 
