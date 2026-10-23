@@ -9,6 +9,7 @@ import { cn } from '@renderer/lib/utils'
 import dayjs from 'dayjs'
 import { memo, useEffect, useState } from 'react'
 import { useLocation, useViewTransitionState } from 'react-router-dom'
+import { HeroBackdrop } from './hero-backdrop'
 
 /** Matches BigCarousel's height clamp so the skeleton does not jump. */
 const heroHeight = 'h-[clamp(260px,28cqi,440px)]'
@@ -184,16 +185,7 @@ const HeroSlide = memo(function HeroSlide({
       >
         {/* Paint the tint and image together: separately clipped translucent layers leave a
             bright hairline at the card's fractional right edge in Chromium. */}
-        <div
-          className="absolute inset-0 scale-125 transform-gpu bg-cover bg-center blur-2xl"
-          style={{
-            backgroundImage: [
-              // Combines the original 40% neutral tint with the 40–75% black gradient.
-              'linear-gradient(to right, rgb(8.625 8.625 8.625 / 64%) 10%, rgb(4.842 4.842 4.842 / 76%) 50%, rgb(2.706 2.706 2.706 / 85%) 90%)',
-              ...(backdrop ? [`url(${JSON.stringify(backdrop)})`] : []),
-            ].join(', '),
-          }}
-        />
+        <HeroBackdrop src={backdrop} />
       </div>
 
       {/* Collapsed and expanded cards share the cover; expanding only reveals the info panel. */}
