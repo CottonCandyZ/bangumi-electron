@@ -541,6 +541,7 @@ function CollectionPreviewItem({ collection }: { collection: CollectionData }) {
               active={isTransitioning}
               className={cn(
                 'w-full overflow-hidden',
+                isTransitioning && 'rounded-[inherit]',
                 subject.type === SubjectType.music ? 'aspect-square' : 'aspect-[5/7]',
               )}
               imageSrc={subject.images.medium || subject.images.grid}

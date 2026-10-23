@@ -61,20 +61,14 @@ html[data-platform='win32'] .episode-label {
   pointer-events: none;
 }
 
+/* Snapshots already include each element's radius and corner shape. A shared
+   rounded mask would clip them again and change their shape during transitions. */
 ::view-transition-group(app-header),
 ::view-transition-group(app-nav) {
   z-index: 100;
   animation: none;
   border-radius: 0;
   overflow: visible;
-}
-
-::view-transition-image-pair(*),
-::view-transition-old(*),
-::view-transition-new(*) {
-  border-radius: 0.75rem;
-  clip-path: inset(0 round 0.75rem);
-  overflow: hidden;
 }
 
 ::view-transition-old(app-header),
@@ -87,7 +81,7 @@ html[data-platform='win32'] .episode-label {
   overflow: visible;
 }
 
-/* Persistent chrome must not inherit the rounded image-transition mask. */
+/* Keep persistent chrome and the page snapshot rectangular and unclipped. */
 ::view-transition-image-pair(app-header),
 ::view-transition-image-pair(app-nav),
 ::view-transition-image-pair(root),

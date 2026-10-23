@@ -102,6 +102,10 @@ export const SubjectCard = memo(
           CardContent={
             <ViewTransitionElement
               active={!isActive && isTransitioning}
+              // Ancestor clipping is excluded from view-transition snapshots.
+              className={
+                !isActive && isTransitioning ? 'overflow-hidden rounded-[inherit]' : undefined
+              }
               viewTransitionName={viewTransitionName}
             >
               <MyLink

@@ -200,14 +200,18 @@ const HeroSlide = memo(function HeroSlide({
       <div
         className={cn(
           // Composite the cover and fading caption before the slide's rounded clip.
-          'relative h-full w-(--big-carousel-cover) shrink-0 transform-gpu',
+          'relative h-full w-(--big-carousel-cover) shrink-0 transform-gpu rounded-l-[inherit]',
           // A square cover in a portrait slot sits as an album on the blurred backdrop.
           containCover && 'flex items-center justify-center px-[clamp(0.75rem,1.5cqi,1.25rem)]',
         )}
       >
         <ViewTransitionElement
           active={selected && isTransitioning}
-          className={containCover ? 'aspect-square w-full' : 'size-full'}
+          className={cn(
+            containCover ? 'aspect-square w-full' : 'size-full',
+            // Capture the slide's left corners without double-clipping normal rendering.
+            selected && isTransitioning && !containCover && 'overflow-hidden rounded-l-[inherit]',
+          )}
           viewTransitionName={viewTransitionName}
         >
           <HeroImage
