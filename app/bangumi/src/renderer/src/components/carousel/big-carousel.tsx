@@ -102,6 +102,13 @@ const mod = (value: number, length: number) => ((value % length) + length) % len
 const virtualIndexOf = (slot: number, value: number, slots: number) =>
   slots === 1 ? 0 : slot + slots * Math.ceil((value - WINDOW_BEHIND - slot) / slots)
 
+/** Invert a card's x offset, including the extra space occupied by the expanding card. */
+function distanceFromOffset(offset: number, step: number, extra: number) {
+  if (offset <= 0) return offset / step
+  if (offset >= step + extra) return (offset - extra) / step
+  return offset / (step + extra)
+}
+
 export function BigCarousel<T>({
   items,
   getKey,
@@ -279,8 +286,10 @@ export function BigCarousel<T>({
     startX: number
     startY: number
     startPosition: number
+    anchor: number
+    startOffset: number
     moved: boolean
-    samples: { x: number; t: number }[]
+    samples: { x: number; t: number; position: number }[]
   } | null>(null)
 
   useEffect(() => {
@@ -300,10 +309,15 @@ export function BigCarousel<T>({
         drag.moved = true
         setDragging(true)
       }
-      drag.samples.push({ x: event.clientX, t: event.timeStamp })
+      // The grabbed card stays under the pointer while its neighbours expand and collapse.
+      const nextPosition = clamp(
+        drag.anchor - distanceFromOffset(drag.startOffset + dx, step, big - small),
+        drag.startPosition - (count - 1),
+        drag.startPosition + (count - 1),
+      )
+      drag.samples.push({ x: event.clientX, t: event.timeStamp, position: nextPosition })
       if (drag.samples.length > 6) drag.samples.shift()
-      const travelled = clamp(-dx / step, -(count - 1), count - 1)
-      position.set(drag.startPosition + travelled)
+      position.set(nextPosition)
     }
     const onUp = (event: PointerEvent) => {
       const drag = dragState.current
@@ -320,7 +334,10 @@ export function BigCarousel<T>({
       const last = drag.samples[drag.samples.length - 1]
       const pixelVelocity =
         first && last && last.t > first.t ? (last.x - first.x) / (last.t - first.t) : 0
-      const slideVelocity = (-pixelVelocity * 1000) / step
+      const slideVelocity =
+        first && last && last.t > first.t
+          ? ((last.position - first.position) * 1000) / (last.t - first.t)
+          : 0
       const origin = Math.round(drag.startPosition)
       let next = Math.round(position.get() + slideVelocity * INERTIA_PROJECTION)
       if (next === origin && Math.abs(pixelVelocity) > FLICK_VELOCITY) {
@@ -336,7 +353,7 @@ export function BigCarousel<T>({
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('pointercancel', onUp)
     }
-  }, [count, moveTo, position, step])
+  }, [big, count, moveTo, position, small, step])
 
   useWheelSwipe(viewportRef, go)
 
@@ -375,13 +392,28 @@ export function BigCarousel<T>({
             // Catch the carousel mid-flight, like grabbing a moving sheet.
             controls.current?.stop()
             direction.current = 0
+            const startPosition = position.get()
+            const slide =
+              event.target instanceof Element
+                ? event.target.closest<HTMLDivElement>('[aria-roledescription=slide]')
+                : null
+            const slot = slide ? slideRefs.current.indexOf(slide) : -1
+            const anchor =
+              slot >= 0 ? virtualIndexOf(slot, startPosition, slots) : Math.round(startPosition)
+            const distance = anchor - startPosition
             dragState.current = {
               pointerId: event.pointerId,
               startX: event.clientX,
               startY: event.clientY,
-              startPosition: position.get(),
+              startPosition,
+              anchor,
+              startOffset: slide
+                ? slide.getBoundingClientRect().left -
+                  event.currentTarget.getBoundingClientRect().left -
+                  leading
+                : distance * step + (big - small) * clamp(distance, 0, 1),
               moved: false,
-              samples: [{ x: event.clientX, t: event.timeStamp }],
+              samples: [{ x: event.clientX, t: event.timeStamp, position: startPosition }],
             }
           }}
           onClickCapture={(event) => {
