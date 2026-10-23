@@ -187,7 +187,8 @@ export function BigCarousel<T>({
   // Every slide is positioned on its own, so a slide wrapping around keeps its node and images.
   useLayoutEffect(() => {
     const extra = big - small
-    const cache: { transform?: string; width?: string; expansion?: string }[] = []
+    const cache: { transform?: string; width?: string; expansion?: string; overshoot?: string }[] =
+      []
     const apply = (raw: number) => {
       // Past the target the spring's overshoot moves the whole strip rigidly: the bounce stays,
       // but card widths hold at the target so the next card never widens and flashes its info.
@@ -211,6 +212,9 @@ export function BigCarousel<T>({
           transform: `translate3d(${x}px, 0, 0)`,
           width: `${small + extra * expansion}px`,
           expansion: expansion.toFixed(3),
+          // The overshoot the widths ignore, so content tied to expansion can carry on with the
+          // spring's momentum instead of stopping dead when the clamp kicks in.
+          overshoot: (expansion === 1 ? Math.abs(raw - value) : 0).toFixed(4),
         }
         const previous = (cache[slot] ??= {})
         if (previous.transform !== next.transform) slide.style.transform = next.transform
@@ -218,6 +222,9 @@ export function BigCarousel<T>({
         if (previous.expansion !== next.expansion) {
           // Content can follow the expansion frame by frame instead of toggling on selection.
           slide.style.setProperty('--big-carousel-expansion', next.expansion)
+        }
+        if (previous.overshoot !== next.overshoot) {
+          slide.style.setProperty('--big-carousel-overshoot', next.overshoot)
         }
         cache[slot] = next
       })
@@ -457,13 +464,19 @@ export function BigCarousel<T>({
               role="tab"
               aria-selected={itemIndex === selected}
               aria-label={`跳转到第 ${itemIndex + 1} 个`}
+              onPointerDown={(event) => {
+                // The squeezing indicators can move between press and release. Keep the click
+                // on the pressed dot even when the width animation moves it out of the pointer.
+                if (event.button === 0) event.currentTarget.setPointerCapture(event.pointerId)
+              }}
               onClick={() => {
                 // Take the shorter way around the loop.
                 const forward = mod(itemIndex - selected, count)
                 go(forward <= count / 2 ? forward : forward - count)
               }}
               className={cn(
-                'h-1.5 rounded-full transition-all duration-300',
+                // Extend the transparent hit area into the gap without changing the squeezing dots.
+                "relative h-1.5 rounded-full transition-all duration-300 before:absolute before:-inset-x-0.75 before:-inset-y-3 before:content-['']",
                 itemIndex === selected
                   ? 'bg-foreground/70 w-6'
                   : 'bg-foreground/15 hover:bg-foreground/30 w-1.5',

@@ -236,9 +236,16 @@ const HeroSlide = memo(function HeroSlide({
 
       <div
         className={cn(
-          'flex h-full w-(--big-carousel-info) shrink-0 flex-col justify-end gap-2 p-[clamp(1rem,2.5cqi,1.75rem)] text-white transition-opacity duration-300',
-          selected ? 'opacity-100 delay-150' : 'opacity-0',
+          'flex h-full w-(--big-carousel-info) shrink-0 transform-gpu flex-col justify-end gap-2 p-[clamp(1rem,2.5cqi,1.75rem)] text-white',
         )}
+        // Parallax on the carousel's per-frame expansion: the text trails in from the right faster
+        // than the card moves, and fades in over the second half so it never shows half-clipped.
+        // The overshoot continues the same motion past the end, so the text settles with the spring.
+        style={{
+          translate:
+            'calc((1 - var(--big-carousel-expansion, 0) - var(--big-carousel-overshoot, 0)) * 40%) 0',
+          opacity: 'max(0, var(--big-carousel-expansion, 0) * 2 - 1)',
+        }}
       >
         <div className="flex items-center gap-2 text-xs font-medium">
           <span className="rounded-md bg-rose-500/90 px-1.5 py-0.5">{badge}</span>
