@@ -26,13 +26,20 @@ function tokensFromEvent(event: KeyboardEvent) {
   return tokens
 }
 
+function addHeldKeys(next: Set<string>, releasedKey?: string) {
+  // macOS can omit ordinary keyup events while Command is held. Once Command is released,
+  // those keys can no longer be trusted, including when its own keyup was missed.
+  if (isMac && pressed.has('meta') && !next.has('meta')) return
+  pressed.forEach((token) => {
+    if (!MODIFIER_TOKENS.has(token) && token !== releasedKey) next.add(token)
+  })
+}
+
 function onKeyDown(event: KeyboardEvent) {
   const next = tokensFromEvent(event)
   const key = getKeyFromKeyboardEvent(event)
   // 修饰键之外的键保持到松开为止
-  pressed.forEach((token) => {
-    if (!MODIFIER_TOKENS.has(token)) next.add(token)
-  })
+  addHeldKeys(next)
   if (key && !MODIFIER_KEYS.has(key)) next.add(key)
   emit(next)
 }
@@ -40,9 +47,7 @@ function onKeyDown(event: KeyboardEvent) {
 function onKeyUp(event: KeyboardEvent) {
   const next = tokensFromEvent(event)
   const key = getKeyFromKeyboardEvent(event)
-  pressed.forEach((token) => {
-    if (!MODIFIER_TOKENS.has(token) && token !== key) next.add(token)
-  })
+  addHeldKeys(next, key)
   emit(next)
 }
 
@@ -50,11 +55,16 @@ function reset() {
   if (pressed.size > 0) emit(new Set())
 }
 
+function onVisibilityChange() {
+  if (document.hidden) reset()
+}
+
 function subscribe(listener: () => void) {
   if (listeners.size === 0) {
     window.addEventListener('keydown', onKeyDown, true)
     window.addEventListener('keyup', onKeyUp, true)
     window.addEventListener('blur', reset)
+    document.addEventListener('visibilitychange', onVisibilityChange)
   }
   listeners.add(listener)
   return () => {
@@ -63,6 +73,7 @@ function subscribe(listener: () => void) {
       window.removeEventListener('keydown', onKeyDown, true)
       window.removeEventListener('keyup', onKeyUp, true)
       window.removeEventListener('blur', reset)
+      document.removeEventListener('visibilitychange', onVisibilityChange)
       pressed = new Set()
     }
   }

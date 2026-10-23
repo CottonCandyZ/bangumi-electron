@@ -51,7 +51,7 @@ export function NavButton({ compact = false }: { compact?: boolean }) {
           variant="ghost"
           aria-label="后退"
           className={cn(
-            'no-drag-region aspect-square p-0.5 shadow-none [&_svg]:size-6',
+            'no-drag-region aspect-square p-0.5 shadow-none focus-visible:ring-inset [&_svg]:size-6',
             compact && 'size-7 rounded-sm [&_svg]:size-4',
           )}
           onClick={() => navigate(-1)}
@@ -65,7 +65,7 @@ export function NavButton({ compact = false }: { compact?: boolean }) {
           variant="ghost"
           aria-label="前进"
           className={cn(
-            'no-drag-region aspect-square p-0.5 shadow-none [&_svg]:size-6',
+            'no-drag-region aspect-square p-0.5 shadow-none focus-visible:ring-inset [&_svg]:size-6',
             compact && 'size-7 rounded-sm [&_svg]:size-4',
           )}
           onClick={() => navigate(1)}
