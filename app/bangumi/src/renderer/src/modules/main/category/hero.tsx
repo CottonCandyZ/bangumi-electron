@@ -165,7 +165,7 @@ const HeroSlide = memo(function HeroSlide({
     // or re-rasterizes the content and the blurred backdrop.
     <MyLink
       to={to}
-      contextMenuTitle={title}
+      contextMenuTitle={{ name: subject.name, nameCN: subject.name_cn }}
       viewTransition
       state={{ viewTransitionName }}
       tabIndex={selected ? 0 : -1}

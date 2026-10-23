@@ -212,7 +212,11 @@ function MonoSubjectListItem({
   const active = useIsRouteActive(to)
 
   return (
-    <PanelButtonItem active={active} to={to}>
+    <PanelButtonItem
+      active={active}
+      contextMenuTitle={{ name: item.name, nameCN: item.nameCn }}
+      to={to}
+    >
       <PanelItemImage image={item.image} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="line-clamp-1 text-sm font-medium">{item.nameCn || item.name}</div>
@@ -284,13 +288,14 @@ function MonoRelatedListItem({
   const active = useIsRouteActive(item.link)
 
   return (
-    <PanelButtonItem active={active} to={item.link}>
+    <PanelButtonItem active={active} contextMenuTitle={item.name} to={item.link}>
       <PanelItemImage image={item.image} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="line-clamp-1 text-sm font-medium">{item.name}</div>
         {item.subjectId ? (
           <MyLink
             className="text-primary hover:bg-primary/10 focus-visible:ring-ring/50 -mx-1 line-clamp-1 w-fit max-w-full rounded-sm px-1 text-xs underline-offset-2 hover:underline focus-visible:ring-2 focus-visible:outline-hidden"
+            contextMenuTitle={{ name: item.subjectName ?? '', nameCN: item.subjectNameCn }}
             to={`/subject/${item.subjectId}`}
             onClick={(event) => event.stopPropagation()}
             onKeyDown={(event) => event.stopPropagation()}

@@ -21,7 +21,7 @@ export function Item({
   return (
     <MyLink
       to={`/subject/${relatedSubject.id}`}
-      contextMenuTitle={relatedSubject.name_cn || relatedSubject.name}
+      contextMenuTitle={{ name: relatedSubject.name, nameCN: relatedSubject.name_cn }}
       className="group/related flex min-w-0 cursor-default flex-col gap-2 focus-visible:outline-hidden"
       state={{ viewTransitionName: `cover-image-${key}` }}
       viewTransition

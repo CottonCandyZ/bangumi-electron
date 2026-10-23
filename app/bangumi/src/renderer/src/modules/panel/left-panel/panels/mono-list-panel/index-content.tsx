@@ -346,7 +346,7 @@ function IndexRelatedPanelItem({ item }: { item: IndexRelated }) {
 
   if (meta.to) {
     return (
-      <PanelLinkItem active={active} to={meta.to}>
+      <PanelLinkItem active={active} contextMenuTitle={meta.contextMenuTitle} to={meta.to}>
         {content}
       </PanelLinkItem>
     )

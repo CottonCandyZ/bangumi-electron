@@ -285,7 +285,11 @@ function SubjectRelatedListItem({
   const active = useIsRouteActive(to)
 
   return (
-    <PanelLinkItem active={active} to={to}>
+    <PanelLinkItem
+      active={active}
+      contextMenuTitle={{ name: item.name, nameCN: item.name_cn }}
+      to={to}
+    >
       <PanelItemImage image={item.images.grid || item.images.common} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="line-clamp-1 text-sm font-medium">{item.name_cn || item.name}</div>

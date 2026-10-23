@@ -1,6 +1,7 @@
 import { HOST } from '@renderer/data/fetch/config'
 import type { IndexRelated, IndexRelatedCategory } from '@renderer/data/types/index'
 import { getMonoPreviewImage } from '@renderer/modules/common/mono-image'
+import type { ContextMenuTitle } from '@renderer/state/context-menu'
 
 export const INDEX_RELATED_CATEGORY_LABELS: Record<IndexRelatedCategory, string> = {
   0: '条目',
@@ -18,6 +19,8 @@ export type IndexRelatedMeta = {
   imageClassName?: string
   imageContain: boolean
   kind: string
+  /** 右键复制标题用，带上中文名和原名 */
+  contextMenuTitle?: ContextMenuTitle
   subtitle?: string
   title: string
   to?: string
@@ -31,6 +34,7 @@ export function getIndexRelatedMeta(item: IndexRelated): IndexRelatedMeta {
       image: item.subject.images?.common || item.subject.images?.grid,
       imageContain: false,
       kind: INDEX_RELATED_CATEGORY_LABELS[0],
+      contextMenuTitle: item.subject,
       subtitle: item.subject.nameCN ? item.subject.name : undefined,
       title: item.subject.nameCN || item.subject.name,
       to: `/subject/${item.subject.id}`,
@@ -43,6 +47,7 @@ export function getIndexRelatedMeta(item: IndexRelated): IndexRelatedMeta {
       imageClassName: MONO_RELATED_IMAGE_CLASS,
       imageContain: false,
       kind: INDEX_RELATED_CATEGORY_LABELS[1],
+      contextMenuTitle: item.character,
       subtitle: item.character.nameCN ? item.character.name : item.character.info,
       title: item.character.nameCN || item.character.name,
       to: `/character/${item.character.id}`,

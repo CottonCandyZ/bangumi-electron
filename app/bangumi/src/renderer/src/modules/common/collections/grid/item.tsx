@@ -29,6 +29,10 @@ export function CollectionItem({
   return (
     <MyLink
       to={`/subject/${collectionItemInfo.subject_id}`}
+      contextMenuTitle={{
+        name: collectionItemInfo.subject.name,
+        nameCN: collectionItemInfo.subject.name_cn,
+      }}
       className={cn('group cursor-default')}
       onClick={(e) =>
         mainSubjectId === collectionItemInfo.subject_id.toString() && e.preventDefault()

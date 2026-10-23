@@ -5,6 +5,9 @@ export type ContextMenuActionHelpers = {
   navigate: NavigateFunction
 }
 
+/** 右键「复制标题」用的标题；传入中文名和原名时可以分别复制 */
+export type ContextMenuTitle = string | { name: string; nameCN?: string | null }
+
 export type ContextMenuEntry =
   | {
       type?: 'item'

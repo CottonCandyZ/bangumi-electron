@@ -1,8 +1,9 @@
 import { Image } from '@renderer/components/image/image'
-import { MyLink } from '@renderer/components/my-link'
+import { MyLink, useLinkContextMenu } from '@renderer/components/my-link'
 import { Tabs } from '@renderer/components/tabs'
 import { SingleColumnVirtualList } from '@renderer/components/virtual/single-column-virtual-list'
 import { SubjectType } from '@renderer/data/types/subject'
+import type { ContextMenuTitle } from '@renderer/state/context-menu'
 import { monoListPanelCenterActiveItemAtom } from '@renderer/state/panel'
 import { useAtomValue } from 'jotai'
 import { Children, isValidElement, useRef } from 'react'
@@ -119,9 +120,11 @@ export function PanelItemImage({
 export function PanelButtonItem({
   active,
   children,
+  contextMenuTitle,
   to,
-}: PropsWithChildren<{ active: boolean; to: string }>) {
+}: PropsWithChildren<{ active: boolean; contextMenuTitle?: ContextMenuTitle; to: string }>) {
   const navigate = useNavigate()
+  const openLinkContextMenu = useLinkContextMenu()
   const ref = useActivePanelItemRef(active)
 
   const open = () => {
@@ -136,6 +139,7 @@ export function PanelButtonItem({
       role="link"
       tabIndex={0}
       onClick={open}
+      onContextMenu={(event) => openLinkContextMenu(event, { path: to, title: contextMenuTitle })}
       onKeyDown={(event) => {
         if (event.key !== 'Enter' && event.key !== ' ') return
         event.preventDefault()
@@ -150,14 +154,16 @@ export function PanelButtonItem({
 export function PanelLinkItem({
   active,
   children,
+  contextMenuTitle,
   to,
-}: PropsWithChildren<{ active: boolean; to: string }>) {
+}: PropsWithChildren<{ active: boolean; contextMenuTitle?: ContextMenuTitle; to: string }>) {
   const ref = useActivePanelItemRef(active)
 
   return (
     <div ref={ref}>
       <MyLink
         className={PANEL_ITEM_CLASS}
+        contextMenuTitle={contextMenuTitle}
         data-active={active}
         to={to}
         onClick={(event) => {

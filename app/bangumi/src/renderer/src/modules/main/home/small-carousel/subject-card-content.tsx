@@ -111,7 +111,7 @@ export const SubjectCard = memo(
               <MyLink
                 to={`/subject/${subjectId}`}
                 className="cursor-default"
-                contextMenuTitle={subjectInfo.name_cn || subjectInfo.name}
+                contextMenuTitle={{ name: subjectInfo.name, nameCN: subjectInfo.name_cn }}
                 viewTransition
                 state={{ viewTransitionName }}
               >
@@ -166,7 +166,7 @@ export const SubjectCard = memo(
           <MyLink
             to={`/subject/${subjectId}`}
             className="cursor-default"
-            contextMenuTitle={subjectInfo.name_cn || subjectInfo.name}
+            contextMenuTitle={{ name: subjectInfo.name, nameCN: subjectInfo.name_cn }}
             viewTransition
             state={{ viewTransitionName }}
           >

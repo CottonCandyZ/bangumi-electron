@@ -266,7 +266,7 @@ function BroadcastItem({ item }: { item: CalendarItem }) {
   return (
     <MyLink
       className="hover:bg-accent/60 flex min-w-0 shrink-0 cursor-default items-center gap-2.5 rounded-md pr-1 transition-colors"
-      contextMenuTitle={subject.nameCN || subject.name}
+      contextMenuTitle={subject}
       title={fullTitle}
       to={`/subject/${subject.id}`}
     >

@@ -103,7 +103,7 @@ function SubjectRecommendationPanelItem({ item }: { item: SubjectRecommendation 
   const ratingTotal = item.subject.rating?.total
 
   return (
-    <PanelLinkItem active={active} to={to}>
+    <PanelLinkItem active={active} contextMenuTitle={item.subject} to={to}>
       <PanelItemImage image={getRecommendationSubjectImage(item)} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="line-clamp-1 text-sm font-medium">{title}</div>

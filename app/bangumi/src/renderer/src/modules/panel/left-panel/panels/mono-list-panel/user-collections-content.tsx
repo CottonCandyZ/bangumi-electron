@@ -126,7 +126,11 @@ function UserCollectionListItem({ item }: { item: CollectionData }) {
   const active = useIsRouteActive(to)
 
   return (
-    <PanelLinkItem active={active} to={to}>
+    <PanelLinkItem
+      active={active}
+      contextMenuTitle={{ name: item.subject.name, nameCN: item.subject.name_cn }}
+      to={to}
+    >
       <PanelItemImage image={item.subject.images.grid || item.subject.images.common} />
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="line-clamp-1 text-sm font-medium">

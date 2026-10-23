@@ -32,7 +32,7 @@ function SeriesLink({ relation, subject }: { relation: string; subject: RelatedS
   return (
     <MyLink
       to={`/subject/${subject.id}`}
-      contextMenuTitle={title}
+      contextMenuTitle={{ name: subject.name, nameCN: subject.name_cn }}
       className="bg-muted/50 hover:bg-muted focus-visible:ring-ring flex max-w-80 min-w-0 cursor-default items-center gap-1.5 rounded-full py-0.5 pr-2.5 pl-0.5 text-xs transition-colors outline-none focus-visible:ring-2"
     >
       {subject.images.common !== '' ? (

@@ -150,6 +150,7 @@ function SearchPanelItem({ item }: { item: SearchSubjectData }) {
         className={cn(
           'hover:bg-accent data-[active=true]:bg-accent flex min-h-24 cursor-default flex-row gap-3 rounded-md p-2',
         )}
+        contextMenuTitle={{ name: item.name, nameCN: item.name_cn }}
         data-active={active}
         to={to}
         onClick={(event) => {
