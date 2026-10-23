@@ -13,19 +13,10 @@ export function TopicEditorSkeleton() {
         <Skeleton className="h-9 w-full" />
       </section>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 @4xl:grid-cols-2">
-        {Array.from({ length: 2 }, (_, index) => (
-          <section className="flex min-h-56 flex-col gap-2" key={index}>
-            <Skeleton className="h-3 w-10" />
-            <Skeleton className="min-h-0 flex-1" />
-          </section>
-        ))}
-      </div>
-
-      <footer className="flex shrink-0 justify-end gap-2 border-t pt-4">
-        <Skeleton className="h-9 w-16" />
-        <Skeleton className="h-9 w-20" />
-      </footer>
+      <section className="flex min-h-56 flex-1 flex-col gap-2">
+        <Skeleton className="h-3 w-8" />
+        <Skeleton className="min-h-0 flex-1 rounded-xl" />
+      </section>
     </div>
   )
 }

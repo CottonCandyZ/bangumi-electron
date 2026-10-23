@@ -5,7 +5,6 @@ import { Input } from '@renderer/components/ui/input'
 import { useSession } from '@renderer/data/hooks/session'
 import { markdownToBBCode } from '@renderer/lib/utils/markdown-bbcode'
 import { MarkdownReplyEditor } from '@renderer/modules/reply-composer/markdown-reply-editor'
-import { ReplyPreview } from '@renderer/modules/reply-composer/reply-preview'
 import { loginDialogAtom } from '@renderer/state/dialog/normal'
 import { useSetAtom } from 'jotai'
 import { Loader2, Save, Send } from 'lucide-react'
@@ -68,7 +67,19 @@ export function TopicEditor({
   }
 
   return (
-    <div className="mx-auto flex h-full min-h-0 max-w-5xl flex-col gap-5 px-10 py-8">
+    <div
+      className="mx-auto flex h-full min-h-0 max-w-5xl flex-col gap-5 px-10 py-8"
+      onKeyDown={(event) => {
+        if (
+          event.key === 'Enter' &&
+          (event.ctrlKey || event.metaKey) &&
+          !event.nativeEvent.isComposing
+        ) {
+          event.preventDefault()
+          void submit()
+        }
+      }}
+    >
       <header className="flex shrink-0 flex-col gap-3">
         <MyLink className="w-fit" to={sourceTo}>
           <Badge
@@ -96,37 +107,44 @@ export function TopicEditor({
         />
       </section>
 
-      <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 @4xl:grid-cols-2">
-        <section className="flex min-h-0 flex-col gap-2">
-          <h2 className="text-muted-foreground shrink-0 text-xs font-medium">预览</h2>
-          <ReplyPreview className="min-h-0 flex-1" value={draft} />
-        </section>
-        <section className="flex min-h-0 flex-col gap-2">
-          <h2 className="text-muted-foreground shrink-0 text-xs font-medium">编辑</h2>
-          <MarkdownReplyEditor
-            className="min-h-0 flex-1"
-            disabled={submitting}
-            value={draft}
-            onChange={setDraft}
-          />
-        </section>
-      </div>
-
-      <footer className="flex shrink-0 flex-row justify-end gap-2 border-t pt-4">
-        <Button disabled={submitting} variant="outline" onClick={onCancel}>
-          取消
-        </Button>
-        <Button disabled={submitting || session === undefined} onClick={submit}>
-          {submitting ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : action === 'create' ? (
-            <Send className="size-4" />
-          ) : (
-            <Save className="size-4" />
-          )}
-          {action === 'create' ? '发布' : '保存'}
-        </Button>
-      </footer>
+      <section className="flex min-h-0 flex-1 flex-col gap-2">
+        <h2 className="text-muted-foreground shrink-0 text-xs font-medium">内容</h2>
+        <MarkdownReplyEditor
+          className="bg-background min-h-0 flex-1 rounded-xl border"
+          disabled={submitting}
+          value={draft}
+          onChange={setDraft}
+          footerEnd={
+            <>
+              <Button
+                className="h-7 px-3 text-xs"
+                disabled={submitting}
+                onClick={onCancel}
+                size="sm"
+                variant="ghost"
+              >
+                取消
+              </Button>
+              <Button
+                className="h-7 gap-1.5 px-3 text-xs"
+                disabled={submitting || session === undefined}
+                onClick={() => void submit()}
+                size="sm"
+                title="Ctrl / ⌘ + Enter"
+              >
+                {submitting ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : action === 'create' ? (
+                  <Send className="size-3.5" />
+                ) : (
+                  <Save className="size-3.5" />
+                )}
+                {action === 'create' ? '发布' : '保存'}
+              </Button>
+            </>
+          }
+        />
+      </section>
     </div>
   )
 }

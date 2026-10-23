@@ -35,8 +35,9 @@
   color: var(--muted-foreground);
 }
 
+/* CodeMirror 基础主题聚焦时的选区规则（#d7d4f0）优先级较高，需要匹配同样的结构才能覆盖 */
 .reply-md-editor .cm-selectionBackground,
-.reply-md-editor .cm-focused .cm-selectionBackground {
+.reply-md-editor .cm-editor.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground {
   background-color: color-mix(in oklch, var(--primary) 22%, transparent);
 }
 
