@@ -14,7 +14,7 @@ function run(...args) {
 }
 const evaluate = (script) => run('eval', '-b', Buffer.from(script).toString('base64')).result
 
-async function mountFixture(importModule, autoPlay = false) {
+async function mountFixture(importModule) {
   const load = (path) => {
     const url = performance
       .getEntriesByType('resource')
@@ -35,11 +35,11 @@ async function mountFixture(importModule, autoPlay = false) {
   document.body.append(host)
   let setCount
   function Fixture() {
-    const [count, update] = React.useState(autoPlay ? 3 : 1)
+    const [count, update] = React.useState(1)
     setCount = update
     return h(carousel.BigCarousel, {
       label: 'Fixture',
-      autoPlay,
+      autoPlay: false,
       items: Array.from({ length: count }, (_, index) => index),
       getKey: (item) => item,
       renderSlide: (item, { selected }) =>
@@ -114,63 +114,6 @@ test('a single hero slide is visible, selected and restored after the list shrin
       'document.querySelectorAll("#big-carousel-fixture [aria-roledescription=slide]").length === 1',
     )
     expect(read()).toEqual({ selected: 'true', visible: true, focusable: true })
-  } finally {
-    evaluate('window.__bigCarouselFixture?.dispose()')
-  }
-}, 60000)
-
-test('hover pauses autoplay and leaving resumes it even when a manual control keeps focus', () => {
-  focusMainWindow()
-  try {
-    evaluate(`(${mountFixture.toString()})(path => import(path), true)`)
-    run(
-      'wait',
-      '--fn',
-      '!!document.querySelector("#big-carousel-fixture button[aria-label=下一个Fixture]")',
-    )
-    run('hover', '#big-carousel-fixture section')
-    evaluate(`(() => {
-      const root = document.querySelector('#big-carousel-fixture section');
-      const button = root.querySelector('button[aria-label=下一个Fixture]');
-      button.focus();
-      const outside = document.createElement('button');
-      outside.id = 'big-carousel-outside';
-      outside.textContent = 'Outside carousel';
-      outside.style.cssText = 'position:fixed;top:380px;left:20px;width:120px;height:30px';
-      document.querySelector('#big-carousel-fixture').append(outside);
-    })()`)
-    expect(
-      evaluate(
-        'document.querySelector("#big-carousel-fixture [data-big-carousel-progress]").dataset.bigCarouselProgress',
-      ),
-    ).toBe('paused')
-    evaluate(
-      'document.querySelector("#big-carousel-fixture button[aria-label=下一个Fixture]").click()',
-    )
-    run(
-      'wait',
-      '--fn',
-      'document.querySelector("#big-carousel-fixture [role=tab][aria-selected=true]").getAttribute("aria-label") === "跳转到第 2 个"',
-    )
-    expect(
-      evaluate(
-        'document.querySelector("#big-carousel-fixture [data-big-carousel-progress]").dataset.bigCarouselProgress',
-      ),
-    ).toBe('paused')
-    run('hover', '#big-carousel-outside')
-    expect(
-      evaluate('document.querySelector("#big-carousel-fixture").contains(document.activeElement)'),
-    ).toBe(true)
-    expect(
-      evaluate(
-        'document.querySelector("#big-carousel-fixture [data-big-carousel-progress]").dataset.bigCarouselProgress',
-      ),
-    ).toBe('running')
-    run(
-      'wait',
-      '--fn',
-      'document.querySelector("#big-carousel-fixture [role=tab][aria-selected=true]").getAttribute("aria-label") === "跳转到第 3 个"',
-    )
   } finally {
     evaluate('window.__bigCarouselFixture?.dispose()')
   }

@@ -28,6 +28,15 @@ Scope definitions:
 - `build`: build tooling, bundling, lint/typecheck, and CI-adjacent scripts.
 - `docs`: repository documentation and agent instructions.
 
+## Testing
+
+- Use Vitest for routine validation. For a scoped change, run `pnpm test:related <source-files...>` once after the edits are ready. Paths are relative to `app/bangumi`, even when running from the repository root; absolute paths also work.
+- Run a known regression directly with `pnpm test scripts/test/<name>.test.ts` (or `.test.tsx`); add `-t <name>` to select a case. `pnpm test:changed [base-ref]` selects tests affected by Git changes when explicit source paths are inconvenient.
+- Prefer one focused test run that covers the changed behavior. Rerun only after further code changes, a failure, or an unresolved concern. Do not repeat passing tests before committing.
+- Reserve the full `pnpm test` suite for an explicit request or changes with broad impact that cannot be covered by a focused selection. Do not automatically fall back to the full suite when `related` finds no tests; add or explicitly select the missing regression instead.
+- Test React state, events, and timers with React Testing Library in a `.test.tsx` file using `// @vitest-environment jsdom`. Use fake timers for delays and clean up mounted components after each test. Keep source imports statically discoverable by `related`.
+- Use Electron window tests only for behavior requiring real layout, browser animation, native integration, or end-to-end reproduction. Select the relevant test file; do not start an Electron window for ordinary component logic or a routine review.
+
 ## Electron CDP
 
 Development runs expose the Electron Chrome DevTools Protocol endpoint by default.

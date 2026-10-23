@@ -33,6 +33,8 @@
     "turnstile:dev": "pnpm --filter bangumi-private-api-turnstile-demo dev",
     "typecheck": "pnpm --filter bangumi-electron typecheck",
     "test": "pnpm --filter bangumi-electron test",
+    "test:related": "pnpm --filter bangumi-electron test:related",
+    "test:changed": "pnpm --filter bangumi-electron test:changed",
     "test:watch": "pnpm --filter bangumi-electron test:watch",
     "browser": "node app/bangumi/scripts/agent-browser.mjs"
   },

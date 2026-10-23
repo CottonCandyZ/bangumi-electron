@@ -51,6 +51,8 @@
     "db:migrate": "pnpm db:drizzle migrate",
     "test:collections": "node scripts/test.mjs run scripts/test/collection-",
     "test": "node scripts/test.mjs run",
+    "test:related": "node scripts/test.mjs related --run",
+    "test:changed": "node scripts/test.mjs run --changed",
     "test:watch": "node scripts/test.mjs"
   },
   "dependencies": {
@@ -105,6 +107,8 @@
     "@tanstack/eslint-plugin-query": "^5.51.1",
     "@tanstack/react-query": "^5.90.2",
     "@tanstack/react-query-persist-client": "^5.90.4",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^20.14.10",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
@@ -131,6 +135,7 @@
     "husky": "^9.1.6",
     "idb-keyval": "^6.2.1",
     "jotai": "^2.16.0",
+    "jsdom": "^27.4.0",
     "lint-staged": "^15.2.10",
     "lucide-react": "^0.544.0",
     "motion": "^12.42.2",

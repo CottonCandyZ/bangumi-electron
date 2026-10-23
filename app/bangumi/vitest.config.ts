@@ -2,6 +2,9 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
+  esbuild: {
+    jsx: 'automatic',
+  },
   resolve: {
     alias: Object.fromEntries(
       Object.entries({
@@ -14,7 +17,7 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: ['scripts/test/*.test.ts'],
+    include: ['scripts/test/*.test.{ts,tsx}'],
     pool: 'forks',
     maxWorkers: 1,
     fileParallelism: false,
