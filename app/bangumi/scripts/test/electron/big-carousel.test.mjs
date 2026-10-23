@@ -139,7 +139,11 @@ test('hover pauses autoplay and leaving resumes it even when a manual control ke
       outside.style.cssText = 'position:fixed;top:380px;left:20px;width:120px;height:30px';
       document.querySelector('#big-carousel-fixture').append(outside);
     })()`)
-    expect(evaluate('document.querySelectorAll("#big-carousel-fixture svg circle").length')).toBe(1)
+    expect(
+      evaluate(
+        'document.querySelector("#big-carousel-fixture [data-big-carousel-progress]").dataset.bigCarouselProgress',
+      ),
+    ).toBe('paused')
     evaluate(
       'document.querySelector("#big-carousel-fixture button[aria-label=下一个Fixture]").click()',
     )
@@ -148,12 +152,20 @@ test('hover pauses autoplay and leaving resumes it even when a manual control ke
       '--fn',
       'document.querySelector("#big-carousel-fixture [role=tab][aria-selected=true]").getAttribute("aria-label") === "跳转到第 2 个"',
     )
-    expect(evaluate('document.querySelectorAll("#big-carousel-fixture svg circle").length')).toBe(1)
+    expect(
+      evaluate(
+        'document.querySelector("#big-carousel-fixture [data-big-carousel-progress]").dataset.bigCarouselProgress',
+      ),
+    ).toBe('paused')
     run('hover', '#big-carousel-outside')
     expect(
       evaluate('document.querySelector("#big-carousel-fixture").contains(document.activeElement)'),
     ).toBe(true)
-    expect(evaluate('document.querySelectorAll("#big-carousel-fixture svg circle").length')).toBe(2)
+    expect(
+      evaluate(
+        'document.querySelector("#big-carousel-fixture [data-big-carousel-progress]").dataset.bigCarouselProgress',
+      ),
+    ).toBe('running')
     run(
       'wait',
       '--fn',

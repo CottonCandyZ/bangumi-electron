@@ -36,30 +36,21 @@ const SPRING = {
 } as const
 const AUTOPLAY_DELAY = 6000
 
-/** Fills once over the autoplay delay; while paused only the empty track shows. */
-function AutoplayCountdown({ running }: { running: boolean }) {
+/**
+ * Fills the selected indicator once over the autoplay delay. While paused the indicator is
+ * solid at once; resuming starts again from empty.
+ */
+function AutoplayProgress({ running }: { running: boolean }) {
   return (
-    <svg
-      aria-hidden
-      viewBox="0 0 20 20"
-      className="pointer-events-none absolute bottom-3 left-3 size-5 -rotate-90 rounded-full bg-black/30 backdrop-blur-sm"
-    >
-      <circle cx="10" cy="10" r="6.5" fill="none" strokeWidth="2.5" className="stroke-white/25" />
-      {running && (
-        <motion.circle
-          cx="10"
-          cy="10"
-          r="6.5"
-          fill="none"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          className="stroke-white/80"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: 1 }}
-          transition={{ duration: AUTOPLAY_DELAY / 1000, ease: 'linear' }}
-        />
-      )}
-    </svg>
+    <span aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
+      <motion.span
+        data-big-carousel-progress={running ? 'running' : 'paused'}
+        className="bg-foreground/80 absolute inset-0 origin-left"
+        initial={{ scaleX: running ? 0 : 1 }}
+        animate={{ scaleX: 1 }}
+        transition={running ? { duration: AUTOPLAY_DELAY / 1000, ease: 'linear' } : { duration: 0 }}
+      />
+    </span>
   )
 }
 /** Pointer travel (px) before a press counts as a drag and its click is swallowed. */
@@ -473,10 +464,6 @@ export function BigCarousel<T>({
                 >
                   {/* Slides stay mounted and only move, so their images never re-decode. */}
                   {renderSlide(item, { selected: isSelected })}
-                  {isSelected && autoPlay && count > 1 && (
-                    // A new key restarts the ring with the timer, after every move or pause.
-                    <AutoplayCountdown key={`${index}-${paused}`} running={!paused} />
-                  )}
                 </div>
               )
             })}
@@ -534,10 +521,15 @@ export function BigCarousel<T>({
                 // Extend the transparent hit area into the gap without changing the squeezing dots.
                 "relative h-1.5 rounded-full transition-all duration-300 before:absolute before:-inset-x-0.75 before:-inset-y-3 before:content-['']",
                 itemIndex === selected
-                  ? 'bg-foreground/70 w-6'
+                  ? 'bg-foreground/20 w-6'
                   : 'bg-foreground/15 hover:bg-foreground/30 w-1.5',
               )}
-            />
+            >
+              {itemIndex === selected && (
+                // A new key restarts the fill with the timer, after every move or pause.
+                <AutoplayProgress key={`${index}-${paused}`} running={!paused} />
+              )}
+            </button>
           ))}
         </div>
       )}
