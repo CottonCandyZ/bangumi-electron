@@ -194,8 +194,17 @@ export function BigCarousel<T>({
   // Every slide is positioned on its own, so a slide wrapping around keeps its node and images.
   useLayoutEffect(() => {
     const extra = big - small
-    const cache: { transform?: string; width?: string; expansion?: string; overshoot?: string }[] =
-      []
+    const cache: {
+      element: HTMLDivElement
+      caption: HTMLElement | null
+      info: HTMLElement | null
+      transform?: string
+      width?: string
+      captionOpacity?: string
+      infoOpacity?: string
+      infoTranslate?: string
+    }[] = []
+    let previousNearest: number | undefined
     const apply = (raw: number) => {
       // Past the target the spring's overshoot moves the whole strip rigidly: the bounce stays,
       // but card widths hold at the target so the next card never widens and flashes its info.
@@ -218,24 +227,39 @@ export function BigCarousel<T>({
         const next = {
           transform: `translate3d(${x}px, 0, 0)`,
           width: `${small + extra * expansion}px`,
-          expansion: expansion.toFixed(3),
-          // The overshoot the widths ignore, so content tied to expansion can carry on with the
-          // spring's momentum instead of stopping dead when the clamp kicks in.
-          overshoot: (expansion === 1 ? Math.abs(raw - value) : 0).toFixed(4),
+          captionOpacity: Math.max(0, 1 - expansion * 2).toFixed(3),
+          infoOpacity: Math.max(0, expansion * 2 - 1).toFixed(3),
+          // Text carries on with the spring after the card width reaches its target.
+          infoTranslate: `${((1 - expansion - (expansion === 1 ? Math.abs(raw - value) : 0)) * 40).toFixed(3)}% 0`,
         }
-        const previous = (cache[slot] ??= {})
+        let previous = cache[slot]
+        if (previous?.element !== slide) {
+          previous = cache[slot] = {
+            element: slide,
+            caption: slide.querySelector('[data-big-carousel-caption]'),
+            info: slide.querySelector('[data-big-carousel-info]'),
+          }
+        }
         if (previous.transform !== next.transform) slide.style.transform = next.transform
         if (previous.width !== next.width) slide.style.width = next.width
-        if (previous.expansion !== next.expansion) {
-          // Content can follow the expansion frame by frame instead of toggling on selection.
-          slide.style.setProperty('--big-carousel-expansion', next.expansion)
+        // Write only to the animated layers. Inherited custom properties on the slide made
+        // Chromium recalculate styles for the entire cover, backdrop and text subtree each frame.
+        if (previous.caption && previous.captionOpacity !== next.captionOpacity) {
+          previous.caption.style.opacity = next.captionOpacity
         }
-        if (previous.overshoot !== next.overshoot) {
-          slide.style.setProperty('--big-carousel-overshoot', next.overshoot)
+        if (previous.info && previous.infoOpacity !== next.infoOpacity) {
+          previous.info.style.opacity = next.infoOpacity
         }
-        cache[slot] = next
+        if (previous.info && previous.infoTranslate !== next.infoTranslate) {
+          previous.info.style.translate = next.infoTranslate
+        }
+        Object.assign(previous, next)
       })
-      setNearest(Math.round(value))
+      const nextNearest = Math.round(value)
+      if (previousNearest !== nextNearest) {
+        previousNearest = nextNearest
+        setNearest(nextNearest)
+      }
     }
     apply(position.get())
     return position.on('change', apply)

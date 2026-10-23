@@ -219,10 +219,10 @@ const HeroSlide = memo(function HeroSlide({
           />
         </ViewTransitionElement>
         <div
+          data-big-carousel-caption
           className="absolute inset-x-0 bottom-0 flex flex-col gap-0.5 bg-linear-to-t from-black/80 via-black/40 to-transparent px-3 pt-10 pb-3 text-white"
-          // Follows the carousel's per-frame expansion, gone by half-way, instead of fading on
-          // selection: fast switching flips selection every few frames and made the titles flicker.
-          style={{ opacity: 'max(0, 1 - var(--big-carousel-expansion, 0) * 2)' }}
+          // BigCarousel updates this layer's opacity directly before paint.
+          style={{ opacity: 1 }}
         >
           <span className="line-clamp-2 text-sm leading-snug font-semibold">{title}</span>
           {subject.rating.score > 0 && (
@@ -235,16 +235,14 @@ const HeroSlide = memo(function HeroSlide({
       </div>
 
       <div
+        data-big-carousel-info
         className={cn(
           'flex h-full w-(--big-carousel-info) shrink-0 transform-gpu flex-col justify-end gap-2 p-[clamp(1rem,2.5cqi,1.75rem)] text-white',
         )}
-        // Parallax on the carousel's per-frame expansion: the text trails in from the right faster
-        // than the card moves, and fades in over the second half so it never shows half-clipped.
-        // The overshoot continues the same motion past the end, so the text settles with the spring.
+        // BigCarousel drives the same parallax and fade directly on this composited layer.
         style={{
-          translate:
-            'calc((1 - var(--big-carousel-expansion, 0) - var(--big-carousel-overshoot, 0)) * 40%) 0',
-          opacity: 'max(0, var(--big-carousel-expansion, 0) * 2 - 1)',
+          translate: '40% 0',
+          opacity: 0,
         }}
       >
         <div className="flex items-center gap-2 text-xs font-medium">
