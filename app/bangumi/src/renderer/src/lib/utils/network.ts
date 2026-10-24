@@ -7,6 +7,26 @@ export class OfflineResourceError extends Error {
   }
 }
 
+/** Cancellation can cross fetch and Electron IPC boundaries before reaching Query. */
+export function isRequestCancelledError(error: unknown) {
+  const seen = new Set<unknown>()
+  let current = error
+  while (current && typeof current === 'object' && !seen.has(current)) {
+    seen.add(current)
+    const failure = current as { name?: unknown; message?: unknown; cause?: unknown }
+    if (failure.name === 'AbortError') return true
+    if (
+      typeof failure.message === 'string' &&
+      /\bAbortError:\s|(?:^|:\s)(?:signal is aborted without reason|this operation was aborted|the operation was aborted|the user aborted a request)\.?$/i.test(
+        failure.message,
+      )
+    )
+      return true
+    current = failure.cause
+  }
+  return false
+}
+
 export function isNetworkUnavailableError(error: unknown) {
   if (error instanceof OfflineResourceError) return true
   if (error instanceof FetchError) return !error.response && !error.statusCode

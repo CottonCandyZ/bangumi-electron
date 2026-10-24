@@ -37,7 +37,6 @@ import { useSetAtom } from 'jotai'
 import { deleteLoginAccountDialogAtom } from '@renderer/state/dialog/alert'
 import { client } from '@renderer/lib/client'
 import { deleteLoginInfo } from '@renderer/data/fetch/db/user'
-import { cleanAccessTokenCache } from '@renderer/data/fetch/session'
 import { store } from '@renderer/state/utils'
 import { authRequiredUserIdAtom, userIdAtom } from '@renderer/state/session'
 import { useBangumiWebVerification } from '@renderer/data/hooks/web-verification'
@@ -111,7 +110,6 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
     await getOAuthAccessToken()
     toast.loading(STEP_MESSAGE.GET_AUTH_SECRET_SUCCESS, { id: toastId.current })
     const user_id = await save()
-    cleanAccessTokenCache()
     store.set(authRequiredUserIdAtom, null)
     store.set(userIdAtom, user_id.toString())
     await queryClient.invalidateQueries({ queryKey: ['userSession'] })

@@ -13,6 +13,7 @@ import { domParser } from '@renderer/lib/utils/parser'
 import { LoginInfo, Token } from '@renderer/data/types/login'
 import { MakeOptional } from '@shared/utils/type'
 import { client } from '@renderer/lib/client'
+import { cleanAccessTokenCache } from '@renderer/data/fetch/session'
 
 // 所以这里就是用 web 登录网页啦，非常感谢下面链接里前人的工作给与的参考！
 
@@ -213,6 +214,7 @@ export async function getOAuthAccessToken() {
  */
 export async function save() {
   if (!store.accessToken) throw new LoginError('尚未获得 accessToken')
+  cleanAccessTokenCache()
   await insertAccessToken(store.accessToken)
   if (!store.loginInfo || !store.loginInfo.id) throw new LoginError('尚未获得账户密码')
   const info = store.loginInfo as LoginInfo
@@ -229,9 +231,11 @@ export async function save() {
 export async function refreshToken({
   refresh_token,
   user_id,
+  beforeSave,
 }: {
   refresh_token: string
   user_id: number
+  beforeSave?: () => void
 }) {
   const token = await oauthFetch<Omit<Token, 'user_id'>>(LOGIN.OAUTH_ACCESS_TOKEN_URL, {
     method: 'post',
@@ -247,6 +251,7 @@ export async function refreshToken({
     }),
   })
   if (!token) throw new LoginError('刷新 Token 失败')
+  beforeSave?.()
   await insertAccessToken({ ...token, user_id })
   return { ...token, user_id }
 }

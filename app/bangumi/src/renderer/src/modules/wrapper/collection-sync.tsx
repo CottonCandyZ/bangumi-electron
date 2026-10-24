@@ -22,7 +22,7 @@ export function CollectionSyncProvider() {
     void expireInvalidSession()
       .then((expired) => {
         if (!expired) return
-        toast.error('登录已过期，已退出登录，本地收藏已保留', {
+        toast.error('登录已过期，请重新登录', {
           id: 'session-expired',
           action: {
             label: '登录',
@@ -32,7 +32,7 @@ export function CollectionSyncProvider() {
         })
       })
       .catch(() => {
-        toast.error('登录已过期，退出清理未完成，请重新登录', {
+        toast.error('登录已过期，请重新登录', {
           id: 'session-expired',
           action: { label: '登录', onClick: () => store.set(loginDialogAtom, { open: true }) },
         })

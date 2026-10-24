@@ -2,6 +2,8 @@ import { AuthorizationHeader } from '@renderer/data/fetch/config/path'
 import {
   getAccessToken,
   safeRecoverAccessTokenAfterUnauthorized,
+  getSessionVersion,
+  assertSessionCurrent,
 } from '@renderer/data/fetch/session'
 import {
   assertWebVerificationNotRequired,
@@ -144,21 +146,28 @@ async function retryAfterTokenRecovery<T>(
   options: JsonFetchOptions | undefined,
   fetcher: typeof apiFetch,
 ) {
+  const version = getSessionVersion()
   try {
-    return await fetcher<T>(request, options)
+    const result = await fetcher<T>(request, options)
+    assertSessionCurrent(version)
+    return result
   } catch (error) {
+    assertSessionCurrent(version)
     options?.signal?.throwIfAborted()
     if (!(error instanceof FetchError) || error.statusCode !== 401) {
       throw error
     }
 
     const recovered = await handleUnauthorizedResponse()
+    assertSessionCurrent(version)
     options?.signal?.throwIfAborted()
     if (!recovered) {
       throw error
     }
 
-    return await fetcher<T>(request, options)
+    const result = await fetcher<T>(request, options)
+    assertSessionCurrent(version)
+    return result
   }
 }
 

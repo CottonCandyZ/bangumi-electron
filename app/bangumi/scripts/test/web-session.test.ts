@@ -11,6 +11,7 @@ import * as webAccess from '../../src/renderer/src/data/fetch/config/web-access'
 import * as config from '../../src/renderer/src/data/fetch/config'
 import * as session from '../../src/renderer/src/data/fetch/session'
 import * as login from '../../src/renderer/src/data/fetch/web/login'
+import { AuthError } from '../../src/renderer/src/lib/utils/error'
 
 const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),
@@ -360,12 +361,14 @@ test('passive CF scripts and ordinary missing OAuth form hashes never open verif
 })
 
 test.each([400, 401, 403])(
-  'rejected token refresh (%s) never opens login or clears the account',
+  'rejected token refresh (%s) only schedules logout for confirmed expiration',
   async (status) => {
     fixture(status)
     const results = await Promise.allSettled([session.getAccessToken(), session.getAccessToken()])
     expect(results.every((result) => result.status === 'rejected')).toBe(true)
-    await expect(session.getAccessToken()).rejects.toBeInstanceOf(FetchError)
+    await expect(session.getAccessToken()).rejects.toBeInstanceOf(
+      status === 400 ? AuthError : FetchError,
+    )
     expect(store.get(loginDialogAtom).open).toBe(false)
     expect(store.get(userIdAtom)).toBe('1')
     expect(store.get(sessionNeedsLoginAtom)).toBe(status === 400)
@@ -373,7 +376,7 @@ test.each([400, 401, 403])(
   },
 )
 
-test('API 401 with failed recovery propagates without opening login', async () => {
+test('API 401 with confirmed refresh rejection becomes a session error without opening login', async () => {
   const f = fixture(400)
   mocks.readAccessToken.mockResolvedValue({
     ...f.expiredToken,
@@ -383,9 +386,10 @@ test('API 401 with failed recovery propagates without opening login', async () =
   mocks.fetch.mockImplementation(async (input: RequestInfo | URL) =>
     Response.json({}, { status: String(input).endsWith('/oauth/access_token') ? 400 : 401 }),
   )
-  await expect(config.apiFetchWithAuth('/v0/me')).rejects.toBeInstanceOf(FetchError)
+  await expect(config.apiFetchWithAuth('/v0/me')).rejects.toBeInstanceOf(AuthError)
   expect(store.get(loginDialogAtom).open).toBe(false)
   expect(store.get(userIdAtom)).toBe('1')
+  expect(store.get(sessionNeedsLoginAtom)).toBe(true)
 })
 
 test('network refresh failure does not mark the saved account as expired', async () => {
@@ -395,9 +399,9 @@ test('network refresh failure does not mark the saved account as expired', async
 })
 
 test('successful token recovery clears the re-login marker', async () => {
-  fixture()
+  const f = fixture()
   store.set(authRequiredUserIdAtom, '1')
-  await session.getAccessToken()
+  await session.safeRefreshToken(f.expiredToken)
   expect(store.get(sessionNeedsLoginAtom)).toBe(false)
 })
 
@@ -410,7 +414,7 @@ test('a refresh failure for an old account cannot mark the active account expire
 
 test('confirmed online expiration signs out once without opening a dialog', async () => {
   fixture(400)
-  await expect(session.getAccessToken()).rejects.toBeInstanceOf(FetchError)
+  await expect(session.getAccessToken()).rejects.toBeInstanceOf(AuthError)
   const results = await Promise.all([
     session.expireInvalidSession(),
     session.expireInvalidSession(),
@@ -436,6 +440,165 @@ test('OAuth client configuration errors do not sign the user out', async () => {
     Response.json({ error: 'invalid_client' }, { status: 400 }),
   )
   await expect(session.getAccessToken()).rejects.toBeInstanceOf(FetchError)
+  expect(await session.expireInvalidSession()).toBe(false)
+  expect(store.get(userIdAtom)).toBe('1')
+})
+
+test('confirmed expiration blocks later refresh attempts until the logout completes', async () => {
+  const f = fixture(400)
+  await expect(session.getAccessToken()).rejects.toBeInstanceOf(AuthError)
+  const results = await Promise.allSettled(
+    Array.from({ length: 4 }, () => session.getAccessToken()),
+  )
+  expect(
+    results.every((result) => result.status === 'rejected' && result.reason instanceof AuthError),
+  ).toBe(true)
+  expect(f.requests).toHaveLength(1)
+  expect(await session.expireInvalidSession()).toBe(true)
+  expect(await session.getAccessToken()).toBeNull()
+  expect(f.requests).toHaveLength(1)
+})
+
+test.each([
+  { error: 'invalid_request', error_description: 'Invalid refresh token' },
+  { error: 'invalid_refresh_token' },
+])('legacy OAuth rejection %j schedules one logout without a raw 400 error', async (body) => {
+  fixture()
+  mocks.fetch.mockImplementation(async () => Response.json(body, { status: 400 }))
+  await expect(session.getAccessToken()).rejects.toBeInstanceOf(AuthError)
+  expect(store.get(sessionNeedsLoginAtom)).toBe(true)
+  expect(await session.expireInvalidSession()).toBe(true)
+  expect(store.get(userIdAtom)).toBeNull()
+  expect(mocks.fetch).toHaveBeenCalledTimes(1)
+})
+
+test.each([400, 401])(
+  'ambiguous refresh 400 only expires after token_status rejects it (%s)',
+  async (status) => {
+    const f = fixture()
+    mocks.fetch.mockImplementation(async (input) =>
+      Response.json(
+        String(input).endsWith('/oauth/token_status') ? { error: 'invalid_token' } : {},
+        { status: String(input).endsWith('/oauth/token_status') ? status : 400 },
+      ),
+    )
+    await expect(session.getAccessToken()).rejects.toBeInstanceOf(AuthError)
+    expect(store.get(sessionNeedsLoginAtom)).toBe(true)
+    expect(mocks.fetch).toHaveBeenLastCalledWith(
+      'https://bgm.tv/oauth/token_status',
+      expect.objectContaining({ retry: 0 }),
+    )
+    expect(f.saved).toHaveLength(0)
+  },
+)
+
+test.each(['valid', 'network', 'challenge'] as const)(
+  'ambiguous refresh 400 keeps the account when token status is %s',
+  async (status) => {
+    fixture()
+    mocks.fetch.mockImplementation(async (input) => {
+      if (!String(input).endsWith('/oauth/token_status')) return Response.json({}, { status: 400 })
+      if (status === 'network') throw new TypeError('Failed to fetch')
+      if (status === 'challenge') return challenge()
+      return Response.json({ user_id: 1 })
+    })
+    await expect(session.getAccessToken()).rejects.toBeInstanceOf(FetchError)
+    expect(store.get(sessionNeedsLoginAtom)).toBe(false)
+    expect(await session.expireInvalidSession()).toBe(false)
+    expect(store.get(userIdAtom)).toBe('1')
+    expect(mocks.fetch).toHaveBeenCalledTimes(2)
+  },
+)
+
+test('another window replacing a rejected refresh token recovers without signing out', async () => {
+  const f = fixture(400)
+  const latest = {
+    ...f.expiredToken,
+    access_token: 'other-window-token',
+    refresh_token: 'other-window-refresh',
+    create_time: new Date(),
+    expires_in: 3600,
+  }
+  mocks.readAccessToken.mockResolvedValueOnce(f.expiredToken).mockResolvedValue(latest)
+  await expect(session.getAccessToken()).resolves.toBe(latest)
+  expect(store.get(sessionNeedsLoginAtom)).toBe(false)
+  expect(mocks.insertAccessToken).not.toHaveBeenCalled()
+  expect(f.requests).toHaveLength(1)
+  await expect(session.getAccessToken()).resolves.toBe(latest)
+})
+
+test.each([200, 400])(
+  'an old refresh response (%s) after a fresh login cannot overwrite or expire it',
+  async (status) => {
+    fixture()
+    let respond!: (response: Response) => void
+    mocks.fetch.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          respond = resolve
+        }),
+    )
+    const pending = session.getAccessToken()
+    const cancelled = expect(pending).rejects.toMatchObject({ name: 'AbortError' })
+    await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalledTimes(1))
+    // Successful login rotates this session even if the same user stays selected.
+    session.cleanAccessTokenCache()
+    respond(
+      Response.json(
+        status === 400
+          ? { error: 'invalid_grant' }
+          : { access_token: 'obsolete', refresh_token: 'obsolete', expires_in: 3600 },
+        { status },
+      ),
+    )
+    await cancelled
+    expect(mocks.insertAccessToken).not.toHaveBeenCalled()
+    expect(store.get(sessionNeedsLoginAtom)).toBe(false)
+    expect(store.get(userIdAtom)).toBe('1')
+  },
+)
+
+test.each([200, 401])(
+  'an old API response (%s) cannot retry with the newly selected account',
+  async (status) => {
+    const f = fixture()
+    mocks.readAccessToken.mockResolvedValue({
+      ...f.expiredToken,
+      create_time: new Date(),
+      expires_in: 3600,
+    })
+    let respond!: (response: Response) => void
+    mocks.fetch.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          respond = resolve
+        }),
+    )
+    const pending = config.apiFetchWithOptionalAuth('/v0/me')
+    const cancelled = expect(pending).rejects.toMatchObject({ name: 'AbortError' })
+    await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalledTimes(1))
+    store.set(userIdAtom, '2')
+    respond(Response.json({ id: 1 }, { status }))
+    await cancelled
+    expect(mocks.fetch).toHaveBeenCalledTimes(1)
+    expect(store.get(userIdAtom)).toBe('2')
+    expect(store.get(sessionNeedsLoginAtom)).toBe(false)
+  },
+)
+
+test('a normal API parameter 400 never refreshes or expires the account', async () => {
+  const f = fixture()
+  mocks.readAccessToken.mockResolvedValue({
+    ...f.expiredToken,
+    create_time: new Date(),
+    expires_in: 3600,
+  })
+  mocks.fetch.mockImplementation(async () =>
+    Response.json({ error: 'invalid parameters' }, { status: 400 }),
+  )
+  await expect(config.apiFetchWithAuth('/v0/me')).rejects.toBeInstanceOf(FetchError)
+  expect(mocks.fetch).toHaveBeenCalledTimes(1)
+  expect(store.get(sessionNeedsLoginAtom)).toBe(false)
   expect(await session.expireInvalidSession()).toBe(false)
   expect(store.get(userIdAtom)).toBe('1')
 })

@@ -8,7 +8,12 @@ import {
 } from '@tanstack/react-query-persist-client'
 import { createStore } from 'idb-keyval'
 import { toast } from 'sonner'
-import { CollectionPendingError, isNetworkUnavailableError } from '@renderer/lib/utils/network'
+import { FetchError } from 'ofetch'
+import {
+  CollectionPendingError,
+  isNetworkUnavailableError,
+  isRequestCancelledError,
+} from '@renderer/lib/utils/network'
 
 const persister = experimental_createQueryPersister<PersistedQuery>({
   storage: newIdbStorage(createStore('cache', 'query_persister')),
@@ -22,6 +27,14 @@ export const queryClient = new QueryClient({
     onError: (error, query) => {
       // Blob URLs and one-time login challenges must never reuse a failed cached image.
       if (query.queryKey[0] === 'captcha' || error instanceof CollectionPendingError) return
+      if (isRequestCancelledError(error)) {
+        if (query.state.data !== undefined) {
+          queryClient.setQueryData(query.queryKey, query.state.data, {
+            updatedAt: query.state.dataUpdatedAt,
+          })
+        }
+        return
+      }
       if (isNetworkUnavailableError(error)) {
         if (query.state.data !== undefined) {
           queryClient.setQueryData(query.queryKey, query.state.data, {
@@ -51,10 +64,7 @@ export const queryClient = new QueryClient({
       }
 
       // Check if this is a 401 error from ofetch
-      const isAuthError =
-        error instanceof Error &&
-        error.message.includes('401') &&
-        error.message.includes('UNAUTHORIZED')
+      const isAuthError = error instanceof FetchError && error.statusCode === 401
 
       if (isAuthError) {
         // Background auth failures stay in the query state, without opening login UI.
@@ -71,7 +81,7 @@ export const queryClient = new QueryClient({
 
       // For other errors, show a toast if we already have data
       if (query.state.data !== undefined) {
-        toast.error(error.message)
+        toast.error(error.message, { id: `query-error:${error.message}` })
       }
     },
   }),
