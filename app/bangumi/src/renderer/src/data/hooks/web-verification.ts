@@ -2,32 +2,38 @@ import {
   isWebVerificationRequired,
   subscribeWebVerificationRequired,
 } from '@renderer/data/fetch/config/web-access'
-import { parseTopListFromHTML } from '@renderer/data/transformer/web'
 import type { SectionPath, TopList } from '@renderer/data/types/web'
-import { client } from '@renderer/lib/client'
 import { useIsMutating, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useCallback, useSyncExternalStore } from 'react'
 import { toast } from 'sonner'
 import { restoreQueriesAfterWebVerification } from './web-verification-cache'
+import { requestWebVerification } from '../fetch/config/web-verification'
 
 const pendingVerifications = new WeakMap<QueryClient, Promise<void>>()
 
-function verifyAndRestore(queryClient: QueryClient, sectionPath: SectionPath, subjectId?: number) {
+function verifyAndRestore(
+  queryClient: QueryClient,
+  sectionPath: SectionPath,
+  subjectId?: number,
+  url?: string,
+) {
   const pending = pendingVerifications.get(queryClient)
   if (pending) return pending
   const request = (async () => {
-    const pages = await client.requestBangumiWebVerification({ sectionPath, subjectId })
+    const pages = await requestWebVerification({ sectionPath, subjectId, url })
     const lists: Partial<Record<SectionPath, TopList[]>> = {}
-    for (const section of ['anime', 'book', 'music', 'game', 'real'] as const) {
-      const html = pages[section]
-      if (html) lists[section] = parseTopListFromHTML(html)
+    if (Object.keys(pages).length) {
+      const { parseTopListFromHTML } = await import('@renderer/data/transformer/web')
+      for (const section of ['anime', 'book', 'music', 'game', 'real'] as const) {
+        const html = pages[section]
+        if (html) lists[section] = parseTopListFromHTML(html)
+      }
     }
+    const { client } = await import('@renderer/lib/client')
     await client.collectionWebVerificationComplete({})
     await restoreQueriesAfterWebVerification(queryClient, lists)
     if (!isWebVerificationRequired())
-      toast.success(
-        subjectId ? '网页验证完成，已继续同步取消收藏' : '网页验证完成，已恢复各分类刷新',
-      )
+      toast.success(subjectId ? '网页验证完成，已继续同步取消收藏' : '网页验证完成')
   })().finally(() => pendingVerifications.delete(queryClient))
   pendingVerifications.set(queryClient, request)
   return request
@@ -41,13 +47,17 @@ export function useWebVerificationRequired() {
   )
 }
 
-export function useBangumiWebVerification(sectionPath: SectionPath = 'anime', subjectId?: number) {
+export function useBangumiWebVerification(
+  sectionPath: SectionPath = 'anime',
+  subjectId?: number,
+  url?: string,
+) {
   const queryClient = useQueryClient()
   const pending = useIsMutating({ mutationKey: ['bangumi-web-verification'] }) > 0
 
   const mutation = useMutation({
     mutationKey: ['bangumi-web-verification'],
-    mutationFn: () => verifyAndRestore(queryClient, sectionPath, subjectId),
+    mutationFn: () => verifyAndRestore(queryClient, sectionPath, subjectId, url),
     onError: (error) => {
       const message = error instanceof Error ? error.message : '网页验证失败'
       if (message.includes('已取消')) return

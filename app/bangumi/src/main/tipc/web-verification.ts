@@ -1,43 +1,61 @@
 import { getIconPath } from '@main/helper'
 import { t } from '@main/tipc/_init'
 import { BrowserWindow } from 'electron'
+import {
+  getWebVerificationUrl,
+  isCloudflareChallenge,
+  type BangumiSectionPath,
+  type VerifiedPages,
+  type WebVerificationInput,
+} from '@shared/web-verification'
 
 const VERIFICATION_TIMEOUT_MS = 5 * 60 * 1000
-
-type BangumiSectionPath = 'anime' | 'book' | 'music' | 'game' | 'real'
-type VerifiedPages = Partial<Record<BangumiSectionPath, string>>
 
 let verificationWindow: BrowserWindow | null = null
 let verificationPromise: Promise<VerifiedPages> | null = null
 
 export const webVerificationIPC = {
   requestBangumiWebVerification: t.procedure
-    .input<{ sectionPath?: BangumiSectionPath; subjectId?: number }>()
+    .input<WebVerificationInput>()
     .action(async ({ input }) => {
       if (
         input.subjectId !== undefined &&
         (!Number.isSafeInteger(input.subjectId) || input.subjectId <= 0)
       )
         throw new Error('无效的条目 ID')
-      return await requestBangumiWebVerification(input.sectionPath ?? 'anime', input.subjectId)
+      const sectionPath = input.sectionPath ?? 'anime'
+      if (!['anime', 'book', 'music', 'game', 'real'].includes(sectionPath))
+        throw new Error('无效的分类')
+      const url = input.url === undefined ? undefined : getWebVerificationUrl(input.url)
+      return await requestBangumiWebVerification(sectionPath, input.subjectId, url)
     }),
 }
 
-function requestBangumiWebVerification(sectionPath: BangumiSectionPath, subjectId?: number) {
+function requestBangumiWebVerification(
+  sectionPath: BangumiSectionPath,
+  subjectId?: number,
+  url?: string,
+) {
   if (verificationPromise) {
     verificationWindow?.show()
     verificationWindow?.focus()
     return verificationPromise
   }
 
-  verificationPromise = createBangumiWebVerificationWindow(sectionPath, subjectId).finally(() => {
-    verificationPromise = null
-    verificationWindow = null
-  })
+  verificationPromise = createBangumiWebVerificationWindow(sectionPath, subjectId, url).finally(
+    () => {
+      verificationPromise = null
+      verificationWindow = null
+    },
+  )
   return verificationPromise
 }
 
-function createBangumiWebVerificationWindow(sectionPath: BangumiSectionPath, subjectId?: number) {
+function createBangumiWebVerificationWindow(
+  sectionPath: BangumiSectionPath,
+  subjectId?: number,
+  verificationUrl?: string,
+) {
   return new Promise<VerifiedPages>((resolve, reject) => {
     const parent = BrowserWindow.getFocusedWindow() ?? undefined
     const window = new BrowserWindow({
@@ -77,15 +95,24 @@ function createBangumiWebVerificationWindow(sectionPath: BangumiSectionPath, sub
     window.webContents.on('did-finish-load', () => {
       void window.webContents
         .executeJavaScript(
-          subjectId
-            ? "document.querySelector('#headerSubject') ? document.documentElement.outerHTML : null"
-            : "document.querySelector('.subjectCover.cover.ll') ? document.documentElement.outerHTML : null",
+          verificationUrl
+            ? "document.querySelector('#headerNeue2, #header') ? document.documentElement.outerHTML : null"
+            : subjectId
+              ? "document.querySelector('#headerSubject') ? document.documentElement.outerHTML : null"
+              : "document.querySelector('.subjectCover.cover.ll') ? document.documentElement.outerHTML : null",
           true,
         )
         .then(async (html: string | null) => {
           if (!html || collecting || settled) return
+          if (
+            await isCloudflareChallenge({
+              headers: new Headers({ 'content-type': 'text/html' }),
+              _data: html,
+            })
+          )
+            return
           collecting = true
-          if (subjectId) {
+          if (verificationUrl || subjectId) {
             finish()
             return
           }
@@ -128,9 +155,11 @@ function createBangumiWebVerificationWindow(sectionPath: BangumiSectionPath, sub
     window.once('closed', () => {
       finish(new Error('Bangumi 网页验证已取消。'))
     })
-    const url = subjectId
-      ? `https://bgm.tv/subject/${subjectId}`
-      : `https://bgm.tv/${sectionPath}/browser/?sort=trends`
+    const url =
+      verificationUrl ??
+      (subjectId
+        ? `https://bgm.tv/subject/${subjectId}`
+        : `https://bgm.tv/${sectionPath}/browser/?sort=trends`)
     window.loadURL(url).catch((error: unknown) => {
       finish(error instanceof Error ? error : new Error('无法打开 Bangumi 网页验证。'))
     })

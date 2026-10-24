@@ -10,7 +10,20 @@ import {
   markWebVerificationRequired,
   WebVerificationRequiredError,
 } from '@renderer/data/fetch/config/web-access'
-import { FetchError, FetchOptions, ofetch } from 'ofetch'
+import { getWebVerificationUrl } from '@shared/web-verification'
+import {
+  getPendingWebVerification,
+  getWebVerificationAttempt,
+  requestWebVerification,
+  waitForWebVerification,
+} from './web-verification'
+import {
+  FetchError,
+  ofetch,
+  type FetchContext,
+  type FetchOptions,
+  type FetchResponse,
+} from 'ofetch'
 
 type JsonFetchOptions = FetchOptions<'json'>
 
@@ -43,38 +56,71 @@ export const APP_SECRET = import.meta.env.VITE_APP_SECRET
 /** OAuth 的 Redirect 地址 */
 export const URL_OAUTH_REDIRECT = `${HOST}/dev/app`
 
-/** ofetch web config */
-const requestVerificationEpochs = new WeakMap<object, number>()
-export const webFetch = ofetch.create({
-  baseURL: HOST,
-  credentials: 'include',
-  onRequest({ options }) {
-    assertWebVerificationNotRequired()
-    requestVerificationEpochs.set(options, getWebVerificationEpoch())
-  },
-  async onResponseError({ response, options }) {
-    if (response.status !== 403 || !(await isCloudflareChallenge(response))) return
-    markWebVerificationRequired(requestVerificationEpochs.get(options))
-    throw new WebVerificationRequiredError()
-  },
-})
+type WebResponseContext = FetchContext & { response: FetchResponse<unknown> }
+
+function createWebFetch(session = false) {
+  const requests = new WeakMap<object, { epoch: number; attempt: number }>()
+  const verificationUrl = (request: WebResponseContext['request']) =>
+    getWebVerificationUrl(typeof request === 'string' ? request : request.url)
+  const rejectChallenge = async ({ request, response, options }: WebResponseContext) => {
+    if (!(await isCloudflareChallenge(response))) return
+    markWebVerificationRequired(requests.get(options)?.epoch)
+    throw new WebVerificationRequiredError(verificationUrl(request))
+  }
+  const fetcher = ofetch.create({
+    baseURL: HOST,
+    credentials: 'include',
+    async onRequest({ request, options }) {
+      options.signal?.throwIfAborted()
+      const pending = getPendingWebVerification()
+      if (pending) {
+        try {
+          await waitForWebVerification(pending, options.signal)
+        } catch {
+          options.signal?.throwIfAborted()
+          throw new WebVerificationRequiredError(verificationUrl(request))
+        }
+      }
+      if (!session) assertWebVerificationNotRequired(verificationUrl(request))
+      requests.set(options, {
+        epoch: getWebVerificationEpoch(),
+        attempt: getWebVerificationAttempt(),
+      })
+    },
+    async onResponse(context) {
+      if (!(await isCloudflareChallenge(context.response))) return
+      const { request, options } = context
+      const previous = requests.get(options)!
+      const url = verificationUrl(request)
+      options.signal?.throwIfAborted()
+      markWebVerificationRequired(previous.epoch)
+      if (previous.epoch === getWebVerificationEpoch()) {
+        // A late response after cancellation must not reopen the dismissed window.
+        if (previous.attempt !== getWebVerificationAttempt() && !getPendingWebVerification())
+          throw new WebVerificationRequiredError(url)
+        try {
+          await waitForWebVerification(requestWebVerification({ url }), options.signal)
+        } catch {
+          options.signal?.throwIfAborted()
+          throw new WebVerificationRequiredError(url)
+        }
+      }
+      options.signal?.throwIfAborted()
+      // Retry only a confirmed challenge, once, preserving POST bodies and raw metadata.
+      context.response = await fetcher.raw(request, { ...options, onResponse: rejectChallenge })
+    },
+  })
+  return fetcher
+}
+
+/** All webpage reads and actions recover through the same verification window. */
+export const webFetch = createWebFetch()
 
 /** OAuth JSON endpoints must remain reachable while webpage verification is pending. */
 export const oauthFetch = ofetch.create({ baseURL: HOST, credentials: 'include' })
 
 /** Login must be able to recover independently of a previously blocked trends request. */
-export const sessionFetch = ofetch.create({
-  baseURL: HOST,
-  credentials: 'include',
-  onRequest({ options }) {
-    requestVerificationEpochs.set(options, getWebVerificationEpoch())
-  },
-  async onResponseError({ response, options }) {
-    if (response.status !== 403 || !(await isCloudflareChallenge(response))) return
-    markWebVerificationRequired(requestVerificationEpochs.get(options))
-    throw new WebVerificationRequiredError()
-  },
-})
+export const sessionFetch = createWebFetch(true)
 
 /** ofetch api config  */
 export const apiFetch = ofetch.create({ baseURL: API_HOST, credentials: 'omit' })

@@ -18,6 +18,8 @@ const mocks = vi.hoisted(() => ({
   insertAccessToken: vi.fn(),
   removeCookie: vi.fn(),
   collectionActivate: vi.fn(),
+  verify: vi.fn(),
+  parseHTML: vi.fn(),
 }))
 vi.mock('ofetch', async (importOriginal) => {
   const actual = await importOriginal<typeof import('ofetch')>()
@@ -29,12 +31,17 @@ vi.mock('@renderer/data/fetch/db/user', () => ({
   insertLoginInfo: vi.fn(),
 }))
 vi.mock('@renderer/lib/client', () => ({
-  client: { removeCookie: mocks.removeCookie, collectionActivate: mocks.collectionActivate },
+  client: {
+    removeCookie: mocks.removeCookie,
+    collectionActivate: mocks.collectionActivate,
+    requestBangumiWebVerification: mocks.verify,
+  },
 }))
-vi.mock('@renderer/lib/utils/parser', () => ({ domParser: {} }))
+vi.mock('@renderer/lib/utils/parser', () => ({ domParser: { parseFromString: mocks.parseHTML } }))
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mocks.verify.mockRejectedValue(new Error('Bangumi 网页验证已取消。'))
   store.set(userIdAtom, '1')
   store.set(authRequiredUserIdAtom, null)
   store.set(loginDialogAtom, { open: false })
@@ -189,6 +196,167 @@ test('challenge HTML without exposed headers is recognized for text and captcha 
   )
   webAccess.markWebVerificationComplete()
   await expect(login.getCaptcha()).rejects.toThrow(webAccess.WebVerificationRequiredError)
+})
+
+const challengeHTML = '<script>window._cf_chl_opt = {}</script>'
+function challenge(status = 403) {
+  return new Response(challengeHTML, { status, headers: { 'content-type': 'text/html' } })
+}
+
+test.each([200, 403, 503])(
+  'OAuth form challenge (%s) opens verification and resumes before parsing the hash',
+  async (status) => {
+    fixture()
+    const form = '<input name="formhash" value="oauth-hash">'
+    mocks.fetch.mockResolvedValueOnce(challenge(status)).mockResolvedValueOnce(new Response(form))
+    mocks.verify.mockResolvedValue({})
+    mocks.parseHTML.mockImplementation((html: string) => ({
+      querySelector: () => (html === form ? { getAttribute: () => 'oauth-hash' } : null),
+    }))
+    await expect(login.getOAuthFormHash()).resolves.toBeUndefined()
+    expect(mocks.parseHTML).toHaveBeenCalledExactlyOnceWith(form, 'text/html')
+    expect(mocks.verify).toHaveBeenCalledExactlyOnceWith({
+      url: expect.stringContaining('https://bgm.tv/oauth/authorize?'),
+    })
+    expect(mocks.fetch).toHaveBeenCalledTimes(2)
+    expect(mocks.removeCookie).not.toHaveBeenCalled()
+    expect(webAccess.isWebVerificationRequired()).toBe(false)
+  },
+)
+
+test('captcha challenge returned as a successful HTML blob is verified before creating its URL', async () => {
+  fixture()
+  mocks.fetch
+    .mockResolvedValueOnce(challenge(200))
+    .mockResolvedValueOnce(new Response('image', { headers: { 'content-type': 'image/png' } }))
+  mocks.verify.mockResolvedValue({})
+  const url = await login.getCaptcha()
+  expect(await (await fetch(url)).text()).toBe('image')
+  URL.revokeObjectURL(url)
+  expect(mocks.verify).toHaveBeenCalledExactlyOnceWith({ url: 'https://bgm.tv/login' })
+})
+
+test('verification retries a blocked POST once and preserves raw response metadata and body', async () => {
+  fixture()
+  const response = new Response('posted')
+  Object.defineProperties(response, {
+    url: { value: 'https://bgm.tv/group/topic/42#post_100' },
+    redirected: { value: true },
+  })
+  mocks.fetch.mockResolvedValueOnce(challenge()).mockResolvedValueOnce(response)
+  mocks.verify.mockResolvedValue({})
+  const body = new URLSearchParams({ content: 'reply', formhash: 'hash' })
+  const result = await config.webFetch.raw('/group/topic/42/new_reply', { method: 'POST', body })
+  expect(result.redirected).toBe(true)
+  expect(result.url).toBe('https://bgm.tv/group/topic/42#post_100')
+  expect(result._data).toBe('posted')
+  expect(mocks.verify).toHaveBeenCalledExactlyOnceWith({ url: 'https://bgm.tv/group/topic/42' })
+  expect(mocks.fetch.mock.calls.map(([, options]) => options.body)).toEqual([body, body])
+  expect(mocks.fetch.mock.calls.map(([, options]) => options.method)).toEqual(['POST', 'POST'])
+})
+
+test('concurrent webpage challenges share verification and retry their own requests', async () => {
+  fixture()
+  let complete!: (pages: Record<string, string>) => void
+  mocks.verify.mockImplementation(() => new Promise((resolve) => (complete = resolve)))
+  mocks.fetch.mockResolvedValueOnce(challenge()).mockResolvedValueOnce(challenge())
+  const first = config.webFetch('/subject/42')
+  const second = config.webFetch('/index/12')
+  await vi.waitFor(() => expect(mocks.verify).toHaveBeenCalledTimes(1))
+  mocks.fetch.mockImplementation(async (url: string) => new Response(url))
+  complete({})
+  await expect(Promise.all([first, second])).resolves.toEqual([
+    'https://bgm.tv/subject/42',
+    'https://bgm.tv/index/12',
+  ])
+  expect(mocks.verify).toHaveBeenCalledTimes(1)
+})
+
+test('a repeated challenge after verification stops without another popup or POST replay', async () => {
+  fixture()
+  mocks.fetch.mockImplementation(async () => challenge())
+  mocks.verify.mockResolvedValue({})
+  await expect(config.webFetch('/index/42/collect?gh=hash')).rejects.toThrow(
+    webAccess.WebVerificationRequiredError,
+  )
+  expect(mocks.verify).toHaveBeenCalledExactlyOnceWith({ url: 'https://bgm.tv/index/42' })
+  expect(mocks.fetch).toHaveBeenCalledTimes(2)
+  expect(webAccess.isWebVerificationRequired()).toBe(true)
+})
+
+test('a cancelled popup leaves a manual recovery error and blocks repeated webpage requests', async () => {
+  fixture()
+  mocks.fetch.mockImplementation(async () => challenge(200))
+  await expect(config.webFetch('/subject/42')).rejects.toMatchObject({
+    name: 'WebVerificationRequiredError',
+    url: 'https://bgm.tv/subject/42',
+  })
+  await expect(config.webFetch('/index/12')).rejects.toThrow(webAccess.WebVerificationRequiredError)
+  expect(mocks.fetch).toHaveBeenCalledTimes(1)
+  expect(mocks.verify).toHaveBeenCalledTimes(1)
+})
+
+test('a late challenge response after cancelling verification cannot open another popup', async () => {
+  fixture()
+  let respond!: (response: Response) => void
+  mocks.fetch
+    .mockImplementationOnce(() => new Promise((resolve) => (respond = resolve)))
+    .mockResolvedValueOnce(challenge())
+  const late = config.webFetch('/subject/42')
+  const rejected = expect(late).rejects.toThrow(webAccess.WebVerificationRequiredError)
+  await expect(config.webFetch('/index/12')).rejects.toThrow(webAccess.WebVerificationRequiredError)
+  respond(challenge())
+  await rejected
+  expect(mocks.verify).toHaveBeenCalledTimes(1)
+  expect(mocks.fetch).toHaveBeenCalledTimes(2)
+})
+
+test('requests started while a popup is open wait and retain verification errors on cancellation', async () => {
+  fixture()
+  let cancel!: (error: Error) => void
+  mocks.verify.mockImplementation(() => new Promise((_, reject) => (cancel = reject)))
+  mocks.fetch.mockImplementation(async () => challenge())
+  const first = config.webFetch('/subject/42')
+  const rejected = expect(first).rejects.toThrow(webAccess.WebVerificationRequiredError)
+  await vi.waitFor(() => expect(mocks.verify).toHaveBeenCalledTimes(1))
+  const waiting = config.webFetch('/index/12')
+  const waitingRejected = expect(waiting).rejects.toMatchObject({
+    name: 'WebVerificationRequiredError',
+    url: 'https://bgm.tv/index/12',
+  })
+  expect(mocks.fetch).toHaveBeenCalledTimes(1)
+  cancel(new Error('已取消'))
+  await Promise.all([rejected, waitingRejected])
+  expect(mocks.verify).toHaveBeenCalledTimes(1)
+  expect(mocks.fetch).toHaveBeenCalledTimes(1)
+})
+
+test('aborting during verification prevents replaying the original action', async () => {
+  fixture()
+  let complete!: (pages: Record<string, string>) => void
+  mocks.verify.mockImplementation(() => new Promise((resolve) => (complete = resolve)))
+  mocks.fetch.mockImplementation(async () => challenge())
+  const controller = new AbortController()
+  const pending = config.webFetch('/index/42/collect?gh=hash', { signal: controller.signal })
+  const rejected = expect(pending).rejects.toMatchObject({ name: 'AbortError' })
+  await vi.waitFor(() => expect(mocks.verify).toHaveBeenCalledTimes(1))
+  controller.abort()
+  await rejected
+  complete({})
+  await vi.waitFor(() => expect(webAccess.isWebVerificationRequired()).toBe(false))
+  expect(mocks.fetch).toHaveBeenCalledTimes(1)
+})
+
+test('passive CF scripts and ordinary missing OAuth form hashes never open verification', async () => {
+  fixture()
+  const html = '<script src="/cdn-cgi/challenge-platform/scripts/jsd/main.js"></script>'
+  mocks.fetch.mockImplementation(
+    async () => new Response(html, { headers: { 'content-type': 'text/html' } }),
+  )
+  mocks.parseHTML.mockReturnValue({ querySelector: () => null })
+  await expect(login.getOAuthFormHash()).rejects.toThrow('获得授权表单 Hash 失败')
+  expect(mocks.verify).not.toHaveBeenCalled()
+  expect(webAccess.isWebVerificationRequired()).toBe(false)
 })
 
 test.each([400, 401, 403])(

@@ -67,7 +67,7 @@ const formSchema = z.object({
 
 export function LoginForm({ success = () => {} }: { success?: () => void }) {
   const online = useOnline()
-  const verification = useBangumiWebVerification('anime')
+  const verification = useBangumiWebVerification('anime', undefined, '/login')
   const queryClient = useQueryClient()
   // init data
   const loginInfo = useLocalLoginInfoQuery().data
@@ -146,6 +146,7 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
     onError(error) {
       if (isWebVerificationRequiredError(error)) {
         toast.dismiss(toastId.current)
+        return
       } else if (error instanceof LoginError) {
         toast.error(error.message, { id: toastId.current, duration: 3000 })
       } else if (error instanceof FetchError) {
@@ -334,7 +335,12 @@ export function LoginForm({ success = () => {} }: { success?: () => void }) {
           type="submit"
           className="w-full"
           disabled={
-            mutation.isPending || !online || !captcha.data || captcha.isError || captcha.isFetching
+            mutation.isPending ||
+            isWebVerificationRequiredError(mutation.error) ||
+            !online ||
+            !captcha.data ||
+            captcha.isError ||
+            captcha.isFetching
           }
         >
           {BUTTON_LOGIN}

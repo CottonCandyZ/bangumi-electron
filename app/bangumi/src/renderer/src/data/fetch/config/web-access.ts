@@ -3,7 +3,7 @@ export { isCloudflareChallenge } from '@shared/web-verification'
 export class WebVerificationRequiredError extends Error {
   readonly statusCode = 403
 
-  constructor() {
+  constructor(readonly url?: string) {
     super('Bangumi 网页验证已过期')
     this.name = 'WebVerificationRequiredError'
   }
@@ -50,8 +50,8 @@ export function markWebVerificationComplete() {
   emitChange()
 }
 
-export function assertWebVerificationNotRequired() {
-  if (verificationRequired) throw new WebVerificationRequiredError()
+export function assertWebVerificationNotRequired(url?: string) {
+  if (verificationRequired) throw new WebVerificationRequiredError(url)
 }
 
 export function isWebVerificationRequiredError(error: unknown) {
