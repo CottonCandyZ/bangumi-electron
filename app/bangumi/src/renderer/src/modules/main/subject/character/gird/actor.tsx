@@ -53,6 +53,7 @@ function ActorLink({
       to={`/person/${actor.id}`}
       state={{ viewTransitionName }}
       viewTransition
+      contextMenuTitle={actor.name}
       className={cn(
         'group/actor flex min-w-0 cursor-default flex-row focus-visible:outline-hidden',
         showAll ? 'items-end gap-2' : 'items-center gap-1.5',

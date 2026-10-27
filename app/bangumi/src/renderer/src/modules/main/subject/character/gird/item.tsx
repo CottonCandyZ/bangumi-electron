@@ -5,7 +5,7 @@ import {
   HoverPopCard,
   PopCardContent,
 } from '@renderer/components/hover-pop-card/manual'
-import { MyLink } from '@renderer/components/my-link'
+import { MyLink, useLinkContextMenu } from '@renderer/components/my-link'
 import { CardContent } from '@renderer/components/ui/card'
 import { Separator } from '@renderer/components/ui/separator'
 import { Character } from '@renderer/data/types/character'
@@ -31,6 +31,7 @@ export function Item({
   const viewTransitionName = `character-avatar-${id}-${key}`
   const isTransitioning = useViewTransitionState(`/character/${id}`)
   const openCharacter = useOpenCharacter(id, viewTransitionName)
+  const openCharacterContextMenu = useCharacterContextMenu(character, viewTransitionName)
 
   return (
     <div
@@ -49,6 +50,7 @@ export function Item({
                   isEmpty(character.images.large) && 'pl-3',
                 )}
                 onClick={openCharacter}
+                onContextMenu={openCharacterContextMenu}
               >
                 {!isEmpty(character.images.large) && (
                   <MyLink
@@ -56,6 +58,7 @@ export function Item({
                     state={{ viewTransitionName }}
                     viewTransition
                     className="shrink-0 cursor-default"
+                    contextMenuTitle={character.name}
                   >
                     <ViewTransitionImage
                       active={isTransitioning}
@@ -81,12 +84,14 @@ function PopCard({ character }: { character: Character }) {
   const viewTransitionName = `character-avatar-${character.id}-${key}`
   const isTransitioning = useViewTransitionState(`/character/${character.id}`)
   const openCharacter = useOpenCharacter(character.id, viewTransitionName)
+  const openCharacterContextMenu = useCharacterContextMenu(character, viewTransitionName)
 
   return (
     <PopCardContent className="w-96 cursor-default">
       <CardContent
         className="flex h-full cursor-default flex-col overflow-hidden p-2"
         onClick={openCharacter}
+        onContextMenu={openCharacterContextMenu}
       >
         <div className="flex h-full flex-row gap-4">
           {!isEmpty(character.images.large) && (
@@ -95,6 +100,7 @@ function PopCard({ character }: { character: Character }) {
               state={{ viewTransitionName }}
               viewTransition
               className="basis-1/4 cursor-default"
+              contextMenuTitle={character.name}
             >
               <ViewTransitionImage
                 active={isTransitioning}
@@ -135,6 +141,18 @@ function useOpenCharacter(characterId: number, viewTransitionName: string) {
   }
 }
 
+/** 卡片空白处右键和点击一样当作角色链接；内层的角色 / 声优链接会先处理自己的菜单 */
+function useCharacterContextMenu(character: Character, viewTransitionName: string) {
+  const openLinkContextMenu = useLinkContextMenu()
+
+  return (event: MouseEvent<HTMLElement>) =>
+    openLinkContextMenu(event, {
+      path: `/character/${character.id}`,
+      state: { viewTransitionName },
+      title: character.name,
+    })
+}
+
 function MetaInfo({
   character,
   showAll = false,
@@ -160,6 +178,7 @@ function MetaInfo({
             'min-w-0 cursor-default text-sm leading-5 font-medium break-words',
             showAll ? 'line-clamp-2 text-base' : 'line-clamp-1',
           )}
+          contextMenuTitle={character.name}
         >
           {character.name}
         </MyLink>
