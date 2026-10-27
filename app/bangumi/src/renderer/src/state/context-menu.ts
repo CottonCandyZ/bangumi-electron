@@ -1,3 +1,5 @@
+import type { ReactionTarget } from '@renderer/data/fetch/api/reaction'
+import type { CommentReaction } from '@renderer/data/types/comment'
 import { atom } from 'jotai'
 import type { NavigateFunction } from 'react-router-dom'
 
@@ -25,6 +27,12 @@ export type ContextMenuEntry =
   | { type: 'subject-collection'; subjectId: number }
   /** 角色 / 人物的收藏开关 */
   | { type: 'resource-collection'; resourceType: 'character' | 'person'; resourceId: number }
+  /** 评论的贴贴表情 */
+  | {
+      type: 'comment-reaction'
+      comment: { id: number; reactions?: CommentReaction[] }
+      target: ReactionTarget
+    }
 
 export type ContextMenuState = {
   /** 每次打开递增，用来让菜单在新位置重新定位 */

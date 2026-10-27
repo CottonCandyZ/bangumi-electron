@@ -68,10 +68,11 @@ export function hasVisibleReplyContent(reply: CommentBase) {
   return reply.content.trim().length > 0
 }
 
-/** 楼层 / 楼中楼共用的右键菜单：回复、复制内容、查看用户 */
-function useCommentContextMenu(replyTarget?: ReplyTarget) {
+/** 楼层 / 楼中楼共用的右键菜单：回复、贴贴、复制内容、查看用户 */
+function useCommentContextMenu(replyTarget?: ReplyTarget, reactionTarget?: ReactionTarget) {
   const openContextMenu = useContextMenu()
   const openReplyComposer = useOpenReplyComposer()
+  const session = useSession()
 
   return (event: MouseEvent, comment: CommentBase, floorLabel: string) => {
     const user = comment.user
@@ -84,6 +85,10 @@ function useCommentContextMenu(replyTarget?: ReplyTarget) {
         onSelect: () =>
           openReplyComposer(getCommentReplyContent({ comment, floorLabel, target: replyTarget })),
       },
+      !!session &&
+        !!reactionTarget &&
+        canReact(reactionTarget) && { type: 'comment-reaction', comment, target: reactionTarget },
+      CONTEXT_MENU_SEPARATOR,
       !!text && {
         label: '复制内容',
         icon: 'i-mingcute-copy-2-line',
@@ -170,7 +175,7 @@ export function CommentItem({
     disableHeightTransition: virtual,
     maxCollapsedHeight: COMMENT_CONTENT_COLLAPSED_HEIGHT,
   })
-  const openCommentContextMenu = useCommentContextMenu(replyTarget)
+  const openCommentContextMenu = useCommentContextMenu(replyTarget, reactionTarget)
   const threadLineRef = useRef<HTMLDivElement>(null)
   const repliesRef = useRef<HTMLDivElement>(null)
   // 线索线只画到最后一条回复的顶部，剩下的弯折由该回复自己的连线完成；
@@ -669,7 +674,7 @@ function ReplyItem({
 }) {
   const [reactionPickerOpen, setReactionPickerOpen] = useState(false)
   const session = useSession()
-  const openCommentContextMenu = useCommentContextMenu(replyTarget)
+  const openCommentContextMenu = useCommentContextMenu(replyTarget, reactionTarget)
   const onContextMenu = (event: MouseEvent) => openCommentContextMenu(event, reply, floorLabel)
   const showEdit = !!replyTarget && canEditReply(replyTarget) && session?.id === reply.creatorID
   const contentState = useCommentContentState({

@@ -277,7 +277,7 @@ function CommentReactionChip({
   )
 }
 
-function hasCurrentUser(reaction: CommentReaction, session: ReturnType<typeof useSession>) {
+export function hasCurrentUser(reaction: CommentReaction, session: ReturnType<typeof useSession>) {
   if (!session) return false
 
   return reaction.users.some((user) => user.id === session.id || user.username === session.username)

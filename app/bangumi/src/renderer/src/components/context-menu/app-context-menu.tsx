@@ -7,6 +7,7 @@ import {
   markSubjectCollection,
   SubjectCollectionMenuEntry,
 } from '@renderer/components/context-menu/subject-collection-entry'
+import { CommentReactionMenuEntry } from '@renderer/components/context-menu/comment-reaction-entry'
 import {
   RESOURCE_COLLECTION_SHORTCUT,
   ResourceCollectionMenuEntry,
@@ -137,6 +138,11 @@ function ContextMenuEntryView({
   if (entry.type === 'subject-collection') {
     return <SubjectCollectionMenuEntry onDone={onClose} subjectId={entry.subjectId} />
   }
+  if (entry.type === 'comment-reaction') {
+    return (
+      <CommentReactionMenuEntry comment={entry.comment} onDone={onClose} target={entry.target} />
+    )
+  }
   if (entry.type === 'resource-collection') {
     return (
       <ResourceCollectionMenuEntry
@@ -181,7 +187,12 @@ function getShortcutAction(items: ContextMenuEntry[], key: string) {
       }
     } else if (item.type === 'resource-collection') {
       if (key === RESOURCE_COLLECTION_SHORTCUT) return { kind: 'resource-collection' as const }
-    } else if (item.type !== 'separator' && item.shortcut === key && !item.disabled) {
+    } else if (
+      item.type !== 'separator' &&
+      item.type !== 'comment-reaction' &&
+      item.shortcut === key &&
+      !item.disabled
+    ) {
       return { kind: 'item' as const, entry: item }
     }
   }
