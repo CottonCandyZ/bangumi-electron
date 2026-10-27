@@ -1,5 +1,4 @@
 import { Button } from '@renderer/components/ui/button'
-import { Badge } from '@renderer/components/ui/badge'
 import { cn } from '@renderer/lib/utils'
 import { AboutSettings } from '@renderer/modules/main/settings/about'
 import { GeneralSettings } from '@renderer/modules/main/settings/general'
@@ -33,6 +32,7 @@ export function Settings() {
     sectionParam === 'shortcuts' || sectionParam === 'general' || sectionParam === 'about'
       ? sectionParam
       : 'general'
+  const currentLabel = SETTINGS_SECTIONS.find((item) => item.id === section)?.label
 
   useEffect(() => {
     if (sectionParam === 'shortcuts' || sectionParam === 'general' || sectionParam === 'about')
@@ -101,44 +101,39 @@ export function Settings() {
     >
       {draggingConfigFile && (
         <div className="bg-background/80 pointer-events-none absolute inset-0 z-20 flex items-center justify-center backdrop-blur-sm">
-          <div className="border-primary/60 bg-background rounded-lg border border-dashed px-8 py-6 text-center shadow-lg">
-            <div className="text-base font-medium">拖放以导入设置</div>
-            <div className="text-muted-foreground mt-1 text-sm">支持导出的 JSON 设置文件</div>
+          <div className="border-primary/60 bg-background rounded-lg border border-dashed px-8 py-6 text-sm font-medium shadow-lg">
+            松开以导入设置
           </div>
         </div>
       )}
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-8 py-6 max-md:px-4">
-        <header className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold">设置</h1>
-          <p className="text-muted-foreground text-sm">管理应用的全局偏好。</p>
-        </header>
+      <div className="mx-auto grid w-full max-w-4xl grid-cols-[9rem_1fr] gap-8 px-8 py-8 max-md:grid-cols-1 max-md:gap-4 max-md:px-4">
+        <aside className="flex flex-col gap-0.5 md:sticky md:top-8 md:self-start">
+          <h1 className="mb-3 px-3 text-lg font-semibold">设置</h1>
+          {SETTINGS_SECTIONS.map((item) => (
+            <Button
+              key={item.id}
+              variant="ghost"
+              size="sm"
+              className={cn(
+                'text-muted-foreground justify-start px-3 text-sm font-normal shadow-none',
+                section === item.id && 'bg-accent text-foreground font-medium',
+              )}
+              onClick={() => setSection(item.id)}
+            >
+              <span>{item.label}</span>
+              {item.id === 'about' && updateVisible && (
+                <span className="bg-primary ml-auto size-1.5 rounded-full" aria-label="有新版本" />
+              )}
+            </Button>
+          ))}
+        </aside>
 
-        <div className="grid grid-cols-[10rem_1fr] gap-6 max-md:grid-cols-1">
-          <aside className="text-muted-foreground flex flex-col gap-1 text-sm">
-            {SETTINGS_SECTIONS.map((item) => (
-              <Button
-                key={item.id}
-                variant="ghost"
-                className={cn(
-                  'h-9 justify-start rounded-md px-3 shadow-none',
-                  section === item.id && 'bg-accent text-foreground',
-                )}
-                onClick={() => setSection(item.id)}
-              >
-                <span>{item.label}</span>
-                {item.id === 'about' && updateVisible && (
-                  <Badge variant="secondary" className="ml-2 px-1.5 py-0 text-[10px]">
-                    新版本
-                  </Badge>
-                )}
-              </Button>
-            ))}
-          </aside>
-
+        <main className="flex min-w-0 flex-col gap-4">
+          <h2 className="text-lg font-semibold max-md:hidden">{currentLabel}</h2>
           {section === 'general' && <GeneralSettings />}
           {section === 'shortcuts' && <ShortcutSettings />}
           {section === 'about' && <AboutSettings />}
-        </div>
+        </main>
       </div>
     </div>
   )

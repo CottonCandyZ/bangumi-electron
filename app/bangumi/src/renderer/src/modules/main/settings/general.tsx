@@ -12,11 +12,10 @@ import {
 import { Button } from '@renderer/components/ui/button'
 import { Switch } from '@renderer/components/ui/switch'
 import { client } from '@renderer/lib/client'
-import { cn } from '@renderer/lib/utils'
+import { SettingGroup, SettingRow } from '@renderer/modules/main/settings/layout'
 import { useAppConfig } from '@renderer/state/app-config'
 import { DEFAULT_APP_CONFIG } from '@shared/config'
 import { Download, FolderOpen, RotateCcw, Upload } from 'lucide-react'
-import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -122,11 +121,11 @@ export function GeneralSettings() {
   }
 
   return (
-    <section className="rounded-lg border">
-      <div className="flex flex-col">
+    <div className="flex flex-col gap-6">
+      <SettingGroup>
         <SettingRow
           title="显示 NSFW 内容"
-          description="开启后，支持 NSFW 参数的全局搜索会默认包含 NSFW 条目。"
+          description="搜索时默认包含 NSFW 条目"
           control={
             <Switch
               checked={config.general.enableNsfw}
@@ -136,9 +135,8 @@ export function GeneralSettings() {
           }
         />
         <SettingRow
-          separated
           title="显示章节快速标记"
-          description="开启后可输入集数批量更新观看进度。也可按住 Shift 点击目标章节，标记为「看到这集」，无需开启此功能。"
+          description="输入集数批量更新进度；Shift + 点击章节可直接标记"
           control={
             <Switch
               aria-label="显示章节快速标记"
@@ -149,85 +147,91 @@ export function GeneralSettings() {
           }
         />
         <SettingRow
-          separated
           title="图片下载目录"
           description={
-            config.general.downloadDirectory
-              ? config.general.downloadDirectory
-              : '使用系统默认下载目录。'
+            config.general.downloadDirectory ? (
+              <span className="font-mono break-all">{config.general.downloadDirectory}</span>
+            ) : (
+              '系统默认'
+            )
           }
           control={
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex items-center gap-2">
+              {config.general.downloadDirectory && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="font-normal shadow-none"
+                  disabled={!loaded || selectingDownloadDirectory}
+                  onClick={resetDownloadDirectory}
+                >
+                  <RotateCcw className="size-3.5" />
+                  默认
+                </Button>
+              )}
               <Button
                 variant="outline"
-                className="h-9 rounded-md font-normal shadow-none"
+                size="sm"
+                className="font-normal shadow-none"
                 disabled={!loaded || selectingDownloadDirectory}
                 onClick={selectDownloadDirectory}
               >
-                <FolderOpen className="size-4" />
+                <FolderOpen className="size-3.5" />
                 选择
-              </Button>
-              <Button
-                variant="outline"
-                className="h-9 rounded-md font-normal shadow-none"
-                disabled={
-                  !loaded || selectingDownloadDirectory || !config.general.downloadDirectory
-                }
-                onClick={resetDownloadDirectory}
-              >
-                <RotateCcw className="size-4" />
-                默认
               </Button>
             </div>
           }
         />
+      </SettingGroup>
+
+      <SettingGroup title="数据">
         <SettingRow
-          separated
           title="导入 / 导出设置"
-          description="将当前全局设置保存为 JSON 文件，或从 JSON 文件恢复。"
+          description="JSON 文件，也可直接拖入此页面导入"
           control={
-            <div className="flex shrink-0 items-center gap-2">
+            <div className="flex items-center gap-2">
               <Button
                 variant="outline"
-                className="h-9 rounded-md font-normal shadow-none"
+                size="sm"
+                className="font-normal shadow-none"
                 disabled={!loaded || transferring}
                 onClick={importSettings}
               >
-                <Upload className="size-4" />
+                <Upload className="size-3.5" />
                 导入
               </Button>
               <Button
                 variant="outline"
-                className="h-9 rounded-md font-normal shadow-none"
+                size="sm"
+                className="font-normal shadow-none"
                 disabled={!loaded || transferring}
                 onClick={exportSettings}
               >
-                <Download className="size-4" />
+                <Download className="size-3.5" />
                 导出
               </Button>
             </div>
           }
         />
         <SettingRow
-          separated
           title="还原默认设置"
-          description="清除所有自定义设置，并恢复应用默认配置。"
           control={
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
                   variant="outline"
-                  className="text-destructive hover:bg-destructive/10 hover:text-destructive h-9 rounded-md font-normal shadow-none"
+                  size="sm"
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive font-normal shadow-none"
                   disabled={!loaded || resetting}
                 >
-                  还原默认
+                  还原
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>还原所有默认设置？</AlertDialogTitle>
                   <AlertDialogDescription>
-                    这会覆盖当前的通用设置和快捷键绑定。此操作不会影响登录状态和本地缓存数据。
+                    通用设置和快捷键都会被覆盖，登录状态和缓存不受影响。
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -250,34 +254,7 @@ export function GeneralSettings() {
             </AlertDialog>
           }
         />
-      </div>
-    </section>
-  )
-}
-
-export function SettingRow({
-  title,
-  description,
-  control,
-  separated = false,
-}: {
-  title: string
-  description: ReactNode
-  control: ReactNode
-  separated?: boolean
-}) {
-  return (
-    <div
-      className={cn(
-        'flex min-h-16 items-center justify-between gap-4 px-4 py-3',
-        separated && 'border-t',
-      )}
-    >
-      <div className="flex min-w-0 flex-col gap-1">
-        <div className="text-base font-medium">{title}</div>
-        <div className="text-muted-foreground text-sm break-words">{description}</div>
-      </div>
-      <div className="shrink-0">{control}</div>
+      </SettingGroup>
     </div>
   )
 }

@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from '@renderer/components/ui/select'
 import { client } from '@renderer/lib/client'
-import { SettingRow } from '@renderer/modules/main/settings/general'
+import { SettingGroup, SettingRow } from '@renderer/modules/main/settings/layout'
 import {
   getUpdateActionText,
   getUpdateTitle,
@@ -21,7 +21,7 @@ import type { AppBuildInfo, AppUpdateState } from '@shared/update'
 import { getUpdateSizeDescription } from '@shared/update-size'
 import { getUpdateProgressDescription } from '@shared/update-progress'
 import { Download, FileDown, RefreshCw, Trash2 } from 'lucide-react'
-import { type ReactNode, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 export function AboutSettings() {
@@ -86,28 +86,24 @@ export function AboutSettings() {
   }
 
   return (
-    <section className="rounded-lg border">
-      <div className="flex flex-col">
+    <div className="flex flex-col gap-6">
+      <SettingGroup>
         <SettingRow
-          title="Build"
-          description="当前安装包的版本、构建时间和 commit hash。"
+          title="版本"
+          description={
+            <span className="tabular-nums">
+              {formatBuildTime(buildInfo?.buildTime)}
+              {buildInfo?.hash && <span className="ml-2 font-mono">{buildInfo.hash}</span>}
+            </span>
+          }
           control={
-            <div className="grid min-w-72 gap-1 text-right text-sm">
-              <div className="font-medium">{buildInfo?.version ?? '--'}</div>
-              <div className="text-muted-foreground">{formatBuildTime(buildInfo?.buildTime)}</div>
-              <div className="text-muted-foreground font-mono text-xs">
-                {buildInfo?.hash ?? '--'}
-              </div>
-            </div>
+            <span className="text-sm font-medium tabular-nums">{buildInfo?.version ?? '--'}</span>
           }
         />
         <SettingRow
-          separated
           title="更新通道"
           description={
-            config.update.channel === 'stable'
-              ? '正式通道还没有发布包，当前可能检查不到更新。'
-              : 'Beta 通道会接收预发布版本。'
+            config.update.channel === 'stable' ? '正式通道暂无发布包，可能检查不到更新' : undefined
           }
           control={
             <Select
@@ -115,7 +111,7 @@ export function AboutSettings() {
               disabled={!loaded || savingChannel}
               onValueChange={(value) => updateChannel(value as AppUpdateChannel)}
             >
-              <SelectTrigger className="w-32 shadow-none">
+              <SelectTrigger size="sm" className="w-28 shadow-none">
                 <SelectValue>{config.update.channel === 'stable' ? '正式' : 'Beta'}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -126,68 +122,72 @@ export function AboutSettings() {
           }
         />
         <SettingRow
-          separated
-          title="更新"
+          title={
+            <span className="flex items-center gap-2">
+              更新
+              {state?.status === 'available' && <Badge variant="secondary">新版本</Badge>}
+              {state?.status === 'downloaded' && <Badge>已下载</Badge>}
+            </span>
+          }
           description={
-            <span className="block space-y-1">
-              <span className="block">{getUpdateDescription(state, updateTitle)}</span>
-              {getUpdateSizeDescription(state) && (
-                <span className="block tabular-nums">{getUpdateSizeDescription(state)}</span>
-              )}
+            <span className="tabular-nums">
+              {getUpdateDescription(state, updateTitle)}
+              {getUpdateSizeDescription(state) && ` · ${getUpdateSizeDescription(state)}`}
             </span>
           }
           control={
-            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-              {state?.status === 'available' && <Badge variant="secondary">新版本</Badge>}
-              {state?.status === 'downloaded' && <Badge>已下载</Badge>}
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              {state?.downloadDir && state.status !== 'unsupported' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="font-normal shadow-none"
+                  title={`清理 ${state.downloadDir}`}
+                  disabled={clearingDownloads || state.status === 'downloading'}
+                  onClick={clearUpdateDownloads}
+                >
+                  <Trash2 className="size-3.5" />
+                  清理下载包
+                </Button>
+              )}
               <Button
                 variant="outline"
-                className="h-9 rounded-md font-normal shadow-none"
-                disabled={
-                  clearingDownloads ||
-                  state?.status === 'downloading' ||
-                  state?.status === 'unsupported' ||
-                  !state?.downloadDir
-                }
-                onClick={clearUpdateDownloads}
-              >
-                <Trash2 className="size-4" />
-                清理下载包
-              </Button>
-              <Button
-                variant="outline"
-                className="h-9 rounded-md font-normal shadow-none"
+                size="sm"
+                className="font-normal shadow-none"
                 disabled={busy || state?.status === 'unsupported'}
                 onClick={runUpdateAction}
               >
                 {state?.status === 'downloaded' ? (
-                  <RefreshCw className="size-4" />
+                  <RefreshCw className="size-3.5" />
                 ) : (
-                  <Download className="size-4" />
+                  <Download className="size-3.5" />
                 )}
                 {getUpdateActionText(state)}
               </Button>
             </div>
           }
         />
+      </SettingGroup>
+
+      <SettingGroup title="诊断">
         <SettingRow
-          separated
-          title="Log"
-          description="导出 renderer 日志，便于定位接口和更新问题。"
+          title="日志"
+          description="排查问题时可导出发给开发者"
           control={
             <Button
               variant="outline"
-              className="h-9 rounded-md font-normal shadow-none"
+              size="sm"
+              className="font-normal shadow-none"
               disabled={exportingLogs}
               onClick={exportLogs}
             >
-              <FileDown className="size-4" />
-              导出 log
+              <FileDown className="size-3.5" />
+              导出
             </Button>
           }
         />
-      </div>
-    </section>
+      </SettingGroup>
+    </div>
   )
 }
 
@@ -198,52 +198,15 @@ function formatBuildTime(value?: string) {
   return date.toLocaleString()
 }
 
-function getUpdateDescription(state: AppUpdateState | null, title: string): ReactNode {
-  if (!state) return '检查当前通道是否有可安装的新版本。'
-  if (state.status === 'available' && state.version) {
-    return withUpdatePath(
-      `当前 ${state.currentVersion}，可下载 ${state.version}。通道：${state.packageChannel}`,
-      '下载目录',
-      state.downloadDir,
-    )
-  }
-  if (state.status === 'downloaded' && state.version) {
-    return withUpdatePath(
-      `${state.version} 已准备就绪，点击后会重启并应用更新。`,
-      '待安装包',
-      state.downloadPath,
-    )
-  }
-  if (state.status === 'downloading' && state.version)
-    return withUpdatePath(getUpdateProgressDescription(state), '当前文件', state.activity?.filePath)
-  if (state.status === 'error')
-    return withUpdatePath(state.error ?? title, '下载目录', state.downloadDir)
-  if (state.status === 'unavailable') {
-    const checkedAt = state.lastCheckedAt ? `上次检查：${formatBuildTime(state.lastCheckedAt)}` : ''
-    return withUpdatePath(
-      `${state.unavailableReason ?? '当前通道暂无发布包。'}${checkedAt ? ` ${checkedAt}` : ''}`,
-      '下载目录',
-      state.downloadDir,
-    )
-  }
+function getUpdateDescription(state: AppUpdateState | null, title: string): string {
+  if (!state) return '检查当前通道是否有新版本'
+  if (state.status === 'available' && state.version)
+    return `${state.currentVersion} → ${state.version}`
+  if (state.status === 'downloaded' && state.version) return `${state.version} 已就绪，重启后生效`
+  if (state.status === 'downloading' && state.version) return getUpdateProgressDescription(state)
+  if (state.status === 'error') return state.error ?? title
+  if (state.status === 'unavailable') return state.unavailableReason ?? '当前通道暂无发布包'
   if (state.status === 'idle' && state.lastCheckedAt)
-    return withUpdatePath(
-      `当前已是最新版本。上次检查：${formatBuildTime(state.lastCheckedAt)}`,
-      '下载目录',
-      state.downloadDir,
-    )
+    return `已是最新 · 上次检查 ${formatBuildTime(state.lastCheckedAt)}`
   return title
-}
-
-function withUpdatePath(text: string, label: string, value?: string): ReactNode {
-  if (!value) return text
-
-  return (
-    <span className="space-y-1">
-      <span>{text}</span>
-      <span className="block font-mono text-xs break-all">
-        {label}：{value}
-      </span>
-    </span>
-  )
 }
