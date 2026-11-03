@@ -42,9 +42,7 @@ export function PanelNav() {
           <PanelButton {...item} />
         </li>
       ))}
-      <li>
-        <CollectionResourceMenuButton />
-      </li>
+      <CollectionResourceMenuButton />
       <li>
         <MonoListPanelButton />
       </li>

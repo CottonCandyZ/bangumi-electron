@@ -4,8 +4,7 @@ import { Button } from '@renderer/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@renderer/components/ui/dropdown-menu'
 import type { CollectionPanelResourceType } from '@renderer/state/collection'
@@ -86,25 +85,29 @@ export function CollectionResourceMenuButton() {
     <>
       {/* 选中「更多」里的收藏时，把它露出成一个独立按钮，取消选中后收回菜单里 */}
       {activeResource && (
-        <NavTooltip label={activeResource.name}>
-          <Button
-            aria-label={activeResource.name}
-            aria-pressed
-            variant="ghost"
-            className="bg-accent text-primary relative h-8 w-full shrink-0 justify-start gap-0 overflow-hidden px-0 py-1.5 text-xs"
-            onClick={() => {
-              startTransition(() => {
-                setPanelState(panelState.subjectType, false, undefined, activeResource.value)
-              })
-            }}
-          >
-            <NavItemContent
-              icon={<span className={cn(activeResource.activeIcon, 'ui-icon-nav')} />}
-            />
-          </Button>
-        </NavTooltip>
+        <li>
+          <NavTooltip label={activeResource.name}>
+            <Button
+              aria-label={activeResource.name}
+              aria-pressed
+              variant="ghost"
+              className="bg-accent text-primary relative h-8 w-full shrink-0 justify-start gap-0 overflow-hidden px-0 py-1.5 text-xs"
+              onClick={() => {
+                startTransition(() => {
+                  setPanelState(panelState.subjectType, false, undefined, activeResource.value)
+                })
+              }}
+            >
+              <NavItemContent
+                icon={<span className={cn(activeResource.activeIcon, 'ui-icon-nav')} />}
+              />
+            </Button>
+          </NavTooltip>
+        </li>
       )}
-      <CollectionResourceMenu activeResource={activeResource} />
+      <li>
+        <CollectionResourceMenu activeResource={activeResource} />
+      </li>
     </>
   )
 }
@@ -130,28 +133,22 @@ function CollectionResourceMenu({
         </DropdownMenuTrigger>
       </NavTooltip>
       <DropdownMenuContent align="start" className="w-36" side="right">
-        <DropdownMenuRadioGroup
-          value={activeResource?.value}
-          onValueChange={(value) => {
-            const resourceType = value as Exclude<CollectionPanelResourceType, 'subject'>
-            const isActive =
-              panelState.openState &&
-              panelState.openContent === 'collection' &&
-              !panelState.username &&
-              panelState.resourceType === resourceType
-
-            startTransition(() => {
-              setPanelState(panelState.subjectType, !isActive, undefined, resourceType)
-            })
-          }}
-        >
-          {EXTRA_COLLECTION_RESOURCES.map((item) => (
-            <DropdownMenuRadioItem key={item.value} value={item.value}>
+        {/* 已露出成独立按钮的收藏不再出现在菜单里 */}
+        {EXTRA_COLLECTION_RESOURCES.filter((item) => item.value !== activeResource?.value).map(
+          (item) => (
+            <DropdownMenuItem
+              key={item.value}
+              onClick={() => {
+                startTransition(() => {
+                  setPanelState(panelState.subjectType, true, undefined, item.value)
+                })
+              }}
+            >
               <span className={cn(item.icon, 'text-base')} />
               {item.name}
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
+            </DropdownMenuItem>
+          ),
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   )
