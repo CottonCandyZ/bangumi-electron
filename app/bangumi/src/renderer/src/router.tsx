@@ -40,12 +40,9 @@ export const router: ReturnType<typeof createHashRouter> = createHashRouter(
         {
           path: '',
           errorElement: <AppShellErrorElement />,
-          lazy: async () => {
-            const [layout] = await Promise.all([
-              import('@renderer/app/layout'),
-              restoreImageDimensions(),
-            ])
-            return layout
+          lazy: () => {
+            void restoreImageDimensions()
+            return import('@renderer/app/layout')
           },
           children: [
             ...pageRoutes,

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render } from '@testing-library/react'
+import { get, update } from 'idb-keyval'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import { CoverMotionImage } from '../../src/renderer/src/components/image/cover-motion-image'
 import { Image } from '../../src/renderer/src/components/image/image'
@@ -9,10 +10,10 @@ const disk = vi.hoisted(() => new Map<string, unknown>())
 
 vi.mock('idb-keyval', () => ({
   createStore: vi.fn(),
-  get: async (key: string) => structuredClone(disk.get(key)),
-  update: async (key: string, apply: (value: unknown) => unknown) => {
+  get: vi.fn(async (key: string) => structuredClone(disk.get(key))),
+  update: vi.fn(async (key: string, apply: (value: unknown) => unknown) => {
     disk.set(key, structuredClone(apply(structuredClone(disk.get(key)))))
-  },
+  }),
 }))
 
 beforeEach(() => {
@@ -85,4 +86,54 @@ test('loading a replacement at the same URL updates the next visit and the saved
   const cache = await import('../../src/renderer/src/components/image/image-dimensions')
   await cache.restoreImageDimensions()
   expect(cache.getImageLayoutDimensions(src)).toEqual({ width: 600, height: 300 })
+})
+
+test('a late cache restore keeps dimensions measured during startup', async () => {
+  const cache = await import('../../src/renderer/src/components/image/image-dimensions')
+  const updatedSrc = 'https://lain.bgm.tv/pic/cover/l/fixtures/updated.jpg'
+  const savedSrc = 'https://lain.bgm.tv/pic/cover/l/fixtures/saved.jpg'
+  const saved = new Map([
+    [updatedSrc, { width: 300, height: 400 }],
+    [savedSrc, { width: 200, height: 200 }],
+  ])
+  const read = Promise.withResolvers<typeof saved>()
+  vi.mocked(get).mockReturnValueOnce(read.promise)
+  const restore = cache.restoreImageDimensions()
+
+  const image = document.createElement('img')
+  image.src = updatedSrc
+  vi.spyOn(image, 'naturalWidth', 'get').mockReturnValue(800)
+  vi.spyOn(image, 'naturalHeight', 'get').mockReturnValue(400)
+  cache.rememberImageDimensions(image)
+
+  read.resolve(saved)
+  await restore
+  expect(cache.getImageLayoutDimensions(updatedSrc)).toEqual({ width: 800, height: 400 })
+  expect(cache.getImageLayoutDimensions(savedSrc)).toEqual({ width: 200, height: 200 })
+})
+
+test('new measurements batch in memory while an IndexedDB write is pending', async () => {
+  const write = Promise.withResolvers<void>()
+  const updateCache = vi.mocked(update)
+  updateCache.mockClear().mockReturnValueOnce(write.promise)
+  const firstSrc = 'https://lain.bgm.tv/pic/cover/l/fixtures/first.jpg'
+  const nextSrc = 'https://lain.bgm.tv/pic/cover/l/fixtures/next.jpg'
+  const view = render(<Image imageSrc={firstSrc} />)
+  loadImage(view.container.querySelector('img')!, 200, 400)
+
+  try {
+    await vi.advanceTimersByTimeAsync(250)
+    expect(updateCache).toHaveBeenCalledOnce()
+
+    view.rerender(<Image imageSrc={nextSrc} />)
+    loadImage(view.container.querySelector('img')!, 300, 400)
+    await vi.advanceTimersByTimeAsync(500)
+    expect(updateCache).toHaveBeenCalledOnce()
+  } finally {
+    write.resolve()
+  }
+
+  await vi.advanceTimersByTimeAsync(250)
+  expect(updateCache).toHaveBeenCalledTimes(2)
+  expect(disk.get('sizes-v1')).toEqual(new Map([[nextSrc, { width: 300, height: 400 }]]))
 })

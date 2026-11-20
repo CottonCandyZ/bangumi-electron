@@ -7,9 +7,10 @@ const CACHE_LIMIT = 2048
 const WRITE_DELAY_MS = 250
 const RESIZE_PREFIXES = ['', '/r/1200', '/r/800', '/r/600', '/r/400', '/r/200', '/r/100']
 
-const dimensions = new Map<string, ImageDimensions>()
+let dimensions = new Map<string, ImageDimensions>()
 let pending = new Map<string, ImageDimensions>()
 let storage: ReturnType<typeof createStore> | undefined
+let writeScheduled = false
 
 function getStorage() {
   return (storage ??= createStore('image-cache', 'dimensions'))
@@ -19,7 +20,11 @@ export async function restoreImageDimensions() {
   try {
     const saved = await get<Map<string, ImageDimensions>>(CACHE_KEY, getStorage())
     if (saved instanceof Map) {
-      saved.forEach((size, src) => setRecentSize(dimensions, src, size))
+      const merged = new Map<string, ImageDimensions>()
+      for (const [src, size] of saved) setRecentSize(merged, src, size)
+      // Measurements can already arrive while IndexedDB is loading.
+      for (const [src, size] of dimensions) setRecentSize(merged, src, size)
+      dimensions = merged
     }
   } catch {
     // Images can still use their fallback and be measured during this session.
@@ -61,6 +66,12 @@ function setRecentSize(cache: Map<string, ImageDimensions>, src: string, size: I
   if (cache.size > CACHE_LIMIT) cache.delete(cache.keys().next().value!)
 }
 
+function scheduleWrite() {
+  if (writeScheduled || pending.size === 0) return
+  writeScheduled = true
+  setTimeout(() => void storePendingDimensions(), WRITE_DELAY_MS)
+}
+
 async function storePendingDimensions() {
   const batch = pending
   pending = new Map()
@@ -77,6 +88,9 @@ async function storePendingDimensions() {
     )
   } catch {
     // A storage failure must not affect image rendering.
+  } finally {
+    writeScheduled = false
+    scheduleWrite()
   }
 }
 
@@ -92,6 +106,6 @@ export function rememberImageDimensions(image: HTMLImageElement) {
 
   const size = { width, height }
   setRecentSize(dimensions, src, size)
-  if (pending.size === 0) setTimeout(() => void storePendingDimensions(), WRITE_DELAY_MS)
   setRecentSize(pending, src, size)
+  scheduleWrite()
 }
