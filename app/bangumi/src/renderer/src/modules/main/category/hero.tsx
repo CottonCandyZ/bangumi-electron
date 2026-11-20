@@ -25,7 +25,8 @@ const coverSource = (subject: Subject) =>
 // The backdrop is blurred heavily, so a small source looks the same and decodes far faster.
 const backdropSource = (subject: Subject) => subject.images.small || subject.images.common
 
-const defaultBadge = (_subject: Subject, index: number) => `热门 #${index + 1}`
+type GetBadge = (subject: Subject, index: number) => string
+const defaultBadge: GetBadge = (_subject, index) => `热门 #${index + 1}`
 
 export function CategoryHero({
   name,
@@ -35,6 +36,7 @@ export function CategoryHero({
   error,
   onRetry,
   getBadge = defaultBadge,
+  keepPreviousData = false,
 }: {
   name: string
   /** Omit for a mix of categories; covers then use the portrait ratio. */
@@ -44,14 +46,13 @@ export function CategoryHero({
   failed: boolean
   error?: unknown
   onRetry: () => unknown
-  getBadge?: (subject: Subject, index: number) => string
+  getBadge?: GetBadge
+  keepPreviousData?: boolean
 }) {
   const coverRatio = sectionPath === 'music' ? 1 : 2 / 3
-  const imagesReady = usePreloadedImages(
-    subjects?.flatMap((subject) => [coverSource(subject), backdropSource(subject)]),
-  )
+  const displayed = useHeroSlides({ subjects, getBadge, failed, keepPreviousData })
 
-  if (!subjects?.length || !imagesReady) {
+  if (!displayed) {
     if (failed && !subjects?.length) {
       return (
         <div className={cn('@container flex items-center', heroHeight)}>
@@ -80,19 +81,20 @@ export function CategoryHero({
     )
   }
 
+  const { subjects: displayedSubjects, getBadge: getDisplayedBadge } = displayed
   return (
     // Bleed into the page padding so the previous card peeks from the very edge.
     <div className="@container -mx-(--category-gutter)">
       <BigCarousel
         leading={categoryGutter}
         label={`热门${name}`}
-        items={subjects}
+        items={displayedSubjects}
         coverRatio={coverRatio}
         getKey={(subject) => subject.id}
         renderSlide={(subject, { selected }) => (
           <HeroSlide
             subject={subject}
-            badge={getBadge(subject, subjects.indexOf(subject))}
+            badge={getDisplayedBadge(subject, displayedSubjects.indexOf(subject))}
             // Square album art in a portrait slot is letterboxed over its blurred backdrop.
             containCover={coverRatio !== 1 && subject.type === SubjectType.music}
             selected={selected}
@@ -101,6 +103,33 @@ export function CategoryHero({
       />
     </div>
   )
+}
+
+function useHeroSlides({
+  subjects,
+  getBadge,
+  failed,
+  keepPreviousData,
+}: {
+  subjects: Subject[] | undefined
+  getBadge: GetBadge
+  failed: boolean
+  keepPreviousData: boolean
+}) {
+  const imagesReady = usePreloadedImages(
+    subjects?.flatMap((subject) => [coverSource(subject), backdropSource(subject)]),
+  )
+  const current = subjects?.length && imagesReady ? { subjects, getBadge } : undefined
+  const [previous, setPrevious] = useState<typeof current>()
+  if (!keepPreviousData) return current
+
+  // Keep the subjects and their ranks together while the replacement is loading.
+  const pending = subjects === undefined ? !failed : subjects.length > 0 && !imagesReady
+  if (pending) return previous
+  if (current?.subjects !== previous?.subjects || current?.getBadge !== previous?.getBadge) {
+    setPrevious(current)
+  }
+  return current
 }
 
 /** Image lists already decoded, so returning to a page renders the carousel in its first frame. */

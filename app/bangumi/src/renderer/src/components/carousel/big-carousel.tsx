@@ -183,6 +183,7 @@ export function BigCarousel<T>({
 
   // The current card shrinks and its neighbour grows in proportion to the fractional position.
   // Every slide is positioned on its own, so a slide wrapping around keeps its node and images.
+  // Reapply layout if the items change without changing the number of slots.
   useLayoutEffect(() => {
     const extra = big - small
     const cache: {
@@ -254,7 +255,7 @@ export function BigCarousel<T>({
     }
     apply(position.get())
     return position.on('change', apply)
-  }, [big, leading, position, slots, small, step])
+  }, [big, items, leading, position, slots, small, step])
 
   const moveTo = useCallback(
     (next: number, velocity?: number) => {
