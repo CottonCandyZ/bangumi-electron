@@ -53,7 +53,7 @@ export function SubjectCoverImage({ subjectId }: { subjectId: SubjectId }) {
     >
       {subjectInfo !== undefined ? (
         !isEmpty(subjectInfo.images.common) ? (
-          <Image imageSrc={subjectInfo.images.common} loadingClassName="aspect-22/31">
+          <Image imageSrc={subjectInfo.images.common} fallbackAspectRatio="2 / 3">
             <ImagePreviewButton
               alt={subjectInfo.name_cn || subjectInfo.name}
               src={subjectInfo.images.large || subjectInfo.images.common}

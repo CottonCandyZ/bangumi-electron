@@ -2,6 +2,7 @@ import { Skeleton } from '@renderer/components/ui/skeleton'
 import { cn } from '@renderer/lib/utils'
 import { ImageLoadCache } from '@renderer/state/global-var'
 import { useEffect, useState } from 'react'
+import { getImageLayoutDimensions, rememberImageDimensions } from './image-dimensions'
 
 type ImageProps = React.HTMLAttributes<HTMLDivElement> & {
   imageSrc?: string
@@ -9,26 +10,35 @@ type ImageProps = React.HTMLAttributes<HTMLDivElement> & {
   loading?: 'eager' | 'lazy'
   loadingClassName?: string
   careLoading?: boolean
+  fallbackAspectRatio?: string
 }
 
-export function Image({
+export function Image(props: ImageProps) {
+  return <ImageContent key={props.imageSrc} {...props} />
+}
+
+function ImageContent({
   className,
   imageSrc,
   imageClassName,
   loadingClassName,
+  fallbackAspectRatio,
   careLoading = false,
   loading = 'lazy',
   children,
   ...props
 }: ImageProps) {
-  const [isLoad, setIsLoad] = useState(imageSrc ? (ImageLoadCache.get(imageSrc) ?? false) : false)
+  const [isLoad, setIsLoad] = useState(() => !!imageSrc && ImageLoadCache.get(imageSrc) === true)
   const [isError, setIsError] = useState(false)
   const [stateImageSrc, setStateImageSrc] = useState(imageSrc)
-  const [prevImageSrc, setPrevImageSrc] = useState(imageSrc)
-  if (prevImageSrc !== imageSrc) {
-    setPrevImageSrc(imageSrc)
-    setStateImageSrc(imageSrc)
-  }
+
+  const dimensions =
+    fallbackAspectRatio && imageSrc ? getImageLayoutDimensions(imageSrc) : undefined
+  const aspectRatio = dimensions
+    ? `${dimensions.width} / ${dimensions.height}`
+    : fallbackAspectRatio
+  const waitingForLoad = careLoading && !isLoad
+  const unavailable = !imageSrc || isError
 
   // 只在出错时才注册重试；正常挂载不做任何事（页面切换时会同时挂载上百张图片）
   useEffect(() => {
@@ -48,20 +58,22 @@ export function Image({
     <div
       className={cn(
         'relative z-0 rounded-[inherit]',
-        (!stateImageSrc || (careLoading && !isLoad)) && loadingClassName,
+        (!stateImageSrc || waitingForLoad) && loadingClassName,
         className,
       )}
       {...props}
-      key={imageSrc}
       draggable={false}
     >
       <img
         className={cn(
           'h-full w-full max-w-none rounded-[inherit] object-cover select-none',
+          fallbackAspectRatio && 'h-auto object-contain',
           imageClassName,
-          (!imageSrc || isError || (careLoading && !isLoad)) && 'invisible',
+          (unavailable || waitingForLoad) && 'invisible',
         )}
-        onLoad={() => {
+        style={aspectRatio ? { aspectRatio: `auto ${aspectRatio}` } : undefined}
+        onLoad={(event) => {
+          rememberImageDimensions(event.currentTarget)
           setIsLoad(true)
           setIsError(false)
           if (imageSrc) ImageLoadCache.set(imageSrc, true)
@@ -75,7 +87,7 @@ export function Image({
         src={stateImageSrc}
         draggable={false}
       />
-      {(!imageSrc || isError || !isLoad) && (
+      {(unavailable || !isLoad) && (
         <Skeleton className="absolute inset-0 -z-10 rounded-[inherit]" />
       )}
       {children}

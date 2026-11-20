@@ -1,4 +1,5 @@
 import { BigCarousel } from '@renderer/components/carousel/big-carousel'
+import { rememberImageDimensions } from '@renderer/components/image/image-dimensions'
 import { ViewTransitionElement } from '@renderer/components/image/view-transition-image'
 import { MyLink } from '@renderer/components/my-link'
 import { QueryFallback } from '@renderer/components/query-fallback'
@@ -314,5 +315,13 @@ const HeroSlide = memo(function HeroSlide({
 
 function HeroImage({ src, className }: { src?: string; className?: string }) {
   if (!src) return <div className={cn('bg-white/10', className)} />
-  return <img src={src} alt="" draggable={false} className={className} />
+  return (
+    <img
+      src={src}
+      alt=""
+      draggable={false}
+      className={className}
+      onLoad={(event) => rememberImageDimensions(event.currentTarget)}
+    />
+  )
 }

@@ -3,6 +3,7 @@ import { cn } from '@renderer/lib/utils'
 import { ImageLoadCache } from '@renderer/state/global-var'
 import { HTMLMotionProps, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
+import { rememberImageDimensions } from './image-dimensions'
 
 type CoverMotionImageProps = HTMLMotionProps<'div'> & {
   imageSrc?: string
@@ -62,7 +63,8 @@ export function CoverMotionImage({
           imageClassName,
           (!imageSrc || isError) && 'invisible',
         )}
-        onLoad={() => {
+        onLoad={(event) => {
+          rememberImageDimensions(event.currentTarget)
           setIsLoad(true)
           setIsError(false)
           if (imageSrc) ImageLoadCache.set(imageSrc, true)

@@ -4,6 +4,7 @@ import App from './App'
 import MainErrorElement from '@renderer/error/main-error-element'
 import AppShellErrorElement from '@renderer/error/app-shell-error-element'
 import NotFoundElement from '@renderer/error/not-found-element'
+import { restoreImageDimensions } from '@renderer/components/image/image-dimensions'
 
 const pageModules = import.meta.glob('./app/**/page.tsx')
 
@@ -39,7 +40,13 @@ export const router: ReturnType<typeof createHashRouter> = createHashRouter(
         {
           path: '',
           errorElement: <AppShellErrorElement />,
-          lazy: () => import('@renderer/app/layout'),
+          lazy: async () => {
+            const [layout] = await Promise.all([
+              import('@renderer/app/layout'),
+              restoreImageDimensions(),
+            ])
+            return layout
+          },
           children: [
             ...pageRoutes,
             {

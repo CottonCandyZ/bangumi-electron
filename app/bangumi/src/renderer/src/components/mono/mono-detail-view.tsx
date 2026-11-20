@@ -86,7 +86,6 @@ const MONO_RELATED_CARD_HEIGHT_REM = 7
 const ALL_SUBJECT_TYPES = '全部类型'
 const ALL_SUBJECT_RELATIONS = '全部职能'
 const MONO_MAIN_IMAGE_FRAME = 'mx-auto w-full max-w-52 lg:max-w-64'
-const MONO_MAIN_IMAGE_LOADING_FRAME = 'aspect-3/4'
 const MONO_SUBJECT_IMAGE_FRAME = 'flex h-52 w-full items-center justify-center'
 const MONO_RELATED_IMAGE_FRAME = 'flex aspect-square items-center justify-center'
 const EXTERNAL_URL_PATTERN = /https?:\/\/[^\s<>"'，。)）\]]+/g
@@ -136,8 +135,8 @@ export function MonoDetailView({
               className={MONO_MAIN_IMAGE_FRAME}
               imageContainerClassName="w-full overflow-hidden rounded-lg border shadow-sm"
               imageSrc={image}
-              imageClassName="h-auto max-h-[min(32rem,65dvh)] w-full object-contain"
-              loadingClassName={MONO_MAIN_IMAGE_LOADING_FRAME}
+              imageClassName="max-h-[min(32rem,65dvh)]"
+              fallbackAspectRatio="3 / 4"
               loading="eager"
               careLoading
               onInViewChange={setAvatarInView}
@@ -263,7 +262,7 @@ function MonoDetailSkeleton() {
   return (
     <div className="max-w-8xl mx-auto grid w-full gap-8 px-10 pt-12 lg:grid-cols-[16rem_minmax(0,1fr)]">
       <div className="flex flex-col gap-4">
-        <Skeleton className="aspect-3/4 rounded-lg" />
+        <Skeleton className={`${MONO_MAIN_IMAGE_FRAME} aspect-3/4 rounded-lg`} />
         <div className="flex flex-row flex-wrap gap-2">
           <Skeleton className="h-6 w-16 rounded-full" />
           <Skeleton className="h-6 w-20 rounded-full" />
